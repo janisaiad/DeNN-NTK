@@ -1,0 +1,56 @@
+
+%\abcomment{update} 
+Recent  years have seen advances in understanding convergence of gradient descent (GD) and variants for the training of deep learning models~\citep{SD-JL-HL-LW-XZ:19,ZAZ-YL-ZS:19,DZ-QG:19,DZ-YC-DZ-QG:20,CL-LZ-MB:21,ZJ-MT:19,oymak2020hermite,ng2021opt}. Despite the fact that such optimization problems are non-convex, a series of recent results have shown that GD has geometric convergence and finds near global solution "near initialization" for wide networks. Such analysis is typically done based on the Neural Tangent Kernel (NTK)~\citep{AJ-FG-CH:18}. The NTK is positive definite "near initialization," the optimization problem then satisfies a condition closely related to the Polyak-Łojasiewicz (PL) condition, which in turn implies geometric convergence to the global minima~\citep{CL-LZ-MB:21,ng2021opt}. A very important step in the analysis is to derive a condition 
+% lower bound 
+on the required network's width to ensure the \emph{NTK condition} is satisfied at initialization, i.e., that the minimum eigenvalue of the NTK is lower bounded at initialization by a positive constant.
+%The larger such eigenvalue is, the better the convergence properties of the algorithm.\pccomment{Not sure if this last sentence is correctly stated.}
+\pcdelete{Such results have been generalized to more flexible forms of "lazy learning" where similar guarantees hold~\citep{LC-EO-FB:19}. However, there are  questions regarding whether such "near initialization" or "lazy learning" truly explains the optimization behavior in realistic deep learning models~\citep{MG-SS-AJ-MW:20,GY-EJH:20,SF-GKD-MP-SK-DR-SG:20,LC-EO-FB:19}.
+%\mbcomment{do we claim to explain optimization in realistic models though?} \abcomment{perhaps not, but we relax the "near initialization" part, and get to PL through RSC, not NTK}
+}
+
+Much of the theoretical convergence analysis of deep models has focused on ReLU networks~\citep{ZAZ-YL-ZS:19,ng2021opt}. While handling the non-smoothness of ReLU activation presents unique challenges, the homogeneity of ReLU helps the analysis~\citep{ZJ-MT:19,DZ-QG:19,DZ-YC-DZ-QG:20,ZAZ-YL-ZS:19,ng2020hermite1,ng2021hermite2}. On the other hand, some progress has also been made for deep models with smooth activations, where such homogeneity property does not generally hold~\citep{SD-JL-HL-LW-XZ:19,JH-HY:20}. However, many existing results for smooth networks have a high requirement on the width of the models; e.g., as polynomial powers of the number of training samples~\citep{SD-JL-HL-LW-XZ:19}. \pcedit{Recently~\cite{bombari2022memorization} have shown sublinear width on the number of training samples; however, they do require additional assumptions on the nature of the input data such as (i) scaling on the first two moments and on a variance-related quantity, as well as a (ii) Lipschitz concentration assumption on the distribution.} 
+%
+%\pcedit{In particular, for models with $L=O(1)$ layers, existing results need $m = \widetilde{\Omega}(n^2)$  for NTK at initialization to be positive definite for smooth actiavtions~\citep{SD-JL-HL-LW-XZ:19}.}
+%Also, 
+%\abdelete{existing analysis are often rather technical, and there is limited clarity on the tools for handling multiple layers of inhomogeneous activations. }
+%\mbcomment{I feel it is a bit negative} \abcomment{fair concern, dropped the last bit}
+%\mbcomment{I still feel that "near initialization" aspect is emphasized too much, given that our is not obviously "far from initialization"}\abcomment{the Hessian and RSC analysis allows the layerwise spectral norm radius to be $\rho < \sqrt{m}$, which is arguably much higher than what realistic deep models use}
+
+Consider a feedforward neural network model with $L$ hidden layers of width $m$, and $\sigma_0^2$ initialization variance; trained with $n$ samples. Recent literature indicates that the NTK condition at initialization for deep networks: (i)  requires $m=\tilde{\Omega}(n)$ with ReLU activation functions~\citep{ng2021hermite2}; (ii) and for smooth activation functions requires $m = \Omega(\sqrt{n})$ under some distributional assumptions on the input data~\citep{bombari2022memorization} and $m = \Omega(n^2)$ without such assumptions~\citep{SD-JL-HL-LW-XZ:19}. Then, the motivating question for our work is: can we improve the dependence to linear width for smooth activation functions under different or weaker assumptions than distributional ones? 
+
+\pcdelete{Then, the motivating question for our work is: since the satisfaction of the NTK condition at initialization for deep networks with ReLU activation functions~\citep{ng2021hermite2} \pcedit{or smooth activation functions with various distributional assumptions on the  input data~\citep{bombari2022memorization}} \lzcomment{I think they need $m = \Omega(\sqrt{n})$} have been recently shown to require $m=\tilde{\Omega}(n)$, can we obtain the same dependence, i.e., sufficiency of linear width, for smooth activation functions \pcedit{under different or weaker assumptions?} 
+}
+
+Our main contribution is to illustrate that $m = \widetilde{\Omega}(n)$ suffices for the NTK condition at initialization without strictly requiring additional assumptions on the distribution of the input data, \pcedit{such as the data distribution conditions stipulated in~\citep{bombari2022memorization}. Instead, our analysis relies on a basic data scaling assumption and other algebraic or geometric conditions present in the existing literature (see Remark~\ref{rem:lambda1}).\lzcomment{Do we assume data separability? If so, we should list that as one of the assumptions} However, our work assumes a neural network where all the layers have the same width, whereas \cite{bombari2022memorization} consider a challenging pyramidal topology since they study the question of achieving the minimum possible over-parameterization in neural networks.}
+
+Our analysis builds on prior work on ReLU networks based on Hermite series expansions~\citep{oymak2020hermite,ng2020hermite1,ng2021hermite2}, which however critically relies on the homogeneity of ReLU activations. We substantially generalize such analysis to handle the inhomogeneity of multiple layers of smooth activations based on \emph{generalized} Hermite series expansions, yielding the desired sharper result. 
+%\pcedit{To the best of our knowledge, our lower bound with effective linear width has only been shown to hold for ReLU networks~\citep{ng2021hermite2}.} 
+\pcedit{To the best of our knowledge, our work is the first in using this mathematical framework in the analysis of neural networks.}
+Our analysis extends to general depth on the network, but does not improve depth dependence of prior work~\citep{SD-JL-HL-LW-XZ:19}.
+%
+\pcedit{We also remark that our analysis technique is of a different nature than the one by~\citep{bombari2022memorization}, since they use tools such as restricted isometry properties for random matrices.}
+
+Finally, our analysis \pcedit{also} reveals a possible trade-off between the constants involved in (i) the Hessian spectral norm bound used in the \pcedit{recently introduced} restricted strong convexity (RSC) based optimization analysis \pcedit{for linear convergence~\citep{AB-PCV-LZ-MB:22}} \abedit{of gradient descent for feedforward smooth networks} and (ii) the minimum eigenvalue of the NTK as we consider here used in NTK based optimization analysis. In simple terms, a small variance reduces the Hessian bound and benefits convergence using the RSC condition,  
+\pcdelete{The tradeoff is determined by the variance $\sigma_0^2$ of the Gaussian used for initializing the random weights.
+In essence, for suitably small values of $\sigma_0^2$, the constants in the Hessian spectral norm bound \abcomment{This will be *very* hard to follow in the introduction -- too much technical detail for Section 1} is $O(\frac{\text{poly}(L)}{\sqrt{m}})$,}
+but such small variance can adversely affect (exponentially decrease) the constants in the NTK minimum eigenvalue lower bound; and vice versa.
+\pcedit{In other words, a smaller variance may better explain convergence from the RSC based analysis, whereas a larger one from the NTK based analysis.
+%
+\pcdelete{This \pcedit{trade-off} effect is not pronounced for small $L$, e.g., $L = O(1)$ or even $L = O(\log n)$. For general (large) $L$, the trade-off can be neutralized by having $m$ grow as $c^{O(L)}, c>1$.}
+
+The rest of the paper is organized as follows. We present related work in Section~\ref{sec:arXiv_related}. We discuss the problem setup in Section~\ref{sec:arXiv_dlopt}. 
+%We establish the Hessian spectral norm bound in Section~\ref{sec:arXiv_hessian}. 
+We analyze the NTK minimum eigenvalue lower bound in Section~\ref{sec:arXiv_ntk}. We provide a discussion on the initialization variance in Section~\ref{sec:discuss-inivar}. \lzedit{We empirically verify our analysis on the lower bound of NTK minimum eigenvalue in Section~\ref{sec:exp}.} Conclusion is in Section~\ref{sec:arXiv_conc}. Technical proofs are in the supplementary material.
+
+%when the and helpful tools which may fuel future work. \abedit{expand} --- (i) seeming tradeoff between Hessian spectral norm and minimum eigenvalue at initialization, based on Gaussian variance; (ii) bounds on Lipschizt constants and characterization of robustness, small variance helps; (iii) handling inhomogenous activation functions using {\em generalized} Hermite polynomials, why this was not needed for ReLU (homogeneity) one layer smooth activations [OS'19], and the price payed in the [Du et al.] analysis 
+
+% \newpage
+
+% \abcomment{dropping random text bits here, not ready to be read}
+
+% Theorem 3.2 in~\cite{CL-LZ-MB:20} and Theorem 5 in~\cite{CL-LZ-MB:21} 
+% state that the spectral norm of the Hessian scales as $\tilde{O}(1/\sqrt{m})$ for any $i$, i.e.,
+% \begin{equation}
+%     \max_{i \in [n]} \| \nabla^2_i f \|_2 = \tilde{O}\left(\frac{1}{\sqrt{m}}\right).
+% \end{equation}
+% However, the constant based on the analysis from~\cite{CL-LZ-MB:20,CL-LZ-MB:21} is $\rho^{3L}$, where $\rho$ is a fixed radius of an Euclidean ball around the initialization point. In Section~\ref{sec:hessian}, we will sharpen the bound by obtaining a constant that can be made polynomial in $L$ and without exponential dependence on the radius size.**

@@ -1,0 +1,311 @@
+\pdfoutput=1 
+\documentclass[10pt, reqno]{amsart}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[USenglish]{babel}
+\usepackage{amsmath,amssymb,amsthm,upgreek}
+\usepackage{mathrsfs}
+\usepackage{aligned-overset}
+\usepackage{mathtools}
+\usepackage{colortbl,color} %
+\usepackage[dvipsnames]{xcolor}
+\usepackage{graphicx,tikz,pgfplots,pgfplotstable} %
+\usepackage{enumitem}
+\pgfplotsset{compat=1.6}
+\usepackage{subcaption,float,longtable}
+\usepackage[bookmarks=true,
+            bookmarksnumbered,
+            plainpages=false,
+            linktocpage,
+            colorlinks=true,
+            citecolor=green!80!black,
+            linkcolor=red!70!black,
+            filecolor=magenta,
+            urlcolor=magenta,
+            hidelinks,
+            breaklinks,
+            pdfauthor={Paul Geuchen, Thomas Heindl, Dominik Stöger, Felix Voigtlaender},
+            pdftitle={On the Lipschitz constant of random neural networks},
+            unicode=true]{hyperref}
+\usepackage[nameinlink,capitalize,noabbrev]{cleveref}
+
+
+\usepackage{adforn} %
+\usepackage{bbm}
+\usepackage{csquotes}
+\MakeOuterQuote{"}
+\usepackage{comment}
+\usepackage[margin=3cm]{geometry}
+\usepackage[style = numeric, url = true, giveninits=true, eprint = false, sortcites=true,backend = biber, maxbibnames=99]{biblatex}
+\addbibresource{references.bib}
+\AtBeginBibliography{\small}
+\AtEveryBibitem{\clearlist{language}}
+\AtEveryBibitem{\clearfield{issn}}
+\AtEveryCitekey{\clearfield{issn}}
+
+\DeclareBibliographyCategory{needsurl}
+\renewbibmacro*{url+urldate}{%
+  \ifcategory{needsurl}
+    {\printfield{url}%
+     \iffieldundef{urlyear}
+       {}
+       {\setunit*{\addspace}%
+        \printurldate}}
+    {}}
+\newcommand{\entryneedsurl}[1]{\addtocategory{needsurl}{#1}}
+\entryneedsurl{van2014probability}
+
+
+
+\usepackage{ifthen}
+
+\usetikzlibrary{decorations.fractals,
+                calc,
+                intersections,
+                through,
+                backgrounds,
+                arrows,
+                patterns,
+                shapes.geometric,
+                shapes.misc,
+                spy,
+                fadings,
+                decorations.pathreplacing
+               }
+
+
+
+
+\newcommand{\hint}[1]{\textcolor{red}{#1}}
+\let\emptyset\varnothing
+\newcommand{\ii}{\mathrm{i}}
+\newcommand{\ee}{\mathrm{e}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\NN}{\mathbb{N}}                                     %
+\newcommand{\RR}{\mathbb{R}}                                     %
+\newcommand{\ZZ}{\mathbb{Z}}                                     %
+\newcommand{\QQ}{\mathbb{Q}}                                     %
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\N}{\mathcal{N}}
+\newcommand{\pp}{\textbf{p}}
+\newcommand{\fall}{\:\forall\:}                                  %
+\newcommand{\ex}{\:\exists\:}                                    %
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}                  %
+\newcommand{\abss}[1]{\lvert#1\rvert}                            %
+\newcommand{\absb}[1]{\big\lvert#1\big\rvert}						 %
+\newcommand{\mnorm}[1]{\left\lVert#1\right\rVert}                %
+\newcommand{\mnorms}[1]{\lVert#1\rVert}                          %
+\newcommand{\setn}[1]{\left\{#1\right\}}                         %
+\newcommand{\setns}[1]{\{#1\}}                                   %
+\newcommand{\setcond}[2]{\left\{#1 \::\: #2\right\}}  %
+\newcommand{\defeq}{\mathrel{\mathop:}=}                               %
+\newcommand{\defequiv}{\mathrel{\mathop:}\Leftrightarrow}
+\newcommand{\lr}[1]{\!\left(#1\right)}                           %
+\newcommand{\p}{\partial}                                        %
+\newcommand{\skpr}[2]{\left\langle#1 \,\middle\vert\, #2\right\rangle}               %
+\newcommand{\norel}{\mathrel{\phantom{=}}}                                           %
+\newcommand{\noequiv}{\mathrel{\phantom{\Longleftrightarrow}}}                       %
+\newcommand{\boxx}{\ensuremath{\mbox{\small$\,\square\,$}}}                          %
+\newcommand{\eqdef}{=\mathrel{\mathop:}}                                             %
+\newcommand{\floor}[1]{\left\lfloor #1\right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1\right\rceil}
+
+\newcommand{\smpl}{\Xi}
+\newcommand{\sph}{\mathbb{S}}
+\newcommand{\prt}{\mathcal{Z}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\TT}{\mathbb{T}}
+\newcommand{\iid}{\overset{\mathrm{i.i.d.}}{\sim}}
+
+
+\newcommand{\rr}{\textbf{r}}
+\newcommand{\pM}[1]{ \begin{pmatrix} #1  \end{pmatrix} }
+\newcommand{\psM}[1]{ \begin{psmallmatrix} #1  \end{psmallmatrix} }
+\renewcommand{\hat}{\widehat}
+\renewcommand{\tilde}{\widetilde}
+\newcommand{\B}{\overline{B}}
+\newcommand{\paul}{}
+
+\DeclareMathOperator{\proj}{Pr}
+\DeclareMathOperator{\ext}{ext}
+\DeclareMathOperator{\prox}{prox}
+\DeclareMathOperator*{\esssup}{ess\,sup}
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\diam}{diam}
+\DeclareMathOperator{\inte}{int}
+\DeclareMathOperator{\card}{card}
+\DeclareMathOperator{\RE}{Re}
+\DeclareMathOperator{\IM}{Im}
+\DeclareMathOperator{\spann}{span}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\lip}{Lip}
+\DeclareMathOperator{\vc}{VC}
+\DeclareMathOperator{\diag}{\Delta}
+\DeclareMathOperator{\Pot}{Pot}
+\DeclareMathOperator{\relu}{ReLU}
+\DeclareMathOperator{\rang}{rank}
+\let \eps \varepsilon
+\let \epsilon \varepsilon
+\let \piup \uppi
+
+\theoremstyle{plain} 
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{Folg}[theorem]{Consequence}
+\newtheorem{Verm}[theorem]{Conjecture}
+\newtheorem{Probl}[theorem]{Problem}
+\newtheorem*{Fakt}{Fact}
+
+\theoremstyle{definition} %
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{Bsp}[theorem]{Example}
+\newtheorem{Bem}[theorem]{Remark}
+\newtheorem{Alg}[theorem]{Algorithm}
+
+\theoremstyle{remark} %
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{myproof}[theorem]{Proof}
+
+\crefname{theorem}{theorem}{theorems}
+\crefname{Prop}{Proposition}{Propositions}
+\crefname{Lem}{Lemma}{Lemmas}
+\crefname{Kor}{Corollary}{Corollaries}
+\crefname{Bem}{Remark}{Remarks}
+\crefname{Bsp}{Example}{Examples}
+\crefname{Def}{Definition}{Definitions}
+\crefname{Alg}{Algorithm}{Algorithms}
+
+\numberwithin{equation}{section}
+
+\makeatletter
+\renewcommand*{\eqref}[1]{%
+  \hyperref[{#1}]{\textup{\tagform@{\ref*{#1}}}}%
+}
+\makeatother
+
+\newcommand{\creflastconjunction}{, and~}
+\newcommand{\creflastgroupconjunction}{, and~}
+
+\makeatletter
+\@ifundefined{textcommabelow}{%
+  \DeclareTextCommandDefault\textcommabelow[1]
+    {\hmode@bgroup\ooalign{\null#1\crcr\hidewidth\raise-.31ex
+     \hbox{\check@mathfonts\fontsize\ssf@size\z@
+     \math@fontsfalse\selectfont,}\hidewidth}\egroup}%
+}{}
+\makeatother
+
+\definecolor{pgcol}{rgb}{0,0,1.} %
+\definecolor{tjcol}{cmyk}{.74, 0, 1, .41} %
+\definecolor{hmcol}{rgb}{0.9,.5,0} %
+
+
+\newcommand{\pg}[1]{{\color{pgcol}{[P: #1]}}}
+\newcommand{\tj}[1]{{\color{tjcol}{[T: #1]}}}
+\newcommand{\hm}[1]{{\color{hmcol}{{[H: #1]}}}}
+
+\definecolor{islamicgreen}{rgb}{0.0, 0.56, 0.0}
+\definecolor{darkpastelgreen}{rgb}{0.01, 0.75, 0.24}
+ \newcommand*{\fres}[2]{ {\left.\kern-\nulldelimiterspace #1 \vphantom{\big|} \right|_{\kern-1pt #2} }}
+\newcommand{\kk}{\textbf{k}}
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\arrow}[1]{\overset{\rightarrow}{#1}}
+\newcommand{\A}{\mathcal{A}}
+\usepackage{url}
+\def\UrlBreaks{\do\/\do-}
+\overfullrule=10pt
+\begin{document}
+\allowdisplaybreaks
+
+
+\hyphenation{Lip-schitz}
+
+\title[Upper and lower bounds for the Lipschitz constant of random neural networks]{Upper and lower bounds for the Lipschitz constant of random neural networks}
+
+
+
+\author{Paul Geuchen}
+\address[P. Geuchen]{Mathematical Institute for Machine Learning and Data Science (MIDS),
+Catholic University of Eichstätt--Ingolstadt (KU),
+Auf der Schanz 49, 85049 Ingolstadt, Germany}
+\email{paul.geuchen@ku.de}
+\thanks{}
+
+\author{Thomas Heindl}
+\address[T. Heindl]{Chair of Mathematics --- Statistics,
+Catholic University of Eichstätt--Ingolstadt (KU),
+Ostenstraße 28,
+85072 Eichstätt,
+Germany}
+\email{thomas.heindl@mail.de}
+\thanks{}
+
+\author{Dominik Stöger}
+\address[D. Stöger]{Mathematical Institute for Machine Learning and Data Science (MIDS),
+Catholic University of Eichstätt--Ingolstadt (KU), Auf der Schanz 49, 85049 Ingolstadt, Germany}
+\email{dominik.stoeger@ku.de}
+\thanks{}
+
+\author{Felix Voigtlaender}\thanks{}
+\address[F. Voigtlaender]{Mathematical Institute for Machine Learning and Data Science (MIDS),
+Catholic University of Eichstätt--Ingolstadt (KU), Auf der Schanz 49, 85049 Ingolstadt, Germany}
+\email{felix.voigtlaender@ku.de}
+
+
+
+
+\subjclass[2020]{68T07, 26A16, 60B20, 60G15}
+
+\keywords{Lipschitz constant, Random neural networks, Adversarial robustness}
+
+\date{\today}
+
+\begin{abstract}    
+Empirical studies have widely demonstrated that neural networks are highly sensitive to small,
+adversarial perturbations of the input. %
+The worst-case robustness against these so-called adversarial examples can be quantified by the Lipschitz constant of the neural network.
+In this paper, we study upper and lower bounds for the Lipschitz constant of \textit{random ReLU neural networks}.
+Specifically, we assume that the weights and biases follow a generalization of the He initialization, where general symmetric
+distributions for the biases are permitted.
+For shallow neural networks, we characterize the Lipschitz constant up to an absolute numerical constant.
+For deep networks of fixed depth and sufficiently large width, our established upper bound is larger than the lower bound by a factor that is logarithmic in the width.
+\end{abstract}
+
+
+
+
+\maketitle
+
+
+\input{introduction.tex}
+\input{background.tex}
+\input{main_results.tex}
+\input{preliminaries.tex}
+\input{upper_bound.tex}
+\input{non_continuous_biases.tex}
+\appendix
+\input{preliminaries_proofs.tex}
+\input{measurability.tex}
+\input{high_prob.tex}
+\input{dudley.tex}
+\input{lipgrad.tex}
+
+
+
+
+
+\textbf{Acknowledgements.} 
+The authors thank Felix Krahmer, Afonso Bandeira, and Sam Buchanan for fruitful discussions and helpful comments.
+FV and PG acknowledge support by
+the German Science Foundation (DFG) in the context of the Emmy Noether junior research
+group VO 2594/1-1.
+FV acknowledges support by the Hightech Agenda Bavaria. 
+
+\printbibliography
+\end{document}

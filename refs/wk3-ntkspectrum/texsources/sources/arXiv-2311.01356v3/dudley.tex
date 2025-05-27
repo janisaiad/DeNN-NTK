@@ -1,0 +1,134 @@
+
+\section{On Dudley's inequality} \label{app:dudley}
+
+In this section we add important notes on Dudley's inequality,
+which is crucial for deriving the upper bounds in \Cref{sec:upper}. 
+
+We first define the notion of separability of a random process. 
+
+\begin{definition}[{cf. \cite[Definition 5.22]{van2014probability}}]
+A random process $(X_t)_{t \in T}$ on a probability space $(\Omega, \mathscr{A}, \PP)$ indexed by a metric space $(T, \varrho)$
+is called \emph{separable} if there exists a countable set $T_0 \subseteq T$ and a $\PP$-null set $N \subseteq \Omega$
+such that for all $\omega \in \Omega \setminus N$
+and $t \in T$ there exists a sequence $(s_n)_{n \in \NN} \in T_0^\NN$
+with $s_n \to t$ and 
+\begin{equation*}
+\lim_{n  \to \infty} X_{s_n}(\omega) = X_t(\omega).
+\end{equation*} 
+\end{definition}
+
+\begin{proposition} \label{prop:equal}
+Let $(\Omega, \mathscr{A}, \PP)$ be a probability space, $(T, \varrho)$ a separable metric space and $(X_t)_{t \in T}$ a random process with $X_t: \Omega \to \RR$ for every $t \in T$. Moreover, we assume that for every fixed $\omega \in \Omega$ the map
+\begin{equation*}
+T \to \RR, \quad t \mapsto X_t(\omega)
+\end{equation*}
+is continuous. Then $(X_t)_{t \in T}$ is a separable random process. 
+\end{proposition}
+
+\newcommand{\T}{\widetilde{T}}
+\begin{proof}
+Let $T_0 \subseteq T$ be a countable dense subset of $T$ and $\omega \in \Omega, \ t \in T$.
+Since $T_0$ is dense there is a sequence $(s_n)_{n \in \NN} \in T_0^\NN$ with $s_n \to t$.
+Then, using the continuity assumption, it holds
+\begin{equation*}
+\lim_{n \to \infty} \ X_{s_n}(\omega) = X_t (\omega),
+\end{equation*} 
+which yields the claim.
+\end{proof}
+
+We can now formulate and prove a slight extension of Dudley's inequality from \cite{van2014probability}.
+
+\begin{theorem}[{cf.~\cite[Theorems~5.25~and~5.29]{van2014probability}}] \label{thm:dudleyyy}
+There is a constant $C>0$ with the following property: If $(X_t)_{t \in T}$ is a mean-zero separable random process indexed by a metric space $(T,\varrho)$ satisfying
+\begin{equation*}
+\Vert X_t - X_s \Vert_{\psi_2} \leq K \, \varrho(t,s)
+\end{equation*}
+for every $t,s \in T$ with a constant $K>0$ which does not depend on $s$ and $t$, the following hold:
+\begin{enumerate}
+\item{For all $t_0 \in T$ and $u \geq 0$ it holds
+\begin{equation*}
+\underset{t \in T}{\sup} \ (X_t - X_{t_0}) \leq CK \left(\int_0^\infty \sqrt{\ln \left(\mathcal{N}(T, \varrho, \eps)\right)} \ \dd\eps + u\diam(T)\right)
+\end{equation*}
+with probability at least $1- 2\exp(-u^2)$.}
+\item{
+$ \displaystyle
+\EE \left[ \underset{t \in T}{\sup}\ X_t\right] \leq CK \int_0^\infty \sqrt{\ln \left(\mathcal{N}(T, \varrho, \eps)\right)} \ \dd\eps.
+$}
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Firstly, note that the separability assumption implies that $\underset{t \in T}{\sup} \ X_t = \underset{t \in T_0}{\sup} \ X_t$ almost surely for some countable set $T_0 \subseteq T$ so that no measurability issues arise (at least if we are willing to pass to the completion of the underlying probability space). 
+
+Let $C_1 > 0$ be the absolute constant appearing in \cite[Equation (2.16)]{vershynin_high-dimensional_2018} and define $Y_t \defeq \frac{X_t}{K \sqrt{2C_1}}$ for $t \in T$. Then it holds
+\begin{equation*}
+\Vert Y_t - Y_s \Vert_{\psi_2} = \frac{\Vert X_t - X_s \Vert_{\psi_2}}{K \sqrt{2C_1}} \leq \frac{\varrho(t,s)}{\sqrt{2C_1}}
+\end{equation*}
+for every $t,s \in T$ and hence, using \cite[Equation (2.16)]{vershynin_high-dimensional_2018}, we get
+\begin{align*}
+\EE \left[ \exp(\lambda(Y_t - Y_s))\right] \leq \exp(C_1 \lambda^2 \Vert Y_t - Y_s\Vert_{\psi_2}^2) \leq \exp(\lambda^2 \varrho(t,s)^2/2)
+\end{align*}
+for all $\lambda \in \RR$. Hence, $(Y_t)_{t \in T}$ is a \emph{sub-gaussian} process (see \cite[Definition 5.20]{van2014probability}) and trivially inherits the property of separability from $(X_t)_{t \in T}$. Hence, \cite[Theorems~5.25~and~5.29]{van2014probability} yield the existence of a constant $C_2>0$ such that the following hold:
+\begin{enumerate}
+\item{For all $u \geq 0$ and $t_0 \in T$ it holds 
+\begin{equation*}
+\underset{t \in T}{\sup} \ (Y_t - Y_{t_0}) \leq C_2 \left(\int_0^\infty \sqrt{\ln(\mathcal{N}(T, \varrho, \eps))} \ \dd \eps + u \diam(T) \right)
+\end{equation*}
+with probability at least $1- C_2\exp(-u^2)$.}
+\item{$ \displaystyle \EE \left[\underset{t \in T}{\sup} \  Y_t \right] \leq C_2 \int_0^\infty \sqrt{\ln(\mathcal{N}(T, \varrho, \eps))} \ \dd \eps $}.
+\end{enumerate}
+Note that in (1) we can bound the probability even by $1-2\exp(-u^2)$ which is due to the first inequality on p.137 in \cite{van2014probability}. Specifically, we have
+\begin{equation*}
+\sum_{k=1}^\infty \ee ^{-k /2} \leq \sum_{k=1}^\infty\left( \frac{9}{4} \right)^{-k/2} = \sum_{k=1}^\infty \left(\frac{3}{2}\right)^{-k} = \frac{2/3}{1- 2/3} = 2.
+\end{equation*}
+Using this fact and the exact definition of $(Y_t)_{t \in T}$ yields the claim by letting $C \defeq \sqrt{2C_1}C_2$.
+\end{proof}
+
+Now we apply Dudley's inequality to certain finite-dimensional Gaussian processes.
+
+\begin{proposition}[{special version of Dudley's inequality}]\label{prop:dudley}
+There exists an absolute constant $C>0$ with the following property: For any $T \subseteq \RR^N$ with $0 \in T$ and any random vector $X \in \RR^N$ with 
+\begin{equation*}
+X_i \iid \mathcal{N}(0,1) \quad \text{for} \quad 1 \leq i \leq N,
+\end{equation*}
+ the following hold:
+ \begin{enumerate}
+ \item{ For any $u \geq 0$, we have
+ \begin{equation*}
+ \underset{t \in T}{\sup} \ \langle X, t \rangle \leq  C \left(\int_0^\infty \sqrt{\ln \left(\mathcal{N}(T, \Vert \cdot \Vert_2, \eps)\right)} \ \dd \eps + u \cdot \diam(T)\right)
+ \end{equation*}
+ with probability at least $1 - 2 \exp(-u^2)$.
+ }
+ \item{
+ $ \displaystyle
+ \EE \left[ \underset{t \in T}{\sup} \ \langle X, t \rangle\right] \leq C\int_0^\infty \sqrt{\ln \left(\mathcal{N}(T, \Vert \cdot \Vert_2, \eps)\right)} \ \dd \eps.
+ $
+ }
+ \end{enumerate}
+\end{proposition}
+\begin{proof}
+For $t,s \in T$ we have
+\begin{equation*}
+\Vert \langle X,t \rangle - \langle X,s \rangle \Vert_{\psi_2} = \Vert \langle X, t-s \rangle \Vert_{\psi_2} \leq C_1 \Vert t -s \Vert_2
+\end{equation*}
+with an absolute constant $C_1>0$. Here we used that$\langle X, t-s \rangle \sim \mathcal{N}(0, \Vert t -s \Vert_2^2)$ (see for instance \cite[Exercise 3.3.3]{vershynin_high-dimensional_2018}) and \cite[Example 2.5.8 (i)]{vershynin_high-dimensional_2018}. Furthermore, it holds
+\begin{equation*}
+\EE \left[ \langle X,t \rangle\right] = 0
+\end{equation*}
+for fixed $t \in T$ since $\langle X,t \rangle \sim \mathcal{N}(0, \Vert  t \Vert_2^2)$. For a fixed realization of $X$ it is trivial that $t \mapsto \langle X,t \rangle$ is continuous and hence, the process $(\langle X,t \rangle)_{t \in T}$ is separable by \Cref{prop:equal}. Dudley's inequality and its high-probability version (cf. \Cref{thm:dudleyyy}) then show that:
+\begin{enumerate}
+\item{ For any $u \geq 0$, we have
+\begin{equation*}
+\underset{t \in T}{\sup} \ \langle X, t \rangle = \underset{t \in T}{\sup}  \big(\langle X,t \rangle - \langle X, 0 \rangle \big)\overset{0 \in T}{\leq}  C_1C_2 \left(\int_0^\infty \sqrt{\ln \left(\mathcal{N}(T, \Vert \cdot \Vert_2, \eps)\right)} \ \dd \eps + u \cdot \diam(T)\right)
+\end{equation*}
+with probability at least $1 - 2\exp(-u^2)$. 
+}
+\item{
+$ \displaystyle
+\EE \left[ \underset{t \in T}{\sup} \ \langle X, t \rangle\right] \leq C_1C_2\int_0^\infty \sqrt{\ln \left(\mathcal{N}(T, \Vert \cdot \Vert_2, \eps)\right)} \ \dd \eps
+$}
+\end{enumerate}
+with an absolute constant $C_2 > 0$. Hence, the claim follows letting $C \defeq C_1C_2$. 
+\end{proof}
+
+

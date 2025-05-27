@@ -1,0 +1,226 @@
+\section{Postponed proofs for the preliminary results} \label{sec:prelim_proofs}
+In this appendix, we provide the postponed proofs for the preliminary results (see \Cref{sec:preliminaries}). Specifically, we prove \Cref{prop:lipgrad,prop:covering_ball,prop:vc_half_spaces_2,prop:gauss_width,prop:Cbound,prop:not_working_deep}. 
+
+We start with the proof of \Cref{prop:lipgrad}. This proposition is similar to other statements in the literature and is probably folklore. However, for the sake of completeness, we include a proof, as we could not locate a convenient reference.
+\renewcommand*{\proofname}{Proof of \Cref{prop:lipgrad}}
+\begin{proof}
+By \cite[Section~4.2.3]{evans_measure_1992} it holds $f \in W^{1, \infty}_{\text{loc}}(\RR^d)$. Here, $f \in W^{1, \infty}_{\text{loc}}(\RR^d)$ denotes the set of functions that are locally (on every open bounded set $U \subseteq \RR^d$) in the Sobolev space $W^{1, \infty}$. Then, \cite[Theorem~1~in~Section~6.2]{evans_measure_1992} implies that there exists a nullset $N \subseteq \RR^d$ such that for every $x \in \RR^d \setminus N$, $f$ is differentiable at $x$, and the partial derivatives agree with the weak partial derivatives on $\RR^d \setminus N$. For $i \in \{1,...,d\}$ let $\widetilde{\partial}_i f$ be an explicit weak $i$-th partial derivative of $f$ satisfying 
+\begin{equation*}
+\widetilde{\partial}_i f = \partial_i f \quad \text{on }\RR^d \setminus N
+\end{equation*}
+where $\partial_i$ denotes the usual $i$-th partial derivative. We further write
+\begin{equation*}
+\widetilde{\nabla} f \defeq \left(\widetilde{\partial}_1 f, ..., \widetilde{\partial}_d f\right)^T.
+\end{equation*}
+
+Now, let $\varphi \in C_c^\infty (\RR^d)$ be a smooth function with compact support satisfying $\varphi \geq 0$ and furthermore $\int_{\RR^d} \varphi(x) \ \dd x = 1$. See, e.g., \cite[Section~4.2.1]{evans_measure_1992} for an explicit example of such a function. For $\eps > 0$ let $\varphi_\eps (x) \defeq \eps^{-d} \varphi(x / \eps)$. Since $f$ is continuous, the convolution $f_\eps \defeq f \ast \varphi_\eps$ converges pointwise (even locally uniformly) to $f$ as $\eps \to 0$; see \cite[Theorem~1~in~Section~4.2]{evans_measure_1992}. The same theorem also shows that $f_\eps \in C^\infty (\RR^d)$ with 
+\begin{equation*}
+\partial_i f_\eps = (\widetilde{\partial}_i f) \ast \varphi_\eps.
+\end{equation*}
+Hence, since $M \subseteq \RR^d$ is a set of full measure, and $N$ is a null-set,
+\begin{align*}
+\Vert \nabla f_\eps (x) \Vert_2 &= \left\Vert (\widetilde{\nabla}f \ast \varphi_\eps)(x)\right\Vert_2 = \left\Vert \int_{\RR^d} \widetilde{\nabla} f (y) \varphi_\eps (x-y)\ \dd y\right\Vert_2 = \left\Vert \int_{M \setminus N} \widetilde{\nabla} f (y) \varphi_\eps (x-y)\ \dd y\right\Vert_2 \\
+&\leq \int_{M \setminus N} \Vert \nabla f (y)\Vert_2 \vert \varphi_\eps (x-y)\vert\ \dd y \leq \underset{y \in M }{\sup} \Vert \nabla f(y)\Vert_2 =: L
+\end{align*}
+for every $x \in \RR^d$. This implies 
+\begin{equation*}
+\left\vert f_\eps(x) - f_\eps(y)\right\vert \leq L \cdot \Vert x-y \Vert_2
+\end{equation*}
+for all $x,y \in \RR^d$ and $\eps > 0$. But then it also follows
+\begin{equation*}
+\vert f(x) - f(y) \vert = \lim_{\eps \to 0} \ \vert f_\eps(x) -f_\eps(y)\vert \leq L \cdot \Vert x-y \Vert_2
+\end{equation*}
+and thus $\lip(f) \leq L$.
+
+To prove the inequality in the other direction, let $x \in M$. Assume without loss of generality that $\nabla f (x) \neq 0$ and let $\nu \defeq \frac{\nabla f (x)}{\Vert \nabla f (x) \Vert_2}$. Then it holds
+\begin{align*}
+\Vert \nabla f (x) \Vert_2 &= \langle \nabla f (x), \nu\rangle= \lim_{t \to 0} \frac{ f(x+t\nu) - f(x)}{ t}= \lim_{t \to 0} \frac{\vert f(x+t\nu) - f(x)\vert}{\vert t \vert} \\
+&=  \lim_{t \to 0} \frac{\vert f(x+t\nu) - f(x)\vert}{\Vert (x + t\nu) - x \Vert_2} \leq \lip(f),
+\end{align*}
+as was to be shown. Note that we applied the absolute value at the third equality, since the limit is positive. 
+\end{proof}
+
+We now move to the proofs of \Cref{prop:covering_ball,prop:vc_half_spaces_2,prop:gauss_width}. To this end, we first formulate a well-known lemma, which is needed for the proofs of these propositions. For the sake of completeness, we decided to include a proof of this lemma in this appendix.
+\begin{lemma}\label{lem:Uhelp}
+Let $V \subseteq \RR^k$ be a linear subspace and let $\ell = \dim(V)>0$. Then there exists a matrix $U \in \RR^{k \times \ell}$ with $U^TU = I_{\ell \times \ell}$, $\IM(U) = V$ and $\langle Ux_1, Ux_2 \rangle = \langle x_1,x_2 \rangle$ for each $x_1,x_2 \in \RR^\ell$ as well as $\langle U^Ty_1, U^Ty_2 \rangle = \langle y_1,y_2 \rangle$ for every $y_1,y_2 \in V$. Here, $I_{\ell \times \ell}$ denotes the $\ell$-dimensional identity matrix.
+\end{lemma}
+\renewcommand*{\proofname}{Proof}
+\begin{proof}
+We pick an orthonormal basis $u_1,...,u_\ell$ of $V$, arrange it columnwise in a matrix and denote the resulting matrix by $U = (u_1 \hspace{0.05cm}\vline \hspace{0.05cm}\cdots \hspace{0.05cm}\vline\hspace{0.05cm} u_\ell)$. From the definition of an orthonormal basis, it follows $U^T U = I_{\ell \times \ell}$ and $\IM(U)=V$. Moreover, for $x_1,x_2 \in \RR^\ell$ we get by definition
+\begin{equation*}
+\langle Ux_1, Ux_2 \rangle = \langle U^T U x_1, x_2 \rangle \overset{U^T U = I_{\ell \times \ell}}{=} \langle x_1, x_2 \rangle.
+\end{equation*}
+For $y_1,y_2 \in V$ we can pick $a_1,a_2 \in \RR^\ell$ with $Ua_1 = y_1$ and $Ua_2 = y_2$. This then gives us
+\begin{equation*}
+\langle U^Ty_1, U^Ty_2 \rangle = \langle U^T U a_1, U^T U a_2 \rangle = \langle a_1, a_2 \rangle = \langle Ua_1, Ua_2 \rangle = \langle y_1, y_2 \rangle,
+\end{equation*}
+as was to be shown.
+\end{proof}
+Note that \Cref{lem:Uhelp} in particular implies that both $U$ and $U^T$ preserve the Euclidean norm, i.e., it holds $\Vert Ux \Vert_2 = \Vert x \Vert_2$ for every $x \in \RR^\ell$ and $\Vert U^T y \Vert_2 = \Vert y \Vert_2$ for every $y \in V$ (but not in general for $y \in \RR^k$).
+
+We can now show \Cref{prop:covering_ball,prop:vc_half_spaces_2,prop:gauss_width}. The proof of \Cref{prop:covering_ball} relies on the well-known fact that the $\eps$-covering-number of the Euclidean unit ball in $\RR^k$ can be bounded from above by $(1 + \frac{2}{\eps})^k$, combined with \Cref{lem:Uhelp}.
+\renewcommand*{\proofname}{Proof of \Cref{prop:covering_ball}}
+\begin{proof}
+Let $\ell \defeq \dim(V)>0$.
+In case of $\ell = 0$, the claim is trivial since then $\overline{B}_k(0,1)\cap V = \{0\}$.
+Hence, we can assume $\ell>0$. 
+Choose $U \in \RR^{k \times \ell}$ according to \Cref{lem:Uhelp}. 
+Pick $x_1, ..., x_M \in \overline{B}_\ell(0,1)$ with $M \leq \left(\frac{2}{\eps} + 1\right)^{\ell}$ and
+\begin{equation*}
+\overline{B}_\ell(0,1) \subseteq \bigcup_{i=1}^M \overline{B}_\ell (x_i, \eps),
+\end{equation*}
+which is possible due to \cite[Corollary 4.2.13]{vershynin_high-dimensional_2018}. 
+We then define $y_i \defeq Ux_i \in V$ for $i=1,...,M$. 
+Then it holds $\Vert y _i \Vert_2 = \Vert x_i \Vert_2 \leq 1$
+and hence, $y_i \in V \cap \overline{B}_k(0,1)$ for every $i = 1,...,M$. 
+Let $y \in V \cap \overline{B}_k(0,1)$ be arbitrary and note that $U^Ty \in \overline{B}_\ell(0,1)$.
+Hence, there exists $i \in \{1,...,M\}$ with $\Vert x_i - U^Ty \Vert_2 \leq \eps$. But then we get
+\begin{equation*}
+\Vert y_i - y \Vert_2 = \Vert Ux_i - y \Vert_2 = \Vert U^T (Ux_i - y)\Vert_2 = \Vert x_i - U^T y \Vert_2 \leq \eps,
+\end{equation*}
+where the second equality follows since $U^T$ is norm-preserving on $V$ and $Ux_i - y \in V$. Since $y$ was arbitrary, we see
+\begin{equation}\label{eq:U_final_cov}
+\overline{B}_k(0,1) \cap V \subseteq \bigcup_{i=1}^M \overline{B}_k(y_i, \eps) \cap V.
+\end{equation}
+This yields the claim. 
+\end{proof}
+For the proof of \Cref{prop:vc_half_spaces_2}, 
+we use the well-known fact that the VC-dimension of the set of homogeneous 
+half spaces in $\RR^k$ equals $k$, combined with \Cref{lem:Uhelp}.
+\renewcommand*{\proofname}{Proof of \Cref{prop:vc_half_spaces_2}}
+\begin{proof}
+Let $\ell \defeq \dim(V)$. 
+In case of $\ell = 0$, we have $\mathcal{F} = \{0\}$ and hence $\vc(\mathcal{F}) = 0$, so that the claim is trivial.
+Hence, we can assume $\ell > 0$.
+Pick $U \in \RR^{k \times \ell}$ according to \Cref{lem:Uhelp}.
+For $\alpha \in V$ we define
+\begin{equation*}
+\widetilde{f_\alpha}: \quad \RR^\ell \to \RR, \quad x \mapsto \mathbbm{1}_{(U^T\alpha)^T x > 0}\quad \text{and}\quad \widetilde{\mathcal{F}} \defeq \{ \widetilde{f_\alpha}: \ \alpha \in V\}.
+\end{equation*}
+Since $U^T$ induces a surjective mapping from $V$ to $\RR^\ell$ (because $U^T$ is isometric on $V$ and $\dim(V) = \ell$) we infer
+\begin{equation*}
+\widetilde{\mathcal{F}} = \left\{f_\alpha : \ \alpha \in \RR^\ell\right\}.
+\end{equation*}
+From \cite[Theorem 9.2]{shalev2014understanding} we infer $\vc(\widetilde{\mathcal{F}}) = \ell$. 
+Therefore, it suffices to show that
+\begin{equation*}
+\vc(\mathcal{F}) = \vc(\mathcal{\widetilde{F}}).
+\end{equation*}
+To this end, let $t \leq \vc(\mathcal{F})$ and let $\{v_1, ..., v_t\} \subseteq V$ be a subset of $V$ with $t$ elements that is shattered by $\mathcal{F}$.
+Let $\eta \in \{0,1\}^t$ be arbitrary and $\alpha \in V$ such that
+\begin{equation*}
+(f_\alpha(v_1),..., f_\alpha(v_t)) = \eta.
+\end{equation*}
+We then consider $\{U^Tv_1, ..., U^T v_t\} \subseteq \RR^\ell$ and note that this set also consists of $t$ elements since $U^T$ induces an injective mapping $V \to \RR^\ell$. 
+Fix $j \in \{1,...,t\}$.
+Then it holds
+\begin{equation*}
+\widetilde{f_\alpha}(U^Tv_j) = \mathbbm{1}_{\langle U^T\alpha, U^T v_j\rangle>0} = \mathbbm{1}_{\langle \alpha, v_j \rangle > 0} = f_\alpha(v_j)= \eta_j.
+\end{equation*}
+But, since $j$ was picked arbitrarily, this shows
+\begin{equation*}
+(\widetilde{f_\alpha}(U^T v_1), ...,\widetilde{f_\alpha}( U^T v_t)) = \eta
+\end{equation*}
+and thus, the set $\{U^Tv_1, ..., U^T v_t\}$ is shattered by $\widetilde{\mathcal{F}}$.
+Therefore, we conclude $\vc (\mathcal{F}) \leq \vc(\widetilde{\mathcal{F}})$.
+Similarly, we can derive the bound in the other direction: Let $t \leq \vc(\widetilde{\mathcal{F}})$ and $\{w_1 ,..., w_t\} \subseteq \RR^\ell$ a subset of $\RR^\ell$ with $t$ elements that is shattered by $\mathcal{F}$. Let $\eta \in \{0,1\}^t$ be arbitrary and $\alpha \in V$ such that
+\begin{equation*}
+(\widetilde{f_\alpha}(w_1), ...,\widetilde{f_\alpha}(w_t)) = \eta.
+\end{equation*}
+We then consider $\{Uw_1, ..., U w_t\} \subseteq V$ and note that this set also consists of $t$ elements since $U$ induces an injective mapping $\RR^\ell \to V$. Moreover, for every $j \in \{1,...,t\}$ we have
+\begin{equation*}
+f_\alpha(Uw_j) = \mathbbm{1}_{\langle \alpha, Uw_j \rangle >0} = \mathbbm{1}_{\langle U^T \alpha, U^T U w_j \rangle > 0} = \widetilde{f_\alpha}(w_j) = \eta_j,
+\end{equation*}
+which gives us
+\begin{equation*}
+(f_\alpha(Uw_1),..., f_\alpha(Uw_t)) = \eta
+\end{equation*}
+and thus, the set $\{Uw_1,..., Uw_t\}$ is shattered by $\mathcal{F}$.
+This yields $\vc (\mathcal{F}) \geq \vc(\widetilde{\mathcal{F}})$ and overall, we get the claim.
+\end{proof}
+The proof of \Cref{prop:gauss_width} makes heavy use of the fact that the Gaussian width of the Euclidean unit ball in $\RR^k$ can be bounded from above by $\sqrt{k}$. Again, we apply \Cref{lem:Uhelp} to transfer the problem to some lower-dimensional space $\RR^\ell$ and use the rotation invariance of the Gaussian distribution.
+\renewcommand*{\proofname}{Proof of \Cref{prop:gauss_width}}
+\begin{proof}
+Let $\ell \defeq \dim(V)$. If $\ell = 0$, then $\overline{B}_k(0,1) \cap V = \{0\}$, and we trivially have $w(\{0\})= 0$. Hence, we can assume $\ell > 0$. Choose $U \in \RR^{k \times \ell}$ according to \Cref{lem:Uhelp}. From the fact that $U$ and $U^T$ preserve the Euclidean norm (on $\RR^\ell$ and $V$, respectively), we get 
+\begin{equation*}
+\overline{B}_k(0,1) \cap V = U\overline{B}_\ell(0,1).
+\end{equation*}
+This yields
+\begin{align*}
+w(\overline{B}_k(0,1) \cap V) &= \underset{g \sim \mathcal{N}(0, I_k)}{\EE}   \left[\underset{x \in \overline{B}_k(0,1) \cap V}{\sup}\  \langle g, x \rangle \right]= \underset{g \sim \mathcal{N}(0, I_k)}{\EE} \left[\underset{v \in U\overline{B}_\ell(0,1)}{\sup}\  \langle g, v \rangle \right]\\
+&= \underset{g \sim \mathcal{N}(0, I_k)}{\EE}  \left[\underset{x \in \overline{B}_\ell(0,1)}{\sup}\  \langle g, Ux \rangle \right]= \underset{g \sim \mathcal{N}(0, I_k)}{\EE}  \left[ \underset{x \in \overline{B}_\ell(0,1)}{\sup}\  \langle U^Tg, x \rangle \right].
+\end{align*}
+By basis completion, pick a matrix $U' \in \RR^{k \times (k - \ell)}$ such that 
+\begin{equation*}
+U_0 \defeq \begin{pmatrix} U & \vline & U'\end{pmatrix} \in \RR^{k \times k}
+\end{equation*}
+is orthogonal. 
+Then $(U_0)^T$ is also orthogonal and from the rotation invariance of $\mathcal{N}(0, I_k)$ (see, e.g., \cite[Proposition~3.3.2]{vershynin_high-dimensional_2018}) we see that, if we take $g \sim \mathcal{N}(0,I_k)$, it holds
+\begin{equation*}
+(U_0)^T g = \left(\begin{array}{c} U^T g \\  \hline \vspace{-0.3cm}\\ (U')^T g\end{array}\right) \sim \mathcal{N}(0, I_k),
+\end{equation*}
+which implies $U^Tg \sim \mathcal{N}(0, I_\ell)$. Therefore, we get
+\begin{equation*}
+w(\overline{B}_k(0,1) \cap V) = \underset{g \sim \mathcal{N}(0, I_k)}{\EE}  \left[ \underset{x \in \overline{B}_\ell(0,1)}{\sup}\  \langle U^Tg, x \rangle \right]= \underset{g \sim \mathcal{N}(0, I_\ell)}{\EE}  \left[ \underset{x \in \overline{B}_\ell(0,1)}{\sup}\  \langle g, x \rangle \right]= w(\overline{B}_\ell(0,1)).
+\end{equation*}
+The claim now follows using \cite[Proposition~7.5.2]{vershynin_high-dimensional_2018}, noting that $\diam(\overline{B}_\ell(0,1)) = 2$.
+\end{proof}
+We now move the proofs of \Cref{prop:Cbound,prop:not_working_deep}.
+The idea of the proof of \Cref{prop:Cbound} is to find one specific choice of weight matrices for which the inequality
+\begin{equation*}
+\lip(\Phi) =  0 < \lip(\widetilde{\Phi})
+\end{equation*}
+holds for arbitrary biases. Then, using a continuity argument, we infer that the desired inequality even holds with positive probability.
+\renewcommand*{\proofname}{Proof of \Cref{prop:Cbound}}
+\begin{proof}
+Let $b^{(0)} \in \RR^3$ and $b^{(1)} \in \RR$ be arbitrary but from now on fixed bias vectors. 
+We consider the shallow network $\Phi_0$ given via the biases $b^{(0)}$ and $b^{(1)}$ and the weights $W^{(0)}_\ast \defeq \begin{pmatrix} 1 & 1\\ 1 & 0 \\ 0 & 1\end{pmatrix}$ and $W^{(1)}_\ast \defeq \begin{pmatrix} 1 & -1 & - 1\end{pmatrix}$ . 
+This implies
+\begin{equation*}
+\Phi_0(x) = \relu(x_1 + x_2+b^{(0)}_1) - \relu(x_1 + b^{(0)}_2) - \relu(x_2 + b^{(0)}_3) + b^{(1)}
+\end{equation*}
+for all $x \in \RR^2$. 
+Moreover, $\widetilde{\Phi_0}(x) = b^{(0)}_1 - b^{(0)}_2  - b^{(0)}_3+ b^{(1)}$ for all $x \in \RR^2$ and hence, $\lip(\widetilde{\Phi_0}) = 0$. 
+On the other hand, we have
+\begin{equation*}
+\Phi_0(x) = x_1 + x_2 + b^{(0)}_1 - x_2 - b^{(0)}_3 +b^{(1)}= x_1 + b^{(0)}_1 - b^{(0)}_3 + b^{(1)},
+\end{equation*}
+whenever $x_1 \leq - b^{(0)}_2$, and $x_2 \geq \max\{- b^{(0)}_3, - x_1 - b^{(0)}_1\}$,  
+whence $\lip(\Phi_0) \geq 1$. Therefore, it holds
+\begin{equation*}
+\lip(\Phi_0) > C \cdot \lip(\widetilde{\Phi_0}).
+\end{equation*}
+It remains to show that this even holds with positive probability. 
+To see this, we still let $b^{(0)}$ and $b^{(1)}$ be fixed and note that $\lip(\widetilde{\Phi}) = \Vert W^{(1)} W^{(0)} \Vert_2$ depends continuously on the network weights $W^{(0)}$ and $W^{(1)}$. 
+Moreover, we fix the point $x_2 \defeq \max\{- b^{(0)}_3, -b^{(0)}_1 + b^{(0)}_2 + 1\}$ and note that the expression $\vert \Phi((-b^{(0)}_2, x_2)) - \Phi(-b^{(0)}_2 - 1, x_2) \vert$ also depends continuously on the network weights. 
+Therefore, for $(W^{(0)}, W^{(1)})$ on a sufficiently small open neighborhood of $(W_\ast^{(0)}, W_\ast^{(1)})$, we have
+\begin{equation*}
+\frac{\lip(\Phi)}{C} \geq \frac{\vert \Phi((-b^{(0)}_2, x_2)) - \Phi(-b^{(0)}_2 - 1, x_2) \vert}{C} > 1/(2C) > \lip(\widetilde{\Phi}).
+\end{equation*}
+Hence, for fixed biases $b^{(0)}$ and $b^{(1)}$ we note
+\begin{equation*}
+\PP^{(W^{(0)}, W^{(1)})} \left(\lip(\Phi) > C \cdot \lip(\widetilde{\Phi})\right)> 0. 
+\end{equation*}
+In total, allowing randomness in $b^{(0)}$ and $b^{(1)}$ as well gives us
+\begin{equation*}
+\PP \left(\lip(\Phi) > C \cdot \lip(\widetilde{\Phi})\right) = \underset{b^{(0)}, b^{(1)}}{\EE} \ \left[ \underbrace{\PP^{(W^{(0)}, W^{(1)})}\left(\lip(\Phi)> C \cdot \lip(\widetilde{\Phi})\right)}_{> 0}\right] > 0. \qedhere
+\end{equation*}
+\end{proof}
+The proof of \Cref{prop:not_working_deep} is based on identity
+\begin{equation*}
+\relu(-\relu(x))= 0 \quad \text{for all }x \in \RR,
+\end{equation*}
+which follows directly from the definition of the $\relu$.
+\renewcommand*{\proofname}{Proof of \Cref{prop:not_working_deep}}
+\begin{proof}
+Whenever $b^{(1)}\leq 0, W^{(1)} < 0$ and $W^{(0)},W^{(2)} \neq 0$ (which happens with positive probability), we get
+\begin{equation*}
+\relu(\underbrace{W^{(1)}\cdot \underbrace{\relu(W^{(0)}x + b^{(0)} )}_{\geq 0} + b^{(1)}}_{\leq 0}) = 0 \quad \text{for all}\quad x \in \RR,
+\end{equation*}	
+which implies $\Phi \equiv 0$ and in particular $\lip(\Phi)=0$ in that case. On the other hand, we get
+\begin{equation*}
+\lip(\widetilde{\Phi}) = \vert W^{(2)}\cdot W^{(1)} \cdot W^{(0)}\vert > 0. \qedhere
+\end{equation*} 
+\end{proof}
+
+\renewcommand*{\proofname}{Proof}

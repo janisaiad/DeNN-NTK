@@ -1,0 +1,693 @@
+
+We establish the main theorem from Section~\ref{sec:arXiv_hessian} in this Appendix.
+
+\boundhess*
+
+
+
+\subsection{Analysis Outline}
+%
+Our analysis follows that of~\cite{CL-LZ-MB:20} and sharpens the analysis to get better dependence on the depth $L$ of the neural network.
+
+We start by defining the following quantities:
+\begin{align}
+\cQ_\infty(f) & := \max_{1\leq l \leq L} \left\{ \left\| \frac{\partial f}{\partial \alpha^{(l)}} \right\|_{\infty} \right\}~,~~~  \frac{\partial f}{\partial \alpha^{(l)}} \in \R^m~,\\
+\cQ_2(f) & := \max_{1\leq l \leq L} \left\{ \left\| \frac{\partial \alpha^{(l)}}{\partial \w^{(l)}} \right\|_2 \right\}~, ~~~\w^{(l)} := \vec(W^{(l)})~, ~ \frac{\partial \alpha^{(l)}}{\partial \w^{(l)}} \in \R^{m \times m^2}~,\\
+\cQ_{2,2,1}(f) & := \max_{1\leq l_1 < l_2 < l_3  \leq L} \left\{ \left\| \frac{\partial^2 \alpha^{(l_1)}}{\partial {\w^{(l_1)}}^2} \right\|_{2,2,1}, 
+\left\| \frac{\partial \alpha^{(l_1)}}{\partial \w^{(l_1)}} \right\|_2 \left\| \frac{\partial^2 \alpha^{(l_2)}}{\partial \alpha^{(l_2-1)} \partial \w^{(l_2)}} \right\|_{2,2,1}, \right.\\
+& \phantom{\max_{1\leq l_1 < l_2 < l_3  \leq L} ......... } \left. 
+\left\| \frac{\partial \alpha^{(l_1)}}{\partial \w^{(l_1)}} \right\|_2 \left\| \frac{\partial \alpha^{(l_2)}}{\partial \w^{(l_2)}} \right\|_2 \left\| \frac{\partial^2 \alpha^{(l_3)}}{\partial {\alpha^{(l_3-1)}}^2 } \right\|_{2,2,1}
+\right\}
+\end{align}
+where for an order-3 tensor $T \in \R^{d_1 \times d_2 \times d_3}$ we define the $(2,2,1)-$norm as follows, 
+\begin{align}
+\| T \|_{2,2,1} := \sup_{\|\x\|_2 = \|\z\|_2 = 1} \sum_{k=1}^{d_3} \left| \sum_{i=1}^{d_1} \sum_{j=1}^{d_2} T_{ijk} x_i z_j \right|~,~~\x \in \R^{d_1}, \z \in \R^{d_2}~.
+\label{eq:norm-221}
+\end{align}
+We will also use the notation $W^{(L+1)}:=\v$.
+
+A key result established in~\cite{CL-LZ-MB:20} provides an upper bound to the spectral norm of the Hessian:
+\lzbhess*
+
+In order to prove Theorem~\ref{theo:bound-Hess}, we prove that Theorem~\ref{theo:upbound_grad_f} holds with high-probability where 
+\begin{itemize}
+    \item $\delta= \gamma$ follows from Lemma~\ref{lemm:alpha_l_alpha_l-1},
+    \item $\cQ_2(f) = O(1)$  follows from Lemma~\ref{lem:alpha_W},
+    \item $\cQ_{2,2,1} = O(1)$ follows from Lemma~\ref{lem:alpha_W} and Lemma~\ref{lem:221-norm-bound}, and
+    \item $\cQ_\infty(f) = \tilde{O}\left(\frac{1}{\sqrt{m}}\right)$ follows from Lemma~\ref{lemm:b_infty_bound}~,
+\end{itemize}
+while also establishing precise constants to get a proper form for the constant $c_H$ in Theorem~\ref{theo:bound-Hess}.
+
+%showing constants in the order notation have a benign $O(L \gamma^L), \gamma < 1$ dependence on $L$, rather than an exponential dependence as in~\cite{CL-LZ-MB:20}.
+
+%\pccomment{TODO later: check if it would be more appropriate  to replace "$c=O(\text{poly}(L))$" by "$c=O(L\gamma^L), \gamma<1$" throughout the paper, e.g., Proposition~\ref{prop:Hessian_bound}, Remark~\ref{rem:importance_Hessianbound}, Theorem~\ref{theo:bound-Hess}.}
+
+%\abcomment{As I wrote in the email, different choices of $\sigma_1$ lead to different $\gamma$. In particular, both $\sigma_1 =1$ and $\sigma_1 < 1$ with suitable choice on how small will have interesting implications. More on this soon!}
+
+
+\subsection{Spectral norms of $W^{(l)}$ and $L_2$ norms of $\alpha^{(l)}$}
+We start by bounding the spectral norm of the layer-wise matrices at initialization.
+\begin{lemm}
+Consider any $l\in[L+1]$. If the parameters are initialized as $w_{0,ij}^{(l)} \sim \cN(0,\sigma_0^2)$ where $\sigma_0 = \frac{\sigma_1}{2(1 + \sqrt{\frac{\log m}{2m}})}$ as in Assumption~\ref{asmp:ginit}, then with probability at least $\left(1 - \frac{2}{m} \right)$, we have
+\begin{equation}
+\label{eq:bound_W_0_final}
+    \| W_0^{(l)} \|_2 \leq \sigma_1 \sqrt{m}  ~.
+\end{equation}
+%, where we recall that $W^{(l)}_0:=\v_0$.
+\label{lem:aux1}
+\end{lemm}
+\proof For a $(m_l \times m_{l-1})$ random matrix $W_0^{(l)}$ with i.i.d.~entries $w_{0,ij}^{(l)} \in \cN(0,\sigma_0^2)$, with probability at least $(1 - 2\exp(-t^2/2\sigma_0^2))$, the largest singular value of $W_{0}$ is bounded by
+\begin{align}
+\label{eq:bound_W_0}
+    \sigma_{\max}(W_{0}^{(\ell)}) \leq \sigma_0(\sqrt{m_l} + \sqrt{m_{l-1}}) + t~.
+\end{align}
+This concentration result can be easily derived as follows: notice that $W_0=\sigma_0 \bar{W}_0^{(\ell)}$, where $\bar{w}_{0,ij}^{(\ell)}\sim N(0,1)$, thus we can use the expectation  $\E[\norm{W_0}_2^{(\ell)}]=\sigma_0\E[\norm{\bar{W_0}}_2^{(\ell)}]=\sigma_0(\sqrt{m_\ell}+\sqrt{m_{\ell-1}})$ from Gordon's Theorem for Gaussian matrices~\cite[Theorem~5.32]{RV:12} in the Gaussian concentration result for Lipschitz functions~\cite[Proposition~3.4]{RV:12} considering that $B\mapsto\norm{\sigma_0 B}_2$ is a $\sigma_0$-Lipschitz function when the matrix $B$ is treated as a vector. Let us choose $t=\sigma_0 \sqrt{2\log m}$ so that~\eqref{eq:bound_W_0} holds with probability at least $(1-\frac{2}{m})$. Then, to obtain~\eqref{eq:bound_W_0_final},
+
+\textbf{Case 1: $l=1$.}
+With $m_0=d$ and $m_1 = m$,  
+\begin{align*}
+    \| W_{0}^{(1)} \|_2 \leq \sigma_0( \sqrt{d} + \sqrt{m} + \sqrt{2\log m})\leq \sigma_0(2 \sqrt{m} + \sqrt{2\log m})
+\end{align*}
+%Using $\sigma_0 = \frac{\sigma_1}{2(1 + \sqrt{\frac{\log m}{2m}})}$ and noting $\sigma_1 < 1$ completes the proof.
+since we are in the over-parameterized regime $m\geq d$.
+
+\textbf{Case 2: $2\leq l \leq L$.}
+With $m_l = m_{l-1} = m$,  
+\begin{align*}
+    \| W_{0}^{(l)} \|_2 \leq \sigma_0(2 \sqrt{m} + \sqrt{2\log m})~.
+\end{align*}
+
+\textbf{Case 3: $l=L+1$.}
+With $m_l =1$ and $m_{l-1} = m$,  
+\begin{align*}
+    \| W_{0}^{(l)} \|_2 \leq \sigma_0(1  + \sqrt{m} + \sqrt{2\log m})\leq 
+    \sigma_0(2 \sqrt{m} + \sqrt{2\log m})~.
+\end{align*}
+
+Now, using $\sigma_0 = \frac{\sigma_1}{2(1 + \sqrt{\frac{\log m}{2m}})}$  in every Case 1~--~3 completes the proof. \qed 
+
+Next we bound the spectral norm of layerwise matrices. 
+%satisfying Assumption~\ref{asmp:radius}.
+%, i.e., within a certain spectral norm radius of the initialization.
+%
+\begin{prop}
+Under Assumptions~\ref{asmp:ginit}, for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, \pcedit{each of the following inequalities hold} with probability at least $\left(1 - \frac{2}{m} \right)$,
+\begin{align*}
+    &\| W^{(l)} \|_2 \leq \left(\sigma_1 + \frac{\rho}{\sqrt{m}}\right)\sqrt{m}\quad\quad,\; l\in[L];\; \text{and}\\
+    &\pcedit{\| W^{(L+1)} \|_2 =\norm{\v}_2\leq \left(\sigma_1 + \frac{\rho_1}{\sqrt{m}}\right)\sqrt{m}}~.
+\end{align*}
+%In particular, if $\rho < (1-\sigma_1) \sqrt{m}$, then $\| W^{(l)}\|_2 < \sqrt{m}$.
+\label{prop:param-W-bound}
+\end{prop}
+\proof By triangle inequality,
+\begin{align*}
+\| W^{(l)} \|_2 & \leq \| W^{(l)}_0 \|_2 + \| W^{(l)} - W^{(l)}_0 \|_2 \overset{(a)}{\leq} \sigma_1 \sqrt{m} + \rho ~,     
+\end{align*}
+where (a) follows from Lemma~\ref{lem:aux1}. The case for $l+1$ follows similarly. This completes the proof. \qed 
+
+% \begin{remark}[Tighter results]
+% Our analysis is tighter than some previous results due to two related aspects:
+% \begin{enumerate}
+% \item Assumption~\ref{asmp:radius} bounds the spectral norm rather than the Frobenius norm of $(W^{(l)} - W^{(l)}_0)$; and
+% \item the spectral radius $\rho = O(\sqrt{m})$ rather than a constant.
+% \end{enumerate}
+% \end{remark}
+
+Next, we show that the output $\alpha^{(l)}$ of layer $l$ has an $L_2$ norm bounded by $O(\sqrt{m})$.
+%
+\begin{lemm}
+Consider any $l\in[L]$. 
+Under Assumptions~\ref{asmp:actinit} and \ref{asmp:ginit}, for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, with probability at least $\left(1 - \frac{2l}{m} \right)$, we have
+\begin{align*}
+\| \alpha^{(l)}\|_2 \leq \sqrt{m}\left(\sigma_1 + \frac{\rho}{\sqrt{m}} \right)^l + \sqrt{m} \sum_{i=1}^l  \left(\sigma_1 + \frac{\rho}{\sqrt{m}} \right)^{i-1} |\phi(0)| =  \left( \gamma^l +  | \phi(0)| \sum_{i=1}^l \gamma^{i-1} \right) \sqrt{m} ~. 
+\end{align*}
+%for $l\in[L]$.
+\label{lemm:outl2}
+\end{lemm}
+%\abcomment{Need to compare with a related result in~\cite{ZAZ-YL-ZS:19}.}
+%
+%\abcomment{analysis can be sharpened by noting that the result is really: $(\gamma^l + \frac{1}{1-\gamma}) \sqrt{m}$, where $\gamma = \sigma_1 + \frac{\rho}{\sqrt{m}} < 1$. In particular, the bound improves with $l$, especially when $\phi(0)=0$.}
+%
+\proof Following~\cite{ZAZ-YL-ZS:19,CL-LZ-MB:20}, we prove the result by recursion. First, recall that since $\| \x\|_2^2 = d$, we have $\| \alpha^{(0)}\|_2 = \sqrt{d}$. Then, since $m_0 = d$ and $\phi$ is 1-Lipschitz,
+\begin{align*}
+\left\|\phi\left( \frac{1}{\sqrt{d}} W^{(1)} \alpha^{(0)} \right) \right\|_2 - \| \phi(\mathbf{0}) \|_2 
+\leq \left\|\phi\left( \frac{1}{\sqrt{d}} W^{(1)} \alpha^{(0)} \right) - \phi(\mathbf{0}) \right\|_2 \leq \left\|  \frac{1}{\sqrt{d}} W^{(1)} \alpha^{(0)} \right\|_2 ~,
+\end{align*}
+so that
+\begin{align*}
+\| \alpha^{(1)}\|_2 & = \left\| \phi\left( \frac{1}{\sqrt{d}} W^{(1)} \alpha^{(0)} \right) \right\|_2
+ \leq  \left\|  \frac{1}{\sqrt{d}} W^{(1)} \alpha^{(0)} \right\|_2 + \| \phi(\mathbf{0}) \|_2 
+\leq  \frac{1}{\sqrt{d}} \| W^{(1)} \|_2 \|\alpha^{(0)} \|_2 + |\phi(0)| \sqrt{m} \\
+& \leq \left( \sigma_1 + \frac{\rho}{\sqrt{m}}\right) \sqrt{m} + |\phi(0)| \sqrt{m}~,
+\end{align*}
+where we used Proposition~\ref{prop:param-W-bound} in the last inequality, which holds with probability at least $1-\frac{2}{m}$. For the inductive step, we assume that for some $l-1$, we have 
+\begin{align*}
+\| \alpha^{(l-1)}\|_2 \leq \sqrt{m} \left( \sigma_1 + \frac{\rho}{\sqrt{m}}\right)^{l-1}  + \sqrt{m} \sum_{i=1}^{l-1}  \left(\sigma_1 + \frac{\rho}{\sqrt{m}} \right)^{i-1} |\phi(0)|, 
+\end{align*}
+which holds with the probability at least $1-\frac{2(l-1)}{m}$. Since $\phi$ is 1-Lipschitz, for layer $l$, we have
+\begin{align*}
+\left\|\phi\left( \frac{1}{\sqrt{m}} W^{(l)} \alpha^{(l-1)} \right) \right\|_2 - \| \phi(\mathbf{0}) \|_2 
+\leq \left\|\phi\left( \frac{1}{\sqrt{m}} W^{(l)} \alpha^{(l-1)} \right) - \phi(\mathbf{0}) \right\|_2 \leq \left\|  \frac{1}{\sqrt{m}} W^{(l)} \alpha^{(l-1)} \right\|_2 ~,    
+\end{align*}
+so that
+\begin{align*}
+\|\alpha^{(l)}\|_2 & = \left\| \phi\left( \frac{1}{\sqrt{m}} W^{(l)} \alpha^{(l-1)} \right) \right\|_2 
+\leq  \left\|  \frac{1}{\sqrt{m}} W^{(l)} \alpha^{(l-1)} \right\|_2 + \| \phi(\mathbf{0}) \|_2 \\
+& \leq  \frac{1}{\sqrt{m}} \| W^{(l)} \|_2 \|\alpha^{(l-1)} \|_2 + \sqrt{m} |\phi(0)|  \\
+& \overset{(a)}{\leq} \left( \sigma_1 + \frac{\rho}{\sqrt{m}}\right) \|\alpha^{(l-1)} \|_2 + \sqrt{m} |\phi(0)|  \\
+%& \leq \left( \sigma_1 + \frac{\rho}{\sqrt{m}}\right) \left[ \sqrt{\frac{m}{d}} \left( \sigma_1 + \frac{\rho}{\sqrt{m}}\right)^l + \sqrt{m} \sum_{i=1}^l  \left(\sigma_1 + \frac{\rho}{\sqrt{m}} \right)^{i-1} |\phi(0)| \right] + \sqrt{m}|\phi(0)| \\
+& \overset{(b)}{=} \sqrt{m} \left( \sigma_1 + \frac{\rho}{\sqrt{m}}\right)^{l} + \sqrt{m} \sum_{i=1}^{l}  \left(\sigma_1 + \frac{\rho}{\sqrt{m}} \right)^{i-1} |\phi(0)|,
+\end{align*}
+where (a) follows from Proposition~\ref{prop:param-W-bound} and (b) from the inductive step. Since we have used Proposition~\ref{prop:param-W-bound} $l$ times, after a union bound, our result would hold with probability at least $1-\frac{2l}{m}$.  This completes the proof. \qed 
+
+\subsection{Spectral norms of $\frac{\partial \alpha^{(l)}}{\partial \w^{(l)}}$ and  $\frac{\partial \alpha^{(l)}}{\partial \alpha^{(l-1)}}$}
+Recall that in our setup, the layerwise outputs and pre-activations are respectively given by:
+\begin{align}
+%\alpha^{(l)} = \phi\left( \frac{1}{\sqrt{m_{l-1}}} W^{(l)} \alpha^{(l-1)} \right)~,~~~ 
+\alpha^{(l)} = \phi\left(\tilde{\alpha}^{(l)} \right)~,~~~
+\tilde{\alpha}^{(l)} := \frac{1}{\sqrt{m_{l-1}}} W^{(l)} \alpha^{(l-1)} ~.
+\end{align}
+%
+\begin{lemm}
+Consider any $l\in\{2,\dots,L\}$. Under Assumptions~\ref{asmp:actinit} and \ref{asmp:ginit}, for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, with probability at least $\left(1-\frac{2}{m}\right)$,
+\begin{equation}
+    \left\| \frac{\partial \alpha^{(l)}}{\partial \alpha^{(l-1)}} \right\|_2^2    \leq \left( \sigma_1 + \frac{\rho}{\sqrt{m}} \right)^2 = \gamma^2~.
+\end{equation}
+%for $l=2,\dots,L$.
+\label{lemm:alpha_l_alpha_l-1}
+\end{lemm}
+\proof By definition, we have
+\begin{align}
+\left[ \frac{\partial \alpha^{(l)}}{\partial \alpha^{(l-1)}}  \right]_{i,j} = \frac{1}{\sqrt{m}} \phi'(\tilde{\alpha}^{(l)}_i) W_{ij}^{(l)}~.
+\label{eq:d_alpha_d_alpha}
+\end{align}
+Since $\|A\|_2 = \sup_{\|\v\|_2=1} \| A \v\|_2$, so that $\| A\|_2^2 = \sup_{\|\v\|_2 = 1} \sum_i \langle \a_i, \v \rangle^2$, we have that for $2 \leq l \leq L$,
+\begin{align*}
+ \left\| \frac{\partial \alpha^{(l)}}{\partial \alpha^{(l-1)}} \right\|_2^2  & =  \sup_{\|\v\|_2=1} \frac{1}{m} \sum_{i=1}^m \left( \phi'(\tilde{\alpha}^{(l)}_i) \sum^m_{j=1}W_{ij}^{(l)} v_j \right)^2 \\
+ & \overset{(a)}{\leq} \sup_{\|\v\|_2=1} \frac{1}{m} \| W^{(l)} \v \|_2^2 \\
+ & = \frac{1}{m} \| W^{(l)} \|_2^2 \\
+ %& \leq \left(\sigma_1 + \frac{\rho}{\sqrt{m}}\right)^2 \\
+ & \overset{(b)}{\leq}\gamma^2~,
+\end{align*}
+where (a) follows from $\phi$ being 1-Lipschitz by Assumption~\ref{asmp:actinit} and (b) from Proposition~\ref{prop:param-W-bound}. 
+%and (b) from $\rho=\sigma+\frac{\rho}{m}<1$.
+%since $\rho < (1-\sigma_1) \sqrt{m}$ and $\sigma_1 < 1$. 
+This completes the proof. \qed 
+
+\begin{lemm}
+Consider any $l\in[L]$. 
+Under Assumptions~\ref{asmp:actinit} and \ref{asmp:ginit}, for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, with probability at least $\left(1-\frac{2l}{m}\right)$,
+\begin{equation}
+\begin{split}
+\left\| \frac{\partial \alpha^{(l)}}{\partial \w^{(l)}} \right\|_2^2  &  \leq \frac{1}{m} \left[ \sqrt{m} \left(\sigma_1 + \frac{\rho}{\sqrt{m}} \right)^{l-1} + \sqrt{m} \sum_{i=1}^{l-1}  \left(\sigma_1 + \frac{\rho}{\sqrt{m}} \right)^{i-1} |\phi(0)| \right]^2  = \left( \gamma^{l-1} + |\phi(0)| \sum_{i=1}^{l-1} \gamma^{i-1}\right)^2.
+%(l-1)^2 \phi(0)^2 + \frac{2l |\phi(0)|}{\sqrt{m}} + \frac{1}{m}~.
+\end{split}
+\end{equation}    
+%for $l\in[L]$.
+% and 
+% \begin{equation*}
+% \left\| \frac{\partial \alpha^{(1)}}{\partial \w^{(1)}} \right\|_2^2\leq \frac{1}{d} \leq 1~.
+% \end{equation*} 
+\label{lem:alpha_W}
+\end{lemm}
+\proof
+%In this proof we introduce the following notation: given a logical statement $p$, we let $\I_p=1$ when $p$ is true, and $\I_p=0$ when $p$ is false. 
+%
+%
+Note that the parameter vector $\w^{(l)} = \text{vec}(W^{(l)})$ and can be indexed with $j,j'\in[m]$. Then, we have
+\begin{align}
+ \left[ \frac{\partial \alpha^{(l)}}{\partial \w^{(l)}} \right]_{i,jj'} & = \left[ \frac{\partial \alpha^{(l)}}{\partial W^{(l)}} \right]_{i,jj'} = \frac{1}{\sqrt{m}} \phi'(\tilde{\alpha}^{(l)}_i) \alpha^{(l-1)}_{j'} \1_{[i=j]}~.
+ \label{eq:d_alpha_d_w}
+\end{align}
+For $l\in\{2,\dots,L\}$, noting that $\frac{\partial \alpha^{(l)}}{\partial \w^{(l)}} \in \R^{m \times m^2}$ and $\norm{V}_F=\norm{\vec(V)}^2_2$ for any matrix $V$, we have 
+\begin{align*}
+\left\| \frac{\partial \alpha^{(l)}}{\partial \w^{(l)}} \right\|_2^2  & = \sup_{\| V \|_F =1} \frac{1}{m} \sum_{i=1}^m  \left( \phi'(\tilde{\alpha}_i^{(l)} ) \sum^m_{j,j'=1}\alpha^{(l-1)}_{j'} \1_{[i=j]} V_{jj'} \right)^2 \\
+& \leq  \sup_{\| V \|_F =1} \frac{1}{m} \| V \alpha^{(l-1)} \|_2^2 \\
+& \leq \frac{1}{m} \sup_{\| V \|_F =1} \| V \|_2^2 \| \alpha^{(l-1)} \|_2^2 \\
+& \overset{(a)}{\leq} \frac{1}{m}  \| \alpha^{(l-1)} \|_2^2 \\
+& \overset{(b)}{\leq} \frac{1}{m} \left[ \sqrt{m} \left(\sigma_1 + \frac{\rho}{\sqrt{m}} \right)^{l-1} + \sqrt{m} \sum_{i=1}^{l-1}  \left(\sigma_1 + \frac{\rho}{\sqrt{m}} \right)^{i-1} |\phi(0)| \right]^2  \\
+& = \left( \gamma^{l-1} +  |\phi(0)| \sum_{i=1}^{l-1} \gamma^{i-1} \right)^2
+\end{align*}
+%where $\gamma < 1$ since $\rho < (1-\sigma_1) \sqrt{m}$ and $\sigma_1 < 1$. 
+where (a) follows from $\norm{V}_2^2\leq\norm{V}_F^2$ for any matrix $V$, and (b) from Lemma~\ref{lemm:outl2}.
+
+The $l=1$ case follows in a similar manner:
+\begin{equation*}
+\left\| \frac{\partial \alpha^{(1)}}{\partial \w^{(1)}} \right\|_2^2 \leq \frac{1}{d}  \| \alpha^{(0)} \|_2^2
+=\frac{1}{d}\norm{\x}_2^2=1~% = \left( \frac{\gamma^0}{\sqrt{d}} \right)^2~,
+\end{equation*} 
+which satisfies the form for $l=1$. That completes the proof. \qed 
+
+
+\subsection{$(2,2,1)$-norms of order 3 tensors}
+
+%\abcomment{Can be bounded by O(1) following similar lines as above and Section F.3 of [LZB'19]}
+%\pccomment{The proposition below might need some polishing!}
+%
+\begin{lemm}
+\label{lem:221-norm-bound}
+Under Assumptions~\ref{asmp:actinit} and \ref{asmp:ginit}, for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, \pcedit{each of the following inequalities hold} with probability at least $\left(1 - \frac{2l}{m} \right)$,
+\begin{align}
+\label{eq:221_one}
+    \left\|\frac{\partial^2 \alpha^{(l)}}{(\partial \alpha^{(l-1)})^2}\right\|_{2,2,1}
+    &\leq\beta_\phi\gamma^2,\\
+    \label{eq:221_two}
+    \norm{\frac{\partial^2 \alpha^{(l)}}{\partial \alpha^{(l-1)}\partial W^{(l)}}}_{2,2,1}
+    &\leq \frac{\beta_\phi}{2}\left(\gamma^2+
+\left( \gamma^{l-1} +  | \phi(0)| \sum_{i=1}^{l-1} \gamma^{i-1} \right)^2\right)+1,\\
+\label{eq:221_three}
+    \left\|\frac{\partial^2 \alpha^{(l)}}{(\partial W^{(l)})^2}\right\|_{2,2,1}
+    &\leq \beta_\phi
+\left( \gamma^{l-1} +  | \phi(0)| \sum_{i=1}^{l-1} \gamma^{i-1} \right)^2,
+\end{align}
+for $l=2,\dots,L$.
+\end{lemm}
+\proof
+%In this proof we introduce the following notation: given a logical statement $p$, we let $\I_p=1$ when $p$ is true, and $\I_p=0$ when $p$ is false.
+%
+For the inequality~\eqref{eq:221_one}, note that from~\eqref{eq:d_alpha_d_alpha} we obtain
+$
+\left(\frac{\partial^2 \alpha^{(l)}}{(\partial \alpha^{(l-1)})^2}\right)_{i,j,k}=\frac{1}{m}\phi''(\tilde{\alpha}_i^{(l)})W^{(l)}_{ik}W^{(l)}_{ij}
+$, and so
+ \begin{align}
+   \norm{\frac{\partial^2 \alpha^{(l)}}{(\partial \alpha^{(l-1)})^2}}_{2,2,1}
+    &=\sup_{\norm{\v_1}_2 = \norm{\v_2}_2=1}\frac{1}{m}\sum_{i=1}^{m}\left|\phi''(\tilde{\alpha}^{(l)}_i)(W^{(l)}\v_1)_i(W^{(l)}\v_2)_i\right|\nonumber \\
+    &\leq \sup_{\norm{\v_1}_2 = \norm{\v_2}_2=1}\frac{1}{m}\beta_\phi \sum_{i=1}^{m}\left|(W^{(l)}\v_1)_i(W^{(l)}\v_2)_i\right|\nonumber\\
+    &\overset{(a)}{\leq} \sup_{\norm{\v_1}_2 = \norm{\v_2}_2=1}\frac{1}{2m}\beta_\phi \sum_{i=1}^{m}(W^{(l)}\v_1)_i^2 +(W^{(l)}\v_2)_i^2\nonumber\\
+    &\leq \frac{1}{2m}\beta_\phi \sup_{\norm{\v_1}_2 = \norm{\v_2}_2=1}(\| W^{(l)}\v_1\|^2_2 +  \|  W^{(l)}\v_2\|^2_2 )\nonumber \\
+    &\le  \frac{1}{2m}\beta_\phi (\| W^{(l)}\|^2_2 +  \|  W^{(l)}\|^2_2 ) \nonumber\\
+    &\overset{(b)}{\leq}{\beta_\phi (\sigma_1 + \rho/\sqrt{m}})^2 = \beta_\phi\gamma^2,
+\end{align}
+where (a) follows from $2ab\leq a^2+b^2$ for $a,b\in\R$, and (b) from Proposition~\ref{prop:param-W-bound}, with probability at least $1-\frac{2}{m}$.
+%
+
+For the inequality~\eqref{eq:221_two}, carefully following the chain rule in~\eqref{eq:d_alpha_d_w} we obtain $$\left(\frac{\partial^2 \alpha^{(l)}}{\partial \alpha^{(l-1)}\partial W^{(l)}}\right)_{i,jj',k}=
+\frac{1}{m}\phi''(\tilde{\alpha}_i^{(l)})W^{(l)}_{ik}\alpha^{(l-1)}_{j'}\1_{[j=i]}
++\frac{1}{\sqrt{m}}\phi'(\tilde{\alpha}^{(l)}_i)\1_{[i=j]}\1_{[j'=k]}.$$
+Then, we have
+ \begin{align*}
+   &\norm{\frac{\partial^2 \alpha^{(l)}}{\partial \alpha^{(l-1)}\partial W^{(l)}}}_{2,2,1}\\
+%
+&=\sup_{\norm{\v_1}_2=\norm{\V_2}_F=1}\sum_{i=1}^{m}\left|\sum_{k=1}^m\sum^m_{j=1}\sum^m_{j'=1}\left(\frac{1}{m}\phi''(\tilde{\alpha}_i^{(l)})W^{(l)}_{ik}\alpha^{(l-1)}_{j'}\1_{[j=i]}
++\frac{1}{\sqrt{m}}\phi'(\tilde{\alpha}^{(l)}_i)\1_{[i=j]}\1_{[j'=k]}\right)\v_{1,k}\V_{2,jj'}\right|\\
+%
+&=\sup_{\norm{\v_1}_2=\norm{\V_2}_F=1}\sum_{i=1}^{m}\left|\frac{1}{m}\sum_{j'=1}^m\phi''(\tilde{\alpha}_i^{(l)})\alpha^{(l-1)}_{j'}\V_{2,ij'}\left(\sum^m_{k=1}W^{(l)}_{ik}\v_{1,k}\right)
++\frac{1}{\sqrt{m}}\sum^m_{k=1}\phi'(\tilde{\alpha}^{(l)}_i)\v_{1,k}\V_{2,ik}\right|\\
+%
+&\leq \sup_{\norm{\v_1}_2 = \norm{\V_2}_F=1}\frac{1}{m}\beta_\phi \sum_{i=1}^{m}\left|(W^{(l)}\v_1)_i(\V_2\alpha^{(l-1)})_i\right|+\frac{1}{\sqrt{m}}\sum^m_{i=1}\sum^m_{k=1}\left|\v_{1,k}\V_{2,ik}\right|\\
+%
+&\leq \sup_{\norm{\v_1}_2 = \norm{\v_2}_F=1}\frac{1}{2m}\beta_\phi \sum_{i=1}^{m}(W^{(l)}\v_1)_i^2 +(\V_2\alpha^{(l-1)})_i^2+\frac{1}{\sqrt{m}}\sum_{i=1}^m\norm{\v_1}_2\norm{\V_{2,_{i,:}}}_2\\
+%
+&= \sup_{\norm{\v_1}_2= \norm{\V_2}_F=1} \frac{1}{2m}\beta_\phi (\norm{W^{(l)}\v_1}^2_2 + \norm{\V_2\alpha^{(l-1)}}_2^2)+\frac{1}{\sqrt{m}}\sum_{i=1}^m\norm{\V_{2,_{i,:}}}_2\\
+%
+&\overset{(a)}{\leq}\frac{1}{2m}\beta_\phi (\norm{W^{(l)}}^2_2 + \norm{\alpha^{(l-1)}}_2^2)+\norm{\V_2}_F\\
+%
+&\overset{(b)}{\leq} \frac{\beta_\phi}{2}\left(\gamma^2+
+\left( \gamma^{l-1} +  | \phi(0)| \sum_{i=1}^{l-1} \gamma^{i-1} \right)^2\right)+1
+%
+\end{align*}
+where (a) follows from $\norm{\V_2\alpha^{(l-1)}}_2\leq \norm{\V_2}_2\norm{\alpha^{l-1}}\leq \norm{\V_2}_F\norm{\alpha^{l-1}}_2=\norm{\alpha^{l-1}}_2$ and $\sum_{i=1}^m\norm{\V_{2,_{i,:}}}_2\leq \sqrt{m}\sqrt{\sum_{i=1}^m\norm{\V_{2,_{i,:}}}_2^2}$, and (b) follows from Proposition~\ref{prop:param-W-bound} and Lemma~\ref{lemm:outl2}, with altogether holds with probability at least $1-\frac{2l}{m}$.
+%
+
+For the last inequality~\eqref{eq:221_three}, carefully following the chain rule in~\eqref{eq:d_alpha_d_w} we obtain $$\left(\frac{\partial^2 \alpha^{(l)}}{(\partial W^{(l)})^2}\right)_{i,j,k}=\frac{1}{m}\phi''(\tilde{\alpha}_i^{(l)})\alpha^{(l-1)}_{k'}\alpha^{(l-1)}_{j'}\1_{[j=i]}\1_{[k=i]}.$$
+Then, we have
+\begin{align*}
+   &\norm{\frac{\partial^2 \alpha^{(l)}}{(\partial W^{(l)})^2}}_{2,2,1}\\
+%
+&=\sup_{\norm{\V_1}_F=\norm{\V_2}_F=1}\sum_{i=1}^{m}\left|\sum^m_{j,j'=1}\sum^m_{k,k'=1}\left(\frac{1}{m}\phi''(\tilde{\alpha}_i^{(l)})\alpha^{(l-1)}_{k'}\alpha^{(l-1)}_{j'}\1_{[j=i]}\1_{[k=i]}\V_{1,jj'}\V_{2,kk'}\right)\right|\\
+%
+&=\sup_{\norm{\V_1}_F=\norm{\V_2}_F=1}\sum_{i=1}^{m}\left|\frac{\phi''(\tilde{\alpha}_i^{(l)})}{m}\sum^m_{j'=1}\left(\alpha^{(l-1)}_{j'}\V_{1,ij'}\right)\sum^m_{k'=1}\left(\alpha^{(l-1)}_{k'}\V_{2,ik'}\right)\right|\\
+%
+&\leq \sup_{\norm{\V_1}_F = \norm{\V_2}_F=1}\frac{1}{m}\beta_\phi \sum_{i=1}^{m}\left|(\V_1\alpha^{(l-1)})_i(\V_2\alpha^{(l-1)})_i\right|\\
+%
+&\leq \sup_{\norm{\V_1}_F = \norm{\v_2}_F=1}\frac{1}{2m}\beta_\phi \sum_{i=1}^{m}(\V_2\alpha^{(l-1)})_i^2 +(\V_2\alpha^{(l-1)})_i^2\\
+%
+&= \sup_{\norm{\V_1}_F= \norm{\V_2}_F=1} \frac{1}{2m}\beta_\phi (\norm{\V_2\alpha^{(l-1)}}^2_2 + \norm{\V_2\alpha^{(l-1)}}_2^2)\\
+%
+&\leq\frac{1}{2m}\beta_\phi (\norm{\alpha^{(l-1)}}^2_2 + \norm{\alpha^{(l-1)}}_2^2)\\
+%
+&\leq\beta_\phi
+\left( \gamma^{l-1} +  | \phi(0)| \sum_{i=1}^{l-1} \gamma^{i-1} \right)^2,
+%
+\end{align*}
+which holds with probability at least $1-\frac{2(l-1)}{m}$. 
+This completes the proof. \qed
+%
+%
+%\pccomment{\textbf{Important:} I have a concern about the calculation of the calculations of the (2,2,1)-norms which, if true, means there are some errors in~\cite{CL-LZ-MB:20}. I am explaining it now:}
+%
+%\pc{Please, recall the definition of the (2,2,1)-norm in~\eqref{eq:norm-221}. In order for it to make sense...}
+%
+%{\color{purple}[Libin: the 1-norm in (2,2,1)-norm is with respect to the third dimension. %
+%
+%Definition of (2,2,1)-norm: for an order 3 tensor $T\in\mathbb{R}^{d_1\times d_2\times d_3}$, 
+%\begin{align*}
+%    \|T\|_{2,2,1} := \sup_{\|\x\|=\|\z\|=1}\sum_{k=1}^{d_3}\left| \sum_{i=1}^{d_1} \sum_{j=1}^{d_2}T_{ijk}x_iz_j\right|.
+%\end{align*}
+%
+%Therefore, 
+%\begin{align*}
+%        \norm{\frac{\partial^2 \alpha^{(l)}}{(\partial \alpha^{(l-1)})^2}}_{2,2,1}=\frac{1}{m}\sup_{\norm{v_1}_2=\norm{v_2}_2=1}\frac{1}{m}\sum^m_{i=1}\left|\sum^m_{k=1}\sum^m_{j=1}\phi''(\tilde{\alpha}_i^{(l)})W^{(l)}_{ik}W^{(l)}_{ij} v_{1,i}v_{2,j}\right|.
+%\end{align*}
+%]}
+%
+%
+%\pccomment{But I am still confused by the notation. Let us take the case of $\frac{\partial^2 \alpha^{(l)}}{(\partial \alpha^{(l-1)})^2}$. Then, 
+%$$\left(\frac{\partial^2 \alpha^{(l)}}{(\partial \alpha^{(l-1)})^2}\right)_{i,j,k}=\frac{1}{m}\phi''(\tilde{\alpha}_i^{(l)})W^{(l)}_{ik}W^{(l)}_{ij}.$$
+%And so if $\frac{\partial^2 \alpha^{(l)}}{(\partial \alpha^{(l-1)})^2}\in \R^{d_1\times d_2\times d_3}$, isn't it the case that $i\in[d_1]$, $j\in[d_2]$, $k\in[d_3]$? If that is the case, then, in order to obtain the equation you showed, the norm should be named "(1,2,2)-norm". I wonder what I am missing; I might be confused with the indices.  
+%}
+%
+%\subsubsection{\pc{The case of $\frac{\partial^2 \alpha^{(l)}}{(\partial \alpha^{(l-1)})^2}$}}
+%
+%\pc{
+%Note that $\frac{\partial^2 \alpha^{(l)}}{(\partial \alpha^{(l-1)})^2}\in\R^{m\times m \times m}$. Indeed, it is a linear map $\frac{\partial^2 \alpha^{(l)}}{(\partial \alpha^{(l-1)})^2}:\R^m\to\R^{m\times m}$.
+%}
+%
+%\pc{Then, $$\left(\frac{\partial^2 \alpha^{(l)}}{(\partial \alpha^{(l-1)})^2}\right)_{i,j,k}=\frac{1}{m}\phi''(\tilde{\alpha}_i^{(l)})W^{(l)}_{ik}W^{(l)}_{ij}$$ and so, following ~\eqref{eq:norm-221},
+%\begin{equation}
+%    \norm{\frac{\partial^2 \alpha^{(l)}}{(\partial \alpha^{(l-1)})^2}}_{2,2,1}=\frac{1}{m}\sup_{\norm{v_1}_2=\norm{v_2}_2=1}\frac{1}{m}\sum^m_{k=1}\left|\sum^m_{i=1}\sum^m_{j=1}\phi''(\tilde{\alpha}_i^{(l)})W^{(l)}_{ik}W^{(l)}_{ij} v_{1,i}v_{2,j}\right|
+%\end{equation}
+%which is a completely different from the expression in the first line of equation~(76) in~\cite{CL-LZ-MB:20}.
+%}
+%
+%\subsubsection{\pc{The case of $\frac{\partial^2 \alpha^{(l)}}{\partial \alpha^{(l-1)}\partial W^{(l)}}$}}
+%
+%\pc{
+%Note that $\frac{\partial^2 \alpha^{(l)}}{\partial \alpha^{(l-1)}\partial W^{(l)}}\in\R^{m\times m^2 \times m}$. Indeed, it is a linear map $\frac{\partial^2 \alpha^{(l)}}{\partial \alpha^{(l-1)}\partial W^{(l)}}:\R^m\to\R^{m\times m^2}$.
+%}
+%
+%\pc{Then, carefully following the chain rule $$\left(\frac{\partial^2 \alpha^{(l)}}{\partial \alpha^{(l-1)}\partial W^{(l)}}\right)_{i,jj',k}=
+%\frac{1}{m}\phi''(\tilde{\alpha}_i^{(l)})W^{(l)}_{ik}\alpha^{(l-1)}_{j'}\mathbb{I}_{i=j}
+%+\frac{1}{\sqrt{m}}\phi'(\tilde{\alpha}^{(l)}_i)\mathbb{I}_{i=j}\mathbb{I}_{k=j'}$$ and this equation is already very different than the one in~(75) of~\cite{CL-LZ-MB:20}. Thus, the (2,2,1)-norm will be completely different. 
+%}
+%
+%\subsubsection{\pc{The case of $\frac{\partial^2 \alpha^{(l)}}{(\partial W^{(l)})^2}$}}
+%
+%\pc{
+%Note that $\frac{\partial^2 \alpha^{(l)}}{(\partial W^{(l)})^2}\in\R^{m\times m^2 \times m^2}$. Indeed, it is a linear map $\frac{\partial^2 \alpha^{(l)}}{(\partial W^{(l)})^2}:\R^{m^2}\to\R^{m\times m^2}$.
+%}
+%
+%\pc{Then, $$\left(\frac{\partial^2 \alpha^{(l)}}{(\partial W^{(l)})^2}\right)_{i,j,k}=\frac{1}{m}\phi''(\tilde{\alpha}_i^{(l)})\alpha^{(l-1)}_{k'}\alpha^{(l-1)}_{j'}I_{i=j}I_{i=k}$$ and so, following ~\eqref{eq:norm-221},
+%\begin{equation}
+%    \norm{\frac{\partial^2 \alpha^{(l)}}{(\partial W^{(l)})^2}}_{2,2,1}=\frac{1}{m}\sup_{\norm{v_1}_2=\norm{V_2}_F=1}\frac{1}{m}\sum^m_{k,k'=1}\left|\sum^m_{i=1}\sum^m_{j,j'=1}\phi''(\tilde{\alpha}_i^{(l)})\alpha^{(l-1)}_{k'}\alpha^{(l-1)}_{j'} \mathbb{I}_{i=j=k}v_{1,i}V_{2,jj'}\right|
+%\end{equation}
+%which is a completely different from the expression in the first line of equation~(77) in~\cite{CL-LZ-MB:20}.
+%}
+%
+%
+\subsection{$L_\infty$ norm of $\frac{\partial f}{\partial \alpha^{(l)}}$}
+
+%We start with some technical lemma.
+%
+%\begin{lemm}
+%Under Assumptions~\ref{asmp:ginit}, \ref{asmp:actinit}, and \ref{asmp:radius} we have that at initialization, with probability at least $(1 - 2e^{-\bar{c}(m) \ln^2(m)})$,
+%%
+%$$|\alpha_i^{(l)}| 
+%\leq \ln(m)+|\phi(0)|.
+%%= \tilde{O}(1).
+%$$
+%with $\bar{c}(m):=\frac{1}{\sigma_1^2}\left(\sqrt{2}+\sqrt{\frac{\ln m}{m}}\right)\left(\frac{\gamma^l}{\sqrt{d}}+\frac{1-\gamma^l}{1-\gamma}|\phi(0)|\right)^{-2}$ for $2\leq l \leq L$ and $\bar{c}(m):=\frac{1}{\sigma_1^2}\left(\sqrt{2}+\sqrt{\frac{\ln m}{m}}\right)$ for $l=1$. 
+%\label{lemm:alpha_bound}
+%\end{lemm}
+%%
+%%
+%\proof \abcomment{Update proof of Lemma F.4 in~\cite{ZAZ-YL-ZS:19}. Also see Section~5, step 1, of~\cite{ZAZ-YL-ZS:19}.} \pccomment{I have included the proof based on~\cite{ZAZ-YL-ZS:19}.}
+%For $2\leq l\leq L$,
+%$$
+%|\alpha^{(l)}_i|=\left|\phi\left(\frac{1}{\sqrt{m}}\sum^m_{k=1}W_{ik}^{(l)}\alpha_k^{(l-1)}\right)\right|\leq \left|\frac{1}{\sqrt{m}}\sum^m_{k=1}W_{ik}^{(l)}\alpha_k^{(l-1)}\right|+|\phi(0)|
+%$$
+%using the Lipschitzness of $\phi$. Now, $\frac{1}{\sqrt{m}}\sum^m_{k=1}W_{ik}^{(l)}\alpha_k^{(l-1)}\sim N(0,\frac{\sigma_0^2\norm{\alpha^{(l-1)}}_2^2}{m})$. Then, using the concentration inequality of Gaussian random variables, 
+%\begin{align*}
+%    \P[|\alpha_i^{(l)}\geq \ln(m)+|\phi(0)|]&\leq \P\left[\left|\frac{1}{\sqrt{m}}\sum^m_{k=1}W_{ik}^{(l)}\alpha_k^{(l-1)}\right|\geq \ln(m)\right]\\
+%    &\leq 2 e^{-\frac{m\ln^2(m)}{2\sigma_0^2\norm{\alpha^{(l-1)}}_2^2}}\\
+%    &\overset{(a)}{\leq}2 e^{-\bar{c}(m)\ln^2(m)}
+%\end{align*}
+%with $\bar{c}(m):=\frac{1}{\sigma_1^2}\left(\sqrt{2}+\sqrt{\frac{\ln m}{m}}\right)\left(\frac{\gamma^l}{\sqrt{d}}+\frac{1-\gamma^l}{1-\gamma}|\phi(0)|\right)^{-2}$. To derive (a), we note that: 
+%$
+%\frac{m}{2\sigma_0^2\norm{\alpha^{(l-1)}}_2^2}\geq \frac{m}{2\sigma_0^2}\left(\frac{\gamma^l}{\sqrt{d}}+\frac{1-\gamma^l}{1-\gamma}|\phi(0)|\right)^{-2}\frac{1}{m}=\frac{(\sqrt{2m}+\sqrt{\ln m})^2}{\sigma^2_1 m}\left(\frac{\gamma^l}{\sqrt{d}}+\frac{1-\gamma^l}{1-\gamma}|\phi(0)|\right)^{-2}
+%$ using Lemma~\ref{lemm:outl2}.
+%%
+%
+%For $l=1$,
+%$$
+%|\alpha^{(l)}_i|\leq \left|
+%\frac{1}{\sqrt{d}}\sum^d_{k=1}W_{ik}^{(l)}x_k\right|+|\phi(0)|
+%$$
+%and so $\frac{1}{\sqrt{d}}\sum^d_{k=1}W_{ik}^{(l)}x_k\sim N(0,\sigma_0^2)$ since $\norm{x}_2=1$ by assumption. Then, 
+%\begin{align*}
+%    \P[|\alpha_i^{(l)}\geq \ln(m)+|\phi(0)|]&\leq \P\left[\left|\frac{1}{\sqrt{d}}\sum^d_{k=1}W_{ik}^{(l)}x_k\right|\geq \ln(m)\right]\\
+%    &\leq 2 e^{-\frac{\ln^2(m)}{2\sigma_0^2}}
+%    =2 e^{-\frac{(\sqrt{2m}+\sqrt{\ln(m)})^2\ln^2(m) }{\sigma_1^2 m}}.
+%\end{align*}
+%This finishes the proof.
+%\qed 
+%
+%\begin{remark}
+%Notice that in Lemma~\ref{lemm:alpha_bound}, we have $\lim_{m\to +\infty}\bar{c}(m) \ln^2(m)=+\infty$, and so the lemma's statement holds with high probability as the width of the network $m$ increases.
+%\end{remark}
+
+Let $\b^{(l)} := \frac{\partial f}{\partial \alpha^{(l)}} \in \R^m$ for any $l\in[L]$. Let $\b_0^{(l)}$ denote $\b^{(l)}$ at initialization. By a direct calculation, we have
+\begin{align*}
+\b^{(l)} & = \frac{\partial f}{\partial \alpha^{(l)}}  
+= \left(\prod_{l'=l+1}^L \frac{\partial \alpha^{(l)}}{\partial \alpha^{(l-1)}} \right) \frac{\partial f}{\partial \alpha^{(L)}} \\
+& =  \left( \prod_{l' = l+1}^L \frac{1}{\sqrt{m}} (W^{(l')})^\top D^{(l')} \right) \frac{1}{\sqrt{m}} \v  ~,
+\end{align*}
+where $D^{(l')}$ is a diagonal matrix of the gradient of activations, i.e., $D^{(l')}_{ii} = \phi'(\tilde{\alpha}_i^{(l')})$. Note that we also have the following recursion:
+\begin{align*}
+\b^{(l)} & = \frac{\partial f}{\partial \alpha^{(l)}}  = \frac{\partial \alpha^{(l+1)}}{\partial \alpha^{(l)}}  \frac{\partial f}{\partial \alpha^{(l+1)}}  \\
+& = \frac{1}{\sqrt{m}} (W^{(l+1)})^\top D^{(l+1)} \b^{(l+1)}~.
+\end{align*}
+
+\begin{lemm}
+Consider any $l\in[L]$. Under Assumptions\ref{asmp:actinit} and~\ref{asmp:ginit}, for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, 
+%with $\gamma = \sigma_1 + \frac{\rho}{\sqrt{m}} < 1$, 
+with probability at least $1-\frac{2(L-l+1)}{m}$,
+\begin{equation}
+ \| \b^{(l)} \|_2 \leq\pcedit{ \left( \sigma_1 +\frac{\rho}{\sqrt{m}} \right)^{L-l} \left(\sigma_1+\frac{\rho_1}{\sqrt{m}}\right)}% = \gamma^{L-l+1}
+\end{equation}
+and
+\begin{equation}
+    \| \b_0^{(l)} \|_2 \leq \sigma_1^{L-l+1} \leq \gamma^{L-l+1}~.
+\end{equation}
+\label{lem:b_l2}
+\end{lemm}
+\proof 
+%\abcomment{Update proof of Lemma F.5 in~\cite{CL-LZ-MB:20}. Also, see the related analysis in~\cite{ZAZ-YL-ZS:19}.} 
+%\pccomment{Here is the proof.}
+%
+First, note that $\norm{\b^{(L)}}_2=\frac{1}{\sqrt{m}}\norm{\v}_2\leq \frac{1}{\sqrt{m}}\left(\sigma_1+\frac{\rho_1}{\sqrt{m}}\right)\sqrt{m}=\sigma_1+\frac{\rho_1}{\sqrt{m}}$, where the inequality follows from from Proposition~\ref{prop:param-W-bound}. Now, for the inductive step, assume $\norm{\b^{(l)}}_2\leq\left(\sigma_1+\frac{\rho}{\sqrt{m}}\right)^{L-l+1}$ with probability at least $1-\frac{2l}{m}$. Then,
+\begin{align*}
+\norm{\b^{(l-1)}}_2 & = \norm{\frac{\partial \alpha^{(l)}}{\partial \alpha^{(l-1)}}\b^{(l)}}_2\leq \norm{\frac{\partial \alpha^{(l)}}{\partial \alpha^{(l-1)}}}_2\norm{\b^{(l)}}_2\leq \left(\sigma_1+\frac{\rho}{\sqrt{m}}\right)\left(\sigma_1+\frac{\rho}{\sqrt{m}}\right)^{L-l}\left(\sigma_1+\frac{\rho_1}{\sqrt{m}}\right)\\
+& =\left(\sigma_1+\frac{\rho}{\sqrt{m}}\right)^{L-l+1}\left(\sigma_1+\frac{\rho_1}{\sqrt{m}}\right)
+\end{align*}
+where the last inequality follows from Lemma~\ref{lemm:alpha_l_alpha_l-1} with probability at least $1-\frac{2}{m}(l+1)$. Since we use Proposition~\ref{prop:param-W-bound} once at layer $L$ and then Lemma~\ref{lemm:alpha_l_alpha_l-1} $(L-l)$ times at layer $l$, then we have that everything holds altogether with probability at least $1-\frac{2}{m}(L-l+1)$. We have finished the proof by induction.
+\qed 
+%
+%
+%
+
+
+
+
+
+
+%
+\begin{lemm}
+Consider any $l\in[L]$. Under Assumptions~\ref{asmp:actinit} and \ref{asmp:ginit},  for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, for $\log m \geq 4\sigma_0$ \pccomment{It seems we don't make much of a deal of this condition, since we didn't even mention it in the main paper.}
+%\pc{Given the event described by Proposition~\ref{prop:param-W-bound} holds (which in itself holds with probability $\left(1-\frac{2}{m})\right)$)}, then, 
+with probability at least $1- \frac{2(L-l+1)}{m}$, %$1-2me^{-\frac{\ln^2(m)}{2\sigma_0}}$,
+\begin{equation}
+%    \|\b^{(l)}\|_{\infty} \leq O\left(\frac{1}{\sqrt{m}}\right)~.
+    \norm{\b^{(l)}}_{\infty} \leq \frac{\gamma^{L-l}}{\sqrt{m}}(\ln(m)+\rho_1).
+\end{equation}
+%\pccomment{We could use a special O notation to hide logarithmic factors of $m$; let's discuss if it is convenient or not.}
+\label{lemm:b_infty_bound}
+\end{lemm}
+%
+\proof 
+For any $l\in [L]$, by definition $i$-th component of $\b^{(l)}$, i.e., $\b_i^{(l)}$, takes the form
+\begin{align*}
+    \b_i^{(l)} =  \frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}}\frac{\partial f}{\partial \alpha^{(L)}}
+    &= \frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}}\frac{1}{\sqrt{m}}\v \\
+    &= \frac{1}{\sqrt{m}}\frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}} \v_0 +\frac{1}{\sqrt{m}}  \frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}} (\v-\v_0).
+\end{align*}
+
+Then, with $W^{(l)}_{:,i}$ denoting the $i$-th column of the matrix $W^{(l)}$, %it follows with probability at least $\left(1-\frac{2}{m}\right)$,
+%By Lemma~??? and Proposition??? we have
+\begin{equation}
+\label{eq:aux_alpha_alpha}    
+\begin{aligned}
+    \left\|  \frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}}\right\|_2\overset{(a)}{=} \left\|\frac{\phi'(\tilde{\alpha}_i^{(l)})}{\sqrt{m}}  \left(W_{:,i}^{(l)}\right)^\top \prod_{l'=l+2}^L\left(\frac{\partial \alpha^{(l')}}{\partial \alpha^{(l'-1)}}\right)\right\|_2
+    &\overset{(b)}{\leq} \frac{1}{\sqrt{m}}\norm{W_{:,i}^{(l)}}_2\prod_{l'=l+2}^L\norm{\frac{\partial \alpha^{(l')}}{\partial \alpha^{(l'-1)}}}_2
+    \\
+    &\overset{(c)}{\leq} \frac{1}{\sqrt{m}}\norm{W_{:,i}^{(l)}}_2\gamma^{L-l-1}\\
+    &\overset{(d)}{\leq} \gamma\;\gamma^{L-l-1}
+    \\
+    &=\gamma^{L-l}
+    %&\leq (\sigma_1+\rho/\sqrt{m})\gamma^{\frac{L-l-1}{2}},
+\end{aligned}
+\end{equation}
+where (a) follows from $\frac{\partial \alpha^{(l+1)}}{\partial \alpha_i^{(l)}}=\frac{1}{\sqrt{m}}\phi'(\tilde{\alpha}^{(l)}_i)(W^{(l)}_{:,i})^\top$, (b) from $\phi$ being  1-Lipschitz, (c) from Lemma~\ref{lemm:alpha_l_alpha_l-1}, and (d) from $\norm{W^{(l)}_{:,i}}_2\leq \norm{W^{(l)}}_2$ and Proposition~\ref{prop:param-W-bound}, which altogether holds with probability $1-\frac{2}{m}(L-l)$. 
+%(note that if the event in  Proposition~\eqref{prop:param-W-bound} holds, then the event in Lemma~\ref{lemm:alpha_l_alpha_l-1} also holds). %with probability $\left(1-\frac{2}{m}\right)$). 
+
+Since $\frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}}$ is independent from $\v_0$ and $\v_0$ is initialized as $v_{0,i}\sim\mathcal{N}(0,\sigma_0^2)$ i.i.d. for each $i\in[m]$, we have $\frac{1}{\sqrt{m}}\frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}} \v_0 \sim \mathcal{N}\left(0,\sigma_0^2\norm{\frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}}}^2_2/m\right)$.  By the concentration inequality for Gaussian random variable, with probability at least $1-2e^{-\frac{\log^2(m)}{2\sigma_0}}$,
+\begin{align*}
+    \left| \frac{1}{\sqrt{m}}\frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}} \v_0\right| 
+    \leq
+    \norm{\frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}}}_2
+    \frac{\ln(m)}{\sqrt{m}}
+    \leq \frac{\gamma^{L-l}\ln(m)}{\sqrt{m}}.
+\end{align*}
+Therefore, for every $i\in[m]$,
+\begin{align*}
+    \left| \b_i^{(l)}\right| &\leq \left|\frac{1}{\sqrt{m}}\frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}} \v_0\right| + \left|\frac{1}{\sqrt{m}}  \frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}} (\v-\v_0)\right| \\
+    &\leq \left|\frac{1}{\sqrt{m}}\frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}} \v_0\right| + \frac{1}{\sqrt{m}}\left\|\frac{\partial \alpha^{(L)}}{\partial \alpha_i^{(l)}}\right\|\|\v - \v_0\| \\
+    &\leq \frac{\gamma^{L-l} \ln(m)}{\sqrt{m}} + \frac{\gamma^{L-l} \rho_1}{\sqrt{m}}~,
+    %= \tilde{O}\left(\frac{1}{\sqrt{m}}\right),
+\end{align*}
+where the last inequality follows from our recently derived results. Then, applying union bound and combining with the probability such that~\eqref{eq:aux_alpha_alpha} holds, using $\log(m) \geq 2 \sigma_0$, we have $\norm{\b^{(l)}}_{\infty} \leq \frac{\gamma^{L-l}}{\sqrt{m}}(\ln(m)+\rho_1)$ with probability $1 - \frac{2(L-l)}{m} - 2m e^{-\frac{\log^2 m}{2\sigma_0}} \geq 1 - \frac{2(L-l)}{m} - 2m e^{-2\log m} = 1-\frac{2(L-l+1)}{m}$. \qed 
+
+
+% The proof is finished by applying a 
+% union bound over indices $i = 1,2,...,m$ of $\b^{(l)}$.
+%
+%, we have with probability $1-2me^{-c_b^{(l)}\ln^2(m)/2}$,
+%\begin{align*}
+%    \left\|\b^{(l)}\right\|_\infty = \tilde{O}\left(\frac{1}{\sqrt{m}}\right).
+%\end{align*} 
+%
+%\qed
+
+% \vspace{0.5cm}
+% %\pccomment{Based on the proof above introduced by Libin, I have moved the old proofs on this part to the appendix of the paper (Section~\ref{sec:Hessian-old}).}
+% %
+
+% \abcomment{Check if this is weaker than~\cite{ZAZ-YL-ZS:19} [ALS'19]. Core argument of relevance is the bound on $\| \b^{(l-1)} - \b_0^{(l-1)} \|_2$ or $\| \b^{(l-1)} - \b_0^{(l-1)} \|_\infty$.}
+
+
+\subsection{Gradient Norm Bounds}
+\label{ssec:app_gradbnd}
+%
+%\abcomment{maybe change the notation and call $c_{L,m,\sigma_1,\rho} := \frac{\gamma^L}{\sqrt{d}} + |\phi(0)| \sum_{i=1}^L \gamma^{i-1} $. The $\sigma_1$ dependency will play a role.}
+\lemgradbnd*
+% \begin{corollary}
+% \label{cor:gradient-bounds}
+% Under Assumptions~\ref{asmp:lips}, \ref{asmp:ginit}, \ref{asmp:actinit}, and \ref{asmp:radius}, and for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, with probability at least $\left(1-\frac{2}{m}\right)$,
+% %
+% \begin{align}
+%     \|\nabla_\theta f(\theta;\x_i)\|_2 & \leq c_{L,m,\sigma_1,\rho}~~~ \text{for any} ~i\in [n]~, \\ 
+%     \|\nabla_\theta \cL(\theta)\|_2 & \leq \lambda c_{L,m,\sigma_1,\rho}~,
+% \end{align}
+% where $c_{L,m,\sigma_1,\rho} =\sqrt{ \sum_{l=1}^{L+1}
+%  \left( \frac{\gamma^{l-1}}{\sqrt{d}} + |\phi(0)| \sum_{i=1}^{l-1} \gamma^{i-1} \right)^2\gamma^{2(L-l+1)}}
+% %
+% %(L+1) \left( \frac{\gamma^L}{\sqrt{d}} + \frac{1-\gamma^L}{1-\gamma} |\phi(0)| \right)^2\max\{1,\gamma^{2(L-l+1)}\}
+% $.
+% %with $\gamma = \sigma_1 + \frac{\rho}{\sqrt{m}}$.
+% %%    $\|\nabla_\theta f(\theta;\x_i)\|_2^2 \leq c_{L,m,\sigma_1,\rho}$ for any $i\in[n]$, $c_{L,m,\sigma_1,\rho}=(L+1)\left(L^2 \phi(0)^2 + \frac{2(L+1)|\phi(0)|}{\sqrt{m}} + \frac{1}{m}\right)$  and thus $\|\nabla_\theta \cL(\theta)\|_2 \leq \lambda \sqrt{c_{L,m,\sigma_1,\rho}}$.
+% \end{corollary}
+% %
+\proof
+Using the chain rule,
+\begin{equation*}
+    \frac{\partial f}{\partial \w^{(l)}}= \frac{\partial \alpha^{(l)}}{\partial w^{(l)}}\prod^{L}_{l'=l+1}\frac{\partial \alpha^{(l')}}{\partial \alpha^{(l'-1)}}\;\frac{\partial f}{\partial \alpha^{(L)}}
+\end{equation*}
+and so
+\begin{align*}
+    \norm{\frac{\partial f}{\partial w^{(l)}}}_2^2
+    \leq 
+    \norm{\frac{\partial \alpha^{(l)}}{\partial w^{(l)}}}_2^2
+    \norm{\prod^{L}_{l'=l+1}\frac{\partial \alpha^{(l')}}{\partial \alpha^{(l'-1)}}\frac{\partial f}{\partial \alpha^{(L)}}}_2^2&\overset{(a)}{\leq} \norm{\frac{\partial \alpha^{(l)}}{\partial w^{(l)}}}_2^2\gamma^{2(L-l)}\left(\sigma_1+\frac{\rho_1}{\sqrt{m}}\right)^2\\
+    &\overset{(b)}{\leq}
+    \left(\gamma^{l-1} + |\phi(0)| \sum_{i=1}^{l-1} \gamma^{i-1} \right)^2\gamma^{2(L-l)}\left(\sigma_1+\frac{\rho_1}{\sqrt{m}}\right)^2
+    %\\
+    %&\pc{\overset{(c)}{\leq}\left( \frac{\gamma^{l-1}}{\sqrt{d}} + \frac{1-\gamma^l}{1-\gamma} |\phi(0)| \right)^2}
+%    (l-1)^2 \phi(0)^2 + \frac{2l |\phi(0)|}{\sqrt{m}} + \frac{1}{m}
+\end{align*}
+for $l\in[L]$, where (a) follows from Lemma~\ref{lem:b_l2}, (b) follows from Lemma~\ref{lem:alpha_W}. Similarly,
+$$
+\norm{\frac{\partial f}{\partial w^{(L+1)}}}_2^2 = \frac{1}{m}\norm{\alpha^{(L)}}_2^2 \leq \left( \gamma^{L} + |\phi(0)| \sum_{i=1}^{L} \gamma^{i-1} \right)^2~,
+%L^2 \phi(0)^2 + \frac{2(L+1)|\phi(0)|}{\sqrt{m}} + \frac{1}{m}
+$$
+where we used Lemma~\ref{lemm:outl2} for the inequality.
+%by following the proof of Lemma~\ref{lem:alpha_W}.
+Now,
+\begin{align*}
+\norm{\nabla_\theta f}_2^2&=\sum_{l=1}^{L+1}\norm{\frac{\partial f}{\partial w^{(l)}}}^2_2 \\
+&\overset{(a)}{\leq}
+\left(\gamma^{L} + |\phi(0)| \sum_{i=1}^{L} \gamma^{i-1} \right)^2+\left(\sigma_1+\frac{\rho_1}{\sqrt{m}}\right)^2\sum_{l=1}^{L}\left( \gamma^{l-1} + |\phi(0)| \sum_{i=1}^{l-1} \gamma^{i-1} \right)^2\gamma^{2(L-l)}=\varrho^2,
+\end{align*}
+where where (a) follows with probability $1-\frac{2}{m}(L+1)$ using a union bound from all the previously used results. Thus,
+\begin{align*}
+\norm{\nabla_\theta\cL(\theta)}_2=\norm{\frac{1}{n}\sum^n_{i=1}\ell_i'\nabla_\theta f}_2&\leq \frac{1}{n}\sum_{i=1}^n|\ell_i'|\norm{\nabla_\theta f}_2\\
+&\leq \frac{2\varrho}{n}\sum^n_{i=1}|y_i-\hat{y}_i|\leq 2\varrho\sqrt{\cL(\theta)}~.
+\end{align*}
+That completes the proof. \qed
+
+% \begin{lemm}
+% Under Assumptions~\ref{asmp:ginit}, \ref{asmp:actinit}, and \ref{asmp:radius}, with probability at least $\left(1-\frac{2}{m}\right)$,
+% %
+% \begin{align}
+% \|\nabla_{\x} f(\theta;\x)\|_2 & \leq \gamma^{L+1} ~,
+% \end{align}
+% where $\gamma = \sigma_1 + \frac{\rho}{\sqrt{m}}$.
+% \label{lemm:flips}
+% \end{lemm}
+
+\lemflips*
+\proof
+Using the chain rule,
+\begin{equation*}
+\frac{\partial f}{\partial \x} =  \frac{\partial f}{\partial \alpha^{(0)}}= \frac{\partial \alpha^{(1)}}{\partial \alpha^{(0)}}\left(\prod^{L}_{l'=2}\frac{\partial \alpha^{(l')}}{\partial \alpha^{(l'-1)}}\right) \frac{\partial f}{\partial \alpha^{(L)}}
+\end{equation*}
+and so
+\begin{align*}
+\norm{\frac{\partial f}{\partial \x}}_2
+& \leq \norm{\frac{\partial \alpha^{(1)}}{\partial \alpha^{(0)}}}_2
+    \norm{\left(\prod^{L}_{l'=2}\frac{\partial \alpha^{(l')}}{\partial \alpha^{(l'-1)}}\right) \frac{\partial f}{\partial \alpha^{(L)}}}_2 \\ 
+& \leq \norm{\frac{\partial \alpha^{(1)}}{\partial \alpha^{(0)}}}_2
+    \left( \prod^{L}_{l'=2} \left\| \frac{\partial \alpha^{(l')}}{\partial \alpha^{(l'-1)}} \right\|_2 \right)  \norm{\frac{\partial f}{\partial \alpha^{(L)}}}_2 \\    
+& \overset{(a)}{\leq} \gamma \cdot \gamma^{L-1} \cdot \left(\sigma_1+\frac{\rho_1}{\sqrt{m}}\right) \\
+& = \gamma^{L}\left(\sigma_1+\frac{\rho_1}{\sqrt{m}}\right) 
+%\norm{\frac{\partial \alpha^{(1)}}{\partial \alpha^{(0)}}}_2^2\overset{(b)}{\leq}
+%    \left( \gamma^{l-1} + \frac{1-\gamma^l}{1-\gamma} |\phi(0)| \right)^2~.
+%    (l-1)^2 \phi(0)^2 + \frac{2l |\phi(0)|}{\sqrt{m}} + \frac{1}{m}
+\end{align*}
+where (a) follows from Lemma~\ref{lemm:alpha_l_alpha_l-1} and Lemma~\ref{lem:b_l2} with probability at least $1-\frac{2(L+1)}{m}$ due to union bound. This completes the proof. \qed  
+
+\subsection{Bound on the empirical or total loss function}
+
+\lemLbounds*
+
+\proof
+We start by noticing that for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$,
+\begin{equation}
+    \cL(\theta)=\frac{1}{n}\sum^n_{i=1}(y_i-f(\theta;\x_i))^2\leq\frac{1}{n}\sum^n_{i=1}(y_i^2+2|y_i||f(\theta;\x_i)|+|f(\theta;\x_i)|^2).
+    \label{eq:loss-upp-b}
+\end{equation}
+%
+Now, let us consider the particular case $\theta=\theta_0$ and a generic $\norm{\x}_2=\sqrt{d}$. Let $\alpha_o^{(l)}$ be the layerwise output of layer $l$ at initialization. Then,
+\begin{align*}
+    |f(\theta;\x_i)|&=\frac{1}{\sqrt{m}}\v_0^\top\alpha_o^{(L)}(\x)\\
+    &\leq \frac{1}{\sqrt{m}}\norm{\v_0}_2\norm{\alpha_o^{(L)}(\x)}_2\\
+    &\overset{(a)}{\leq}\frac{1}{\sqrt{m}}\sigma_1\sqrt{m}\norm{\alpha_o^{(L)}(\x)}_2\\
+    &\overset{(b)}{\leq}\frac{1}{\sqrt{m}}\sigma_1\sqrt{m}\left(\sigma_1^L+|\phi(0)|\sum^L_{i=1}\sigma_1^{i-1}\right)\sqrt{m}\\
+    &=A_o(\sigma_1)\sqrt{m},
+\end{align*}
+where (a) follows from Lemma~\ref{lem:aux1} and (b) follows from following the same proof as in Lemma~\ref{lemm:outl2} with the difference that we consider the weights at initialization. Now, replacing this result back in~\eqref{eq:loss-upp-b} we obtain $\cL(\theta_0)\leq\left(\frac{1}{n}\sum^n_{i=1}(y_i^2+2|y_i|A_o(\sigma_1)+(A_o(\sigma_1))^2\right)m$.
+
+Now, let us consider the general case of $\theta$,
+\begin{align*}
+    |f(\theta;\x_i)|&=\frac{1}{\sqrt{m}}\v^\top\alpha^{(L)}(\x)\\
+    &\leq \frac{1}{\sqrt{m}}\norm{\v}_2\norm{\alpha^{(L)}(\x)}_2\\
+    &\overset{(a)}{\leq}\frac{1}{\sqrt{m}}\left(\sigma_1+\frac{\rho_1}{\sqrt{m}}\right)\sqrt{m}\norm{\alpha^{(L)}(\x)}_2\\
+    &\overset{(b)}{\leq}\frac{1}{\sqrt{m}}\left(\sigma_1+\frac{\rho_1}{\sqrt{m}}\right)\sqrt{m}\left(\gamma^L+|\phi(0)|\sum^L_{i=1}\gamma^{i-1}\right)\sqrt{m}\\
+    &=A(\sigma_1,\gamma)\sqrt{m},
+\end{align*}
+where (a) follows from Lemma~\ref{prop:param-W-bound} and (b) follows from Lemma~\ref{lemm:outl2}. Now, replacing this result back in~\eqref{eq:loss-upp-b} we obtain $\cL(\theta_0)\leq\left(\frac{1}{n}\sum^n_{i=1}(y_i^2+2|y_i|A(\sigma_1,\gamma)+(A(\sigma_1,\gamma))^2\right)m$.
+
+In either case, a union bound let us obtain the probability with which the results hold. This finishes the proof.
+%
+%\cL(\theta)&\leq \left(\frac{1}{n}\sum^n_{i=1}(y_i-2|y_i|A(\gamma,\sigma_1)+(A(\gamma,\sigma_1))^2\right)m
+%
+\qed

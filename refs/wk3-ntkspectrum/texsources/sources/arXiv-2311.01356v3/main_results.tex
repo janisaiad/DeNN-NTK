@@ -1,0 +1,203 @@
+
+\section{Main results}\label{sec:mainresults}
+
+
+In this section, we discuss the main results of the paper.
+In the case of shallow networks, we present upper and lower bounds on the Lipschitz constant
+that hold almost without any restrictions on the input dimension $d$,
+the network width $N$ and the network depth $L$.
+Moreover, the upper and lower bounds match up to an absolute multiplicative constant.
+In the case of deep networks, we have to impose the additional assumption $N \gtrsim d L^2$. 
+Furthermore, there is a gap between the upper and lower bounds;
+this gap grows exponentially with the depth $L$ of the network
+and logarithmically with the network width $N$.
+\subsection{Shallow networks}
+
+We provide a high-probability version and an expectation version for the upper and lower bounds. 
+The result for the upper bound reads as follows:
+
+\begin{theorem}\label{thm:main_1}
+  There exist absolute constants $C, c_1>0$ satisfying the following:
+  If $\Phi: \RR^d \to \RR$ is a random shallow ReLU network of arbitrary width $N \in \NN$
+  with random weights and random biases following \Cref{assum:1}, then the following hold:
+  \begin{enumerate}
+    \item We have
+          \begin{align*}
+            \lip(\Phi) \leq C \cdot \sqrt{d} 
+          \end{align*}
+          with probability at least $(1-2\exp(-\min\{d,N\})) \cdot (1-2\exp(-c_1 \cdot \max\{d,N\}))_+$.
+    
+    \item $\displaystyle \EE \left[\lip(\Phi) \right] \leq C  \cdot \sqrt{d}.$
+  \end{enumerate}
+\end{theorem}
+
+The proof of \Cref{thm:main_1} can be found in \Cref{sec:shallow}.
+ 
+The upper bound from above is complemented by the following lower bound,
+which indeed shows that the bounds are tight up to multiplicative constants.
+
+\begin{theorem}\label{thm:main_shallow_lower}
+  There exist absolute constants $c,c_1>0$ satisfying the following: If $\Phi: \RR^d \to \RR$ is a random shallow ReLU network with width $N$ and with random weights and biases following \Cref{assum:1}, then the following hold:
+\begin{enumerate}
+\item{The inequality
+\begin{equation*}
+\lip(\Phi) \geq \frac{1}{4\sqrt{2}} \cdot \sqrt{d}
+\end{equation*}
+holds with probability at least $(1- 2 \exp(-cN))_+(1-2\exp(-cd))_+$.}
+\item{ If $d,N > \frac{\ln(2)}{c}$, it holds
+\begin{equation*}
+\EE [\lip(\Phi)] \geq c_1 \cdot \sqrt{d}.
+\end{equation*}
+}
+\end{enumerate}
+\end{theorem}
+
+The proof of \Cref{thm:main_shallow_lower} can be found in \Cref{sec:low_bound_shallow}.
+
+
+The two results combined show that in the case of shallow networks it holds
+\begin{equation*}
+  \lip(\Phi) \asymp \sqrt{d},
+\end{equation*}
+where the involved constants are absolute.
+This holds with high probability and in expectation and moreover
+without almost any restrictions on the width $N$ or the input dimension $d$.
+
+\subsection{Deep networks}
+
+In the case of deep networks, our upper bound for the Lipschitz constant
+reads as follows:
+
+\begin{theorem}\label{thm:main_2}
+  There exist absolute constants $C, c_1 > 0$ such that, if $N > d + 2$ and $\Phi: \RR^d \to \RR$
+  is a random ReLU network of width $N$ and with $L$ hidden layers with random weights
+  and biases following \Cref{assum:1}, the following hold:
+  \begin{enumerate}
+  \item The inequality
+        \begin{align*}
+          \lip(\Phi)
+          \leq C \cdot (3\sqrt{2})^{L}
+                 \cdot \sqrt{L}
+                 \cdot \sqrt{\ln \left(\frac{\ee N}{d+1}\right)}
+                 \cdot \sqrt{d} 
+        \end{align*}
+        holds with probability at least $(1-2\exp(- d))\left((1-2\exp(-c_1N))_+\right)^L$.
+        \vspace*{0.1cm}
+  
+  \item \(
+          \displaystyle
+          \EE \left[\lip(\Phi) \right]
+          \leq C \cdot (2 \sqrt{2})^{L}
+                 \cdot \sqrt{L}
+                 \cdot \sqrt{\ln \left(\frac{\ee N}{d+1}\right)}
+                 \cdot \sqrt{d}.
+        \)
+  \end{enumerate}
+\end{theorem}
+
+The proof of \Cref{thm:main_2} can be found in \Cref{sec:deep}.
+We remark that for the upper bounds in the case of deep networks above,
+we impose the assumption $N > d+2$ on the network width, which is not present
+in our results for shallow networks.
+
+Again, we complement the upper bound by a lower bound,
+which shows---at least for fixed depth $L$---that the bounds are tight up to
+a factor that is logarithmic in the width of the network.
+
+\begin{theorem}\label{thm:main_3}
+  There exist absolute constants $C, c_1,c_2 > 0$ with the following property: 
+  If $N \geq CdL^2$ and if $\Phi:\RR^d \to \RR$ is a random ReLU network of width $N$, with $L$ hidden layers 
+  with random weights and biases following \Cref{assum:2}, 
+  then the following two properties are satisfied:
+\begin{enumerate}
+\item It holds
+\begin{equation*}
+\lip(\Phi) \geq \frac{1}{4} \sqrt{d}
+\end{equation*}
+with probability at least $\left(1 - \frac{1}{2^N}-\exp(-N/(CL^2))\right)^L \cdot (1- 2 \exp (-c_1 d ))_+$. 
+\item If we additionally assume $N \geq CL^2 \ln(4L)$ and $d> \frac{\ln(2)}{c_1}$, it holds \begin{equation*}
+\EE \left[\lip(\Phi)\right] \geq c_2 \cdot \sqrt{d}.
+\end{equation*}
+\end{enumerate}
+\end{theorem}
+
+\Cref{thm:main_3} is proven in \Cref{subsec:deep_lower}.
+At first glance, it might be irritating that the probability in (1) depends on $N/(CL^2)$.
+Here, it should be noted that the condition $N \geq CdL^2$ is equivalent to $N/(CL^2) \geq d$.
+Therefore, the bound on the Lipschitz constant in particular holds with high probability depending
+on the input dimension $d$.
+We remark that in contrast to the upper bound, where we assume that $N > d+2$,
+for the lower bound we assume that $N \gtrsim d L^2$.
+Moreover, we assume that the biases are drawn from symmetric distributions,
+\paul{whereas this assumption is not needed in \Cref{thm:main_2,thm:main_shallow_lower,thm:main_1}. 
+However, we emphasize once more that the assumption that the biases are drawn from symmetric distributions
+is natural and includes in particular the initialization to zero (as originally introduced in \cite{he2015delving}), 
+a Gaussian initialization, a symmetric uniform initialization as well as a Rademacher initialization.}
+
+
+The above results provide bounds on the Lipschitz constant of deep ReLU networks.
+The upper and lower bounds are tight up to a factor that
+depends exponentially on the depth $L$, but is only logarithmic in $N/d$.
+
+Note that for both the upper and lower bound for \emph{deep} networks, we impose some additional assumptions
+on the input dimension $d$, the width $N$, and the depth $L$,
+whereas no such assumption is needed in the case of shallow networks.
+Specifically, for the upper bound we require $N > d+2$ and for the lower bound $N \gtrsim d L^2$.
+
+
+\begin{remark}\label{remark:compare}
+In this remark, we compare the upper bounds for the Lipschitz constant of random $\relu$
+networks which we derive in this work (see \Cref{thm:main_1,thm:main_2})
+to the bounds that were shown in \cite{buchanan2021deep,nguyen2021tight}
+in the context of the lazy training regime \cite{chizat2019lazy}.
+
+We first note that neither of the papers \cite{buchanan2021deep,nguyen2021tight}
+provides \emph{lower} bounds for the Lipschitz constant.
+
+The analysis in \cite{nguyen2021tight} concentrates on bounding the Lipschitz constant
+of the feature maps and does not include the final layer.
+In our setting ($L$ hidden layers, each with $N$ neurons and input dimension $d$
+with weights following the variant of the He initialization),
+the bound in \cite[Theorem~6.2]{nguyen2021tight} shows that the output of the penultimate layer
+has Lipschitz constant at most $\mathcal{O} (2^L \max \{1, \sqrt{d/N}\})$ up to log factors,
+with high probability.
+If one naively combines this bound with the (sharp) bound of $\sqrt{N}$
+for the Lipschitz constant of the function mapping the output of the penultimate layer
+to the output of the network, one achieves a bound of $\mathcal{O}(2^L\max\{\sqrt{N}, \sqrt{d}\})$,
+which is (for fixed depth $L$ and $N \gg d$) significantly weaker
+than the bound of $\mathcal{O}({C^L\sqrt{d}})$ (up to log factors) that we derive.
+Moreover, the analysis in \cite{nguyen2021tight} heavily uses the fact that the biases are all zero,
+whereas our techniques can handle quite general distributions of the biases. 
+ 
+A sharper version of this bound has been obtained as an auxiliary result in \cite[Theorem~B.5]{buchanan2021deep}: 
+Under the additional assumption $N \gtrsim d^4L \ln^4 (N)$,
+this result implies that the Lipschitz constant is bounded by $\mathcal{O}(\sqrt{d})$ up to log factors,
+with high probability.
+In particular, it is remarkable that the bound is independent of the network depth $L$,
+whereas our bound depends \emph{exponentially} on $L$. 
+Removing the exponential dependence on $L$ in our setting is interesting but beyond the scope of the present work. 
+Adapting the techniques from \cite{buchanan2021deep} to our setting
+with quite general distributions of the biases is not straightforward,
+since \cite{buchanan2021deep} heavily uses that all biases are zero
+in order to reduce the problem of bounding the global Lipschitz constant
+to bounding the Lipschitz constant on the sphere.
+Finally, we point out that the upper bound in \cite{buchanan2021deep} implies
+that our lower bound of $\Omega(\sqrt{d})$ is sharp,
+at least in the case of all biases being zero and $N \gtrsim d^4L \ln^4(N) + dL^2$.
+\end{remark}
+\begin{remark}\label{remark:compare_lower}
+This remark is dedicated to comparing the lower bounds that we derive in this work (see \Cref{thm:main_3,thm:main_shallow_lower})
+with a lower bound on the norm of the gradient of random ReLU networks at a fixed point that was derived in \cite[Lemma~2.2]{bartlett2021adversarial}.
+Noting that the initialization scheme considered in \cite{bartlett2021adversarial} is slightly different from the setting that we consider,
+transferred to our setting the lower bound from \cite{bartlett2021adversarial} states that the norm of the gradient at a single fixed point is lower bounded by $\Omega\left(\sqrt{d} \cdot \sqrt{2}^{-L}\right)$ with high probability. 
+This lower bound immediately implies the same lower bound for the Lipschitz constant of random ReLU
+networks, since such networks are almost surely differentiable at a fixed point (see \Cref{app:diff}). While this lower bound is for fixed depth $L$ at par 
+with the lower bound of $\Omega(\sqrt{d})$ that we derive, it is important to note that our bound does \emph{not} depend on the depth $L$ of the network,
+whereas the bound from \cite{bartlett2021adversarial} has \emph{exponential} decay in $L$. 
+Moreover, in \cite{bartlett2021adversarial} it is also assumed that all the biases are equal to zero, whereas we allow more general distributions for the biases.
+
+In principle, it might be possible to adapt the techniques from \cite{bartlett2021adversarial} to derive a lower bound
+that is similar to ours but this is not done in \cite{bartlett2021adversarial}. 
+As far as we are aware, our paper is the first to state and derive a sharp lower bound matching the upper bound from \cite{buchanan2021deep}.
+\end{remark}
+

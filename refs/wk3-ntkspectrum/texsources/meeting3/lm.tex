@@ -1,0 +1,208 @@
+\documentclass{beamer}
+
+\usetheme{Madrid} % Classic theme, or choose another theme if you prefer
+
+% Necessary packages based on sources
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern} % Modern font
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm} % For theorem environments
+\usepackage{graphicx}
+\usepackage{hyperref} % Hyperlinks
+\usepackage{booktabs} % For professional tables
+\usepackage{bm} % For bold mathematical symbols
+
+% Definitions of theorem environments, lemmas, etc.
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[section]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[section]{Definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{remark}{Remark}[section]
+\newtheorem{claim}[theorem]{Claim}
+
+% Commands for common mathematical notation
+\newcommand{\E}{\mathbb{E}} % Expectation
+\newcommand{\R}{\mathbb{R}} % Real numbers
+\newcommand{\N}{\mathbb{N}} % Natural numbers
+\newcommand{\I}{\mathbf{I}} % Identity matrix
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert} % Norm
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert} % Absolute value
+\newcommand{\svmin}[1]{\sigma_{\rm min}\left(#1\right)} % Smallest singular value
+\newcommand{\evmin}[1]{\lambda_{\rm min}\left(#1\right)} % Smallest eigenvalue
+\newcommand{\tr}{\mathop{\rm tr}\nolimits} % Trace
+\newcommand{\tildeF}{\tilde{F}} % Centered feature matrix
+
+% Presentation information
+\title{Proof Techniques for Lower Bounds on $\lambda_{\min}(\text{NTK})$}
+\author{Summary Based on Provided Sources}
+\date{\today}
+
+\begin{document}
+
+% Title page
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% Table of contents
+\begin{frame}{Table of Contents}
+  \tableofcontents
+\end{frame}
+
+% Introduction
+\section{Introduction}
+\begin{frame}{Importance of $\lambda_{\min}(\text{NTK})$ Lower Bounds}
+  \begin{itemize}[<+->]
+    \item The study of lower bounds for the smallest eigenvalue ($\evmin{}$) of the Neural Tangent Kernel (NTK) is crucial for understanding the convergence and generalization properties of overparameterized neural networks.
+    \item A strictly positive lower bound on $\evmin{}$ ensures that the optimization landscape is well-conditioned near initialization.
+    \item It also guarantees that the network behaves like a linear model in the "lazy training" regime.
+    \item This presentation summarizes techniques used to establish such bounds, based on the provided sources.
+  \end{itemize}
+\end{frame}
+
+\section{Proof Techniques for $\lambda_{\min}(\text{NTK})$}
+
+\begin{frame}{Overview of Techniques}
+  The sources describe several strategies to establish lower bounds for $\evmin{\text{NTK}}$, depending on:
+  \begin{itemize}[<+->]
+    \item Network type (depth, activation function).
+    \item Nature of the matrix under study (empirical NTK or its limit/expectation).
+  \end{itemize}
+  We will cover three main categories of approaches.
+\end{frame}
+
+\subsection{Activation Matrix Analysis and Expectations}
+\begin{frame}{Technique 1: Activation Matrix Analysis & Expectations}
+  \textbf{Focus:} NTK at initialization, particularly for smooth activations.
+  \begin{itemize}[<+->]
+    \item This approach aims to show sufficient width requirements, e.g., $\tilde{\Omega}(n)$ for smooth activations.
+    \item \textbf{Strategy:} Employ matrix concentration bounds to relate the $\evmin{}$ of random matrices (e.g., $A^{(l)}(A^{(l)})^\top$, from activations) to the $\evmin{}$ of their mathematical expectation.
+    \item This shifts the problem from a high-probability bound for the random matrix to a bound for its expectation, which is often easier to analyze.
+    \item Cited examples of such concentration results include Lemma 4.1 and Lemma \ref{lemm:highproblambda}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Technique 1 (Continued): Analyzing the Expectation}
+  \begin{itemize}[<+->]
+    \item The analysis of the expected activation matrix (or related quantities) utilizes specific tools, notably \textbf{generalized Hermite polynomials}.
+    \item This technique is developed for handling smooth and potentially inhomogeneous activation functions in deep networks, extending previous approaches often limited to homogeneous activations like ReLU.
+    \item The lower bound result is frequently expressed in terms of $\lambda_1 = \evmin{\E_g[\phi(\cdot)\phi(\cdot)^\top]}$, where $\phi$ is the activation function.
+    \item Proving $\lambda_1 > 0$ involves analyzing the expectation of quadratic forms involving the activation, using properties of $\phi$, Markov's inequality, and data separability.
+  \end{itemize}
+\end{frame}
+
+\subsection{Empirical NTK Decomposition}
+\begin{frame}{Technique 2: Empirical NTK Decomposition}
+  \textbf{Focus:} Empirical NTK matrix $JJ^T$ (or $K_L$) computed on a training dataset, e.g., for networks with cosine activation.
+  \begin{itemize}[<+->]
+    \item \textbf{Method:} Relies on standard matrix inequalities such as Weyl's inequality or the Schur complement.
+    \item These inequalities allow the decomposition of the lower bound on $\evmin{JJ^T}$ into a sum of terms.
+    \item Each term in this sum involves the $\evmin{}$ of smaller matrices, such as feature matrices ($F_kF_k^T$) at each layer $k$.
+    \item It also involves the squared norms of certain vectors derived from the network (e.g., $\norm{(G_{k+1})_{i:}}_2^2$ or $\norm{(B_{k+1})_{i:}}_2^2$).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Technique 2 (Continued): Bounding the Terms}
+  \begin{itemize}[<+->]
+    \item The proof then reduces to establishing:
+    \begin{itemize}
+        \item Lower bounds for $\evmin{F_kF_k^T}$ (or $\svmin{F_k}^2$).
+        \item Lower bounds (away from zero) for the corresponding vector norms.
+    \end{itemize}
+    \item Establishing the bound on $\svmin{F_k}$ is a sub-problem, often addressed by relating it to the expected Gram matrix or by relying on existing results (e.g., Lemma \ref{lem:bound_svmin_Fk} from \cite{QuynhNTK2021}), which require assumptions on data distribution.
+    \item Lemma \ref{G-bound} provides a bound for vector norms for cosine networks.
+    \item This approach is presented as building upon techniques used in prior works like \cite{nguyen2021tight}.
+  \end{itemize}
+\end{frame}
+
+\subsection{Other Approaches and Spectral Analyses}
+\begin{frame}{Technique 3: Other Approaches & Spectral Analyses}
+  \begin{itemize}[<+->]
+    \item \textbf{Specific Kernels (e.g., UNK):} Direct matrix inequalities on $\evmin{}$ of products or sums (e.g., $\chi_{\min}(\mathbf{AB}) \geq \chi_{\min}(\mathbf{A}) \cdot \min_{i\in[m]} \mathbf{B}(i,i)$ and $\chi_{\min}(\mathbf{A}+\mathbf{B}) \geq \chi_{\min}(\mathbf{A}) + \chi_{\min}(\mathbf{B})$) are used, relating terms to covariance analysis and feedforward compositions.
+    \item \textbf{Power Series Expansion of NTK:} Particularly via Hermite analysis, this is a powerful tool for characterizing the \textbf{global spectrum} of the NTK (outliers, eigenvalue decay rates).
+    \item While not always directly applied to prove that $\evmin{}$ is positively bounded, the understanding of spectral decay it provides is fundamental for analyzing spectral properties.
+  \end{itemize}
+\end{frame}
+
+\section{Chronology and Evolution of Techniques}
+\begin{frame}{Chronology and Evolution: Prior Work}
+  Current sources build heavily on a rich prior literature on NTK and related problems:
+  \begin{itemize}[<+->]
+    \item \textbf{Early Methods:} Matrix concentration and Hermite analysis were already used in previous works (e.g., \cite{SD-JL-HL-LW-XZ:19}, \cite{oymak2020hermite}, \cite{ng2020hermite1}, \cite{ng2021hermite2}) to analyze NTK properties and prove bounds on its $\evmin{}$.
+    \item These earlier works notably showed that for smooth activations and constant depth, a width of $\tilde{\Omega}(n^2)$ was necessary to ensure the positive-definiteness of the NTK at initialization.
+    \item \textbf{Empirical NTK Decomposition:} Techniques, especially those based on splitting into terms involving feature matrices and vector norms, seem inspired or generalized from works like \cite{nguyen2021tight} on the empirical NTK.
+    \item Lemma \ref{lem:bound_svmin_Fk} on singular values of feature matrices is directly attributed to \cite{QuynhNTK2021}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Chronology and Evolution: Current Advances}
+  The current sources present significant advancements:
+  \begin{itemize}[<+->]
+    \item They demonstrate that for smooth activations, an effectively linear width $\tilde{\Omega}(n)$ is sufficient for the NTK to be positive-definite at initialization, improving the $n$-dependency of previous results. This is enabled by using \textbf{generalized Hermite polynomials} to handle smooth, inhomogeneous activations—a technique differing from earlier work based on restricted isometry properties or classical Hermite expansions for homogeneous activations.
+    \item They apply empirical NTK decomposition techniques (inspired by \cite{nguyen2021tight} and using results like those from \cite{QuynhNTK2021}) to networks with other activation functions, such as cosine activation.
+    \item They use power series analysis to characterize the NTK spectrum in detail (including outliers and the decay rate of small eigenvalues), providing a finer understanding of spectral properties.
+    \item Convergence analysis (how the NTK bound evolves during training) relies on initial bounds and uses optimization analysis tools (bounds on Hessian, gradients, smoothness) but does not prove the initial bound itself.
+  \end{itemize}
+\end{frame}
+
+\section{Mathematical Tools and Lemmas}
+\begin{frame}{Frequently Used External Tools and Lemmas}
+  The proofs of these bounds rely on a set of standard mathematical tools, particularly from high-dimensional probability theory and linear/matrix algebra:
+  \begin{itemize}[<+->]
+    \item \textbf{Concentration Bounds:} Probabilistic inequalities ensuring that random quantities are close to their mean/expectation with high probability.
+    \begin{itemize}
+      \item Bernstein's inequality
+      \item Hoeffding's inequality
+      \item Specific lemmas on sub-Gaussian variables
+      \item Matrix concentration (general theory)
+      \item Matrix Chernoff bound (\cite{Tropp2011}, Theorem 1.1)
+      \item Other matrix concentration lemmas (\cite{vershynin2018high}, Theorem 6.2.1)
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Frequently Used External Tools (Continued)}
+  \begin{itemize}[<+->]
+    \item \textbf{Bounds on Norms of Random Matrices:}
+    \begin{itemize}
+      \item Bound on the operator norm of Gaussian matrices (\cite{Davidson2001}, Theorem 2.12)
+    \end{itemize}
+    \item \textbf{Matrix Inequalities:}
+    \begin{itemize}
+      \item Weyl's inequality (for eigenvalues of sums of matrices)
+      \item Schur decomposition (for eigenvalues of block matrices)
+      \item Inequalities on the smallest eigenvalue of products and sums of matrices (e.g., $\chi_{\min}(\mathbf{AB}) \geq \chi_{\min}(\mathbf{A}) \cdot \min \mathbf{B}(i,i)$, $\chi_{\min}(\mathbf{A}+\mathbf{B}) \geq \chi_{\min}(\mathbf{A}) + \chi_{\min}(\mathbf{B})$)
+    \end{itemize}
+    \item \textbf{Other Probabilistic/Geometric Tools:}
+    \begin{itemize}
+      \item Analysis of covering numbers
+      \item VC dimension
+      \item Isotropic properties (\cite{vershynin_high-dimensional_2018}, Example 2.5.8 (i))
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\section{Conclusion}
+\begin{frame}{Conclusion}
+  In summary, proving lower bounds for $\evmin{\text{NTK}}$ combines:
+  \begin{itemize}[<+->]
+    \item Techniques of \textbf{matrix concentration} and analysis of key matrix expectations, often facilitated by (generalized) Hermite polynomials.
+    \item OR, techniques of \textbf{empirical NTK matrix decomposition} into simpler terms involving singular values of feature matrices and vector norms.
+    \item These approaches rely on standard probabilistic and matrix results, as well as prior work on feature matrices.
+    \item Recent research has refined bounds (especially width dependency) and extended spectral analysis via power series.
+  \end{itemize}
+\end{frame}
+
+% End of presentation
+\begin{frame}
+  \begin{center}
+    Thank you!
+  \end{center}
+\end{frame}
+
+\end{document}

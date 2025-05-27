@@ -1,0 +1,98 @@
+%We derive a power series for the NTK of deep neural networks under the following assumptions on the network initialization.
+The following assumption allows us to study a power series for the NTK of deep networks and with general activation functions. We remark that power series for the NTK of deep networks with positive homogeneous activation functions, namely ReLU, have been studied in prior works \cite{han2022fast, chen2021deep, bietti2021deep, geifman2022on}. We further remark that while these works focus on the asymptotics of the NTK spectrum we also study the large eigenvalues.
+\begin{assumption} \label{assumption:init_var_1}
+    The hyperparameters of the network satisfy $\gamma_w^2 + \gamma_b^2 = 1$, $\sigma_w^2 \expec_{Z \sim \cN(0,1)}[\phi(Z)^2] \leq 1$ and $\sigma_b^2 = 1 - \sigma_w^2\expec_{Z \sim \cN(0,1)} [\phi(Z)^2]$. The data is normalized so that $\norm{\vx_i}=1$ for all $i \in [n]$.
+\end{assumption}
+Recall under Assumption \ref{assumptions:kernel_regime} that the preactivations of the network are centered Gaussian processes \citep{neal1996, LeeBNSPS18}. 
+ Assumption~\ref{assumption:init_var_1} ensures the preactivation of each neuron has unit variance and thus is reminiscent of the \cite{LeCuBottOrrMull9812}, \cite{pmlr-v9-glorot10a} and \cite{7410480} initializations, which are designed to avoid vanishing and exploding gradients. We refer the reader to Appendix~\ref{appendix:unit_var_init} for a thorough discussion. Under Assumption~\ref{assumption:init_var_1} we will show it is possible to write the NTK not only as a dot-product kernel but also as an analytic power series on $[-1,1]$ and derive expressions for the coefficients. In order to state this result recall, given a function $f \in L^2(\reals, \gamma)$, that the $p$th normalized probabilist's Hermite coefficient of $f$ is denoted $\mu_p(f)$, we refer the reader to Appendix~\ref{appendix:background_hermite} for an overview of the Hermite polynomials and their properties. Furthermore, letting $\bar{a} = (a_j)_{j=0}^{\infty}$ denote a sequence of real numbers, then for any $p, k \in \ints_{\geq 0}$ we define
+\begin{equation} \label{eq:def_F}
+    F(p,k,\bar{a}) = 
+    \begin{cases}
+        1, \; &k=0 \text{ and } p = 0, \\
+        0, \; &k=0 \text{ and } p \geq 1,\\
+        \sum_{(j_i) \in \cJ(p,k)} \prod_{i=1}^k a_{j_i}, \; &k\geq 1 \text{ and } p \geq 0,
+    \end{cases}
+\end{equation}
+where
+\[
+    \cJ(p,k) \defeq \big\{ (j_i)_{i \in [k]} \; : \; j_i \geq 0 \; \forall i \in [k], \; \sum_{i=1}^k j_i = p  \big\} \quad \text{for all $p \in \ints_{\geq 0}$, $k \in \naturals$}. 
+\]
+Here $\cJ(p,k)$ is the set of all $k$-tuples of nonnegative integers which sum to $p$ and $F(p,k,\bar{a})$ is therefore the sum of all ordered products of $k$ elements of $\bar{a}$ whose indices sum to $p$. We are now ready to state the key result of this section, Theorem~\ref{theorem:ntk_power_series}, whose proof is provided in Appendix~\ref{appendix:subsec:deriving_power_series}. 
+
+\begin{restatable}{theorem}{ntkPowerSeries}\label{theorem:ntk_power_series}
+    Under Assumptions \ref{assumptions:kernel_regime} and \ref{assumption:init_var_1}, for all $l \in [L+1]$
+    \begin{equation}\label{eq:ntk_power_series}
+        n\mK_{l} = \sum_{p=0}^{\infty} \kappa_{p,l}\left( \mX \mX^T \right)^{\odot p}.
+    \end{equation}
+    The series for each entry $n[\mK_{l}]_{ij}$ converges absolutely and the coefficients $\kappa_{p,l}$ are nonnegative and can be evaluated using the recurrence relationships
+    \begin{equation}\label{eq:recurrence_ntk_coeffs}
+        \kappa_{p,l} = 
+        \begin{cases}
+            \delta_{p=0}\gamma_b^2 + \delta_{p=1}\gamma_w^2, & l=1,\\
+            \alpha_{p,l} + \sum_{q = 0}^p \kappa_{q,l-1}\upsilon_{p-q,l}, &l \in [2,L+1],
+        \end{cases}
+    \end{equation}
+    where
+    \begin{equation} \label{eq:recurrence_alpha_coeffs}
+        \alpha_{p,l} = 
+        \begin{cases}
+            \sigma_w^2 \mu_p^2(\phi) + \delta_{p=0}\sigma_b^2, &l=2,\\
+            \sum_{k=0}^{\infty}\alpha_{k,2} F(p,k,\bar{\alpha}_{l-1}), &l\geq 3, 
+        \end{cases}
+    \end{equation}
+    and
+    \begin{equation} \label{eq:recurrence_upsilon_coeffs}
+        \upsilon_{p,l} = 
+        \begin{cases}
+            \sigma_w^2 \mu_p^2(\phi'), &l=2,\\
+            \sum_{k=0}^{\infty} \upsilon_{k,2} F(p,k,\bar{\alpha}_{l-1}), &l\geq3, 
+        \end{cases}
+    \end{equation}
+    are likewise nonnegative for all $p \in \ints_{\geq 0}$ and $l \in [2, L+1]$.
+\end{restatable}
+As already remarked, power series for the NTK have been studied in previous works, however, to the best of our knowledge Theorem \ref{theorem:ntk_power_series} is the first to explicitly express the coefficients at a layer in terms of the coefficients of previous layers. To compute the coefficients of the NTK as per Theorem~\ref{theorem:ntk_power_series}, the Hermite coefficients of both $\phi$ and $\phi'$ are required. Under Assumption~\ref{assumption:phi} below, which has minimal impact on the generality of our results, this calculation can be simplified. In short, under Assumption~\ref{assumption:phi} $\upsilon_{p,2} = (p+1) \alpha_{p+1,2}$ and therefore only the Hermite coefficients of $\phi$ are required. We refer the reader to Lemma \ref{lem:derivhermiterelation} in Appendix \ref{appendix:subsec:analyzing_ntk_coefficients} for further details.
+
+\begin{assumption}\label{assumption:phi}
+The activation function $\phi\colon\reals \rightarrow \reals$ is absolutely continuous on $[-a, a]$ for all $a > 0$, differentiable almost everywhere, and is polynomially bounded, i.e., $|\phi(x)| = \mathcal{O}(|x|^\beta)$ for some $\beta > 0$. 
+Further, the derivative $\phi'\colon\reals \rightarrow \reals$ satisfies $\phi' \in L^2(\mathbb{R}, \gamma)$. 
+\end{assumption}
+We remark that ReLU, Tanh, Sigmoid, Softplus and many other commonly used activation functions satisfy Assumption~\ref{assumption:phi}. In order to understand the relationship between the Hermite coefficients of the activation function and the coefficients of the NTK, we first consider the simple two-layer case with $L=1$ hidden layers. From Theorem~\ref{theorem:ntk_power_series}
+\begin{equation} \label{eq:ntk_coeffs_2_layer_simple}
+    \kappa_{p,2} = \sigma_w^2(1 + \gamma_w^2 p)\mu_p^2(\phi) +\sigma_w^2 \gamma_b^2 (1+p)\mu_{p+1}^2(\phi)+ \delta_{p=0} \sigma_b^2.
+\end{equation}
+As per Table \ref{tab:kappa_2layer_coeffs}, a general trend we observe across all activation functions is that the first few coefficients account for the large majority of the total NTK coefficient series. 
+
+\begin{table}[H]
+\footnotesize 
+\begin{center}
+\caption{Percentage  of $\sum_{p=0}^{\infty}\kappa_{p,2}$ accounted for by the first $T+1$ NTK coefficients assuming $\gamma_w^2=1$, $\gamma_b^2 = 0$, $\sigma_w^2 = 1$ and $\sigma_b^2 = 1 - \expec[\phi(Z)^2]$.}
+\label{tab:kappa_2layer_coeffs}
+\begin{tabular}{ |p{1.2cm}|p{1.2cm}|p{1.2cm}|p{1.2cm}|p{1.2cm}|p{1.2cm}|p{1.2cm}|p{1.2cm}| }
+ \hline
+ $T =$ & 0 & 1 & 2 & 3 & 4 & 5 \\
+ \hline
+ReLU & 43.944 & 77.277 & 93.192 & 93.192 & 95.403 & 95.403 \\
+Tanh & 41.362 & 91.468 & 91.468 & 97.487 & 97.487 & 99.090 \\
+Sigmoid & 91.557 & 99.729 & 99.729 & 99.977 & 99.977 & 99.997 \\
+Gaussian & 95.834 & 95.834 & 98.729 & 98.729 & 99.634 & 99.634 \\
+ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+However, the asymptotic rate of decay of the NTK coefficients varies significantly by activation function, due to the varying behavior of their tails. In Lemma \ref{lemma:ntk_2layer_coeff_decay} we choose ReLU, Tanh and Gaussian as prototypical examples of activations functions with growing, constant, and decaying tails respectively, and analyze the corresponding NTK coefficients in the two layer setting. For typographical ease we denote the zero mean Gaussian density function with variance $\sigma^2$ as $\omega_{\sigma}(z) \defeq (1/\sqrt{2 \pi \sigma^2}) \exp\left( -z^2/ (2 \sigma^2)\right)$.
+
+\begin{restatable}{lemma}{NTKcoeffTwolayer}\label{lemma:ntk_2layer_coeff_decay}
+    Under Assumptions \ref{assumptions:kernel_regime} and \ref{assumption:init_var_1},
+    \begin{enumerate}
+        \item if $\phi(z) = ReLU(z)$, then $\kappa_{p,2} = \delta_{(\gamma_b >0) \cup (p \text{ even})} \Theta(p^{-3/2})$,
+        \item if $\phi(z) = Tanh(z)$, then $\kappa_{p,2} = \cO \left(\exp\left( - \frac{\pi \sqrt{p-1}}{2}\right) \right)$,
+        \item if $\phi(z) = \omega_{\sigma}(z)$, then $\kappa_{p,2} = \delta_{(\gamma_b >0) \cup (p \text{ even})}\Theta(p^{1/2} (\sigma^2+1)^{-p})$. 
+    \end{enumerate}
+\end{restatable}
+
+The trend we observe from Lemma \ref{lemma:ntk_2layer_coeff_decay} is that activation functions whose Hermite coefficients decay quickly, such as $\omega_{\sigma}$, result in a faster decay of the NTK coefficients. We remark that analyzing the rates of decay for $l \geq 3$ is challenging due to the calculation of $F(p, k, \bar{\alpha}_{l-1})$ \eqref{eq:def_F}. In Appendix \ref{subsec:appendix:deep_decay} we provide preliminary results in this direction, upper bounding, in a very specific setting, the decay of the NTK coefficients for depths $l\geq 2$. Finally, we briefly pause here to highlight the potential for using a truncation of \eqref{eq:ntk_power_series} in order to perform efficient numerical approximation of the infinite width NTK. We remark that this idea is also addressed in a concurrent work by \cite{han2022fast}, albeit under a somewhat different set of assumptions \footnote{In particular, in \cite{han2022fast} the authors focus on homogeneous activation functions and allow the data to lie off the sphere. By contrast, we require the data to lie on the sphere but can handle non-homogeneous activation functions in the deep setting.}. As per our observations thus far that the coefficients of the NTK power series \eqref{eq:ntk_power_series} typically decay quite rapidly, one might consider approximating $\Theta^{(l)}$ by computing just the first few terms in each series of \eqref{eq:ntk_power_series}. Figure~\ref{fig:error_truncated_ntk} in Appendix~\ref{appendix:numerical_approx_ntk} displays the absolute error between the truncated ReLU NTK and the analytical expression for the ReLU NTK, which is also defined in Appendix~\ref{appendix:numerical_approx_ntk}. Letting $\rho$ denote the input correlation then the key takeaway is that while for $\abs{\rho}$ close to one the approximation is poor, for $\abs{\rho}<0.5$, which is arguably more realistic for real-world data, with just $50$ coefficients machine level precision can be achieved. We refer the interested reader to Appendix~\ref{appendix:numerical_approx_ntk} for a proper discussion.
+
+
+
+

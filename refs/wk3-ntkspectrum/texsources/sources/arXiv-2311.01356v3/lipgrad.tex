@@ -1,0 +1,94 @@
+
+\section{Differentiability of a random ReLU network at a fixed point} \label{app:diff}
+
+In this appendix, we prove that, if we fix a point $x_0 \in \RR^d \setminus \{0\}$, a random $\relu$ network that follows \Cref{assum:1} is differentiable at $x_0$ with
+\begin{equation*}
+\left(\nabla \Phi (x_0)\right)^T = W^{(L)} \cdot D^{(L-1)}(x_0) \cdot W^{(L-1)}\cdots D^{(0)}(x_0) \cdot W^{(0)}.
+\end{equation*}
+Since the vector $x_0$ is fixed, we often omit the argument and write $D^{(\ell)}$ instead of $D^{(\ell)}(x_0)$ for each $\ell \in \{0,...,L-1\}$. 
+Let us now formulate and prove the statement.
+\begin{theorem}
+Let $x_0 \in \RR^d \setminus \{0\}$ be fixed and consider a random $\relu$ network $\Phi: \RR^d \to \RR$ of width $N$ and depth $L$, satisfying the random initialization as described in \Cref{assum:1}. 
+Then $\Phi$ is almost surely differentiable at $x_0$ with
+\begin{equation} \label{eq:des}
+\left(\nabla \Phi(x_0)\right)^T = W^{(L)} \cdot D^{(L-1)}\cdot W^{(L-1)} \cdots D^{(0)}\cdot W^{(0)}.
+\end{equation}
+\end{theorem}
+\begin{proof}
+We denote by $\mathcal{A}$ the event that $\Phi$ is differentiable at $x_0$ and \eqref{eq:des} holds. 
+Let $x^{(\ell)}$, $\ell \in \{0,...,L-1\}$ be defined as in \eqref{eq:d-matrices}.
+We denote
+\begin{align*}
+\eta &= \eta (W^{(0)},..., W^{(L-1)}, b^{(0)},..., b^{(L-1)}) \\
+&\defeq \min \left\{\ell \in \{0,...,L-1\}: \ \exists i \in \{1,...,N\} \text{ with } \left(W^{(\ell)}x^{(\ell)} + b^{(\ell)}\right)_i = 0\right\}
+\end{align*}
+and $\eta \defeq L$ if the minimum above is not well-defined. 
+Since the events $\{\eta = \ell\}$ for $\ell \in \{0,...,L\}$ are pairwise disjoint and their union is the entire probability space, we get
+\begin{equation*}
+\PP(\mathcal{A}) = \sum_{\ell = 0}^L \PP(\mathcal{A} \cap \{\eta = \ell\}).
+\end{equation*}
+The goal is now to show that
+\begin{equation}\label{eq:Ptoshow}
+\PP (\mathcal{A} \cap \{\eta = \ell\}) = \PP(\{\eta = \ell\}) \quad \text{for every } \ell \in \{0,...,L\}, 
+\end{equation}
+which will directly give us $\PP(\mathcal{A}) = 1$.
+
+To this end, we start with the case $\ell = L$. Note that 
+\begin{equation*}
+\eta = L \quad \Longleftrightarrow \quad \left(W^{(\ell)}x^{(\ell)} + b^{(\ell)}\right)_i \neq 0 \quad \text{ for all } \ell \in \{0,...,L-1\}, \ i \in \{1,...,N\}.
+\end{equation*}
+But since the $\relu$ is differentiable on $\RR \setminus \{0\}$, this directly implies the differentiability of $\Phi$ at $x_0$ and that \eqref{eq:des} holds. 
+Hence, it even holds
+\begin{equation*}
+\mathcal{A} \cap \{\eta = L\} = \{\eta = L\}.
+\end{equation*}
+We proceed with the case $\ell \in \{1,...,L-1\}$. 
+Note that it holds
+\begin{equation*}
+\PP (\mathcal{A} \cap \{\eta = \ell\}) = \PP (\mathcal{A} \cap \{\eta = \ell\}\cap \{x^{(\ell)} \neq 0\}) + \PP (\mathcal{A} \cap \{\eta = \ell\}\cap \{x^{(\ell)} = 0\}).
+\end{equation*}
+We get
+\begin{align}
+\PP (\mathcal{A} \cap \{\eta = \ell\}\cap \{x^{(\ell)} \neq 0\}) &\leq \PP (\{\eta = \ell\}\cap \{x^{(\ell)} \neq 0\}) \nonumber\\
+&= \underset{b^{(0)},...,b^{(\ell-1)}}{\underset{W^{(0)},..., W^{(\ell - 1)}}{\EE}} \left[\mathbbm{1}_{x^{(\ell)} \neq 0} \cdot \underset{W^{(\ell)}, b^{(\ell)}}{\EE} \mathbbm{1}_{\eta = \ell} \right]\nonumber\\
+\label{eq:zeroset} 
+&= 0.
+\end{align}
+Here, the last equality stems from the fact that, if $x^{(\ell)} \neq 0$, it follows that, conditioning on the weights $W^{(0)}, ..., W^{(\ell -1)}$ and the biases $b^{(0)},..., b^{(\ell - 1)}$, it holds
+\begin{equation*}
+\left(W^{(\ell)} x^{(\ell)} + b^{(\ell)} \right)_i \sim \mathcal{N}\left(0, \frac{2}{N} \Vert x^{(\ell)} \Vert_2^2\right) \ast \mathcal{D}^{(\ell)}_i \quad \text{for each }i \in \{1,...,N\},
+\end{equation*}
+the fact that the distribution on the right-hand side is an absolutely continuous distributions (as follows from \cite[Proposition~9.16]{dudley2002real}) and the fact that all the random variables $\left(W^{(\ell)} x^{(\ell)} + b^{(\ell)} \right)_i$, $i \in \{1,...,N\}$, are jointly independent. Here, $\ast$ denotes the convolution of two (probability) measures.
+
+We now show that it holds
+\begin{equation} \label{eq:capequal}
+\mathcal{A} \cap \{\eta = \ell\}\cap \{x^{(\ell)} = 0\} = \{\eta = \ell\}\cap \{x^{(\ell)} = 0\}.
+\end{equation}
+To this end, assume that $\eta = \ell$ and $x^{(\ell) } = 0$ hold. This implies 
+\begin{equation*}
+\left(W^{(\ell - 1)}x^{(\ell - 1)} + b^{(\ell - 1)}\right) _i \neq 0 \quad \text{and} \quad \left(W^{(\ell - 1)}x^{(\ell - 1)} + b^{(\ell - 1)}\right) _i \leq 0 \quad \text{for all } i \in \{1,...,N\},
+\end{equation*}
+or equivalently
+\begin{equation*}
+\left(W^{(\ell - 1)}x^{(\ell - 1)} + b^{(\ell - 1)}\right) _i < 0 \quad \text{for all }i \in \{1,...,N\}.
+\end{equation*}
+But by continuity, these inequalities also hold in an open neighborhood of $x_0$. 
+This implies that $\Phi$ is constant on a neighborhood of $x_0$ and hence, $\Phi$ is differentiable at $x_0$ with  
+\begin{equation*}
+\left(\nabla \Phi (x_0)\right)^T = 0 = W^{(L)} \cdot D^{(L-1)} \cdot W^{(L-1)}\cdots D^{(0)} \cdot W^{(0)}.
+\end{equation*}
+Here, the last equality stems from $D^{(\ell - 1)} = \Delta (W^{(\ell - 1)} x^{(\ell - 1)} + b^{(\ell - 1)})= 0$. This proves \eqref{eq:capequal}. Overall, we get
+\begin{align*}
+\PP (\mathcal{A} \cap \{\eta = \ell\}) \overset{\eqref{eq:zeroset}}&{=} \PP (\mathcal{A} \cap \{\eta = \ell\}\cap \{x^{(\ell)} = 0\}) \overset{\eqref{eq:capequal}}{=} \PP(\{\eta = \ell\}\cap \{x^{(\ell)} = 0\}) \\
+\overset{\eqref{eq:zeroset}}&{=}\PP(\{\eta = \ell\}\cap \{x^{(\ell)} = 0\}) + \PP (\{\eta = \ell\}\cap \{x^{(\ell)} \neq 0\})\\
+&= \PP(\{\eta = \ell\}) .
+\end{align*}
+It remains to deal with the case $\ell = 0$. Since $x^{(0)} = x_0 \neq 0$, we get with the same reasoning as above (\Cref{eq:zeroset}) that 
+\begin{equation*}
+0\leq \PP(\mathcal{A} \cap \{\eta = 0\}) \leq \PP (\eta = 0) = 0,
+\end{equation*}
+such that equality has to hold everywhere. 
+
+We thus have shown \eqref{eq:Ptoshow}, which implies the claim. 
+\end{proof}
+
