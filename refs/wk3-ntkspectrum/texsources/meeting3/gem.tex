@@ -1,0 +1,329 @@
+\documentclass{beamer}
+\usetheme{Madrid} % Or another theme of your choice
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs} % For professional quality tables
+\usepackage{bm}       % For bold mathematical symbols
+\usepackage{ragged2e} % For text justification
+
+% Definitions of theorem, lemma, etc. environments
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+% Common mathematical commands
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\KNTK}{K_{\text{NTK}}}
+\newcommand{\KLim}{K^{(L)}} % Limit kernel in Nguyen et al. (ReLU)
+\newcommand{\KEmp}{\overline{K}^{(L)}} % Empirical kernel in Nguyen et al. (ReLU)
+\newcommand{\KCosine}{K_L} % Empirical NTK for cosine activation
+\newcommand{\lambdaMin}{\lambda_{\min}}
+\newcommand{\sigmaMin}{\sigma_{\min}}
+\newcommand{\Order}{\mathcal{O}}
+\newcommand{\TildeOrder}{\tilde{\mathcal{O}}}
+\newcommand{\OmegaNotation}{\Omega} % For \Omega (complexity)
+\newcommand{\TildeOmega}{\tilde{\Omega}}
+
+% Presentation information
+\title{Timeline and Proof Techniques for Lower Bounds of $\lambda_{\min}(\text{NTK})$}
+\subtitle{A Detailed Analysis Based on Key Research Works}
+\author{Synthesis of Provided Documents}
+\date{\today}
+
+\begin{document}
+
+% --- Title Page ---
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% --- Table of Contents ---
+\begin{frame}{Table of Contents}
+  \tableofcontents
+\end{frame}
+
+% --- Introduction ---
+\section{Introduction}
+\begin{frame}{Importance of $\lambda_{\min}(\text{NTK})$}
+  \justify
+  The smallest eigenvalue ($\lambdaMin$) of the Neural Tangent Kernel (NTK) is a fundamental quantity in the theoretical analysis of deep neural networks.
+  \begin{itemize}
+    \item It is related to \textbf{memorization capacity}[cite: 2, 20, 254, 753].
+    \item It influences the \textbf{global convergence} of gradient descent algorithms[cite: 2, 19, 748, 751].
+    \item It appears in \textbf{generalization bounds}[cite: 2, 20, 753].
+    \item A bound $\lambdaMin(\text{NTK}) > c > 0$ is often a key assumption or result to establish[cite: 3, 25].
+  \end{itemize}
+  This presentation details proof strategies for bounding $\lambdaMin(\text{NTK})$, based on approaches developed for different activation functions.
+\end{frame}
+
+% --- General Framework for Proofs ---
+\section{General Framework for Lower Bound Proofs}
+\begin{frame}{General Multi-Step Approach}
+  \justify
+  Although details vary according to activation and NTK type (limit or empirical), a common structure emerges:
+
+  \begin{block}{Phase 1: Analysis of Limit Kernel (Infinite Width) or Expected}
+    \textbf{Objective}: Bound $\lambdaMin(K^{(\infty)} \text{ or } \E[K^{(m)}])$.
+    \begin{itemize}
+      \item Derive the analytical form of the expected kernel[cite: 71, 513].
+      \item Use specific properties (decomposition, Hermite polynomials, activation function properties) to prove positive definiteness and establish a lower bound[cite: 84, 508, 540].
+    \end{itemize}
+  \end{block}
+  \pause
+  \begin{block}{Phase 2: Concentration of Empirical Kernel (Finite Width)}
+    \textbf{Objective}: Show that $K^{(m)}$ is close to $K^{(\infty)}$ (or its expectation).
+    \begin{itemize}
+      \item Bound $\|K^{(m)} - K^{(\infty)}\|_{\text{op}}$ using matrix concentration inequalities (Chernoff, Bernstein, Hanson-Wright)[cite: 15, 95, 553, 665].
+    \end{itemize}
+  \end{block}
+  \pause
+  \begin{block}{Phase 3: Combination and Conclusion}
+    \textbf{Objective}: Obtain a bound for $\lambdaMin(K^{(m)})$.
+    \begin{itemize}
+      \item \textbf{Weyl's inequality}: $\lambdaMin(K^{(m)}) \ge \lambdaMin(K^{(\infty)}) - \|K^{(m)} - K^{(\infty)}\|_{\text{op}}$[cite: 96].
+    \end{itemize}
+  \end{block}
+  An alternative is direct analysis of the empirical kernel by decomposition.
+\end{frame}
+
+% --- Techniques for Deep ReLU Networks ---
+\section{Deep ReLU Networks (Nguyen, Mondelli, Montúfar)}
+\begin{frame}{Bounds for $\lambdaMin$ of ReLU NTK [cite: 1]}
+  \frametitle{ReLU Networks: \textit{Tight Bounds on the Smallest Eigenvalue} [cite: 1]}
+  \justify
+  This paper [cite: 1] provides tight bounds for $\lambdaMin(\text{NTK})$ of deep ReLU networks.
+
+  \begin{block}{1. Limit NTK ($K^{(L)}$) - Theorem 3.2 [cite: 78]}
+    \begin{itemize}
+      \item \textbf{Key Decomposition (Lemma 3.1)}[cite: 73]: $K^{(L)} = G^{(L)} + \sum_{l=1}^{L-1} G^{(l)} \circ \dot{G}^{(l+1)} \circ \dots \circ \dot{G}^{(L)}$.
+      \item \textbf{Application of Schur product theorem}: $\lambdaMin(P \circ Q) \ge \lambdaMin(P) \min_i Q_{ii}$[cite: 82, 284]. Used to obtain $\lambdaMin(K^{(L)}) \ge \sum_{l=1}^{L} \lambdaMin(G^{(l)})$[cite: 83, 285].
+      \item \textbf{Analysis of $\lambdaMin(G^{(l)})$ via Hermite expansion} [cite: 84, 288] and ReLU homogeneity, relating it to $\lambdaMin((X^{\ast r})(X^{\ast r})^T)$ (Khatri-Rao power of input $X$)[cite: 85].
+      \item \textbf{Gershgorin circle theorem} to bound $\lambdaMin((X^{\ast r})(X^{\ast r})^T)$ under data assumptions (Assumption 2.1, 2.2)[cite: 86, 289].
+      \item Result: $\lambdaMin(K^{(L)}) \ge \mu_r(\sigma)^2 \OmegaNotation(d)$ with high probability[cite: 81].
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{ReLU Networks: Empirical NTK ($\overline{K}^{(L)}$) [cite: 1]}
+  \frametitle{ReLU Networks: Finite Width Empirical NTK - Theorem 4.1 [cite: 31, 105]}
+   \justify
+  Concerns networks with at least one wide layer ($\approx N$ neurons).
+
+  \begin{block}{2. Empirical NTK ($\overline{K}^{(L)}$) - Proof (Section 4.1) [cite: 151]}
+    \begin{itemize}
+      \item \textbf{Decomposition of $JJ^T$}: $JJ^T = \sum_{k=0}^{L-1} F_k F_k^T \circ B_{k+1} B_{k+1}^T$, where $F_k$ is the feature matrix at layer $k$[cite: 151].
+      \item \textbf{Schur product theorem}: $\lambdaMin(JJ^T) \ge \sum_{k=0}^{L-1} \lambdaMin(F_k F_k^T) \min_{i \in [N]} \|(B_{k+1})_{i:}\|_2^2$[cite: 152].
+      \item \textbf{Strategy}: Bound the two terms separately:
+      \begin{enumerate}
+        \item $\lambdaMin(F_k F_k^T) = \sigmaMin(F_k)^2$ (smallest singular value of $F_k$).
+        \item $\min_{i \in [N]} \|(B_{k+1})_{i:}\|_2^2$ (norm of rows of $B_{k+1}$).
+      \end{enumerate}
+    \end{itemize}
+  \end{block}
+  \pause
+  \begin{block}{Bounds on $\sigmaMin(F_k)$ (Theorem 5.1) [cite: 163]}
+    \begin{itemize}
+      \item \textbf{Concentration (Lemma 5.2)}[cite: 166]: Relates $\sigmaMin(F_k)^2$ to $\lambdaMin(\E[F_k F_k^T])$. Uses \textbf{Matrix Chernoff} (Tropp, 2012 [cite: 269, 371]).
+      \item \textbf{Hermite expansion (Lemma 5.3)}[cite: 172]: Relates $\E[F_k F_k^T]$ to $\lambdaMin((F_k^{\ast r})(F_k^{\ast r})^T)$.
+      \item \textbf{Feature centering (Lemma 5.4)}[cite: 174]: $(F_k^{\ast r})(F_k^{\ast r})^T \ge (\tilde{F}_k \tilde{F}_k^T - \text{centering term})^{\circ r}$.
+      \item \textbf{Hadamard powers (Lemma 5.5)}[cite: 176]: Bounds $\lambdaMin$ of the above matrix via Gershgorin.
+    \end{itemize}
+  \end{block}
+   \justify
+  Also requires bounds on the Lipschitz constant of feature maps (Theorem 6.2)[cite: 40, 194].
+\end{frame}
+
+% --- Techniques for Smooth Activations ---
+\section{Smooth Activations (Banerjee, Cisneros-Velarde, Zhu, Belkin)}
+\begin{frame}{Smooth Activations: Linear Width Suffices [cite: 444]}
+  \frametitle{\textit{Linear Width Suffices} - Theorem 4.1 [cite: 446, 511]}
+   \justify
+  This paper [cite: 444] shows that for smooth activations, width $\TildeOrder(n)$ suffices for $\lambdaMin(\KNTK) > 0$.
+
+  \begin{block}{Structure of Theorem 4.1 Proof (NTK at initialization) [cite: 525]}
+    \begin{itemize}
+      \item $\KNTK = JJ^T = \sum_{l=1}^{L} \frac{1}{m_{l-1}}A^{(l-1)}(A^{(l-1)})^T \odot B_l B_l^T + \frac{1}{m_L}A^{(L)}(A^{(L)})^T$[cite: 528]. $A^{(l)}$ is the activation matrix at layer $l$.
+      \item \textbf{Schur product theorem} applied to terms in the sum[cite: 528].
+      \item The proof reduces to lower bounding $\lambdaMin(A^{(L)}(A^{(L)})^T)$[cite: 529].
+      \item Result: $\lambdaMin(\KNTK(\cdot;\theta_0)) \ge c_0 \lambda_1$[cite: 513, 531], where $\lambda_1 = \lambdaMin(\E[\dots])$.
+    \end{itemize}
+  \end{block}
+  \pause
+  \begin{block}{Key Contribution: Bound on $\lambdaMin(A^{(l)}(A^{(l)})^T)$ (Theorem 4.2) [cite: 524, 537]}
+    Proof in 3 steps:
+    \begin{enumerate}
+      \item \textbf{Matrix Concentration (Lemma 4.1 of paper, Lemma A.1 of suppl.)}[cite: 553, 653, 662]:
+      $\lambdaMin(A^{(l)}(A^{(l)})^T) \ge \frac{m_l \lambda_l}{4}$[cite: 555]. $\lambda_l = \lambdaMin(\E[\text{term } A^{(l)}(A^{(l)})^T])$.
+      Uses a version of \textbf{Matrix Chernoff} (implicit, via sub-Gaussian bounds on activations [cite: 654, 665]).
+      \item \textbf{Bound on $\|A^{(l)}\|_F^2$ (Lemma 4.2 of paper)}[cite: 557, 672]: Shows that $\|\alpha^{(l)}(x_i)\|_2^2 = \Theta(m_l)$ via \textbf{scalar Bernstein inequality}[cite: 677].
+      \item \textbf{Lower bound for $\lambda_l$ (Lemma 4.3 of paper, Lemmas A.2, A.3 of suppl.)}[cite: 564, 680, 684, 706, 716]: This is where \textbf{Generalized Hermite Polynomials} come in to handle inhomogeneity of smooth activations[cite: 509, 536, 540, 541].
+        \begin{itemize}
+          \item Lemma A.2 (suppl.): $\E[H_r^{[c_x^2\sigma^2]}(\cdot) H_{r'}^{[c_y^2\sigma^2]}(\cdot)]$[cite: 706].
+          \item Lemma A.3 (suppl.): $\E[\phi(C_lU_lg)\phi(C_lU_lg)^T] \succeq \sum (\dots)$[cite: 718].
+        \end{itemize}
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+% --- Techniques for Periodic Activations ---
+\section{Periodic Activations (Saratchandran, Chng, Lucey)}
+\begin{frame}{Periodic Activations (Cosine) [cite: 731]}
+  \frametitle{\textit{NTK of Periodically Activated Networks} - Theorem 3.1 [cite: 734, 794]}
+  \justify
+  This paper [cite: 731] analyzes the NTK for networks with activation $cos(sx)$. Shows that $\lambdaMin(K_L) = \Theta(n_k^{3/2})$ if layer $k$ is wide[cite: 759, 790].
+
+  \begin{block}{Proof Structure (Section 4 of paper) [cite: 797]}
+    Similar approach to Nguyen et al. (ReLU)[cite: 798]:
+    \begin{itemize}
+      \item Decomposition: $JJ^T = \sum_{k=0}^{L-1} F_k F_k^T \circ G_{k+1} G_{k+1}^T$[cite: 799].
+      \item \textbf{Weyl's inequality} then \textbf{Schur product theorem}[cite: 799, 800]:
+      $$ \lambdaMin(JJ^T) \ge \sum_{k=0}^{L-1} \lambdaMin(F_k F_k^T) \min_{i \in [N]} \|(G_{k+1})_{i:}\|_2^2 \quad \text{[cite: 801]} $$
+      \item \textbf{Strategy}: Bound $\lambdaMin(F_k F_k^T)$ and $\min_i \|(G_{k+1})_{i:}\|_2^2$ separately[cite: 802].
+    \end{itemize}
+  \end{block}
+  \pause
+  \begin{block}{Key Proof Components}
+    \begin{itemize}
+      \item \textbf{Bound on $\lambdaMin(F_k F_k^T)$ (Theorem 6.1 of paper)}[cite: 760, 825, 829]:
+        The proof (Appendix C of paper) uses:
+        \begin{itemize}
+          \item Lemma C.1 (Feature centering, similar to Nguyen et al. (ReLU) [cite: 174])[cite: 1003].
+          \item Weyl's inequality[cite: 1006].
+          \item \textbf{Gershgorin circle theorem}[cite: 1007].
+          \item Lipschitz concentration (Assumption A3 of paper)[cite: 780, 1012].
+          \item Lemmas A.1-A.4 (suppl. of paper) for bounds on norms and expectations of features $F_k$ and $\tilde{F}_k$, using scalar Bernstein and Lipschitz concentration.
+          \item Requires assumption on network Lipschitz constant (Assumption A4)[cite: 783, 1009].
+        \end{itemize}
+      \item \textbf{Bound on $\|(G_{k+1})_{i:}\|_2^2$ (Lemma 4.1 of paper)}[cite: 803, 997]:
+        The proof (Appendix B of paper) [cite: 986] uses:
+        \begin{itemize}
+          \item \textbf{Hanson-Wright inequality} (citing Vershynin, Thm 6.2.1 [cite: 1000]).
+          \item Lemmas A.5, A.6, B.1, B.2 (suppl. of paper) for bounds on norms of $\Sigma_k(x)$ and products of weight matrices and $\Sigma_l(x)$, using scalar Hoeffding and Bernstein.
+        \end{itemize}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+% --- Timeline and Evolution ---
+\section{Timeline and Evolution of Techniques}
+\begin{frame}{Evolution of Proof Methods}
+  \justify
+  \begin{itemize}
+    \item \textbf{Early works (before $\approx$2020)}:
+    \begin{itemize}
+        \item Often focused on ReLU or 2 layers.
+        \item Use of standard Hermite expansion for ReLU (homogeneous)[cite: 469, 508].
+        \item Required widths often high polynomials ($N^2$ or more) for smooth activations (e.g., Du et al. 2019 [cite: 458, 463, 487, 542]).
+    \end{itemize}
+    \pause
+    \item \textbf{Developments for Deep ReLU (Nguyen et al. [cite: 1, 645])}:
+    \begin{itemize}
+        \item Detailed analysis of $K^{(L)}$ (limit) and $\overline{K}^{(L)}$ (empirical).
+        \item Combination of NTK decomposition, Schur, standard Hermite, Khatri-Rao, Gershgorin, and matrix concentration (Chernoff).
+        \item Shows that one wide layer ($\TildeOrder(N)$) suffices for ReLU[cite: 5, 32].
+    \end{itemize}
+    \pause
+    \item \textbf{Advances for Smooth Activations (Banerjee et al. [cite: 444])}:
+    \begin{itemize}
+        \item Introduction of \textbf{generalized Hermite polynomials} to handle inhomogeneity of smooth activations across multiple layers[cite: 448, 470, 509, 536, 541, 573].
+        \item Achieves required width $\TildeOrder(n)$ without strong distributional assumptions on data, improving previous results (e.g. $\Order(n^2)$ in Du et al. [cite: 463] or $\Order(\sqrt{n})$ with data assumptions in Bombari et al. [cite: 463, 466]).
+    \end{itemize}
+    \pause
+    \item \textbf{Extension to Other Activations (Saratchandran et al. [cite: 731])}:
+    \begin{itemize}
+        \item Adapts the decomposition methodology of Nguyen et al. (ReLU) for periodic activations (cosine)[cite: 760, 798].
+        \item Highlights different scaling of $\lambdaMin$ ($\Theta(n_k^{3/2})$) compared to ReLU ($\Theta(n_k)$), suggesting better conditioning[cite: 761, 790, 791].
+        \item Uses Hanson-Wright for certain concentration steps[cite: 1000].
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+% --- External Tools and Probabilistic/Matrix Lemmas ---
+\section{Frequently Used External Mathematical Tools}
+\begin{frame}{Probabilistic Concentration Tools}
+  \justify
+  \begin{itemize}
+    \item \textbf{Scalar concentration inequalities}:
+    \begin{itemize}
+      \item \textbf{Bernstein}: Sum of independent random variables[cite: 305, 314, 333, 345, 415, 677, 949, 956, 983].
+      \item \textbf{Hoeffding}: Sum of bounded random variables[cite: 339, 974].
+      \item \textbf{Lipschitz concentration} (for functions of random variables): Used with Assumption 2.2 (Nguyen et al. ReLU [cite: 63, 280]) or A3 (Saratchandran et al. Cosine [cite: 780, 1012]).
+    \end{itemize}
+    \pause
+    \item \textbf{Matrix concentration inequalities}:
+    \begin{itemize}
+      \item \textbf{Matrix Chernoff}: (e.g., Tropp 2012 [cite: 269, 270]) Sum of bounded PSD random matrices[cite: 371, 553, 665]. (Nguyen et al. ReLU Lemma 5.2, Banerjee et al. Lemma 4.1/A.1).
+      \item \textbf{Matrix Bernstein}: (e.g. Vershynin 2018 [cite: 271, 554]) More general, for matrices with bounded variance.
+      \item \textbf{Hanson-Wright inequality}: (e.g., Rudelson & Vershynin 2013 [cite: 271]) For quadratic forms of sub-Gaussian vectors [cite: 1000] (Saratchandran et al. for bounds on norms of $B_{k+1}$).
+    \end{itemize}
+    \item \textbf{Bounds on norms of random matrices}: E.g., for Gaussian matrices (Davidson & Szarek 2001 [cite: 236, 179, 900, 995]).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Linear Algebra and Matrix Analysis Tools}
+  \justify
+  \begin{itemize}
+    \item \textbf{Weyl's inequality}: Bounds eigenvalues of a sum of matrices[cite: 96, 799, 1006].
+    \item \textbf{Schur (Hadamard) product theorem}: For $P, Q \succeq 0$, $\lambdaMin(P \circ Q) \ge \lambdaMin(P) \min_i Q_{ii}$[cite: 82, 152, 266, 284, 528, 800].
+    \item \textbf{Gershgorin circle theorem}: Localizes eigenvalues[cite: 86, 289, 1007].
+    \item \textbf{Singular Value Decomposition (SVD)} and link $\sigmaMin(A)^2 = \lambdaMin(AA^T)$.
+    \item \textbf{Khatri-Rao product}: Appears in analysis of powers of feature matrices or interaction terms[cite: 85, 287, 375, 718].
+    \item \textbf{Properties of activation functions}:
+    \begin{itemize}
+      \item ReLU homogeneity[cite: 84, 287, 455, 469, 508].
+      \item Hermite polynomials (standard for ReLU[cite: 54, 84, 288, 469, 508], generalized for smooth activations [cite: 448, 470, 509, 536, 540, 541, 543, 573, 695, 701, 705]).
+    \end{itemize}
+    \item \textbf{Lipschitz constant of functions}: Important for concentration and bounds on features[cite: 7, 40, 154, 179, 180, 185, 190, 194, 318, 381, 392, 394, 407, 410, 783, 803, 845, 851, 852, 860, 873, 958, 1009, 1017].
+  \end{itemize}
+\end{frame}
+
+% --- Conclusion ---
+\section{Conclusion}
+\begin{frame}{Summary and Perspectives}
+  \justify
+  The study of lower bounds for $\lambdaMin(\text{NTK})$ is essential for theoretical understanding of deep learning.
+  \begin{itemize}
+    \item \textbf{Varied Approaches}: Techniques are adapted to the specificities of activation functions (ReLU, smooth, periodic).
+    \item \textbf{Common Tools}: Despite differences, a set of mathematical tools (matrix concentration, advanced linear algebra, polynomial analysis) is frequently mobilized.
+    \item \textbf{Notable Evolution}: Significant progress has been made, notably the reduction of width requirements for smooth activations thanks to generalized Hermite polynomials[cite: 446, 470, 542].
+    \item \textbf{Impact of Activations}: The choice of activation (ReLU, cosine) can notably influence the scaling of $\lambdaMin(\text{NTK})$[cite: 761, 791].
+  \end{itemize}
+  \vspace{1em}
+  \textbf{Persistent challenges}: dynamics of $\lambdaMin$ during training, complex architectures, fine dependence on data distribution.
+\end{frame}
+
+% --- Bibliography (Example) ---
+\section*{Main References (Examples)}
+\begin{frame}[allowframebreaks]{Main References (Indicative)}
+  \begin{thebibliography}{99}
+    \bibitem{NguyenMondelliMontufar2021} Q. Nguyen, M. Mondelli, G. Montúfar. (2021-2022). Tight Bounds on the Smallest Eigenvalue of the Neural Tangent Kernel for Deep ReLU Networks. \textit{arXiv:2012.11654v5} (ICML 2021)[cite: 1, 645].
+    \bibitem{BanerjeeEtAl2023} A. Banerjee, P. Cisneros-Velarde, L. Zhu, M. Belkin. (2023). Neural Tangent Kernel at Initialization: Linear Width Suffices. \textit{UAI 2023}[cite: 444].
+    \bibitem{SaratchandranEtAl2024} H. Saratchandran, S.-F. Chng, S. Lucey. (2024). Analyzing the Neural Tangent Kernel of Periodically Activated Coordinate Networks. \textit{arXiv:2402.04783v1}[cite: 731].
+
+    \bibitem{Tropp2012UserFriendly} J. A. Tropp. (2012). User-friendly tail bounds for sums of random matrices. \textit{Foundations of Computational Mathematics}[cite: 270]. (General reference for matrix Chernoff/Bernstein).
+    \bibitem{Vershynin2018HDP} R. Vershynin. (2018). \textit{High-Dimensional Probability: An Introduction with Applications in Data Science}. Cambridge University Press[cite: 271, 305, 314, 333, 345, 357, 666, 947, 949, 956, 968, 974, 983, 1000]. (General reference for concentration).
+    \bibitem{Schur1911} I. Schur. (1911). Bemerkungen zur Theorie der beschränkten Bilinearformen mit unendlich vielen Veränderlichen. \textit{Journal für die reine und angewandte Mathematik}[cite: 82, 266, 800].
+    \bibitem{DavidsonSzarek2001} K. R. Davidson, S. J. Szarek. (2001). Local operator theory, random matrices and Banach spaces. \textit{Handbook of the geometry of Banach spaces}[cite: 236, 179, 900, 995].
+    \bibitem{RudelsonVershynin2013HansonWright} M. Rudelson, R. Vershynin. (2013). Hanson-Wright inequality and sub-gaussian concentration. \textit{Electronic Communications in Probability}.
+    \bibitem{OymakSoltanolkotabi2020Hermite} S. Oymak, M. Soltanolkotabi. (2020). Towards moderate overparameterization: Global convergence guarantees for training shallow neural networks. \textit{IEEE Journal on Selected Areas in Information Theory}[cite: 449, 469, 508, 518, 522, 540, 647, 680, 704, 723, 728].
+    \bibitem{DuEtAl2019Smooth} S. S. Du, J. D. Lee, H. Li, L. Wang, X. Zhai. (2019). Gradient Descent Finds Global Minima of Deep Neural Networks. \textit{ICML}[cite: 449, 456, 458, 463, 472, 484, 485, 487, 517, 519, 522, 542, 570, 622, 723, 725].
+    \bibitem{NguyenEtAl2021ReLU} Q. Nguyen, M. Mondelli, G. Montúfar. (2021). Tight bounds on the smallest eigenvalue of the neural tangent kernel for deep ReLU networks. \textit{ICML}. (Identical to first reference here, but often cited this way)[cite: 455, 462, 492, 506, 508, 518, 522, 528, 540, 645, 704, 723, 728, 760, 761, 788, 791, 812, 814, 820, 833, 839, 868, 879, 913, 991].
+
+  \end{thebibliography}
+  \tiny
+  Note: Bibliographic entries are indicative and based on provided documents. Labels like `Lemma \ref{...}` are placeholders.
+\end{frame}
+
+\end{document}

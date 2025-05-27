@@ -1,3 +1,4 @@
+\begin{document}
 \documentclass{beamer}
 
 \usetheme{Madrid} % Classic theme, or choose another theme if you prefer
@@ -14,6 +15,7 @@
 \usepackage{hyperref} % Hyperlinks
 \usepackage{booktabs} % For professional tables
 \usepackage{bm} % For bold mathematical symbols
+\usepackage{enumerate}
 
 % Definitions of theorem environments, lemmas, etc.
 \newtheorem{theorem}{Theorem}[section]
@@ -36,10 +38,21 @@
 \newcommand{\evmin}[1]{\lambda_{\rm min}\left(#1\right)} % Smallest eigenvalue
 \newcommand{\tr}{\mathop{\rm tr}\nolimits} % Trace
 \newcommand{\tildeF}{\tilde{F}} % Centered feature matrix
+\newcommand{\chiMin}{\chi_{\min}} % Alternative notation for min eigenvalue
+\newcommand{\lambdaMin}{\lambda_{\min}} % Min eigenvalue
+\newcommand{\cN}{\mathcal{N}} % Normal distribution
+\newcommand{\x}{\mathbf{x}} % Bold x
+\newcommand{\g}{\mathbf{g}} % Bold g
+\newcommand{\u}{\mathbf{u}} % Bold u
+\newcommand{\v}{\mathbf{v}} % Bold v
+\newcommand{\bm}{\boldsymbol} % Bold math
+\newcommand{\odot}{\odot} % Hadamard product
+\newcommand{\bigOmg}{\Omega} % Big Omega
+\newcommand{\tilde}{\widetilde} % Tilde
 
 % Presentation information
-\title{Proof Techniques for Lower Bounds on $\lambda_{\min}(\text{NTK})$}
-\author{Summary Based on Provided Sources}
+\title{Mathematical Chronology of NTK Lower Bound Proof Techniques}
+\author{Comprehensive Analysis of $\lambda_{\min}(\text{NTK})$ Bounds}
 \date{\today}
 
 \begin{document}
@@ -55,153 +68,293 @@
 \end{frame}
 
 % Introduction
-\section{Introduction}
-\begin{frame}{Importance of $\lambda_{\min}(\text{NTK})$ Lower Bounds}
+\section{Introduction: Mathematical Foundation}
+\begin{frame}{The Neural Tangent Kernel and $\lambda_{\min}$}
   \begin{itemize}[<+->]
-    \item The study of lower bounds for the smallest eigenvalue ($\evmin{}$) of the Neural Tangent Kernel (NTK) is crucial for understanding the convergence and generalization properties of overparameterized neural networks.
-    \item A strictly positive lower bound on $\evmin{}$ ensures that the optimization landscape is well-conditioned near initialization.
-    \item It also guarantees that the network behaves like a linear model in the "lazy training" regime.
-    \item This presentation summarizes techniques used to establish such bounds, based on the provided sources.
-  \end{itemize}
-\end{frame}
-
-\section{Proof Techniques for $\lambda_{\min}(\text{NTK})$}
-
-\begin{frame}{Overview of Techniques}
-  The sources describe several strategies to establish lower bounds for $\evmin{\text{NTK}}$, depending on:
-  \begin{itemize}[<+->]
-    \item Network type (depth, activation function).
-    \item Nature of the matrix under study (empirical NTK or its limit/expectation).
-  \end{itemize}
-  We will cover three main categories of approaches.
-\end{frame}
-
-\subsection{Activation Matrix Analysis and Expectations}
-\begin{frame}{Technique 1: Activation Matrix Analysis & Expectations}
-  \textbf{Focus:} NTK at initialization, particularly for smooth activations.
-  \begin{itemize}[<+->]
-    \item This approach aims to show sufficient width requirements, e.g., $\tilde{\Omega}(n)$ for smooth activations.
-    \item \textbf{Strategy:} Employ matrix concentration bounds to relate the $\evmin{}$ of random matrices (e.g., $A^{(l)}(A^{(l)})^\top$, from activations) to the $\evmin{}$ of their mathematical expectation.
-    \item This shifts the problem from a high-probability bound for the random matrix to a bound for its expectation, which is often easier to analyze.
-    \item Cited examples of such concentration results include Lemma 4.1 and Lemma \ref{lemm:highproblambda}.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Technique 1 (Continued): Analyzing the Expectation}
-  \begin{itemize}[<+->]
-    \item The analysis of the expected activation matrix (or related quantities) utilizes specific tools, notably \textbf{generalized Hermite polynomials}.
-    \item This technique is developed for handling smooth and potentially inhomogeneous activation functions in deep networks, extending previous approaches often limited to homogeneous activations like ReLU.
-    \item The lower bound result is frequently expressed in terms of $\lambda_1 = \evmin{\E_g[\phi(\cdot)\phi(\cdot)^\top]}$, where $\phi$ is the activation function.
-    \item Proving $\lambda_1 > 0$ involves analyzing the expectation of quadratic forms involving the activation, using properties of $\phi$, Markov's inequality, and data separability.
-  \end{itemize}
-\end{frame}
-
-\subsection{Empirical NTK Decomposition}
-\begin{frame}{Technique 2: Empirical NTK Decomposition}
-  \textbf{Focus:} Empirical NTK matrix $JJ^T$ (or $K_L$) computed on a training dataset, e.g., for networks with cosine activation.
-  \begin{itemize}[<+->]
-    \item \textbf{Method:} Relies on standard matrix inequalities such as Weyl's inequality or the Schur complement.
-    \item These inequalities allow the decomposition of the lower bound on $\evmin{JJ^T}$ into a sum of terms.
-    \item Each term in this sum involves the $\evmin{}$ of smaller matrices, such as feature matrices ($F_kF_k^T$) at each layer $k$.
-    \item It also involves the squared norms of certain vectors derived from the network (e.g., $\norm{(G_{k+1})_{i:}}_2^2$ or $\norm{(B_{k+1})_{i:}}_2^2$).
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Technique 2 (Continued): Bounding the Terms}
-  \begin{itemize}[<+->]
-    \item The proof then reduces to establishing:
+    \item For a neural network $f(\x; \theta)$ with parameters $\theta$, the \textbf{Neural Tangent Kernel} is:
+    $$K_{\text{NTK}}(x_i, x_j) = \left\langle \frac{\partial f(\x_i; \theta)}{\partial \theta}, \frac{\partial f(\x_j; \theta)}{\partial \theta} \right\rangle$$
+    \item In matrix form: $K_{\text{NTK}} = JJ^T$ where $J$ is the Jacobian matrix
+    \item \textbf{Critical requirement}: $\evmin{K_{\text{NTK}}} \geq c > 0$ with high probability
+    \item This ensures:
     \begin{itemize}
-        \item Lower bounds for $\evmin{F_kF_k^T}$ (or $\svmin{F_k}^2$).
-        \item Lower bounds (away from zero) for the corresponding vector norms.
-    \end{itemize}
-    \item Establishing the bound on $\svmin{F_k}$ is a sub-problem, often addressed by relating it to the expected Gram matrix or by relying on existing results (e.g., Lemma \ref{lem:bound_svmin_Fk} from \cite{QuynhNTK2021}), which require assumptions on data distribution.
-    \item Lemma \ref{G-bound} provides a bound for vector norms for cosine networks.
-    \item This approach is presented as building upon techniques used in prior works like \cite{nguyen2021tight}.
-  \end{itemize}
-\end{frame}
-
-\subsection{Other Approaches and Spectral Analyses}
-\begin{frame}{Technique 3: Other Approaches & Spectral Analyses}
-  \begin{itemize}[<+->]
-    \item \textbf{Specific Kernels (e.g., UNK):} Direct matrix inequalities on $\evmin{}$ of products or sums (e.g., $\chi_{\min}(\mathbf{AB}) \geq \chi_{\min}(\mathbf{A}) \cdot \min_{i\in[m]} \mathbf{B}(i,i)$ and $\chi_{\min}(\mathbf{A}+\mathbf{B}) \geq \chi_{\min}(\mathbf{A}) + \chi_{\min}(\mathbf{B})$) are used, relating terms to covariance analysis and feedforward compositions.
-    \item \textbf{Power Series Expansion of NTK:} Particularly via Hermite analysis, this is a powerful tool for characterizing the \textbf{global spectrum} of the NTK (outliers, eigenvalue decay rates).
-    \item While not always directly applied to prove that $\evmin{}$ is positively bounded, the understanding of spectral decay it provides is fundamental for analyzing spectral properties.
-  \end{itemize}
-\end{frame}
-
-\section{Chronology and Evolution of Techniques}
-\begin{frame}{Chronology and Evolution: Prior Work}
-  Current sources build heavily on a rich prior literature on NTK and related problems:
-  \begin{itemize}[<+->]
-    \item \textbf{Early Methods:} Matrix concentration and Hermite analysis were already used in previous works (e.g., \cite{SD-JL-HL-LW-XZ:19}, \cite{oymak2020hermite}, \cite{ng2020hermite1}, \cite{ng2021hermite2}) to analyze NTK properties and prove bounds on its $\evmin{}$.
-    \item These earlier works notably showed that for smooth activations and constant depth, a width of $\tilde{\Omega}(n^2)$ was necessary to ensure the positive-definiteness of the NTK at initialization.
-    \item \textbf{Empirical NTK Decomposition:} Techniques, especially those based on splitting into terms involving feature matrices and vector norms, seem inspired or generalized from works like \cite{nguyen2021tight} on the empirical NTK.
-    \item Lemma \ref{lem:bound_svmin_Fk} on singular values of feature matrices is directly attributed to \cite{QuynhNTK2021}.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Chronology and Evolution: Current Advances}
-  The current sources present significant advancements:
-  \begin{itemize}[<+->]
-    \item They demonstrate that for smooth activations, an effectively linear width $\tilde{\Omega}(n)$ is sufficient for the NTK to be positive-definite at initialization, improving the $n$-dependency of previous results. This is enabled by using \textbf{generalized Hermite polynomials} to handle smooth, inhomogeneous activations—a technique differing from earlier work based on restricted isometry properties or classical Hermite expansions for homogeneous activations.
-    \item They apply empirical NTK decomposition techniques (inspired by \cite{nguyen2021tight} and using results like those from \cite{QuynhNTK2021}) to networks with other activation functions, such as cosine activation.
-    \item They use power series analysis to characterize the NTK spectrum in detail (including outliers and the decay rate of small eigenvalues), providing a finer understanding of spectral properties.
-    \item Convergence analysis (how the NTK bound evolves during training) relies on initial bounds and uses optimization analysis tools (bounds on Hessian, gradients, smoothness) but does not prove the initial bound itself.
-  \end{itemize}
-\end{frame}
-
-\section{Mathematical Tools and Lemmas}
-\begin{frame}{Frequently Used External Tools and Lemmas}
-  The proofs of these bounds rely on a set of standard mathematical tools, particularly from high-dimensional probability theory and linear/matrix algebra:
-  \begin{itemize}[<+->]
-    \item \textbf{Concentration Bounds:} Probabilistic inequalities ensuring that random quantities are close to their mean/expectation with high probability.
-    \begin{itemize}
-      \item Bernstein's inequality
-      \item Hoeffding's inequality
-      \item Specific lemmas on sub-Gaussian variables
-      \item Matrix concentration (general theory)
-      \item Matrix Chernoff bound (\cite{Tropp2011}, Theorem 1.1)
-      \item Other matrix concentration lemmas (\cite{vershynin2018high}, Theorem 6.2.1)
+      \item Well-conditioned optimization landscape
+      \item Global convergence of gradient descent
+      \item "Lazy training" regime validity
     \end{itemize}
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Frequently Used External Tools (Continued)}
+\section{Technique 1: Matrix Concentration and Hermite Analysis}
+
+\begin{frame}{Matrix Concentration Framework}
+  \textbf{Core Strategy}: Relate random matrix eigenvalues to their expectations
   \begin{itemize}[<+->]
-    \item \textbf{Bounds on Norms of Random Matrices:}
-    \begin{itemize}
-      \item Bound on the operator norm of Gaussian matrices (\cite{Davidson2001}, Theorem 2.12)
-    \end{itemize}
-    \item \textbf{Matrix Inequalities:}
-    \begin{itemize}
-      \item Weyl's inequality (for eigenvalues of sums of matrices)
-      \item Schur decomposition (for eigenvalues of block matrices)
-      \item Inequalities on the smallest eigenvalue of products and sums of matrices (e.g., $\chi_{\min}(\mathbf{AB}) \geq \chi_{\min}(\mathbf{A}) \cdot \min \mathbf{B}(i,i)$, $\chi_{\min}(\mathbf{A}+\mathbf{B}) \geq \chi_{\min}(\mathbf{A}) + \chi_{\min}(\mathbf{B})$)
-    \end{itemize}
-    \item \textbf{Other Probabilistic/Geometric Tools:}
-    \begin{itemize}
-      \item Analysis of covering numbers
-      \item VC dimension
-      \item Isotropic properties (\cite{vershynin_high-dimensional_2018}, Example 2.5.8 (i))
-    \end{itemize}
+    \item \textbf{Activation Matrix}: $A^{(l)} \in \R^{n \times m_l}$ where $A^{(l)}_{i,:} = \alpha^{(l)}(\x_i)$
+    \item \textbf{Key Concentration Result} (Lemma 4.1):
+    $$\evmin{A^{(l)}(A^{(l)})^T} \geq \frac{m_l \lambda_l}{4}$$
+    with probability $\geq 1 - \frac{\delta}{L}$, where
+    $$\lambda_l = \evmin{\E_{g \sim \cN(\bm{0}_{m_{l-1}}, \sigma^2 \I_{m_{l-1}})} \left[ \phi\left(\frac{1}{\sqrt{m_{l-1}}} A^{(l-1)} g\right) \phi\left(\frac{1}{\sqrt{m_{l-1}}} A^{(l-1)} g\right)^T \right]}$$
+    \item \textbf{Width requirement}: $m_l \geq \max\left(n, c_2 v \max(1, \log(15v)) \log(Ln/\delta)\right)$
+    where $v = \frac{2(\sqrt{\log n}+1)^2 \sigma^2 \|A^{(l-1)}\|_F^2}{c_3 \lambda_l m_{l-1}}$
   \end{itemize}
 \end{frame}
 
-\section{Conclusion}
-\begin{frame}{Conclusion}
-  In summary, proving lower bounds for $\evmin{\text{NTK}}$ combines:
+\begin{frame}{Generalized Hermite Polynomials: The Key Innovation}
+  \textbf{Classical vs. Generalized Hermite Polynomials}:
   \begin{itemize}[<+->]
-    \item Techniques of \textbf{matrix concentration} and analysis of key matrix expectations, often facilitated by (generalized) Hermite polynomials.
-    \item OR, techniques of \textbf{empirical NTK matrix decomposition} into simpler terms involving singular values of feature matrices and vector norms.
-    \item These approaches rely on standard probabilistic and matrix results, as well as prior work on feature matrices.
-    \item Recent research has refined bounds (especially width dependency) and extended spectral analysis via power series.
+    \item \textbf{Probabilist's Hermite polynomials}:
+    $$H_r(x) = \frac{(-1)^r}{\sqrt{r!}} e^{x^2/2} \frac{d^r}{dx^r} e^{-x^2/2}$$
+    \item \textbf{Generalized Hermite polynomials} $H_r^{[q]}(x)$ for variance parameter $q > 0$
+    \item \textbf{Hermite coefficients}: $\mu_r^{[q]}(\phi)$ for activation function $\phi$
+    \item \textbf{Key Lemma} (Hermite Product):
+    $$\E_{\tilde{g} \sim \cN(\bm{0}_d, \sigma^2 \I_d)} [H_r^{[c_x^2 \sigma^2]}(c_x \langle \tilde{g}, \u_x \rangle) H_{r'}^{[c_y^2 \sigma^2]}(c_y \langle \tilde{g}, \u_y \rangle)] = \sigma^{6r} c_x^{3r} c_y^{3r} \langle \u_x, \u_y \rangle^r \delta_{rr'}$$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Hermite Series Expansion for Inhomogeneous Activations}
+  \textbf{Main Result} (Lemma on Hermite Series):
+  \begin{align}
+    &\E_{\tilde{g} \sim \cN(\bm{0}_d, \sigma^2 \I_d)} [\phi(c_x \langle \tilde{g}, \u_x \rangle) \phi(c_y \langle \tilde{g}, \u_y \rangle)] \\
+    &= \sum_{r=0}^{\infty} \mu_r^{[c_x^2 \sigma^2]}(\phi) \mu_r^{[c_y^2 \sigma^2]}(\phi) \sigma^{6r} c_x^{3r} c_y^{3r} \langle \u_x, \u_y \rangle^r
+  \end{align}
+  
+  \textbf{Matrix Form}:
+  $$\E_{\tilde{g}} [\phi(CU\tilde{g}) \phi(CU\tilde{g})^T] \succeq \sum_{r=0}^{\infty} \sigma^{6r} c_0^{6r} (M_r(\phi) U^{\star r})(M_r(\phi) U^{\star r})^T$$
+  where:
+  \begin{itemize}
+    \item $U^{\star r}$: $r$-th Khatri-Rao power of $U$
+    \item $M_r(\phi) = \text{diag}(\mu_r^{[c_i^2 \sigma^2]}(\phi))$
+    \item $c_0 = \min_{i} c_i > 0$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Recursive Lower Bound via Hermite Analysis}
+  \textbf{Main Theorem} (Eigenvalue Recursion):
+  
+  Let $c_{l,i} = \frac{\|\alpha^{(l)}(\x_i)\|_2}{\sqrt{m_l}}$ and $(\mu_{r,0}^{(l)})^2 = \min_{i \in [n]} (\mu_r^{[c_{l,i}^2 \sigma^2]}(\phi))^2$.
+  
+  Then with probability $\geq 1 - 2n\sum_{l=1}^L \frac{1}{m_l}$:
+  $$\lambda_{l+1} \geq \left(\frac{(\mu_{r,0}^{(l)})^2}{6 c_{\phi,\sigma_0}}\right)^l \left(\frac{\sigma_0^2}{2}\right)^{3rl} \lambda_1$$
+  
+  where $\lambda_1 = \evmin{\E_{g \sim \cN(\bm{0}_d, \nu_0^2 \I_d)} [\phi(\frac{1}{\sqrt{d}} X g) \phi(\frac{1}{\sqrt{d}} X g)^T]}$
+  
+  \textbf{Key Innovation}: This handles \textbf{inhomogeneous} activations, improving from $\tilde{\Omega}(n^2)$ to $\tilde{\Omega}(n)$ width requirement!
+\end{frame}
+
+\section{Technique 2: Empirical NTK Decomposition}
+
+\begin{frame}{NTK Decomposition via Chain Rule}
+  \textbf{Empirical NTK Decomposition}:
+  $$K_L = JJ^T = \sum_{l=1}^L \left(\frac{\partial F_L}{\partial \text{vec}(W_l)}\right) \left(\frac{\partial F_L}{\partial \text{vec}(W_l)}\right)^T$$
+  
+  \textbf{Feature Matrix Form}:
+  $$JJ^T = \sum_{k=0}^{L-1} F_k F_k^T \circ G_{k+1} G_{k+1}^T$$
+  
+  where $F_k$ are feature matrices and $G_k$ contain network derivatives.
+  
+  \textbf{Weyl's Inequality Application}:
+  $$\evmin{JJ^T} \geq \sum_{k=0}^{L-1} \evmin{F_k F_k^T \circ G_{k+1} G_{k+1}^T}$$
+\end{frame}
+
+\begin{frame}{Schur Product Theorem Application}
+  \textbf{Schur's Theorem}: For PSD matrices $P, Q$:
+  $$\evmin{P \circ Q} \geq \evmin{P} \min_{i \in [n]} Q_{ii}$$
+  
+  \textbf{Applied to NTK}:
+  $$\evmin{F_k F_k^T \circ G_{k+1} G_{k+1}^T} \geq \evmin{F_k F_k^T} \min_{i \in [N]} \|(G_{k+1})_{i:}\|_2^2$$
+  
+  \textbf{Final Decomposition}:
+  $$\evmin{JJ^T} \geq \sum_{k=0}^{L-1} \evmin{F_k F_k^T} \min_{i \in [N]} \|(G_{k+1})_{i:}\|_2^2$$
+  
+  \textbf{Strategy}: Bound each term separately:
+  \begin{itemize}
+    \item $\evmin{F_k F_k^T} = \svmin{F_k}^2$ (singular value bounds)
+    \item $\|(G_{k+1})_{i:}\|_2^2$ (vector norm bounds)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Bounding Feature Matrix Singular Values}
+  \textbf{Key Lemma} (from \cite{QuynhNTK2021}):
+  
+  For feature matrix $F_k$ with appropriate data distribution assumptions:
+  $$\svmin{F_k}^2 \geq c \cdot \text{(data-dependent constant)}$$
+  
+  \textbf{Typical approach}:
+  \begin{itemize}[<+->]
+    \item Relate $\svmin{F_k}$ to expected Gram matrix
+    \item Use concentration inequalities for random matrices
+    \item Apply Gershgorin circle theorem:
+    $$\evmin{(X^{\star r})(X^{\star r})^T} \geq \min_{i \in [N]} \|\x_i\|_2^{2r} - (N-1) \max_{i \neq j} |\langle \x_i, \x_j \rangle|^r$$
+    \item For well-separated data: $\geq \Omega(d)$
+  \end{itemize}
+  
+  \textbf{Vector Norm Bounds} (Lemma G-bound):
+  For cosine networks: $\|(B_{k+1})_{i:}\|_2^2 \geq c > 0$ with high probability
+\end{frame}
+
+\section{Technique 3: Power Series and Spectral Analysis}
+
+\begin{frame}{Power Series Expansion of NTK}
+  \textbf{NTK as Power Series}:
+  Under unit variance initialization, the NTK can be written as:
+  $$K_{\text{NTK}}(\langle \x_i, \x_j \rangle) = \sum_{p=0}^{\infty} a_p \langle \x_i, \x_j \rangle^p$$
+  
+  \textbf{Coefficient Structure}:
+  $$a_p = \sum_{k=1}^L F(p, k, \bar{\mu})$$
+  where $F(p,k,\bar{\mu})$ involves Hermite coefficients $\mu_r(\phi)$.
+  
+  \textbf{Applications}:
+  \begin{itemize}[<+->]
+    \item Characterize \textbf{complete spectrum} of NTK
+    \item Identify spectral "outliers" (largest eigenvalues)
+    \item Determine eigenvalue decay rates
+    \item Connect to covering number analysis
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Spectral Decay and Outlier Analysis}
+  \textbf{Key Insights from Power Series}:
+  \begin{itemize}[<+->]
+    \item \textbf{Rapid coefficient decay}: $|a_p| \leq C \rho^p$ for some $\rho < 1$
+    \item \textbf{Eigenvalue decay}: Small eigenvalues decay exponentially fast
+    \item \textbf{Outlier eigenvalues}: Related to constant term $a_0$
+    \item \textbf{Spectral gap}: Large gap between outliers and bulk spectrum
+  \end{itemize}
+  
+  \textbf{Connection to $\lambda_{\min}$}:
+  While not directly proving $\lambda_{\min} > 0$, this analysis provides:
+  \begin{itemize}
+    \item Understanding of spectral structure
+    \item Bounds on condition number
+    \item Insights into optimization landscape
+  \end{itemize}
+\end{frame}
+
+\section{Chronological Evolution and Mathematical Tools}
+
+\begin{frame}{Historical Development: Early Methods}
+  \textbf{Pre-2020 Era}:
+  \begin{itemize}[<+->]
+    \item \textbf{Matrix concentration + Classical Hermite} (\cite{SD-JL-HL-LW-XZ:19}, \cite{oymak2020hermite})
+    \item \textbf{Width requirement}: $\tilde{\Omega}(n^2)$ for smooth activations
+    \item \textbf{Limitation}: Only homogeneous activations (ReLU, etc.)
+    \item \textbf{Tools}: Basic Hermite polynomials, restricted isometry properties
+  \end{itemize}
+  
+  \textbf{Empirical NTK Foundations}:
+  \begin{itemize}[<+->]
+    \item \cite{nguyen2021tight}: First systematic empirical NTK analysis
+    \item Feature matrix decomposition techniques
+    \item Singular value concentration results
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Recent Breakthroughs: 2020-Present}
+  \textbf{Major Advances}:
+  \begin{itemize}[<+->]
+    \item \textbf{Generalized Hermite polynomials}: Handle inhomogeneous activations
+    \item \textbf{Improved width bounds}: $\tilde{\Omega}(n^2) \rightarrow \tilde{\Omega}(n)$
+    \item \textbf{Extended activation classes}: Beyond ReLU to smooth functions
+    \item \textbf{Refined decomposition}: Better empirical NTK bounds
+  \end{itemize}
+  
+  \textbf{Key Mathematical Innovation}:
+  $$\text{Classical: } \phi(x) = \sum_{r=0}^{\infty} \mu_r(\phi) H_r(x)$$
+  $$\text{Generalized: } \phi(cx) = \sum_{r=0}^{\infty} \mu_r^{[c^2\sigma^2]}(\phi) H_r^{[c^2\sigma^2]}(cx)$$
+  
+  This handles varying scales $c$ across network layers!
+\end{frame}
+
+\begin{frame}{Mathematical Tools: Concentration Inequalities}
+  \textbf{Scalar Concentration}:
+  \begin{itemize}[<+->]
+    \item \textbf{Bernstein's inequality}: $P(|X - \E[X]| \geq t) \leq 2\exp\left(-\frac{t^2/2}{\sigma^2 + bt/3}\right)$
+    \item \textbf{Hoeffding's inequality}: For bounded random variables
+    \item \textbf{Sub-Gaussian concentration}: $P(|X| \geq t) \leq 2\exp(-t^2/(2\sigma^2))$
+  \end{itemize}
+  
+  \textbf{Matrix Concentration}:
+  \begin{itemize}[<+->]
+    \item \textbf{Matrix Chernoff bound} (\cite{Tropp2011}):
+    $$P(\lambda_{\max}(S) \geq (1+\delta)\mu) \leq d \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^\mu$$
+    \item \textbf{Matrix Bernstein} (\cite{vershynin2018high}):
+    $$P(\|S - \E[S]\| \geq t) \leq 2d \exp\left(-\frac{t^2/2}{\sigma^2 + Rt/3}\right)$$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Mathematical Tools: Matrix Inequalities}
+  \textbf{Fundamental Matrix Inequalities}:
+  \begin{itemize}[<+->]
+    \item \textbf{Weyl's inequality}: For Hermitian matrices $A, B$:
+    $$\lambda_i(A) + \lambda_n(B) \leq \lambda_i(A + B) \leq \lambda_i(A) + \lambda_1(B)$$
+    \item \textbf{Schur complement}: For block matrix $\begin{pmatrix} A & B \\ B^T & C \end{pmatrix}$:
+    $$\lambda_{\min} \geq \min(\lambda_{\min}(A), \lambda_{\min}(C - B^T A^{-1} B))$$
+    \item \textbf{Eigenvalue bounds for products}:
+    $$\chiMin(AB) \geq \chiMin(A) \cdot \min_{i} B_{ii} \quad \text{(under conditions)}$$
+    $$\chiMin(A + B) \geq \chiMin(A) + \chiMin(B) \quad \text{(for PSD matrices)}$$
+  \end{itemize}
+  
+  \textbf{Specialized Tools}:
+  \begin{itemize}
+    \item \textbf{Gershgorin circle theorem}: Eigenvalue localization
+    \item \textbf{Khatri-Rao products}: For deep network structure
+  \end{itemize}
+\end{frame}
+
+\section{Current State and Future Directions}
+
+\begin{frame}{Summary of Proof Techniques}
+  \textbf{Three Main Approaches}:
+  \begin{enumerate}[<+->]
+    \item \textbf{Matrix Concentration + Hermite Analysis}:
+    \begin{itemize}
+      \item Best for initialization bounds
+      \item Handles inhomogeneous activations
+      \item Width requirement: $\tilde{\Omega}(n)$
+    \end{itemize}
+    \item \textbf{Empirical NTK Decomposition}:
+    \begin{itemize}
+      \item Direct analysis of $JJ^T$
+      \item Feature matrix + vector norm bounds
+      \item Works for various activation types
+    \end{itemize}
+    \item \textbf{Power Series Analysis}:
+    \begin{itemize}
+      \item Complete spectral characterization
+      \item Eigenvalue decay rates
+      \item Outlier identification
+    \end{itemize}
+  \end{enumerate}
+  
+  \textbf{Key Mathematical Innovation}: Generalized Hermite polynomials enable handling of inhomogeneous activations with optimal width scaling.
+\end{frame}
+
+\begin{frame}{Open Questions and Future Directions}
+  \textbf{Remaining Challenges}:
+  \begin{itemize}[<+->]
+    \item \textbf{Training dynamics}: How does $\lambda_{\min}$ evolve during training?
+    \item \textbf{Finite-width effects}: Beyond the infinite-width limit
+    \item \textbf{Architecture dependence}: ResNets, Transformers, etc.
+    \item \textbf{Data distribution}: Beyond Gaussian assumptions
+  \end{itemize}
+  
+  \textbf{Emerging Techniques}:
+  \begin{itemize}[<+->]
+    \item \textbf{Random matrix theory}: Free probability, Marchenko-Pastur law
+    \item \textbf{Optimal transport}: Wasserstein distances for kernel analysis
+    \item \textbf{Information theory}: Mutual information bounds
+    \item \textbf{Algebraic geometry}: Polynomial system analysis
   \end{itemize}
 \end{frame}
 
 % End of presentation
 \begin{frame}
   \begin{center}
-    Thank you!
+    \textbf{Thank you!}
+    
+    \vspace{1em}
+    
+    \textit{The mathematical journey from $\tilde{\Omega}(n^2)$ to $\tilde{\Omega}(n)$ width requirements represents a fundamental advance in our understanding of neural network optimization landscapes.}
   \end{center}
 \end{frame}
 

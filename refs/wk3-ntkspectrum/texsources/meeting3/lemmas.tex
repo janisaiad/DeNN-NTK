@@ -1,0 +1,395 @@
+\documentclass{beamer}
+
+\usetheme{Madrid}
+
+% Necessary packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{bm}
+\usepackage{enumerate}
+
+% Theorem environment definitions
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+
+% Mathematical commands
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\I}{\mathbf{I}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\evmin}[1]{\lambda_{\min}\left(#1\right)}
+\newcommand{\evmax}[1]{\lambda_{\max}\left(#1\right)}
+\newcommand{\tr}{\text{tr}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\g}{\mathbf{g}}
+\newcommand{\odot}{\odot}
+\newcommand{\bigOmg}{\Omega}
+\newcommand{\bigTheta}{\Theta}
+\newcommand{\Pr}{\text{Pr}}
+
+\title{Fundamental Lemmas and Theorems for NTK Eigenvalue Bounds}
+\subtitle{Compilation of Results from Banerjee, Nguyen et al.}
+\author{Comparative Analysis of Proof Techniques}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{Concentration Inequalities: Foundation Tools}
+
+\begin{frame}{Scalar Concentration: Chernoff Bound}
+  \begin{theorem}[Chernoff Bound for Bounded Random Variables]
+  Let $X_1, \ldots, X_n$ be independent random variables with $X_i \in [0,1]$ and $\E[X_i] = \mu_i$. Let $S = \sum_{i=1}^n X_i$ and $\mu = \E[S] = \sum_{i=1}^n \mu_i$. Then:
+  $$\Pr(S \geq (1+\delta)\mu) \leq e^{-\frac{\delta^2 \mu}{2+\delta}}$$
+  $$\Pr(S \leq (1-\delta)\mu) \leq e^{-\frac{\delta^2 \mu}{2}}$$
+  for $\delta > 0$.
+  \end{theorem}
+  
+  \textbf{Key features}:
+  \begin{itemize}
+    \item Exponential decay in deviation
+    \item Multiplicative form: bounds $(1 \pm \delta)\mu$
+    \item Optimal for bounded variables
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Scalar Concentration: Bernstein Inequality}
+  \begin{theorem}[Bernstein's Inequality]
+  Let $X_1, \ldots, X_n$ be independent random variables with $\E[X_i] = 0$, $|X_i| \leq M$, and $\E[X_i^2] \leq \sigma_i^2$. Let $S = \sum_{i=1}^n X_i$ and $\sigma^2 = \sum_{i=1}^n \sigma_i^2$. Then:
+  $$\Pr(|S| \geq t) \leq 2\exp\left(-\frac{t^2/2}{\sigma^2 + Mt/3}\right)$$
+  \end{theorem}
+  
+  \textbf{Applications in NTK theory}:
+  \begin{itemize}
+    \item Concentration of activation norms: $\|\alpha^{(l)}(x_i)\|_2^2$
+    \item Bounds on feature matrix entries
+    \item Control of empirical vs. expected quantities
+  \end{itemize}
+  
+  \textbf{Advantage}: Handles both variance ($\sigma^2$) and range ($M$) constraints
+\end{frame}
+
+\begin{frame}{Quadratic Forms: Classical Hanson-Wright}
+  \begin{theorem}[Hanson-Wright Inequality]
+  Let $Y_1, \ldots, Y_n$ be independent mean-zero $\alpha$-subgaussian random variables, and $\mathbf{A} = (a_{i,j})$ be a symmetric matrix. Then:
+  $$\Pr\left(\left|\sum_{i,j=1}^n a_{i,j}(Y_i Y_j - \E[Y_i Y_j])\right| \geq t\right) \leq 2\exp\left(-\frac{1}{C}\min\left\{\frac{t^2}{\beta^4\|\mathbf{A}\|_{HS}^2}, \frac{t}{\beta^2\|\mathbf{A}\|_{op}}\right\}\right)$$
+  \end{theorem}
+  
+  where $\|\mathbf{A}\|_{HS} = \sqrt{\sum_{i,j} |a_{i,j}|^2}$ (Hilbert-Schmidt norm) and $\|\mathbf{A}\|_{op}$ is the operator norm.
+  
+  \textbf{Key insight}: The bound depends on both:
+  \begin{itemize}
+    \item Frobenius norm $\|\mathbf{A}\|_{HS}$ (controls variance)
+    \item Operator norm $\|\mathbf{A}\|_{op}$ (controls extreme deviations)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Generalized Hanson-Wright for Tensors}
+  \begin{theorem}[Generalized Hanson-Wright for Random Tensors (Chang, 2022)]
+  For random tensor vector $\overline{\mathcal{X}} \in \mathbb{C}^{(n \times I_1 \times \cdots \times I_M) \times (I_1 \times \cdots \times I_M)}$ and fixed tensor $\overline{\overline{\mathcal{A}}}$, the polynomial function:
+  $$f_j(\overline{\mathcal{X}}) = \left(\sum_{i,k=1}^n \mathcal{A}_{i,k} \star_M (\mathcal{X}_i - \E[\mathcal{X}_i]) \star_M (\mathcal{X}_k - \E[\mathcal{X}_k])\right)^j$$
+  
+  satisfies concentration bounds involving Ky Fan $k$-norms of tensor sums.
+  \end{theorem}
+  
+  \textbf{Applications}:
+  \begin{itemize}
+    \item High-dimensional data analysis
+    \item Multi-way array processing
+    \item Extension of classical matrix concentration to tensor settings
+  \end{itemize}
+  
+  \textbf{Reference}: [Chang, S.Y. (2022). "Generalized Hanson-Wright Inequality for Random Tensors"](https://arxiv.org/pdf/2203.00659)
+\end{frame}
+
+\begin{frame}{Matrix Concentration: Matrix Chernoff}
+  \begin{theorem}[Matrix Chernoff Bound (Tropp, 2012)]
+  Let $X_1, \ldots, X_n$ be independent random Hermitian matrices with $X_i \preceq R \cdot I$ and $\E[X_i] \preceq \mu \cdot I$. Let $S = \sum_{i=1}^n X_i$. Then:
+  $$\Pr(\lambda_{\max}(S) \geq (1+\delta)\mu n) \leq d \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^{\mu n / R}$$
+  \end{theorem}
+  
+  \textbf{NTK Applications}:
+  \begin{itemize}
+    \item Concentration of $A^{(l)}(A^{(l)})^T$ around its expectation
+    \item Bounds on empirical Gram matrices $F_k F_k^T$
+    \item Control of feature matrix singular values
+  \end{itemize}
+  
+  \textbf{Key advantage}: Direct control of all eigenvalues simultaneously
+\end{frame}
+
+\begin{frame}{Matrix Concentration: Matrix Bernstein}
+  \begin{theorem}[Matrix Bernstein Inequality (Vershynin, 2018)]
+  Let $X_1, \ldots, X_n$ be independent random matrices with $\E[X_i] = 0$, $\|X_i\| \leq L$, and $\left\|\sum_{i=1}^n \E[X_i X_i^*]\right\| \leq \sigma^2$. Then:
+  $$\Pr\left(\left\|\sum_{i=1}^n X_i\right\| \geq t\right) \leq 2d \exp\left(-\frac{t^2/2}{\sigma^2 + Lt/3}\right)$$
+  \end{theorem}
+  
+  \textbf{Comparison with scalar Bernstein}:
+  \begin{itemize}
+    \item Same functional form: $\exp(-t^2/(\sigma^2 + Lt))$
+    \item Matrix version: bounds operator norm
+    \item Dimension factor: $2d$ instead of $2$
+  \end{itemize}
+  
+  \textbf{Usage in NTK proofs}: Concentration of centered feature matrices around zero
+\end{frame}
+
+\section{Technique 1: Matrix Concentration + Hermite Analysis}
+
+\begin{frame}{Fundamental Concentration Lemma (Banerjee et al.)}
+  \begin{lemma}[Concentration of Activation Matrices]
+  Let $A^{(l)} \in \R^{n \times m_l}$ be the activation matrix at layer $l$. Then with probability $\geq 1 - \frac{\delta}{L}$:
+  $$\evmin{A^{(l)}(A^{(l)})^T} \geq \frac{m_l \lambda_l}{4}$$
+  where $\lambda_l = \evmin{\E_{g \sim \mathcal{N}(\bm{0}, \sigma^2 I)} \left[ \phi\left(\frac{1}{\sqrt{m_{l-1}}} A^{(l-1)} g\right) \phi\left(\frac{1}{\sqrt{m_{l-1}}} A^{(l-1)} g\right)^T \right]}$
+  \end{lemma}
+  
+  \textbf{Width condition}: $m_l \geq \max\left(n, c_2 v \max(1, \log(15v)) \log(Ln/\delta)\right)$
+  
+  \textbf{Key innovation}: Generalized Hermite polynomials for inhomogeneous activations
+  
+  \textbf{Proof technique}: Uses Matrix Chernoff bound for the concentration step
+\end{frame}
+
+\begin{frame}{Generalized Hermite Lemma (Banerjee et al.)}
+  \begin{lemma}[Hermite Product for Inhomogeneous Activations]
+  For generalized Hermite polynomials $H_r^{[q]}(x)$ with variance parameter $q > 0$:
+  $$\E_{\tilde{g} \sim \mathcal{N}(\bm{0}_d, \sigma^2 I_d)} [H_r^{[c_x^2 \sigma^2]}(c_x \langle \tilde{g}, u_x \rangle) H_{r'}^{[c_y^2 \sigma^2]}(c_y \langle \tilde{g}, u_y \rangle)]$$
+  $$= \sigma^{6r} c_x^{3r} c_y^{3r} \langle u_x, u_y \rangle^r \delta_{rr'}$$
+  \end{lemma}
+  
+  \textbf{Consequence}: Hermite series expansion for activations with variable scales
+  $$\E_{\tilde{g}} [\phi(CU\tilde{g}) \phi(CU\tilde{g})^T] \succeq \sum_{r=0}^{\infty} \sigma^{6r} c_0^{6r} (M_r(\phi) U^{\star r})(M_r(\phi) U^{\star r})^T$$
+\end{frame}
+
+\begin{frame}{Recurrence Theorem (Banerjee et al.)}
+  \begin{theorem}[Recursive Eigenvalue Bound]
+  Let $c_{l,i} = \frac{\|\alpha^{(l)}(\x_i)\|_2}{\sqrt{m_l}}$ and $(\mu_{r,0}^{(l)})^2 = \min_{i \in [n]} (\mu_r^{[c_{l,i}^2 \sigma^2]}(\phi))^2$.
+  
+  Then with probability $\geq 1 - 2n\sum_{l=1}^L \frac{1}{m_l}$:
+  $$\lambda_{l+1} \geq \left(\frac{(\mu_{r,0}^{(l)})^2}{6 c_{\phi,\sigma_0}}\right)^l \left(\frac{\sigma_0^2}{2}\right)^{3rl} \lambda_1$$
+  \end{theorem}
+  
+  \textbf{Improvement}: Required width $\tilde{\Omega}(n^2) \rightarrow \tilde{\Omega}(n)$
+\end{frame}
+
+\section{Technique 2: Empirical NTK Decomposition}
+
+\begin{frame}{NTK Decomposition (Nguyen et al.)}
+  \begin{lemma}[Chain Rule Decomposition]
+  The empirical NTK decomposes as:
+  $$K_L = JJ^T = \sum_{l=1}^L \left(\frac{\partial F_L}{\partial \text{vec}(W_l)}\right) \left(\frac{\partial F_L}{\partial \text{vec}(W_l)}\right)^T$$
+  
+  In terms of feature matrices:
+  $$JJ^T = \sum_{k=0}^{L-1} F_k F_k^T \circ G_{k+1} G_{k+1}^T$$
+  \end{lemma}
+  
+  \textbf{Application of Weyl's inequality}:
+  $$\evmin{JJ^T} \geq \sum_{k=0}^{L-1} \evmin{F_k F_k^T \circ G_{k+1} G_{k+1}^T}$$
+\end{frame}
+
+\begin{frame}{Schur Theorem and Application (Nguyen et al.)}
+  \begin{lemma}[Application of Schur's Theorem]
+  For PSD matrices $P, Q$: $\evmin{P \circ Q} \geq \evmin{P} \min_{i \in [n]} Q_{ii}$
+  
+  Applied to the NTK:
+  $$\evmin{F_k F_k^T \circ G_{k+1} G_{k+1}^T} \geq \evmin{F_k F_k^T} \min_{i \in [N]} \|(G_{k+1})_{i:}\|_2^2$$
+  \end{lemma}
+  
+  \begin{lemma}[Singular Value Bound]
+  For feature matrix $F_k$ with appropriate distributional assumptions:
+  $$\evmin{(X^{\star r})(X^{\star r})^T} \geq \min_{i \in [N]} \|\x_i\|_2^{2r} - (N-1) \max_{i \neq j} |\langle \x_i, \x_j \rangle|^r$$
+  
+  For well-separated data: $\geq \Omega(d)$
+  \end{lemma}
+  
+  \textbf{Concentration tool}: Matrix Chernoff for $\evmin{F_k F_k^T}$ bounds
+\end{frame}
+
+\begin{frame}{G-bound Lemma (Nguyen et al.)}
+  \begin{lemma}[Vector Norm Bound]
+  Fix $k \in [L-2]$ and let $x \sim \mathcal{P}$. Then:
+  $$\left\|\Sigma_k(x)\left(\prod_{l=k+1}^{L-1}W_l\Sigma_l(x)\right)W_L\right\|_2^2$$
+  $$= \bigTheta\left(s^2(1 - e^{-\beta_k^2s^2})\sqrt{n_0}\beta_kn_k\beta_{L}n_L\prod_{l=1, l\neq k}^{L-1}\sqrt{\beta_l}\sqrt{n_l}\right)$$
+  
+  with probability at least $1 - \sum_{l=0}^{L-1}2\exp(-\bigOmg(n_l))$
+  \end{lemma}
+  
+  \textbf{Proof technique}: Uses Hanson-Wright inequality for quadratic forms in the network weights
+\end{frame}
+
+\section{Technique 3: Spectral Analysis via Power Series}
+
+\begin{frame}{Power Series Expansion (Banerjee et al.)}
+  \begin{lemma}[NTK as Power Series]
+  Under unit variance initialization, the NTK can be written as:
+  $$K_{\text{NTK}}(\langle \x_i, \x_j \rangle) = \sum_{p=0}^{\infty} a_p \langle \x_i, \x_j \rangle^p$$
+  
+  Coefficient structure: $a_p = \sum_{k=1}^L F(p, k, \bar{\mu})$
+  \end{lemma}
+  
+  \begin{lemma}[Spectral Decay]
+  \begin{itemize}
+    \item Rapid coefficient decay: $|a_p| \leq C \rho^p$ for $\rho < 1$
+    \item Exponential decay of small eigenvalues
+    \item Spectral gap between dominant eigenvalues and bulk spectrum
+  \end{itemize}
+  \end{lemma}
+\end{frame}
+
+\begin{frame}{Effective Rank Lemma (Banerjee et al.)}
+  \begin{lemma}[Series Head Rank Bound]
+  Let $\mG\in \R^{n \times n}$ be a symmetric PSD matrix of rank $2 \leq r \leq d$. Define:
+  $$\mH_m = \sum_{j=0}^{m-1} c_j \mG^{\odot j}$$
+  
+  Then:
+  $$\text{rank}(\mH_m) \leq 1 + \min\{r-1, m-1 \}(2e)^{r-1} + \max\{0, m-r\}\left(\frac{2e}{r-1}\right)^{r-1} (m-1)^{r-1}$$
+  \end{lemma}
+  
+  \textbf{Application}: Control of the number of significant eigenvalues
+\end{frame}
+
+\section{Concentration Results and Matrix Inequalities}
+
+\begin{frame}{Concentration Lemmas (Various Authors)}
+  \begin{lemma}[Matrix Bernstein Concentration]
+  $$P(\|S - \E[S]\| \geq t) \leq 2d \exp\left(-\frac{t^2/2}{\sigma^2 + Rt/3}\right)$$
+  \end{lemma}
+  
+  \begin{lemma}[Gershgorin Inequality]
+  $$\evmin{(X^{\star r})(X^{\star r})^T} \geq \min_{i \in [N]} \|\x_i\|_2^{2r} - (N-1) \max_{i \neq j} |\langle \x_i, \x_j \rangle|^r$$
+  \end{lemma}
+  
+  \begin{lemma}[Norm Bound (Huang et al.)]
+  If $X$ is $(\eps,B)$-orthonormal with $\eps<1/\lambda_\sigma$:
+  \begin{enumerate}
+    \item $\|\Phi\| \leq C\lambda_\sigma^2 B^2$
+    \item With probability $\geq 1-2e^{-cn}$: $\|\tilde{X}\| \leq C(1+\sqrt{n/\tilde{d}})\lambda_\sigma B$
+  \end{enumerate}
+  \end{lemma}
+\end{frame}
+
+\section{Main Theorems and Final Bounds}
+
+\begin{frame}{Main Theorem (Nguyen et al.)}
+  \begin{theorem}[Smallest Eigenvalue of Limiting NTK]
+  Let $\{x_i\}_{i=1}^{N}$ be a set of i.i.d. points from $P_X$ satisfying the distributional assumptions. For any even integer $r\ge 2$:
+  $$L\mathcal{O}(d) \geq \evmin{K^{(L)}} \geq \mu_r(\sigma)^2\; \bigOmg(d)$$
+  
+  with probability at least $1 - Ne^{-\bigOmg{d}} - N^2e^{-\bigOmg{dN^{-2/(r-0.5)}}}$
+  \end{theorem}
+  
+  where $\mu_r(\sigma)$ is the $r$-th Hermite coefficient of the ReLU function.
+\end{frame}
+
+\begin{frame}{Effective Rank Theorem (Banerjee et al.)}
+  \begin{theorem}[NTK Effective Rank Bound]
+  Suppose $\phi(x) = \text{ReLU}(x)$ and $m \geq d$. Then with probability at least $1 - 3\epsilon$:
+  $$\frac{\text{Tr}(\mK_{\text{outer}})}{\lambda_1(\mK_{\text{outer}})} \leq 12 \left(\frac{\sqrt{m} + \sqrt{d} + t_1}{\sqrt{m} - \sqrt{d} - t_1}\right)^2 \frac{\text{Tr}(X^T X)}{\lambda_1(X^T X)}$$
+  \end{theorem}
+  
+  \textbf{Consequence}: The NTK has only $O(d)$ large eigenvalues when $m \gtrsim n \gg d$
+  
+  \textbf{Condition number bound}: $\frac{\lambda_1(\mK)}{\lambda_n(\mK)} \gtrsim \frac{n}{d}$
+\end{frame}
+
+\begin{frame}{Fixed Point Lemma (Huang et al.)}
+  \begin{lemma}[Resolvent Approximation]
+  Under appropriate assumptions, for any deterministic matrix $M \in \mathbb{C}^{n \times n}$:
+  $$P\left[\left|\tr RM-\tr \left(A+\bar{s}^{-1}\Phi-z\text{Id}\right)^{-1}M\right| >\|M\|t\right] \leq Cne^{-cnt^2}$$
+  
+  and
+  $$P\left[\left|\bar{s}-\left(\alpha^{-1}+\gamma \tr \left(A+\bar{s}^{-1} \Phi-z\text{Id}\right)^{-1}\Phi\right)\right| >t\right] \leq Cne^{-cnt^2}$$
+  \end{lemma}
+\end{frame}
+
+\section{Synthesis and Comparison of Techniques}
+
+\begin{frame}{Comparison of Approaches}
+  \begin{table}[h]
+  \centering
+  \small
+  \begin{tabular}{|l|c|c|c|}
+  \hline
+  \textbf{Technique} & \textbf{Required Width} & \textbf{Activations} & \textbf{Authors} \\
+  \hline
+  Classical Hermite & $\tilde{\Omega}(n^2)$ & Homogeneous & Various \\
+  \hline
+  Generalized Hermite & $\tilde{\Omega}(n)$ & Inhomogeneous & Banerjee et al. \\
+  \hline
+  NTK Decomposition & $\tilde{\Omega}(n)$ & General & Nguyen et al. \\
+  \hline
+  Power Series & - & Smooth & Banerjee et al. \\
+  \hline
+  \end{tabular}
+  \end{table}
+  
+  \textbf{Major innovation}: Generalized Hermite polynomials enable:
+  \begin{itemize}
+    \item Treatment of inhomogeneous activations
+    \item Optimal reduction of required width
+    \item Complete spectral analysis
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Key Mathematical Tools}
+  \textbf{Fundamental Matrix Inequalities}:
+  \begin{itemize}
+    \item \textbf{Weyl}: $\lambda_i(A) + \lambda_n(B) \leq \lambda_i(A + B) \leq \lambda_i(A) + \lambda_1(B)$
+    \item \textbf{Schur}: $\evmin{P \circ Q} \geq \evmin{P} \min_i Q_{ii}$ (PSD matrices)
+    \item \textbf{Gershgorin}: Eigenvalue localization
+  \end{itemize}
+  
+  \textbf{Concentration}:
+  \begin{itemize}
+    \item Matrix Bernstein, Hoeffding, Matrix Chernoff
+    \item Gaussian Poincaré inequality
+    \item Hanson-Wright for quadratic forms
+  \end{itemize}
+  
+  \textbf{Specialized Tools}:
+  \begin{itemize}
+    \item Khatri-Rao products for deep structures
+    \item Stieltjes transforms for spectral analysis
+    \item Random matrix theory (Marchenko-Pastur)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    \textbf{Thank you!}
+    
+    \vspace{1em}
+    
+    \textit{This compilation presents the evolution of proof techniques for NTK eigenvalue bounds, from classical methods to recent innovations with generalized Hermite polynomials.}
+    
+    \vspace{1em}
+    
+    \textbf{Main references}: Banerjee et al., Nguyen et al., Huang et al.
+    
+    \vspace{0.5em}
+    
+    \textbf{Additional reference}: Chang, S.Y. (2022). "Generalized Hanson-Wright Inequality for Random Tensors", arXiv:2203.00659
+  \end{center}
+\end{frame}
+
+\end{document}
