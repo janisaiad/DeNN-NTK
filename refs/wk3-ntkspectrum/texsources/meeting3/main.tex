@@ -77,7 +77,7 @@ Mathematical Foundations, Proof Techniques, and Concentration Inequalities}
 \maketitle
 
 \begin{abstract}
-This document provides an exhaustive compilation and analysis of mathematical techniques for bounding the smallest eigenvalue $\lambdaMin(\KNTK)$ of the Neural Tangent Kernel. We synthesize results from three complementary perspectives: (1) concentration inequalities and their applications to NTK analysis, (2) timeline-based evolution of proof techniques from classical to modern approaches, and (3) detailed lemma-by-lemma analysis of fundamental results. The document covers the progression from classical Hermite polynomial methods requiring $\TildeOmega(n^2)$ width to modern generalized Hermite techniques achieving $\TildeOmega(n)$ width, along with empirical NTK decomposition methods and spectral analysis via power series. Key mathematical tools include matrix concentration inequalities (Chernoff, Bernstein, Hanson-Wright), matrix analysis techniques (Weyl, Schur, Gershgorin), and specialized tools for neural network analysis (Khatri-Rao products, generalized Hermite polynomials).
+%This document provides an exhaustive compilation and analysis of mathematical techniques for bounding the smallest eigenvalue $\lambdaMin(\KNTK)$ of the Neural Tangent Kernel. We synthesize results from three complementary perspectives: (1) concentration inequalities and their applications to NTK analysis, (2) timeline-based evolution of proof techniques from classical to modern approaches, and (3) detailed lemma-by-lemma analysis of fundamental results. The document covers the progression from classical Hermite polynomial methods requiring $\TildeOmega(n^2)$ width to modern generalized Hermite techniques achieving $\TildeOmega(n)$ width, along with empirical NTK decomposition methods and spectral analysis via power series. Key mathematical tools include matrix concentration inequalities (Chernoff, Bernstein, Hanson-Wright), matrix analysis techniques (Weyl, Schur, Gershgorin), and specialized tools for neural network analysis (Khatri-Rao products, generalized Hermite polynomials).
 \end{abstract}
 
 \tableofcontents
@@ -90,14 +90,23 @@ $$\KNTK(x_i, x_j) = \left\langle \frac{\partial f(\x_i; \theta)}{\partial \theta
 
 In matrix form, $\KNTK = JJ^T$ where $J$ is the Jacobian matrix of the network outputs with respect to parameters. The smallest eigenvalue $\lambdaMin(\KNTK)$ plays a crucial role in:
 
-\begin{itemize}
-    \item \textbf{Memorization capacity}: The ability of the network to fit arbitrary labels
-    \item \textbf{Global convergence}: Ensuring gradient descent converges to global minima
-    \item \textbf{Generalization bounds}: Controlling the complexity of the learned function
-    \item \textbf{Lazy training regime}: Validating the infinite-width approximation
-\end{itemize}
 
 The central question addressed in this document is: \textit{Under what conditions can we guarantee $\lambdaMin(\KNTK) \geq c > 0$ with high probability?}
+
+
+\section{What the SOTA gives us}
+
+\begin{itemize}
+    \item \textbf{Banerjee et al. (2023)}: 1 linear width layer suffices for ReLU networks to get confident bounds on $\lambdaMin$
+    \item \textbf{Nguyen et al. (2021)}: Very tight linear bound
+    \item \textbf{Saratchandran et al. (2024)}: Periodic activations (cosine)
+    \item \textbf{Tarjek (2022)}: linear scaling of $\lambdaMin$ for MLP at the EOCs
+\end{itemize}
+
+
+What is behind everything is the kernel integral operator $K$ and its spectrum.
+
+\newpage
 
 \section{Mathematical Foundation: Concentration Inequalities}
 
@@ -147,6 +156,37 @@ $$\Pr(\lambda_{\max}(S) \geq (1+\delta)\mu n) \leq d \left(\frac{e^\delta}{(1+\d
 Let $X_1, \ldots, X_n$ be independent random matrices with $\E[X_i] = 0$, $\|X_i\| \leq L$, and $\left\|\sum_{i=1}^n \E[X_i X_i^*]\right\| \leq \sigma^2$. Then:
 $$\Pr\left(\left\|\sum_{i=1}^n X_i\right\| \geq t\right) \leq 2d \exp\left(-\frac{t^2/2}{\sigma^2 + Lt/3}\right)$$
 \end{theorem}
+
+\section{Fundamental Mathematical Tools}
+
+\subsection{Matrix Analysis Techniques}
+
+\begin{lemma}[Weyl's Inequality]
+For Hermitian matrices $A, B$:
+$$\lambda_i(A) + \lambda_n(B) \leq \lambda_i(A + B) \leq \lambda_i(A) + \lambda_1(B)$$
+\end{lemma}
+
+\begin{lemma}[Schur Product Theorem]
+For PSD matrices $P, Q$:
+$$\evmin{P \circ Q} \geq \evmin{P} \min_i Q_{ii}$$
+\end{lemma}
+
+\begin{lemma}[Gershgorin Circle Theorem]
+For matrix $A = (a_{ij})$, all eigenvalues lie in the union of discs:
+$$\bigcup_{i=1}^n \left\{z \in \C : |z - a_{ii}| \leq \sum_{j \neq i} |a_{ij}|\right\}$$
+\end{lemma}
+
+\subsection{Specialized Neural Network Tools}
+
+\begin{definition}[Khatri-Rao Product]
+For matrices $A \in \R^{m \times k}$ and $B \in \R^{n \times k}$, the Khatri-Rao product $A \star B \in \R^{mn \times k}$ is the column-wise Kronecker product.
+\end{definition}
+
+\begin{definition}[Hadamard Power]
+For matrix $A$ and positive integer $r$, the $r$-th Hadamard power $A^{\odot r}$ is the element-wise $r$-th power.
+\end{definition}
+
+\newpage
 
 \section{Proof Schemes and High-Level Strategies}
 
@@ -391,6 +431,22 @@ Power Series & Complete spectrum & Effective rank & Full characterization \\
     \end{itemize}
 \end{enumerate}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\newpage
 \section{Main Theorems and Final Bounds}
 
 \subsection{Limiting NTK Results}
@@ -422,153 +478,24 @@ $$\frac{\text{Tr}(\mathbf{K}_{\text{outer}})}{\lambda_1(\mathbf{K}_{\text{outer}
 
 \textbf{Consequence}: The NTK has only $O(d)$ large eigenvalues when $m \gtrsim n \gg d$.
 
-\section{Timeline and Evolution of Techniques}
 
-\subsection{Historical Development}
+\newpage
 
-\textbf{Pre-2020 Era}:
-\begin{itemize}
-    \item Classical Hermite polynomial methods
-    \item Width requirement: $\TildeOmega(n^2)$ for smooth activations
-    \item Limited to homogeneous activations (ReLU)
-    \item Basic matrix concentration tools
-\end{itemize}
 
-\textbf{2020-2021 Breakthroughs}:
-\begin{itemize}
-    \item Nguyen et al.: Systematic empirical NTK analysis for ReLU networks
-    \item Feature matrix decomposition techniques
-    \item Tight bounds for deep ReLU networks
-    \item One wide layer suffices: $\TildeOmega(N)$ width
-\end{itemize}
-
-\textbf{2022-Present}:
-\begin{itemize}
-    \item Banerjee et al.: Generalized Hermite polynomials
-    \item Optimal width scaling: $\TildeOmega(n^2) \rightarrow \TildeOmega(n)$
-    \item Extension to inhomogeneous smooth activations
-    \item Saratchandran et al.: Periodic activations (cosine)
-\end{itemize}
-
-\subsection{Mathematical Innovation Timeline}
-
-\begin{enumerate}
-    \item \textbf{Classical Hermite Expansion}:
-    $$\phi(x) = \sum_{r=0}^{\infty} \mu_r(\phi) H_r(x)$$
-    
-    \item \textbf{Generalized Hermite Innovation}:
-    $$\phi(cx) = \sum_{r=0}^{\infty} \mu_r^{[c^2\sigma^2]}(\phi) H_r^{[c^2\sigma^2]}(cx)$$
-    
-    \item \textbf{Matrix Decomposition Techniques}:
-    $$JJ^T = \sum_{k=0}^{L-1} F_k F_k^T \circ G_{k+1} G_{k+1}^T$$
-    
-    \item \textbf{Power Series Analysis}:
-    $$K_{\text{NTK}}(\langle \x_i, \x_j \rangle) = \sum_{p=0}^{\infty} a_p \langle \x_i, \x_j \rangle^p$$
-\end{enumerate}
-
-\section{Fundamental Mathematical Tools}
-
-\subsection{Matrix Analysis Techniques}
-
-\begin{lemma}[Weyl's Inequality]
-For Hermitian matrices $A, B$:
-$$\lambda_i(A) + \lambda_n(B) \leq \lambda_i(A + B) \leq \lambda_i(A) + \lambda_1(B)$$
-\end{lemma}
-
-\begin{lemma}[Schur Product Theorem]
-For PSD matrices $P, Q$:
-$$\evmin{P \circ Q} \geq \evmin{P} \min_i Q_{ii}$$
-\end{lemma}
-
-\begin{lemma}[Gershgorin Circle Theorem]
-For matrix $A = (a_{ij})$, all eigenvalues lie in the union of discs:
-$$\bigcup_{i=1}^n \left\{z \in \C : |z - a_{ii}| \leq \sum_{j \neq i} |a_{ij}|\right\}$$
-\end{lemma}
-
-\subsection{Specialized Neural Network Tools}
-
-\begin{definition}[Khatri-Rao Product]
-For matrices $A \in \R^{m \times k}$ and $B \in \R^{n \times k}$, the Khatri-Rao product $A \star B \in \R^{mn \times k}$ is the column-wise Kronecker product.
-\end{definition}
-
-\begin{definition}[Hadamard Power]
-For matrix $A$ and positive integer $r$, the $r$-th Hadamard power $A^{\odot r}$ is the element-wise $r$-th power.
-\end{definition}
-
-\section{Comparison of Approaches and Current State}
-
-\subsection{Technique Comparison}
-
-\begin{table}[h]
-\centering
-\begin{tabular}{|l|c|c|c|}
-\hline
-\textbf{Technique} & \textbf{Required Width} & \textbf{Activations} & \textbf{Key Innovation} \\
-\hline
-Classical Hermite & $\TildeOmega(n^2)$ & Homogeneous & Standard polynomials \\
-\hline
-Generalized Hermite & $\TildeOmega(n)$ & Inhomogeneous & Variable variance \\
-\hline
-NTK Decomposition & $\TildeOmega(n)$ & General & Feature matrices \\
-\hline
-Power Series & - & Smooth & Spectral analysis \\
-\hline
-\end{tabular}
-\end{table}
-
-\subsection{Key Mathematical Innovations}
-
-\begin{enumerate}
-    \item \textbf{Generalized Hermite Polynomials}: Enable treatment of inhomogeneous activations with optimal width scaling
-    \item \textbf{Matrix Decomposition}: Direct analysis of empirical NTK structure
-    \item \textbf{Advanced Concentration}: Matrix-level concentration inequalities
-    \item \textbf{Spectral Methods}: Complete characterization of eigenvalue distribution
-\end{enumerate}
 
 \section{Open Questions and Future Directions}
 
 \subsection{Remaining Challenges}
-
-\begin{itemize}
-    \item \textbf{Training Dynamics}: Evolution of $\lambdaMin$ during optimization
-    \item \textbf{Finite-Width Effects}: Beyond infinite-width approximations
-    \item \textbf{Architecture Dependence}: ResNets, Transformers, attention mechanisms
-    \item \textbf{Data Distribution}: Beyond Gaussian and well-separated assumptions
-    \item \textbf{Computational Aspects}: Efficient estimation of eigenvalue bounds
-\end{itemize}
-
-\subsection{Emerging Mathematical Tools}
-
-\begin{itemize}
-    \item \textbf{Random Matrix Theory}: Free probability, Marchenko-Pastur law
-    \item \textbf{Optimal Transport}: Wasserstein distances for kernel analysis
-    \item \textbf{Information Theory}: Mutual information bounds
-    \item \textbf{Algebraic Geometry}: Polynomial system analysis
-    \item \textbf{Tensor Methods}: Higher-order generalizations
-\end{itemize}
-
-\section{Conclusion}
-
-This comprehensive analysis reveals the remarkable mathematical journey in understanding NTK eigenvalue bounds. The progression from classical methods requiring $\TildeOmega(n^2)$ width to modern techniques achieving $\TildeOmega(n)$ width represents a fundamental advance in neural network theory.
-
-\textbf{Key Achievements}:
 \begin{enumerate}
-    \item \textbf{Optimal Width Scaling}: Generalized Hermite polynomials achieve the best known width requirements
-    \item \textbf{Broad Activation Coverage}: From ReLU to smooth to periodic activations
-    \item \textbf{Unified Framework}: Matrix concentration + spectral analysis provides comprehensive tools
-    \item \textbf{Practical Implications}: Results inform network design and optimization strategies
+    \item \textbf{Very different assumptions}: All of the papers assumes differently (domains, init, architecture, activations), I'll try to find a way to unify them
+    \item \textbf{Out of the sphere}: Harmonic analysis (integral operator) over $\L(2,\gamma)$ is frequently discussed as a future research direction (not even explored yet)
+    \item \textbf{Optimal Width Scaling}: Only needed 1 linear width, getting linear scaling for $\lambdaMin$
+    \item \textbf{Broad Activation Coverage}: From ReLU to inhomogeneous activations with harmonic analysis over $\L(2,\gamma)$
+    \item \textbf{Sobolev Framework}: We multiply the NTK by P (spectral bias) and analyse this new spectrum with those techniques
+    \item \textbf{Deep Narrow Frameworks}: We use the NTK given by a deep narrow network
 \end{enumerate}
 
-\textbf{Mathematical Legacy}:
-The techniques developed for NTK analysis have broader implications for:
-\begin{itemize}
-    \item Random matrix theory in machine learning
-    \item Concentration inequalities for structured random matrices
-    \item Spectral analysis of kernel methods
-    \item Optimization theory for neural networks
-\end{itemize}
-
-The field continues to evolve, with ongoing work addressing training dynamics, finite-width effects, and extensions to modern architectures. The mathematical foundations established through this body of work provide a solid platform for future theoretical advances in deep learning.
+\newpage
 
 \section*{References}
 
