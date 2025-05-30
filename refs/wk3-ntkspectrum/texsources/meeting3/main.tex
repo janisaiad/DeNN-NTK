@@ -15,7 +15,7 @@
 \usepackage{geometry}
 \usepackage{fancyhdr}
 \usepackage{tocloft}
-
+\usepackage{tikz}
 % Page setup
 \geometry{a4paper, margin=2.5cm}
 \pagestyle{fancy}
@@ -194,167 +194,341 @@ For matrix $A$ and positive integer $r$, the $r$-th Hadamard power $A^{\odot r}$
 
 All modern approaches to bounding $\lambdaMin(\KNTK)$ follow a common high-level structure, though they differ in technical details and specific tools employed.
 
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+    % Define styles
+    \tikzset{
+        box/.style={rectangle, draw, thick, minimum width=3cm, minimum height=1.2cm, text centered, fill=blue!15},
+        arrow/.style={->, thick, blue!70}
+    }
+
+    % Main boxes
+    \node[box] (step1) at (0,4) {\textbf{Step 1} \\ Problem Decomposition};
+    \node[box] (step2) at (0,2) {\textbf{Step 2} \\ Concentration Analysis};
+    \node[box] (step3) at (0,0) {\textbf{Step 3} \\ Spectral Analysis};
+
+    % Arrows
+    \draw[arrow] (step1) -- (step2);
+    \draw[arrow] (step2) -- (step3);
+
+    % Annotations
+    \node[align=left, text width=4cm] at (4.5,4) {
+        $\bullet$ Decompose NTK \\
+        $\bullet$ Identify key terms \\
+        $\bullet$ Separate components
+    };
+    
+    \node[align=left, text width=4cm] at (4.5,2) {
+        $\bullet$ Apply matrix bounds \\
+        $\bullet$ Control randomness \\
+        $\bullet$ High-probability results
+    };
+    
+    \node[align=left, text width=4cm] at (4.5,0) {
+        $\bullet$ Matrix inequalities \\
+        $\bullet$ Combine bounds \\
+        $\bullet$ Final $\lambda_{\min}$ result
+    };
+
+\end{tikzpicture}
+\caption{General Framework for NTK Eigenvalue Bounds}
+\end{figure}
+
+
+\newpage
+
+\subsection{Proof Scheme 1: Empirical NTK Decomposition (Nguyen et al.)}
+
+\textbf{High-Level Strategy}: Direct decomposition of empirical NTK $\bar{K}^{(L)} = JJ^T$ using feature matrices and chain rule to obtain precise bounds on $\lambdaMin$.
+
+\subsubsection{Step 1: Fundamental Chain Rule Decomposition}
+
+The proof begins by decomposing the empirical NTK $\bar{K}^{(L)} = JJ^T$ where $J$ is the Jacobian matrix \eqref{eq:Jac}. Applying the chain rule and standard algebraic manipulations yields the fundamental decomposition:
+
+\begin{align}
+\bar{K}^{(L)} = JJ^T = \sum_{k=0}^{L-1} F_k F_k^T \circ B_{k+1} B_{k+1}^T
+\end{align}
+
+where:
+\begin{itemize}
+    \item $F_k = [f_k(x_1), \ldots, f_k(x_N)]^T \in \R^{N \times n_k}$ are the \textbf{feature matrices} at layer $k$
+    \item $B_k \in \R^{N \times n_k}$ are the \textbf{derivative term matrices} with $i$-th row given by:
+\end{itemize}
+
+\begin{align}
+(B_k)_{i:} = \begin{cases}
+\Sigma_k(x_i) \left(\prod_{l=k+1}^{L-1} W_l \Sigma_l(x_i)\right) W_L, & k \in [L-2] \\
+\Sigma_{L-1}(x_i) W_L, & k = L-1 \\
+\frac{1}{\sqrt{N}} \mathbf{1}_N, & k = L
+\end{cases}
+\end{align}
+
+where $\Sigma_k(x) = \text{diag}([\sigma'(g_{k,j}(x))]_{j=1}^{n_k})$ is the diagonal matrix of activation derivatives.
+
+\subsubsection{Step 2: Application of Schur Product Theorem and Weyl's Inequality}
+
+For PSD matrices $P, Q \in \R^{n \times n}$, the Schur product theorem :
+\begin{align}
+\evmin{P \circ Q} \geq \evmin{P} \min_{i \in [n]} Q_{ii}
+\end{align}
+
+Applying this to each term, then using Weyl's inequality for the sum:
+
+\begin{align}
+\evmin{JJ^T} &\geq \sum_{k=0}^{L-1} \evmin{F_k F_k^T \circ B_{k+1} B_{k+1}^T} \\
+&\geq \sum_{k=0}^{L-1} \evmin{F_k F_k^T} \min_{i \in [N]} \|(B_{k+1})_{i:}\|_2^2
+\end{align}
+
+This reduction separates the problem into:
 \begin{enumerate}
-    \item \textbf{Step 1: Problem Decomposition}
-    \begin{itemize}
-        \item Decompose the NTK into manageable components
-        \item Separate empirical from expected quantities
-        \item Identify the key matrices/terms to bound
-    \end{itemize}
-    
-    \item \textbf{Step 2: Concentration Analysis}
-    \begin{itemize}
-        \item Apply concentration inequalities to control random fluctuations
-        \item Relate empirical quantities to their expectations
-        \item Establish high-probability bounds
-    \end{itemize}
-    
-    \item \textbf{Step 3: Spectral Analysis}
-    \begin{itemize}
-        \item Analyze the spectrum of expected quantities
-        \item Use matrix inequalities to combine bounds
-        \item Derive final eigenvalue bounds
-    \end{itemize}
+    \item The \textbf{minimum eigenvalues of feature Gram matrices}: $\evmin{F_k F_k^T}$
+    \item The \textbf{minimum row norms of derivative matrices}: $\min_{i \in [N]} \|(B_{k+1})_{i:}\|_2^2$
 \end{enumerate}
 
-\subsection{Proof Scheme 1: Matrix Concentration + Generalized Hermite (Banerjee et al.)}
+\subsubsection{Step 3: Bounding Feature Matrix Eigenvalues}
 
-\textbf{High-Level Strategy}: Use generalized Hermite polynomials to handle inhomogeneous activations, combined with matrix concentration.
+To bound $\evmin{F_k F_k^T}$, the strategy uses Chernoff-type matrix concentration. The fundamental bound is given by:
+\begin{lemma}[Matrix Concentration for Features]
+Let $\lambda = \evmin{\E_{w \sim \mathcal{N}(0, \beta_k^2 \mathbf{I}_{n_{k-1}})}[\sigma(F_{k-1}w)\sigma(F_{k-1}w)^T]}$. If 
+\begin{align}
+n_k \geq \max\left(N, c Q \max(1, \log(4Q)) \log\frac{N}{\delta}\right)
+\end{align}
+where $Q = \frac{\beta_k^2 \|F_{k-1}\|_F^2}{\lambda}$, then with probability at least $1-\delta$:
+\begin{align}
+\svmin{F_k}^2 \geq \frac{n_k \lambda}{4}
+\end{align}
 
-\begin{enumerate}
-    \item \textbf{Setup and Decomposition}
-    \begin{itemize}
-        \item \textit{Input}: Neural network with smooth activation $\phi$, width $m_l$ at layer $l$
-        \item \textit{Goal}: Bound $\lambdaMin(\KNTK) = \lambdaMin(JJ^T)$
-        \item \textit{Key insight}: Focus on activation matrices $A^{(l)} \in \R^{n \times m_l}$
-    \end{itemize}
-    
-    \item \textbf{Apply Matrix Concentration (Lemma 4.1)}
-    \begin{itemize}
-        \item \textit{Tool}: Matrix Chernoff bound
-        \item \textit{Result}: $\evmin{A^{(l)}(A^{(l)})^T} \geq \frac{m_l \lambda_l}{4}$ w.h.p.
-        \item \textit{Key quantity}: $\lambda_l = \evmin{\E[\phi(\text{input}) \phi(\text{input})^T]}$
-    \end{itemize}
-    
-    \item \textbf{Generalized Hermite Expansion (Innovation)}
-    \begin{itemize}
-        \item \textit{Classical limitation}: Standard Hermite only works for homogeneous activations
-        \item \textit{Solution}: Use $H_r^{[c^2\sigma^2]}(cx)$ with variable variance parameter
-        \item \textit{Result}: Handle activations with different scales across layers
-    \end{itemize}
-    
-    \item \textbf{Hermite Series Analysis (Lemma A.2, A.3)}
-    \begin{itemize}
-        \item \textit{Apply}: Orthogonality of generalized Hermite polynomials
-        \item \textit{Get}: $\E[\phi(CU\tilde{g}) \phi(CU\tilde{g})^T] \succeq \sum_{r=0}^{\infty} \sigma^{6r} c_0^{6r} (M_r(\phi) U^{\star r})(M_r(\phi) U^{\star r})^T$
-        \item \textit{Key}: Khatri-Rao powers $U^{\star r}$ capture interaction structure
-    \end{itemize}
-    
-    \item \textbf{Recursive Bound Construction (Theorem 4.2)}
-    \begin{itemize}
-        \item \textit{Apply}: Induction across layers
-        \item \textit{Control}: Hermite coefficients $\mu_r^{[c_{l,i}^2 \sigma^2]}(\phi)$
-        \item \textit{Get}: $\lambda_{l+1} \geq \left(\frac{(\mu_{r,0}^{(l)})^2}{6 c_{\phi,\sigma_0}}\right)^l \left(\frac{\sigma_0^2}{2}\right)^{3rl} \lambda_1$
-    \end{itemize}
-    
-    \item \textbf{Width Optimization}
-    \begin{itemize}
-        \item \textit{Classical requirement}: $m_l \geq \tilde{\Omega}(n^2)$
-        \item \textit{Generalized Hermite achievement}: $m_l \geq \tilde{\Omega}(n)$
-        \item \textit{Key factor}: Better control of variance parameters
-    \end{itemize}
-\end{enumerate}
+This lemma assumes that:
+\begin{itemize}
+\item The width $n_k$ of layer $k$ is sufficiently large compared to the number of samples $N$
+\item The feature matrix $F_{k-1}$ from the previous layer has bounded Frobenius norm
+\end{itemize}
+These conditions ensure concentration of the minimum singular value of the feature matrix around its expected value.
+\end{lemma}
 
-\subsection{Proof Scheme 2: Empirical NTK Decomposition (Nguyen et al.)}
+\subsubsection{Step 4: Spectral Analysis via Hermite Expansion}
 
-\textbf{High-Level Strategy}: Direct decomposition of empirical NTK $JJ^T$ using feature matrices and chain rule.
+To bound $\lambda$, we use the Hermite expansion of the ReLU. and exploiting the homogeneity of $\sigma$ (unless, generalized hermite):
 
-\begin{enumerate}
-    \item \textbf{NTK Decomposition (Chain Rule)}
-    \begin{itemize}
-        \item \textit{Apply}: Chain rule for gradients
-        \item \textit{Get}: $JJ^T = \sum_{k=0}^{L-1} F_k F_k^T \circ G_{k+1} G_{k+1}^T$
-        \item \textit{Components}: $F_k$ (feature matrices), $G_k$ (derivative terms)
-    \end{itemize}
-    
-    \item \textbf{Apply Weyl's Inequality}
-    \begin{itemize}
-        \item \textit{Tool}: $\lambda_i(A + B) \geq \lambda_i(A) + \lambda_n(B)$
-        \item \textit{Result}: $\evmin{JJ^T} \geq \sum_{k=0}^{L-1} \evmin{F_k F_k^T \circ G_{k+1} G_{k+1}^T}$
-        \item \textit{Strategy}: Bound each term separately
-    \end{itemize}
-    
-    \item \textbf{Apply Schur Product Theorem}
-    \begin{itemize}
-        \item \textit{Tool}: For PSD matrices $P, Q$: $\evmin{P \circ Q} \geq \evmin{P} \min_i Q_{ii}$
-        \item \textit{Get}: $\evmin{F_k F_k^T \circ G_{k+1} G_{k+1}^T} \geq \evmin{F_k F_k^T} \min_i \|(G_{k+1})_{i:}\|_2^2$
-        \item \textit{Reduction}: Two separate problems to solve
-    \end{itemize}
-    
-    \item \textbf{Bound Feature Matrix Eigenvalues (Theorem 5.1)}
-    \begin{itemize}
-        \item \textit{Apply}: Matrix Chernoff concentration
-        \item \textit{Relate}: $\evmin{F_k F_k^T}$ to $\evmin{\E[F_k F_k^T]}$
-        \item \textit{Use}: Hermite expansion for expected quantities
-        \item \textit{Apply}: Gershgorin circle theorem for data-dependent bounds
-    \end{itemize}
-    
-    \item \textbf{Bound Vector Norms (G-bound Lemma)}
-    \begin{itemize}
-        \item \textit{Target}: $\min_i \|(G_{k+1})_{i:}\|_2^2$
-        \item \textit{Apply}: Hanson-Wright inequality for quadratic forms
-        \item \textit{Control}: Products of weight matrices and activation patterns
-        \item \textit{Get}: $\|(G_{k+1})_{i:}\|_2^2 \geq c > 0$ w.h.p.
-    \end{itemize}
-    
-    \item \textbf{Combine Bounds}
-    \begin{itemize}
-        \item \textit{Apply}: Union bound over all layers and data points
-        \item \textit{Optimize}: Width requirements for each layer
-        \item \textit{Result}: $\evmin{JJ^T} \geq c \cdot \text{(data and architecture dependent)}$
-    \end{itemize}
-\end{enumerate}
+\begin{align}
+\lambda &= \evmin{\E[\sigma(F_{k-1}w)\sigma(F_{k-1}w)^T]} \\
+&= \evmin{D \E[\sigma(\hat{F}_{k-1}w)\sigma(\hat{F}_{k-1}w)^T] D}
+\end{align}
 
-\subsection{Proof Scheme 3: Spectral Analysis via Power Series}
+where $D = \text{diag}(\|\{F_{k-1}\}_{i:}\|_2)$ and $\hat{F}_{k-1} = D^{-1}F_{k-1}$.
 
-\textbf{High-Level Strategy}: Represent NTK as power series and analyze complete spectrum.
+Applying the Hermite expansion $\sigma(x) = \sum_{r=0}^{\infty} \mu_r(\sigma) H_r(x)$:
 
-\begin{enumerate}
-    \item \textbf{Power Series Representation}
-    \begin{itemize}
-        \item \textit{Setup}: Unit variance initialization
-        \item \textit{Expand}: $K_{\text{NTK}}(\langle \x_i, \x_j \rangle) = \sum_{p=0}^{\infty} a_p \langle \x_i, \x_j \rangle^p$
-        \item \textit{Coefficients}: $a_p = \sum_{k=1}^L F(p, k, \bar{\mu})$ (Hermite-based)
-    \end{itemize}
-    
-    \item \textbf{Coefficient Analysis}
-    \begin{itemize}
-        \item \textit{Study}: Decay rate $|a_p| \leq C \rho^p$ for $\rho < 1$
-        \item \textit{Identify}: Dominant terms (low-order $p$)
-        \item \textit{Control}: Tail behavior of series
-    \end{itemize}
-    
-    \item \textbf{Spectral Decomposition}
-    \begin{itemize}
-        \item \textit{Represent}: $K = \sum_{j=0}^{m-1} c_j G^{\odot j}$ (finite truncation)
-        \item \textit{Apply}: Effective rank lemma
-        \item \textit{Get}: $\text{rank}(K_m) \leq \text{controlled expression}$
-    \end{itemize}
-    
-    \item \textbf{Eigenvalue Separation}
-    \begin{itemize}
-        \item \textit{Identify}: "Outlier" eigenvalues vs. bulk spectrum
-        \item \textit{Show}: Spectral gap between large and small eigenvalues
-        \item \textit{Bound}: $\lambda_{\min}$ in terms of series coefficients
-    \end{itemize}
-    
-    \item \textbf{Condition Number Analysis}
-    \begin{itemize}
-        \item \textit{Compute}: $\frac{\lambda_{\max}}{\lambda_{\min}}$ ratio
-        \item \textit{Show}: Only $O(d)$ large eigenvalues when $m \gg n \gg d$
-        \item \textit{Result}: Well-conditioned kernel matrix
-    \end{itemize}
-\end{enumerate}
+\begin{align}
+\E[\sigma(\hat{F}_{k-1}w)\sigma(\hat{F}_{k-1}w)^T] = \mu_0(\sigma)^2 \mathbf{1}_N \mathbf{1}_N^T + \sum_{s=1}^{\infty} \mu_s(\sigma)^2 (\hat{F}_{k-1}^{*s})(\hat{F}_{k-1}^{*s})^T
+\end{align}
+
+where $\hat{F}_{k-1}^{*s}$ represents the $s$-th Khatri-Rao power of $\hat{F}_{k-1}$.
+
+\subsubsection{Step 5: Reduction to Khatri-Rao Powers}
+
+For an integer $r \geq 2$, we can lower bound:
+\begin{align}
+\lambda \geq \mu_r(\sigma)^2 \evmin{D(\hat{F}_{k-1}^{*r})(\hat{F}_{k-1}^{*r})^T D} = \mu_r(\sigma)^2 \frac{\evmin{(F_{k-1}^{*r})(F_{k-1}^{*r})^T}}{\max_{i \in [N]} \|(F_{k-1})_{i:}\|_2^{2(r-1)}}
+\end{align}
+
+\subsubsection{Step 6: Feature Centering and Hadamard Power Analysis}
+
+To analyze $(F_{k-1}^{*r})(F_{k-1}^{*r})^T = (F_{k-1}F_{k-1}^T)^{\circ r}$, we introduce centered features $\tilde{F}_{k-1} = F_{k-1} - \E_X[F_{k-1}]$. 
+
+Let $\mu = \E_x[f_{k-1}(x)] \in \R^{n_{k-1}}$ and $\Lambda = \text{diag}(F_{k-1}\mu - \|\mu\|_2^2 \mathbf{1}_N)$. Then:
+
+\begin{align}
+(F_{k-1}^{*r})(F_{k-1}^{*r})^T = (F_{k-1}F_{k-1}^T)^{\circ r} \succeq \left(\tilde{F}_{k-1}\tilde{F}_{k-1}^T - \frac{\Lambda \mathbf{1}_N \mathbf{1}_N^T \Lambda}{\|\mu\|_2^2}\right)^{\circ r}
+\end{align}
+
+\subsubsection{Step 7: Application of Gershgorin Circle Theorem}
+
+To bound the minimum eigenvalue of $(\tilde{F}_{k-1}\tilde{F}_{k-1}^T)^{\circ r}$, we apply the Gershgorin circle theorem:
+
+\begin{align}
+\evmin{(\tilde{F}_{k-1}^{*r})(\tilde{F}_{k-1}^{*r})^T} &\geq \min_{i \in [N]} \|(\tilde{F}_{k-1})_{i:}\|_2^{2r} - N \max_{i \neq j} |\langle (\tilde{F}_{k-1})_{i:}, (\tilde{F}_{k-1})_{j:} \rangle|^r
+\end{align}
+
+Using concentration properties of centered features, we show:
+\begin{align}
+\|(\tilde{F}_{k-1})_{i:}\|_2^{2r} &= \Theta\left(\left(d \prod_{l=1}^{k-1} n_l \beta_l^2\right)^r\right) \\
+N \max_{i \neq j} |\langle (\tilde{F}_{k-1})_{i:}, (\tilde{F}_{k-1})_{j:} \rangle|^r &= o\left(\left(d \prod_{l=1}^{k-1} n_l \beta_l^2\right)^r\right)
+\end{align}
+
+with exponentially high probability.
+
+\subsubsection{Step 8: Bounding Derivative Term Norms, very technical}
+
+To bound $\min_{i \in [N]} \|(B_{k+1})_{i:}\|_2^2$, we analyze each case:
+
+For $k \in [L-2]$:
+\begin{align}
+\|(B_{k+1})_{i:}\|_2^2 &= \|\Sigma_{k+1}(x_i) \left(\prod_{l=k+2}^{L-1} W_l \Sigma_l(x_i)\right) W_L\|_2^2 \\
+&= \Theta\left(\beta_L^2 n_{k+1} \prod_{l=k+2}^{L-1} n_l \beta_l^2\right)
+\end{align}
+
+This bound uses some very technical and important tools:
+\begin{itemize}
+    \item \textbf{Operator norm for  concentration of Gaussian matrices}
+    \item \textbf{Inductive analysis of random matrix products for every layer}
+    \item \textbf{Properties of derivative matrices $\Sigma_l(x)$ for every layer}
+\end{itemize}
+
+\subsubsection{Step 9: Final Assembly and Width Optimization}
+
+Combining all bounds via union bound yields:
+
+\begin{align}
+\evmin{\bar{K}^{(L)}} &\geq \sum_{k=0}^{L-1} \mu_r(\sigma)^2 \Theta\left(d \prod_{l=1}^k n_l \beta_l^2\right) \Theta\left(\beta_L^2 \prod_{l=k+1}^{L-1} n_l \beta_l^2\right) \\
+&= \mu_r(\sigma)^2 \Theta\left(d \beta_L^2 \sum_{k=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
+\end{align}
+
+The width condition requires at least one layer to satisfy:
+\begin{align}
+n_k = \tilde{\Omega}(N \log N), \quad \text{with } \xi_k = 1
+\end{align}
+
+where $\xi_k$ indicates layer $k$ is "wide".
+
+\subsubsection{Upper Bound via Diagonal Analysis}
+
+For the upper bound, we use:
+\begin{align}
+\evmin{JJ^T} &\leq (JJ^T)_{11} = \sum_{k=0}^{L-1} \|(F_k)_{1:}\|_2^2 \|(B_{k+1})_{1:}\|_2^2 \\
+&= \sum_{k=0}^{L-1} \|f_k(x_1)\|_2^2 \|(B_{k+1})_{1:}\|_2^2 \\
+&= \mathcal{O}\left(d \beta_L^2 \sum_{k=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
+\end{align}
+
+\subsubsection{Final Result}
+
+Assuming $\beta_l = 1$ for simplicity and that some layer $k^*$ satisfies $n_{k^*} = \tilde{\Omega}(N)$, the main theorem gives:
+
+\begin{align}
+\mu_r(\sigma)^2 \Omega(d) \leq \evmin{\bar{K}^{(L)}} \leq \mathcal{O}(d L)
+\end{align}
+
+with probability at least $1 - \text{poly}(N) \exp(-\Omega(\min_l n_l))$.
+
+This approach significantly reduces width requirements compared to classical methods, requiring only one wide layer rather than all layers.
+
+\subsection{Proof Scheme 2: Kernel Integral Operator via Integral Transform (Karhadkar et al.)}
+
+\textbf{Key Inequalities Chain}:
+\begin{align}
+    \lambda_{\min}(\mathbf{K}_{\psi}^{\infty}) &= \inf_{\|\z\|=1} \|T_{\psi}\mu_{\z}\|_{L^2(\mathbb{S}^{d-1})}^2 \\
+    &\geq \sum_{a=1}^N \kappa_a^2 \left|\sum_{i=1}^n g_a(\x_i) z_i\right|^2 \\
+    &\geq \min_a \kappa_a^2 \sigma_{\min}^2(\mathbf{D}) \\
+    &\geq \min_a \kappa_a^2 \frac{N}{2} \quad \text{(for } N \geq C(\delta^4/2)^{-(d-2)/2}\text{)} \\
+    &= \tilde{\Omega}(d_0^{-3}\delta^2) \quad \text{(shallow nets)} \\
+    &= \tilde{\Omega}(d_0^{-3}\delta^4) \quad \text{(deep nets)}
+\end{align}
+
+\textbf{High-Level Strategy}: Novel approach using integral transforms and spherical harmonics to analyze the NTK for arbitrary spherical data without distributional assumptions or dimension scaling requirements.
+
+\subsubsection{Step 1: Spherical Data Setup and $\delta$-Separation}
+
+The fundamental innovation is analyzing data $\{\x_i\}_{i=1}^n \subset \mathbb{S}^{d_0-1}$ with the $\delta$-separation property:
+\begin{align}
+    \min_{i \neq k} \min(\|\x_i - \x_k\|, \|\x_i + \x_k\|) \geq \delta
+\end{align}
+
+This measures collinearity without requiring distributional assumptions. Key advantages:
+\begin{itemize}
+    \item No requirement that $d_0$ scales with $n$ (works for constant $d_0$)
+    \item No Lipschitz concentration assumptions on data distribution
+    \item Direct geometric control via separation parameter $\delta$
+\end{itemize}
+
+\subsubsection{Step 2: Infinite-Width Kernel Representation}
+
+For $\psi \in \{\sqrt{d}\sigma, \dot{\sigma}\}$, the limiting NTK becomes:
+\begin{align*}
+    \mathbf{K}^{\infty}_{\psi} &= \mathbb{E}_{\mathbf{u} \sim U(\mathbb{S}^{d-1})}[\psi(\mathbf{X}^T\mathbf{u})\psi(\mathbf{u}^T\mathbf{X})]
+\end{align*}
+
+This reformulation enables the integral transform approach by treating the kernel as an integral over the sphere.
+
+\subsubsection{Step 3: Integral Transform Construction}
+
+For a signed Radon measure $\mu \in \mathcal{M}(\mathbb{S}^{d-1})$, define the integral transform:
+\begin{align*}
+    (T_{\psi}\mu)(\u) &= \int_{\mathbb{S}^{d-1}} \psi(\langle \u, \x \rangle) d\mu(\x)
+\end{align*}
+
+\textbf{Key Insight}: For data-supported measures $\mu_{\z} = \sum_{i=1}^n z_i \delta_{\x_i}$:
+\begin{align}
+    \lambda_{\min}(\mathbf{K}_{\psi}^{\infty}) &= \inf_{\|\z\|=1} \|T_{\psi}\mu_{\z}\|_{L^2(\mathbb{S}^{d-1})}^2
+\end{align}
+
+This reduces eigenvalue analysis to studying integral transform norms.
+
+\subsubsection{Step 4: Spherical Harmonics Decomposition}
+
+Using the orthogonal decomposition $L^2(\mathbb{S}^{d-1}) = \bigoplus_{r=0}^{\infty} \mathcal{H}_r^d$ where $\mathcal{H}_r^d$ are degree-$r$ harmonic homogeneous polynomials:
+
+\begin{align}
+    \|T_{\psi}\mu_{\z}\|^2 &\geq \sum_{a=1}^N \kappa_a^2 \left|\sum_{i=1}^n g_a(\x_i) z_i\right|^2 \\
+    &\geq \min_a \kappa_a^2 \sigma_{\min}^2(\mathbf{D})
+\end{align}
+
+where:
+\begin{itemize}
+    \item $g_a$ are spherical harmonic eigenfunctions: $T_{\psi} g_a = \kappa_a g_a$
+    \item $\mathbf{D} \in \mathbb{R}^{N \times n}$ with $[\mathbf{D}]_{ai} = g_a(\x_i)$
+    \item $\kappa_a$ are eigenvalues of the integral transform operator
+\end{itemize}
+
+\subsubsection{Step 5: Addition Formula and Matrix Analysis}
+
+The spherical harmonics addition formula provides:
+\begin{align}
+    \sum_{s=1}^{\dim(\mathcal{H}_r^d)} Y_{r,s}^d(\x) Y_{r,s}^d(\x') &= \frac{(2r + d - 2)C_r^{(d-2)/2}(\langle \x, \x' \rangle)}{d - 2}
+\end{align}
+
+For $\delta$-separated data, this gives the crucial bound:
+\begin{align}
+    \left|\sum_{r=0}^R \sum_{s=1}^{\dim(\mathcal{H}_{2r+\beta}^d)} Y_{2r+\beta,s}^d(\x_i) Y_{2r+\beta,s}^d(\x_j)\right| &\lesssim \left(\frac{\delta^2}{2}\right)^{-(d-2)/4} \binom{2R + \beta + d - 1}{d - 1}^{1/2}
+\end{align}
+
+\subsubsection{Step 6: Singular Value Control via Separation}
+
+The key lemma emerges from controlling the condition number of the spherical harmonic evaluation matrix $\mathbf{D}$ using the $\delta$-separation property to ensure diagonal dominance over off-diagonal cross-terms.
+
+\begin{lemma}[Spherical Harmonic Matrix Conditioning]
+Let $\mathbf{D} \in \mathbb{R}^{N \times n}$ with $[\mathbf{D}]_{ai} = g_a(\x_i)$ where $\{g_a\}$ are orthonormal spherical harmonic eigenfunctions and $\{\x_i\}$ are $\delta$-separated on $\mathbb{S}^{d_0-1}$. If $N = \sum_{r=0}^R \dim(\mathcal{H}_{2r+\beta}^d) \geq C(\delta^4/2)^{-(d-2)/2}$ for sufficiently large constant $C$, then $\sigma_{\min}(\mathbf{D}) \geq \sqrt{N/2}$.
+\end{lemma}
+
+\textbf{Key Lemma}: If $N = \sum_{r=0}^R \dim(\mathcal{H}_{2r+\beta}^d) \geq C(\delta^4/2)^{-(d-2)/2}$, then:
+\begin{align}
+    \sigma_{\min}(\mathbf{D}) &\geq \sqrt{\frac{N}{2}}
+\end{align}
+
+\subsubsection{Step 7: Integral Transform Eigenvalue Analysis}
+
+Using the Funk-Hecke formula, the integral transform eigenvalues are:
+\begin{align}
+    \kappa_r &= \int_{-1}^1 \psi(t) C_r^{(d-2)/2}(t) (1-t^2)^{(d-3)/2} dt
+\end{align}
+
+For ReLU activations, these integrals have explicit expressions involving Gegenbauer polynomials.
+
+\subsubsection{Step 8: Final Bounds Assembly}
+
+Combining all components yields the main result:
+
+\textbf{For shallow networks}: If $d_1 = \tilde{\Omega}(\|\mathbf{X}\|^2 d_0^3 \delta^{-2})$, then:
+\begin{align}
+    \lambda_{\min}(\mathbf{K}) &= \tilde{\Omega}(d_0^{-3}\delta^2)
+\end{align}
+
+\textbf{For deep networks}: With pyramidal widths $d_l \geq d_{l+1}$ and $d_1 = \tilde{\Omega}(n d_0^3 \delta^{-4})$:
+\begin{align}
+    \lambda_{\min}(\mathbf{K}) &= \tilde{\Omega}(d_0^{-3}\delta^4)
+\end{align}
+
+\textbf{Revolutionary Impact}: This approach completely removes the requirement that input dimension $d_0$ scales with sample size $n$, enabling analysis of fixed-dimensional data with arbitrary distributions on the sphere.
 
 \subsection{Comparative Analysis of Proof Strategies}
 
@@ -373,63 +547,6 @@ Power Series & Complete spectrum & Effective rank & Full characterization \\
 \end{tabular}
 \end{table}
 
-\subsection{Common Proof Patterns and Techniques}
-
-\textbf{Pattern 1: Concentration-then-Spectral}
-\begin{enumerate}
-    \item Apply concentration inequality (Chernoff, Bernstein, Hanson-Wright)
-    \item Relate random matrix to its expectation
-    \item Analyze spectrum of expected matrix
-    \item Combine using matrix perturbation theory
-\end{enumerate}
-
-\textbf{Pattern 2: Decompose-then-Bound}
-\begin{enumerate}
-    \item Decompose complex matrix into simpler components
-    \item Apply matrix inequalities (Weyl, Schur) to preserve eigenvalue bounds
-    \item Bound each component separately
-    \item Reconstruct bound for original matrix
-\end{enumerate}
-
-\textbf{Pattern 3: Series-then-Truncate}
-\begin{enumerate}
-    \item Represent kernel as infinite series
-    \item Analyze convergence and decay properties
-    \item Truncate to finite approximation
-    \item Control approximation error and bound spectrum
-\end{enumerate}
-
-\subsection{Critical Technical Innovations}
-
-\begin{enumerate}
-    \item \textbf{Generalized Hermite Polynomials}
-    \begin{itemize}
-        \item \textit{Problem}: Classical Hermite fails for inhomogeneous activations
-        \item \textit{Solution}: $H_r^{[q]}(x)$ with variable variance parameter $q$
-        \item \textit{Impact}: Reduces width requirement from $\tilde{\Omega}(n^2)$ to $\tilde{\Omega}(n)$
-    \end{itemize}
-    
-    \item \textbf{Matrix Decomposition Techniques}
-    \begin{itemize}
-        \item \textit{Problem}: Direct analysis of $JJ^T$ is complex
-        \item \textit{Solution}: Decompose via feature matrices and chain rule
-        \item \textit{Impact}: Enables layer-by-layer analysis
-    \end{itemize}
-    
-    \item \textbf{Advanced Matrix Concentration}
-    \begin{itemize}
-        \item \textit{Problem}: Scalar concentration insufficient for matrices
-        \item \textit{Solution}: Matrix Chernoff, Bernstein, Hanson-Wright
-        \item \textit{Impact}: Direct control of eigenvalues
-    \end{itemize}
-    
-    \item \textbf{Spectral Analysis Tools}
-    \begin{itemize}
-        \item \textit{Problem}: Understanding complete eigenvalue distribution
-        \item \textit{Solution}: Power series + effective rank analysis
-        \item \textit{Impact}: Full characterization of kernel spectrum
-    \end{itemize}
-\end{enumerate}
 
 
 
@@ -445,6 +562,175 @@ Power Series & Complete spectrum & Effective rank & Full characterization \\
 
 
 
+
+
+
+
+
+
+
+
+
+
+\subsection{Proof Scheme 3: Spectral Analysis via Power Series}
+
+\textbf{Theorem} (Power Series Decomposition): The Neural Tangent Kernel admits a power series representation:
+\begin{align}
+K_{\text{NTK}}(\langle \mathbf{x}_i, \mathbf{x}_j \rangle) = \sum_{p=0}^{\infty} a_p \langle \mathbf{x}_i, \mathbf{x}_j \rangle^p
+\end{align}
+where coefficients $a_p = \sum_{k=1}^L F(p, k, \bar{\mu})$ are derived from Hermite polynomial expansions.
+
+\textbf{Key Steps in Analysis:}
+
+1. \textbf{Coefficient Properties}
+   \begin{align}
+   |a_p| &\leq C\rho^p, \quad \rho < 1 \\
+   F(p,k,\bar{\mu}) &= \mathbb{E}_{z \sim \mathcal{N}(0,\bar{\mu})}[H_p(z)]
+   \end{align}
+
+2. \textbf{Finite Truncation}
+   \begin{align}
+   K_m = \sum_{j=0}^{m-1} c_j G^{\odot j}
+   \end{align}
+   where $G_{ij} = \langle \mathbf{x}_i, \mathbf{x}_j \rangle$ and $\odot$ denotes Hadamard product.
+
+3. \textbf{Spectral Bounds}
+   \begin{align}
+   \text{rank}(K_m) &\leq R(m,n,d) \\
+   \lambda_{\min}(K) &\geq \sum_{p=0}^m a_p \lambda_{\min}(G^{\odot p}) - \epsilon_m
+   \end{align}
+   where $\epsilon_m$ is the truncation error.
+
+4. \textbf{Eigenvalue Distribution}
+   \begin{itemize}
+   \item Large eigenvalues: $\lambda_i = \Theta(n)$ for $i \leq d$
+   \item Bulk spectrum: $\lambda_i = O(\sqrt{n})$ for $i > d$
+   \item Spectral gap: $\Delta = \lambda_d - \lambda_{d+1} = \Omega(\sqrt{n})$
+   \end{itemize}
+
+5. \textbf{Condition Number}
+   When $m \gg n \gg d$:
+   \begin{align}
+   \kappa(K) = \frac{\lambda_{\max}}{\lambda_{\min}} = O\left(\frac{n}{\sqrt{n}}\right) = O(\sqrt{n})
+   \end{align}
+
+\textbf{Corollary}: The NTK matrix is well-conditioned with high probability when the network width satisfies:
+\begin{align}
+d_1 \geq \Omega(n \log n)
+\end{align}
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Overview of Proof Schemes and Their Main Tools}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    node distance=1.5cm,
+    scheme/.style={draw, rounded corners, fill=blue!15, minimum width=4.5cm, minimum height=3.5cm, text width=4.3cm, align=center, thick},
+    tools/.style={draw, rounded corners, fill=green!10, minimum width=4.5cm, minimum height=2cm, text width=4.3cm, align=center},
+    arrow/.style={->, thick, >=latex, blue!70}
+]
+
+% Main scheme boxes
+\node[scheme] (scheme1) at (0,0) {
+    \textbf{\Large Scheme 1} \\
+    \textbf{NTK Decomposition} \\
+    \small{(Nguyen et al.)} \\[0.3cm]
+    \textit{Strategy:} Direct $JJ^T$ \\
+    matrix decomposition \\
+    via chain rule
+};
+
+\node[scheme] (scheme2) at (6,0) {
+    \textbf{\Large Scheme 2} \\
+    \textbf{Integral Transform} \\
+    \small{(Karhadkar et al.)} \\[0.3cm]
+    \textit{Strategy:} Spherical \\
+    harmonic analysis \\
+    via integral operators
+};
+
+\node[scheme] (scheme3) at (12,0) {
+    \textbf{\Large Scheme 3} \\
+    \textbf{Power Series} \\
+    \small{(Spectral Analysis)} \\[0.3cm]
+    \textit{Strategy:} Complete \\
+    spectrum analysis \\
+    via Hermite expansion
+};
+
+% Tool boxes
+\node[tools] (tools1) at (0,-4.5) {
+    \textbf{Main Tools:} \\
+    • Schur Product Theorem \\
+    • Weyl's Inequality \\
+    • Matrix Chernoff Bounds \\
+    • Feature Matrix Analysis
+};
+
+\node[tools] (tools2) at (6,-4.5) {
+    \textbf{Main Tools:} \\
+    • Spherical Harmonics \\
+    • Funk-Hecke Formula \\
+    • $\delta$-Separation \\
+    • Addition Formula
+};
+
+\node[tools] (tools3) at (12,-4.5) {
+    \textbf{Main Tools:} \\
+    • Hermite Polynomials \\
+    • Power Series \\
+    • Effective Rank \\
+    • Coefficient Analysis
+};
+
+% Arrows
+\draw[arrow] (scheme1) -- (tools1);
+\draw[arrow] (scheme2) -- (tools2);
+\draw[arrow] (scheme3) -- (tools3);
+
+% Key advantages boxes
+\node[draw, rounded corners, fill=yellow!10, minimum width=4.5cm, minimum height=1.5cm, text width=4.3cm, align=center] (adv1) at (0,-7) {
+    \textbf{Key Advantage:} \\
+    Only 1 linear layer needed
+};
+
+\node[draw, rounded corners, fill=yellow!10, minimum width=4.5cm, minimum height=1.5cm, text width=4.3cm, align=center] (adv2) at (6,-7) {
+    \textbf{Key Advantage:} \\
+    No dimension scaling required
+};
+
+\node[draw, rounded corners, fill=yellow!10, minimum width=4.5cm, minimum height=1.5cm, text width=4.3cm, align=center] (adv3) at (12,-7) {
+    \textbf{Key Advantage:} \\
+    Complete spectral characterization
+};
+
+% Final arrows
+\draw[arrow] (tools1) -- (adv1);
+\draw[arrow] (tools2) -- (adv2);
+\draw[arrow] (tools3) -- (adv3);
+
+\end{tikzpicture}
+\caption{High-Level Overview of NTK Eigenvalue Bound Proof Schemes}
+\end{figure}
+
+\textbf{Comparative Strengths:}
+\begin{itemize}
+    \item \textbf{Scheme 1} excels in practical width requirements - revolutionary reduction from $\tilde{\Omega}(n^2)$ to $\tilde{\Omega}(n)$
+    \item \textbf{Scheme 2} removes distributional assumptions and dimension scaling - works for constant dimension
+    \item \textbf{Scheme 3} provides the most complete theoretical understanding of the entire spectrum
+\end{itemize}
 
 \newpage
 \section{Main Theorems and Final Bounds}
@@ -494,6 +780,16 @@ $$\frac{\text{Tr}(\mathbf{K}_{\text{outer}})}{\lambda_1(\mathbf{K}_{\text{outer}
     \item \textbf{Sobolev Framework}: We multiply the NTK by P (spectral bias) and analyse this new spectrum with those techniques
     \item \textbf{Deep Narrow Frameworks}: We use the NTK given by a deep narrow network
 \end{enumerate}
+
+\subsubsection{Roadmap}
+\begin{itemize}
+    \item Study behavior of narrow NTK to identify potential simplifications before developing general approach, and unify assumptions
+    \item Incorporate Sobolev framework and analyze kernel matrix/operator changes in spherical framework, including eigenvalue modifications (with experiments)
+    \item Extend harmonic analysis from sphere to entire space (with experiments)
+    \item Apply narrow network NTK to complete framework
+\end{itemize}
+
+
 
 \newpage
 
