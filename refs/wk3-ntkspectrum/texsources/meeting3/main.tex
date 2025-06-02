@@ -77,7 +77,7 @@ Mathematical Foundations, Proof Techniques, and Concentration Inequalities}
 \maketitle
 
 \begin{abstract}
-%This document provides an exhaustive compilation and analysis of mathematical techniques for bounding the smallest eigenvalue $\lambdaMin(\KNTK)$ of the Neural Tangent Kernel. We synthesize results from three complementary perspectives: (1) concentration inequalities and their applications to NTK analysis, (2) timeline-based evolution of proof techniques from classical to modern approaches, and (3) detailed lemma-by-lemma analysis of fundamental results. The document covers the progression from classical Hermite polynomial methods requiring $\TildeOmega(n^2)$ width to modern generalized Hermite techniques achieving $\TildeOmega(n)$ width, along with empirical NTK decomposition methods and spectral analysis via power series. Key mathematical tools include matrix concentration inequalities (Chernoff, Bernstein, Hanson-Wright), matrix analysis techniques (Weyl, Schur, Gershgorin), and specialized tools for neural network analysis (Khatri-Rao products, generalized Hermite polynomials).
+This document provides an exhaustive compilation and analysis of mathematical techniques for bounding the smallest eigenvalue $\lambdaMin(\KNTK)$ of the Neural Tangent Kernel. We synthesize results from three complementary perspectives: (1) concentration inequalities and their applications to NTK analysis, (2) timeline-based evolution of proof techniques from classical to modern approaches, and (3) detailed lemma-by-lemma analysis of fundamental results. The document covers the progression from classical Hermite polynomial methods requiring $\TildeOmega(n^2)$ width to modern generalized Hermite techniques achieving $\TildeOmega(n)$ width, along with empirical NTK decomposition methods and spectral analysis via power series. Key mathematical tools include matrix concentration inequalities (Chernoff, Bernstein, Hanson-Wright), matrix analysis techniques (Weyl, Schur, Gershgorin), and specialized tools for neural network analysis (Khatri-Rao products, generalized Hermite polynomials).
 \end{abstract}
 
 \tableofcontents
@@ -88,23 +88,11 @@ Mathematical Foundations, Proof Techniques, and Concentration Inequalities}
 The Neural Tangent Kernel (NTK) has emerged as a central object in the theoretical analysis of deep neural networks. For a neural network $f(\x; \theta)$ with parameters $\theta$, the NTK is defined as:
 $$\KNTK(x_i, x_j) = \left\langle \frac{\partial f(\x_i; \theta)}{\partial \theta}, \frac{\partial f(\x_j; \theta)}{\partial \theta} \right\rangle$$
 
-In matrix form, $\KNTK = JJ^T$ where $J$ is the Jacobian matrix of the network outputs with respect to parameters. The smallest eigenvalue $\lambdaMin(\KNTK)$ plays a crucial role in:
-
+In matrix form, $\KNTK = JJ^T$ where $J$ is the Jacobian matrix of the network outputs with respect to parameters. The smallest eigenvalue $\lambdaMin(\KNTK)$ plays a crucial role in understanding the training dynamics and generalization properties of neural networks.
 
 The central question addressed in this document is: \textit{Under what conditions can we guarantee $\lambdaMin(\KNTK) \geq c > 0$ with high probability?}
 
-
-\section{What the SOTA gives us}
-
-\begin{itemize}
-    \item \textbf{Banerjee et al. (2023)}: 1 linear width layer suffices for ReLU networks to get confident bounds on $\lambdaMin$
-    \item \textbf{Nguyen et al. (2021)}: Very tight linear bound
-    \item \textbf{Saratchandran et al. (2024)}: Periodic activations (cosine)
-    \item \textbf{Tarjek (2022)}: linear scaling of $\lambdaMin$ for MLP at the EOCs
-\end{itemize}
-
-
-What is behind everything is the kernel integral operator $K$ and its spectrum.
+What underlies everything is the kernel integral operator $K$ and its spectrum.
 
 \newpage
 
@@ -131,14 +119,14 @@ $$\Pr(|S| \geq t) \leq 2\exp\left(-\frac{t^2/2}{\sigma^2 + Mt/3}\right)$$
 For neural networks, we frequently encounter quadratic forms in random variables, necessitating more sophisticated concentration tools.
 
 \begin{theorem}[Classical Hanson-Wright Inequality]
-Let $Y_1, \ldots, Y_n$ be independent mean-zero $\alpha$-subgaussian random variables, and $\mathbf{A} = (a_{i,j})$ be a symmetric matrix. Then:
+Let $Y_1, \ldots, Y_n$ be independent mean-zero $\alpha$-subgaussian random variables, and let $\mathbf{A} = (a_{i,j})$ be a symmetric matrix. Then:
 $$\Pr\left(\left|\sum_{i,j=1}^n a_{i,j}(Y_i Y_j - \E[Y_i Y_j])\right| \geq t\right) \leq 2\exp\left(-\frac{1}{C}\min\left\{\frac{t^2}{\beta^4\|\mathbf{A}\|_{HS}^2}, \frac{t}{\beta^2\|\mathbf{A}\|_{op}}\right\}\right)$$
 \end{theorem}
 
 where $\|\mathbf{A}\|_{HS} = \sqrt{\sum_{i,j} |a_{i,j}|^2}$ is the Hilbert-Schmidt norm and $\|\mathbf{A}\|_{op}$ is the operator norm.
 
 \begin{theorem}[Generalized Hanson-Wright for Random Tensors (Chang, 2022)]
-For random tensor vector $\overline{\mathcal{X}} \in \C^{(n \times I_1 \times \cdots \times I_M) \times (I_1 \times \cdots \times I_M)}$ and fixed tensor $\overline{\overline{\mathcal{A}}}$, the polynomial function:
+For a random tensor vector $\overline{\mathcal{X}} \in \C^{(n \times I_1 \times \cdots \times I_M) \times (I_1 \times \cdots \times I_M)}$ and a fixed tensor $\overline{\overline{\mathcal{A}}}$, the polynomial function:
 $$f_j(\overline{\mathcal{X}}) = \left(\sum_{i,k=1}^n \mathcal{A}_{i,k} \star_M (\mathcal{X}_i - \E[\mathcal{X}_i]) \star_M (\mathcal{X}_k - \E[\mathcal{X}_k])\right)^j$$
 satisfies concentration bounds involving Ky Fan $k$-norms of tensor sums, extending classical matrix concentration to tensor settings.
 \end{theorem}
@@ -172,7 +160,7 @@ $$\evmin{P \circ Q} \geq \evmin{P} \min_i Q_{ii}$$
 \end{lemma}
 
 \begin{lemma}[Gershgorin Circle Theorem]
-For matrix $A = (a_{ij})$, all eigenvalues lie in the union of discs:
+For a matrix $A = (a_{ij})$, all eigenvalues lie in the union of discs:
 $$\bigcup_{i=1}^n \left\{z \in \C : |z - a_{ii}| \leq \sum_{j \neq i} |a_{ij}|\right\}$$
 \end{lemma}
 
@@ -183,7 +171,7 @@ For matrices $A \in \R^{m \times k}$ and $B \in \R^{n \times k}$, the Khatri-Rao
 \end{definition}
 
 \begin{definition}[Hadamard Power]
-For matrix $A$ and positive integer $r$, the $r$-th Hadamard power $A^{\odot r}$ is the element-wise $r$-th power.
+For a matrix $A$ and a positive integer $r$, the $r$-th Hadamard power $A^{\odot r}$ is the element-wise $r$-th power.
 \end{definition}
 
 \newpage
@@ -240,11 +228,11 @@ All modern approaches to bounding $\lambdaMin(\KNTK)$ follow a common high-level
 
 \subsection{Proof Scheme 1: Empirical NTK Decomposition (Nguyen et al.)}
 
-\textbf{High-Level Strategy}: Direct decomposition of empirical NTK $\bar{K}^{(L)} = JJ^T$ using feature matrices and chain rule to obtain precise bounds on $\lambdaMin$.
+\textbf{High-Level Strategy}: Direct decomposition of the empirical NTK $\bar{K}^{(L)} = JJ^T$ using feature matrices and the chain rule to obtain precise bounds on $\lambdaMin$.
 
 \subsubsection{Step 1: Fundamental Chain Rule Decomposition}
 
-The proof begins by decomposing the empirical NTK $\bar{K}^{(L)} = JJ^T$ where $J$ is the Jacobian matrix \eqref{eq:Jac}. Applying the chain rule and standard algebraic manipulations yields the fundamental decomposition:
+The proof begins by decomposing the empirical NTK $\bar{K}^{(L)} = JJ^T$ where $J$ is the Jacobian matrix. Applying the chain rule and standard algebraic manipulations yields the fundamental decomposition:
 
 \begin{align}
 \bar{K}^{(L)} = JJ^T = \sum_{k=0}^{L-1} F_k F_k^T \circ B_{k+1} B_{k+1}^T
@@ -268,7 +256,7 @@ where $\Sigma_k(x) = \text{diag}([\sigma'(g_{k,j}(x))]_{j=1}^{n_k})$ is the diag
 
 \subsubsection{Step 2: Application of Schur Product Theorem and Weyl's Inequality}
 
-For PSD matrices $P, Q \in \R^{n \times n}$, the Schur product theorem :
+For PSD matrices $P, Q \in \R^{n \times n}$, the Schur product theorem states:
 \begin{align}
 \evmin{P \circ Q} \geq \evmin{P} \min_{i \in [n]} Q_{ii}
 \end{align}
@@ -309,7 +297,7 @@ These conditions ensure concentration of the minimum singular value of the featu
 
 \subsubsection{Step 4: Spectral Analysis via Hermite Expansion}
 
-To bound $\lambda$, we use the Hermite expansion of the ReLU. and exploiting the homogeneity of $\sigma$ (unless, generalized hermite):
+To bound $\lambda$, we use the Hermite expansion of the ReLU function and exploit the homogeneity of $\sigma$ (unless using generalized Hermite polynomials):
 
 \begin{align}
 \lambda &= \evmin{\E[\sigma(F_{k-1}w)\sigma(F_{k-1}w)^T]} \\
@@ -359,7 +347,7 @@ N \max_{i \neq j} |\langle (\tilde{F}_{k-1})_{i:}, (\tilde{F}_{k-1})_{j:} \rangl
 
 with exponentially high probability.
 
-\subsubsection{Step 8: Bounding Derivative Term Norms, very technical}
+\subsubsection{Step 8: Bounding Derivative Term Norms (highly technical)}
 
 To bound $\min_{i \in [N]} \|(B_{k+1})_{i:}\|_2^2$, we analyze each case:
 
@@ -369,11 +357,11 @@ For $k \in [L-2]$:
 &= \Theta\left(\beta_L^2 n_{k+1} \prod_{l=k+2}^{L-1} n_l \beta_l^2\right)
 \end{align}
 
-This bound uses some very technical and important tools:
+This bound uses several highly technical and important tools:
 \begin{itemize}
-    \item \textbf{Operator norm for  concentration of Gaussian matrices}
-    \item \textbf{Inductive analysis of random matrix products for every layer}
-    \item \textbf{Properties of derivative matrices $\Sigma_l(x)$ for every layer}
+    \item \textbf{Operator norm concentration of Gaussian matrices}
+    \item \textbf{Inductive analysis of random matrix products for each layer}
+    \item \textbf{Properties of derivative matrices $\Sigma_l(x)$ for each layer}
 \end{itemize}
 
 \subsubsection{Step 9: Final Assembly and Width Optimization}
@@ -390,7 +378,7 @@ The width condition requires at least one layer to satisfy:
 n_k = \tilde{\Omega}(N \log N), \quad \text{with } \xi_k = 1
 \end{align}
 
-where $\xi_k$ indicates layer $k$ is "wide".
+where $\xi_k$ indicates that layer $k$ is "wide".
 
 \subsubsection{Upper Bound via Diagonal Analysis}
 
@@ -773,20 +761,20 @@ $$\frac{\text{Tr}(\mathbf{K}_{\text{outer}})}{\lambda_1(\mathbf{K}_{\text{outer}
 
 \subsection{Remaining Challenges}
 \begin{enumerate}
-    \item \textbf{Very different assumptions}: All of the papers assumes differently (domains, init, architecture, activations), I'll try to find a way to unify them
-    \item \textbf{Out of the sphere}: Harmonic analysis (integral operator) over $\L(2,\gamma)$ is frequently discussed as a future research direction (not even explored yet)
-    \item \textbf{Optimal Width Scaling}: Only needed 1 linear width, getting linear scaling for $\lambdaMin$
-    \item \textbf{Broad Activation Coverage}: From ReLU to inhomogeneous activations with harmonic analysis over $\L(2,\gamma)$
-    \item \textbf{Sobolev Framework}: We multiply the NTK by P (spectral bias) and analyse this new spectrum with those techniques
-    \item \textbf{Deep Narrow Frameworks}: We use the NTK given by a deep narrow network
+    \item \textbf{Very different assumptions}: All papers make different assumptions (domains, initialization, architecture, activations). I will try to find a way to unify them.
+    \item \textbf{Beyond the sphere}: Harmonic analysis (integral operator) over $L^2(\gamma)$ is frequently discussed as a future research direction (not yet explored).
+    \item \textbf{Optimal Width Scaling}: Only one layer needs linear width, achieving linear scaling for $\lambdaMin$.
+    \item \textbf{Broad Activation Coverage}: From ReLU to inhomogeneous activations with harmonic analysis over $L^2(\gamma)$.
+    \item \textbf{Sobolev Framework}: We multiply the NTK by $P$ (spectral bias) and analyze this new spectrum with these techniques.
+    \item \textbf{Deep Narrow Frameworks}: We use the NTK given by a deep narrow network.
 \end{enumerate}
 
 \subsubsection{Roadmap}
 \begin{itemize}
-    \item Study behavior of narrow NTK to identify potential simplifications before developing general approach, and unify assumptions
-    \item Incorporate Sobolev framework and analyze kernel matrix/operator changes in spherical framework, including eigenvalue modifications (with experiments)
-    \item Extend harmonic analysis from sphere to entire space (with experiments)
-    \item Apply narrow network NTK to complete framework
+    \item Study the behavior of narrow NTK to identify potential simplifications before developing a general approach, and unify assumptions.
+    \item Incorporate the Sobolev framework and analyze kernel matrix/operator changes in the spherical framework, including eigenvalue modifications (with experiments).
+    \item Extend harmonic analysis from the sphere to the entire space (with experiments).
+    \item Apply narrow network NTK to the complete framework.
 \end{itemize}
 
 
