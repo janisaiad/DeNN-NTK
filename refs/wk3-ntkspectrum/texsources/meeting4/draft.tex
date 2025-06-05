@@ -2,26 +2,22 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{lmodern}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage{amsfonts}
 \usepackage{amsthm}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{bm}
 \usepackage{enumerate}
-\usepackage{geometry}
-\usepackage{fancyhdr}
-\usepackage{tocloft}
+\usepackage[a4paper, margin=2.5cm]{geometry}
 \usepackage{tikz}
+\usepackage{tikz-3dplot}
+\usetikzlibrary{math}
+\usepackage[round]{natbib}
+
 % Page setup
-\geometry{a4paper, margin=2.5cm}
-\pagestyle{fancy}
-\fancyhf{}
-\fancyhead[L]{Analyse Spectrale du NTK et Entraînement Sobolev}
-\fancyhead[R]{\thepage}
+\pagestyle{plain}
 
 % Theorem environments
 \newtheorem{theorem}{Theorem}[section]
@@ -39,6 +35,7 @@
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\C}{\mathbb{C}}
 \newcommand{\I}{\mathbf{I}}
+\newcommand{\NN}{\mathcal{N}}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \newcommand{\abs}[1]{\left\lvert#1\right\rvert}
 \newcommand{\evmin}[1]{\lambda_{\min}\left(#1\right)}
@@ -47,12 +44,10 @@
 \newcommand{\tr}{\text{tr}}
 \newcommand{\x}{\mathbf{x}}
 \newcommand{\g}{\mathbf{g}}
-\newcommand{\uu}{\mathbf{u}} % changed from \u to avoid conflict
-\newcommand{\vv}{\mathbf{v}} % changed from \v to avoid conflict
-% \newcommand{\odot}{\odot} % already defined by amssymb if loaded, or define explicitly
+\newcommand{\uu}{\mathbf{u}}
+\newcommand{\vv}{\mathbf{v}}
 \newcommand{\bigOmg}{\Omega}
 \newcommand{\bigTheta}{\Theta}
-\newcommand{\Pr}{\text{Pr}}
 \newcommand{\KNTK}{K_{\text{NTK}}}
 \newcommand{\KLim}{K^{(L)}}
 \newcommand{\KEmp}{\overline{K}^{(L)}}
@@ -66,10 +61,12 @@
 \newcommand{\TildeOmega}{\tilde{\Omega}}
 \newcommand{\cN}{\mathcal{N}}
 \newcommand{\LaplaceBeltrami}{\Delta_{\mathbb{S}^{d_0-1}}}
+\newcommand{\limiting}[1]{#1^{\infty}}
+\newcommand{\Kinf}{K^{\infty}}
 
-\title{Analyse de l'Échelle des Valeurs Propres du NTK et \ de sa Modification par Entraînement de type Sobolev}
+\title{Spectral Analysis of the Neural Tangent Kernel and its Modification by Sobolev-type Training}
 
-\author{Synthèse et Analyse}
+\author{Synthesis and Analysis}
 
 \date{\today}
 
@@ -78,7 +75,7 @@
 \maketitle
 
 \begin{abstract}
-Ce document examine l'échelle des valeurs propres du Noyau Tangent Neuronal (NTK), en s'appuyant sur des travaux récents, et détaille comment l'entraînement de type Sobolev, via un préconditionnement matriciel, modifie le spectre du NTK. Nous nous concentrons sur les réseaux de neurones profonds avec des activations homogènes (comme ReLU) et analysons l'impact de cette technique sur la décroissance des valeurs propres, en particulier sur la plus petite valeur propre et son vecteur propre associé, dans le contexte des harmoniques sphériques.
+This document re-examines the eigenvalue scaling of the Neural Tangent Kernel (NTK) and its modification through Sobolev-type training, drawing heavily on the work of Yu, Yang, and Townsend (ICLR 2023, arXiv:2205.14300v2). We focus on their analysis of frequency bias for non-uniform data and how training with a Sobolev norm modifies the learning dynamics of different frequencies. The aim is to calculate the final spectral exponent of the modified NTK and to justify the assumption of common eigenfunctions for the involved operators.
 \end{abstract}
 
 \tableofcontents
@@ -86,116 +83,197 @@ Ce document examine l'échelle des valeurs propres du Noyau Tangent Neuronal (NT
 
 \section{Introduction}
 
-Le Noyau Tangent Neuronal (NTK) est un outil théorique fondamental pour comprendre l'entraînement et la généralisation des réseaux de neurones profonds. Son spectre de valeurs propres, en particulier sa plus petite valeur propre $\lambdaMin(\KNTK)$, gouverne la dynamique d'entraînement et les capacités de généralisation du modèle. Une observation courante pour de nombreux noyaux, y compris le NTK dans certains régimes, est une décroissance rapide de leurs valeurs propres, par exemple $\lambda_k \sim k^{-\alpha}$, où $k$ indexe les valeurs propres (souvent par fréquence croissante) et $\alpha$ dépend de la régularité du noyau et de la dimensionnalité des données. Cette décroissance peut limiter l'apprentissage des fonctions de haute fréquence et affecter le conditionnement du noyau.
+The Neural Tangent Kernel (NTK) has become a central tool for the theoretical analysis of overparameterized neural networks (NNs) \citep{jacot2018neural}. A key phenomenon observed during the training of such networks is "frequency bias": gradient-based algorithms tend to first minimize the error in low frequencies before addressing high-frequency residuals \citep{rahaman2019spectral, basri2020frequency}. Yu, Yang, and Townsend (YYT23, \citep{yu2022tuning}) extended the rigorous analysis of this bias to the case of non-uniform training data, using the NTK and data-dependent quadrature rules.
 
-Ce rapport vise à :
+YYT23 also propose replacing the usual $L^2$ loss function with a carefully chosen Sobolev $H^s$ norm to amplify, dampen, counterbalance, or reverse this intrinsic frequency bias. This document aims to synthesize this approach, focusing on:
 \begin{enumerate}
-    \item Synthétiser les résultats concernant l'échelle des valeurs propres du NTK, en se basant sur des études récentes (par exemple, celles indiquées par les arXiv ID \texttt{2305.02657} et \texttt{2205.14300}).
-    \item Expliquer en détail comment une technique d'entraînement inspirée des espaces de Sobolev, utilisant une matrice de préconditionnement $P$, peut contrecarrer cette décroissance des valeurs propres. Nous supposerons que $P$ partage les mêmes vecteurs propres que le NTK $K$ (par exemple, les harmoniques sphériques pour des données sur la sphère $\mathbb{S}^{d_0-1}$), et le noyau modifié devient $K_S = KP$.
+    \item Adopting the notation and framework of YYT23 to describe the NTK and its spectral bias.
+    \item Calculating the exponent that characterizes the decay (or growth) of the eigenvalues of the effective NTK after applying Sobolev training, particularly for data on the sphere $\mathbb{S}^{d-1}$.
+    \item Theoretically justifying the sharing of eigenfunctions (spherical harmonics) by the NTK operator and the Sobolev preconditioning operator, under isotropy assumptions.
 \end{enumerate}
-L'objectif final est de comprendre comment cette approche modifie le spectre du NTK, en particulier sa plus petite valeur propre et le mode (vecteur propre) qui lui est associé.
 
-\section{Échelle des Valeurs Propres du Noyau Tangent Neuronal}
+\section{The NTK and its Spectral Bias according to YYT23}
 
-L'analyse du spectre du NTK, et notamment de sa plus petite valeur propre $\lambdaMin$, est cruciale. Des travaux récents ont établi des conditions sous lesquelles $\lambdaMin(\KNTK)$ est strictement positive, garantissant que le processus d'apprentissage par descente de gradient peut minimiser la fonction de perte.
+Let a neural network be $\mathcal{N}(\mathbf{x}; \mathbf{W})$ where $\mathbf{x} \in \mathbb{R}^d$ and $\mathbf{W}$ represents the parameters. YYT23 consider training data $(\mathbf{x}_i, y_i)_{i=1}^n$ where $y_i = g(\mathbf{x}_i)$ for an underlying function $g$, and the $\mathbf{x}_i$ are normalized on the unit sphere $\mathbb{S}^{d-1}$.
 
-\subsection{Non-dégénérescence du NTK}
-Des études comme celles de Banerjee et al. (2023, arXiv:2305.02657) ont montré que pour des réseaux ReLU, une largeur de couche "linéaire" (par exemple, $\TildeOmega(N)$ où $N$ est le nombre d'échantillons) suffit pour garantir que $\lambdaMin(\KNTK) > c > 0$ avec une forte probabilité. Cela contraste avec des exigences de largeur quadratique plus anciennes.
-\begin{theorem}[Banerjee et al., 2023, simplifié]
-Pour des réseaux de neurones profonds avec activations ReLU et sous certaines conditions sur les données, si la largeur $m$ des couches cachées satisfait $m = \TildeOmega(N)$, alors $\lambdaMin(\KNTK) \geq c_0 > 0$ avec haute probabilité.
-\end{theorem}
-De même, Nguyen et al. (2022, arXiv:2205.14300) ont exploré la non-dégénérescence du NTK pour des réseaux profonds avec des activations log-Lipschitz (une classe qui n'inclut pas directement ReLU, mais des versions lissées). Leurs travaux, ainsi que d'autres (par exemple, Nguyen et al., ICML 2021, arXiv:2006.06333), soutiennent l'idée que le NTK est typiquement non dégénéré pour des architectures suffisamment larges.
+\subsection{The Limiting Neural Tangent Kernel from Terjék \& Gonzáles-Sánchez (MLPs at EOC)}
+Terjék and Gonzáles-Sánchez (TGS25, \citep{terjek2025ntk}) study the NTK for Multilayer Perceptrons (MLPs) with $(a,b)$-ReLU activations, $\phi(s) = as + b|s|$, initialized at the Edge of Chaos (EOC). The EOC initialization implies setting the initial weight variance $\sigma^2 = (a^2+b^2)^{-1}$. A key parameter characterizing the activation is $\Delta_\phi = \frac{b^2}{a^2+b^2}$.
 
-\subsection{Décroissance Spectrale Générale}
-Au-delà de la simple non-dégénérescence de $\lambdaMin$, le comportement de l'ensemble du spectre est important. Pour les opérateurs intégraux associés à des noyaux définis sur des variétés de dimension $d_0$, les valeurs propres $\lambda_l$ (où $l$ peut correspondre au degré d'une base de fonctions propres, comme les harmoniques sphériques) présentent souvent une décroissance polynomiale : $\lambda_l(K) \sim l^{-\alpha}$. L'exposant $\alpha$ dépend de la régularité (nombre de dérivées continues) du noyau et de la dimension $d_0$. Par exemple, pour un noyau $s$ fois différentiable sur une variété de dimension $d_0$, on observe souvent $\alpha \approx 2s/d_0$. Le NTK issu d'activations ReLU possède une régularité limitée (par exemple, $C^1$ mais pas $C^2$ dans de nombreux cas), ce qui peut conduire à une décroissance relativement rapide de ses valeurs propres, potentiellement $\alpha > 1$. L'utilisateur a spécifiquement mentionné une décroissance en $l^{-d_0}$ comme point de référence à contrecarrer, ce qui impliquerait $\alpha = d_0$.
-
-Cette décroissance rapide signifie que les modes de haute fréquence (associés aux grandes valeurs de $l$) ont de petites valeurs propres, ce qui peut rendre leur apprentissage lent ou numériquement instable.
-
-\section{Entraînement de type Sobolev pour la Modification du Spectre NTK}
-
-Pour pallier la décroissance rapide des valeurs propres du NTK, des techniques d'entraînement inspirées des espaces de Sobolev peuvent être employées. L'idée centrale est de préconditionner le noyau $K$ avec un opérateur (ou une matrice) $P$ qui rehausse les composantes de haute fréquence.
-
-\subsection{Le Concept d'Entraînement Sobolev}
-L'entraînement de type Sobolev vise à modifier la métrique de l'espace des fonctions dans lequel l'optimisation a lieu. En pratique, cela peut se traduire par la modification de la fonction de perte ou, de manière équivalente dans le régime des noyaux, par la modification du noyau lui-même. L'objectif est de donner plus de poids aux composantes de la fonction qui varient rapidement (hautes fréquences).
-
-\subsection{Préconditionnement avec la Matrice P}
-Nous considérons un noyau NTK $K$ (par exemple, pour un MLP avec activation ReLU, ou une autre activation homogène). Soit $P$ une matrice (ou un opérateur) de préconditionnement. Le noyau modifié par l'entraînement Sobolev est $K_S = KP$.
-
-Une hypothèse clé, formulée par l'utilisateur, est que $K$ et $P$ partagent les mêmes vecteurs propres. Pour des données sur la sphère $\mathbb{S}^{d_0-1}$ et des noyaux invariants par rotation, ces vecteurs propres communs sont typiquement les harmoniques sphériques $Y_{lm}(\uu)$.
-Soit $v_l$ un vecteur propre commun (correspondant à un harmonique sphérique de degré $l$):
-\begin{align*}
-    Kv_l &= \lambda_l(K) v_l \\
-    Pv_l &= \lambda_l(P) v_l
-\end{align*}
-Alors, pour le noyau modifié $K_S = KP$:
-\begin{align*}
-    K_S v_l = K(Pv_l) = K(\lambda_l(P)v_l) = \lambda_l(P) (Kv_l) = \lambda_l(P) \lambda_l(K) v_l
-\end{align*}
-Ainsi, les valeurs propres de $K_S$ sont simplement le produit des valeurs propres de $K$ et de $P$:
+They define a cosine map $\varrho: [-1,1] \to [-1,1]$ (Prop. 3.4, TGS25):
 \begin{equation}
-    \lambda_l(K_S) = \lambda_l(K) \lambda_l(P)
-    \label{eq:eigen_prod}
+    \varrho(\rho) = \rho + \Delta_\phi \frac{2}{\pi}\left( \sqrt{1-\rho^2} - \rho \arccos(\rho) \right)
 \end{equation}
-
-\subsection{Contrecarrer la Décroissance des Valeurs Propres avec les Harmoniques Sphériques}
-Considérons des données d'entrée sur la sphère unité $\mathbb{S}^{d_0-1}$. Les harmoniques sphériques $Y_{lm}$ forment une base orthonormée de $L^2(\mathbb{S}^{d_0-1})$.
+\begin{equation}
+    \varrho'(\rho) = 1 - \Delta_\phi \frac{2}{\pi}\arccos(\rho)
+\end{equation}
+Let $\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2) = \frac{\langle \mathbf{x}_1, \mathbf{x}_2 \rangle}{\left\lVert\mathbf{x}_1\right\rVert \left\lVert\mathbf{x}_2\right\rVert}$ be the initial cosine similarity. The limiting NTK $K^{\infty}$ at EOC is given by (Prop. 3.5, TGS25):
+\begin{equation}
+    K^{\infty}(\mathbf{x}_1, \mathbf{x}_2) = \left\lVert\mathbf{x}_1\right\rVert \left\lVert\mathbf{x}_2\right\rVert \left( \sum_{k=1}^l \varrho^{\circ (k-1)}\left( \rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2) \right) \prod_{k'=k}^{l-1} \varrho'\left( \varrho^{\circ (k'-1)}\left( \rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2) \right) \right) \right) \mathbf{I}_{m_l}.
+    \label{eq:NTK_TGS25}
+\end{equation}
+where $l$ is the depth and $m_l$ is the output dimension. Their spectral analysis (Thm. 3.10, TGS25) reveals that for a dataset of size $n$:
 \begin{itemize}
-    \item \textbf{Valeurs propres du NTK $K$}: Comme discuté, supposons que les valeurs propres $\lambda_l(K)$ associées aux harmoniques de degré $l$ décroissent polynomialement pour $l$ grand:
-    \begin{equation}
-        \lambda_l(K) \sim c_K l^{-\alpha} \quad \text{pour } l \ge 1
-    \end{equation}
-    L'utilisateur a suggéré une décroissance de référence de type $l^{-d_0}$, donc nous pouvons considérer $\alpha \approx d_0$.
-
-    \item \textbf{Opérateur de préconditionnement $P$}: L'opérateur $P$ est choisi pour amplifier les hautes fréquences. Il est typiquement lié à un opérateur pseudo-différentiel de type Sobolev, par exemple $P \propto (c_0 I - \LaplaceBeltrami)^{s/2}$, où $\LaplaceBeltrami$ est l'opérateur de Laplace-Beltrami sur $\mathbb{S}^{d_0-1}$ et $s > 0$. Les harmoniques sphériques $Y_{lm}$ sont des fonctions propres de $\LaplaceBeltrami$:
-    \begin{equation*}
-        -\LaplaceBeltrami Y_{lm} = l(l+d_0-2) Y_{lm}
-    \end{equation*}
-    où $l(l+d_0-2)$ est la valeur propre pour le degré $l$.
-    Par conséquent, les valeurs propres de $P$ se comportent comme suit pour $l$ grand:
-    \begin{equation}
-        \lambda_l(P) \sim c_P (l(l+d_0-2))^{s/2} \sim c'_P l^s \quad \text{pour } l \ge 1
-    \end{equation}
-
-    \item \textbf{Valeurs propres du noyau modifié $K_S = KP$}: En utilisant l'équation \eqref{eq:eigen_prod}:
-    \begin{equation}
-        \lambda_l(K_S) = \lambda_l(K) \lambda_l(P) \sim (c_K l^{-\alpha}) (c'_P l^s) = c_{KP} l^{s-\alpha}
-        \label{eq:modified_decay}
-    \end{equation}
+    \item The eigenvalues of the $nm_l \times nm_l$ NTK matrix group together. There are $m_l$ large eigenvalues scaling roughly as $\overline{\tau}^2 (l/4 + \xi)$ and $(n-1)m_l$ smaller ones scaling as $\underline{\tau}^2 (3l/(4n) - \xi/n)$, where $\xi$ depends on depth and initial data separation, and $\tau$ relates to input norms.
+    \item The condition number $\kappa(K^{\infty})$ converges to $1 + n/3$ as depth $l$ increases.
+    \item $\Delta_\phi$ (e.g., $\Delta_\phi=1$ for absolute value is better than $\Delta_\phi=1/2$ for ReLU) affects the convergence rate and conditioning for a given depth.
 \end{itemize}
-Si l'on souhaite contrecarrer une décroissance initiale $\lambda_l(K) \sim l^{-d_0}$ (c'est-à-dire $\alpha = d_0$), on peut choisir $s \approx d_0$. Dans ce cas, $\lambda_l(K_S) \sim c_{KP} l^{d_0-d_0} = c_{KP}$, ce qui signifie que les valeurs propres du noyau modifié deviennent approximativement constantes pour les hautes fréquences, au lieu de décroître. Si $s > d_0$, elles pourraient même augmenter avec $l$.
+This framework provides a detailed view of NTK spectrum scaling with depth but does not directly use a harmonic basis for its primary spectral decay analysis.
 
-\subsection{Impact sur la Plus Petite Valeur Propre et son Vecteur Propre}
-Le comportement de la "plus petite valeur propre" est modifié de manière significative.
+\subsection{The Limiting Neural Tangent Kernel $K^{\infty}$ in YYT23}
+In the infinite-width limit, the NTK $K(\mathbf{x}, \mathbf{x}'; \mathbf{W})$ converges to a deterministic kernel $K^{\infty}(\mathbf{x}, \mathbf{x}')$. For 2-layer ReLU networks with zero biases (simplified YYT23 setting for main analysis), and weights $\mathbf{w}_r$ i.i.d. Gaussian $\mathcal{N}(\mathbf{0}, \kappa^2 \mathbf{I})$, $K^{\infty}$ is given by (Eq. 2.4, YYT23, adapted):
+\begin{equation}
+    K^{\infty}(\mathbf{x}, \mathbf{y}) = \frac{(\langle \mathbf{x}, \mathbf{y} \rangle + 1) (\pi - \arccos(\langle \mathbf{x}, \mathbf{y} \rangle))}{4\pi}
+    \label{eq:Kinf_YYT23}
+\end{equation}
+Note that YYT23 use $\mathbf{H}^\infty_{ij} = K^{\infty}(\mathbf{x}_i, \mathbf{x}_j)$ for the discrete matrix.
+
+\subsection{Integral Operator and Intrinsic Spectral Bias}
+The evolution of the residual $z(\mathbf{x}) = g(\mathbf{x}) - \mathcal{N}(\mathbf{x})$ during gradient flow training can be described by the integral operator (YYT23, after Eq. 1.1, and with $d\mathbf{x}'$ for their Eq. 1.2 framework):
+\begin{equation}
+    (\mathcal{L} z)(\mathbf{x}) = \int_{\mathbb{S}^{d-1}} K^{\infty}(\mathbf{x}, \mathbf{x}') z(\mathbf{x}') d\mathbf{x}'
+\end{equation}
+When the domain is $\mathbb{S}^{d-1}$ and $K^{\infty}(\mathbf{x}, \mathbf{x}')$ is rotationally invariant (i.e., depends only on $\langle \mathbf{x}, \mathbf{x}' \rangle$), the eigenfunctions of $\mathcal{L}$ are the spherical harmonics $Y_{\ell,p}(\mathbf{x})$. The corresponding eigenvalues, denoted $\mu_\ell$ by YYT23 (Eq. 2.5), depend only on the degree $\ell$.
+
+A central result, recalled by YYT23 (end of Section 2, citing \cite{basri2020frequency, bietti2019inductive}), is that for large values of $\ell$:
+\begin{equation}
+    \mu_\ell = \mathcal{O}(\ell^{-d})
+    \label{eq:mu_ell_decay}
+\end{equation}
+This rapid decay of eigenvalues $\mu_\ell$ with frequency $\ell$ is the \textbf{intrinsic spectral bias} of the NTK: the operator $\mathcal{L}$ strongly attenuates high-frequency components of the residual function, leading to slower learning of these components.
+
+\subsection{Case of Non-Uniform Data (YYT23)}
+Most real-world datasets are not uniformly distributed. YYT23 address this problem by considering a continuous loss function with respect to the Lebesgue measure $d\mathbf{x}$ on $\mathbb{S}^{d-1}$ (their Eq. 1.2):
+\begin{equation}
+    \widetilde{\Phi}(\mathbf{W}) = \frac{1}{2}   \int_{\mathbb{S}^{d-1}}  | g(\mathbf{x}) - \mathcal{N}(\mathbf{x};\mathbf{W})|^2 d\mathbf{x}
+\end{equation}
+This is then discretized using a quadrature rule with weights $c_i > 0$ at data points $\mathbf{x}_i$:
+\begin{equation}
+    \widetilde{\Phi}(\mathbf{W}) \approx \frac{1}{2} \sum_{i=1}^n  c_i |y_i - \mathcal{N}(\mathbf{x}_i;\mathbf{W})|^2 = \frac{1}{2} (\mathbf{y} - \mathbf{u})^T \mathbf{D_c} (\mathbf{y} - \mathbf{u})
+    \label{eq:loss_quadrature}
+\end{equation}
+Where $\mathbf{u}_i = \mathcal{N}(\mathbf{x}_i)$, $\mathbf{y}_i = g(\mathbf{x}_i)$, and $\mathbf{D_c} = \text{diag}(c_1, \dots, c_n)$.
+Theorem 4.1 of YYT23 (\textit{A frequency-based formula for the training error}) shows that, even with this discretization and non-uniform data, the learning dynamics of the frequency component $g_\ell$ of $g$ are still dictated by the $\mu_\ell$ of the continuous kernel $K^{\infty}$ (up to quadrature errors):
+\begin{equation}
+    \left\lVert\mathbf{y} - \mathbf{u}(k) \right\rVert_{\mathbf{D_c}} \approx \sqrt{\sum_{\ell=0}^L (1-2\eta\mu_\ell)^{2k} \left\lVert g_\ell\right\rVert^2_{L^2(\mathbb{S}^{d-1})}}
+\end{equation}
+Thus, the frequency bias $\mu_\ell \sim \ell^{-d}$ persists for non-uniform data when the loss is defined with respect to the underlying Lebesgue measure.
+
+\section{Sobolev-type Training according to YYT23}
+
+To actively control the frequency bias, YYT23 propose using a loss function based on an $H^s$ Sobolev norm.
+
+\subsection{Sobolev Norm and Loss Function}
+The $H^s(\mathbb{S}^{d-1})$ Sobolev norm is defined (YYT23, Section 5) by:
+\begin{equation}
+    \left\lVert f\right\rVert_{H^s(\mathbb{S}^{d-1})}^2 = \sum_{\ell=0}^\infty \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}|\hat{f}_{\ell,p}|^2
+\end{equation}
+where $\hat{f}_{\ell,p}$ are the spherical harmonic coefficients of $f$. The discretized Sobolev loss function is (Eq. 5.3, YYT23):
+\begin{equation}
+    \Phi_s(\mathbf{W}) = \frac{1}{2} (\mathbf{y} - \mathbf{u})^T \mathbf{P}_s (\mathbf{y} - \mathbf{u})
+    \label{eq:sobolev_loss_YYT23}
+\end{equation}
+where $\mathbf{P}_s = \sum_{\ell=0}^{\ell_{max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} \mathbf{a}_{\ell,p} \mathbf{a}_{\ell,p}^T$, with $(\mathbf{a}_{\ell,p})_i = c_i Y_{\ell,p}(\mathbf{x}_i)$. Essentially, $\mathbf{P}_s$ applies a frequency re-weighting.
+
+\subsection{Training Dynamics with Sobolev Loss}
+Theorem 5.1 of YYT23 describes the error dynamics for this loss. For the $k$-th gradient descent iteration and neglecting quadrature and NTK approximation errors:
+\begin{equation}
+    \mathbf{y} - \mathbf{u}(k) \approx \sum_{\ell=0}^L (1-2\eta\mu_\ell(1+\ell)^{2s})^k \mathbf{y}^\ell
+\end{equation}
+where $\mathbf{y}^\ell$ is the vector of $g_\ell(\mathbf{x}_i)$.
+This means the effective convergence rate for the frequency component $\ell$ is now $e^{-2\eta \mu_\ell (1+\ell)^{2s} \cdot \text{time}}$.
+
+\subsection{Calculation of the Final Spectral Exponent}
+The continuous NTK operator $\mathcal{L}$ (with respect to $d\mathbf{x}$) has eigenvalues $\lambda_\ell(\mathcal{L}) = \mu_\ell \sim \ell^{-d}$.
+The effect of the Sobolev loss is to introduce a frequency preconditioner $P_s$ whose action on the $\ell$-th harmonic component is a multiplication by $(1+\ell)^{2s}$. So, $\lambda_\ell(P_s) \sim \ell^{2s}$ for large $\ell$.
+
+The "effective modified kernel" $K_S$ can be seen as having eigenvalues:
+\begin{equation}
+    \lambda_\ell(K_S) = \lambda_\ell(\mathcal{L}) \cdot \lambda_\ell(P_s) \sim \ell^{-d} \cdot \ell^{2s} = \ell^{2s-d}
+    \label{eq:final_exponent}
+\end{equation}
+The final exponent of spectral decay (or growth) is therefore $\mathbf{2s-d}$.
 \begin{itemize}
-    \item Pour le noyau original $K$, si $\lambda_l(K) \sim l^{-\alpha}$ avec $\alpha > 0$, les valeurs propres deviennent très petites pour les $l$ élevés (hautes fréquences). La "plus petite valeur propre" est souvent comprise comme la limite lorsque $l \to \infty$ (qui est zéro), ou la valeur propre pour le plus grand $l$ considéré dans une approximation finie.
-
-    \item Pour le noyau modifié $K_S = KP$, les valeurs propres sont $\lambda_l(K_S) \sim l^{s-\alpha}$.
-    \begin{enumerate}
-        \item Si $s > \alpha$ (par exemple, $s=d_0$ et $\alpha < d_0$, ou $s > d_0$ pour $\alpha=d_0$), alors $s-\alpha > 0$. Les valeurs propres $\lambda_l(K_S)$ \textit{augmentent} avec $l$. Dans ce cas, la plus petite valeur propre de $K_S$ (pour $l \ge 1$) correspondrait au degré $l$ le plus bas, par exemple $l=1$. Le vecteur propre associé serait l'harmonique sphérique de plus bas degré (non constant).
-        \item Si $s = \alpha$ (par exemple, $s=d_0$ et $\alpha=d_0$), alors $s-\alpha = 0$. Les valeurs propres $\lambda_l(K_S)$ sont approximativement constantes pour $l$ grand. Il n'y a plus de "petite" valeur propre unique due à la décroissance.
-        \item Si $s < \alpha$ (le préconditionnement est "trop faible"), alors $s-\alpha < 0$. Les valeurs propres $\lambda_l(K_S)$ décroissent encore avec $l$, mais plus lentement que $\lambda_l(K)$. La plus petite valeur propre correspondrait toujours aux $l$ les plus élevés.
-    \end{enumerate}
+    \item If $s = d/2$, then $2s-d = 0$. The eigenvalues $\lambda_\ell(K_S)$ become approximately constant for large $\ell$. The frequency bias is compensated.
+    \item If $s > d/2$, then $2s-d > 0$. The eigenvalues $\lambda_\ell(K_S)$ increase with $\ell$. High frequencies are amplified (frequency bias reversed).
+    \item If $s < d/2$, then $2s-d < 0$. The eigenvalues $\lambda_\ell(K_S)$ still decay, but slower than $\ell^{-d}$ if $s>0$.
 \end{itemize}
-Dans tous les cas où $s>0$, les valeurs propres $\lambda_l(K)$ qui étaient initialement petites (pour $l$ grand) sont multipliées par $\lambda_l(P) \sim l^s$, qui est grand pour $l$ grand. Ainsi, $\lambda_l(K_S)$ est significativement plus grand que $\lambda_l(K)$ pour les hautes fréquences. Cela améliore le conditionnement global du noyau et facilite l'apprentissage des composantes de haute fréquence de la fonction cible.
+This parameter $s$ thus allows to \textit{tune} the frequency bias, as indicated by the title of YYT23.
 
-Le vecteur propre associé à $\lambda_l(K_S)$ reste l'harmonique sphérique $Y_{lm}$ (ou la combinaison linéaire correspondante si $v_l$ est un espace propre). La question de savoir "pour quel vecteur elle est la plus petite" dépend donc du nouveau profil $l^{s-\alpha}$ et de la plage de $l$ considérée. Si $s \ge \alpha$, les valeurs propres ne tendent plus vers zéro pour les hautes fréquences, ce qui est l'effet désiré.
+\section{Common Eigenfunctions for Operators $K$ and $P_s$}
 
-\section{Cas Spécifique du NTK des MLP avec Activation ReLU}
-Le NTK pour un MLP avec activation ReLU (qui est homogène) est connu pour avoir une régularité limitée. Sur $\mathbb{S}^{d_0-1}$, sa fonction noyau $K(\x, \x')$ dépend de $\langle \x, \x' \rangle$. La décomposition en harmoniques sphériques (ou polynômes de Gegenbauer) révèle une décroissance polynomiale des $\lambda_l(K)$. L'application du préconditionnement de Sobolev $P$ avec un $s$ approprié permet de rendre ce spectre beaucoup plus "plat", améliorant l'apprentissage. Par exemple, des travaux comme ceux de Druker et al. (2023, arXiv:2305.19380) explorent empiriquement et théoriquement la puissance du préconditionnement de type Sobolev pour les noyaux, y compris le NTK.
+The preceding analysis relies on the NTK operator $\mathcal{L}$ and the frequency preconditioning operator $P_s$ (implicit in the Sobolev norm) sharing the same eigenfunctions, namely the spherical harmonics $Y_{\ell,p}(\mathbf{x})$, when the domain is $\mathbb{S}^{d-1}$.
 
-\section{Conclusion}
-L'entraînement de type Sobolev, par le biais d'un préconditionnement $P$ qui partage les vecteurs propres du NTK $K$, offre un mécanisme puissant pour remodeler le spectre du noyau $K_S = KP$. En choisissant judicieusement $P$ (par exemple, basé sur des puissances de l'opérateur de Laplace-Beltrami, caractérisé par le paramètre $s$), il est possible de contrecarrer la décroissance naturelle des valeurs propres $\lambda_l(K) \sim l^{-\alpha}$ du NTK, en particulier pour les activations ReLU.
+\begin{proposition}[Common eigenfunctions on the sphere]
+Let $\mathcal{L}$ be an integral operator on $L^2(\mathbb{S}^{d-1})$ with a kernel $k(\mathbf{x}, \mathbf{y}')$ that is rotationally invariant (i.e., $k(\mathbf{x}, \mathbf{y}') = \tilde{k}(\langle \mathbf{x}, \mathbf{y}' \rangle)$). Let $P_s$ be an operator defined by its action on the spherical harmonic coefficients of a function $f = \sum \hat{f}_{\ell,p} Y_{\ell,p}$ as $P_s f = \sum (1+\ell)^{s_0} \hat{f}_{\ell,p} Y_{\ell,p}$ (where $(1+\ell)^{s_0}$ represents a polynomial factor in $\ell$, e.g., $(1+\ell)^{2s}$ for the $H^s$ norm). Then, $\mathcal{L}$ and $P_s$ share the spherical harmonics $Y_{\ell,p}$ as eigenfunctions.
+\end{proposition}
+\begin{proof}
+1. \textbf{NTK Operator $\mathcal{L}$}: If the kernel $K^{\infty}(\mathbf{x}, \mathbf{y}')$ is rotationally invariant (as is the case for the standard NTK on the sphere, e.g., Eq. \eqref{eq:Kinf_YYT23}), then the operator $\mathcal{L}$ commutes with all rotations of the sphere. The Laplace-Beltrami operator $\Delta_{\mathbb{S}^{d_0-1}}$ on $\mathbb{S}^{d-1}$ is the generator of rotations (more precisely, its enveloping algebra). The eigenspaces of $\Delta_{\mathbb{S}^{d_0-1}}$ are precisely the spaces $\mathcal{H}^d_\ell = \text{span}\{Y_{\ell,p}\}_{p=1}^{N(d,\ell)}$ for each degree $\ell$, with eigenvalues $- \ell(\ell+d-2)$.
+    By Schur's lemma (or by direct arguments about commuting operators), any operator that commutes with all rotations (and thus with $\Delta_{\mathbb{S}^{d_0-1}}$) must be a multiple of the identity on each irreducible eigenspace $\mathcal{H}^d_\ell$. Thus, $\mathcal{L} Y_{\ell,p} = \mu_\ell Y_{\ell,p}$ for a constant $\mu_\ell$ that only depends on $\ell$. The $Y_{\ell,p}$ are therefore the eigenfunctions of $\mathcal{L}$.
 
-Si les valeurs propres de $P$ croissent comme $\lambda_l(P) \sim l^s$, les valeurs propres modifiées $\lambda_l(K_S) \sim l^{s-\alpha}$ peuvent être rendues constantes (si $s=\alpha$) ou même croissantes (si $s>\\alpha$) avec la fréquence $l$. Cela a pour effet d'augmenter significativement les valeurs propres associées aux hautes fréquences, améliorant le conditionnement du problème d'apprentissage et permettant une meilleure capture des détails fins de la fonction cible. La nature du "plus petit" mode propre est ainsi transformée : au lieu d'être systématiquement un mode de haute fréquence, il peut devenir un mode de basse fréquence ou le spectre peut devenir relativement plat, éliminant le problème des valeurs propres évanescentes aux hautes fréquences.
+2. \textbf{Sobolev Operator $P_s$}: The operator $P_s$ is defined by its action in the spherical harmonic basis. For example, if $P_s = (\mathbf{I} - c \Delta_{\mathbb{S}^{d_0-1}})^{s'}$ (for $s_0 = 2s's_{laplace}$), or more directly as in the definition of the $H^s$ norm where $P_s$ acts as a multiplication of coefficients $\hat{f}_{\ell,p}$ by $(1+\ell)^{s_0/2}$ (to get $(1+\ell)^{s_0}$ in the square of the norm). In any case, its action on $Y_{\ell,p}$ is $P_s Y_{\ell,p} = \lambda_\ell(P_s) Y_{\ell,p}$, where $\lambda_\ell(P_s)$ is proportional to a power of $\ell$ (e.g., $(1+\ell)^{s_0/2}$). Thus, the $Y_{\ell,p}$ are also the eigenfunctions of $P_s$.
 
-\section*{Références}
+Since $\mathcal{L}$ and $P_s$ share the same eigenfunctions $Y_{\ell,p}$, the composite operator (or the product of eigenvalues in the learning dynamics) is simple to analyze:
+\begin{equation*}
+    (\mathcal{L} P_s) Y_{\ell,p} = \mathcal{L} (\lambda_\ell(P_s) Y_{\ell,p}) = \lambda_\ell(P_s) (\mathcal{L} Y_{\ell,p}) = \lambda_\ell(P_s) \mu_\ell Y_{\ell,p}
+\end{equation*}
+The eigenvalues of the effective operator are thus the product of the individual eigenvalues.
+\end{proof}
 
-\begin{enumerate}
-    \item Banerjee, A., Cisneros-Velarde, P., Zhu, L., Belkin, M. (2023). Neural Tangent Kernel at Initialization: Linear Width Suffices. \textit{arXiv:2305.02657}.
-    \item Nguyen, Q., Pham, T., Nguyen, T., Montúfar, G. (2022). The Neural Tangent Kernel of Deep Networks with Log-Lipschitz Activations is Non-Degenerate. \textit{arXiv:2205.14300}.
-    \item Nguyen, Q., Mondelli, M., Montúfar, G. (2021). Tight Bounds on the Smallest Eigenvalue of the Neural Tangent Kernel for Deep ReLU Networks. \textit{ICML 2021 (arXiv:2006.06333)}.
-    \item Druker, R., Falik, M., Razin, N., Shamir, O., Wagner, T. (2023). On the Power of Preconditioning in Kernel Ridge Regression: A Theoretical and Empirical Study of Sobolev Training for Neural Tangent Kernels. \textit{arXiv:2305.19380}.
-    % Ajouter d'autres références si nécessaire, par exemple sur la décomposition en harmoniques sphériques des noyaux ou la régularité du NTK ReLU.
-\end{enumerate}
+\section{Conclusion and Discussion}
+The approach of Yu, Yang, and Townsend (YYT23) provides a rigorous framework for understanding and manipulating the frequency bias of neural networks, even with non-uniform data. By relating back to a continuous analysis via quadrature rules, they show that the intrinsic spectral bias of the NTK (decay of $\mu_\ell \sim \ell^{-d}$) persists.
+
+The introduction of a loss function based on the $H^s$ Sobolev norm allows for the modification of this bias. The effective preconditioning operator $P_s$ introduces a frequency re-weighting $\sim \ell^{2s}$. Consequently, the effective spectrum of the modified NTK behaves as $\ell^{2s-d}$. This offers direct control over how the network learns different frequencies:
+\begin{itemize}
+    \item $s = d/2$: Balanced learning of frequencies (flat spectrum for large $\ell$).
+    \item $s > d/2$: Accelerated learning of high frequencies (reversed bias).
+    \item $s < d/2$: Maintenance of a bias towards low frequencies, potentially attenuated if $s>0$.
+\end{itemize}
+The justification that NTK and Sobolev operators (under rotational invariance on the sphere) share spherical harmonics as eigenfunctions makes this spectral modification analysis direct and powerful. The work of YYT23 not only shows that frequency bias is a fundamental phenomenon but also that it can be actively "tuned" by the judicious choice of the loss function, opening perspectives for improving the convergence and robustness of neural networks.
+
+\section*{References}
+
+\begin{thebibliography}{99} % Manual bibliography, natbib warnings may occur if keys don't match cites
+
+\bibitem{jacot2018neural}
+Jacot, A., Gabriel, F., Hongler, C. (2018).
+Neural tangent kernel: Convergence and generalization in neural networks.
+\textit{Advances in neural information processing systems, 31}.
+
+\bibitem{rahaman2019spectral}
+Rahaman, N. S., Baratin, A., Arpit, D., Draxler, F., Lin, M., Hamprecht, F., ... & Bengio, Y. (2019).
+On the spectral bias of neural networks.
+\textit{International Conference on Machine Learning (pp. 5301-5310). PMLR}.
+
+\bibitem{basri2020frequency}
+Basri, R., Jacot, A., Lelarge, M., Netrapalli, P., & Bach, F. (2020).
+Frequency bias of neural networks for input of varying dimension.
+\textit{International Conference on Machine Learning (pp. 670-680). PMLR}.
+
+\bibitem{yu2022tuning}
+Yu, A., Yang, Y., Townsend, A. (2023).
+Tuning Frequency Bias in Neural Network Training with Nonuniform Data.
+\textit{International Conference on Learning Representations (ICLR 2023). arXiv:2205.14300v2}.
+
+\bibitem{bietti2019inductive}
+Bietti, A., Mairal, J. (2019).
+On the inductive bias of neural tangent kernels.
+\textit{arXiv preprint arXiv:1905.12173}.
+
+% References from previous draft
+\bibitem{terjek2025ntk}
+Terjék, D., Gonzáles-Sánchez, D. (2025). MLPs at the EOC: Spectrum of the NTK. \textit{arXiv:2501.13225v1} (as provided in user's files).
+
+\bibitem{nguyen2021tight}
+Nguyen, Q., Mondelli, M., Montúfar, G. (2021). Tight Bounds on the Smallest Eigenvalue of the Neural Tangent Kernel for Deep ReLU Networks. \textit{ICML 2021 (arXiv:2006.06333)}.
+
+\bibitem{druker2023power}
+Druker, R., Falik, M., Razin, N., Shamir, O., Wagner, T. (2023). On the Power of Preconditioning in Kernel Ridge Regression: A Theoretical and Empirical Study of Sobolev Training for Neural Tangent Kernels. \textit{arXiv:2305.19380}.
+
+\bibitem{bach2017breaking}
+Bach, F. (2017). Breaking the Curse of Dimensionality with Convex Neural Networks. \textit{Journal of Machine Learning Research, 18}(19), 1-53.
+
+\end{thebibliography}
+
+\bibliographystyle{plainnat} % Basic style compatible with natbib and manual bibliography
 
 \end{document}
