@@ -1,0 +1,104 @@
+
+\begin{frame}{Matrix Visualization of Operators}
+    \begin{columns}
+    \column{0.33\textwidth}
+    [Placeholder: Heatmap of NTK matrix $K$]
+    \column{0.33\textwidth}
+    [Placeholder: Heatmap of Sobolev matrix $P_s$]
+    \column{0.33\textwidth}
+    [Placeholder: Heatmap of combined operator $KP_s$]
+    \end{columns}
+    \begin{itemize}
+    \item Structure of kernel matrices
+    \item Block-diagonal patterns from spherical harmonics
+    \item Symmetry properties visible in structure
+    \end{itemize}
+    \end{frame}
+    
+    \begin{frame}{Spectral Analysis}
+    \begin{columns}
+    \column{0.5\textwidth}
+    [Placeholder: Eigenvalue decay plots]
+    \begin{itemize}
+    \item $K$: $\sim \ell^{-d}$
+    \item $P_s$: $\sim \ell^{2s}$
+    \item $KP_s$: $\sim \ell^{2s-d}$
+    \end{itemize}
+    \column{0.5\textwidth}
+    [Placeholder: Eigenvector correlation plots]
+    \begin{itemize}
+    \item Alignment with spherical harmonics
+    \item Verification of commutation
+    \item Numerical accuracy
+    \end{itemize}
+    \end{columns}
+    \end{frame}
+
+
+    
+\begin{frame}{Spectral Analysis with Sobolev Training}
+    \begin{itemize}
+    \item Final spectral exponent: $2s-d$
+    \item Cases:
+    \begin{itemize}
+    \item $s = d/2$: Balanced learning (flat spectrum)
+    \item $s > d/2$: High frequencies amplified
+    \item $s < d/2$: Low frequencies still favored
+    \end{itemize}
+    \item Effective eigenvalues:
+    \[ \lambda_\ell(K_S) = \lambda_\ell(\mathcal{L}) \cdot \lambda_\ell(P_s) \sim \ell^{-d} \cdot \ell^{2s} = \ell^{2s-d} \]
+    \end{itemize}
+    \end{frame}
+
+    
+
+
+    
+
+\begin{frame}{Experimental Validation}
+    \begin{columns}
+    \column{0.33\textwidth}
+    [Placeholder: Learning curves for different $s$]
+    \column{0.33\textwidth}
+    [Placeholder: Frequency component evolution]
+    \column{0.33\textwidth}
+    [Placeholder: Error vs frequency plots]
+    \end{columns}
+    \begin{itemize}
+    \item Empirical verification of theoretical predictions
+    \item Convergence rates match spectral theory
+    \item Effect of $s$ parameter on learning dynamics
+    \end{itemize}
+    \end{frame}
+    
+    \begin{frame}{Training Dynamics Comparison}
+    [Placeholder: Loss curves]
+    \begin{columns}
+    \column{0.5\textwidth}
+    L2 Loss:
+    [Placeholder: L2 training curves]
+    \column{0.5\textwidth}
+    Sobolev Loss:
+    [Placeholder: Sobolev training curves]
+    \end{columns}
+    \end{frame}
+    
+    \begin{frame}{DeepONet Performance}
+    [Placeholder: DeepONet specific results]
+    \begin{itemize}
+    \item Various network widths
+    \item Different depth configurations
+    \item Convergence analysis
+    \end{itemize}
+    \end{frame}
+    
+    \begin{frame}{Deep Network Analysis}
+    [Placeholder: Very deep network results]
+    \begin{itemize}
+    \item Impact on spectral properties
+    \item Training stability
+    \item Convergence rates
+    \end{itemize}
+    \end{frame}
+
+    
