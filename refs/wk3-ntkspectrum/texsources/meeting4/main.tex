@@ -425,20 +425,52 @@ with $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random
 \textbf{Promising direction:} Limited expansion analysis for this specific architecture with infinite layers and special initialization (positive entries assumption)
 \end{frame}
 
+\begin{frame}{Path forward: Sobolev Training Framework}
+\textbf{NTK-Sobolev Operator $P_s$ on $\mathbb{S}^{d-1}$:}
+\[ P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}P_{\ell,p} \]
+where $P_{\ell,p} = a_{\ell,p}a_{\ell,p}^T$ with $(a_{\ell,p})_i = c_iY_{\ell,p}(x_i)$
+
+\textbf{Key Properties:}
+\begin{itemize}
+\item Modifies NTK spectrum via spectral exponent $2s-d$
+\item Commutes with NTK: $[K^{\infty}, P_s] = 0$ 
+\item Eigenvalues: $\lambda_i(K P_s) \approx \lambda_i(A W_l + B) \cdot \lambda_i(P_s)$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Path forward: Sobolev Operator as Kernel Matrix}
+\textbf{Matrix Elements:}
+\[ (P_s)_{ij} = c_i c_j \cdot p_s(\langle x_i, x_j \rangle) \]
+where kernel function:
+\[ p_s(t) = \sum_{\ell=0}^{\ell_{\max}} (1+\ell)^{2s} K_\ell(t) \]
+
+\textbf{ Research directions:}
+\begin{itemize}
+\item Approximate the spectrum of the sampled kernel matrix $P_s$ (with $c_i$ as weights)
+\item Study dependence on parameters $s$, $d$, $n$, $l$ (NTK, Sobolev, and product)
+\end{itemize}
+\end{frame}
+
+
 \begin{frame}{Perspectives}
 \textbf{Research directions for deep narrow networks:}
 \begin{itemize}
-\item \textbf{Concatenate units:} Combine multiple narrow networks to increase expressivity
-\item \textbf{Alternative initializations:} Explore different initialization schemes beyond current setup
-\item \textbf{$\beta \to 0$ limit:} Analyze behavior when bias variance vanishes
-\[ v = \frac{1}{1 + \beta^2/\alpha^2} \to 1 \text{ as } \beta \to 0 \]
-\item \textbf{Complex kernel structures:} Find initializations that yield more intricate kernel forms
-\item \textbf{Skip connections:} Investigate ResNet-style connections for this framework
-\[ \tilde{\Theta}^\infty_{\text{skip}}(x, x') = \tilde{\Theta}^\infty(x, x') + \text{skip terms} \]
-\end{itemize}
+\item \textbf{Non-spherical case:} NTK not fully rotationally invariant due to norm dependence
+\[ \tilde{\Theta}^\infty(x, x') = x^T x' + 1 + (a^2 + b^2)\kappa(\cos(u)v) \]
+where $a = \frac{\rho\|x\|\|x'\|}{d_{in}}$ depends on input norms
 
-\textbf{Goal:} Richer spectral properties and improved learning dynamics
+\item \textbf{Initialization assumptions:} Need $\rho \gg \beta$ to stay at edge of chaos
+\[ \text{EOC condition: } \rho^2 \gg \beta^2 \text{ for stable training} \]
+
+\item \textbf{Unified initialization:} Combine schemes to maintain EOC with biases
+\[ v = \frac{1}{1 + \beta^2/\alpha^2}, \quad \alpha = \frac{\rho\|x\|\|x'\|}{d_{in}} \]
+
+\item \textbf{Gaussian process analysis:} Study GP($0, \frac{\rho^2}{d_{in}}x^T x' + \beta^2$) expectations
+\[ \E_g[\sigma(g(x))\sigma(g(x'))] \text{ determines kernel structure} \]
+\end{itemize}
 \end{frame}
+
+
 
 \begin{frame}{Mean Field Analysis and Experimental Validation}
     From that there is 2 paths to go:

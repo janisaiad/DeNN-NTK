@@ -1,0 +1,458 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{bm}
+\usepackage{enumerate}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{tocloft}
+\usepackage{tikz}
+% Page setup
+\geometry{a4paper, margin=2.5cm}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{NTK Eigenvalue Bounds: Comprehensive Analysis}
+\fancyhead[R]{\thepage}
+
+% Theorem environments
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{claim}[theorem]{Claim}
+
+% Mathematical commands
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\I}{\mathbf{I}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\evmin}[1]{\lambda_{\min}\left(#1\right)}
+\newcommand{\evmax}[1]{\lambda_{\max}\left(#1\right)}
+\newcommand{\svmin}[1]{\sigma_{\min}\left(#1\right)}
+\newcommand{\tr}{\text{tr}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\g}{\mathbf{g}}
+\newcommand{\u}{\mathbf{u}}
+\newcommand{\v}{\mathbf{v}}
+\newcommand{\odot}{\odot}
+\newcommand{\bigOmg}{\Omega}
+\newcommand{\bigTheta}{\Theta}
+\newcommand{\Pr}{\text{Pr}}
+\newcommand{\KNTK}{K_{\text{NTK}}}
+\newcommand{\KLim}{K^{(L)}}
+\newcommand{\KEmp}{\overline{K}^{(L)}}
+\newcommand{\KCosine}{K_L}
+\newcommand{\lambdaMin}{\lambda_{\min}}
+\newcommand{\sigmaMin}{\sigma_{\min}}
+\newcommand{\Order}{\mathcal{O}}
+\newcommand{\TildeOrder}{\tilde{\mathcal{O}}}
+\newcommand{\OmegaNotation}{\Omega}
+\newcommand{\TildeOmega}{\tilde{\Omega}}
+\newcommand{\cN}{\mathcal{N}}
+
+\title{Spectral Analysis of the Neural Tangent Kernel:\\
+Sobolev Training and Eigenvalue Scaling Laws}
+
+\author{Synthesis and Analysis}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document provides a comprehensive analysis of the Neural Tangent Kernel (NTK) spectrum and its modification through Sobolev-type training. We present eigenvalue scaling laws with respect to decay rates $\mu_\ell \sim \ell^{-\alpha}$, showing how spectral properties impact learning dynamics. The analysis covers both the discrete NTK matrix spectrum and continuous NTK operator eigenvalues, demonstrating how matrix spectral analysis reveals learning behavior. Key results include scaling laws for eigenvalues with respect to network depth $l$ and data size $n$, with condition numbers $\kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l)$ and eigenvalue distributions $\lambda \sim \frac{l}{4} \pm \xi$ where $\xi \sim \log(l)$. We show how Sobolev training modifies the spectrum through the operator $P_s$, enabling control over learned frequency components via the spectral exponent $2s-d$. The framework extends to deep narrow networks and includes analysis of inverse cosine distance matrices with near-affine NTK behavior.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introduction: Eigenvalue Scaling Laws and Learning Dynamics}
+
+The Neural Tangent Kernel (NTK) has emerged as a fundamental tool for understanding the training dynamics of deep neural networks. For a neural network $f(\x; \theta)$ with parameters $\theta$, the NTK is defined as:
+$$K^{\infty}(x_i, x_j) = \left\langle \frac{\partial f(\x_i; \theta)}{\partial \theta}, \frac{\partial f(\x_j; \theta)}{\partial \theta} \right\rangle$$
+
+\subsection{Key Objectives}
+
+This document addresses three fundamental objectives:
+\begin{enumerate}
+\item \textbf{Eigenvalue scaling laws}: Derive decay rates $\mu_\ell \sim \ell^{-\alpha}$ for NTK operator eigenvalues
+\item \textbf{Spectral impact on learning}: Understand how spectral properties determine learning dynamics  
+\item \textbf{Matrix vs. Operator relationship}: Analyze scaling laws for discrete matrix eigenvalues with respect to network depth $l$ and data size $n$
+\end{enumerate}
+
+\subsection{NTK Matrix vs. NTK Operator}
+
+A crucial distinction exists between:
+\begin{itemize}
+\item \textbf{NTK Matrix}: Discrete sampled version $K \in \mathbb{R}^{n \times n}$ with entries $K_{ij} = K^{\infty}(x_i, x_j)$
+\item \textbf{NTK Operator}: Continuous integral operator $(\mathcal{L}f)(x) = \int K^{\infty}(x,y)f(y)dy$
+\end{itemize}
+
+\textbf{Warning}: The eigenvalues of the sampled NTK matrix are \emph{not} the same as the NTK operator eigenvalues. The matrix spectrum provides discrete approximations that depend on the sampling strategy and data distribution.
+
+\subsection{Initialization: Edge of Chaos}
+
+All analysis assumes Edge of Chaos (EOC) initialization:
+\begin{itemize}
+\item Initialize weights as $w_{ij} \sim \mathcal{N}(0, \sigma_w^2/\text{fan-in})$ 
+\item For ReLU networks: $\sigma_w^2 = 2$ to maintain unit variance through layers
+\item This ensures activations neither explode nor vanish with depth
+\end{itemize}
+
+\newpage
+
+\section{NTK Matrix Structure and Spectrum}
+
+\subsection{Example NTK Matrix Structure}
+
+Consider a dataset of 3 points $x_1, x_2, x_3 \in \mathbb{R}^d$. The NTK matrix has entries:
+\[
+K^{\infty} = \begin{pmatrix} 
+k(x_1,x_1) & k(x_1,x_2) & k(x_1,x_3) \\
+k(x_2,x_1) & k(x_2,x_2) & k(x_2,x_3) \\
+k(x_3,x_1) & k(x_3,x_2) & k(x_3,x_3)
+\end{pmatrix}
+\]
+
+For general depth $l$ networks at EOC, the NTK kernel function is:
+\begin{align}
+K^{\infty}(\mathbf{x}_1, \mathbf{x}_2) &= \|\mathbf{x}_1\| \|\mathbf{x}_2\| \left( \sum_{k=1}^l \varrho^{\circ (k-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right) \right. \\
+&\quad \left. \times \prod_{k'=k}^{l-1} \varrho'\left(\varrho^{\circ (k'-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right)\right) \right) \mathbf{I}_{m_l}
+\end{align}
+
+For 2-layer ReLU networks, this simplifies to:
+\[
+k(x_i,x_j) = x_i^T x_j \cdot \arccos(-\langle x_i,x_j \rangle) + \sqrt{1-\langle x_i,x_j \rangle^2}
+\]
+
+\subsection{NTK Operator Structure}
+
+For functions $f,g \in L^2(\mathbb{S}^{d-1})$, the NTK operator acts as:
+\[
+(K^{\infty} f)(x) = \int_{\mathbb{S}^{d-1}} k(x,y)f(y)d\sigma(y)
+\]
+
+\textbf{Key Properties}:
+\begin{itemize}
+\item Symmetric positive definite operator
+\item Eigenfunctions are spherical harmonics $Y_{\ell,p}$
+\item Eigenvalues decay polynomially: $\mu_\ell \sim \ell^{-d}$
+\end{itemize}
+
+\subsection{Matrix Spectrum Results}
+
+The key scaling laws for the discrete NTK matrix are:
+
+\textbf{Condition Number}:
+\[ \kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l) \]
+The condition number grows linearly with data size $n$ but improves with depth $l$.
+
+\textbf{Eigenvalue Distribution}:
+\[ \lambda_{\text{min}} \sim \frac{3l}{4}, \quad \lambda_{\text{max}} \sim \frac{3nl}{4} \pm \xi \text{ where } \xi \sim \log(l) \]
+
+The minimum eigenvalue scales linearly with depth, while the maximum scales with both depth and data size.
+
+\textbf{Key Insight}: The training dynamics are dictated by the NTK matrix eigenvalues, not the operator eigenvalues. Deeper networks ($l \uparrow$) improve conditioning but with diminishing returns.
+
+\section{Sobolev Training and NTK Spectral Modification}
+
+\subsection{NTK-Sobolev Operator Framework}
+
+The key innovation in Sobolev training is the modification of the standard $L^2$ loss to incorporate high-order derivatives. The NTK-Sobolev operator $P_s$ acts on the sphere $\mathbb{S}^{d-1}$ with the commutation property:
+
+\textbf{Spherical Harmonics Transform}: Let $\mathcal{F}$ denote the mapping from $L^2(\mathbb{S}^d)$ to the spectral domain $\bigoplus_{\ell=0}^{\infty} \mathbb{C}^{N(d,\ell)}$, where $N(d,\ell)$ is the dimension of the $\ell$-th spherical harmonic space.
+
+The Sobolev operator $P_s$ is defined through its action in Fourier space:
+\[ P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}P_{\ell,p} \]
+
+where $P_{\ell,p} = a_{\ell,p}a_{\ell,p}^T$ with spectral coefficients $(a_{\ell,p})_i = c_iY_{\ell,p}(x_i)$.
+
+\subsection{From Sobolev Loss to Discrete Matrix Operator}
+
+\textbf{Sobolev loss with gradients}:
+\[ \mathcal{L}_s[f] = \|f\|_{L^2}^2 + \|\nabla f\|_{L^2}^2 = \int_{\mathbb{S}^d} f(x)^2 d\sigma(x) + \int_{\mathbb{S}^d} \|\nabla f(x)\|^2 d\sigma(x) \]
+
+\textbf{Fourier decomposition}: For $f(x) = \sum_{\ell,p} \hat{f}_{\ell,p} Y_{\ell,p}(x)$:
+\[ \mathcal{L}_s[f] = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} |\hat{f}_{\ell,p}|^2 \]
+
+\textbf{Discretization}: At points $\{x_i\}_{i=1}^n$:
+\[ \hat{f}_{\ell,p} \approx \sum_{i=1}^n c_i f(x_i) Y_{\ell,p}(x_i) \]
+
+\textbf{Final matrix form}: $\mathcal{L}_s[f] \approx f^T P_s f$ where $f = (f(x_1), \ldots, f(x_n))^T$.
+
+\subsection{Spectral Properties and Dimension Growth}
+
+The dimension of spherical harmonic spaces grows as:
+\[ N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!} \quad \text{as } \ell \to \infty \]
+
+This exponential growth in dimension determines the computational complexity of the Sobolev operator discretization.
+
+\subsection{Common Eigenfunctions Property}
+
+\begin{theorem}[Spherical Harmonics as Common Eigenfunctions]
+For rotationally invariant kernels on $\mathbb{S}^{d-1}$:
+\begin{itemize}
+\item NTK operator $K^{\infty}$ and Sobolev operator $P_s$ share spherical harmonics $Y_{\ell,p}$ as eigenfunctions
+\item This is due to rotational invariance and Schur's lemma for irreducible representations
+\item Enables direct spectral modification analysis
+\end{itemize}
+\end{theorem}
+
+\begin{theorem}[Commutation Property]
+The NTK operator $K^{\infty}$ and Sobolev operator $P_s$ commute:
+\[ [K^{\infty}, P_s] = 0 \]
+This holds for any sampling distribution $\rho(x)$ on $\mathbb{S}^{d-1}$ and implies that spectral decompositions are compatible.
+\end{theorem}
+
+\newpage
+
+\section{Deep NTK Analysis and Theoretical Results}
+
+\subsection{NTK at Edge of Chaos}
+
+For MLPs with $(a,b)$-ReLU activation $\phi(s) = as + b|s|$, the Edge of Chaos initialization requires:
+\begin{itemize}
+\item Initialization: $\sigma^2 = (a^2+b^2)^{-1}$
+\item Key parameter: $\Delta_\phi = \frac{b^2}{a^2+b^2}$ (for standard ReLU: $\Delta_\phi = 0.5$)
+\item Cosine map: $\varrho(\rho) = \rho + \Delta_\phi \frac{2}{\pi}\left( \sqrt{1-\rho^2} - \rho \arccos(\rho) \right)$
+\end{itemize}
+
+The Edge of Chaos is the unique initialization that remains invariant to network depth, preventing activation explosion or vanishing.
+
+\section{Reconciling NTK matrix spectrum and Sobolev Training}
+
+\subsection{A Unified Spectral Viewpoint: Commutation and Eigenvalue Products}
+
+The reconciliation between the geometric view of the NTK (approximated by the inverse cosine distance matrix) and the functional view of Sobolev training lies in their shared algebraic structure.
+
+\begin{itemize}
+    \item \textbf{Shared Invariance}: Both the NTK matrix $K$ and the discrete Sobolev operator matrix $P_s$ are rotationally invariant. This means their entries $(K)_{ij}$ and $(P_s)_{ij}$ depend only on the inner product $\langle x_i, x_j \rangle$.
+    
+    \item \textbf{Matrix Commutation}: As a consequence, both matrices can be expressed as functions of the Gram matrix $G$ (where $G_{ij} = \langle x_i, x_j \rangle$). For two such matrices, $K=f(G)$ and $P_s=g(G)$, they commute:
+    \[ K P_s = f(G)g(G) = g(G)f(G) = P_s K \]
+    This is the discrete analogue of the commutation of their underlying continuous operators.
+    
+    \item \textbf{Simultaneous Diagonalization}: Since they commute, $K$ and $P_s$ are simultaneously diagonalizable. They share the same set of eigenvectors, which are the eigenvectors of the Gram matrix $G$.
+    
+    \item \textbf{Product of Eigenvalues}: The spectrum of the Sobolev-modified NTK operator, $K P_s$, which governs the learning dynamics, is directly given by the product of the individual spectra:
+    \[ \lambda_i(K P_s) = \lambda_i(K) \cdot \lambda_i(P_s) \]
+    (after aligning the eigenvector bases).
+\end{itemize}
+
+\textbf{Key Insight}: The challenge of analyzing the complex operator $K P_s$ is reduced to separately analyzing the spectra of $K$ and $P_s$. We can leverage the geometric approximation for $K$ and combine it with a spectral analysis of $P_s$.
+
+\subsection{A Path Forward: Geometric Approximation and Experimental Validation}
+
+Based on the unified spectral viewpoint, a clear research path emerges to develop a predictive model for Sobolev training dynamics.
+
+\textbf{Goal}: Develop a semi-analytic model for the spectrum of the Sobolev-modified NTK matrix $K P_s$.
+
+\textbf{Proposed Strategy}:
+
+\begin{enumerate}
+    \item \textbf{Approximate the NTK Spectrum}:
+    Use the established near-affine relationship between the NTK and the inverse cosine distance matrix $W_l$:
+    \[ K \approx A W_l + B \]
+    The spectrum of the geometric matrix $W_l$ can be analyzed to provide an approximation for the eigenvalues $\lambda_i(K)$.
+
+    \item \textbf{Analyze the Sobolev Operator Spectrum}:
+    The matrix $P_s$ is itself a kernel matrix with a well-defined kernel $p_s(t) = \sum_{\ell} (1+\ell)^{2s} N(d,\ell) P_\ell(t)$, where $P_\ell$ are Legendre polynomials. Its spectrum $\lambda_i(P_s)$ can be characterized:
+    \begin{itemize}
+        \item Analytically, through its kernel polynomial expansion.
+        \item Or by viewing it as a differential operator on the data manifold (graph), relating its spectrum to that of the graph Laplacian.
+    \end{itemize}
+
+    \item \textbf{Combine Spectra and Validate}:
+    The core prediction is that the eigenvalues of the learning operator are given by the product of the component eigenvalues:
+    \[ \lambda_i(K P_s) \approx \lambda_i(A W_l + B) \cdot \lambda_i(P_s) \]
+    
+    \textbf{Experimental Validation Plan}:
+    \begin{itemize}
+        \item For a dataset on $\mathbb{S}^{d-1}$, numerically compute the matrices $K$, $P_s$, and the product $K P_s$.
+        \item Compare the analytically predicted spectrum with the true, numerically computed spectrum of $K P_s$.
+        \item Investigate the quality of this approximation as a function of the Sobolev parameter $s$, dimension $d$, data size $n$, and network depth $l$.
+    \end{itemize}
+\end{enumerate}
+
+\begin{remark}[The Sobolev Operator as a Kernel Matrix]
+The statement that the discrete Sobolev operator matrix $P_s$ is itself a kernel matrix is a subtle but fundamental point. Here is a detailed derivation.
+
+\paragraph{1. Definition of the Matrix $P_s$}
+We start from its construction via projectors on the spherical harmonics:
+\[
+(P_s)_{ij} = \left( \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} a_{\ell,p}a_{\ell,p}^\top \right)_{ij}
+\]
+With the coefficient $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$, this becomes:
+\begin{align*}
+(P_s)_{ij} &= \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} (a_{\ell,p})_i (a_{\ell,p})_j \\
+&= \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} (c_i Y_{\ell,p}(x_i)) (c_j Y_{\ell,p}(x_j))
+\end{align*}
+
+\paragraph{2. Reorganization and Application of the Addition Theorem}
+We can factor out the quadrature weights $c_i, c_j$ and apply the spherical harmonic addition theorem, which is the key step.
+\[
+(P_s)_{ij} = c_i c_j \sum_{\ell=0}^{\ell_{\max}} (1+\ell)^{2s} \left[ \sum_{p=1}^{N(d,\ell)} Y_{\ell,p}(x_i) Y_{\ell,p}(x_j) \right]
+\]
+The addition theorem states that the term in brackets is a function only of the inner product $\langle x_i, x_j \rangle$:
+\[
+\sum_{p=1}^{N(d,\ell)} Y_{\ell,p}(x) Y_{\ell,p}(y) = K_\ell(\langle x, y \rangle)
+\]
+where $K_\ell(t) = \frac{N(d,\ell)}{\text{Area}(\mathbb{S}^{d-1})} P_\ell^{((d-2)/2)}(t)$ and $P_\ell^{(\lambda)}$ is a Gegenbauer polynomial.
+
+\paragraph{3. Definition of the Kernel $p_s(t)$}
+By substituting this back, we can define a kernel function $p_s(t)$ that depends only on the inner product $t = \langle x_i, x_j \rangle$:
+\[
+p_s(t) := \sum_{\ell=0}^{\ell_{\max}} (1+\ell)^{2s} K_\ell(t)
+\]
+Thus, the matrix element is indeed a weighted kernel evaluation:
+\[
+(P_s)_{ij} = c_i c_j \cdot p_s(\langle x_i, x_j \rangle)
+\]
+
+\paragraph{Conclusion}
+The matrix $P_s$ is a \textbf{weighted kernel matrix}. If the sampling is uniform, the weights $c_i$ are constant and $P_s$ becomes a standard kernel matrix (up to a scaling factor). This rotational invariance, shared with the NTK, is what guarantees that they commute.
+\end{remark}
+
+\subsection{Deep NTK Properties}
+
+The limiting NTK at EOC for $L$-layer networks is given by:
+\begin{align}
+K^{\infty}(\mathbf{x}_1, \mathbf{x}_2) &= \|\mathbf{x}_1\| \|\mathbf{x}_2\| \left( \sum_{k=1}^l \varrho^{\circ (k-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right) \right. \\
+&\quad \left. \times \prod_{k'=k}^{l-1} \varrho'\left(\varrho^{\circ (k'-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right)\right) \right) \mathbf{I}_{m_l}
+\end{align}
+
+\textbf{Eigenvalue Decay}: For $L$-layer ReLU networks with $L \geq 3$:
+\[ \mu_k \sim C(d, L)k^{-d} \]
+where $C(d, L)$ depends on the parity of $k$ and grows quadratically with $L$.
+
+For the normalized NTK $\kappa^L_{\text{NTK}}/L$, the constant $C(d, L)$ grows linearly with $L$.
+
+\subsection{Inverse Cosine Distance Matrix Analysis}
+
+\textbf{Inverse cosine distance matrix} $W_k$ for depth $k$:
+\[ {W_k}_{i,i} = 0, \quad {W_k}_{i_1,i_2} = \left( \frac{1 - \rho_k(x_{i_1},x_{i_2})}{2} \right)^{-\frac{1}{2}} \text{ for } i_1 \neq i_2 \]
+
+\textbf{Near-affine behavior}:
+\begin{itemize}
+\item NTK matrix $K^{\infty} \approx A \cdot W_l + B$ (affine dependence)
+\item Spectral bounds transfer from $W_k$ to NTK via this affine relationship  
+\item Error terms: $O(k^{-1})$ - decreases with depth
+\end{itemize}
+
+This relationship enables indirect analysis of NTK spectral properties through simpler geometric matrices.
+
+\section{Deep Narrow Neural Networks}
+
+\subsection{Scaled NTK at Initialization}
+
+\begin{theorem}[Theorem 1: Scaled NTK at Initialization]
+For $f^L_\theta$ initialized appropriately, as $L \to \infty$:
+\[ \tilde{\Theta}^L_0(x, x') \xrightarrow{p} \tilde{\Theta}^\infty(x, x') \]
+where
+\[ \tilde{\Theta}^\infty(x, x') = (x^T x' + 1 + \E_g[\sigma(g(x))\sigma(g(x'))]) I_{d_{out}} \]
+with $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random field).
+\end{theorem}
+
+\textbf{Alternative formulation}: $\kappa_1(\cos(u) \cdot v)$ where:
+\begin{itemize}
+\item $v = \frac{1}{1 + \beta^2/\alpha^2}$, where $\beta$ is the bias variance
+\item $\alpha = \frac{\|x\| \|x'\| \rho}{d_{in}}$, where $\cos(u)$ is the cosine distance between $x, x'$
+\end{itemize}
+
+This framework provides a promising direction for analyzing deep narrow networks through limited expansion analysis.
+
+\subsection{Research Perspectives for Deep Narrow Networks}
+
+\textbf{Architectural modifications}:
+   \begin{itemize}
+\item \textbf{Unit concatenation}: Combine multiple narrow networks to increase expressivity
+\item \textbf{Skip connections}: Investigate ResNet-style connections:
+  \[ \tilde{\Theta}^\infty_{\text{skip}}(x, x') = \tilde{\Theta}^\infty(x, x') + \text{skip terms} \]
+   \end{itemize}
+
+\textbf{Initialization studies}:
+\begin{itemize}
+\item \textbf{Alternative initializations}: Explore different schemes beyond current setup
+\item \textbf{$\beta \to 0$ limit}: Analyze behavior when bias variance vanishes:
+  \[ v = \frac{1}{1 + \beta^2/\alpha^2} \to 1 \text{ as } \beta \to 0 \]
+\item \textbf{Complex kernel structures}: Find initializations that yield more intricate kernel forms
+\end{itemize}
+
+\textbf{Theoretical extensions}:
+\begin{itemize}
+\item Extension of Hayou \& Yang's work on ResNets showing "wide and deep limits commute"
+\item Mean field analysis for deep narrow frameworks
+\item Careful analysis of stochasticity in initialization (not dropout)
+\item Experimental validation on practical tasks
+\end{itemize}
+
+\section{Conclusions and Future Directions}
+
+\subsection{Summary of Key Results}
+
+This document presents a comprehensive analysis of Neural Tangent Kernel spectral properties and their modification through Sobolev training. The main contributions include:
+
+\begin{enumerate}
+\item \textbf{Eigenvalue scaling laws}: Established relationships $\mu_\ell \sim \ell^{-\alpha}$ for NTK operator eigenvalues and their impact on learning dynamics
+
+\item \textbf{Matrix vs. Operator distinction}: Clarified the fundamental difference between discrete NTK matrix eigenvalues and continuous operator eigenvalues, showing how sampling affects spectral properties
+
+\item \textbf{Sobolev training framework}: Demonstrated how the operator $P_s$ modifies the NTK spectrum via the spectral exponent $2s-d$, enabling control over learned frequency components
+
+\item \textbf{Deep network analysis}: Provided scaling laws for condition numbers $\kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l)$ and eigenvalue distributions with respect to depth $l$ and data size $n$
+
+\item \textbf{Spherical harmonic framework}: Established the commutation property $[K^{\infty}, P_s] = 0$ and common eigenfunctions for rotationally invariant kernels
+\end{enumerate}
+
+\subsection{Research Challenges and Open Questions}
+
+\begin{enumerate}
+\item \textbf{Unified framework}: Different papers assume varying domains, initializations, architectures, and activations. A unified theoretical framework remains to be developed.
+
+\item \textbf{Beyond spherical domains}: Extension of harmonic analysis from spheres to general spaces $L^2(\gamma)$ represents a significant theoretical challenge.
+
+\item \textbf{Optimal width scaling}: Achieving linear scaling in $\lambda_{\min}$ with minimal width requirements.
+
+\item \textbf{Broad activation coverage}: Extending from ReLU to general inhomogeneous activations using harmonic analysis.
+
+\item \textbf{Experimental validation}: Systematic experimental verification of theoretical predictions across different architectures and tasks.
+\end{enumerate}
+
+\subsection{Research Roadmap}
+
+\textbf{Near-term objectives}:
+\begin{itemize}
+\item Study narrow NTK behavior to identify simplifications before developing general approaches
+\item Incorporate Sobolev framework into spherical harmonic analysis with experimental validation
+\item Unify initialization schemes and architectural assumptions across different theoretical frameworks
+\end{itemize}
+
+\textbf{Long-term goals}:
+\begin{itemize}
+\item Extend harmonic analysis from spherical to general domains with experimental validation
+\item Develop complete theory for deep narrow networks with practical applications
+\item Create unified spectral theory encompassing all major NTK variants and training modifications
+\end{itemize}
+
+The convergence of spectral analysis, harmonic analysis, and neural network theory opens promising avenues for understanding and controlling the learning dynamics of deep networks through their spectral properties.
+
+\newpage
+
+\end{document}
