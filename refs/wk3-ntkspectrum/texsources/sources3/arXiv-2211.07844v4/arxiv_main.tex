@@ -1,0 +1,97 @@
+\documentclass{article} % For LaTeX2e
+\usepackage{arxiv,times}
+
+\input{preamble}
+\usepackage{natbib}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{enumitem}
+
+\usepackage{thm-restate}
+
+
+\title{Characterizing the spectrum of the NTK via a power series expansion}
+
+\author{$\dagger$$^*$ Michael Murray, $\dagger$$^*$ Hui Jin, $\dagger$$^*$ Benjamin Bowman, $\dagger \ddag \mathsection$ Guido Montufar\\
+  $\dagger$ Department of Mathematics, UCLA, CA, USA\\
+  $\ddag$ Department of Statistics, UCLA, CA, USA\\
+  $\mathsection$ Max Planck Institute for Mathematics in the Sciences, Leipzig, Germany \\
+  \texttt{[mmurray,huijin,benbowman314,montufar]@math.ucla.edu} \\
+  $^*$Equal contribution
+  %% examples of more authors
+}
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+
+\begin{document}
+
+\maketitle
+\begin{abstract}
+Under mild conditions on the network initialization we derive a power series expansion for the Neural Tangent Kernel (NTK) of arbitrarily deep feedforward networks in the infinite width limit. We provide expressions for the coefficients of this power series which depend on both the Hermite coefficients of the activation function as well as the depth of the network. We observe faster decay of the Hermite coefficients leads to faster decay in the NTK coefficients and explore the role of depth. Using this series, first we relate the effective rank of the NTK to the effective rank of the input-data Gram. Second, for data drawn uniformly on the sphere we study the eigenvalues of the NTK, analyzing the impact of the choice of activation function. Finally, for generic data and activation functions with sufficiently fast Hermite coefficient decay, we derive an asymptotic upper bound on the spectrum of the NTK.
+\end{abstract}
+
+
+\section{Introduction} \label{sec:intro}
+\input{introduction}
+
+
+\section{Expressing the NTK as a power series}\label{sec:power_series}
+\input{power_series}
+
+
+\section{Analyzing the spectrum of the NTK via its power series}\label{sec:ntk_spectrum}
+\input{ntk_spectrum}
+
+
+
+\section{Conclusion} 
+Using a power series expansion we derived a number of insights into both the outliers as well as the asymptotic decay of the spectrum of the NTK.  We are able to perform our analysis without recourse to a high dimensional limit or the use of random matrix theory. Interesting avenues for future work include better characterizing the role of depth and performing the same analysis on networks with convolutional or residual layers.  
+
+\paragraph{Reproducibility Statement} 
+To ensure reproducibility, we make the code public at \url{https://github.com/bbowman223/data_ntk}. 
+
+\section*{Acknowledgements and Disclosure of Funding}
+This project has been supported by ERC Grant 757983 and NSF CAREER Grant DMS-2145630. 
+
+\newpage 
+% \subsubsection*{Author Contributions}
+% XXX
+
+% \subsubsection*{Acknowledgments}
+% XXX
+\bibliography{ntkpow}
+\bibliographystyle{arxiv}
+
+\newpage 
+
+\appendix
+
+\section*{Appendix} 
+
+The appendix is organized as follows. 
+\begin{itemize}[leftmargin=*]
+    \item Appendix~\ref{app:background} %``Background materials'' 
+    gives background material on Gaussan kernels, NTK, unit variance intitialization, and Hermite polynomial expansions. 
+    
+    \item Appendix~\ref{appendix:power_series} %``Expressing the NTK as a power series'' 
+    provides details for Section~\ref{sec:power_series}. 
+    
+    \item Appendix~\ref{appendix:ntk_spectrum} %``Analyzing the spectrum of the NTK via its power series'' 
+    provides details for Section~\ref{sec:ntk_spectrum}. 
+\end{itemize}
+
+\section{Background material}
+\label{app:background}
+\input{appendix_background}
+
+\section{Expressing the NTK as a power series}\label{appendix:power_series}
+\input{appendix_power_series}
+
+\section{Analyzing the spectrum of the NTK via its power series}\label{appendix:ntk_spectrum}
+\input{appendix_ntk_spectrum}
+
+
+
+\end{document}

@@ -1,0 +1,188 @@
+\documentclass[twoside,11pt]{article}
+ 
+%\usepackage{blindtext}
+
+% Any additional packages needed should be included after jmlr2e.
+% Note that jmlr2e.sty includes epsfig, amssymb, natbib and graphicx,
+% and defines many common macros, such as 'proof' and 'example'.
+%
+% It also sets the bibliographystyle to plainnat; for more information on
+% natbib citation styles, see the natbib documentation, a copy of which
+% is archived at http://www.jmlr.org/format/natbib.pdf
+
+% Available options for package jmlr2e are:
+%
+%   - abbrvbib : use abbrvnat for the bibliography style
+%   - nohyperref : do not load the hyperref package
+%   - preprint : remove JMLR specific information from the template,
+%         useful for example for posting to preprint servers.
+%
+% Example of using the package with custom options:
+%
+% \usepackage[abbrvbib, preprint]{jmlr2e}
+
+\usepackage[preprint]{jmlr2e}
+\usepackage{physics,mathtools,enumerate,bm,mathrsfs}
+\usepackage{autobreak}
+\allowdisplaybreaks[4]
+\usepackage{wrapfig,subfigure,multirow}
+\usepackage{tikz}
+\usepackage{mleftright}
+\usetikzlibrary{shapes.geometric}
+\usepackage{hyperref,prettyref}
+
+% Definitions of handy macros can go here
+
+%\theoremstyle{plain}
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{lemma}[theorem]{Lemma}
+%\newtheorem{corollary}[theorem]{Corollary}
+%
+%
+%\theoremstyle{definition}
+\newtheorem{condition}[theorem]{Condition}
+%\newtheorem{definition}{Definition}
+%\newtheorem{remark}[theorem]{Remark}
+%\newtheorem{example}{Example}
+%\newtheorem{assumption}{Assumption}
+
+\newrefformat{eq}{\textup{(\ref{#1})}}
+\newrefformat{lem}{Lemma~\textup{\ref{#1}}}
+\newrefformat{thm}{Theorem~\textup{\ref{#1}}}
+\newrefformat{cor}{Corollary~\textup{\ref{#1}}}
+\newrefformat{prop}{Proposition~\textup{\ref{#1}}}
+\newrefformat{cond}{Condition~\textup{\ref{#1}}}
+\newrefformat{assu}{Assumption~\textup{\ref{#1}}}
+\newrefformat{rem}{Remark~\textup{\ref{#1}}}
+\newrefformat{def}{Definition~\textup{\ref{#1}}}
+\newrefformat{sec}{Section~\textup{\ref{#1}}}
+\newrefformat{subsec}{Section~\textup{\ref{#1}}}
+
+\input{header/Abbv}
+\input{header/Symbols}
+\providecommand{\cref}{\prettyref}
+
+% Heading arguments are {volume}{year}{pages}{date submitted}{date published}{paper id}{author-full-names}
+
+\usepackage{lastpage}
+\jmlrheading{23}{2024}{1-\pageref{LastPage}}{1/21; Revised 5/22}{9/22}{21-0000}{Yicheng Li, Zixiong Yu, Guhan Chen and Qian Lin}
+
+% Short headings should be running head and authors last names
+
+\ShortHeadings{Eigenvalues of NTK on General Domains}{Li, Yu, Chen and Lin}
+\firstpageno{1}
+
+\begin{document}
+
+
+  \title{On the Eigenvalue Decay Rates of a Class of Neural-Network Related Kernel Functions Defined on General Domains}
+
+  \author{\name Yicheng Li \email liyc22@mails.tsinghua.edu.cn \\
+  \addr Center for Statistical Science, Department of Industrial Engineering\\
+  Tsinghua University\\
+  Beijing, 100084, China
+  \AND
+  \name Zixiong Yu \email yuzx19@mails.tsinghua.edu.cn \\
+  \addr Yau Mathematical Sciences Center, Department of Mathematical Sciences\\
+  Tsinghua University\\
+  Beijing, 100084, China
+  \AND Guhan Chen \email ghchen12@qq.com \\
+  \addr Center for Statistical Science, Department of Industrial Engineering\\
+  Tsinghua University\\
+  Beijing, 100084, China
+  \AND Qian Lin \email qianlin@tsinghua.edu.cn \\
+  \addr Center for Statistical Science, Department of Industrial Engineering\\
+  Tsinghua University\\
+  Beijing, 100084, China
+  }
+
+  \editor{My editor}
+
+  \maketitle
+
+  \begin{abstract}%   <- trailing '%' for backward compatibility of .sty file
+    \input{abstract}
+  \end{abstract}
+
+  \begin{keywords}
+    Neural tangent kernel, eigenvalue decay rate, early stopping, non-parametric regression, reproducing kernel Hilbert space
+  \end{keywords}
+
+
+  \section{Introduction}\label{sec:intro}
+  \input{s1_Intro}
+
+
+  \section{Analysis of Eigenvalue Decay Rate}\label{sec:NTK}
+  \input{s2_EDR}
+
+%  \section{Over-parametrized Deep Neural Networks and Deep Neural Tangent Kernel}\label{sec:NN}
+%  \input{s2_NN}
+
+
+
+
+
+  \section{Application: Optimal Rates of Over-parameterized Neural Networks}\label{sec:optimality}
+  \input{s3_NN}
+
+  \section{Proof of the Result on the Eigenvalues}\label{sec:eigen-decay-on-the-sphere}
+  \input{s4_Sphere_EDR}
+
+
+  \section{Conclusion}
+  \label{sec:conclusion}
+  \input{s5_Conclusion}
+
+% Acknowledgements and Disclosure of Funding should go at the end, before appendices and references
+
+  \acks{
+The authors thank the anonymous reviewers for their valuable suggestions.
+  This work is supported in part by the National Natural Science Foundation of China (Grant 11971257),
+  Beijing Natural Science Foundation (Grant Z190001),
+  National Key R\&D Program of China (2020AAA0105200),
+  and Beijing Academy of Artificial Intelligence.
+%    All acknowledgements go at the end of the paper before appendices and references.
+%    Moreover, you are required to declare funding (financial activities supporting the
+%    submitted work) and competing interests (related financial activities outside the submitted work).
+%    More information about this disclosure can be found on the JMLR website.
+  }
+
+% Manual newpage inserted to improve layout of sample file - not
+% needed in general before appendices/bibliography.
+
+  \newpage
+
+  \appendix
+  % \input{sa0_notations}
+
+
+  \section{Uniform Convergence of the Neural Network to Kernel Regression}\label{sec:A_NN}
+  \input{sa_Proof_NN}
+
+%  \section{Kernel and Transformation}
+%  \input{sb_Kernels}
+
+
+
+
+
+
+
+  \section{Auxiliary Results on the NTK}
+  \input{sd_Proof_NTK}
+
+
+  \section{Omitted proofs}\label{sec:omitted-proofs}
+  \input{se_Proof_omitted}
+
+
+  \section{Auxiliary Results}\label{sec:A_Aux}
+  \input{sy_Aux}
+
+
+
+  \vskip 0.2in
+  \bibliography{main}
+
+\end{document}

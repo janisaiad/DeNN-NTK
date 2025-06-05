@@ -1,0 +1,84 @@
+
+\section{Background}\label{sec:Background}
+
+In the present paper, we derive bounds on the Lipschitz constant of random ReLU networks at initialization.
+We consider a variant of the so-called \emph{He initialization} as introduced in \cite{he2015delving}.
+In \cite{he2015delving}, the entries of the weight matrices $W^{(\ell)} \in \RR^{N^{(\ell + 1)} \times N^{(\ell)}}$ are identically and independently drawn from a Gaussian distribution
+with zero mean and standard deviation $\sqrt{2/N^{(\ell)}}$
+and the biases are initialized to zero.
+We consider a standard deviation of $\sqrt{2/N^{(\ell+1)}}$, which is commonly used in theoretical studies of random ReLU networks (cf. \cite{buchanan2021deep,allen2019convergence,dirksen2022separation}).
+This random initialization is a natural choice since it is \emph{isometric in expectation}, 
+meaning that $\EE [\Vert \relu(W^{(\ell)}x)\Vert_2^2] = \Vert x \Vert_2^2$ 
+for every vector $x \in \RR^{N^{(\ell)}}$ that is fed into the $\ell$th layer of the network.
+Since the $\relu$ is positively homogeneous, our results readily imply corresponding bounds for other initialization choices where the network weights are chosen from a Gaussian distribution which may vary from layer to layer.
+
+Moreover, we allow more general biases than in \cite{he2015delving}.
+Specifically, we require that the biases are also drawn independently from certain probability distributions.
+In order to derive upper bounds for the Lipschitz constant (see \Cref{sec:upper}) 
+and lower bounds in the case of shallow networks (see \Cref{sec:low_bound_shallow}),
+we do not need to impose \emph{any} assumptions on these probability distributions.
+To derive lower bounds in the case of deep networks (see \Cref{subsec:deep_lower}), however,
+we require these probability distributions to be symmetric.
+Note that assuming symmetry of the distributions of the biases is very natural and in particular covers
+the zero initialization that is used in \cite{he2015delving}.
+In the following assumption, we formally introduce the considered random initialization.
+
+\begin{assumption} \label{assum:1}
+We consider ReLU networks with $d$ input neurons, 1 output neuron, a width of $N$ and $L$ hidden layers.
+Precisely, we consider maps 
+\begin{equation} \label{eq:relu-network}
+  \Phi: \quad \RR^d \to \RR,
+  \quad
+  \Phi(x)
+  \defeq \left( V^{(L)} \circ \relu \circ V^{(L-1)} \circ  \hdots \circ \relu \circ V^{(0)}\right) (x).
+\end{equation}
+Here, $\relu$ denotes the function defined as 
+\begin{equation*}
+  \relu (x) \defeq \max \{0,x\}, \quad x \in \RR,
+\end{equation*} 
+and the application of $\relu$ in \eqref{eq:relu-network} is to be understood componentwise, i.e., 
+\begin{equation*}
+  \relu ((x_1, ..., x_N)) = (\relu (x_1),..., \relu(x_N)). 
+\end{equation*}
+Furthermore, the maps $V^{(\ell)}$ for $0 \leq \ell \leq L$ are affine-linear maps,
+which in detail means the following:
+There are matrices $W^{(0)} \in \RR^{N \times d}$, $W^{(\ell)} \in \RR^{N \times N}$
+for $1 \leq \ell \leq L-1$ and $W^{(L)} \in \RR^{1 \times N}$
+as well as \emph{biases} $b^{(\ell)} \in \RR^N$ for $0 \leq \ell < L$ and $b^{(L)} \in \RR$ such that
+\begin{equation*}
+  V^{(\ell)} (x) = W^{(\ell)}x + b^{(\ell)}
+  \quad \text{for every } 0 \leq \ell \leq L.
+\end{equation*}
+
+We assume that the matrices $W^{(\ell)}$ as well as the biases $b^{(\ell)}$ are randomly
+chosen in the following way:
+For $0 \leq \ell < L$, we have 
+\begin{equation*}
+  \left( W^{(\ell)}\right)_{i,j} \overset{\mathrm{i.i.d.}}{\sim} \mathcal{N}(0,2/N),
+  \quad
+  \left( W^{(L)}\right)_{1,j} \overset{\mathrm{i.i.d.}}{\sim} \mathcal{N}(0,1).
+\end{equation*}
+Concerning the biases, we assume
+\begin{equation*}
+  \left( b^{(\ell)}\right)_i \sim \mathcal{D}^{(\ell)}_i,
+  \quad 0 \leq \ell \leq L.
+\end{equation*}
+Here, each $\mathcal{D}^{(\ell)}_i$ is an arbitrary probability distribution over $\RR$.
+Furthermore, the random variables $W^{(0)}, ..., W^{(L)}, b^{(0)}, ..., b^{(L)}$ are assumed to be jointly independent.
+\end{assumption}
+
+The above assumption, which suffices for deriving the upper bound on the Lipschitz constant for networks of arbitrary depth and the lower bound in the case of shallow networks,
+imposes almost no restrictions on the distribution of the biases.
+However, for deriving lower bounds \paul{for deep networks} we will use the following more restrictive assumption
+on the initialization of the biases.
+\begin{assumption}\label{assum:2}
+  Let $\Phi: \RR^d \to \RR$ be a random ReLU network satisfying \Cref{assum:1}.
+  Moreover, we assume that each $\mathcal{D}_i^{(\ell)}$ is a symmetric probability distribution over $\RR$
+  (e.g., $\mathcal{N}(0, \sigma^2)$ for some parameter $\sigma > 0$, uniform on some interval $[-m,m] \subseteq \RR$, or initialized to zero).
+\end{assumption}
+
+We restrict ourselves to square matrices
+(i.e., we assume that each layer of the network has the same amount of neurons).
+We believe, however, that our proofs still work in the case of layers with varying widths
+that are uniformly bounded from below by $\Omega (dL^2)$.
+

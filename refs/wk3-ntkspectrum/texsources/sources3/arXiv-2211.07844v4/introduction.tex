@@ -1,0 +1,70 @@
+Neural networks currently dominate modern artificial intelligence, however, despite their empirical success establishing a principled theoretical foundation for them remains an active challenge. The key difficulties are that neural networks induce nonconvex optimization objectives \citep{Sontag89backpropagationcan} and typically operate in an overparameterized regime which precludes classical statistical learning theory \citep{DBLP:books/daglib/0025992}. The persistent success of overparameterized models tuned via non-convex optimization suggests that the relationship between the parameterization, optimization, and generalization is more sophisticated than that which can be addressed using classical theory. 
+\par
+A recent breakthrough on understanding the success of overparameterized networks was established through the Neural Tangent Kernel (NTK) \citep{jacot_ntk}.  In the infinite width limit the optimization dynamics are described entirely by the NTK and the parameterization behaves like a linear model \citep{Lee2019WideNN-SHORT}.  In this regime explicit guarantees for the optimization and generalization can be obtained \citep{du2019gradient,du2018gradient,fine_grain_arora, allenzhu2019convergence, zou2020gradient}.  While one must be judicious when extrapolating insights from the NTK to finite width networks \citep{10.5555/3495724.3496995}, the NTK remains one of the most promising avenues for understanding deep learning on a principled basis.
+\par
+The spectrum of the NTK is fundamental to both the optimization and generalization of wide networks. In particular, bounding the smallest eigenvalue of the NTK Gram matrix is a staple technique for establishing convergence guarantees for the optimization \citep{du2019gradient,du2018gradient,solt_mod_over}.  Furthermore, the full spectrum of the NTK Gram matrix governs the dynamics of the empirical risk \citep{arora_exact_comp}, and the eigenvalues of the associated integral operator characterize the dynamics of the generalization error outside the training set \citep{bowman2022spectral, bowman2022implicit}. Moreover, the decay rate of the generalization error for Gaussian process regression using the NTK can be characterized by the decay rate of the spectrum \citep{caponnetto2007optimal, cui2021generalization,jin2022learning}. 
+\par
+The importance of the spectrum of the NTK has led to a variety of efforts to characterize its structure via random matrix theory and other tools \citep{https://doi.org/10.48550/arxiv.1907.10599,NEURIPS2020_572201a4}.  There is a broader body of work studying the closely related Conjugate Kernel, Fisher Information Matrix, and Hessian \citep{Poole2016,pennington_nonlinear,pennington_shallow,10.2307/26542333,Karakida_2020}.  These results often require complex random matrix theory or operate in a regime where the input dimension is sent to infinity.  By contrast, using a just a power series expansion we are able to characterize a variety of attributes of the spectrum for fixed input dimension and recover key results from prior work. 
+
+\subsection{Contributions} 
+    In Theorem~\ref{theorem:ntk_power_series} we derive coefficients for the power series expansion of the NTK under unit variance initialization, see Assumption \ref{assumption:init_var_1}. Consequently we are able to derive insights into the NTK spectrum, notably concerning the outlier eigenvalues as well as the asymptotic decay. 
+\begin{itemize}[leftmargin=*] 
+    \item In Theorem~\ref{thm:infinite_effective_constant_bd} and Observation~\ref{obs:order_one_outliers} we demonstrate that the largest eigenvalue $\lambda_1(\mK)$ of the NTK takes up an $\Omega(1)$ proportion of the trace and that there are $O(1)$ outlier eigenvalues of the same order as $\lambda_1(\mK)$. 
+    \item In Theorem~\ref{thm:infinite_effective_rank_bd} and Theorem~\ref{thm:main_effective_rank_bd} we show that the effective rank $Tr(\mK) / \lambda_1(\mK)$ of the NTK is upper bounded by a constant multiple of the effective rank $Tr(\mX \mX^T) / \lambda_1(\mX \mX^T)$ of the input data Gram matrix for both infinite and finite width networks.  
+    \item In Corollary~\ref{cor:ReLUbias0} and Theorem~\ref{theorem:informal_ub_eigs_nonuniform} we characterize the asymptotic behavior of the NTK spectrum for both uniform and nonuniform data distributions on the sphere. 
+\end{itemize}
+
+\subsection{Related work}
+\textbf{Neural Tangent Kernel (NTK):} the NTK was introduced by \cite{jacot_ntk}, who demonstrated that in the infinite width limit neural network optimization is described via a kernel gradient descent.  As a consequence, when the network is polynomially wide in the number of samples, global convergence guarantees for gradient descent can be obtained \citep{du2019gradient,du2018gradient,allenzhu2019convergence, zou2019improved,Lee2019WideNN-SHORT,zou2020gradient,solt_mod_over,marco,nguyenrelu}. Furthermore, the connection between infinite width networks and Gaussian processes, which traces back to \cite{neal1996}, has been reinvigorated in light of the NTK. Recent investigations include  \cite{LeeBNSPS18,matthews2018gaussian,bayesianconv}. 
+
+\textbf{Analysis of NTK Spectrum:} theoretical analysis of the NTK spectrum via random matrix theory was investigated by \cite{https://doi.org/10.48550/arxiv.1907.10599,NEURIPS2020_572201a4} in the high dimensional limit. \cite{NEURIPS2021_14faf969} demonstrated that for ReLU networks the spectrum of the NTK integral operator asymptotically follows a power law, which is consistent with our results for the uniform data distribution. \cite{uniform_sphere_data} calculated the NTK spectrum for shallow ReLU networks under the uniform distribution, which was then expanded to the nonuniform case by \cite{10.5555/3524938.3525002}. \cite{geifman2022on} analyzed the spectrum of the conjugate kernel and NTK for convolutional networks with ReLU activations whose pixels are uniformly distributed on the sphere.  \cite{geifman2020similarity, bietti2021deep,chen2021deep} analyzed the reproducing kernel Hilbert spaces of the NTK for ReLU networks and the Laplace kernel via the decay rate of the spectrum of the kernel.  In contrast to previous works, we are able to address the spectrum in the finite dimensional setting and characterize the impact of different activation functions on it. 
+
+\textbf{Hermite Expansion:} \cite{dual_view} used Hermite expansion to the study the expressivity of the Conjugate Kernel. \cite{pmlr-v162-simon22a} used this technique to demonstrate that any dot product kernel can be realized by the NTK or Conjugate Kernel of a shallow, zero bias network. \cite{solt_mod_over} use Hermite expansion to study the NTK and establish a quantitative bound on the smallest eigenvalue for shallow networks. This approach was incorporated by \cite{marco} to handle convergence for deep networks, with sharp bounds on the smallest NTK eigenvalue for deep ReLU networks provided by \cite{nguyen_tight_bounds}. The Hermite approach was utilized by \cite{Panigrahi2020Effect} to analyze the smallest NTK eigenvalue of shallow networks under various activations. Finally, in a concurrent work \cite{han2022fast} use Hermite expansions to develop a principled and efficient polynomial based approximation algorithm for the NTK and CNTK. In contrast to the aforementioned works, here we employ the Hermite expansion to characterize both the outlier and asymptotic portions of the spectrum for both shallow and deep networks under general activations. 
+
+\section{Preliminaries} \label{subsec:preliminaries}
+For our notation, lower case letters, e.g., $x,y$, denote scalars, lower case bold characters, e.g., $\vx, \vy$ are for vectors, and upper case bold characters, e.g., $\mX, \mY$, are for matrices.  For natural numbers $k_1, k_2 \in \mathbb{N}$ we let $[k_1] = \{1, \ldots, k_1\}$ and $[k_2, k_1] = \{k_2, \ldots, k_1\}$. If $k_2>k_1$ then $[k_2,k_1]$ is the empty set. We use $\norm{\cdot}_p$ to denote the $p$-norm of the matrix or vector in question and as default use $\norm{\cdot}$ as the operator or 2-norm respectively. We use $\mathbf{1}_{m \times n} \in \mathbb{R}^{m \times n}$ to denote the matrix with all entries equal to one. We define $\delta_{p=c}$ to take the value $1$ if $p=c$ and be zero otherwise. We will frequently overload scalar functions $\phi:\reals \rightarrow \reals$ by applying them elementwise to vectors and matrices. The entry in the $i$th row and $j$th column of a matrix we access using the notation $[\mX]_{ij}$. The Hadamard or entrywise product of two matrices $\mX, \mY \in \reals^{m \times n}$ we denote $\mX \odot \mY$ as is standard. The $p$th Hadamard power we denote $\mX^{\odot p}$ and define it as the Hadamard product of $\mX$ with itself $p$ times, 
+\[
+\mX^{\odot p} \defeq \mX \odot \mX \odot \cdots \odot \mX.
+\]
+Given a Hermitian or symmetric matrix $\mX \in \reals^{n \times n}$, we adopt the convention that $\lambda_i(\mX)$ denotes the $i$th largest eigenvalue,
+\[
+\lambda_1(\mX) \geq \lambda_2(\mX) \geq \cdots \geq \lambda_n(\mX).
+\]
+Finally, for a square matrix $\mX \in \mathbb{R}^{n \times n}$ we let $Tr(\mX) = \sum_{i = 1}^n [\mX]_{ii}$ denote the trace.
+
+\subsection{Hermite Expansion}
+We say that a function $f\colon \reals \rightarrow \reals$ is square integrable with respect to the standard Gaussian measure $\gamma(z) = \frac{1}{\sqrt{2 \pi}} e^{-z^2/2}$ if $\expec_{X \sim \cN(0,1)}[f(X)^2]< \infty$. 
+We denote by $L^2(\reals,\gamma)$ the space of all such functions. The normalized probabilist's Hermite polynomials are defined as
+\begin{align*}
+	h_k(x)=\frac{{(-1)}^ke^{x^2/2}}{\sqrt{k!}} \frac{d^{k}}{d x^{k}} e^{-x^2/2}, \quad k=0,1,\ldots 
+\end{align*}
+and form a complete orthonormal basis in $L^2(\reals,\gamma)$ \cite[\S 11]{donnellbook}. The Hermite expansion of a function $\phi \in L^2(\reals ,\gamma)$ is given by $\phi(x)= \sum_{k=0}^\infty \mu_k(\phi) h_k(x)$, where $\mu_k(\phi) = \expec_{X \sim \cN(0,1)}[\phi(X)h_k(X)]$ is the $k$th normalized probabilist's Hermite coefficient of $\phi$. 
+
+\subsection{NTK Parametrization} 
+In what follows, for $n,d\in \naturals$ let $\mX \in \reals^{n \times d}$ denote a matrix which stores $n$ points in $\reals^d$ row-wise. Unless otherwise stated, we assume $d \leq n$ and denote the $i$th row of $\mX_n$ as $\vx_i$. In this work we consider fully-connected neural networks of the form $f^{(L+1)}\colon \reals^d \rightarrow \reals$ with $L \in \naturals$ hidden layers and a linear output layer. For a given input vector $\vx \in \reals^d$, the activation $f^{(l)}$ and preactivation $g^{(l)}$ at each layer $l \in [L+1]$ are defined via the following recurrence relations, 
+\begin{equation}\label{eq:ffnn}
+    \begin{aligned}
+    &g^{(1)}(\vx) = \gamma_w \mW^{(1)}\vx + \gamma_b\vb^{(1)}, \; f^{(1)}(\vx) = \phi \left( g^{(1)} (\vx) \right),\\
+    &g^{(l)}(\vx) = \frac{\sigma_w}{\sqrt{m_{l-1}}} \mW^{(l)} f^{(l-1)}(\vx) + \sigma_b\vb^{(l)}, \; f^{(l)}(\vx) = \phi \left( g^{(l)} (\vx) \right), \; \forall l \in [2,L],\\
+    &g^{(L+1)}(\vx) =  \frac{\sigma_w}{\sqrt{m_L}}\mW^{(L+1)}f^{(L)}(\vx), \; f^{(L+1)}(\vx) = g^{(L+1)}(\vx). 
+    \end{aligned}
+\end{equation}
+The parameters $\mW^{(l)} \in \reals^{m_l \times m_{l-1}}$ and $\vb^{(l)} \in \reals^{m_l}$ are the weight matrix and bias vector at the $l$th layer respectively, $m_0 = d$, $m_{L+1} = 1$, and $\phi\colon \reals \rightarrow \reals$ is the activation function applied elementwise. The variables $\gamma_w, \sigma_w \in \reals_{>0}$ and $\gamma_b, \sigma_b \in \reals_{\geq0}$ correspond to weight and bias hyperparameters respectively.
+Let $\theta_l \in \reals^p$ denote a vector storing the network parameters $(\mW^{(h)}, \vb^{(h)})_{h=1}^{l}$ up to and including the $l$th layer. The Neural Tangent Kernel \citep{jacot_ntk} $\tilde{\Theta}^{(l)}\colon \reals^d \times \reals^d \rightarrow \reals$ associated with $f^{(l)}$ at layer $l \in [L+1]$ is defined as
+\begin{equation} \label{eq:ntk}
+    \tilde{\Theta}^{(l)}(\vx, \vy) := \langle \nabla_{\theta_l} f^{(l)}(\vx), \nabla_{\theta_l} f^{(l)}(\vy) \rangle. 
+\end{equation}
+We will mostly study the NTK under the following standard assumptions.
+\begin{assumption}\label{assumptions:kernel_regime}
+NTK initialization. 
+    \begin{enumerate}[leftmargin=*]
+        \item At initialization all network parameters are distributed as $\cN(0,1)$ and are mutually independent.
+        \item The activation function satisfies $\phi \in L^2(\reals, \gamma)$, is differentiable almost everywhere and its derivative, which we denote $\phi'$, also satisfies $\phi' \in L^2(\reals, \gamma)$.
+        \item The widths are sent to infinity in sequence, $m_1 \rightarrow \infty, m_2 \rightarrow \infty, \ldots, m_{L}\rightarrow \infty$. %We refer to this regime as the sequential infinite width limit. 
+    \end{enumerate}
+\end{assumption}
+Under Assumption~\ref{assumptions:kernel_regime}, for any $l \in [L+1]$, $\tilde{\Theta}^{(l)}(\vx, \vy)$ converges in probability to a deterministic limit $\Theta^{(l)}\colon \reals^d \times \reals^d \rightarrow \reals$ \citep{jacot_ntk} and the network behaves like a kernelized linear predictor during training; see, e.g., \cite{arora_exact_comp, Lee2019WideNN-SHORT, pmlr-v125-woodworth20a}. Given access to the rows $(\vx_i)_{i=1}^n$ of $\mX$ the NTK matrix at layer $l\in [L+1]$, which we denote $\mK_{l}$, is the $n \times n$ matrix with entries defined as 
+\begin{equation} \label{eq:ntk_matrix_def}
+[\mK_{l}]_{ij} = \frac{1}{n}\Theta^{(l)}(\vx_i, \vx_j), \; \forall (i,j) \in [n] \times [n].
+\end{equation}
+

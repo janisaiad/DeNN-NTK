@@ -1,0 +1,124 @@
+%!TEX root = main.tex
+
+In this section, we provide the proofs for results in Section~\ref{sub:extensions} related to obtaining power series expansions (with generalized exponents) of kernels arising from deep networks, which leads to the corresponding decays by Theorem~\ref{thm:decay}.
+We note that for the kernels considered in this section, we can differentiate the expansions since the kernel function is $\Delta$-analytic~\citep[see][Theorem 7]{chen2020deep}, so that the technical assumption in Theorem~\ref{thm:decay} is verified.
+
+\subsection{Proof of Corollary~\ref{cor:rf_decay}} % (fold)
+\label{sub:rf_decay_proof}
+
+\begin{proof}
+Let~$\kappa^\ell := \underbrace{\kappa_1 \circ \cdots \circ \kappa_1}_{\ell-1 \text{ times}} = \kappa_{\RF}^\ell$. We have
+\begin{equation*}
+\kappa_1(1 - t) = 1 - t + c t^{3/2} + o(t^{3/2}), \quad c := \frac{2\sqrt{2}}{3 \pi}.
+\end{equation*}
+We now show by induction that~$\kappa^\ell(1 - t) = 1 - t + a_\ell t^{3/2} + o(t^{3/2})$, with~$a_\ell = (\ell - 1) c$.
+This is obviously true for~$\ell = 2$ since~$\kappa^\ell = \kappa_1$, and for~$\ell \geq 3$ we have
+\begin{align*}
+\kappa^\ell(1 - t) &= \kappa_1(\kappa^{\ell-1}(1 - t)) \\
+	&= \kappa_1(1 - t + a_{\ell-1} t^{3/2} + o(t^{3/2})) \\
+	&= 1 - (t - a_{\ell-1} t^{3/2} + o(t^{3/2})) + c (t + O(t^{3/2}))^{3/2} + o(O(t)^{3/2}) \\
+	&= 1 - t + a_{\ell-1} t^{3/2} + c t^{3/2}(1 + O(t^{1/2}))^{3/2} + o(t^{3/2}) \\
+	&= 1 - t + a_{\ell-1} t^{3/2} + c t^{3/2}(1 + O(t^{1/2})) + o(t^{3/2}) \\
+	&= 1 - t + a_\ell t^{3/2} + o(t^{3/2}),
+\end{align*}
+which proves the result.
+
+Around~$-1$, we know that
+\begin{equation*}
+\kappa_1(-1 + t) = ct^{3/2} + o(t^{3/2}).
+\end{equation*}
+We then have~$\kappa^\ell(-1+t) = b_\ell + c_\ell t^{3/2} + o(t^{3/2})$, with~$0 \leq b_\ell < 1$ and~$0 < c_\ell \leq c$ (and the upper bound is strict for~$\ell \geq 3$).
+Indeed, this is true for~$\ell=2$, and for~$\ell \geq 3$ we have, for~$t > 0$,
+\begin{align*}
+\kappa^\ell(-1+t) &= \kappa_1(\kappa^{\ell-1}(-1+t)) \\
+	&= \kappa_1(b_{\ell-1} + c_{\ell-1} t^{3/2} + o(t^{3/2})) \\
+	&= \kappa_1(b_{\ell-1}) + \kappa_1'(b_{\ell-1}) c_{\ell-1} t^{3/2} + o(t^{3/2}).
+\end{align*}
+Now, note that~$\kappa_1$ and~$\kappa_1'$ are both positive and strictly increasing on~$[0, 1]$, with~$\kappa_1(1) = \kappa_1'(1) = 1$. Thus, we have $b_\ell = \kappa_1(b_{\ell-1}) \in (0, 1)$, and $c_\ell = \kappa_1'(a_{\ell-1}) c_{\ell-1} < c_{\ell-1}$, thus completing the proof.
+
+Since~$c_\ell$ is bounded while~$a_\ell$ grows linearly with~$\ell$, the constants in front of the asymptotic decay~$k^{-d-2}$ grow linearly with~$\ell$.
+
+\end{proof}
+
+% subsection proof_of_corollary (end)
+
+\subsection{Proof of Corollary~\ref{cor:ntk_decay}} % (fold)
+\label{sub:ntk_decay_proof}
+
+\begin{proof}
+We show by induction that $\kappa_{\NTK}^\ell$ as defined in~\eqref{eq:ntk_rec} satisfies
+\begin{equation*}
+\kappa_{\NTK}^\ell(1 - t) = \ell - \left(\sum_{s=1}^{\ell-1} s \right) c t^{1/2} + o(t^{1/2}), \qquad c := \frac{\sqrt{2}}{\pi}.
+\end{equation*}
+For~$\ell = 2$ we have~$\kappa_{\NTK}^\ell(u) = u \kappa_0(u) + \kappa_1(u)$, so that
+\begin{equation*}
+\kappa_{\NTK}^2(1 - t) = (1 - t)(1 - c t^{1/2} + o(t^{1/2})) + 1 + O(t) = 2 - c t^{1/2} + o(t^{1/2}).
+\end{equation*}
+By induction, for~$\ell \geq 3$, we have~$\kappa_{\NTK}^\ell(u) = \kappa_{\NTK}^{\ell-1}(u) \kappa_0(\kappa^{\ell-1}(u)) + \kappa^\ell(u)$, with~$\kappa^\ell$ as in the proof of Corollary~\ref{cor:rf_decay}, which hence satisfies~$\kappa^\ell(1 - t) = 1 - t + o(t)$ for all~$\ell \geq 2$.
+We then have
+\begin{align*}
+\kappa_0(\kappa^{\ell-1}(1 - t)) &= \kappa_0(1 - t + o(t)) \\
+	&= 1 - c (t + o(t))^{1/2} + o(t^{1/2}) \\
+	&= 1 - c t^{1/2} (1 + o(t^{1/2})) + o(t^{1/2}) \\
+	&= 1 - c t^{1/2} + o(t^{1/2}).
+\end{align*}
+This yields
+\begin{align*}
+\kappa_{\NTK}^\ell(1 - t) &= (\ell-1 - (\sum_{s=1}^{\ell-2}s) c t^{1/2} + o(t^{1/2})) (1 - c t^{1/2} + o(t^{1/2})) + 1 + O(t) \\
+	&= \ell - (\sum_{s=1}^{\ell-1} s)c t^{1/2} + o(t^{1/2}) \\
+	&= \ell - \frac{\ell (\ell-1)}{2} c t^{1/2} + o(t^{1/2}),
+\end{align*}
+which proves the claim for the expansion around~$+1$.
+
+Around -1, recall the expansion from the proof of Corollary~\ref{cor:rf_decay}, $\kappa^\ell(-1+t) = b_\ell + O(t^{3/2})$, with~$0 \leq b_\ell < 1$. For~$\ell = 2$, we have
+\begin{equation*}
+\kappa_{\NTK}^2(-1+t) = (-1+t)(ct^{1/2} + o(t^{1/2})) + b_2 + o(t^{1/2}) = b_2 - ct^{1/2} + o(t^{1/2}).
+\end{equation*}
+Note also that for~$\ell \geq 2$,
+\begin{equation*}
+\kappa_0(\kappa^\ell(-1+t)) = \kappa_0(b_\ell + O(t^{3/2})) = \kappa_0(b_\ell) + O(t^{3/2}),
+\end{equation*}
+since $\kappa_0'(b_\ell)$ is finite for~$b_\ell < 1$. We also have~$\kappa_0(b_\ell) \in (0, 1)$ since~$\kappa_0$ is positive and strictly increasing on~$[0, 1]$ with~$\kappa_0(1) = 1$.
+Then, by an easy induction, we obtain
+\begin{equation*}
+\kappa_{\NTK}^\ell(-1+t) = a_\ell - c_\ell t^{1/2} + o(t^{1/2}),
+\end{equation*}
+with~$a_\ell \leq \ell$ and~$0 < c_\ell < c$.
+
+Similar to the case of the RF kernel, the constant in front of~$t^{1/2}$ grows with~$\ell^2$ for the expansion around~$+1$ but is bounded for the expansion around~$-1$, so that the final constants in front of the asymptotic decay~$k^{-d}$ grow quadratically with~$\ell$. However, they grow linearly with~$\ell$ when considering the NTK normalized by~$\ell$, $\tilde \kappa^\ell = \kappa_{\NTK}^\ell / \ell$, which then satisfies $\tilde \kappa^\ell(1) = 1$.
+
+\end{proof}
+
+% subsection proof_of_corollary (end)
+
+\subsection{Deep networks with step activations} % (fold)
+\label{sub:deep_step_decay}
+
+In this section, we study the decay of the random weight kernel arising from deep networks with step activations, as presented in Section~\ref{sub:extensions}.
+For an~$L$-layer network, this kernel is of the form~$\kappa_s^L := \underbrace{\kappa_0 \circ \cdots \circ \kappa_0}_{L-1\text{ times}}$.
+
+\begin{corollary}
+$\kappa_s^L$ has a decay~$k^{-d-2 \nu_L+1}$ with $\nu_L = 1/2^{L-1}$ for~$L$ layers.
+\end{corollary}
+\begin{proof}
+We show by induction that we have, for~$\ell \geq 2$,
+\begin{equation*}
+\kappa_s^\ell(1-t) = 1 - c^{\sum_{j=0}^{\ell-1} 2^{-j}} t^{1/2^{\ell-1}} + o(t^{1/2^{\ell-1}}),
+\end{equation*}
+with~$c := \frac{\sqrt{2}}{\pi}$.
+This is true for~$\ell = 2$ due to the expansion for~$\kappa_0$.
+Now assume it holds for~$\ell \geq 2$. We have
+\begin{align*}
+\kappa_s^{\ell+1}(1-t) &= \kappa_0(\kappa_s^{\ell}(1-t)) \\
+	&= \kappa_0 \left(1 - c^{\sum_{j=0}^{\ell-1} 2^{-j}} t^{1/2^{\ell-1}} + o(t^{1/2^{\ell-1}})\right) \\
+	&= 1 - c \left(c^{\sum_{j=0}^{\ell-1} 2^{-j}} t^{1/2^{\ell-1}} + o(t^{1/2^{\ell-1}}) \right)^{1/2} + o(o(t^{1/2^{\ell-1}})^{1/2}) \\
+	&= 1 - c^{\sum_{j=0}^{\ell} 2^{-j}} t^{1/2^{\ell}} (1 + o(1)) + o(t^{1/2^\ell}) \\
+	&= 1 - c^{\sum_{j=0}^{\ell} 2^{-j}} t^{1/2^{\ell}} + o(t^{1/2^\ell}),
+\end{align*}
+proving the desired claim.
+
+Around~$-1$, we have~$\kappa_0(-1+t) = c t^{1/2} + o(t^{1/2})$, and for~$\ell \geq 3$, $\kappa_s^{\ell}(-1+t) = a_\ell + O(t^{1/2})$, by an easy induction using the fact that~$\kappa_0([0,1)) \subset (0, 1)$ and~$\kappa_0$ is smooth on~$[0,1)$. Thus the behavior around~$-1$ does not affect the decay of~$\kappa_s^\ell$ for~$\ell \geq 3$, and Theorem~\ref{thm:decay} leads to the desired decay, with a constant that only depends on~$\ell$ through~$c^{\sum_{j=0}^{\ell-1} 2^{-j}}$, which lies in the interval~$[c^2, c]$ for any~$\ell$.
+\end{proof}
+
+
+% subsection decay_for_ (end)

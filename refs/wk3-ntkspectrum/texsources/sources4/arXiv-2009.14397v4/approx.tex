@@ -1,0 +1,108 @@
+
+
+In this section, we present our main results concerning approximation properties of dot-product kernels on the sphere, and applications to the kernels arising from wide random neural networks.
+We begin by stating our main theorem, which provides eigenvalue decays for dot-product kernels from differentiability properties of the kernel function~$\kappa$ at the endpoints~$\pm 1$.
+We then present applications of this result to various kernels, including those coming from deep networks, showing in particular that the RKHSs associated to deep and shallow ReLU networks are the same (up to parity constraints).
+
+\subsection{Statement of our main theorem}
+
+We now state our main result regarding the asymptotic eigenvalue decay of dot-product kernels.
+Recall that we consider a kernel of the form~$k(x, y) = \kappa(x^\top y)$ for~$x, y \in \Sbb^{\dmone}$,
+and seek to obtain decay estimates on the eigenvalues~$\mu_k$ defined in~\eqref{eq:mu_k}.
+We now state our main theorem, which derives the asymptotic decay of~$\mu_k$ with~$k$ in terms of differentiability properties of~$\kappa$ around~$\{\pm 1\}$, assuming that~$\kappa$ is infinitely differentiable on~$(-1,1)$. This latter condition is always verified when~$\kappa$ takes the form of a power series~\eqref{eq:kappa_series} with~$\kappa(1) = 1$, since the radius of convergence is at least~$1$.
+We also require a technical condition, namely the ability to ``differentiate asymptotic expansions'' of~$\kappa$ at~$\pm 1$, which holds for the kernels considered in this work.
+
+\begin{theorem}[Decay from regularity of~$\kappa$ at endpoints, simplified]
+\label{thm:decay}
+Let~$\kappa: [-1,1] \to \R$ be a function that is~$C^\infty$ on~$(-1,1)$ and has the following asymptotic expansions around~$\pm 1$:
+\begin{align}
+\kappa(1-t) &= p_1(t) + c_{1} t^{\nu} + o(t^{\nu}) \\
+\kappa(-1+t) &= p_{-1}(t) + c_{-1} t^{\nu} + o(t^{\nu}),
+\end{align}
+for~$t \geq 0$, where~$p_1, p_{-1}$ are polynomials and~$\nu > 0$ is not an integer.
+Also, assume that the derivatives of~$\kappa$ admit similar expansions obtained by differentiating the above ones.
+Then, there is an absolute constant~$C(d,\nu)$ depending on~$d$ and~$\nu$ such that:
+\begin{itemize}[noitemsep]
+	\item For~$k$ even, if~$c_1 \ne -c_{-1}$: $\mu_k \sim (c_1 + c_{-1}) C(d,\nu) k^{-d-2 \nu + 1}$;
+	\item For~$k$ odd, if~$c_1 \ne c_{-1}$: $\mu_k \sim (c_1 - c_{-1}) C(d,\nu) k^{-d-2 \nu + 1}$.
+\end{itemize}
+In the case~$|c_1| = |c_{-1}|$, then we have~$\mu_k = o(k^{-d-2 \nu + 1})$ for one of the two parities (or both if~$c_1 = c_{-1} = 0$).
+If~$\kappa$ is infinitely differentiable on~$[-1, 1]$ so that no such~$\nu$ exists, then~$\mu_k$ decays faster than any polynomial.
+\end{theorem}
+
+The full theorem is given in Appendix~\ref{sec:appx_thm_proof} along with its proof, and requires an additional mild technical condition on the expansion which is verified for all kernels considered in this paper, namely, a finite number of terms in the expansions with exponents between~$\nu$ and~$\nu+1$.
+The proof relies on integration by parts using properties of Legendre polynomials, in a way reminiscent of fast decays of Fourier series for differentiable functions, and on precise computations of the decay for simple functions of the form~$t \mapsto (1 - t^2)^\nu$.
+This allows us to obtain the asymptotic decay for general kernel functions~$\kappa$ as long as the behavior around the endpoints is known, in contrast to previous approaches which rely on the precise form of~$\kappa$, or of the corresponding activation in the case of arc-cosine kernels~\citep{bach2017breaking,basri2019convergence,bietti2019inductive,geifman2020similarity}.
+This enables the study of more general and complex kernels, such as those arising from deep networks, as discussed below.
+When~$\kappa$ is of the form~$\kappa(t) = \sum_k b_k t^k$, the exponent~$\nu$ in Theorem~\ref{thm:decay} is also related to the decay of coefficients~$b_k$.
+Such coefficients provide a dimension-free description of the kernel which may be useful for instance in the study of kernel methods in certain high-dimensional regimes~\citep[see, \eg,][]{el2010spectrum,ghorbani2019linearized,liang2019risk}.
+We show in Appendix~\ref{sub:appx_dimension_free} that the~$b_k$ may be recovered from the~$\mu_k$ by taking high-dimensional limits~$d \to \infty$, and that they decay as~$k^{-\nu-1}$.
+
+
+\subsection{Consequences for ReLU networks}
+\label{sub:deep_relu}
+
+When considering neural networks with ReLU activations, the corresponding random features and neural tangent kernels depend on the arc-cosine functions~$\kappa_1$ and~$\kappa_0$ defined in~\eqref{eq:kappa_arccos}.
+These have the following expansions (with generalized exponents) near~$+1$:
+\begin{align}
+\kappa_0(1 - t) &= 1 - \frac{\sqrt{2}}{\pi} t^{1/2}  + O(t^{3/2}) \label{eq:kappa0_expansion} \\
+\kappa_1(1 - t) &= 1 - t + \frac{2 \sqrt{2}}{3 \pi} t^{3/2} + O(t^{5/2}). \label{eq:kappa1_expansion}
+\end{align}
+Indeed, the first follows from integrating the expansion of the derivative using the relation $\frac{d}{dt}\arccos(1-t) = \frac{1}{\sqrt{2t}\sqrt{1 - t/2}}$ and the second follows from the first using the expression of~$\kappa_1$ in~\eqref{eq:kappa_arccos}.
+Near~$-1$, we have by symmetry~$\kappa_0(-1+t) = 1 - \kappa_0(1-t) = \frac{\sqrt{2}}{\pi} t^{1/2}  + O(t^{3/2})$, and we have $\kappa_1(-1+t) = \frac{2\sqrt{2}}{3 \pi} t^{3/2} + O(t^{5/3})$ by using~$\kappa_1' = \kappa_0$ and~$\kappa_1(-1) = 0$.
+The ability to differentiate the expansions follows from~\citep[Theorem VI.8, p.419]{flajolet2009analytic}, together with a complex-analytic property known as~$\Delta$-analyticity, which was shown to hold for RF and NTK kernels by~\citet{chen2020deep}.
+By Theorem~\ref{thm:decay}, we immediately obtain a decay of~$k^{-d-2}$ for even coefficients for~$\kappa_1$, and~$k^{-d}$ for odd coefficients for~$\kappa_0$, recovering results of~\citet{bach2017breaking}.
+For the two-layer ReLU NTK, we have~$\kappa^2_{\NTK}(u) = u \kappa_0(u) + \kappa_1(u)$, leading to a similar expansion to~$\kappa_0$ and thus decay, up to a change of parity due to the factor~$u$ which changes signs in the expansion around~$-1$; this recovers~\citet{bietti2019inductive}.
+We note that for these specific kernels,~\citet{bach2017breaking,bietti2019inductive} show in addition that coefficients of the opposite parity are exactly zero for large enough~$k$, which imposes parity constraints on functions in the RKHS, although such a constraint may be removed in the NTK case by adding a zero-initialized bias term~\citep{basri2019convergence}, leading to a kernel~$\kappa_{\NTK,b}(u) = (u+1) \kappa_0(u) + \kappa_1(u)$.
+
+\paragraph{Deep networks.}
+Recall from Section~\ref{sub:nn_kernels} that the RF and NTK kernels for deep ReLU networks may be obtained through compositions and products using the functions~$\kappa_1$ and~$\kappa_0$.
+Since asymptotic expansions can be composed and multiplied, we can then obtain expansions for the deep RF and NTK kernels.
+The following results show that such kernels have the same eigenvalue decay as the ones for the corresponding shallow (two-layer) networks.
+\begin{corollary}[Deep RF decay.]
+\label{cor:rf_decay}
+For the random neuron kernel~$\kappa^L_{\RF}$ of an~$L$-layer ReLU network with~$L \geq 3$,
+we have~$\mu_k \sim C(d,L) k^{-d-2}$, where~$C(d,L)$ is different depending on the parity of~$k$ and grows linearly with~$L$.
+\end{corollary}
+\begin{corollary}[Deep NTK decay.]
+\label{cor:ntk_decay}
+For the neural tangent kernel~$\kappa^L_{\NTK}$ of an~$L$-layer ReLU network with~$L \geq 3$,
+we have~$\mu_k \sim C(d, L) k^{-d}$, where~$C(d,L)$ is different depending on the parity of~$k$ and grows quadratically with~$L$ (it grows linearly with~$L$ when considering the normalized NTK~$\kappa^L_{\NTK}/L$, which satisfies~$\kappa^L_{\NTK}(1)/L=1$).
+\end{corollary}
+The proofs, given in Appendix~\ref{sec:appx_proofs}, use the fact that~$\kappa_1 \circ \kappa_1$ and~$\kappa_1$ have the same non-integer exponent factors in their expansions, and similarly for~$\kappa_0 \circ \kappa_1$ and~$\kappa_0$.
+One benefit compared to the shallow case is that the odd and even coefficients are both non-zero with the same decay, which removes the parity constraints, but as mentioned before, simple modifications of the shallow kernels can yield the same effect.
+
+
+\paragraph{The finite neuron case.}
+For two-layer networks with a finite number of neurons, the obtained models correspond to random feature approximations of the limiting kernels~\citep{rahimi2007}.
+Then, one may approximate RKHS functions and achieve optimal rates in non-parametric regression as long as the number of random features exceeds a certain degrees-of-freedom quantity~\citep{bach2017equivalence,rudi2017generalization}, which is similar to standard such quantities in the analysis of ridge regression~\citep{caponnetto2007optimal}, at least when the data are uniformly distributed on the sphere (otherwise the quantity involved may be larger unless features are sampled non-uniformly).
+Such a number of random features is optimal for a given eigenvalue decay of the integral operator~\citep{bach2017equivalence}, which implies that the shallow random feature architectures provides optimal approximation for the multi-layer ReLU kernels as well, since the shallow and deep kernels have the same decay, up to the parity constraint.
+In order to overcome this constraint for shallow kernels while preserving decay, one may consider vector-valued random features of the form~$(\sigma(w^\top x), x_1 \sigma(w^\top x), \ldots, x_d \sigma(w^\top x))$ with~$w \sim \Ncal(0, I)$, leading to a kernel~$\kappa_{\sigma,b}(u) = (1 + u) \kappa_\sigma(u)$, where~$\kappa_\sigma$ is the random feature kernel corresponding to~$\sigma$.
+With~$\sigma(u) = \max(0,u)$,~$\kappa_{\sigma,b}$ has the same decay as~$\kappa^L_{\RF}$, and when~$\sigma(u) = \1\{u \geq 0\}$ it has the same decay as~$\kappa^L_{\NTK}$.
+
+
+\subsection{Extensions to other kernels}
+\label{sub:extensions}
+
+We now provide other examples of kernels for which Theorem~\ref{thm:decay} provides approximation properties thanks to its generality.
+
+\paragraph{Laplace kernel and generalizations.}
+The Laplace kernel~$k_{c}(x, y) = e^{-c\|x - y\|}$ has been found to provide similar empirical behavior to neural networks when fitting randomly labeled data with gradient descent~\citep{belkin2018understand}.
+Recently, \citet{geifman2020similarity} have shown that when inputs are on the sphere, the Laplace kernel has the same decay as the NTK, which may suggest a similar conditioning of the optimization problem as for fully-connected networks, as discussed in Section~\ref{sub:dp_kernel_approx}.
+Denoting~$\kappa_{c}(u) = e^{-c\sqrt{1-u}}$ so that~$k_{c}(x, y) = \kappa_{c\sqrt{2}}(x^\top y)$, we may easily recover this result using Theorem~\ref{thm:decay} by noticing that~$\kappa_{c}$ is infinitely differentiable around~$-1$ and satisfies
+\begin{equation*}
+\kappa_c(1-t) = e^{-c\sqrt{t}} = 1 - c\sqrt{t} + O(t),
+\end{equation*}
+which yields the same decay~$k^{-d}$ as the NTK.
+\citet{geifman2020similarity} also consider a heuristic generalization of the Laplace kernel with different exponents, $\kappa_{c,\gamma}(u) = e^{-c(1-u)^\gamma}$.
+Theorem~\ref{thm:decay} allows us to obtain a precise decay for this kernel as well using~$\kappa_{c,\gamma}(1-t) = 1 - c t^\gamma + O(t^{2 \gamma})$, which is of the form~$k^{-d-2 \gamma+1}$ for non-integer~$\gamma > 0$, and in particular approaches the limiting order of smoothness~$(d-1)/2$ when~$\gamma \to 0$.\footnote{For~$\kappa_c$ and~$\kappa_{c,\gamma}$, the ability to differentiate expansions is straightforward since we have the exact expansion~$\kappa_{c,\gamma}(u) = \sum_k c^k (1 - u)^{\gamma k} / k!$, which may be differentiated term-by-term.}
+
+\paragraph{Deep kernels with step activations.}
+We saw in Section~\ref{sub:deep_relu} that for ReLU activations, depth does not change the decay of the corresponding kernels.
+In contrast, when considering step activations~$\sigma(u) = \1\{u \geq 0\}$, we show in Appendix~\ref{sub:deep_step_decay} that approximation properties of the corresponding random neuron kernels (of the form~$\kappa_0 \circ \cdots \circ \kappa_0$) improve with depth, leading to a decay~$k^{-d-2 \nu+1}$ with $\nu = 1/2^{L-1}$ for~$L$ layers. This also leads to an RKHS which becomes as large as allowed (order of smoothness close to~$(d-1)/2$) when~$L \to \infty$.
+While this may suggest a benefit of depth, note that step activations make optimization hard for anything beyond a linear regime with random weights, since the gradients with respect to inner neurons vanish.
+Theorem~\ref{thm:decay} may also be applied to deep kernels with other positively homogeneous activations~$\sigma_s(u) = \max(0, u)^s$ with~$s \geq 2$, for which endpoint expansions easily follow from those of~$\kappa_0$ or~$\kappa_1$ through integration.
+
+\paragraph{Infinitely differentiable kernels.}
+Finally, we note that Theorem~\ref{thm:decay} shows that kernels associated to infinitely differentiable activations (which are themselves infinitely differentiable, see~\citet{daniely2016toward}\footnote{This requires the mild additional condition that each derivative of the activation is in~$L^2$ w.r.t.~the Gaussian measure.}), as well as Gaussian kernels on the sphere of the form~$e^{-c(1-x^\top y)}$, have faster decays than any polynomial. This results in a ``small'' RKHS that only contains smooth functions.
+See~\citet{azevedo2014sharp,minh2006mercer} for a more precise study of the decay for Gaussian kernels on the sphere.

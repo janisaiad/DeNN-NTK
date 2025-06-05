@@ -1,0 +1,157 @@
+%\documentclass[twoside]{article}
+
+\documentclass{uai2023}
+
+% \documentclass[11pt]{article}
+
+
+% % Fonts
+% \usepackage{palatino}
+% \linespread{1.05}			% Palatino needs more leading (space between lines)
+% \usepackage{times}
+% %\usepackage{mathpazo}		% use [sc] option for more line spacing
+% %\usepackage[T1]{fontenc}
+% % End Fonts
+
+% \usepackage[letterpaper,margin=1in]{geometry}
+% %\usepackage[margin=1.0in]{geometry}
+
+% \setlength{\parskip}{4pt}
+% \setlength{\parindent}{0pt}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{amsfonts,amsmath,amssymb,amsthm}       % blackboard math symbols
+\usepackage{array}
+%\usepackage{subcaption}
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage[dvipsnames]{xcolor}         % colors
+\usepackage{bm}
+
+%\usepackage{natbib}
+\usepackage[round]{natbib}
+\renewcommand{\bibname}{References}
+\renewcommand{\bibsection}{\subsubsection*{\bibname}}
+
+\usepackage{graphicx}
+\usepackage{subfigure}
+%\usepackage{booktabs}
+\usepackage{hyperref}
+% Attempt to make hyperref and algorithmic work together better:
+%\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+\usepackage{bigints}
+\usepackage{amssymb,amsopn,algorithm,algorithmic,float,bbm,bm,enumerate,color,multirow,gensymb}
+%\usepackage{algpseudocode} %
+%\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+%\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+
+\usepackage{epsfig,subfigure,graphicx}
+\usepackage{comment}
+%\usepackage[dvipsnames]{xcolor}
+%\usepackage{authblk}
+\usepackage{afterpage}
+\usepackage{thmtools,thm-restate}
+
+\input{notation}
+
+\usepackage[dvipsnames]{xcolor}
+%\usepackage[]{color-edits}
+\usepackage[suppress]{color-edits}
+\addauthor{ab}{blue}
+\addauthor{abg}{green}
+\addauthor{pc}{red}
+\addauthor{mb}{magenta}
+\addauthor{lz}{teal}
+
+\newcommand\pc[1]{\textcolor{red}{#1}} %Pedro's highlights 
+%\newcommand\ab[1]{\textcolor{blue}{#1}} %Arindam's highlights
+
+
+% \title{Deep Learning Optimization with Smooth Activations:\\Linear Width Suffices for the NTK condition}
+
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+%\bibliographystyle{plainnat}
+\renewcommand{\bibsection}{\subsubsection*{References}}
+
+\usepackage{xr} 
+\externaldocument{banerjee_558}
+
+\title{Neural Tangent Kernel at Initialization: Linear Width Suffices\\
+(Supplementary Material)}
+
+
+% Add authors
+\author[1]{\href{mailto:<jj@example.edu>?Subject=Your UAI 2023 paper}{Jane~J.~von~O'L\'opez}{}}
+\author[1]{Harry~Q.~Bovik}
+\author[1,2]{Further~Coauthor}
+\author[3]{Further~Coauthor}
+\author[1]{Further~Coauthor}
+\author[3]{Further~Coauthor}
+\author[3,1]{Further~Coauthor}
+% Add affiliations after the authors
+\affil[1]{%
+    Computer Science Dept.\\
+    Cranberry University\\
+    Pittsburgh, Pennsylvania, USA
+}
+\affil[2]{%
+    Second Affiliation\\
+    Address\\
+    …
+}
+\affil[3]{%
+    Another Affiliation\\
+    Address\\
+    …
+  }
+
+
+% \author{%
+% %\hspace*{-10mm}
+%   Arindam Banerjee \\ 
+%   Department of Computer Science\\
+%   University of Illinois  Urbana-Champaign\\
+%   \texttt{arindamb@illinois.edu} \\
+%   \and
+%   Pedro Cisneros-Velarde\\
+%     Department of Computer Science\\
+%     \hspace*{-5mm} University of Illinois Urbana-Champaign\\
+%     \texttt{pacisne@gmail.com}
+%   \and
+%     Libin Zhu\\
+%     Department of Computer Science\\
+%     University of California, San Diego\\
+%     \texttt{l5zhu@ucsd.edu}
+%     \and
+%     Mikhail Belkin\\ 
+%     Halicioglu Data Science Institute\\
+%     University of California, San Diego\\
+%     \texttt{mbelkin@ucsd.edu}
+% } 
+
+% \maketitle
+\begin{document}
+  
+\onecolumn %% Turn this off if single column is desired for the supplement
+\maketitle
+\appendix
+
+\section{NEURAL TANGENT KERNEL AT INITIALIZATION}
+\label{app:arXiv_ntk}
+\input{app/arx1app_ntk}
+
+
+\end{document}

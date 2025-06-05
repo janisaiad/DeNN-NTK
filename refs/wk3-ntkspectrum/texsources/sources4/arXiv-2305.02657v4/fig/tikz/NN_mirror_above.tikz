@@ -1,0 +1,103 @@
+\usetikzlibrary{positioning}
+
+\newcommand{\myfontsize}{11\fontsize{8pt}{12pt}\selectfont}
+\newcommand{\minimumsize}{0.8cm}
+\newcommand{\upsize}{0.65}
+
+\begin{tikzpicture}[x=1.95cm, y=1.2cm, >=stealth]
+\centering
+		% % input layer nodes
+		% \foreach \i in {1, ..., 3} {
+		% 	\node[circle, draw=black, fill=white, minimum size=\minimumsize] (x\i) at (0, -\i+2.75) {};}
+		% \node at (0, -1) {$\vdots$};
+		% \node[circle, draw=black, fill=white, minimum size=\minimumsize] (x4) at (0, -1.75) {};
+  
+        % input layer nodes
+		\foreach \i in {1, ..., 3} {
+			\node[circle, draw=black, fill=white, minimum size=1cm] (x\i) at (0, -\i+2.75) {$x_{\i}$};}
+		\node at (0, -1) {$\vdots$};
+		\node[circle, draw=black, fill=white, minimum size=1cm] (x4) at (0, -1.75) {$x_d$};
+		
+		% hidden layer 1 nodes
+		\foreach \i in {1, ..., 2} {
+			\node[circle, draw=black, fill=white, minimum size=\minimumsize] (a11\i) at (1.5, -\i+3.5+\upsize) {};}
+     	\node at (1.5, 0.75+\upsize) {$\vdots$};
+		\node[circle, draw=black, fill=white, minimum size=\minimumsize] (a113) at (1.5, \upsize) {};
+	
+	    \foreach \i in {1, ..., 2} {
+		    \node[circle, draw=black, fill=white, minimum size=\minimumsize] (a12\i) at (1.5, -\i+1-\upsize){};} 
+         \node[circle, draw=black, fill=white, minimum size=\minimumsize] (a123) at (1.5, -2.5-\upsize){};
+         \node at (1.5, -1.75-\upsize) {$\vdots$};
+		
+		
+		% other hidden layers
+		\foreach \i in {1, ..., 2} {
+			\node[circle, draw=black, fill=white, minimum size=\minimumsize] (a31\i) at (3, -\i+3.5+\upsize) {};		}
+		\node at (3, 0.75+\upsize) {$\vdots$};
+		\node[circle, draw=black, fill=white, minimum size=\minimumsize] (a313) at (3, \upsize) {};
+		
+		\foreach \i in {1, ..., 2} {
+			\node[circle, draw=black, fill=white, minimum size=\minimumsize] (a32\i) at (3, -\i+1-\upsize){};	} 
+		\node[circle, draw=black, fill=white, minimum size=\minimumsize] (a323) at (3, -3-\upsize+0.5){};
+		\node at (3, -1.75-\upsize) {$\vdots$};
+	
+		% hidden layer L nodes
+	    \foreach \i in {1, ..., 2} {
+	    	\node[circle, draw=black, fill=white, minimum size=\minimumsize] (aL1\i) at (4.5, -\i+3.5+\upsize) {};}
+	    \node at (4.5, 0.75+\upsize) {$\vdots$};
+	    \node[circle, draw=black, fill=white, minimum size=\minimumsize] (aL13) at (4.5, \upsize) {};
+	    
+	    \foreach \i in {1, ..., 2} {
+	    	\node[circle, draw=black, fill=white, minimum size=\minimumsize] (aL2\i) at (4.5, -\i+1-\upsize){};} 
+	    \node[circle, draw=black, fill=white, minimum size=\minimumsize] (aL23) at (4.5, -2.5-\upsize){};
+	    \node at (4.5, -1.75-\upsize) {$\vdots$};
+
+	
+	    
+		
+		% hidden layer 5 nodes
+		\node[circle, draw=black, fill=white, minimum size=\minimumsize] (f1) at (6, 1.25+\upsize){$f^{(1)}$};
+		\node[circle, draw=black, fill=white, minimum size=\minimumsize] (f2) at (6, -1.25-\upsize){$f^{(2)}$};
+		
+		% output layer node
+		\node[circle, draw=black, fill=white, minimum size=\minimumsize] (o) at (7, 0) {$y$};
+		
+		% connections
+		\foreach \i in {1, ..., 4} {
+			\foreach \j in {1, ..., 3} {
+				\draw (x\i) -- (a11\j);
+				\draw (x\i) -- (a12\j);
+			}
+		}
+		
+	
+	   	% new connection between hidden layer 1, 2 and 3
+	    \foreach \i in {1,2,3} {
+	   	    \foreach \j in {1,2,3} {
+	   		    \draw (a11\i) -- (a31\j);
+	   		    \draw (a12\i) -- (a32\j);
+	   		    \draw (a31\i) -- (aL1\j);
+	   		    \draw (a32\i) -- (aL2\j);
+	   	    }
+	   }
+  
+	   
+		
+		% connections between hidden layer 3 and 4
+		\foreach \j in {1, ..., 3}{
+	           \draw (aL1\j) -- (f1);\draw (aL2\j) -- (f2);}
+           
+        \draw (f1) -- (o);
+        \draw (f2) -- (o);
+
+% labels for layers
+\node[above=0.5cm of a111] {Hidden layer 1};
+\node[above=0cm of a111] {$\bm{\alpha}^{(1,1)}$};
+\node[above=0cm of a121] {$\bm{\alpha}^{(1,2)}$};
+\node[above=0.5cm of a311] {$\cdots$};
+\node[above=0.5cm of aL11] {Hidden layer $L$};
+\node[above=0cm of aL11] {$\bm{\alpha}^{(L,1)}$};
+\node[above=0cm of aL21] {$\bm{\alpha}^{(L,2)}$};
+\node[above=0cm of x1] {Input};
+\node[above=0cm of o] {Output};
+\end{tikzpicture}

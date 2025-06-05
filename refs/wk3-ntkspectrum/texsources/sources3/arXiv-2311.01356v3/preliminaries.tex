@@ -1,0 +1,352 @@
+
+\section{Technical preliminaries}\label{sec:preliminaries}
+
+In this section, we discuss the necessary technical preliminaries for our proofs.
+
+\subsection{The gradient of ReLU networks}
+\label{subsec:gradient}
+
+To obtain bounds on the Lipschitz constant of a neural network,
+we will use the gradient of the network.
+To conveniently express this gradient, we introduce the following notation:
+For a vector $x \in \RR^N$ we define the diagonal matrix $\diag(x) \in \RR^{N \times N}$ via
+\begin{equation*}
+  \left(\diag(x)\right)_{i,j}
+  \defeq \begin{cases}
+            \mathbbm{1}_{x_i > 0},& i=j, \\
+            0,                    &i \neq j .
+          \end{cases}
+\end{equation*}
+This leads to the following recursive representation of a ReLU network $\Phi$
+with the same notation as in \Cref{assum:1}:
+Let $x =: x^{(0)} \in \RR^d$ and define recursively 
+\begin{align} \label{eq:d-matrices}
+  D^{(\ell)}(x)
+  &\defeq \diag(W^{(\ell)}x^{(\ell)} + b^{(\ell)}), \nonumber\\
+  x^{(\ell +1)}
+  &\defeq D^{(\ell)}(x) \cdot \left(W^{(\ell)}x^{(\ell)} + b^{(\ell)}\right)
+         = \relu(W^{(\ell)}x^{(\ell)} + b^{(\ell)}),
+  \quad 0 \leq \ell < L.
+\end{align}
+Then it holds $\Phi(x) = W^{(L)}x^{(L)} + b^{(L)}$.
+
+A ReLU network is not necessarily everywhere differentiable,
+since the ReLU itself is not differentiable at $0$.
+Nevertheless, the following proposition states how the gradient of a ReLU network
+can be computed almost everywhere.
+
+\begin{proposition}[cf.~{\cite[Theorem III.1]{berner2019towards}}]\label{prop:grad_relu}
+Let $\Phi : \RR^d \to \RR$ be a ReLU network. Then it holds for almost every $x \in \RR^d$ that $\Phi$ is differentiable at $x$ with
+\begin{equation*}
+\left(\nabla \Phi (x) \right)^T = W^{(L)} \cdot D^{(L-1)}(x) \cdot W^{(L-1)} \cdots D^{(0)}(x)\cdot W^{(0)}.
+\end{equation*}
+Here, the matrices $D^{(\ell)}(x)$ are defined as in \eqref{eq:d-matrices} and $\Phi$ is any realization of a random ReLU network as in \Cref{assum:1}. 
+\end{proposition}
+
+\subsection{The Lipschitz constant of ReLU networks}
+\label{subsec:lip}
+
+The following well-known proposition establishes a relation between the Lipschitz constant
+and the gradient of a function.
+
+\begin{proposition}\label{prop:lipgrad}
+  Let $f: \RR^d \to \RR$ be Lipschitz continuous and $M \subseteq \RR^d$ any measurable subset
+  of $\RR^d$ with Lebesgue measure $\lambda^d (\RR^d \setminus M) = 0$
+  such that $f$ is differentiable in every $x \in M$.
+  Then it holds that
+  \begin{equation*}
+    \lip(f) = \underset{x \in M}{\sup} \Vert \nabla f (x) \Vert_2.
+  \end{equation*}
+\end{proposition} 
+
+For the sake of completeness, we provide a proof of \Cref{prop:lipgrad} in \Cref{sec:prelim_proofs}.
+It should be noted that the existence of a set $M$
+as in the proposition follows from the fact that $f$ is Lipschitz continuous;
+this is known as Rademacher's theorem (cf.\ \cite[Section~3.1.2]{evans_measure_1992}). 
+
+Every ReLU network $\Phi$ is Lipschitz continuous as the composition of Lipschitz continuous functions.
+Hence, from \Cref{prop:grad_relu,prop:lipgrad}, we infer 
+\begin{equation}\label{eq:lowbound}
+\lip(\Phi)
+  \leq \underset{x \in \RR^d}{\sup}
+         \Vert
+           W^{(L)} \cdot D^{(L-1)}(x) \cdot W^{(L-1)} \cdots D^{(0)}(x)\cdot W^{(0)}
+         \Vert_2.
+\end{equation}
+We remark that in general, one does \emph{not} necessarily have equality
+in \eqref{eq:lowbound}, since the supremum is taken over all of $\RR^d$,
+including points at which $\Phi$ might not be differentiable.
+
+As an example, consider the shallow ReLU network $\Phi:\RR^2 \to \RR$ with three hidden neurons 
+built from the matrices $W^{(0)}\defeq \begin{pmatrix}1 & -1 \\ -1 & 1 \\ 2 & -1\end{pmatrix}$ and $W^{(1)} \defeq \begin{pmatrix} -1&1&1\end{pmatrix}$ and all biases equal to zero. 
+Then a direct computation shows that for each vector $(x,y) \in \RR^2$ it holds
+\begin{equation*}
+\left(W^{(1)}D^{(0)}(x,y)W^{(0)}\right)^T
+= \begin{pmatrix}
+    -\mathbbm{1}_{x>y}- \mathbbm{1}_{y > x} + 2\mathbbm{1}_{2x>y} \\
+    \mathbbm{1}_{x>y} + \mathbbm{1}_{y>x}- \mathbbm{1}_{2x>y}\end{pmatrix}
+= \begin{cases}
+    \begin{pmatrix}1\\0\end{pmatrix},  & x\neq y, 2x>y, \\[0.4cm]
+    \begin{pmatrix}-1\\1\end{pmatrix}, & x\neq y, 2x\leq y, \\[0.4cm]
+    \begin{pmatrix}2\\-1\end{pmatrix}, & x= y, 2x>y, \\[0.4cm]
+    \begin{pmatrix}0\\0\end{pmatrix},  & x= y, 2x\leq y.
+\end{cases}
+\end{equation*}
+Since $\Phi$ is Lipschitz continuous, differentiable on $\{(x,y) \in \RR^2: \ x\neq y \ \text{and} \ y\neq 2x\}$ and this set has full measure, we conclude using \Cref{prop:lipgrad} that $\lip(\Phi) = \sqrt{2}$. On the other hand, the above computation shows \begin{equation*}
+\underset{(x,y) \in \RR^2}{\sup} \Vert W^{(1)}D^{(0)}(x,y)W^{(0)} \Vert_2 = \sqrt{5}>\lip(\Phi).
+\end{equation*}
+
+The estimate \eqref{eq:lowbound} is essential for our derivation of \emph{upper} bounds
+for Lipschitz constants of random ReLU networks.
+On the other hand, for any $x_0 \in \RR^d$ with the property that $\Phi$ is differentiable at $x_0$ 
+it holds
+\begin{equation}\label{eq:upbound}
+  \lip(\Phi) \geq \Vert \nabla \Phi(x_0) \Vert_2 \, ,
+\end{equation}
+which also follows directly from \Cref{prop:grad_relu,prop:lipgrad}. 
+This will be useful to derive \emph{lower} bounds for Lipschitz constants of random ReLU networks. 
+
+
+For technical reasons, since we form expressions such as
+$\EE [\lip (\Phi)]$, it is important to observe that the map
+\begin{equation*}
+  (W^{(0)}, \dots, W^{(L)}, b^{(0)}, \dots, b^{(L)}) \mapsto \lip(\Phi),
+\end{equation*}
+where $\Phi$ is the ReLU network built from $(W^{(0)}, \dots, W^{(L)}, b^{(0)}, \dots, b^{(L)})$,
+is measurable.
+This follows from the continuity of the map
+\begin{equation*}
+  (x,y) \mapsto \frac{\abs{ \Phi(x) - \Phi(y)} }{\Vert x - y \Vert_2}
+\end{equation*}
+on $\{ (x,y) \in \RR^{d} \times \RR^d \colon x \neq y \}$ for a fixed network $\Phi$,
+combined with the separability of the latter set.
+
+\subsection{Covering numbers and VC-dimension}
+
+Let $(T, \varrho)$ be a metric space.
+For $\varepsilon > 0$, we define the $\varepsilon$-\emph{covering number} of $T$ as
+\begin{equation*}
+  \mathcal{N}(T,\varrho,\varepsilon)
+  \defeq \inf
+         \left\{
+           \vert K \vert : \ K \subseteq T, \ \bigcup_{k \in K} \overline{B}^\varrho_T(k,\eps) = T
+         \right\}
+   \in   \NN \cup \{\infty\},
+\end{equation*} 
+where $\vert K\vert$ denotes the cardinality of a set $K$.
+Any set $K \subseteq T$ with $\bigcup_{k \in K} \overline{B}^\varrho_T(k,\eps) = T$
+is called an $\eps$-\emph{net} of $T$.
+
+
+It is well-known that the $\eps$-covering number of the unit ball in $k$-dimensional Euclidean space 
+with respect to the $\Vert \cdot \Vert_2$-norm can be upper bounded by $\left(1 + \frac{2}{\eps}\right)^k$ (see, e.g., \cite[Corollary 4.2.13]{vershynin_high-dimensional_2018}). 
+We, however, need a slightly modified version of this result, which we prove in \Cref{sec:prelim_proofs}.
+\begin{proposition}\label{prop:covering_ball}
+  Let $\eps>0$ and $V \subseteq \RR^k$ be a linear subspace of $\RR^k$.
+  Then it holds 
+  \begin{equation*}
+    \mathcal{N}(\overline{B}_k(0,1) \cap V, \Vert \cdot \Vert_2, \eps) \leq \left(\frac{2}{\eps} + 1\right)^{\dim(V)}.
+  \end{equation*}
+\end{proposition}
+
+For a set $\mathcal{F}$ of Boolean functions defined on a set $\Omega$ (i.e., $\mathcal{F} \subseteq \{f: \ \Omega \to \{0,1\}\}$),
+we denote by $\vc(\mathcal{F})$ its \emph{VC-dimension}, i.e., 
+\begin{equation*}
+  \vc(\mathcal{F})
+  \defeq \sup
+         \left\{
+           \abs{\Lambda}
+           : \
+           \Lambda \subseteq \Omega, \ 
+           \left\vert \left\{ \fres{f}{\Lambda}: \ f \in \mathcal{F}\right\}\right\vert = 2^{\abs{\Lambda}}
+         \right\}.
+\end{equation*}
+We refer to \cite[Chapter 6]{shalev2014understanding}
+and \cite[Chapter 8.3]{vershynin_high-dimensional_2018} for details on the concept of the VC-dimension.
+
+It is well-known that the VC-dimension of the class of homogeneous halfspaces in $k$-dimensional Euclidean space equals $k$ (see, e.g., \cite[Theorem 9.2]{shalev2014understanding}). 
+As in the case of the covering number of Euclidean balls, we need a slightly modified version of this result. The proof is also deferred to \Cref{sec:prelim_proofs}.
+\begin{proposition}\label{prop:vc_half_spaces_2}
+Let $k \in \NN$ and $V \subseteq \RR^k$ be a linear subspace. 
+For $\alpha \in \RR^k$, we define
+\begin{equation*}
+f_\alpha: \quad \RR^{k} \to \{0,1\},
+    \quad x \mapsto \mathbbm{1}_{\alpha^Tx > 0}.
+\end{equation*}
+Let $\mathcal{F} \defeq \{\fres{f_\alpha}{V} : \ \alpha \in V\}$. Then it holds $\vc(\mathcal{F}) = \dim(V)$.
+\end{proposition}
+We will further make use of the following estimate, which enables us to bound the covering number of a class of Boolean functions with respect to $L^2(\mu)$ for some probability measure $\mu$ using the VC-dimension of this set.
+
+\begin{proposition}[{cf.\ \cite[Theorem 8.3.18]{vershynin_high-dimensional_2018}}] \label{prop:covering_vc}
+  There exists an absolute constant $C > 0$ with the following property:
+  For any class of measurable Boolean functions $\mathcal{F} \neq \emptyset$ on some probability space $(\Omega, \mathscr{A}, \mu)$
+  and for every $\eps \in (0,1)$, we have
+  \begin{equation*}
+    \mathcal{N}(\mathcal{F}, L^2(\mu), \eps)
+    \leq \left(\frac{2}{\eps}\right)^{C \cdot  \vc(\mathcal{F})}.
+  \end{equation*}
+\end{proposition}
+
+\subsection{Sub-gaussian random variables \paul{and Gaussian width}}
+
+Sub-gaussian random variables occur frequently over the course of our paper;
+we therefore briefly recall their definition in this subsection.
+We refer to  \cite[Chapters 2.5 and 3.4]{vershynin_high-dimensional_2018}
+for a detailed introduction to this topic.
+
+A real-valued random variable $X$ is called \emph{sub-gaussian} if 
+\begin{equation*}
+  \PP (\vert X \vert \geq t ) \leq 2 \exp(-t^2 / C_1^2)
+\end{equation*}
+holds with a constant $C_1 > 0$ and all $t > 0$.
+This is equivalent (see \cite[Proposition~2.5.2]{vershynin_high-dimensional_2018}) to the existence of a constant $C_2>0$ satisfying
+\begin{equation}\label{eq:sub-gaussian}
+  \EE \left[ \exp(X^2 / C_2^2)\right] \leq 2.
+\end{equation}
+The \emph{sub-gaussian} norm of $X$ (see \cite[Equation~(2.13)]{vershynin_high-dimensional_2018}) is defined as the infimum of all numbers
+satisfying \eqref{eq:sub-gaussian}, i.e.,
+\begin{equation*}
+  \Vert X \Vert_{\psi_2}
+  \defeq \inf \{t >0: \ \EE \left[ \exp(X^2 / t^2)\right] \leq 2\}.
+\end{equation*}
+Following \cite[Definition~3.4.1]{vershynin_high-dimensional_2018}, a $k$-dimensional \emph{random vector} $X$ is called sub-gaussian
+if and only if $\langle X,x \rangle$ is sub-gaussian for every $x \in \RR^k$.
+The sub-gaussian norm of $X$ is defined as
+\begin{equation*}
+  \Vert X \Vert_{\psi_2}
+  \defeq \underset{x \in \mathbb{S}^{k-1}}{\sup} \Vert \langle X,x \rangle \Vert_{\psi_2}.
+\end{equation*}
+
+In \Cref{sec:low_bound}, we will use the notion of Gaussian width since this quantity appears in the high-probability version of the matrix deviation inequality \cite[Theorem~3]{Liaw2017}. Specifically, we will need to bound the Gaussian width of low-dimensional balls in a higher-dimensional space. Also here, we defer the proof to \Cref{sec:prelim_proofs}.
+\begin{proposition}\label{prop:gauss_width}
+Let $k \in \NN$ and $\emptyset \neq T \subseteq \RR^k$. Following \cite[Definition~7.5.1]{vershynin_high-dimensional_2018}, we then define
+\begin{align*}
+w(T) \defeq  \underset{g \sim \mathcal{N}(0, I_k)}{\EE}  \left[ \underset{x \in T}{\sup}\  \langle g, x \rangle \right].
+\end{align*}
+$w(T)$ is called the \emph{Gaussian width} of $T$. 
+
+Let $V \subseteq \RR^k$ be a linear subspace of $\RR^k$. Then it holds
+\begin{equation*}
+w(\overline{B}_k(0,1) \cap V) \leq \sqrt{\dim(V)}.
+\end{equation*}
+\end{proposition}
+
+\subsection{Omitting the ReLU activation}
+
+It is natural to ask how the Lipschitz constant of a ReLU network is related to the Lipschitz constant of the corresponding linear network, i.e., using the identity function instead of the $\relu$ as the activation function.
+Precisely, for a given random $\relu$ network $\Phi: \RR^d \to \RR$ that is defined as in \Cref{sec:Background}, we define the corresponding linear network via
+\begin{equation}\label{eq:tildelinear}
+\widetilde{\Phi} \defeq V^{(L)} \circ V^{(L-1)} \circ \cdots \circ  V^{(1)} \circ V^{(0)}.
+\end{equation}
+We first note that $\widetilde{\Phi}$ is an affine map with
+\begin{equation*}
+\lip(\widetilde{\Phi}) = \Vert W^{(L)}\cdot W^{(L-1)} \cdots W^{(1)} \cdot W^{(0)}\Vert_2.
+\end{equation*}
+At first glance, one might be tempted to think that the ReLU activation reduces the Lipschitz constant at most, since the ReLU itself is Lipschitz continuous with Lipschitz constant 1. 
+The following proposition, however, demonstrates that this is in general \emph{not} the case, even for shallow networks. We defer the proof to \Cref{sec:prelim_proofs}.
+\begin{proposition}\label{prop:Cbound}
+Let $\Phi: \RR^2 \to \RR$ be a random shallow ReLU network with width $N=3$ satisfying \Cref{assum:1}. 
+Moreover, let $C>0$ be arbitrary.
+Then with positive probability it holds for $\widetilde{\Phi}$ as in \eqref{eq:tildelinear} that
+\begin{equation*}
+\lip(\Phi) > C \cdot \lip(\widetilde{\Phi}).
+\end{equation*}
+\end{proposition}
+Hence, we see that in general it does \emph{not} hold
+\begin{equation*}
+\lip(\Phi) \lesssim \lip(\widetilde{\Phi}) \quad \text{almost surely.}
+\end{equation*}
+Nevertheless, \Cref{thm:main_1,thm:main_shallow_lower} show that at least for shallow networks, we indeed have that
+\begin{equation*}
+\lip(\Phi) \asymp \lip(\widetilde{\Phi}) \quad \text{with high probability}
+\end{equation*} 
+but proving this is nontrivial.
+
+Remarkably, the converse estimate to what is considered in \Cref{prop:Cbound} even holds deterministically, at least for shallow networks.
+\begin{proposition}\label{prop:shallow_low_linear}
+Let $d, N \in \NN$ and let $\Phi: \RR^d \to \RR$ be a fixed (deterministic) shallow ReLU network with $N$ hidden neurons. Then it holds for $\widetilde{\Phi}$ as in \eqref{eq:tildelinear} that
+\begin{equation*}
+\lip(\Phi) \geq \frac{1}{2} \lip(\widetilde{\Phi}).
+\end{equation*}
+\end{proposition}
+\begin{proof}
+In this proof, we use a different notation for  shallow ReLU networks than the one introduced in \Cref{sec:Background}. 
+Specifically, we write 
+\begin{equation*}
+\Phi(x) \defeq \sum_{i=1}^N \left[c_i \relu(\langle a_i, x \rangle + b_i)\right] + \beta \quad \text{and} \quad \widetilde{\Phi}(x) \defeq \sum_{i=1}^N \left[c_i \cdot (\langle a_i, x \rangle + b_i)\right] + \beta
+\end{equation*}
+with $a_1, ..., a_N \in \RR^d$, $b_1, ..., b_N, c_1, ..., c_N, \beta \in \RR$.
+
+Let 
+\begin{equation*}
+v_0 \defeq \sum_{i=1}^N c_ia_i \in \RR^d.
+\end{equation*}
+If $v_0 = 0$, there is nothing to show, since in that case we have $\lip(\widetilde{\Phi}) = \Vert v_0 \Vert_2 = 0$. 
+Hence, we assume $v_0 \neq 0$ and define $v \defeq \frac{v_0}{\Vert v_0 \Vert_2}$.
+We denote $\alpha_i \defeq \langle a_i, v \rangle$ for $i \in \{1,...,N\}$ and define the sets
+\begin{align*}
+I_+ &\defeq \{i \in \{1,...,N\}: \ \alpha_i > 0\}, \\
+ I_- &\defeq \{i \in \{1,...,N\}: \ \alpha_i < 0\}, \\
+  I_0 &\defeq \{i \in \{1,...,N\}: \ \alpha_i = 0\} \quad \text{and} \\ 
+I &\defeq I_+ \cup I_-.
+\end{align*}
+We then see for every $t \in \RR$ that 
+\begin{align*}
+\Phi(tv) &= \sum_{i \in I_+} \left[c_i \relu(t \langle a_i, v \rangle + b_i)\right] + \sum_{i \in I_-} \left[c_i \relu(t \langle a_i, v \rangle + b_i)\right] + \sum_{i \in I_0} \left[c_i \relu(t\langle a_i,v \rangle + b_i)\right] + \beta \\
+&= \sum_{i \in I_+} \left[c_i \relu(t \alpha_i + b_i)\right] + \sum_{i \in I_-} \left[c_i \relu(t \alpha_i + b_i)\right] + \sum_{i \in I_0} \left[c_i \relu(b_i)\right] + \beta.
+\end{align*}
+Fix $t_0 \in \RR$ with 
+\begin{equation*}
+t_0 > \max \left\{-\frac{b_i}{\alpha_i}: \ i \in I\right\}.
+\end{equation*}
+For $i \in I_+$, this implies
+\begin{equation}\label{eq:t_0_1}
+t_0\alpha_i + b_i > \left(- \frac{b_i}{\alpha_i}\right) \alpha_i + b_i = 0 
+\end{equation}
+and for $i \in I_-$, we see
+\begin{equation}\label{eq:t_0_2}
+t_0\alpha_i + b_i < \left(- \frac{b_i}{\alpha_i}\right) \alpha_i + b_i = 0.
+\end{equation}
+By continuity, there exists $\delta > 0$ such that the inequalities \eqref{eq:t_0_1} and \eqref{eq:t_0_2} hold for any $t \in (t_0 - \delta, t_0 + \delta)$.
+In particular, it holds
+\begin{equation*}
+\Phi(t v) = \sum_{i \in I_+} \left[c_i\cdot (t \alpha_i + b_i)\right]+\sum_{i \in I_0} \left[c_i \relu(b_i)\right] + \beta
+\end{equation*}
+for every $t \in (t_0 - \delta, t_0 + \delta)$. 
+This means that $t \mapsto \Phi(tv)$ is differentiable on $(t_0 - \delta, t_0 + \delta)$ with
+\begin{equation*}
+\frac{\dd}{\dd t}\Big|_{t= t_0}\left[\Phi(tv)\right] = \sum_{i \in I_+} c_i \alpha_i.
+\end{equation*}
+We then get
+\begin{equation*}
+\left\vert \sum_{i \in I_+} c_i \alpha_i \right\vert = \left\vert \frac{\dd}{\dd t}\Big|_{t=t_0}\left[\Phi(tv)\right]\right\vert = \lim_{t \to t_0} \frac{\vert \Phi(tv) - \Phi(t_0v)\vert}{\vert t - t_0 \vert} = \lim_{t \to t_0} \frac{\vert \Phi(tv) - \Phi(t_0v)\vert}{\Vert tv - t_0v \Vert_2} \leq \lip(\Phi).
+\end{equation*}
+Similarly, by picking $t_0 < \min \left\{-\frac{b_i}{\alpha_i}: \ i \in I\right\}$, we get 
+\begin{equation*}
+\lip(\Phi) \geq \left\vert \sum_{i \in I_-} c_i \alpha_i \right\vert.
+\end{equation*}
+Hence, combining these two estimates, we arrive at
+\begin{equation*}
+\lip(\Phi) \geq \frac{1}{2} \left[ \left\vert \sum_{i \in I_+} c_i \alpha_i \right\vert + \left\vert \sum_{i \in I_-} c_i \alpha_i \right\vert\right] \geq \frac{1}{2} \left[\left\vert\sum_{i \in I} c_i \alpha_i  \right\vert\right] = \frac{1}{2} \left[\left\vert\sum_{i  = 1}^N c_i \alpha_i  \right\vert\right], 
+\end{equation*}
+where the last equality follows from $\alpha_i = 0$ for every $i \in I_0$. To get the final claim, note that
+\begin{align*}
+\left\vert\sum_{i  = 1}^N c_i \alpha_i  \right\vert = \left\vert\sum_{i  = 1}^N c_i \langle a_i, v \rangle  \right\vert =\left\vert \left\langle\sum_{i=1}^N c_i a_i, v \right\rangle \right\vert= \langle v_0, v \rangle = \Vert v_0 \Vert_2 = \lip(\widetilde{\Phi}), 
+\end{align*}
+as was to be shown. 
+\end{proof}
+This bound will be useful in order to derive a lower bound for the Lipschitz constant of \emph{shallow} ReLU networks. 
+Specifically, in order to get a lower bound on the Lipschitz constant of shallow random ReLU networks, 
+it suffices to establish a lower bound for $\Vert W^{(1)} W^{(0)} \Vert_2$ for a Gaussian matrix $W^{(0)} \in \RR^{N \times d}$ and a Gaussian row vector $W^{(1)} \in \RR^{1 \times N}$. We refer to \Cref{sec:low_bound_shallow} for the details. 
+
+Unfortunately, an analogous bound does not hold for \emph{deep} networks anymore, even for depth $L =2$, as is stated in the following proposition, the proof of which can also be found in \Cref{sec:prelim_proofs}.
+\begin{proposition}\label{prop:not_working_deep}
+We consider a ReLU network $\Phi: \RR \to \RR$ with depth $L=2$ and width $N=1$ satisfying \Cref{assum:1}. Moreover, we assume that $\PP(b^{(1)} \leq 0)> 0$. Then, it holds with positive probability for $\widetilde{\Phi}$ as in \Cref{eq:tildelinear} that 
+\begin{equation*}
+\lip(\Phi) = 0 < \lip(\widetilde{\Phi}).
+\end{equation*}
+\end{proposition}
+\Cref{prop:not_working_deep} shows that for deriving a lower bound on the Lipschitz constant in the case of deep networks,
+it is no longer sufficient to analyze the Lipschitz constant of the corresponding linear network. Instead, one must carry out a more detailed analysis of the gradients in this case (see \Cref{subsec:deep_lower}).
+
+

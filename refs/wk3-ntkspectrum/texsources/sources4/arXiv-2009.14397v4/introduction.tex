@@ -1,0 +1,33 @@
+%!TEX root = main.tex
+
+The question of which functions can be well approximated by neural networks is crucial for understanding when these models are successful, and has always been at the heart of the theoretical study of neural networks~\citep[\eg,][]{hornik1989multilayer,pinkus1999approximation}.
+While early works have mostly focused on shallow networks with only two layers, more recent works have shown benefits of deep networks for approximating certain classes of functions~\citep{eldan2016power,mhaskar2016deep,telgarsky2016benefits,daniely2017depth,yarotsky2017error,schmidt2020nonparametric}.
+Unfortunately, many of these approaches rely on constructions that are not currently known to be learnable using efficient algorithms.
+
+A separate line of work has considered over-parameterized networks with random neurons~\citep{neal1996bayesian}, which also display universal approximation properties while additionally providing efficient algorithms based on kernel methods or their approximations such as random features~\citep{rahimi2007,bach2017equivalence}.
+Many recent results on gradient-based optimization of certain over-parameterized networks have been shown to be equivalent to kernel methods with an architecture-specific kernel called the \emph{neural tangent kernel} (NTK) and thus also fall in this category~\citep[\eg,][]{jacot2018neural,li2018learning,allen2019convergence,du2019bgradient,du2019agradient,zou2019stochastic}.
+This regime has been coined \emph{lazy}~\citep{chizat2018note}, as it does not capture the common phenomenon where weights move significantly away from random initialization and thus may not provide a satisfying model for learning adaptive representations, in contrast to other settings such as the \emph{mean field} or \emph{active} regime, which captures complex training dynamics where weights may move in a non-trivial manner and adapt to the data~\citep[\eg,][]{chizat2018global,mei2018mean}.
+Nevertheless, one benefit compared to the mean field regime is that the kernel approach easily extends to deep architectures, leading to compositional kernels similar to the ones of~\citet{cho2009kernel,daniely2016toward}.
+Our goal in this paper is to study the role of depth in determining approximation properties for such kernels, with a focus on fully-connected deep ReLU networks.
+
+Our approximation results rely on the study of eigenvalue decays of integral operators associated to the obtained dot-product kernels on the sphere, which are diagonalized in the basis of spherical harmonics.
+This provides a characterization of the functions in the corresponding reproducing kernel Hilbert space (RKHS) in terms of their smoothness, and leads to convergence rates for non-parametric regression when the data are uniformly distributed on the sphere.
+We show that for ReLU networks, the eigenvalue decays for the corresponding deep kernels remain the same regardless of the depth of the network.
+Our key result is that the decay for a certain class of kernels is characterized by a property related to differentiability of the kernel function around the point where the two inputs are aligned.
+In particular, the property is preserved when adding layers with ReLU activations, showing that depth plays essentially no role for such networks in kernel regimes.
+This highlights the limitations of the kernel regime for understanding the power of depth in fully-connected networks, and calls for new models of deep networks beyond kernels~\citep[see, \eg,][for recent works in this direction]{allen2020backward,chen2020towards}.
+We also provide applications of our result to other kernels and architectures, and illustrate our results with numerical experiments on synthetic and real datasets.
+
+
+
+\paragraph{Related work.}
+Kernels for deep learning were originally derived by~\citet{neal1996bayesian} for shallow networks, and later for deep networks~\citep{cho2009kernel,daniely2016toward,lee2018deep,matthews2018gaussian}.
+\citet{smola2001regularization,minh2006mercer} study regularization properties of dot-product kernels on the sphere using spherical harmonics, and~\citet{bach2017breaking} derives eigenvalue decays for such dot-product kernels arising from shallow networks with positively homogeneous activations including the ReLU.
+Extensions to shallow NTK or Laplace kernels are studied by~\citet{basri2019convergence,bietti2019inductive,geifman2020similarity}.
+The observation that depth does not change the decay of the NTK was previously made by~\citet{basri2020frequency} empirically, and~\citet{geifman2020similarity} provide a lower bound on the eigenvalues for deep networks; our work makes this observation rigorous by providing tight asymptotic decays.
+Spectral properties of wide neural networks were also considered in~\citep{cao2019towards,fan2020spectra,ghorbani2019linearized,xie2017diverse,yang2019fine}.
+\citet{azevedo2014sharp,scetbon2020risk} also study eigenvalue decays for dot-product kernels but focus on kernels with geometric decays, while our main focus is on polynomial decays.
+Additional works on over-parameterized or infinite-width networks in lazy regimes include~\citep{allen2019learning,allen2019convergence,arora2019exact,arora2019fine,brand2020training,lee2020generalized,song2019quadratic}.
+
+Concurrently to our work,~\citet{chen2020deep} also studied the RKHS of the NTK for deep ReLU networks, showing that it is the same as for the Laplace kernel on the sphere. They achieve this by studying asymptotic decays of Taylor coefficients of the kernel function at zero using complex-analytic extensions of the kernel functions, and leveraging this to obtain both inclusions between the two RKHSs. In contrast, we obtain precise descriptions of the RKHS and regularization properties in the basis of spherical harmonics for various dot-product kernels through spectral decompositions of integral operators, using (real) asymptotic expansions of the kernel function around endpoints. The equality between the RKHS of the deep NTK and Laplace kernel then easily follows from our results by the fact that the two kernels have the same spectral decay.
+

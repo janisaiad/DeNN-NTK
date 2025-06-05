@@ -1,0 +1,41 @@
+
+In the above setup, for a suitable initialization of the layerwise weights, one can bound the spectral norm of the Hessian in the spectral norm ball around the initialization. Such results have appeared in the recent literature~\cite{CL-LZ-MB:20,CL-LZ-MB:21,AB-PCV-LZ-MB:22}, and we suitably adapt the result in~\citep[Theorem~4.1]{AB-PCV-LZ-MB:22}.
+
+\begin{restatable}[\textbf{Hessian Spectral Norm Bound}]{theo}{boundhess}
+\label{theo:bound-Hess}
+Consider Assumption~\ref{asmp:actinit} and that the elements of $W_0^{(l)}$, $l\in[L]$, are drawn i.i.d from $\cN(0,\nu_0^2)$, where $\nu_0^2 = \frac{\sigma_0^2}{c_{\phi,\sigma_0}}$ with $c_{\phi,\sigma_0} := \E_{z \sim \cN(0,\sigma_0^2)}[\phi^2(z)]$ \abdelete{$\sigma_0 = \frac{\sigma_1}{2\left(1 + \frac{2\sqrt{\log m}}{\sqrt{m}}\right)}, \sigma_1 > 0$}, and $\v_0$ is a random unit vector with $\norm{\v_0}_2=1$. Then, for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, 
+%$\rho_1=O(1)$ or 
+$\rho_1=O(\poly(L))$,  with probability at least $(1-\frac{2(L+1)}{m})$, we have 
+\begin{equation}
+\label{eq:bound_Hessian}
+   \max_{i \in [n]} ~\norm{ \nabla^2_\theta f(\theta;\x_i)}_2 \leq \frac{c_H}{\sqrt{m}}~,
+\end{equation}
+with $c_H = O(\poly(L)(1+\gamma^{2L}))$ where $\gamma := \frac{\rho}{\sqrt{m}} + \frac{2\sigma_0}{\sqrt{c_{\phi,\sigma_0}}} \left(1 + \frac{2 \sqrt{\log m}}{\sqrt{m}} \right) $. \end{restatable}
+
+\proof The proof follows by a direct extension of \citep[Theorem~4.1]{AB-PCV-LZ-MB:22}. \qed 
+
+\begin{remark}
+Note that the $c_{\phi,\sigma_0}$ term is a scaling factor to suitably normalize the layerwise inputs and shows up in prior work with smooth activations~\cite{SD-JL-HL-LW-XZ:19}. While such prior work have used the scaling explicitly in the model, i.e., a factor of $\sqrt{\frac{c_{\sigma}}{m c_{\phi,\sigma_0}}}$ where $c_{\sigma}$ in \cite{SD-JL-HL-LW-XZ:19} is $\frac{1}{c_{\phi,\sigma_0}}$ for us with $\sigma_0=1$, Theorem~\ref{theo:bound-Hess} has the equivalent scaling in the initialization variance. Note that we develop the results for general $\sigma_0$ so the effect of the choice of the variance is clear. \qed 
+\end{remark}
+
+
+\begin{remark}
+Note that for $L = \tilde{O}(1)$, $c_H = \poly(L)$. More generally ... \abcomment{maybe say $m$ needs to scale as $(\frac{2\sigma_0}{\sqrt{c_{\phi,\sigma_0}}} + \frac{\cdots}{\sqrt{m}})^L$ etc., or drop this}
+\end{remark}
+%
+%\begin{remark}[\textbf{Desirable operating regimes}]
+
+\abdelete{We also remark that choosing $\rho_1=O(1)$ yields the same result in Theorem~\ref{theo:bound-Hess}.}
+%
+\pcdelete{The work~\cite[Remark~4.1]{AB-PCV-LZ-MB:22} remarks that for any choice of the spectral norm radius $\rho < \sqrt{m}$, we can choose $\sigma_1 \leq 1 - \frac{\rho}{\sqrt{m}}$ ensuring $\gamma \leq 1$ and hence $c_H = O(\text{poly}(L))$. If $\rho = O(1)$, we can keep $\sigma_1 = 1$ so that $\gamma = 1 + \frac{O(1)}{\sqrt{m}}$, and $c_H = O(\text{poly(L)})$ as long as $L < \sqrt{m}$, which is common. Both of these give good choices for $\sigma_1$ and desirable operating regime for the result. If we choose $\sigma_1 > 1$, an undesirable operating regime, then $c_H = O(c^{\Theta(L)})$, $c >1$, and we will need $m = \Omega(c^{\Theta(L)})$ for the result to be of interest.}
+%
+\pcdelete{\pcedit{When the elements of $\v_0$ are drawn i.i.d from $\cN(0,\sigma_0^2)$ --- our setting ---,~\cite{AB-PCV-LZ-MB:22} show that, under the choices aforementioned for the parameters of the spectral ball, we can obtain $c_H=O(\polylog(m)\poly(L))$.}}
+%\qed 
+%\label{rem:gamma}
+%\end{remark}
+%
+\pcedit{
+\begin{remark}[\textbf{Difference in balls around initialization}]
+%
+Unlike the work~\citep{AB-PCV-LZ-MB:22} which considers the spectral ball $B_{\rho,\rho_1}^{\spec}(\theta_0)$ around the initialization point $\theta_0\in\R^d$, we consider the Euclidean ball $B_{\rho}^{\euc}(\theta_0)$, which has been a more common assumption in the literature~\citep{CL-LZ-MB:20}. Since $B_{\rho}^{\euc}(\theta_0)\subseteq B_{\rho,\rho}^{\spec}(\theta_0)$, the result in Theorem~\ref{theo:bound-Hess} also holds for our setting.
+\end{remark}}\abcomment{not sure we need the last remark, we can state in terms of spectral norm ball}

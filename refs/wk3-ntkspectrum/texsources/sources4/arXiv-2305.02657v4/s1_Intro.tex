@@ -1,0 +1,120 @@
+Deep neural networks have gained incredible successes in a variety of areas,
+from image classification~\citep{he2016deep,krizhevsky2017_ImagenetClassification} to natural language processing~\citep{devlin2019_BERTPretraining},
+generative models~\citep{karras2019_StylebasedGenerator}, and beyond.
+The number of parameters appearing in modern deep neural networks is often ten or hundreds of times larger than the sample size of the data.
+It is widely observed that large neural networks possess smaller generalization errors than traditional methods.
+This ``benign overfitting phenomenon'' brings challenges to the usual bias-variance trade-off doctrine in statistical learning theory.
+Understanding the mysterious generalization power of deep neural networks might be one of the most interesting statistical problems.
+
+Although the training dynamics of neural networks is highly non-linear and non-convex,
+the celebrated neural tangent kernel (NTK) theory~\citep{jacot2018_NeuralTangent} provides us a way to study the generalization ability of over-parametrized neural networks.
+It is shown that
+when the width of neural networks is sufficiently large (i.e., in the over-parameterized or lazy trained regime),
+the training dynamics of the neural network can be well approximated by a simpler kernel regression method with respect to the corresponding NTK\@.
+Consequently, it offers us a way to investigate the generalization ability of the over-parametrized neural network
+by means of the well established theory of generalization in kernel regression~\citep{caponnetto2007_OptimalRates,andreaschristmann2008_SupportVector,lin2018_OptimalRates}.
+
+
+However, to obtain the generalization results in kernel regression, the eigenvalue decay rate (EDR) of the kernel (see \cref{eq:MercerDecomp} and below) is an essential quantity that must be determined in priori.
+Considering the NTKs associated with two-layer and multilayer fully-connected ReLU neural networks,
+\citet{bietti2019_InductiveBias} and the subsequent work \citet{bietti2020_DeepEquals} showed that the EDR of the NTKs is $i^{-(d+1)/d}$ when the inputs are uniformly distributed on $\bbS^d$.
+Consequently, \citet{hu2021_RegularizationMatters} and \citet{suh2022_NonparametricRegression} claimed that the neural network can achieve the minimax rate $n^{-(d+1)/(2d+1)}$ of the excess risk.
+However, their assumption on the input distribution is too restrictive, and can hardly be satisfied in practice,
+so it is of interest to determine the EDR of the NTKs for general input domains and distributions.
+As far as we know, few works have studied the EDR of the NTKs beyond the case of uniform distribution on $\bbS^d$.
+More recently, focusing on one dimensional data over an interval,
+\citet{lai2023_GeneralizationAbility} showed that the EDR of the NTK associated with two-layer neural networks is $i^{-2}$
+and thus the neural network can achieve the minimax rate $n^{-2/3}$ of the excess risk.
+However, their approach of determining the EDR, which relies heavily on the closed form expression of the NTK,
+can not be generalized to $d$-dimensional inputs or the NTK associated with multilayer neural networks.
+
+In this work, we study the EDR of the NTKs associated with multilayer fully-connected ReLU neural networks
+on a general domain in $\R^d$ with respect to a general input distribution $\mu$ satisfying mild assumptions.
+For this purpose, we develop a novel approach for determining the EDR of kernels by transformation and restriction.
+As a key contribution, we prove that the EDR of a dot-product kernel on the sphere remains the same if one restricts it to a subset of the sphere,
+which is a non-trivial generalization of the result in \citet{widom1963_AsymptoticBehavior}.
+Consequently, we can show that the EDR of the NTKs is $i^{-(d+1)/d}$ for general input domains and distributions.
+Moreover, after proving the uniform approximation of the over-parameterized neural network by the NTK regression,
+we show the statistical optimality of the over-parameterized neural network trained via gradient descent with proper early stopping.
+In comparison, we also show that the overfitted neural network can not generalize well.
+
+\subsection{Related works}
+
+\paragraph{The EDR of NTKs}
+The spectral properties of NTK have been of particular interests to the community of theorists since \citet{jacot2018_NeuralTangent} introduced the neural tangent kernel.
+For example, noticing that the NTKs associated with fully-connected ReLU networks are inner product kernels on the sphere,
+several works utilized the theory of the spherical harmonics~\citep{dai2013_ApproximationTheory,azevedo2014_SharpEstimates} to study the eigen-decomposition of the NTK
+~\citep{bietti2019_InductiveBias,ronen2019_ConvergenceRate,geifman2020_SimilarityLaplace,chen2020_DeepNeural,bietti2020_DeepEquals}.
+In particular, \citet{bietti2019_InductiveBias} and \citet{bietti2020_DeepEquals} showed that the EDR of
+the NTKs associated with the two-layer and multilayer neural network is $i^{-(d+1)/d}$ if the inputs are uniformly distributed on $\bbS^d$.
+However, their analysis depends on the spherical harmonics theory on the sphere to derive the explicit expression of the eigenvalues,
+which cannot be extended to general input domains and distributions.
+Recently, considering two-layer ReLU neural networks on an interval,
+\citet{lai2023_GeneralizationAbility} showed that the EDR of the corresponding NTK is $i^{-2}$.
+However, their technique relies heavily on the explicit expression of the NTK on $\R$ and can hardly be extended to NTKs defined on $\R^d$
+or NTKs associated with multilayer wide networks.
+
+\paragraph{The generalization performance of over-parameterized neural networks}
+
+Though now it is a common strategy to study the generalization ability of over-parameterized neural networks through that of the NTK regression,
+few works state it explicitly or rigorously.
+For example, \citet{du2018_GradientDescent,li2018_LearningOverparameterized,arora2019_FinegrainedAnalysis}
+showed that the training trajectory of two-layer neural networks converges pointwisely to that of the NTK regressor;
+\citet{du2019_GradientDescent,allen-zhu2019_ConvergenceRate,lee2019_WideNeural} further extended the results to the multilayer networks and ResNet.
+However, if one wants to approximate the generalization error of over-parameterized neural network by that of the NTK regressor,
+the approximation of the neural network by the kernel regressor has to be uniform.
+Unfortunately, the existing two works~\citep{hu2021_RegularizationMatters,suh2022_NonparametricRegression}
+studying the generalization error of over-parameterized neural networks
+overlooked the aforementioned subtle difference between the pointwise convergence and uniform convergence,
+so there might be some gaps in their claims.
+To the best of our knowledge, \citet{lai2023_GeneralizationAbility} might be one of the first works who showed the two-layer wide ReLU neural networks converge uniformly to the corresponding NTK regressor.
+
+
+\paragraph{The high-dimensional setting}
+It should be also noted that several other works tried to consider the generalization error of NTK regression in the high-dimensional setting,
+where the dimension of the input diverges as the number of samples tends to infinity.
+These works include the eigenvalues of NTK, the ``benign overfitting phenomenon'', the ``double descent phenomenon'',
+and the generalization error.
+For example, \citet{frei2022_BenignOverfitting}, \citet{nakkiran2019_DeepDouble} and \citet{liang2020_JustInterpolate}
+have shown the benign overfitting and double descent phenomena, while \citet{fan2020_SpectraConjugate} and \citet{nguyen2021_TightBounds}
+have investigated the eigenvalue properties of NTK in the high-dimensional setting.
+Furthermore, recent works by \citet{montanari2022_InterpolationPhase} have examined the generalization performance of neural networks in the high-dimensional setting.
+However, it has been suggested by \citet{rakhlin2018_ConsistencyInterpolation,beaglehole2022_KernelRidgeless}
+that there may be differences between the traditional fixed-dimensional setting and the high-dimensional setting.
+In this work, we focus solely on the fixed-dimensional setting.
+
+
+\subsection{Our contributions}
+%Our contribution
+
+The main contribution of this paper is that we determine the EDR of the NTKs associated with multilayer fully-connected ReLU neural networks
+on $\R^d$ with respect to a general input distribution $\mu$ satisfying mild assumptions.
+We develop a novel approach for determining the EDR of kernels by means of algebraic transformation and restriction to subsets:
+if the kernel can be transformed to a dot-product kernel on the sphere,
+its EDR on a general domain coincides with the EDR of the resulting dot-product kernel with respect to the uniform distribution over the entire sphere,
+while the latter can be determined more easily by the theory of spherical harmonics.
+In particular, we show that the EDR of the considered NTKs is $i^{-(d+1)/d}$, which coincides with that of the NTKs on the sphere.
+Besides, we also prove that the NTKs are strictly positive definite.
+As a key technical contribution,
+we prove that the EDR of a dot-product kernel on the sphere remains the same if one restricts it to a subset of the sphere, provided that
+the EDR of the kernel satisfies a very mild assumption.
+This result is a non-trivial generalization of the result on shift-invariant kernels in \citet{widom1963_AsymptoticBehavior}
+and its proof involves fine-grained harmonic analysis on the sphere.
+We believe that our approach is also of independent interest in the research of kernel methods.
+
+
+Another contribution of this paper is that we rigorously prove that
+the over-parameterized multilayer neural network trained by gradient descent can be approximated uniformly by the corresponding NTK regressor.
+Combined with the aforementioned EDR result,
+this uniform approximation allows us to characterize the generalization performance of the neural network through the well-established kernel regression theory.
+The theoretical results show that proper early stopping is essential for the generalization performance of the neural networks,
+which urges us to scrutinize the widely reported ``benign overfitting phenomenon'' in deep neural network literature.
+
+\subsection{Notations}
+
+For two sequences $a_n, b_n,~n\geq 1$ of non-negative numbers,
+we write $a_n = O(b_n)$ (or $a_n = \Omega(b_n)$) if there exists absolute constant $C > 0$ such that
+$a_n \leq C b_n$ (or $a_n \geq C b_n$).
+We also denote $a_n \asymp b_n$ (or $a_n =\Theta(b_n)$) if $a_n = O(b_n)$ and $a_n = \Omega(b_n)$.
+For a function $f : \caX \to \R$, we denote by $\norm{f}_{\infty} = \sup_{x \in \caX}\abs{f(x)}$ the sup-norm of $f$.
+We denote by $L^p(\caX,\dd \mu)$ the Lebesgue $L^p$-space over $\caX$ with respect to $\mu$.

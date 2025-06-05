@@ -1,0 +1,303 @@
+
+We now present a convergence analysis based on the NTK condition, for which we also introduce some useful bounds from the recent literature~\cite{CL-LZ-MB:20,CL-LZ-MB:21,AB-PCV-LZ-MB:22}.
+
+%\abcomment{flow needs work ... maybe state the main result first, then unpack the three pieces:  (a) Hessian spectral norm bound, (b) NTK change bound, and (c) optimization bound ... somewhat similar to the flow in Section 4}
+
+
+\subsection{Useful Bounds on the Neural Network}
+
+{\bf Hessian Spectral Norm bound.} In the setup of Section~\ref{sec:arXiv_dlopt}, for a suitable initialization of the layerwise weights, one can bound the spectral norm of the Hessian in the spectral norm ball around the initialization. Such results have appeared in the recent literature~\citep{CL-LZ-MB:20,CL-LZ-MB:21,AB-PCV-LZ-MB:22}, and we suitably adapt the result in~\citep[Theorem~4.1]{AB-PCV-LZ-MB:22}.
+%
+\begin{restatable}[\textbf{Hessian Spectral Norm Bound}]{theo}{boundhess}
+\label{theo:bound-Hess}
+Consider Assumption~\ref{asmp:actinit} and that the elements of $W_0^{(l)}$, $l\in[L]$, are drawn i.i.d from $\cN(0,\nu_0^2)$, where $\nu_0^2 = \frac{\sigma_0^2}{c_{\phi,\sigma_0}}$ with $c_{\phi,\sigma_0} := \E_{z \sim \cN(0,\sigma_0^2)}[\phi^2(z)]$ \abdelete{$\sigma_0 = \frac{\sigma_1}{2\left(1 + \frac{2\sqrt{\log m}}{\sqrt{m}}\right)}, \sigma_1 > 0$}, and $\v_0$ is a random unit vector with $\norm{\v_0}_2=1$. Then, for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, 
+%$\rho_1=O(1)$ or 
+%$\rho_1=O(\poly(L))$,  
+with probability at least $(1-\frac{2(L+1)}{m})$, we have 
+\begin{equation}
+\label{eq:bound_Hessian}
+   \max_{i \in [n]} ~\norm{ \nabla^2_\theta f(\theta;\x_i)}_2 \leq \frac{c_H}{\sqrt{m}}~,
+\end{equation}
+with $c_H = O(\poly(L)(1+\gamma^{2L})\pcedit{(1+\rho_1)})$ \pcedit{where 
+$\gamma := \frac{\rho}{\sqrt{m}} + 4\nu_0$.}
+%$\gamma := \frac{\rho}{\sqrt{m}} + 2\nu_0 \left(1 + \frac{\sqrt{\log m}}{\sqrt{2 m}} \right) $. 
+\end{restatable}
+%
+\proof The proof follows by a direct extension of~\citep[Theorem~4.1]{AB-PCV-LZ-MB:22}. \pcedit{Indeed, the original result in~\citep[Theorem~4.1]{AB-PCV-LZ-MB:22} can be stated as $\max_{i \in [n]} ~\norm{ \nabla^2_\theta f(\theta;\x_i)}_2 \leq \frac{\tilde{c}_H}{\sqrt{m}}$, with $\tilde{c}_H = O(\poly(L)(1+\tilde{\gamma}^{2L})(1+\rho_1))$ where 
+$\tilde{\gamma} := \frac{\rho}{\sqrt{m}} + 2\nu_0 \left(1 + \frac{\sqrt{\log m}}{\sqrt{2 m}} \right)$. We obtain~\eqref{eq:bound_Hessian} by upper bounding $\tilde{\gamma}\leq \frac{\rho}{\sqrt{m}} + 4\nu_0$ due to $\frac{\sqrt{\log m}}{\sqrt{2 m}}\leq \frac{1}{\sqrt{2}}\leq 1$. Then $\tilde{c}_H\leq c_H$ since $L\geq 1$.}  %  
+\qed 
+
+\begin{remark}
+Note that the $c_{\phi,\sigma_0}$ term is a scaling factor to suitably normalize the layerwise inputs. 
+%and shows up in prior work with smooth activations~\cite{SD-JL-HL-LW-XZ:19}. 
+While prior work 
+has used the scaling explicitly in the model, as a multiplying factor to the activation function~\citep{SD-JL-HL-LW-XZ:19}, Theorem~\ref{theo:bound-Hess} has the equivalent scaling in the initialization variance.
+We note that~\citep{SD-JL-HL-LW-XZ:19} has the scaling factor of $\sqrt{\frac{1}{m\, c_{\phi,\sigma_0}}}$ with $\sigma_0=1$, whereas we develop the results for general $\sigma_0$ so the effect of the choice of the variance is clear. \qed 
+\end{remark}
+
+\pcdelete{\begin{remark}
+Note that for $L = \tilde{O}(1)$, $c_H = \poly(L)$. More generally ... \abcomment{maybe say $m$ needs to scale as $(\frac{2\sigma_0}{\sqrt{c_{\phi,\sigma_0}}} + \frac{\cdots}{\sqrt{m}})^L$ etc., or drop this}
+\end{remark}}
+%
+%\begin{remark}[\textbf{Desirable operating regimes}]
+%
+\abdelete{We also remark that choosing $\rho_1=O(1)$ yields the same result in Theorem~\ref{theo:bound-Hess}.}
+%
+\pcdelete{The work~\cite[Remark~4.1]{AB-PCV-LZ-MB:22} remarks that for any choice of the spectral norm radius $\rho < \sqrt{m}$, we can choose $\sigma_1 \leq 1 - \frac{\rho}{\sqrt{m}}$ ensuring $\gamma \leq 1$ and hence $c_H = O(\text{poly}(L))$. If $\rho = O(1)$, we can keep $\sigma_1 = 1$ so that $\gamma = 1 + \frac{O(1)}{\sqrt{m}}$, and $c_H = O(\text{poly(L)})$ as long as $L < \sqrt{m}$, which is common. Both of these give good choices for $\sigma_1$ and desirable operating regime for the result. If we choose $\sigma_1 > 1$, an undesirable operating regime, then $c_H = O(c^{\Theta(L)})$, $c >1$, and we will need $m = \Omega(c^{\Theta(L)})$ for the result to be of interest.}
+%
+\pcdelete{\pcedit{When the elements of $\v_0$ are drawn i.i.d from $\cN(0,\sigma_0^2)$ --- our setting ---,~\cite{AB-PCV-LZ-MB:22} show that, under the choices aforementioned for the parameters of the spectral ball, we can obtain $c_H=O(\polylog(m)\poly(L))$.}}
+%\qed 
+%\label{rem:gamma}
+%\end{remark}
+%
+\abdelete{\pcedit{
+\begin{remark}[\textbf{Difference in balls around initialization}]
+%
+Unlike the work~\citep{AB-PCV-LZ-MB:22} which considers the spectral ball $B_{\rho,\rho_1}^{\spec}(\theta_0)$ around the initialization point $\theta_0\in\R^d$, we consider the Euclidean ball $B_{\rho}^{\euc}(\theta_0)$, which has been a more common assumption in the literature~\citep{CL-LZ-MB:20}. Since $B_{\rho}^{\euc}(\theta_0)\subseteq B_{\rho,\rho}^{\spec}(\theta_0)$, the result in Theorem~\ref{theo:bound-Hess} also holds for our setting.
+\end{remark}}\abcomment{not sure we need the last remark, we can state in terms of spectral norm ball}}
+
+
+{\bf Gradient and Loss Bounds.}
+%The analysis for bounding the spectral norm of the Hessian can be used to established additional bounds, which 
+The following additional bounds will be used for the optimization analysis and we obtain them by following closely and adapting the results from~\citep{AB-PCV-LZ-MB:22}. 
+
+\begin{restatable}[\textbf{Predictor gradient bounds}]{lemm}{lemgradbnd}
+\label{cor:gradient-bounds}
+Under Assumption~\ref{asmp:actinit} and the weights initialized as in Theorem~\ref{theo:bound-Hess}, for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, with probability at least $\left(1-\frac{2(L+1)}{m}\right)$, we have
+\begin{equation}
+\begin{split}
+\|\nabla_\theta f(\theta;\x)\|_2  \leq \varrho\; \text{and}\; \|\nabla_{\x} f(\theta;\x)\|_2 \leq \frac{\gamma^{L}}{\sqrt{m}}(1+\rho_1)~,
+\end{split}
+\end{equation}
+where
+$$\varrho^2  := \pcedit{(h(L+1))^2+\frac{1}{m}(1+\rho_1)^2\sum_{l=1}^{L+1}(h(l))^2\gamma^{2(L-l)}}~,
+$$
+\pcedit{$\gamma = \frac{\rho}{\sqrt{m}} + 4\nu_0$},  \pcedit{$h(l)=\gamma^{l-1}+|\phi(0)|\sum^{l-1}_{i=1}\gamma^{i-1}$}.
+\end{restatable}
+
+Under the assumption of square losses, further bounds can be obtained.
+
+\begin{restatable}[\textbf{Loss bounds}]{lemm}{lemLbounds}
+Consider the square loss. Under Assumption~\ref{asmp:actinit} and the weights initialized as in Theorem~\ref{theo:bound-Hess}, each of the following inequalities hold with probability at least $\left(1-\frac{2(L+1)}{m}\right)$: 
+$\cL(\theta_0)\leq \bar{c}_{0,4\nu_0}$ and 
+$\cL(\theta)\leq \bar{c}_{\rho_1,\gamma}$ 
+for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, where for \pcedit{$\gamma = \frac{\rho}{\sqrt{m}} + 4\nu_0$},  $\bar{c}_{a,b}=\frac{2}{n}\sum^n_{i=1}y_i^2+2(1+a)^2|g(b)|^2$ and $g(a)=a^L+|\phi(0)|\sum^L_{i=1}a^i$ for any $a,b\in\R$.
+\label{lem:BoundTotalLoss}
+%\vspace*{-2mm}
+\end{restatable}
+%
+\proof \pcedit{The original result from~\citep[Lemma~4.2]{AB-PCV-LZ-MB:22} states the bounds $\cL(\theta_0)\leq \bar{c}_{0,\sigma_1}$ and 
+$\cL(\theta)\leq \bar{c}_{\rho_1,\tilde{\gamma}}$ with $\tilde{\gamma}=\sigma_1+\frac{\rho}{\sqrt{m}}$ with $\sigma_1=2\nu_0\left(1 + \frac{\sqrt{\log m}}{\sqrt{2 m}} \right)$. Our result follows from the fact that 1) the function $a\mapsto g(a)$ is monotonically increasing, 2) $\sigma_1\leq 4\nu_0$, and 3) $\tilde{\gamma}\leq \gamma$. 
+}
+\qed
+%
+
+\begin{restatable}[\textbf{Loss gradient bound}]{corr}{corrtotalbnd}
+\label{cor:total-bound}
+Consider the square loss. Under Assumption~\ref{asmp:actinit}  and the weights initialized as in Theorem~\ref{theo:bound-Hess}, for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, with probability at least $\left(1-\frac{2(L+1)}{m}\right)$, we have
+$\|\nabla_\theta \cL(\theta)\|_2  \leq 2\sqrt{\cL(\theta)}\varrho\leq 2\sqrt{\bar{c}_{\rho_1,\gamma}}\varrho$,
+%\end{align}
+with $\varrho$ as in Lemma~\ref{cor:gradient-bounds} and $\bar{c}_{\rho_1,\gamma}$ as in Lemma~\ref{lem:BoundTotalLoss}.
+\end{restatable}
+
+{\bf Smoothness.} For the convergence analysis, we also need to establish smoothness of the total loss, which we also take from~\citep{AB-PCV-LZ-MB:22}.
+
+\begin{restatable}[\textbf{Local Smoothness for Square Loss}]{theo}{theosmoothnes}
+Consider the square loss. Under Assumption~\ref{asmp:actinit} and the weights initialized as in Theorem~\ref{theo:bound-Hess},
+with probability at least $(1 - \frac{2(L+1)}{m})$, $\forall \theta,\theta' \in B_{\rho,\rho_1}^{\spec}(\theta_0)$,
+%
+\begin{equation}
+\label{eq:Smooth-formula-NN}
+\begin{split}
+\hspace*{-5mm} 
+\cL(\theta') & \leq \cL(\theta) + \langle \theta'-\theta, \nabla_\theta\cL(\theta) \rangle + \frac{\beta}{2} \| \theta' - \theta \|_2^2~, \\
+%\quad & \text{with} \quad \\
+\beta & := b\varrho^2 + \frac{c_H\sqrt{\bar{c}_{\rho_1,\gamma}}}{\sqrt{m}} ~,
+\end{split}
+\end{equation}
+%
+with $c_H$ as in~Theorem~\ref{theo:bound-Hess}, $\varrho$ as in Lemma~\ref{cor:gradient-bounds}, and $\bar{c}_{\rho_1,\gamma}$ as in Lemma~\ref{lem:BoundTotalLoss}. Consequently, $\cL$ is locally $\beta$-smooth.
+%Moreover, if $\gamma$ (and so $\sigma_1$ and $\rho$) is chosen according to the desirable operating regimes (see Remark~\ref{rem:gamma}) and $\rho_1=O(\poly(L))$, %according to Theorem~\ref{theo:bound-Hess}
+%then $\beta =O(\poly(L))$.
+\label{theo:smoothnes}
+\end{restatable}
+
+
+
+%{\bf (b) Change in NTK minimum eigenvalue.}  
+
+\subsection{Convergence Analysis: Unknown Desired Loss} 
+
+For the convergence analysis, we consider the (cumulative) square loss $\bar{\cL}(\theta) = \sum_{i=1}^n (y_i - f(\theta;\x_i))^2$ and study how gradient descent (GD) has geometric convergence starting from the initialization discussed in Section~\ref{sec:arXiv_ntk}. In this section we consider the Unknown Desired Loss (UDL) setting, where $T$, the number of GD steps, is not specified or bounded, and the geometric convergence result has to held for all $T$. 
+
+We start with a result showing how the lower bound for the minimum eigenvalue of the NTK changes for one step of gradient descent. All proofs can be found in Appendix~\ref{app:arXiv_NRKConv}.
+
+\begin{restatable}[\textbf{NTK condition per step}]{lemm}{lemmNTKstep}
+\label{lemm:NTK_step}
+Under Assumption~\ref{asmp:actinit} and the weights $\theta_0$ initialized as in Theorem~\ref{theo:bound-Hess}, for the gradient descent update $\theta_{t+1} = \theta_t - \eta_t \nabla \bar{\cL}(\theta_t)$ or the cumulative loss $\bar{\cL}(\theta) = \sum_{i=1}^n (y_i - f(\theta;\x_i))^2$ with $\theta_t, \theta_{t+1} \in B_{\rho,\rho_1}^{\spec}(\theta_0)$ \abdelete{for $\rho_1=O(\poly(L))$},
+\pcedit{it holds with probability at least $\left(1-\frac{2(L+1)}{m}\right)$,}
+\begin{equation}
+\begin{split}
+\lambda_{\min}(K_{\ntk}(\theta_{t+1})) &\geq \lambda_{\min}(K_{\ntk}(
+\theta_t))\\ 
+&~~~~~~~~  
+- 4c_H \varrho^2  \frac{n}{\sqrt{m}} \eta_t \sqrt{\bar{\cL}(\theta_t)} ~,
+\end{split}    
+\end{equation}
+where $c_H$ is as in Theorem~\ref{theo:bound-Hess} and $\varrho$ is as in Lemma~\ref{cor:gradient-bounds}. 
+%and $c_{\rho_1,\nu}$ as in Lemma~\ref{lem:BoundTotalLoss}.
+\end{restatable}
+
+%\pcedit{We assume that the NTK condition holds at initialization, i.e., that the minimum eigenvalue of the NTK at initialization is lower bounded by some constant $\lambda_0>0$.}
+
+\abdelete{
+\begin{restatable}[\textbf{NTK condition from Initialization}]{corr}{corrNTKinit}
+\label{corr:NTK_init}
+Under Assumption~\ref{asmp:actinit} and the weights $\theta_0$ initialized as in Theorem~\ref{theo:bound-Hess}, for the gradient descent update $\theta_{t+1} = \theta_t - \eta_t \nabla \cL(\theta_t)$ with $\theta_{\tau} \in B_{\rho,\rho_1}^{\spec}(\theta_0), \tau \in [T]$,
+\pcedit{it holds with high probability,}\abcomment{we need to be precise}
+\begin{align}
+\lambda_{\min}(K_{\ntk}(\cdot;\theta_{T+1})) \geq \lambda_{\min}(K_{\ntk}(\cdot;\theta_0)) - \tilde{c}~ \frac{n}{\sqrt{m}} \sum_{\tau=1}^T \eta_{\tau} ~,
+\end{align}
+where \abcomment{may need an update, we dont need these constants anymore} $\tilde{c} = c_H \sqrt{c_{\rho_1,\nu}} \varrho$ with $c_H$ as in Theorem~\ref{theo:bound-Hess}, $\varrho$ as in Lemma~\ref{cor:gradient-bounds}, and $c_{\rho_1,\nu}$ as in Lemma~\ref{lem:BoundTotalLoss}.
+\end{restatable}}
+
+
+
+
+
+\begin{restatable}[\textbf{Geometric convergence: Unknown Desired Loss}]{theo}{theoNTKconv}
+\label{thm:conv-NTK} 
+Consider Assumption~\ref{asmp:actinit}, the NTK condition at initialization $\lambda_{\min}(K_{\ntk}(\theta_0))\geq \lambda_0>0$, and the weights $\theta_0$ initialized as in Theorem~\ref{theo:bound-Hess}. Consider the gradient descent update $\theta_{t+1} = \theta_t - \eta_t \nabla \bar{\cL}(\theta_t)$ for the cumulative loss $\bar{\cL}(\theta) = \sum_{i=1}^n (y_i - f(\theta;\x_i))^2$ and with 
+\begin{align*}
+\eta_t  \pcedit{\equiv} \eta \pcedit{<} \min\left( \frac{1}{\beta n} , \frac{1}{\lambda_0} \right) ~,
+%\eta_t = \eta\, \pcedit{<} \min\left( \frac{1}{\beta n} , \frac{1}{2 \lambda_0}, \frac{1}{ \sqrt{\bar{c}_{0,4\nu_0}} \varrho} \min\left( \frac{\lambda_0}{n c_H} , \pcedit{\frac{\rho}{\sqrt{n}}} \right) \right) ~,
+\end{align*}
+%where is as in Lemma~\ref{theo:ntk0},  
+%$\bar{c}_{0,4\nu_0}$ as in Lemma~\ref{lem:BoundTotalLoss}, $c_H$ as in Theorem~\ref{theo:bound-Hess} and $\varrho$ as in Lemma~\ref{cor:gradient-bounds}, and 
+with $\beta$ as in Theorem~\ref{theo:smoothnes}.
+Then, choosing
+\pcdelete{$m=\Omega\left(\frac{n^4}{\lambda_0^2}\right)$}\pcedit{$m=\Omega\left(\max\{\frac{n^{3}}{\lambda_0^4},\frac{n^4}{\lambda_0^6}\}\right)$}
+\pcedit{ and $L=O(1)$, we have that, with probability at least $\left(1-\frac{2(L+1)}{m}\right)$,} we have $\{\theta_t\}_{t} \subset B^{\spec}_{\rho,\rho_1}$ with \abedit{$\rho, \rho_1 = \Theta(\frac{\sqrt{n}}{\lambda_0})$}, and for every $t$,
+\begin{equation}
+    \bar{\cL}(\theta_{t+1}) \leq \left(1- \eta \lambda_0 \right)^t \bar{\cL}(\theta_0)~.
+    \label{eq:conv-NTK}
+\end{equation}
+\label{prop:conv-NTK-1}
+%where $c_0$ \abcomment{add details}.
+%for some constant $c>0$ such that $\left(1-c\frac{\lambda_0}{n} \right)\in(0,1)$. 
+\end{restatable}
+
+\abcomment{reverted back to the Frobenius norm based analysis, we get $m=n^4$, same as others. The following comment needs to be updated -- say that we match existing results}
+
+\begin{remark}[\textbf{Comparison to related works}] 
+Our dependency $m=\Omega(n^4)$ matches the $\Omega(n^4)$ dependency reported in the literature for smooth functions~\citep{ng2020hermite1,SD-JL-HL-LW-XZ:19}. We highlight that our proof techniques are different from these cited works, since we rely on explicitly derived bounds on the Hessian and gradients of the neural network. We remark that the work~\citep{CL-LZ-MB:21} also use Hessian bounds, but they take it as an assumption with a convenient dependance on $n$, whereas we do not make such assumption. Recently ~\citet{AB-PCV-LZ-MB:22} made use of the same bounds as we do in the context of smooth activation functions; however, their analysis is not based on the NTK condition (nor on Gram matrices), and thus it does not need a width dependence on $n$. Moreover, they show their analysis work under different sufficient conditions than NTK-based works.  
+\end{remark}
+
+\begin{remark}[\textbf{Using our derivation from Section~\ref{sec:arXiv_ntk}}]
+Since we have used in Theorem~\ref{prop:conv-NTK-1} the initialization discussed in Section~\ref{sec:arXiv_ntk}, we can use the result from Theorem~\ref{theo:ntk0} to imply the existence of $\lambda_0$. 
+Therefore, we conclude that, to imply the results from both Theorem~\ref{theo:ntk0} and Theorem~\ref{prop:conv-NTK-1} with high-probability, we need $m=\tilde{\Omega}(n^4)$.
+\end{remark}
+
+
+
+%\pccomment{This theorem is still not complete since: (a) as how it is now, gradient descent does not guarantee that $\theta_t\in B_{\rho}^{\spec}(\theta_0)$ --- or even $B_{\rho}^2(\theta_0)$ if that is easier ---  for all $t$; (c) we need the expression of the lower bound on the minimum NTK eigenvalue over the ball; (d) we need to check that $\lambda_0 < \beta n$. Also, it seems we can't simply choose $\rho$ as in the proof of Theorem~14 of \cite{CL-LZ-MB:21}, since the smoothness constant $\beta$ for our total loss function depends on $\rho$ in some non-trivial way through many of its constants in its definition!}
+%
+% \abdelete{\abcomment{moved this below}\begin{remark}[\textbf{Comparison with existing works}]
+% \pcedit{
+% Theorem~\ref{thm:conv-NTK} shows we need a dependence of $n^2$ to ensure convergence. For smooth activation functions, the work~\citep{ng2020hermite1} first shows that when all layers are initialized with the same variance $1/m$ in our network (which they call LeCun’s initialization), there is also a dependency on $n^2$. Moreover,~\citep{ng2020hermite1} proposes a way to improve the dependency to be linear in $n$ by considering a setting different than ours: a network with a different model scaling (in its topology) and a different initialization scheme. For networks with ReLU activations,~\citep{AM-SO-ZS-DPW:22} showed a dependency of $n^2$ under different assumptions in the initialization of the weight than ours.}
+% \end{remark}}
+
+
+\newpage 
+
+\subsection{Convergence Analysis: Unknown Desired Loss, Fixed Last Layer} 
+
+We first focus on gradient descent while keeping the last layer $\v$. With the notation
+\begin{align*}
+\theta & := (\w^\top, \v^\top)^\top \\    
+\w & := (\vec(W^{(1)}^\top, \cdots, \vec(W^{(L)}^\top )^\top
+\end{align*}
+the predictor will be viewed as a function of $\w$, i.e., $f(\w;\x)$, and GD will be based on $\w$ so that
+\begin{align}
+    \w_{t+1} = \w_t = \eta \nabla \bar{\cL}(\w_t)~,
+\end{align}
+where $\bar{\cL}(w) = \sum_{i=1}^n (y_i - f(\w;\x_i))^2$. In this setting, global geometric convergence can be guaranteed with quadratic width, $m = \Omega(n^2)$.
+
+\begin{restatable}[\textbf{Geometric convergence: Fixed Last Layer}]{theo}{theoNTKconvfix}
+\label{thm:conv-NTKfix} 
+Consider Assumption~\ref{asmp:actinit}, the NTK condition at initialization $\lambda_{\min}(K_{\ntk}(\theta_0))\geq \lambda_0>0$, and the weights $\theta_0$ initialized as in Theorem~\ref{theo:bound-Hess}. Consider the gradient descent update $\w_{t+1} = \w_t - \eta_t \nabla \bar{\cL}(\w_t)$ for the cumulative loss $\bar{\cL}(\theta) = \sum_{i=1}^n (y_i - f(\theta;\x_i))^2$ and with 
+\begin{align*}
+\eta_t  \pcedit{\equiv} \eta \pcedit{<} \min\left( \frac{1}{\beta n} , \frac{1}{\lambda_0} \right) ~,
+\end{align*}
+with $\beta$ as in Theorem~\ref{theo:smoothnes}.
+Then, choosing
+$m=\Omega\left(\frac{n^{3}}{\lambda_0^4}\right)$ and $L=O(1)$,  with probability at least $\left(1-\frac{2(L+1)}{m}\right)$, we have $\{\w_t\}_{t} \subset B^{\spec}_{\rho,0}$ with $\rho = \Theta(\frac{\sqrt{n}}{\lambda_0})$, and for every $t$,
+\begin{equation}
+    \bar{\cL}(\w_{t+1}) \leq \left(1- \eta \lambda_0 \right)^t \bar{\cL}(\w_0)~.
+    \label{eq:conv-NTKfix}
+\end{equation}
+%\label{prop:conv-NTK-1}
+\end{restatable}
+
+
+
+\newpage 
+
+\subsection{Convergence Analysis: Known Desired Loss} 
+
+
+We first show a lower bound for the minimum eigenvalue of the NTK for any point inside the initialization ball. All proofs can be found in Appendix~\ref{app:arXiv_NRKConv}. 
+%
+\begin{restatable}[\textbf{NTK condition in the Ball}]{lemm}{lemmNTKball}
+\label{lemm:NTK_ball}
+Under Assumption~\ref{asmp:actinit} and the weights $\theta_0$ initialized as in Theorem~\ref{theo:bound-Hess}, for any $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$,
+\pcedit{it holds with high probability,}\abcomment{we need to be precise}
+\begin{equation}
+\begin{split}
+\lambda_{\min}(K_{\ntk}(\theta)) &\geq \lambda_0 - 2 c_H \varrho (L\rho+\rho_1) \frac{n}{\sqrt{m}} ~,
+\end{split}    
+\end{equation}
+where $c_H$ is as in Theorem~\ref{theo:bound-Hess}. 
+%and $\varrho$ is as in Lemma~\ref{cor:gradient-bounds}. 
+\end{restatable}
+
+We now consider the Known Desired Loss (KDL) setting where, given an $\epsilon>0$, the goal is get to an iterate $\theta_T$ for some $T>0$ such that $\bar{\cL}(\theta_{T+1}) \leq \epsilon$. As we show next, under the NTK assumption at initialization, linear width $m = \widetilde{\Omega}(n)$ is sufficient for GD to provably reach the specified loss $\epsilon$.
+%We now present our convergence result when we want to achieve a desired $\epsilon$-suboptimality on the loss, i.e., when we have a known desired loss value.
+
+\begin{restatable}[\textbf{Geometric Convergence: Known Desired Loss}]{theo}{theoNTKconvBall}
+\label{thm:conv-NTK-ball} 
+Consider Assumption~\ref{asmp:actinit}, the NTK condition at initialization $\lambda_{\min}(K_{\ntk}(\theta_0))\geq \lambda_0>0$, and the weights $\theta_0$ initialized as in Theorem~\ref{theo:bound-Hess}. Consider the gradient descent update $\theta_{t+1} = \theta_t - \eta_t \nabla \bar{\cL}(\theta_t)$ for the cumulative loss $\bar{\cL}(\theta) = \sum_{i=1}^n (y_i - f(\theta;\x_i))^2$ and with 
+\begin{align*}
+\eta_t \equiv \eta &< \min\left( \frac{1}{n\beta} , \frac{1}{\lambda_0} , \frac{\lambda_0^2}{c' n^{3/2}} \right) ~,
+\end{align*}
+for some constant $c'>0$ and with $\beta$ as in Theorem~\ref{theo:smoothnes}. 
+Then, for any given $\epsilon > 0$, with $m = \Omega(\frac{n}{\pcedit{\lambda_0^2}})$\pcedit{, $L=O(1)$,}
+and with $T$ steps of gradient descent with
+\begin{align}
+T = \Omega\left( \frac{\log \frac{\bar{\cL(\theta_0)}}{\epsilon}}{\log \frac{1}{1-\eta \lambda_0}} \right)
+%= \Theta\left( \log \frac{n}{\epsilon}\right)~, 
+\end{align}
+\pcedit{with probability at least $\left(1-\frac{2(L+1)}{m}\right)$,} we have
+$\{\theta_t\}_{t=0}^{\pcedit{T+1}} \subset B^{\spec}_{\rho,\rho_1}$ with \pcedit{$\rho, \rho_1 = \Theta(\frac{\sqrt{n}}{\lambda_0})$}, and
+\begin{equation}
+    \bar{\cL}(\theta_{T+1}) \leq \epsilon~.
+    \label{eq:conv-NTK}
+\end{equation}
+\label{prop:conv-NTK}
+%where $c_0$ \abcomment{add details}.
+%for some constant $c>0$ such that $\left(1-c\frac{\lambda_0}{n} \right)\in(0,1)$. 
+\end{restatable}
+
+
+\begin{remark}[\textbf{Comparison with existing works}] To the best of our knowledge, achieving a linear width dependence on $n$ for attaining $\epsilon$-suboptimality is the first of its kind on the literature for square losses for the case of both smooth and ReLU activation networks. Though we did not find a specific $\epsilon$-suboptimality analysis for networks with smooth activation functions, such an analysis for ReLU networks has been done in~\citep{AM-SO-ZS-DPW:22} with an $n^2$ width dependence. \qed 
+\end{remark}
+
+\begin{remark}[\textbf{Wider networks allow wider steps}]
+The proof for the KDL result implies: we only need $\eta \frac{n^2}{\sqrt{m}}$ to be less than a constant proportional to $\lambda_0^2$. As a result, wider networks, i.e., with larger $m$, can use bigger step sizes while holding on the same guarantee of reaching $\epsilon$ loss. 
+Ignoring constants to understand the essence of the storyline,  width $m = n$ needs $\eta \leq 1/n^{3/2}$ as stated in Theorem~\ref{thm:conv-NTK-ball} whereas $m=n^2$ needs $\eta \leq 1/n$. \qed 
+\end{remark}
+
+\begin{remark}[\textbf{Using our derivation from Section~\ref{sec:arXiv_ntk}}]
+Since we have used in Theorem~\ref{prop:conv-NTK} the initialization discussed in Section~\ref{sec:arXiv_ntk}, we can use the result from Theorem~\ref{theo:ntk0} to imply the existence of $\lambda_0$. 
+Therefore, we conclude that, to imply the results from both Theorem~\ref{theo:ntk0} and Theorem~\ref{prop:conv-NTK} with high-probability, we need $m=\tilde{\Omega}(n)$.
+\end{remark}

@@ -1,0 +1,1746 @@
+In this section we will prove \cref{lem:UnifConverge}.
+Applying Proposition 3.2 and Proposition 3.3 in \citet{lai2023_GeneralizationAbility},
+it suffices to show \cref{prop:2_KernelUniform}, that is, the kernel $K_t$ converges uniformly to $\NTK$.
+This rest of this section is organized as follows:
+We first introduce some more preliminaries;
+in \cref{subsec:Init}, we discuss some properties of the network at initialization;
+in \cref{subsec:Training}, we analyze the effect of small perturbation during training process of the network;
+we then prove the lazy regime approximation of the neural network in \cref{subsec:Lazy};
+we also show the Hölder continuity of $\NTK$ in \cref{subsec:Holder_NTK};
+finally, we prove the kernel uniform convergence in \cref{subsec:KernelUniformConvergence}.
+
+
+\paragraph{Further notations}
+Let us denote $\tilde{B}_R = \left\{ x \in \R^d : \tilde{x} \leq R \right\}$ for $R\geq 1$.
+For a vector $\bm{v}=(v_1, v_2, \cdots, v_m)\in\mb{R}^m$, we use $\norm{\bm{v}}_2$ (or simply $\norm{\bm{v}}$) to represent the Euclidean norm.
+Additionally, if we have a univariate function $f:\mb{R}\to\mb{R}$, we define $f(\bm{v}) = (f(v_1), f(v_2),\cdots, f(v_m))\in\mathbb{R}^m$.
+We denote by $\norm{\bm{M}}_2$ and $\norm{\bm{M}}_{\mr{F}}$ the spectral and Frobenius norm of a matrix $\bm{M}$ respectively.
+Also, we use $\norm{\,\cdot\,}_0$ to represent the number of non-zero elements of a vector or matrix.
+For matrices $\bm{A}\in\mb{R}^{n_1\times n_2}$ and $\bm{B}\in\mb{R}^{n_2\times n_1}$,
+we define $\ang{\bm{A},\bm{B}} = \Tr(\bm{A}\bm{B}^T)$.
+We remind that $\ang{\bm{M}, \bm{M}} = \norm{\bm{M}}_{\mr{F}}^2$ in this way.
+
+\paragraph{Network Architecture} Let us recall the neural network in the main text.
+% We fix the number of layers $L \geq 1$.
+%(1) initialized by (2) and trained by gradient descent 
+% \cref{eq:NN_Arch}, \cref{eq:NN_Init}
+Since it can be shown easily that the bias term $\bm{b}^{(0,p)}$ in the first layer can be absorbed into $\bm{A}^{(p)}$
+if we append an $1$ at the last coordinate of $\x$,
+% for a little abuse of notation,
+we denote $\bm{W}^{(0,p)}=(\bm{A}^{(p)}~\bm{b}^{(0,p)})$, $\tilde{\x}=(\x^T,1)^T\in\mb{R}^d \times \{1\}\subset\mb{R}^{d+1}$
+and consider the following equivalent neural network:
+% \begin{align} 
+%   \label{eq:A_NN_Arch}
+%   \begin{split}
+%     \bm{\alpha}^{(0,p)}(\x)&=\tilde{\bm{\alpha}}^{(0,p)}(\x)=\tilde{\x}\in\mb{R}^{d+1},~p\in\dk{1,2},\\
+%     \bm{\alpha}^{(l,p)}(\x) & = \sqrt{\tfrac{2}{m_{l}}} \bm{W}^{(l-1,p)}\tilde{\bm{\alpha}}^{(l-1,p)}(\x)\in\mb{R}^{m_l},\quad~\tilde{\bm{\alpha}}^{(l,p)}(\x)=\sigma\mpt{\bm{\alpha}^{(l,p)}(\x)}\in\mb{R}^{m_l},\qquad~ l \in [L],~p\in\dk{1,2},\\
+%     g^{(p)}(\x;\bm{\theta}) & = \bm{W}^{(L,p)}\tilde{\bm{\alpha}}^{(L,p)}(\x)+b^{(L,p)}\in\mb{R},\quad~p\in\dk{1,2},\qquad~
+%     f(\x;\bm{\theta}) = \frac{\sqrt{2}}{2}\bk{ g^{(1)}(\x;\bm{\theta}) - g^{(2)}(\x;\bm{\theta}) }\in\mb{R},
+%   \end{split}
+% \end{align}
+\begin{align}
+  \label{eq:A_NN_Arch}
+  \begin{split}
+    \bm{\alpha}^{(0,p)}(\x)&=\widetilde{\bm{\alpha}}^{(0,p)}(\x)=\tilde{\x}\in\mb{R}^{d+1},\\
+    \widetilde{\bm{\alpha}}^{(l,p)}(\x) & = \sqrt{\tfrac{2}{m_{l}}} \bm{W}^{(l-1,p)}{\bm{\alpha}}^{(l-1,p)}(\x)\in\mb{R}^{m_l},\\
+    {\bm{\alpha}}^{(l,p)}(\x)&=\sigma\xkm{\widetilde{\bm{\alpha}}^{(l,p)}(\x)}\in\mb{R}^{m_l},\\
+    g^{(p)}(\x;\bm{\theta}) & = \bm{W}^{(L,p)}{\bm{\alpha}}^{(L,p)}(\x)+b^{(L,p)}\in\mb{R},\\
+    f(\x;\bm{\theta}) &= \frac{\sqrt{2}}{2}\zk{ g^{(1)}(\x;\bm{\theta}) - g^{(2)}(\x;\bm{\theta}) }\in\mb{R}.
+  \end{split}
+\end{align}
+for $p=1,2$ and $l=1,\cdots,L$.
+% where $l \in \cl{ 0,1,\cdots,L }$ and $p \in \{1,2\}$ stand for the index of layers and parts respectively, $\sigma(x)= \max(x,0)$ is the ReLU activation,
+Recall that the integers $m_1,m_2,\cdots, m_L$ are the width of $L$-hidden layers and $m_{L+1} = 1$ is the width of output layer.
+Additionally, we have set $m = \min(m_1,m_2,\cdots,m_L)$ and made the assumption that $\max(m_1,m_2,\dots,m_{L}) \leq C_{\mathrm{m}} m$ for some absolute constant $C_{\mathrm{m}}$.
+By setting $m_0=d+1$ for convenience, we have $\bm{W}^{(l,p)} \in \R^{m_{l+1} \times m_l}$ for $l\in\{0,1,2,\cdots,L\}$.
+
+% We use $\bm{\theta}$ to represent the collection of all parameters flatten as a column vector,
+% and use $\bm{\theta}^{(p)}$ for the parameters in part $p$.
+% We also recall that $m = \min(m_1,\cdots,m_L)$, $M = \max(m_1,\cdots,m_L)$
+% and we assume that $m\leq M\leq C_m m$ for some absolute constant $C_m\geq 1$.
+
+
+
+% \subsubsection{Initialization and training}
+
+%\paragraph{Initialization and training}
+%At initialization, the parameters in one parity are i.i.d. normal and the parameters in the other parity are the same as the corresponding ones. For $l=0,1,\cdots,L$, we have
+%%The initialization for $W$ is always given by independent
+%\begin{align*}
+%  \bm{W}^{(l,1)}_{i,j},b^{(L,1)} \iid N(0,1),\qquad~\bm{W}^{(l,2)} = \bm{W}^{(l,1)},\qquad~ b^{(L,2)} = b^{(L,1)}.
+%\end{align*}
+%In the training process, the parameter at time $t \geq 0$, denoted by $\bm{\theta}_t$, is determined according to the gradient flow equation \cref{eq:2_GD}.
+% \begin{align}
+%   \label{eq:a_GD}
+%   \dot{\bm{\theta}}_t = - \nabla_{\bm{\theta}} \mathcal{L}(\bm{\theta}_t)= - \frac{1}{n} \nabla_{\bm{\theta}} f(\X;\bm{\theta}_t) (f(\X;\bm{\theta}_t) - \bm{y})
+% \end{align}
+% where $f(\X;\bm{\theta}_t) = \pt{f(\x_1;\bm{\theta}_t),\dots,f(\x_n;\bm{\theta}_t)}^T$ and $\nabla_{\bm{\theta}} f(\X;\bm{\theta}_t)$ is an $N_{\bm{\theta}} \times n$
+% matrix where $N_{\bm{\theta}}$ is the number of parameters.
+% %Quantities adding a subscript $t$ refer to the quantities
+% %We also add a subscript $t$ for all the related quantities to refer to them in the training process.
+
+For $p=1,2$, we define $g^{(p)}_t(\x) = g^{(p)}(\x;\bm{\theta}_t)$ and $f_t(\x) = f(\x;\bm{\theta}_t)$.
+Similarly, we also add a subscript $t$ for all the related quantities (including those defined afterwards) to indicate their values at time $t$ during the training process.
+% we add the subscript "$t$" to the other quantities in \cref{eq:A_NN_Arch} to indicate their values at time $t$.
+
+
+% To track the training process, we will use $T$ to represent an interval $[0,t_0]$ or $[0,+\infty)$.
+
+%\paragraph{Folding the network}
+%Let us expand \cref{eq:a_GD} by $f(\x;\bm{\theta}) = \frac{\sqrt{2}}{2}\big[ g^{(1)}(\x;\bm{\theta}) - g^{(2)}(\x;\bm{\theta}) \big]$ and get
+%\begin{align*}
+%  \dot{\bm{\theta}}_t
+%  &= - \frac{1}{n} \left[ \nabla_{\bm{\theta}} f(\X;\bm{\theta}_t) \right]^T
+%\end{align*}
+%We will show that for the the parameters evolve training process of our mirrored neural network is exactly the same as training only a parity of the network, except
+
+% \subsubsection{The neural tangent kernel}
+
+\paragraph{The neural tangent kernel}
+%In \cref{subsec:UniformConv},
+%we have introduced the concepts of NNK (Neural Network Kernel), denoted by $K_t$, and NTK (Neural Tangent Kernel), denoted by $\NTK$.
+%
+Let us consider the following neural network kernel
+\begin{align*}
+ % \label{eq:A_Kt_Formula}
+ K_t(\x,\x') = \ang{\nabla_{\bm{\theta}} f(\x;\bm{\theta}_t),\nabla_{\bm{\theta}} f(\x';\bm{\theta}_t)}.
+\end{align*}
+Then, the gradient flow can be written as~\citep{jacot2018_NeuralTangent}
+\begin{align*}
+ % \label{eq:A_NN_GF}
+ \dot{f}(\x;\bm{\theta}_t) = - \frac{1}{n} K_t(\x,\X)\xk{f(\X;\bm{\theta}_t) - \bm{y}}.
+\end{align*}
+As shown in \citet{jacot2018_NeuralTangent}, as the width $m$ goes to infinity, the kernel $K_t$ converges to the deterministic neural tangent kernel $\NTK$.
+%
+% The limit of $K_0$ as $m \to \infty$ yields the neural tangent kernel (NTK),
+% \begin{align*}
+%   % \label{eq:A_NTK_Def}
+%   K_{0}(\x,\x') \overset{p}{\rightarrow} \NTK(\x,\x')  \qq{as} {m \to \infty}.
+% \end{align*}
+%
+With the mirrored architecture given by \cref{eq:A_NN_Arch}, we can express the kernel $K_t(\x,\x')$ as follows:
+\begin{align*}
+  K_t(\x,\x')
+  &=  \ang{\nabla_{\bm{\theta}} f(\x;\bm{\theta}_t), \nabla_{\bm{\theta}} f(\x;\bm{\theta}_t)} =\sum_{p=1}^2 \ang{\nabla_{\bm{\theta}^{(p)}} f(\x;\bm{\theta}_t), \nabla_{\bm{\theta}^{(p)}}f(\x;\bm{\theta}_t)} \\
+  % &=  \frac{1}{2}\sum_{p=1}^2 \ang{\nabla_{\bm{\theta}^{(p)}} \mpt{g^{(1)}_t(\x) - g^{(2)}_t(\x)}, \nabla_{\bm{\theta}^{(p)}} \mpt{g^{(1)}_t(\x) - g^{(2)}_t(\x)}} \\
+  &= \frac{1}{2} \sum_{p=1}^2 \ang{\nabla_{\bm{\theta}^{(p)}} g^{(p)}_t(\x),\nabla_{\bm{\theta}^{(p)}} g^{(p)}_t(\x')}=  \frac{1}{2} \xk{K_t^{(1)}(\x,\x') + K_t^{(2)}(\x,\x') },
+  % &K_t(\x,\x')
+  % =\sum_{p=1}^2 \ang{\nabla_{\bm{\theta}^{(p)}} f(\x;\bm{\theta}_t), \nabla_{\bm{\theta}^{(p)}}f(\x;\bm{\theta}_t)} \\
+  % &~~= \frac{1}{2} \sum_{p=1}^2 \ang{\nabla_{\bm{\theta}^{(p)}} g^{(p)}_t(\x),\nabla_{\bm{\theta}^{(p)}} g^{(p)}_t(\x')}=\frac{1}{2}\sum_{p=1}^2 K_t^{(p)}(\x,\x'),
+\end{align*}
+where $K_t^{(p)}(\x,\x')=\ang{\nabla_{\bm{\theta}^{(p)}} g^{(p)}_t(\x),\nabla_{\bm{\theta}^{(p)}} g^{(p)}_t(\x')}$ is the neural network kernel of $g_t^{(p)}$ for $p=1,2$, which is a vanilla neural network.
+Consequently, due to the mirror initialization, we have
+% \begin{align*}
+% \label{eq:TangentKernel_0}
+$K_0^{(1)}(\x,\x') = K_0^{(2)}(\x,\x')= K_0(\x,\x')$.
+% \end{align*}
+
+% As $m\to\infty$, the neural network kernel $K_t(\x,\x')$ converges in probability to a kernel function known as the Neural Tangent Kernel (NTK), denoted by $\NTK(\x,\x')$:
+% \begin{align*}
+%   % \label{eq:A_NTK_Def}
+%   K_{t}(\x,\x') \overset{\mb{P}}{\rightarrow} \NTK(\x,\x')  \qq{as} {m \to \infty}.
+% \end{align*}
+% This convergence result is the focus of \cref{thm:A_KernelUniform}, which we aim to prove in this section.
+
+% Following \citet{jacot2018_NeuralTangent}, we can provide an explicit recursive formula for the limit of $K_0^{(p)}$ as well as $K_0$.
+% % Here we note that since now $\x \in \tilde{B}_R \times\{1\}$, our formula is different from the formula in the main text in $\Sigma_0(\x,\x')$.
+% Let us define
+% \begin{align*}
+%   \Sigma_0(\x,\x') &= N_0(\x,\x') = \ang{\x,\x'}+1;\\
+%   \Sigma_{l}(\x,\x') &= 2 \E_{(u_l,v_l)}[ \sigma(u_l) \sigma(v_l)], \\
+%   N_{l}(\x,\x') &= \Sigma_{l}(\x,\x') + 2 N_{l-1}(\x,\x') \E_{(u_l,v_l)}[ \dot{\sigma}(u_l) \dot{\sigma}(v_l)],
+% \end{align*}
+% for $l=1,2,\cdots,L$, where $(u_l,v_l)$ follows a multivariate normal distribution with mean 0 and covariance matrix $\bm{B}_{l-1}(\x,\x')$, i.e., $(u_l,v_l)\sim N(\bm{0},\bm{B}_{l-1}(\x,\x'))$, and the matrix $\bm{B}_l(\x,\x')$ is defined as:
+% \begin{align*}
+%   \bm{B}_l(\x,\x') =
+%   \begin{pmatrix}
+%     \Sigma_l(\x,\x)  & \Sigma_l(\x,\x')  \\
+%     \Sigma_l(\x,\x') & \Sigma_l(\x',\x')
+%   \end{pmatrix}.
+% \end{align*}
+% Additionally, we define $\dot{\sigma}(x) = \bm{1}_{\cl{x > 0}}$ as the weak derivative of $\sigma(x)$. With these definitions, it can be shown that the limit of $K_0$ is $N_L(\x,\x') + 1$. Actually, we can prove that it is also the limit of $K^{(p)}_t$ and $K_t$, which means that the NTK associated with $K_t^{(p)}$ and $K_t$ is
+% \begin{align}
+%   \label{eq:A_NTK_Def0}
+%   &\NTK(\x,\x') = N_L(\x,\x') + 1.
+% \end{align}
+% Before completing the proof of \cref{thm:A_KernelUniform}, we can treat \cref{eq:A_NTK_Def0} as the definition of $\NTK$.
+
+%Further computation (see \cref{subsec:A_ExplicitNTK}) shows that
+%\begin{align}
+%  \label{eq:NTK_Formula_new}
+%  \NTK(\x,\x') =
+%  \norm{\tilde{\x}}\norm{\tilde{\x}'} \sum_{r=0}^L \kappa^{(r)}_1(\bar{u}) \prod_{s=r}^{L-1} \kappa_0\mpt{\kappa^{(s)}_1(\bar{u})} + 1.
+%\end{align}
+%where $\tilde{\x} = (\x^T,1)^T$, $\tilde{\x}' = (\x'^T,1)^T$, $\bar{u} = \ang{\tilde{\x},\tilde{\x}'} / \pt{\norm{\tilde{\x}}\norm{\tilde{\x}'}}$,
+%\begin{align}
+%  \label{eq:A_Arccos_Formula}
+%  \kappa_0(u) =  \frac{1}{\pi}\pt{\pi - \arccos u},\qquad
+%  \kappa_1(u) = \frac{1}{\pi}\bk{\sqrt {1-u^2} + u (\pi - \arccos u)},
+%\end{align}
+%$\kappa_1^{(p)} = \kappa_1\underbrace{\circ \dots \circ}_{p \text{ times}} \kappa_1$ represents $p$ times composition of $\kappa_1$
+%and $\kappa_1^{(0)}(u) = u$ by convention;
+%if $r = L$, the product $\prod_{s=r}^{L-1}$ is understood to be $1$.
+%%It is easy to check that \cref{eq:NTK_Formula_new} is different but equivalent to \cref{eq:NTK_Formula}.
+
+% \subsubsection{An expanded matrix form}
+
+\paragraph{An expanded matrix form}
+Sometimes it is convenient to write the neural network \cref{eq:A_NN_Arch} in an expanded matrix form as introduced in \citet{allen-zhu2019_ConvergenceTheory}.
+Let us define the activation matrix
+\begin{align*}
+  \bm{D}^{(l,p)}_{\x}=
+  \begin{cases}
+    \bm{I}_{d+1}, &l=0;\\
+    \mr{diag}\xkm{\dot\sigma\xkm{\widetilde{\bm{\alpha}}^{(l,p)}\xkm{\x}}}, &l \geq 1,
+  \end{cases}\quad\in\mb{R}^{m_l\times m_l}
+\end{align*}
+% \begin{align*}
+%   \bm{D}^{(l,p)}_{\x}=\mr{diag}\mpt{\bm{1}\cl{\pt{\bm{\alpha}^{(l,p)}_{\x}}_1>0},\cdots,\bm{1}\cl{\pt{\bm{\alpha}^{(l,p)}_{\x}}_{m_l}>0}}
+% \end{align*}
+for $p=1,2$, where $\bm{I}_{d+1}$ is the identity matrix.
+Then, we have
+\begin{align*}
+  \widetilde{\bm{\alpha}}^{(l,p)}(\x) &= \sqrt{\frac{2}{m_l}} \bm{W}^{(l-1,p)}\bm{D}^{(l-1,p)}_{\x}\widetilde{\bm{\alpha}}^{(l-1,p)}(\x),\quad
+  {\bm{\alpha}}^{(l,p)}(\x)
+  % =\bm{D}^{(l,p)}_{\x}\bm{\alpha}^{(l,p)}(\x)
+  = \sqrt{\frac2{m_l}}\bm{D}^{(l,p)}_{\x}\bm{W}^{(l-1,p)}{\bm{\alpha}}^{(l-1,p)}(\x).
+\end{align*}
+% We will also add a subscript $t$ to indicate those quantities during the training.
+
+To further write it as product of matrices, we first introduce the following notation to avoid confusion since matrix product is not commutative.
+For matrices $\bm{A}_0,\bm{A}_1,\cdots,\bm{A}_L$, we define the left multiplication product
+\begin{align*}
+  \prod_{i=a}^b \bm{A}_i =
+  \begin{cases}
+    1,&0\leq b <a \leq L;\\
+    \bm{A}_b \bm{A}_{b-1} \cdots \bm{A}_{a+1} \bm{A}_a,& 0 \leq a \leq b \leq L.
+  \end{cases}
+\end{align*}
+% and set $\prod_{i=a}^b \bm{A}_i = 1$ if $a > b$. 
+Since real number multiplication is commutative, the notation introduced above is compatible with the traditional usage when $\bm{A}_0,\bm{A}_1, \cdots, \bm{A}_L$ degenerate into real numbers.
+In this way, we have
+\begin{align}
+  \label{eq:NN_Layer_MatrixProductForm}
+  \widetilde{\bm{\alpha}}^{(l,p)}(\x) = \xk{\prod_{r=1}^l \sqrt{\frac{2}{m_r}} \bm{W}^{(r-1,p)}\bm{D}^{(r-1,p)}_{\x}} \tilde{\x}, \quad
+  {\bm{\alpha}}^{(l,p)}(\x) = \xk{\prod_{r=1}^{l} \sqrt{\frac{2}{m_r}} \bm{D}^{(r,p)}_{\x} \bm{W}^{(r-1,p)}}\tilde{\x}.
+\end{align}
+Using the above expressions, we can obtain
+\begin{align*}
+  g^{(p)}(\x) &= \bm{W}^{(L,p)}{\bm{\alpha}}^{(L,p)}(\x) + b^{(L,p)}=\bm{W}^{(L,p)}\xk{\prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}} \bm{D}^{(r,p)}_{\x} \bm{W}^{(r-1,p)}}{\bm{\alpha}}^{(l,p)}(\x) + b^{(L,p)}\\
+  &=\xk{ \prod_{r=l+1}^{L} \sqrt{\frac{2}{m_{r}}} \bm{W}^{(r,p)}\bm{D}^{(r,p)}_{\x} }\bm{W}^{(l,p)} {\bm{\alpha}}^{(l,p)}(\x) + b^{(L,p)}.
+  % &=\bm{W}^{(L,p)} \pt{\prod_{r=1}^{L} \sqrt{\frac{2}{m_r}} \bm{D}^{(r,p)}_{\x} \bm{W}^{(r-1,p)} } \x+b^{(L,p)}
+  % \nonumber\\
+  % &=\pt{ \prod_{r=1}^{L} \sqrt{\frac{2}{m_{r}}} \bm{W}^{(r,p)}\bm{D}^{(r,p)}_{\x} }\bm{W}^{(0,p)} \x + b^{(L,p)}.
+  % \label{eq:NN_Output_MatrixProductForm}
+\end{align*}
+Finally, we use the above results to calculate the gradient $\nabla_{\bm{W}^{(l,p)}} g^{(p)}(\x)$.
+To simplify notation, we define:
+\begin{align}
+  \label{eq:def_gamma}
+  \begin{split}
+    \begin{gathered}
+      \widetilde{\bm{\alpha}}^{(l,p)}_{\x}=\widetilde{\bm{\alpha}}^{(l,p)}\xkm{\x},
+      \quad{\bm{\alpha}}^{(l,p)}_{\x}={\bm{\alpha}}^{(l,p)}\xkm{\x},
+      \quad\bm{\gamma}^{(l,p)}_{\x}=\xk{\prod_{r=l+1}^{L} \sqrt{\frac2{m_r}}  \bm{W}^{(r,p)} \bm{D}^{(r,p)}_{\x}}^T\in\mb{R}^{m_{l+1}}.
+    \end{gathered}
+  \end{split}
+\end{align}
+Then we can obtain
+\begin{align*}
+  g^{(p)}(\x)=\bm{\gamma}^{(l,p),T}_{\x}\bm{W}^{(l,p)}{\bm{\alpha}}^{(l,p)}_{\x}+b^{(L,p)},
+\end{align*}
+% holds for $l\in\cl{0,1,\cdots,L}$ and $p\in\dk{1,2}$,
+which can lead to
+\begin{align}
+  \label{eq:GradientExpr}
+  \nabla_{\bm{W}^{(l,p)}} g^{(p)}(\x)=\bm{\gamma}^{(l,p)}_{\x}{\bm{\alpha}}^{(l,p),T}_{\x},\quad l=0,1,\cdots,L,~p=1,2.
+\end{align}
+Also, it is worth noting that for two vectors $\bm{a}$ and $\bm{b}$, we have
+\begin{align*}
+  \norm{\bm{a} \bm{b}^T}_{\mathrm{F}}^2 = \Tr(\bm{a} \bm{b}^T \bm{b} \bm{a}^T) = \Tr(\bm{a}^T \bm{a} \bm{b}^T \bm{b}) = \norm{\bm{a}}_2^2 \norm{\bm{b}}_2^2.
+\end{align*}
+Consequently, we can get
+\begin{align}
+  \label{eq:GradientExpr_Fnorm}
+  \norm{\nabla_{\bm{W}^{(l,p)}} g^{(p)}(\x)}_{\mr{F}}=\norm{\bm{\gamma}^{(l,p)}_{\x}}_2\norm{{\bm{\alpha}}^{(l,p)}_{\x}}_2.
+\end{align}
+
+% \subsubsection{Further notations}
+% \paragraph{Further notations}
+% To track the training process, we will use $T$ to represent an interval $[0,t_0]$ or $[0,+\infty)$.
+% For a vector $\bm{v}$, we use $\norm{\bm{v}}_2$ (or simply $\norm{\bm{v}}$) to represent the Euclidean norm
+% and use $\norm{\bm{v}}_\infty$ to represent the maximum absolute value of its elements.
+% We denote by $\norm{\bm{M}}_2$, $\norm{\bm{M}}_\infty$ and $\norm{\bm{M}}_{\mr{F}}$ the spectral, infinity and Frobenius norm of a matrix $\bm{M}$ respectively.
+% Also, we use $\norm{\,\cdot\,}_0$ to represent the number of non-zero elements of a vector or matrix.
+% For matrices $\bm{A}\in\mb{R}^{n_1\times n_2}$ and $\bm{B}\in\mb{R}^{n_2\times n_1}$,
+% we define $\ang{\bm{A},\bm{B}} = \Tr(\bm{A}\bm{B}^T)$.
+% We remind that $\ang{\bm{M}, \bm{M}} = \norm{\bm{M}}_{\mr{F}}^2$ in this way.
+
+% \subsubsection{Organization}
+
+
+
+\subsection{Initialization}\label{subsec:Init}
+Since our neural network is mirrored, we can focus only on one part $g^{(p)}(\x)$ of the network at initialization.
+For notational simplicity, we omit the superscript $p$ for $\bm{W}^{(l,p)}_t$ and other notations in the following if there is no ambiguity.
+And unless otherwise stated, it is understood that the conclusions hold for both $p = 1$ and $p = 2$.
+%We will also suppress the subscript $t$ when $t = 0$.
+
+Since $K^{(p)}_0$ corresponds to the tangent kernel of a vanilla fully connected neural network,
+\citet[Theorem 3.1]{arora2019_ExactComputation} shows the following convergence result.
+
+
+%We set this constriction since we know $\norm{\tilde{\x}}\geq 1$ (recalling that $\tilde{\x} \in \mathbb{R}^d \times \{1\}$).
+
+\begin{lemma}
+[Convergence to the NTK at initialization]
+  There exist some positive absolute constants $C_1>0$ and $C_2\geq 1$ such that if $\varepsilon\in\xk{0,1}$, $\delta\in\xk{0,1}$ and $m\geq C_1\varepsilon^{-4}\ln\xkm{C_2/\delta}$, then for any fixed $\bm{z}, \bm{z}'$ such that $\norm{\bm{z}} \leq 1$ and $\norm{\bm{z}'}\leq 1$, with probability at least $1-\delta$ with respect to the initialization, we have
+  \[\abs{K^{(p)}_0\xkm{\bm{z},\bm{z}'}-\NTK\xkm{\bm{z},\bm{z}'}}\leq\varepsilon.\]
+
+  % For any
+  % $\varepsilon > 0$ and any $\delta\in(0, 1)$, if $m = \Omega(\varepsilon^{-4}\ln(1/\delta))$, we then have that
+  % for any inputs $\x, \x'\in\mc{\X}\times\{1\}$, with probability at least $1-\delta$ we have:
+  %  \begin{align*}
+  %    \abs{K^{(p)}_0(\x,\x')-\NTK(\x,\x')}\leq \varepsilon.
+  %  \end{align*}
+\end{lemma}
+
+Letting $\varepsilon=m^{-1/5}$ in the previous lemma, we can get the following corollary:
+\begin{corollary}
+  \label{cor:Init_Kt_NTK}
+
+  There exist some positive absolute constants $C_1>0$ and $C_2\geq 1$ such that if $\delta\in\xk{0,1}$ and $m\geq C_1\xk{\ln\xkm{C_2/\delta}}^5$, 
+  then for any fixed $\bm{z},\bm{z}'\in \tilde{B}_R$, with probability at least $1-\delta$ with respect to the initialization, we have
+  \[\abs{K^{(p)}_0\xkm{\bm{z},\bm{z}'}-\NTK\xkm{\bm{z},\bm{z}'}}=O\xkm{ R^2 m^{-1/5}}.\]
+
+%   For any $\delta\in(0,1)$,
+%   if $m \geq \mr{poly}(\ln(1/\delta))$,
+% %  There exists a polynomial $\mr{poly}_1$ such that for any  $m\geq \mr{poly}_1\big(\ln(1/\delta)\big)$.
+%   then for any inputs $\x$, $\x'\in\mc{\X}\times\{1\}$, with probability at least $1-\delta$, we have
+%   \begin{align}
+%     \abs{K_0(\x,\x')-\NTK(\x,\x')} = O(m^{-1/5}).
+%   \end{align}
+\end{corollary}
+
+Now we further provide some bounds about the magnitudes of weight matrices and layer outputs.
+The following is a standard estimation of Gaussian random matrix, which is a direct consequence of \citet[Corollary 5.35]{vershynin2010_IntroductionNonasymptotic}.
+\begin{lemma}
+  \label{lem:Random matrix}At initialization, there exists a positive absolute constant $C$, 
+  such that when $m\geq C$, with probability at least $1-\exp\xkm{-\Omega(m)}$ with respect to the initialization,
+  % With probability at least $1-\exp(-\Omega(m))$ with respect to the initialization,
+  % for $l=0,1,\cdots,L$, 
+  we have
+  \begin{align*}
+    \norm{\bm{W}^{(l)}_0}_2 = O\xkm{\sqrt{m}},\quad l\in \dk{0,1,\dots,L}.
+  \end{align*}
+\end{lemma}
+% \begin{proof}This lemma is a direct consequence of \citet[Corollary 5.35]{vershynin2010_IntroductionNonasymptotic}.\end{proof}
+
+%\begin{lemma}
+%  Let $A$ be an $a\times b$ matrix whose entries are independent standard normal random variables.
+%  Then for every $t\geq 0$, with probability at least $1-2\exp(- t^2/2)$ one has
+%  \[\sqrt{a}-\sqrt{b}-t\leq s_{\min}(A)\leq s_{\max}(A)\leq \sqrt{a}+\sqrt{b}+t.\]
+%\end{lemma}
+
+Noticing that $\norm{\bm{D}^{(l)}_{\x}}_2 \leq 1$ and combining \cref{lem:Random matrix} with \cref{eq:NN_Layer_MatrixProductForm}, \cref{eq:def_gamma} and \cref{eq:GradientExpr_Fnorm}, we have:
+
+\begin{lemma}
+  \label{lem:Init_WeightsProductBound}There exists a positive absolute constant $C$, 
+  such that when $m\geq C$, with probability at least $1-\exp(-\Omega(m))$ with respect to the initialization, for any
+  % $1 \leq a \leq b \leq L $, 
+  $l\in\dk{0,1,\cdots,L}$ and $\x \in \tilde{B}_R$, we have
+  \begin{align*}
+    \begin{gathered}
+      \norm{\widetilde{\bm{\alpha}}_{\x,0}^{(l)}}_2 = O(R),\quad~\norm{{\bm{\alpha}}_{\x,0}^{(l)}}_2 = O(R),\quad~\norm{\bm{\gamma}^{(l)}_{\x,0}}_2=O(1)
+      \quad~\text{and}\quad~
+      \norm{\nabla_{\bm{W}^{(l)}} g_0(\x) }_{\mr{F}} = O(R).
+    \end{gathered}
+    % \norm{\bm{\alpha}_{\x,0}^{(l)}}_2 = O(1),
+  \end{align*}
+  % \begin{align*}
+  % \begin{gathered}
+  %   \norm{\prod_{r=a}^b \sqrt{\frac2{m_r}}  \bm{W}_0^{(r)} \bm{D}^{(r)}_{\x,0}}_2 = O(1),\quad \norm{\bm{\gamma}^{(l)}_{\x,0}}_2=O(1),\\
+  %   \norm{\tilde{\bm{\alpha}}_{\x,0}^{(l)}}_2 = O(1) \qand \norm{\bm{\alpha}_{\x,0}^{(l)}}_2 = O(1),
+  %   \end{gathered}
+  % \end{align*}
+\end{lemma}
+
+\cref{lem:Random matrix} and \cref{lem:Init_WeightsProductBound} provide some upper bounds, and the subsequent lemma provides a lower bound.
+It is important to note that the previous lemma holds uniformly for $\x\in\tilde{B}_R$, while the following lemma only holds pointwisely.
+
+% Combining \cref{lem:Chi2_Binomial} with \cref{eq:NN_Layer_MatrixProductForm},
+% we can get the following lemma. 
+% \citep[Lemma 7.1]{allen-zhu2019_ConvergenceTheory}.
+\begin{lemma}[Lemma 7.1 in \citet{allen-zhu2019_ConvergenceTheory}]
+  \label{lem:Init_LayerOutputBounds}
+  There exists a positive absolute constant $C$ such that when $m\geq C$, for any fixed $\bm{z}\in\tilde{B}_R$, 
+  with probability at least $1-\exp\xkm{-\Omega(m)}$ with respect to the initialization, we have $\norm{{\bm{\alpha}}^{(l)}_{\bm{z},0}}_{2} =\Theta(R)$ for $l\in\dk{0,1,\cdots,L}$.
+  % \begin{align*}
+  %   \norm{{\bm{\alpha}}^{(l)}_{\bm{z},0}}_{2} =\Theta(1)\qquad~\text{for}~l\in\cl{0,1,\cdots,L}.
+  % \end{align*}
+  % when $m$ is greater than the positive constant $C$.
+
+%   \begin{proof}
+%     We prove the lemma by induction. For $l = 0$, we can get
+%     \[\norm{ \tilde{\bm{\alpha}}^{(0)}_{\bm{z},0}}_2 =\norm{\bm{\alpha}^{(0)}_{\bm{z},0}}_2 = \norm{(\z^T,1)}_2 \in \bk{1,\sqrt{R^2+1}},\] and thus the base case holds.
+
+%     Assuming the statement holds for $l=k\in\cl{0,1,\cdots,L-1}$. When $l=k+1$, we fix $\tilde{\bm{\alpha}}^{(k)}_{\bm{z},0}$ and let $\bm{W}^{(k)}_0$ be the only source of randomness. According to \cref{eq:A_NN_Arch}, we have $\bm{\alpha}^{(k+1)}_{\bm{z},0} = \sqrt{{2}/{m_{k+1}}} \,\bm{W}^{(k)}_0 \tilde{\bm{\alpha}}^{(k)}_{\bm{z},0}$, which implies that
+%     \begin{align*}
+%       \sqrt{{m_{k+1}}/2}\,{\bm{\alpha}^{(k+1)}_{\bm{z},0}}/{\norm{\bm{\tilde{\alpha}}^{(k)}_{\bm{z},0}}_2}=\bm{W}^{(k)}_0 {\tilde{\bm{\alpha}}^{(k)}_{\bm{z},0}}/{\norm{\bm{\tilde{\alpha}}^{(k)}_{\bm{z},0} }_2}
+%     \end{align*}
+%     is an $m_{k+1}$-dimensional standard normal random vector with respect to the randomness of $\bm{W}^{(k)}_0$.
+% % then we have 
+% % \[\frac{m_{k+1}\norm{\bm{\alpha}^{(k+1)}_0(\bm{z}) }_2^2}{2\norm{\tilde{\bm{\alpha}}^{(k)}_0(\bm{z}) }_2^2}= \sum_{j=1}^{m_{k+1}}\frac{ {m_{k+1}}\pt{\alpha^{(k+1)}_{0,j}(\bm{z})}^2}{2\norm{\tilde{\bm{\alpha}}^{(k)}_0(\bm{z}) }_2^2} \sim\chi^2_{m_{k+1}}.\]
+% % Based on the inductive assumption, we have $\norm{\tilde{\bm{\alpha}}^{(k)}_0(\bm{z})}_2 = \Theta(1)$ with probability at least $1- \exp\mpt{-\Omega(m)} $.
+% %  By applying tail probability estimation of the chi-square distribution, we can conclude that 
+% %  $\norm{\bm{\alpha}^{(k+1)}_0(\bm{z})}_2 = \Theta(1)$ holds with probability at least $1-\exp\mpt{-\Omega(m)}$.
+%     Recall the symmetry of the Gaussian distribution, we can see that \[\sigma\mpt{{\alpha}^{(k+1)}_{\bm{z},0,j}} = w_j \cdot  \abs{{\alpha}^{(k+1)}_{\bm{z},0,j}},\] where ${\alpha}^{(k+1)}_{\bm{z},0,j}$ denotes the $j$-entry of $\bm{\alpha}^{(k+1)}_{\bm{z},0}$ and $w_j\iid\mathcal{B}(1,1/2)$. By combining $\tilde{\bm{\alpha}}^{(k+1)}_{\bm{z},0}=\sigma\mpt{{\bm{\alpha}}^{(k+1)}_{\bm{z},0}}$ with the above symmetry, we have
+%     \begin{align*}
+%       \frac{m_{k+1}}{2}{\norm{\tilde{\bm{\alpha}}^{(k+1)}_{\bm{z},0} }_2^2}/{\norm{\tilde{\bm{\alpha}}^{(k)}_{\bm{z},0} }_2^2}= \sum_{j:w_j\not=0}\frac{m_{k+1}}{2}{ \pt{\alpha^{(k+1)}_{\bm{z},0,j}}^2}/{\norm{\tilde{\bm{\alpha}}^{(k)}_{\bm{z},0} }_2^2} \sim\chi^2_\omega
+%     \end{align*}
+%     where $\omega \sim \mathcal{B}(m_{k+1},{1}/{2}) $. Then, apply \cref{lem:Chi2_Binomial}, we can conclude that $\norm{\bm{\alpha}^{(k+1)}_{\bm{z},0}}_2 = \Theta(1)$ holds with probability at least $1-\exp\mpt{-\Omega(m)}$.
+
+%     This completes the proof of the lemma by induction.
+%   \end{proof}
+
+  % With probability at least $1-\exp(-\Omega(m))$ with respect to the initialization, for any $0 \leq l \leq L$ and $\x \in \tilde{B}_Rl$, we have
+  % \begin{align}
+  %   \norm{\tilde{\bm{\alpha}}_0^{(l)}(\x)}_2 = \Theta(1) \qand \norm{\bm{\alpha}_0^{(l)}(\x)}_2 = O(1).
+  % \end{align}
+\end{lemma}
+
+% The gradient at initialization can also be bounded by the following lemma.
+
+% \begin{lemma}
+%   \label{lem:Init_GradientBound}There exists a positive absolute constant $C$ such that with probability at least $1-\exp(-\Omega(m))$
+%   with respect to the initialization,
+%   for any $l \in\cl{ 0,1,\cdots,L}$ and $\x\in \tilde{B}_R$, we have
+%   \begin{align*}
+%     % \label{eq:Init_GradientBound}
+%     \norm{\nabla_{\bm{W}^{(l)}} g_0(\x) }_{\mr{F}} = O(1)
+%   \end{align*}
+%   when $m$ is greater than the positive constant $C$.
+% \end{lemma}
+% \begin{proof}
+%   Recalling \cref{eq:GradientExpr}, we can get the following result:
+%   \begin{align*}
+% \nabla_{\bm{W}^{(l)}} g_0(\x)=\bm{\gamma}^{(l)}_{\x,0}\tilde{\bm{\alpha}}^{(l),T}_{\x,0}.
+% \end{align*}
+% % \begin{align*}
+% %     g(\x) = \pt{\prod_{r=l+1}^{L} \sqrt{\frac{2}{m_{r+1}}}  \bm{W}^{(r)} \bm{D}^{(r)}_{\x}} 
+% %     \sqrt{\frac{1}{m_{l+1}}} \bm{W}^{(l)} \tilde{\bm{\alpha}}^{(l)}
+% %     + b^{(L)},
+% %   \end{align*}
+% %   and hence
+% %   \begin{align}
+% %     \nabla_{\bm{W}^{(l)}} g(\x) &=
+% %     \sqrt{\frac{1}{m_{l+1}}} \tilde{\bm{\alpha}}^{(l)} \pt{\prod_{r=l+1}^{L} \sqrt{\frac{2}{m_{r+1}}}  \bm{W}^{(r)} \bm{D}^{(r)}_{\x}}\nonumber\\
+% %     &= \tilde{\bm{\alpha}}^{(l)} \pt{\prod_{r=l+1}^{L} \sqrt{\frac2{m_r}}  \bm{W}^{(r)} \bm{D}^{(r)}_{\x} }.\label{eq:GradientExpr}
+% %   \end{align}
+%   Then, to bound the two terms separately, we can apply \cref{lem:Init_WeightsProductBound}. Additionally, it is worth noting that for two vectors $\bm{a}$ and $\bm{b}$, we have
+% \begin{align*}
+% \norm{\bm{a} \bm{b}^T}_{\mathrm{F}}^2 = \Tr(\bm{a} \bm{b}^T \bm{b} \bm{a}^T) = \Tr(\bm{a}^T \bm{a} \bm{b}^T \bm{b}) = \norm{\bm{a}}_2^2 \norm{\bm{b}}_2^2.
+% \end{align*}
+% The result follows from these observations.
+%   % Then the result follows from \cref{lem:Init_WeightsProductBound} to bound the two terms separately,
+%   % and the fact that for two vectors $\bm{a},\bm{b}$,
+%   % \begin{align*}
+%   %   \norm{\bm{a} \bm{b}^T}_{\mathrm{F}}^2 = \Tr(\bm{a} \bm{b}^T \bm{b} \bm{a}^T) = \Tr(\bm{a}^T \bm{a} \bm{b}^T \bm{b}) = \norm{\bm{a}}_2^2 \norm{\bm{b}}_2^2.
+%   % \end{align*}
+% \end{proof}
+
+\subsection{The training process}\label{subsec:Training}
+
+In this subsection we will show that as long as the parameters and input do not change much, some the relative quantities can also be bounded.
+We still focus on one parity in this subsection and suppress the superscript $p$ for convenience.
+
+The most crucial result we will obtain in this subsection is the following proposition:
+\begin{proposition}
+  \label{prop:Training_KernelBound}
+  % For any $\delta\in(0,1)$, suppose $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}}= O(m^{1/4})$ holds for all $t\in T$.
+  % Then for any $\x,\x' \in \mc{\X}$, with probability at least $1 - \exp(-\Omega(m^{5/6}))$, we have
+  % \begin{align}
+  %   \sup_{t\in T}\abs{K^{(p)}_t(\x,\x') - K^{(p)}_0(\x,\x')} = O \left( m^{-1/12}\sqrt{\ln m}\right).
+  % \end{align}
+
+  Fix $ \bm{z},\bm{z}' \in \tilde{B}_R$ and $T\subseteq[0,\infty)$.
+  Suppose that $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0}_{\mr{F}}= O(m^{1/4})$ holds for all $t\in T$ and $l\in\dk{0,1,\cdots,L}$.
+  Then there exists a positive absolute constant $C$ such that when $m\geq C$, with probability at least $1 - \exp\xkm{-\Omega(m^{5/6})}$, for any $\x,\x' \in \mc{\X}$ such that $\norm{\x-\z}_2,\norm{\x'-\z'}_2 \leq O( 1/m)$, we have
+  \[\sup_{t\in T}\abs{K^{(p)}_t(\x,\x') - K^{(p)}_0(\z,\z')}= O \xkm{R^2 m^{-{1}/{12}}\sqrt{\ln m}}.\]
+\end{proposition}
+% \begin{proposition}
+%   \label{prop:Training_KernelBound}
+%   % For any $\delta\in(0,1)$, suppose $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}}= O(m^{1/4})$ holds for all $t\in T$.
+%   % Then for any $\x,\x' \in \mc{\X}$, with probability at least $1 - \exp(-\Omega(m^{5/6}))$, we have
+%   % \begin{align}
+%   %   \sup_{t\in T}\abs{K^{(p)}_t(\x,\x') - K^{(p)}_0(\x,\x')} = O \left( m^{-1/12}\sqrt{\ln m}\right).
+%   % \end{align}
+
+%   Fix $ \bm{z},\bm{z}' \in \tilde{B}_R$ and $T\subseteq[0,\infty)$. Suppose that $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0}_{\mr{F}}= O(m^{1/4})$ holds for all $t\in T$ and $l\in\cl{0,1,\cdots,L}$. Then there exists a positive absolute constant $C$ such that with probability at least $1 - \exp\mpt{-\Omega(m^{5/6})}$, we have
+%   \[\sup_{t\in T}\abs{K^{(p)}_t(\z,\z') - K^{(p)}_0(\z,\z')}= O \mpt{m^{-{1}/{12}}\sqrt{\ln m}}\]
+%   when $m$ is greater than the positive constant $C$.
+% \end{proposition}
+The proof of this proposition will be presented at the end of this subsection.
+Combining this proposition with \cref{cor:Init_Kt_NTK}, we can derive the following corollary:
+\begin{corollary}
+  \label{cor:Training_Kernel_uniform}
+  Fix $ \bm{z},\bm{z}' \in \tilde{B}_R$ and let $\delta\in(0,1)$, $T\subseteq[0,\infty)$.
+  Suppose that $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0}_{\mr{F}}= O(m^{1/4})$ holds for all $t\in T$ and $l\in\dk{0,1,\cdots,L}$.
+  Then there exist some positive absolute constants $C_1>0$ and $C_2\geq 1$ such that with probability at least $1 - \delta$, for any $\x,\x' \in \mc{\X}$ such that $\norm{\x-\z}_2,\norm{\x'-\z'}_2 \leq O( 1/m)$, we have
+  \[\sup_{t\in T}\abs{K^{(p)}_t(\x,\x') - \NTK(\z,\z')}= O \xkm{R^2 m^{-{1}/{12}}\sqrt{\ln m}},~\text{when}~m\geq C_1\xk{\ln(C_2/\delta)}^5.\]
+\end{corollary}
+% \begin{corollary}
+%   \label{cor:Training_Kernel_uniform}
+%   Fix $ \bm{z},\bm{z}' \in \tilde{B}_R$ and let $\delta\in(0,1)$, $T\subseteq[0,\infty)$. Suppose that $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0}_{\mr{F}}= O(m^{1/4})$ holds for all $t\in T$ and $l\in\cl{0,1,\cdots,L}$. Then there exist some positive absolute constants $C_1>0$ and $C_2\geq 1$ such that with probability at least $1 - \delta$, we have
+%   \[\sup_{t\in T}\abs{K^{(p)}_t(\z,\z') - \NTK(\z,\z')}= O \mpt{m^{-{1}/{12}}\sqrt{\ln m}}\]
+%   when $m\geq C_1\pt{\ln(C_2/\delta)}^5$.
+% \end{corollary}
+
+% To prove \cref{prop:Training_KernelBound}
+
+
+% \begin{lemma}
+%   \label{lem:Training_GradientBound}
+%   Let $\tau\in\left[\Omega\big(m^{-1}(\ln m)^{-3/2}\big), O\big({\sqrt{m}}/{(\ln m)^3}\big)\right]$ and fix $\x \in \tilde{B}_R\times\{1\}$.
+%   Suppose $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}}\leq \tau$ holds for all $t\in T$ and $l = 0,\dots,L$.
+%   Then, with probability at least $1-\exp(-\Omega( m^{2/3} \tau^{2/3}))$ over the randomness of initialization, we have
+%   \begin{align}
+%     \sup_{t\in T}\norm{\nabla_{\bm{W}^{(l)}} g_t(\x) - \nabla_{\bm{W}^{(l)}} g_0(\x)}_{\mr{F}}= O\left( m^{-\frac{1}{6}} \tau^\frac{1}{3} \sqrt{\ln m} \right)
+%   \end{align}
+%   for all $l = 0,\dots,L$.
+% \end{lemma}
+
+To prove \cref{prop:Training_KernelBound}, we need to introduce some necessary lemmas.
+In \cref{lem:Init_WeightsProductBound}, we have provided upper bounds for the norms of ${\widetilde{\bm{\alpha}}_{\x,0}^{(l)}}$, ${{\bm{\alpha}}_{\x,0}^{(l)}}$, $\bm{\gamma}^{(l)}_{\x,0}$ and $\nabla_{\bm{W}^{(l)}} g_0(\x)$ at initialization.
+Next, we aim to prove that under perturbations in the parameters and the input, the corresponding changes in these quantities will also be small.
+
+In fact, similar lemmas can be found in \citet{allen-zhu2019_ConvergenceTheory}, although they have different conditions compared to the lemmas in this paper.
+For example, in \citet{allen-zhu2019_ConvergenceTheory}, the input points are constrained to lie on a sphere, the input and output layers are not involved in training, and each hidden layer has the same width.
+
+However, the most crucial point is that \citet{allen-zhu2019_ConvergenceTheory} did not consider the impact of small perturbations in the input, which is vital for proving uniform convergence.
+In fact, the slight perturbation between $\x$ and $\z$ can be regarded as taking a slight perturbation on $\bm{W}^{(0)}$, with other $\bm{W}^{(l)} $ fixed.
+Additionally, since this paper fixes the number of layers $L$, there is no need to consider the impact of $L$ on the bounds.
+This simplifies the proof of the corresponding conclusions.
+
+Inspired by \citet[Lemma 8.2]{allen-zhu2019_ConvergenceTheory}, we can prove the following lemma:
+
+\begin{lemma}
+  \label{lem:NN_forward_perturbation}
+  Let $\Delta=O(1/\sqrt{m})$, $\tau\in\zk{\Delta\sqrt{m},O\xkm{{\sqrt{m}}/{(\ln m)^3}}}$, $T\subseteq [0,\infty)$ and fix ${\bm{z}} \in\tilde{B}_R$.
+  Suppose that $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}}\leq\tau$ holds for all $t\in T$ and $l\in\dk{0,1,\cdots,L}$.
+  Then there exists a positive absolute constant $C$ such that with probability at least $1-\exp\xkm{-\Omega(m^{2/3}\tau^{2/3})}$, for all $t\in T$, $l\in\dk{0,1,\cdots,L}$ and $\x \in\tilde{B}_R$ such that $\norm{\x-\bm{z}}_2 \leq \Delta$, we have
+  % \begin{enumerate}[$(a)$~]
+
+  $(a)$ $\norm{\widetilde{\bm{\alpha}}^{(l)}_{\x,t} - \widetilde{\bm{\alpha}}_{\z,0}^{(l)}}_2 = O(R \tau/\sqrt{m})$ and thus $\norm{\widetilde{\bm{\alpha}}^{(l)}_{\x,t}}_2=O(R)$;
+
+  $(b)$ $\norm{\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}}_0 = O(m^{2/3} \tau^{2/3})$ and $\norm{\xk{\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}}\widetilde{\bm{\alpha}}_{\x,t}^{(l)}}_2= O(R{\tau}/{\sqrt{m}})$;
+
+  $(c)$ $\norm{{\bm{\alpha}}^{(l)}_{\x,t} - {\bm{\alpha}}_{\z,0}^{(l)}}_2 = O(R \tau/\sqrt{m})$ and thus $\norm{{\bm{\alpha}}^{(l)}_{\x,t}}_2=O(R)$,
+
+  % \end{enumerate}
+  \noindent when $m$ is greater than the positive constant $C$.
+\end{lemma}
+\begin{proof}
+  We use mathematical induction to prove this lemma.
+  When $l=0$, it can be easily verified that $\bs{D}_{\bs{x},t}^{(0)} - \bs{D}_{\bs{z},0}^{(0)} = \bm{O}$ and $\norm{\widetilde{\bm{\alpha}}^{(l)}_{\x,t} - \widetilde{\bm{\alpha}}_{\z,0}^{(l)}}_2=\norm{{{\bm{\alpha}}}_{\x,t}^{(0)} -{{\bm{\alpha}}}^{(0)}_{\bm{z},0}}_2=\norm{\tilde{\x}-\tilde{\z}}_2 = \norm{\x-{\bm{z}}}_2 \leq \Delta\leq \tau/\sqrt{m}$, where $\bm{O}$ represents the zero matrix, $\tilde{\x}$ and $\tilde{\bm{z}}$ are extended vectors with an additional coordinate of $1$.
+  Thus, all the statements hold for $l=0$.
+  Now we assume that this lemma holds for $l=k\in\dk{0,1,\cdots,L-1}$.
+
+  $(a)$  First of all, we can decompose $\widetilde{\bm{\alpha}}^{(k+1)}_{\x,t} -\widetilde{\bm{\alpha}}^{(k+1)}_{\z,0}$ as following:
+  \begin{equation*}
+    \begin{aligned}
+      &\widetilde{\bm{\alpha}}^{(k+1)}_{\x,t} -\widetilde{\bm{\alpha}}^{(k+1)}_{\z,0}=
+      \sqrt{\frac{2}{m_{k+1}}} \bm{W}^{(k)}_t {\bm{\alpha}}^{(k)}_{\x,t} - \sqrt{\frac{2}{m_{k+1}}} \bm{W}_0^{(k)}{\bm{\alpha}}^{(k)}_{\z,0}\\
+      &\qquad=\sqrt{\frac{2}{m_{k+1}}} \xk{\bm{W}^{(k)}_t - \bm{W}^{(k)}_0} {\bm{\alpha}}^{(k)}_{\x,t} + \sqrt{\frac{2}{m_{k+1}}}\bm{W}^{(k)}_0 \xk{{\bm{\alpha}}^{(k)}_{\x,t} - {\bm{\alpha}}^{(k)}_{\z,0}}.
+    \end{aligned}
+  \end{equation*}
+  From the above equation, we can deduce that $(a)$ holds for $l=k+1$ by the induction hypothesis and \cref{lem:Init_WeightsProductBound}.
+  % and $\norm{{\bm{\alpha}}^{(k)}_{\x,t}}_2\leq \norm{{\bm{\alpha}}^{(k)}_{\z,0}}_2+\norm{{\bm{\alpha}}^{(k)}_{\x,t}-{\bm{\alpha}}^{(k)}_{\z,0}}_2$.
+  % $\norm{\widetilde{\bm{\alpha}}^{(k+1)}_{\x,t} -\widetilde{\bm{\alpha}}^{(k+1)}_{\z,0}}_2 \leq O\mpt{{\tau}/{\sqrt{m}}}$.
+
+  $(b)$
+% Next, we use \cref{lem:Allen_Claim 8.3} to prove part $(a)(b)$. 
+  Let us consider the following choices in
+  \cref{lem:Allen_Claim 8.3}:
+  \begin{align*}
+    \bm{g}&=\frac{\widetilde{\bm{\alpha}}^{(k+1)}_{\z,0}}{\sqrt{{2}/{m_{k+1}}}\norm{{\bm{\alpha}}_{\z,0}^{(k)}}_2}=\frac{\bm{W}_0^{(k)}{\bm{\alpha}}_{\z,0}^{(k)}}{\norm{{\bm{\alpha}}_{\z,0}^{(k)}}_2},\qquad~
+    \bm{g}'=\frac{\widetilde{\bm{\alpha}}^{(k+1)}_{\x,t}-\widetilde{\bm{\alpha}}^{(k+1)}_{\z,0}}{\sqrt{{2}/{m_{k+1}}}\norm{{\bm{\alpha}}_{\z,0}^{(k)}}_2}.
+  \end{align*}
+  It follows that $\bm{g}\sim N(0,\bm{I})$ if we fix ${\bm{\alpha}}_{\z,0}^{(k)}$ and only consider the randomness of $\bm{W}^{(k)}_0$.
+  Also, we have $\norm{\bm{g}'}_2\leq O(\tau/\sqrt{m})\cdot O(\sqrt{m})\leq O(\tau)$ holds for all $\x \in\tilde{B}_R$ such that $\norm{\x-\bm{z}}_2 \leq \Delta$ since we have previously shown that $\norm{{\bm{\alpha}}_{\z,0}^{(k)}}_2=\Theta(R)$ in \cref{lem:Init_LayerOutputBounds}.
+  Therefore, we can choose $\delta=\Theta(\tau)$ such that $\norm{\bm{g}'}_2\leq\delta$.
+  Then, we can obtain
+  \begin{align*}
+    \bm{g}+\bm{g}'=\frac{\widetilde{\bm{\alpha}}^{(k+1)}_{\x,t}}{\sqrt{\frac{2}{m_{k+1}}}\norm{{\bm{\alpha}}_{\z,0}^{(k)}}_2},~~\bm{D}'=\bm{D}_{\x,t}^{(k+1)} - \bm{D}_{{\bm{z}},0}^{(k+1)}~~\text{and}~~\bm{u}=\frac{\xk{\bm{D}_{\x,t}^{(k+1)} - \bm{D}_{{\bm{z}},0}^{(k+1)}}\widetilde{\bm{\alpha}}^{(k+1)}_{\x,t}}{\sqrt{\frac{2}{m_{k+1}}}\norm{{\bm{\alpha}}_{\z,0}^{(k)}}_2}&,
+  \end{align*}
+  where $\bm{D}'$ and $\bm{u}$ are defined as in \cref{lem:Allen_Claim 8.3}.
+  By applying \cref{lem:Allen_Claim 8.3}, we can get $\norm{\bm{D}'}_0\leq O(m^{2/3}\tau^{2/3})$ and $\norm{\bm{u}}_2\leq O(\delta)$, which establish the conclusion of part $(b)$.
+
+
+% As to the second statement, we define $\bs{u}^{(l)}$ as following:
+
+% % Let $u^{(l)} = (\bs{D}^{(l)}_{\bs{x},t} - \bs{D}^{(l)}_{\bs{z},0}) \bs{\alpha}_t^{(l)}(x)$
+
+% \begin{equation}
+% \begin{aligned}
+% \bm{u}^{(l)} &:= (\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}) \bm{\alpha}^{(l)}_t(\x)=
+% \left(\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}\right)\left(\bm{\alpha}^{(l)}_0({\bm{z}})+(\bm{\alpha}^{(l)}_t(\x)-\bm{\alpha}^{(l)}_0({\bm{z}}))\right) \\
+% &=(\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)})\left[\sqrt{\frac{2}{m_l}}\bm{W}^{(l-1)}_0{\tilde{\bm{\alpha}}}^{(l-1)}_0({\bm{z}})+
+% \left(\bm{\alpha}^{(l)}_t(\x)-\bm{\alpha}^{(l)}_0({\bm{z}})\right)\right],
+% \end{aligned}
+% \end{equation}
+
+
+% Now we re-scale $\bm{u}^{(l)}$ by ${1}/{\norm{\tilde{\bm{\alpha}}^{(l-1)}_0({\bm{z}})}_2}$, then with Lemma \ref{lem: Recur_D0} we know (let$\bm{D}'=\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}$, $\bm{g}=\sqrt{{2}/{m_l}}\bm{W}^{(l-1)}_0{ \bm{\tilde{\alpha}}^{(l-1)}_0({\bm{z}})}/{\norm{\tilde{\bm{\alpha}}^{(l-1)}_0({\bm{z}})}_2}$ and $\bm{g}'=\big({\bm{\alpha}^{(l)}_t(\x)-\bm{\alpha}^{(l)}_0({\bm{z}})}\big)/{\norm{\tilde{\bm{\alpha}}^{(l-1)}_0({\bm{z}})}_2}$) with probability at least $1-\exp\big(-\Omega(m^{2/3} \tau^{2/3})\big)$, we have:
+% \begin{align}
+% \label{a2}
+% \norm{\bm{u}^{(l)}}_0 \leq \norm{\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}}_0 = O\big(m^{\frac{2}{3}}\tau^\frac{2}{3}\big); \quad \text{and} \quad
+% \norm{\bm{u}^{(l)}}_2 = O\big(\frac{\tau}{\sqrt{m}}\big).
+% \end{align}
+
+
+
+  $(c)$ Further, the third statement can be directly obtained from the following inequality:
+  \begin{align*}
+    \norm{{\bm{\alpha}}^{(k+1)}_{\x,t} -{\bm{\alpha}}^{(k+1)}_{\bm{z},0}}_2 &\leq \norm{\bm{D}^{(k+1)}_{{\bm{z}},0}\xk{\widetilde{\bm{\alpha}}^{(k+1)}_{\x,t} - \widetilde{\bm{\alpha}}^{(k+1)}_{\bm{z},0}}}_2+\norm{\xk{\bm{D}^{(k+1)}_{\x,t} - \bm{D}^{(k+1)}_{{\bm{z}},0} }\widetilde{\bm{\alpha}}^{(k+1)}_{\x,t} }_2.
+  \end{align*}
+  Thus, the proof of this lemma is complete.
+\end{proof}
+
+In the proof of \cref{lem:NN_forward_perturbation}, we use the following result:
+\begin{lemma}[\citet{allen-zhu2019_ConvergenceTheory} Claim 8.3]
+  \label{lem:Allen_Claim 8.3}
+  % Suppose $\delta_2 \in [0,O(1)]$, $\delta_\infty \in \big[0,1/({4\sqrt{m}})\big]$ and $m_1 \in [1,M]$.
+  % Suppose $\bm{W} \in \R^{m\times m_1}$ is a random matrix with entries drawn i.i.d from $\mathcal{N}(0,1)$.
+  % With probability at least $1- \exp(-\Omega\big(m^{3/2}\delta_\infty\big))$, the following holds.
+  % Fix any unit vector $\bm{h} \in \R^m$, and for all $\bm{g}\in \R^{m_1}$ that can be written as
+  % \begin{align*}
+  %   \bm{g}= \bm{g}_1+\bm{g}_2\quad \text{where} \quad\norm{\bm{g}_1}_2\leq \delta_2 \quad \text{and} \quad \norm{\bm{g}_2}_\infty \leq \delta_\infty.
+  % \end{align*}
+  % Let $\bm{D}' \in \R^{m\times m}$ be the diagonal matrix where
+  % \begin{align*}
+  % (\bm{D}')
+  %   _{k,k}  =  \bm{1}\big\{\big(\sqrt{{2}/{m}}\bm{Wh}+\bm{g}\big)_k \geq 0\big\} - \bm{1}\big\{\big(\sqrt{{2}/{m}}\bm{Wh}\big)_k \geq 0\big\},\quad~\forall k \in [m].
+  % \end{align*}
+  % Then, letting $\x=\bm{D}'\left(\sqrt{{2}/{m}}\bm{Wh}+\bm{g}\right) \in \R^m$, we have
+  % \begin{align*}
+  %   \norm{\x}_0 \leq \norm{\bm{D}'}_0 = O\big(m(\delta_2)^\frac{2}{3}+\delta_\infty m^\frac{3}{2}\big)\quad  and \quad \norm{\x}_2 = O\big(\delta_2+(\delta_\infty)^\frac{3}{2}m^\frac{3}{4}\big).
+  % \end{align*}
+
+  Suppose each entry of $\bm{g} \in \mathbb{R}^m$ follows $g_i \iid {N}(0,1)$.
+  For any $\delta > 0$, with probability at least $1-\exp\xkm{-\Omega(m^{2/3}\delta^{2/3})} $, the following proposition holds:
+
+  Select $\bm{g}' \in \mathbb{R}^m$ such that $ \norm{\bm{g}'}_2\leq\delta.$
+  Let $\bm{D}' = \mr{diag}(D'_{kk})$ be a diagonal matrix, where the $k$-th diagonal element
+  $D_{kk}' $ follows
+  $$D_{k k}^{\prime}=\bs{1}\left\{\left(g+g^{\prime}\right)_{k} \geq 0\right\}-\bs{1}\left\{g_{k} \geq 0\right\},\quad k\in[m].$$
+  If we define $\bm{u} = \bm{D}'(\bm{g}+\bm{g}')$, then it satisfies the following inequalities:
+  \[\norm{\bm{u}}_0 \leq \norm{\bm{D}'}_0 \leq O\xkm{m^{2/3}\delta^{2/3}} \quad \text{ and }\quad \norm{\bm{u}}_2 \leq O(\delta).\]
+\end{lemma}
+
+% Before proving \cref{prop:Training_KernelBound}, let us introduce some lemmas from \citet{allen-zhu2019_ConvergenceTheory}. By inspecting the proof of \citet[Lemma 8.2]{allen-zhu2019_ConvergenceTheory}(perturb the first layer), we have the following lemma: 
+
+% \begin{lemma}
+%   [Forward perturbation, Lemma 8.2 in \citet{allen-zhu2019_ConvergenceTheory} ]
+%   \label{lem:NN_forward_perturbation}
+%   Fix $\x \in \mc{\X}$ and suppose $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}}\leq\tau=O\Big({\sqrt{m}}/{(\ln m)^3}\Big)$ holds for all $t\in T$, with probability at least $1-\exp({-\Omega( m^{2/3} \tau^{2/3})})$, we have
+%   \begin{align} 
+%     \label{eq:NN_ForwardPerturbation}
+%     \begin{split}
+%     &\norm{\bm{D}^{(l)}_{\x,t}-\bm{D}^{(l)}_{\x,0}}_0=O(m^{2/3}\tau^{2/3}); \\ & 
+%     \norm{\tilde{\bm{\alpha}}^{(l)}_t(\x) - \tilde{\bm{\alpha}}_0^{(l)}(\x)}_2= O\mpt{\frac{\tau\sqrt{\ln m} }{\sqrt{m}}}
+%     \end{split}
+%   \end{align}
+%   hold for all $t\in T$ and $l \in \{0,1,\cdots, L\}$.
+% \end{lemma}
+
+% \begin{lemma}
+%   [Forward perturbation, Lemma 8.2 in \citet{allen-zhu2019_ConvergenceTheory} ]\label{lem:NN_forward_perturbation}
+%   Let $\tau=O\mpt{{\sqrt{m}}/{(\ln m)^3}}$, $T\subseteq [0,\infty)$ and fix ${\bm{z}} \in\tilde{B}_R$. Suppose that $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}}\leq\tau$ holds for all $t\in T$ and $l\in\cl{0,1\cdots,L}$. Then there exists a positive absolute constant $C$ such that with probability at least $1-\exp\mpt{-\Omega(m^{2/3}\tau^{2/3})}$, for all $t\in T$ and $l\in\cl{0,1,\cdots,L}$, we have
+%   \begin{enumerate}[$(a)$~]
+% % \item $\norm{\bm{\alpha}^{(l)}_t(\x) - \bm{\alpha}^{(l)}_0({\bm{z}}) }_2= O\big(\tau/\sqrt{m}\big)$;
+%     \item $\norm{\bm{D}_{\bm{z},t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}}_0 = O(m^{2/3} \tau^{2/3})$;
+%     \item $\norm{\pt{\bm{D}_{\bm{z},t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}}\bm{\alpha}_{\z,t}^{(l)}}_2= O(\tau/\sqrt{m})$;
+%     \item $\norm{\tilde{\bm{\alpha}}^{(l)}_{\z,t} - \tilde{\bm{\alpha}}_{\z,0}^{(l)}}_2 = O(\tau/\sqrt{m})$,
+%   \end{enumerate}
+%   when $m$ is greater than the positive constant $C$.
+% \end{lemma}
+% \begin{proof}
+%   The proof of this lemma is similar to the proof of \cref{lem:NN_forward_perturbation2}.
+% \end{proof}
+
+
+% By inspecting the proof of \citet[Lemma 8.7]{allen-zhu2019_ConvergenceTheory}(perturbing the last layer), we can relax their condition $\norm{\x}_2 =1$ to $\norm{\x}_2 \leq R$ and $m_l = m$ to $m_l \in [m,C_m m]$, deriving the following lemma:
+
+Inspired by \citet[Lemma 8.7]{allen-zhu2019_ConvergenceTheory}, we then have the following lemma:
+\begin{lemma}
+  \label{lem:backward perturbation}
+  Let $\Delta=O(1/\sqrt{m})$, $\tau\in\zk{\Delta\sqrt{m},O\xkm{{\sqrt{m}}/{(\ln m)^3}}}$, $T\subseteq [0,\infty)$ and fix ${\bm{z}} \in\tilde{B}_R$.
+  Suppose that $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}}\leq\tau$ holds for all $t\in T$ and $l\in\dk{0,1,\cdots,L}$.
+  Then there exists a positive absolute constant $C$ such that with probability at least $1-\exp\xkm{-\Omega(m^{2/3}\tau^{2/3})}$, for all $t\in T$, $l\in\dk{0,1,\cdots,L}$ and $\x \in\tilde{B}_R$ such that $\norm{\x-\bm{z}}_2 \leq \Delta$, we have
+  \begin{align*}
+    \norm{{\bm{\gamma}}^{(l)}_{\x,t} - {\bm{\gamma}}^{(l)}_{\z,0}}_2
+    = O\xkm{m^{-1/6} \tau^{1/3}\sqrt{\ln m}}\qquad~\text{and thus}\qquad~ \norm{{\bm{\gamma}}^{(l)}_{\x,t}}_2=O(1)
+  \end{align*}
+\end{lemma}
+when $m$ is greater than the positive constant $C$.
+% \begin{proof}
+%   We prove this lemma by mathematical induction. For $l=L$, we have ${\bm{\gamma}}^{(L)}_{\x,t} - {\bm{\gamma}}^{(L)}_{\z,0}=0$. Now we assume that this lemma holds for $l=k\in\zk{L}$, then our goal is to prove that the lemma also holds for $l=k-1$. First, we can obtain
+% \begin{align*}
+%     \bm{\gamma}^{(k-1)}_{\x,t}=\xk{\sqrt{\frac2{m_{k}}}\bm{W}^{(k)}_t \bm{D}_{\x,t}^{(k)}}^T\bm{\gamma}^{(k)}_{\x,t}=\sqrt{\frac2{m_{k}}} \bm{D}_{\x,t}^{(k)}\bm{W}^{(k),T}_t\bm{\gamma}^{(k)}_{\x,t}
+%   \end{align*}
+%   holds for $k\in[L]$. If we denote $\Delta\bm{\gamma}^{(l)}={\bm{\gamma}}^{(l)}_{\x,t}-\bm{\gamma}^{(l)}_{\z,0}$, $\Delta\bm{W}^{(l)}={\bm{W}}^{(l)}_{t}-\bm{W}^{(l)}_{0}$ and $\bm{D}^{(l)\prime}={\bm{D}}^{(l)}_{\x,t}-\bm{D}^{(l)}_{\z,0}$, then we have $\norm{\bm{W}^{(k)}_t}_2\leq\norm{\bm{W}^{(k)}_t}_2+\norm{\Delta\bm{W}^{(k)}}_2=O(\sqrt{m})$ and
+%   \begin{align*}
+%     \Delta\bm{\gamma}^{(k-1)} =\sqrt{\frac2{m_k}}\Big[{\bm{D}}^{(k)}_{\x,t}{\bm{W}}^{(k),T}_{t}\Delta{\bm{\gamma}}^{(k)}+{\bm{D}}^{(k)}_{\x,t}\Delta{\bm{W}}^{(k),T}{\bm{\gamma}}^{(k)}_{\z,0}
+%     +{\bm{D}}^{(k)\prime}{\bm{W}}^{(k),T}_0{\bm{\gamma}}^{(k)}_{\z,0}&\Big].
+% % +\bm{\gamma}_{k+1}\bm{W}^{(k)\prime}\bm{D}^{(k)\prime}}.
+%   \end{align*}
+%   Let us denote the three terms within the square brackets, excluding the factor `$\sqrt{2/m_k}$' outside the brackets, as $\bm{u}_1$ to $\bm{u}_3$ respectively.
+% % Let us denote the three terms within the square brackets as $\bm{u}_1$ to $\bm{u}_3$ respectively, while ignoring the factor $\sqrt {2/m_k}$ outside the brackets. 
+%   First of all, it is easy to check that, with probability at least $1-\exp\xkm{-\Omega(m)}$, we have
+%   \begin{align*}
+%     \norm{\bm{u}_1}_2=O\xkm{m^{1/3} \tau^{1/3}\sqrt{\ln m}},\qquad~ \norm{\bm{u}_2}_2=O\xkm{\tau}.
+%   \end{align*}
+% %   \begin{align*}
+% %     \begin{gathered}
+% % \norm{\tilde{\bm{W}}^{(r)}}_2\leq\norm{{\bm{W}}^{(r)}_0}_2+\norm{{\bm{W}}^{(r)\prime}}_2= O(\sqrt{m}),\qquad~\norm{\tilde{\bm{D}}^{(r)}_{\z}}_2=\norm{{\bm{D}}^{(r)}_{\z,0}}_2+\norm{{\bm{D}}^{(r)\prime}}_2=O(1).
+% %     \end{gathered}
+% %   \end{align*}
+
+%   As for $\bm{u}_3$, if $\bm{\gamma}^{(k)}_{\z,0}=\bm{0}$ or $\norm{\bm{D}^{(k)\prime}}_0=0$, we have $\norm{\bm{u}_3}_2=0$. Therefore, we consider the case where $\bm{\gamma}^{(k)}_{\z,0}\not=\bm{0}$ and $\norm{\bm{D}^{(k)\prime}}_0\geq1$. Denote $\hat{\bm{\gamma}}={\bm{\gamma}^{(k)}_{\z,0}}/\norm{\bm{\gamma}^{(k)}_{\z,0}}_2$ for $\bm{\gamma}^{(k)}_{\z,0}\in\mb{R}^{m_{k+1}}\backslash\dk{\bm{0}}$, we can get
+%   \begin{align*}
+%     \norm{\bm{u}_3}_2&\leq \norm{{\bm{D}}^{(k)\prime}{\bm{W}}^{(k),T}_0\hat{\bm{\gamma}}}_2\norm{\bm{\gamma}^{(k)}_{\z,0}}_2\leq O\xkm{1}\norm{{\bm{D}}^{(k)\prime}{\bm{W}}^{(k),T}_0\hat{\bm{\gamma}}}_2.
+%   \end{align*}
+%   Using the randomness of $\bm{W}^{(k)}_0$, for fixed $\hat{\bm{\gamma}}$, we have $\bm{W}^{(k),T}_0\hat{\bm{\gamma}}\sim {N}(\bm{0},\bm{I}_{m_k})$. According to \cref{lem:NN_forward_perturbation}(b) and \cref{lem:Recur_uv}, choosing $s=\Theta(m^{2/3}\tau^{2/3})$ such that $\norm{\bm{D}^{(k)\prime}}\leq s$, then with probability at least $1-\exp\xkm{-\Omega(m^{2/3}\tau^{2/3})}$, we can get
+%   \begin{align*}
+%     &\norm{{\bm{D}}^{(k)\prime}{\bm{W}}^{(k),T}_0\hat{\bm{\gamma}}}_2=\sup_{\bm{u}:\norm{\bm{u}}_2=1}\norm{\bm{u}^T{\bm{D}}^{(k)\prime}{\bm{W}}^{(k),T}_0\hat{\bm{\gamma}}\cdot 1}_2\\
+%     &\quad=\sup_{\bm{u}:\norm{\bm{u}}_2=1}\norm{\xk{{\bm{D}}^{(k)\prime}\bm{u}}^T{\bm{W}}^{(k),T}_0\hat{\bm{\gamma}}\cdot 1}_2 =O\xkm{\sqrt{s\ln m}}
+%     % =O\mpt{m^{1/3}\tau^{1/3}\sqrt{\ln m}},
+%   \end{align*}
+%   because of $\norm{\bm{D}^{(k)\prime}\bm{u}}_0\leq\norm{\bm{D}^{(k)\prime}}_0\leq s$ and $\norm{1}_0=1\leq \norm{\bm{D}^{(k)\prime}}_0\leq s$. Combining the above discussions, we can conclude the result.
+% \end{proof}
+
+% % \begin{lemma}
+% %   [Backward perturbation, Lemma 8.7 in \citet{allen-zhu2019_ConvergenceTheory}]\label{lem:backward perturbation}Let $\tau=O\mpt{\sqrt{m}/{(\ln m)^3}}$, $s \asymp m^{2/3} \tau^{2/3}$ and fix $\bm{z} \in \mathcal{X}$. Then, with probability at least $1-\exp\mpt{-\Omega(m^{2/3} \tau^{2/3})}$ over the random initialization, the following result holds:
+
+% %   For any perturbation matrices $\bm{D}^{(r)\prime}$, $\bm{W}^{(r)\prime}$ (where $r = 0,1,\cdots,L$) satisfying the following conditions:
+% % % , with probability at least $1-\exp(-\Omega(s\ln m)) $ over the randomness of $\bm{W}^{(l)}_0$ for all $l \in \{0,1,\cdots,L\}$, if the perturbation
+% %   \begin{enumerate}
+% %     \item each $ \bm{D}^{(r)\prime}\in[-3,3]^{m_r\times m_r}$ is diagonal, and $\norm{\bm{D}^{(r)\prime}}_0\leq s$;
+% %     \item each $\bm{W}^{(r)\prime}$ satisfies $\norm{\bm{W}^{(r)\prime}}_F \leq \tau$,
+% %   \end{enumerate}
+% %   denote $\tilde{\bm{W}}^{(r)}={\bm{W}}^{(r)}_0+{\bm{W}}^{(r)\prime}$, $\tilde{\bm{D}}^{(r)}_{\z}={\bm{D}}^{(r)}_{\z,0}+{\bm{D}}^{(r)\prime}$ and
+% %   \[\tilde{\bm{\gamma}}^{(l)}_{\z}=\pt{\prod_{r=l+1}^L \sqrt{\frac2{m_r}}\tilde{\bm{W}}^{(r)} \tilde{\bm{D}}^{(r)}_{\bm{z}}}^T\in\mb{R}^{m_{l+1}},\]
+% %   then for all $l = 0,1,\cdots,L$, we have the following bound:
+% %   \begin{align*}
+% %     \norm{\tilde{\bm{\gamma}}^{(l)}_{\z} - {\bm{\gamma}}^{(l)}_{\z,0}}_2
+% %     = O\mpt{m^{-1/6} \tau^{1/3}\sqrt{\ln m}}.
+% %   \end{align*}
+% % \end{lemma}
+% % \begin{proof}
+% %   We prove this lemma by mathematical induction. For $l=L$, we have $\tilde{\bm{\gamma}}^{(L)}_{\z} - {\bm{\gamma}}^{(L)}_{\z,0}=0$. Now we assume that this lemma holds for $l=k\in\bk{L}$, then our goal is to prove that the lemma also holds for $l=k-1$. First, we can obtain
+% %   \begin{align*}
+% %     \tilde{\bm{\gamma}}^{(k-1)}_{\z}=\pt{\sqrt{\frac2{m_{k}}}\tilde{\bm{W}}^{(k)} \tilde{\bm{D}}^{(k)}_{\bm{z}}}^T\tilde{\bm{\gamma}}^{(k)}_{\z}=\sqrt{\frac2{m_{k}}}\tilde{\bm{D}}^{(k)}_{\bm{z}}\tilde{\bm{W}}^{(k),T}\tilde{\bm{\gamma}}^{(k)}_{\z};\\
+% %     \bm{\gamma}^{(k-1)}_{\z,0}=\pt{\sqrt{\frac2{m_{k}}}\bm{W}^{(k)}_0 \bm{D}_{\bm{z},0}^{(k)}}^T\bm{\gamma}^{(k)}_{\z,0}=\sqrt{\frac2{m_{k}}} \bm{D}_{\bm{z},0}^{(k)}\bm{W}^{(k),T}_0\bm{\gamma}^{(k)}_{\z,0}
+% %   \end{align*}
+% %   hold for $k=[L]$. If we denote $\Delta\bm{\gamma}^{(l)}_{\z}=\tilde{\bm{\gamma}}^{(l)}_{\z}-\bm{\gamma}^{(l)}_{\z,0}$, then we have
+% %   \begin{align*}
+% %     \Delta\bm{\gamma}^{(k-1)}_{\z}
+% % % &=\sqrt{\frac2{m_{k}}}\tilde{\bm{D}}^{(k)}_{\bm{z}}\tilde{\bm{W}}^{(k),T}\tilde{\bm{\gamma}}^{(k)}_{\z}-\sqrt{\frac2{m_{k}}} \bm{D}_{\bm{z}}^{(k)}\bm{W}^{(k),T}\bm{\gamma}^{(k)}_{\z}\\
+% % % &\quad=\sqrt{\frac2{m_k}}\bk{\Delta\bm{\gamma}_{k+1}{\mpt{\bm{W}^{(k)} +\bm{W}^{(k)\prime}} \mpt{\bm{D}^{(k)}_{\bm{z}}+\bm{D}^{(k)\prime}}}+\bm{\gamma}_{k+1}\mbk{\mpt{\bm{W}^{(k)} +\bm{W}^{(k)\prime}} \mpt{\bm{D}^{(k)}_{\bm{z}}+\bm{D}^{(k)\prime}}-\bm{W}^{(k)} \bm{D}_{\bm{z}}^{(k)}}}\\
+% %     =\sqrt{\frac2{m_k}}\Big[\tilde{\bm{D}}^{(k)}_{\bm{z}}\tilde{\bm{W}}^{(k),T}\Delta{\bm{\gamma}}^{(k)}_{\z}+\tilde{\bm{D}}^{(k)}_{\bm{z}}{\bm{W}}^{(k)\prime,T}{\bm{\gamma}}^{(k)}_{\z,0}
+% %     +{\bm{D}}^{(k)\prime}{\bm{W}}^{(k),T}_0{\bm{\gamma}}^{(k)}_{\z,0}&\Big].
+% % % +\bm{\gamma}_{k+1}\bm{W}^{(k)\prime}\bm{D}^{(k)\prime}}.
+% %   \end{align*}
+% %   Let us denote the three terms within the square brackets, excluding the factor `$\sqrt{2/m_k}$' outside the brackets, as $\bm{u}_1$ to $\bm{u}_3$ respectively.
+% % % Let us denote the three terms within the square brackets as $\bm{u}_1$ to $\bm{u}_3$ respectively, while ignoring the factor $\sqrt {2/m_k}$ outside the brackets. 
+% %   First of all, it is easy to check that, with probability at least $1-\exp\mpt{-\Omega(m)}$, we have
+% %   \begin{align*}
+% %     \norm{\bm{u}_1}_2=O\mpt{m^{1/3} \tau^{1/3}\sqrt{\ln m}},\qquad~ \norm{\bm{u}_2}_2=O\mpt{\tau}
+% %   \end{align*}
+% %   since
+% %   \begin{align*}
+% %     \begin{gathered}
+% % \norm{\tilde{\bm{W}}^{(r)}}_2\leq\norm{{\bm{W}}^{(r)}_0}_2+\norm{{\bm{W}}^{(r)\prime}}_2= O(\sqrt{m}),\qquad~\norm{\tilde{\bm{D}}^{(r)}_{\z}}_2=\norm{{\bm{D}}^{(r)}_{\z,0}}_2+\norm{{\bm{D}}^{(r)\prime}}_2=O(1).
+% %     \end{gathered}
+% %   \end{align*}
+% %   As for $\bm{u}_3$, if $\bm{\gamma}^{(k)}_{\z,0}=\bm{0}$ or $\norm{\bm{D}^{(k)\prime}}_0=0$, we have $\norm{\bm{u}_3}_2=0$. Therefore, we consider the case where $\bm{\gamma}^{(k)}_{\z,0}\not=\bm{0}$ and $\norm{\bm{D}^{(k)\prime}}_0\geq1$. Denote $\hat{\bm{\gamma}}={\bm{\gamma}^{(k)}_{\z,0}}/\norm{\bm{\gamma}^{(k)}_{\z,0}}_2$ for $\bm{\gamma}^{(k)}_{\z,0}\in\mb{R}^{m_{k+1}}\backslash\cl{\bm{0}}$, we can get
+% %   \begin{align*}
+% %     \norm{\bm{u}_3}_2&\leq \norm{{\bm{D}}^{(k)\prime}{\bm{W}}^{(k),T}_0\hat{\bm{\gamma}}}_2\norm{\bm{\gamma}^{(k)}_{\z,0}}_2\leq O\mpt{1}\norm{{\bm{D}}^{(k)\prime}{\bm{W}}^{(k),T}_0\hat{\bm{\gamma}}}_2.
+% %   \end{align*}
+% %   Using the randomness of $\bm{W}^{(k)}_0$, for fixed $\hat{\bm{\gamma}}$, we have $\bm{W}^{(k),T}_0\hat{\bm{\gamma}}\sim\mathcal{N}(\bm{0},\bm{I}_{m_k})$. Thus, by \cref{lem:Recur_uv}, with probability at least $1-\exp\mpt{-\Omega(s\ln m)}$, we can get
+% %   \begin{align*}
+% %     &\norm{{\bm{D}}^{(k)\prime}{\bm{W}}^{(k),T}_0\hat{\bm{\gamma}}}_2=\sup_{\bm{u}:\norm{\bm{u}}_2=1}\norm{\bm{u}^T{\bm{D}}^{(k)\prime}{\bm{W}}^{(k),T}_0\hat{\bm{\gamma}}\cdot 1}_2\\
+% %     &\quad=\sup_{\bm{u}:\norm{\bm{u}}_2=1}\norm{\pt{{\bm{D}}^{(k)\prime}\bm{u}}^T{\bm{W}}^{(k),T}_0\hat{\bm{\gamma}}\cdot 1}_2 =O\mpt{\sqrt{s\ln m}},
+% %   \end{align*}
+% %   because of $\norm{\bm{D}^{(k)\prime}\bm{u}}_0\leq\norm{\bm{D}^{(k)\prime}}_0\leq s$ and $\norm{1}_0=1\leq \norm{\bm{D}^{(k)\prime}}_0\leq s$. Combining the above discussions, we can conclude the result.
+% % \end{proof}
+
+% % \begin{lemma}
+% %   \label{lem:backward perturbation} Fix $\x \in \mc{\X}$ and $s \in [\Omega({d}/{\ln m }), O({m}/{\ln m}) ]$. Then, with probability at least $1-\exp(-\Omega(s\ln m))$ over the random initialization, we have the following result:
+% %   Let $\bm{D}^{(r)'}$, $\bm{W}^{(r)'}$, $r = 0,\dots,L$ be perturbation matrices satisfying
+% %   % , with probability at least $1-\exp(-\Omega(s\ln m)) $ over the randomness of $\bm{W}^{(l)}_0$ for all $l \in \{0,1,\cdots,L\}$, if the perturbation
+% %   \begin{enumerate}
+% %     \item each $ \bm{D}^{(r)'}$ is diagonal with at most $s$ non-zero entries;
+% %     \item each $\bm{W}^{(r)'}$ satisfies $\norm{\bm{W}^{(r)'}}_2 \leq \tau=O\big({\sqrt{m}}/{(\ln m)^3}\big)$.
+% %   \end{enumerate}
+% %   Denote $\tilde{\bm{W}}^{(r)}={\bm{W}}^{(r)}+{\bm{W}}^{(r)\prime}$ and $\tilde{\bm{D}}^{(r)}_{\x}={\bm{D}}^{(r)}_{\x}+{\bm{D}}^{(r)\prime}$. Then, we have
+% %   \begin{equation*}
+% %   \begin{aligned}
+% %   \norm{\prod_{r=l}^L \sqrt{\frac2{m_r}}\tilde{\bm{W}}^{(r)} \tilde{\bm{D}}^{(r)}_{\x} -
+% %     \prod_{r=l}^L \sqrt{\frac2{m_r}}  \bm{W}^{(r)} \bm{D}_{\x}^{(r)}}_2
+% %     \\= O\mpt{\sqrt{\frac{s \ln m +\tau^2}{m}}}
+% %   \end{aligned}     
+% %   \end{equation*}
+% %   for all $l = 0,1,\dots,L$.
+% % \end{lemma}
+% % \begin{remark}
+% %   If we choose the parameter $s$ in \cref{lem:backward perturbation} to be $s \asymp m^{2/3} \tau^{2/3}$, the upper bound  becomes $O(m^{-1/6} \tau^{1/3}\sqrt{\ln m} )$ for $\tau\in\big[\Omega\big(m^{-1}(\ln m)^{-3/2}\big),O\big({\sqrt{m}}/{(\ln m)^3}\big)\big]$.
+% % \end{remark}
+
+% In the proof of \cref{lem:backward perturbation}, we use the following result:
+% \begin{lemma}
+%   \label{lem:Recur_uv}
+%   Suppose each entry of matrix $\bm{W} \in \mathbb{R}^{a \times b}$ follows $\bm{W}_{ij} \iid\mathcal{N}(0,1)$. Let $c = \max(a,b)$. If $s\geq 0$, then with probability at least $1- \exp\xkm{-s \ln c}$, the following holds:
+%   \[\forall \bm{u} \in \mathbb{R}^a, \bm{v} \in \mathbb{R}^b~\text{such that}~\norm{\bm{u}}_0, \norm{\bm{v}}_0 \leq s,~\text{we have}~
+%     \abs{\bm{u}^T \bm{W v}}\leq 9 \sqrt{s \ln c } \norm{\bm{u}}_2 \norm{\bm{v}}_2.\]
+% \end{lemma}
+% \begin{proof}
+%  First of all, it is easy to see that when $s<1 $ or $c=1$, the proposition is trivial. So we only need to consider the result under condition that $s \geq 1$ and $c \geq 2$. 
+
+%  Let $A \subseteq [a]$ such that $\abs{A}= \min\dk{a,\fl{s}}$, and let $U_A = \dk{ \bm{u}\in \mathbb{R}^{\abs{A}} : \forall i \notin A, u_i = 0 } $ be a set that contains vectors of which non-zero entries are only located in $A$. In the same way, let $B \subseteq [b] $ such that $\abs{B}=\min\dk{b, \fl{s}}$, and let $V_B =
+%  \dk{ \bm{v}\in \mathbb{R}^{\abs{B}} : \forall j \notin B, v_j = 0 } $. Then we have
+%  \begin{equation*}
+%  \bm{u}^T \bm{W v} = \sum^{a}_{i=1} \sum^{b}_{j=1} \bm{u}_i \bm{W}_{ij} \bm{v}_j = \sum_{i \in A,j \in B} \bm{u}_i \bm{W}_{ij} \bm{v}_j= \bm{u}^T_A \bm{W}_{AB} \bm{v}_B,
+%  \end{equation*}
+%  in which $\bm{u}_A = (\bm{u}_i)_{i \in A}^T, \bm{v}_B = (\bm{v}_j)_{j \in B}^T, \bm{W}_{AB} = (\bm{W}_{ij})_{i \in A, j \in B}$.
+%  According to the definition of spectral norm, we know that
+%  \begin{equation*}
+%  \abs{\bm{u}^T \bm{W v}} = \abs{ \bm{u}^T_A \bm{\bm{W}}_{AB} \bm{\bm{v}}_B } \leq \norm{\bm{u}_A}_2 \norm{\bm{W}_{AB}}_2 \norm{\bm{v}_B} _2.
+%  \end{equation*}
+
+%  Now we consider the spectral norm of $\bm{W}_{AB} \in \mathbb{R}^{\abs{A} \times \abs{B}}$. When $t \geq \sqrt{\fl{s}}$, with probability at least $1- 2\exp\xkm{-t^2/2}$, we have $\norm{\bm{W}_{AB}}_2 \leq 3t$. Then we have
+%  \begin{equation*}
+%  \forall \bm{u} \in U_A, \forall \bm{v} \in V_B, \quad \lvert \bm{u}^T \bm{W v} \rvert \leq \norm{\bm{u}}_2 \norm{\bm{W}_{AB}}_2 \norm{\bm{v}}_2 \leq 3t \norm{\bm{u}}_2 \norm{\bm{v}}_2.
+%  \end{equation*}
+
+%  Now we consider all possible $A$ and $B$, or to say all possible location of non-zero entries. We know there are $\binom{a}{\abs{A}}$ kinds of $ A$ and $\binom{b}{\abs{B}}$ kinds of $B$ in total. Therefore, with probability at least $1- 2\binom{a}{\abs{A}}\binom{b}{\abs{B}} \exp\xkm{-t^2/2} $, the following proposition holds:
+% \begin{equation*}
+%  \forall \bm{u} \in \mathbb{R}^a, \forall \bm{v} \in \mathbb{R}^b, s.t. \norm{\bm{u}}_0,\norm{\bm{v}}_0 \leq s, \quad \text{we have } \lvert \bm{u}^T \bm{W v} \rvert \leq 3t \norm{\bm{u}}_2 \norm{\bm{v}}_2.
+%  \end{equation*}
+
+% With the trivial inequality $\binom{n}{k} \leq n^k $, we have a control for the probability above:
+% \begin{align*}1-2\binom{a}{\abs{A}}\binom{b}{\abs{B}}\exp\xkm{-t^2/2} \geq1-2a^{\abs{A}}b^{\abs{B}}\exp\xkm{- t^2/2}\geq 1-2a^{\fl{s}}b^{\fl{s}}\exp\xkm{- t^2/2}&\\
+% \qquad\geq 1-2c^{2s}\exp\xkm{- t^2/2}=1-\exp\xkm{-\xk{t^2/2-2s\log c-\log 2}}&.\end{align*}
+% Finally, let $t=\sqrt{8s\log c} \geq \sqrt{s}$, and then we get the expected result.
+% \end{proof}
+
+By using \cref{lem:NN_forward_perturbation} and \cref{lem:backward perturbation}, we can prove the following lemma:
+% , which is a key lemma in proving \cref{prop:Training_KernelBound}.
+\begin{lemma}
+  \label{lem:Training_GradientBound}
+  Let $\Delta=O(1/\sqrt{m})$, $\tau\in\zk{\Delta\sqrt{m},O\xkm{{\sqrt{m}}/{(\ln m)^3}}}$, $T\subseteq [0,\infty)$ and fix ${\bm{z}} \in\tilde{B}_R$.
+  Suppose that $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{F}\leq\tau$ holds for all $t\in T$ and $l\in\dk{0,1,\cdots,L}$.
+  
+  Then there exists a positive absolute constant $C$ such that with probability at least $1-\exp\xkm{-\Omega(m^{2/3}\tau^{2/3})}$, for all $t\in T$, $l\in\dk{0,1,\cdots,L}$ and $\x\in\tilde{B}_R$ such that $\norm{\x-\bm{z}}_2\leq \Delta$, we have
+  % Suppose $\sup_{t \geq 0} \norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}}= O(m^{1/4}) $ holds for all $l$.
+  % For fixed $\z \in  \tilde{B}_R$, with probability at least $1-\exp(-\Omega(m^{5/6}))$ over the random initialization,
+  % for any $\x \in  \mc{\X}$ such that  $\norm{\x - \z}_2 =  O(1/m)  $, we have
+  \begin{align*}
+    \norm{\nabla_{\bm{W}^{(l)}} g_t(\x) - \nabla_{\bm{W}^{(l)}} g_0(\z)}_{\mr{F}} = O\xkm{R m^{-1/6} \tau^{1/3}\sqrt{\ln m}}~\text{and thus}~\norm{ \nabla_{\bm{W}^{(l)}} g_t(\x)}_{\mr{F}} = O(R).
+  \end{align*}
+  when $m$ is greater than the positive constant $C$.
+\end{lemma}
+% \begin{lemma}
+%   \label{lem:Training_GradientBound}
+%   Let $\tau=O\mpt{{\sqrt{m}}/{(\ln m)^3}}$ and $T\subseteq [0,\infty)$. Suppose that $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}}\leq\tau$ holds for all $t\in T$ and $l\in\cl{0,1,\cdots,L}$. Then there exists a positive absolute constant $C$ such that for any fixed $\bm{z}\in\tilde{B}_R$, with probability at least $1-\exp\mpt{-\Omega(m^{2/3}\tau^{2/3})}$, for all $l\in\cl{0,1,\cdots,L}$, we have
+%   \begin{align*}
+%     \sup_{t\in T}\norm{\nabla_{\bm{W}^{(l)}} g_t(\z) - \nabla_{\bm{W}^{(l)}} g_0(\z)}_{\mr{F}}= O\mpt{m^{-1/6} \tau^{1/3} \sqrt{\ln m}}
+%   \end{align*}
+%   when $m$ is greater than the positive constant $C$.
+% \end{lemma}
+\begin{proof}
+  % [Proof of \cref{lem:Training_GradientBound}]
+  Recalling \cref{eq:GradientExpr}, we have
+  $\nabla_{\bm{W}^{(l)}} g_t(\x)=\bm{\gamma}^{(l)}_{\x,t}\
+    {\bm{\alpha}}^{(l),T}_{\x,t}$.
+  Then, we have
+  \begin{align*}
+    &\norm{\nabla_{\bm{W}^{(l)}} g_t(\x) - \nabla_{\bm{W}^{(l)}} g_0(\z)}_{\mr{F}}=\norm{\bm{\gamma}^{(l)}_{\x,t}{\bm{\alpha}}^{(l),T}_{\x,t} -\bm{\gamma}^{(l)}_{\z,0}{\bm{\alpha}}^{(l),T}_{\z,0}}_{\mr{F}}\notag \\
+    % \label{eq:Proof_Training_GradientBound_Decomp}
+    &\qquad \leq \norm{\bm{\gamma}^{(l)}_{\x,t} - \bm{\gamma}^{(l)}_{\z,0}}_2\norm{{\bm{\alpha}}^{(l)}_{\x,t}}_2
+    + \norm{\bm{\gamma}^{(l)}_{\z,0}}_2\norm{{\bm{\alpha}}^{(l)}_{\x,t} - {\bm{\alpha}}^{(l)}_{\z,0}}_2 \leq O\xkm{R m^{-1/6} \tau^{1/3}\sqrt{\ln m}}
+  \end{align*}
+  by \cref{lem:backward perturbation}, \cref{lem:NN_forward_perturbation} and \cref{lem:Init_WeightsProductBound}.
+
+%   According to \cref{lem:Init_WeightsProductBound}, with probability at least $1-\exp(-\Omega(m))$, we can get
+%   \[\norm{\bm{\gamma}^{(l)}_{\z,0}}_2 = O(1)\qquad\text{and}\qquad\norm{\tilde{\bm{\alpha}}_{\z,0}^{(l)}}_2 = O(1).\]
+%   On the other hand, by \cref{lem:NN_forward_perturbation}, with probability at least $1-\exp\mpt{-\Omega(m^{2/3}\tau^{2/3})}$, we have
+%   $\norm{\tilde{\bm{\alpha}}^{(l)}_{\x,t} - \tilde{\bm{\alpha}}_{\z,0}^{(l)}}_2 = O({\tau }/{\sqrt{m}})$, which implies that (since $\tau = O\big({\sqrt{m}}/{(\ln m)^3}\big)$)
+%   \begin{align*}
+%     \norm{\tilde{\bm{\alpha}}_{\x,t}^{(l)}}_2
+%     \leq \norm{\tilde{\bm{\alpha}}_{\z,0}^{(l)}}_2 + \norm{\tilde{\bm{\alpha}}^{(l)}_{\x,t} - \tilde{\bm{\alpha}}_{\z,0}^{(l)}}_2 = O(1).
+%   \end{align*}
+% %  since $O\big({\sqrt{m}}/{(\ln m)^3}\big)$,
+%   Moreover, the statement $(b)$ in \cref{lem:NN_forward_perturbation} also enable us to
+%   apply \cref{lem:backward perturbation} for $\bm{W}^{(r)'} = \bm{W}_t^{(r)} - \bm{W}_0^{(r)}$,
+%   $\bm{D}^{(r)'} =  \bm{D}^{(r)}_{\x,t} -  \bm{D}^{(r)}_{\z,0}$, yielding that with probability at least $1-\exp\mpt{-\Omega(m^{2/3}\tau^{2/3})}$, we have
+%   \begin{align*}
+%     \norm{{\bm{\gamma}}^{(l)}_{\x,t} - {\bm{\gamma}}^{(l)}_{\z,0}}_2=\norm{\tilde{\bm{\gamma}}^{(l)}_{\z} - {\bm{\gamma}}^{(l)}_{\z,0}}_2
+%     = O\mpt{m^{-1/6} \tau^{1/3}\sqrt{\ln m}}.
+%   \end{align*}
+%   Plugging these bounds in \cref{eq:Proof_Training_GradientBound_Decomp}, we can get the result.
+  % \begin{align*}
+  %   &\norm{\nabla_{\bm{W}^{(l)}} g_t(\z) - \nabla_{\bm{W}^{(l)}} g_0(\z)}_{\mr{F}}
+  %   = O\mpt{m^{-{1}/{6}}\tau^{1/3}  \sqrt{\ln m}} + O\Big(\frac{\tau\sqrt{\ln m} }{\sqrt{m}}\Big) \\&=
+  %   O(\tau^\frac{1}{3} m^{-\frac{1}{6}} \sqrt{\ln m}).
+  % \end{align*}
+\end{proof}
+
+After preparing these tools, now we are ready to give the proof of \cref{prop:Training_KernelBound}.
+% \begin{proof}
+
+\paragraph{Proof of \cref{prop:Training_KernelBound}}
+By applying \cref{lem:Training_GradientBound} with $\Delta=O(1/m)\leq O(1/\sqrt{m})$ and $\tau \asymp m^{1/4}\geq \Delta\sqrt{m}$, with probability at least $1 - \exp(-\Omega(m^{5/6}))$, for all $\x\in\tilde{B}_R$ such that $\norm{\x-\z}_2\leq O(1/m)$, we can obtain the following result
+\begin{align*}
+  \norm{ \nabla_{\bm{W}^{(l)}} g_t(\x)- \nabla_{\bm{W}^{(l)}} g_0(\z) }_{\mr{F}}
+  = O\xkm{ R m^{-1/12}\sqrt{ \ln m}}~\text{and}~\norm{ \nabla_{\bm{W}^{(l)}} g_t(\x)}_{\mr{F}} = O(R).
+\end{align*}
+The same conclusion holds if we replace $\x$ and $\z$ with $\x'$ and $\z'$.
+% Furthermore, since
+% \begin{align*}
+%   K^{(p)}_t(\x,\x')
+%   &= \ang{\nabla_{\bm{\theta}^{(p)}} g_t(\x),\nabla_{\bm{\theta}^{(p)}} g_t(\x')}
+%   = \sum_{l=0}^L \ang{\nabla_{\bm{W}^{(l)}} g_t(\x), \nabla_{\bm{W}^{(l)}} g_t(\x') } + 1,
+% \end{align*}
+Thus, we have
+\begin{align*}
+  &\abs{K^{(p)}_t(\x,\x') - K^{(p)}_0(\z,\z')}\leq \sum_{l=0}^L\abs{\ang{\nabla_{\bm{W}^{(l)}} g_t(\x), \nabla_{\bm{W}^{(l)}} g_t(\x') } - \ang{\nabla_{\bm{W}^{(l)}} g_0(\z), \nabla_{\bm{W}^{(l)}} g_0(\z') }} \\
+  \begin{split}
+    &\qquad\qquad\qquad \leq \sum_{l=0}^L \Big[\norm{ \nabla_{\bm{W}^{(l)}} g_t(\x)}_{\mr{F}} \norm{ \nabla_{\bm{W}^{(l)}} g_t(\x')- \nabla_{\bm{W}^{(l)}} g_0(\z') }_{\mr{F}}\\
+    &\qquad\qquad\qquad\qquad\,\, + \norm{ \nabla_{\bm{W}^{(l)}} g_t(\x)- \nabla_{\bm{W}^{(l)}} g_0(\z) }_{\mr{F}}\norm{ \nabla_{\bm{W}^{(l)}} g_0(\z')}_{\mr{F}}\Big]
+  \end{split}
+  = O\xkm{R m^{-1/12}\sqrt{ \ln m}}
+\end{align*}
+holds for all $t\in T$ with probability at least $1 - \exp\xkm{-\Omega(m^{5/6})}$ when $m$ is large enough.
+% \end{proof}
+
+
+% Let $\tau = (\ln m)^\frac{3}{2}$, we have
+% \[\norm{\nabla_{\bm{W}^{(l)}} g^{(p)}_t(\x) - \nabla_{\bm{W}^{(l)}} g^{(p)}_0(\x)}_{\mr{F}} \leq O\left( m^{-\frac{1}{6}}  \ln m \right).\]
+
+\subsection{Lazy regime}\label{subsec:Lazy}
+% Via continuous time gradient descent, the evolution of the parameters $\bm{\theta}$ can be written as
+% \begin{align*}
+%     \frac{\dd{\bm{\theta}}_t}{\dd t}&=-\nabla_{{\bm{\theta}}}\mathcal{L}(f,\mc{S})=-\nabla_{{\bm{\theta}}}f({\X})^T\nabla_{f({\X})}\mathcal{L}(f,\mc{S})= -\frac1n\nabla_{{\bm{\theta}}} f({\X})^T (f({\X})-{Y}).
+% \end{align*}
+
+In this subsection, we will prove that during the process of gradient descent training, the parameters do not change much.
+Therefore, the conditions for the lemmas stated in the previous subsection are satisfied.
+Since training relies on the structure of the neural network, in this subsection, we will no longer omit the superscript $p$ (although the corresponding conclusions also hold for non-mirror neural networks).
+
+
+Let $\lambda_0 = \lambda_{\min} (\NTK(\X,\X))$ and $\bm{u}(t)=f_t(\X)-\bm{y}$.
+Denote $\tilde{M}_{\bm{X}} = \sum_{i=1}^n\norm{\tilde{\x_i}}_2 $.
+Since we will show the positive definiteness of the NTK in \cref{prop:NTK_PD}, we can assume that $\lambda_0 > 0$ hereafter.
+Similar to Lemma F.8 and Lemma F.7 in \citet{arora2019_ExactComputation}, we have the following lemmas:
+
+
+\begin{lemma}
+  \label{lem:GradientFlow_ExpDecay}
+  Let $\delta\in(0,1)$ and $t\in[0,\infty)$.
+  Suppose that $\norm{\bm{W}^{(l,p)}_s - \bm{W}^{(l,p)}_0}_{\mr{F}} = O(m^{1/4})$ holds for all $s \in [0,t] $, $l\in \dk{0,1,\cdots,L}$ and $p\in\dk{1,2}$.
+  Then there exists a polynomial $\poly(\cdot)$ such that when $m\geq\poly\xkm{n,\lambda_0^{-1},\ln(1/\delta)}$,
+% Then there exist some positive absolute constants $C_1>0$ and $C_2\geq 1$ such that when $m\geq C_1\bk{\pt{n^{2}\lambda_0^{-1}}^{15}+\pt{\ln(C_2n^2/\delta)}^5}$, 
+  with probability at least $1-\delta$, we have
+  \begin{align}
+    \label{eq:GradientFlow_ExpDecay}\norm{\bm{u}(s)}^{2}\leq \exp\xkm{- \frac{\lambda_{0}}{n}s}\norm{\bm{u}(0)}^{2} = \exp\xkm{-\frac{\lambda_{0}}{n}s} \|\bm{y}\|^{2},\quad~\text{for all}~s\in [0,t].
+  \end{align}
+  % Suppose that $\sup_{s \in T} \norm{\bm{W}^{(l,p)}_s - \bm{W}^{(l,p)}_0}_{\mathrm{F}} = O(m^{1/4})$ holds for all $l$ and $p$.
+  % Then, for any $\delta \in (0,1)$, if $m \geq \mathrm{poly}\big(n,\lambda_0^{-1},\ln(1/\delta)\big)$, with probability at least $1-\delta$, we have
+  % \begin{align}
+  %   \label{eq:GradientFlow_ExpDecay}
+  %   \norm{\bm{u}(s)}^2 \leq \exp(-\frac{\lambda_{0}}{n}s)\norm{\bm{u}(0)}^{2} = \exp({-\frac{\lambda_{0}}{n}s}) \norm{\bm{y}}^2,\quad
+  %   \forall s \in T.
+  % \end{align}
+\end{lemma}
+
+\begin{proof}
+  Denote $\tilde{\lambda}_0(s)=\lambda_{\min}\big(K_s(\X,\X)\big)$.
+  By Weyl's inequality, we can get
+  \begin{align*}
+    \abs{\tilde{\lambda}_0(s)-\lambda_0} \leq \norm{ K_s(\X,\X) - \NTK(\X,\X) }_2\leq \norm{ K_s(\X,\X) - \NTK(\X,\X) }_{\mr{F}}&\\
+    \leq\frac12\sum_{p=1}^2\sum^n_{i,j=1} \abs{K^{(p)}_s(\x_i,\x_j) - \NTK(\x_i,\x_j)}&.
+  \end{align*}
+  Applying \cref{cor:Training_Kernel_uniform} with $\delta'= {\delta}/{(2 n^2)}$ to each difference,
+  with probability at least $1-2n^2\delta'=1-\delta$, we can obtain the following bound for all $s\in [0,t]$:
+  \begin{align*}
+    \abs{\tilde{\lambda}_0(s)-\lambda_0}\leq n^2 O\xkm{m^{-1/12} \sqrt{\ln m}}\leq n^2 O\xkm{m^{-1/15}}\leq\frac{\lambda_0}2,
+  \end{align*}
+  when $m\geq C_1\zk{\xk{n^{2}\lambda_0^{-1}}^{15}+\xk{\ln\xkm{C_2n^2/\delta}}^5}$ for some positive absolute constants $C_1>0$ and $C_2\geq 1$.
+  This implies that $\tilde{\lambda}_0(s)\geq\lambda_0/2$ holds for all $s\in [0,t]$.
+  Therefore, we have
+  \begin{equation*}
+    \frac{\dd}{\dd s}\|\bm{u}(s)\|^{2}=- \frac{2}{n}\bm{u}(s)^T K_{s}(\X,\X) \bm{u}(s)\le -\frac{\lambda_{0}}{n} \lVert \bm{u}(s)\rVert^{2},
+  \end{equation*}
+  which implies \cref{eq:GradientFlow_ExpDecay} by standard ODE theory.
+  Finally, by choosing
+  \begin{align*}
+    \poly\xkm{n,\lambda_0^{-1},\ln(1/\delta)}=C_1\zkm{\xk{n^{2}\lambda_0^{-1}}^{15}+\xk{2n+\ln(1/\delta)+\ln C_2}^5}
+  \end{align*}
+  we can complete the proof of this lemma.
+\end{proof}
+
+
+% Similar to Lemma F.7 in \citet{arora2019_ExactComputation}, we have the following lemma:
+
+
+
+\begin{lemma}
+  \label{lem:A_lazy_W}
+  Fix $l \in \{0,1,\cdots,L\}$, $p \in \{1,2\}$ and let $\delta\in(0,1)$, $t\in[0,\infty)$.
+  Suppose that for $s \in [0,t]$, we have
+  \begin{align*}
+    \begin{gathered}
+      \norm{f_s(\X)-\bm{y}}_2 \leq \exp(\frac{-\lambda_0 }{4n}s) \norm{\bm{y}}_2\quad~\text{and}\\
+      \norm{ \bm{W}^{(l',p')}_s - \bm{W}^{(l',p')}_0 }_{\mr{F}} \leq \frac{\sqrt{m}}{(\ln m)^3},\qquad~\text{for all}~(l',p') \neq (l,p).
+    \end{gathered}
+  \end{align*}
+  Then there exists a polynomial $\poly(\cdot)$ such that when $m\geq\poly\xkm{n, \tilde{M}_{\bm{X}}, \norm{\bm{y}}_2,\lambda_0^{-1},\ln(1/\delta)}$,
+  % Then there exists a positive absolute constant $C>0$ such that when $m\geq C\bk{\pt{n\norm{\bm{y}}_2\lambda_0^{-1}}^5+\pt{\ln\mpt{n/\delta}}^{6/5}}$,
+  with probability at least $1-\delta$, we have
+  $\sup_{s\in[0,t]}\norm{\bm{W}^{(l,p)}_s-\bm{W}^{(l,p)}_0 }_{\mr{F}} = O\xkm{{n \tilde{M}_{\bm{X}}\norm{\bm{y}}_2}/{\lambda_0}}$.
+\end{lemma}
+
+\begin{proof}
+  First of all, recalling \cref{eq:2_GD} we have
+  \begin{align}
+    \notag
+    \norm{\bm{W}^{(l,p)}_{t_0} - \bm{W}^{(l,p)}_0}_{\mr{F}}&= \norm{\int^{t_0}_0 {\dd \bm{W}^{(l,p)}_s}}_{\mr{F}} \leq  \int^{t_0}_0 \norm{\frac{1}{n\sqrt{2}}\sum^n_{i=1} ( f_s(\x_i) - y_i) \nabla_{\bm{W}^{(l,p)}} g^{(p)}_s(\x_i)}_{\mr{F}}\dd s \\
+    \notag
+    &\leq \frac{1}{n\sqrt{2}} \sum^n_{i=1} \sup_{0\leq s \leq t_0}\norm{\nabla_{\bm{W}^{(l,p)}} g_s^{(p)}(\x_i)}_{\mr{F}} \int^{t_0}_0 \norm{f_s(\X)-\bm{y}}_2~\dd s \\
+    \label{eq:Proof_Lazy_GradientControl0}
+    &\leq  O\xkm{\frac{\norm{\bm{y}}}{\lambda_0}} \sum^n_{i=1}\sup_{0\leq s \leq t_0} \norm{\nabla_{\bm{W}^{(l,p)}} g_s^{(p)}(\x_i)}_{\mr{F}} .
+  \end{align}
+  for all $t_0\in[0,t]$.
+  % By triangle inequality, we have
+  % \begin{equation}
+  %   \label{eq:Proof_Lazy_GradientControl1}
+  %   \begin{aligned}
+  %     \norm{\nabla_{\bm{W}^{(l,p)}} g_s^{(p)}(\x_i) }_{\mr{F}} &\leq \norm{\nabla_{\bm{W}^{(l,p)}} g_0^{(p)}(\x_i) }_{\mr{F}} + \norm{\nabla_{\bm{W}^{(l,p)}} g_s^{(p)}(\x_i) - \nabla_{\bm{W}^{(l,p)}} g_0^{(p)}(\x_i) }_{\mr{F}} .
+  %   \end{aligned}
+  % \end{equation}
+  % For the first term in \cref{eq:Proof_Lazy_GradientControl1}, by \cref{lem:Init_WeightsProductBound}, with probability at least $1-\exp\big({-\Omega(m)}\big)$, we have
+  % $\norm{\nabla_{ \bm{W}^{(l,p)}} g_0^{(p)}(\x_i) }_{\mr{F}} = O(1)$ for any $i\in[n]$. So it suffices to bound the second term in \cref{eq:Proof_Lazy_GradientControl1}. 
+  Suppose that \[s_0 = \min\dkm{ s \in [0,t]:\norm{\bm{W}^{(l,p)}_s- \bm{W}^{(l,p)}_0}_{\mr{F}} \geq  {\sqrt{m}}/{(\ln m)^3}}\] exists,
+%  If $T_0 \neq T$, set $t_0$
+  then $\norm{\bm{W}^{(l',p')}_s - \bm{W}^{(l',p')}_0}_{\mr{F}} \leq {\sqrt{m}}/{(\ln m)^3}$ holds for all $s \in [0,s_0] $, $l'\in \dk{0,1,\cdots,L}$ and $p'\in\dk{1,2}$.
+  Applying \cref{lem:Training_GradientBound} with $\Delta=0$ and $\tau={\sqrt{m}}/{(\ln m)^3}$, we know that for any $i\in[n]$, with probability at least $1-\exp\xkm{-\Omega\xkm{m/(\ln m)^{2}}}\geq 1-\exp\xkm{-\Omega(m^{5/6})}$, we have
+  \begin{equation*}
+    \sum_{i=1}^n\sup_{s \in [0,s_0]} \norm{\nabla_{ \bm{W}^{(l,p)}} g_s^{(p)}(\x_i)}_{\mr{F}} = O(\tilde{M}_{\bm{X}}).
+  \end{equation*}
+  Plugging it back to \cref{eq:Proof_Lazy_GradientControl0}, with probability at least $1-n\exp\xkm{-\Omega(m^{5/6})}$, we obtain
+  \[\norm{\bm{W}^{(l,p)}_{s_0} - \bm{W}^{(l,p)}_0}_{\mr{F}} =  O({n \tilde{M}_{\bm{X}} \norm{\bm{y}}}/{\lambda_0}),\]
+  which contradicts to $\norm{\bm{W}^{(l,p)}_{s_0}- \bm{W}^{(l,p)}_0}_{\mr{F}}  \geq {\sqrt{m}}/{(\ln m)^3}$ when $m\geq C_1\xk{n\tilde{M}_{\bm{X}}\norm{\bm{y}}_2\lambda_0^{-1}}^5$ for some positive constant $C_1$.
+%  Here we have to note that the hidden constants in
+
+  Now we show that $\norm{\bm{W}^{(l',p')}_s- \bm{W}^{(l',p')}_0}_{\mr{F}} \leq {\sqrt{m}}/{(\ln m)^3}$ holds for all $s \in [0,t]$ and any $(l',p')$.
+  The desired bound then follows from applying \cref{lem:Training_GradientBound} again for the interval $[0,t]$.
+
+  Also, it is easy to check that there exists a positive absolute constant $C$ such that when $m
+  \geq C_2\ln(n/\delta)^{6/5}$, we have $1-n\exp\xkm{-\Omega(m^{5/6})}\geq 1-\delta$.
+  Finally, by choosing
+  \[\poly\xkm{n,\lambda_0^{-1},\ln(1/\delta)}=C\zk{\xk{n\tilde{M}_{\bm{X}}\norm{\bm{y}}_2\lambda_0^{-1}}^{5}+\xk{n+\ln(1/\delta)}^2+1}\]
+  for some positive absolute constant $C>0$, we can complete the proof.
+\end{proof}
+
+
+The following lemma is the key lemma that we aim to prove in this subsection.
+It serves as the prerequisite for establishing the conclusions of the lemmas in the preceding and subsequent subsections.
+
+\begin{lemma}
+[Lazy regime]
+  \label{lem:A_lazy_regime}
+  There exists a polynomial $\poly(\cdot)$ such that for any $\delta\in(0,1)$, with probability at least $1-\delta$, for all $p\in\dk{1,2}$ and $l\in\dk{0,1,\cdots,L}$, we have
+  \begin{align*}
+    \sup_{t \geq 0}\norm{\bm{W}^{(l,p)}_t - \bm{W}^{(l,p)}_0 }_{\mr{F}} =O(m^{1/4}).
+  \end{align*}
+  when $m\geq\poly\xkm{n,\tilde{M}_{\bm{X}},\norm{\bm{y}}_2,\lambda_0^{-1},\ln(1/\delta)}$.
+\end{lemma}
+
+\begin{proof}
+  Let us assume that
+  \begin{align*}
+    t_0 = \min\dkm{t\geq 0:\exists l,p~\text{such that}~
+    \norm{\bm{W}^{(l,p)}_t - \bm{W}^{(l,p)}_0}_{\mr{F}} \geq m^{1/4}~\text{or}~\norm{\bm{u}(t)} \geq \exp(\tfrac{-\lambda_0}{4n}t) \norm{\bm{y}}}
+  \end{align*}
+  exists.
+  Then, for all $t \in  [0,t_0]$, we have
+  \begin{align*}
+    \begin{gathered}
+      \norm{\bm{u}(t)} \leq \exp(\frac{-\lambda_0}{4n}t) \norm{\bm{y}}\qquad~\text{and}~\qquad
+      \norm{\bm{W}^{(l,p)}_t - \bm{W}^{(l,p)}_0}_{\mr{F}} \leq m^{1/4}~\text{for all}~l, p.
+    \end{gathered}
+  \end{align*}
+  According to \cref{lem:A_lazy_W} and \cref{lem:GradientFlow_ExpDecay}, we know that there exists a polynomial $\poly(\cdot)$ such that with probability at least $1-\delta$, we have
+  \begin{align*}
+    \begin{gathered}
+      \norm{\bm{u}(t_0)} \leq \exp(\frac{-\lambda_{0}}{2n}t_0)\norm{\bm{y}}\qquad~\text{and}~\qquad
+      \norm{\bm{W}^{(l,p)}_{t_0}-\bm{W}^{(l,p)}_0 }_{\mr{F}} = O\xkm{\frac{n\tilde{M}_{\bm{X}}\norm{\bm{y}}}{\lambda_0}}~\text{for all}~l, p
+    \end{gathered}
+  \end{align*}
+  when $m\geq \poly\xkm{n,\norm{\bm{y}}_2,\lambda_0^{-1},\ln(1/\delta)}$,
+  which contradicts to the definition of $t_0$ when $m\geq C\xkm{n\tilde{M}_{\bm{X}}\norm{\bm{y}}_2\lambda_0^{-1}}^5$ for some positive absolute constant $C>0$.
+\end{proof}
+We also have a simple corollary:
+\begin{corollary}
+  \label{cor:UpperboundNN}
+  There exists a positive absolute constant $M$ and $C$ such that when $m \geq M$,
+  with probability at least $1-\exp(-\Omega(m^{5/6}))$,
+  \begin{align*}
+    \abs{f_t^m(x)} \leq  C \norm{\tilde{\x}}, \quad \forall x \in \R^d,~ \forall t \geq 0.
+  \end{align*}
+\end{corollary}
+\begin{proof}
+  Recall that
+  \begin{align*}
+    f_t^m(x) = \frac{\sqrt{2}}{2}[\bm{W}^{(L,1)}_t\bm{\alpha}_t^{(L,1)}(x) - \bm{W}^{(L,2)}_t\bm{\alpha}_t^{(L,2)}(x) ].
+  \end{align*}
+  Since with probability at least $1-\exp(-\Omega(m^{5/6}))$ we have
+  \begin{align*}
+    \norm{\bm{W}_0^{(l,p)}}_2\leq O(\sqrt{m}),\quad \norm{\bm{D}_{x,t}^{(l,p)}}_2 \leq 1,\quad \sup_{t\geq 0}\norm{\bm{W}_t^{(l,p)} - \bm{W}_0^{(l,p)}}_2 \leq O(m^\frac{1}{4}),
+  \end{align*}
+  the corollary is proved by \cref{lem:Random matrix} and \cref{lem:A_lazy_regime}
+\end{proof}
+% Suppose at time $t_0$, we have $\norm{\bm{W}^{(l,q)}_{t_0} - \bm{W}^{(l,q)}_0}_{\mr{F}} \geq \tau$ holds for some $l$ and $p$. 
+
+% Then according to \cref{lem:A_lazy_W}, with...... there exists $t\in[0,t_0)$ such that $\norm{ \bm{W}^{(l',p)}_t- \bm{W}^{(l',p)}_0}_{\mr{F}} > \frac{\sqrt{m}}{(\ln m)^3}$ for some $l' \neq l$ or $\norm{f_t(\X) - Y}_2 >\me^{-\frac{\lambda_0}{2n}t} \norm{Y}_2$.
+
+%  Suppose that for all $t\geq 0$, we have $\norm{f_t(\X) - Y}_2 \leq \me^{-\frac{\lambda_0}{2n}t} \norm{Y}_2\leq\sqrt{n}\me^{-\frac{\lambda_0}{2n}t}C_y$ and $\norm{ \bm{W}^{(l',p)}(t) - \bm{W}^{(l',p)}(0) }_{\mr{F}} \leq \frac{\sqrt{m}}{(\ln m)^3}$ for all $l' \neq l$.
+
+
+%\begin{remark}
+%  With mirror initialization, We know that $f(\x) = \frac{1}{2}[g^{(1)}(\x;\bm{\theta}) - g^{(2)}(\x;\bm{\theta})]$ and
+%  \begin{align*}
+%    &K_t(\x,\x') =\sum_{p=1}^2 \sum^{L}_{l=0} \langle \nabla_{\bm{W}^{(l,p)}} f_t(\x) , \nabla_{\bm{W}^{(l,p)}} f_t(\x') \rangle + 1 \\
+%    &\quad= \frac{1}{2} \sum^2_{p=1} \Big(\sum^{L}_{l=0}\langle \nabla_{\bm{W}^{(l,p)}} g^{(p)}_t(\x) , \nabla_{\bm{W}^{(l,p)}} g^{(p)}_t(\x')  \rangle +1 \Big) =  \frac{1}{2} \sum^2_{p=1} K_t^{(p)}(\x,\x').
+%  \end{align*}
+%  With the simple decomposition above, we can get the property of $K_t$ from the property of $K_t^{(p)}$ (namely the fully-connected network without mirror initialization). So in the following several section, we only consider one single network $g^{(p)}$ and we write $\bm{W}_t^{(l,p)}$, $\bm{\alpha}^{(l,p)}$, $\tilde{\bm{\alpha}}^{(l,p)}$, $\bm{D}^{(l,p)}$ as $\bm{W}_t^{(l)}$, $\bm{\alpha}^{(l)}$, $\tilde{\bm{\alpha}}^{(l)}$, $\bm{D}^{(l)}$ respectively.
+%
+%\end{remark}
+
+% \subsection{Nearly Hölder Continuity of \texorpdfstring{$K_t$}{Kt}}\label{subsec:Holder_Kt}
+
+% Since $K_t = (K^{(1)}_t+K^{(2)}_t )/2$, to show the continuity of $K_t$, it suffices to show it for $K^{(p)}_t$.
+% For convenience, we will focus on one part and omit the superscript $p$ in this subsection.
+
+% \begin{proposition}
+%   \label{prop:Continuity_Kt}
+%   % For any $\delta\in(0,1)$, suppose $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}}= O(m^{1/4})$ holds for all $t\in T$.
+%   % Then for any $\x,\x' \in \mc{\X}$, with probability at least $1 - \exp(-\Omega(m^{5/6}))$, we have
+%   % \begin{align}
+%   %   \sup_{t\in T}\abs{K^{(p)}_t(\x,\x') - K^{(p)}_0(\x,\x')} = O \left( m^{-1/12}\sqrt{\ln m}\right).
+%   % \end{align}
+
+%   Fix $ \bm{z},\bm{z}' \in \tilde{B}_R$ and $T\subseteq[0,\infty)$. Suppose that $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0}_{\mr{F}}= O(m^{1/4})$ holds for all $t\in T$ and $l\in\cl{0,1,\cdots,L}$. Then there exists a positive absolute constant $C$ such that with probability at least $1 - \exp\mpt{-\Omega(m^{5/6})}$, for any $\x,\x' \in \mc{\X}$ such that $\norm{\x-\z}_2,\norm{\x'-\z'}_2 \leq O( 1/m)$, we have
+%   \[\sup_{t\in T}\abs{K^{(p)}_t(\x,\x') - K^{(p)}_0(\z,\z')}= O \mpt{m^{-{1}/{12}}\sqrt{\ln m}}\]
+%   when $m$ is greater than the positive constant $C$.
+% \end{proposition}
+% The proof of this proposition is similar to the proof of \cref{prop:Training_KernelBound}. We will also include its proof at the end of this subsection. Combining this proposition with \cref{cor:Init_Kt_NTK}, we can derive the following corollary:
+% \begin{corollary}
+%   \label{cor:Training_Kernel_uniform}
+%   Fix $ \bm{z},\bm{z}' \in \tilde{B}_R$ and let $\delta\in(0,1)$, $T\subseteq[0,\infty)$. Suppose that $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0}_{\mr{F}}= O(m^{1/4})$ holds for all $t\in T$ and $l\in\cl{0,1,\cdots,L}$. Then there exist some positive absolute constants $C_1>0$ and $C_2\geq 1$ such that with probability at least $1 - \delta$, for any $\x,\x' \in \mc{\X}$ such that $\norm{\x-\z}_2,\norm{\x'-\z'}_2 \leq O( 1/m)$, we have
+%   \[\sup_{t\in T}\abs{K^{(p)}_t(\x,\x') - \NTK(\z,\z')}= O \mpt{m^{-{1}/{12}}\sqrt{\ln m}}\]
+%   when $m\geq C_1\pt{\ln(C_2/\delta)}^5$.
+% \end{corollary}
+
+
+% To prove \cref{prop:Continuity_Kt}, we need to introduce several necessary lemmas. These lemmas can be seen as generalizations of the lemmas in \cref{subsec:Training}. The main difference compared to the previous lemmas is that now we also need to consider the impact of perturbations in the input points.
+% \begin{proposition} 
+%   \label{prop:Continuity_Kt}
+%   Let $\delta \in (0,1)$.
+%   Suppose $\sup_{t \geq 0} \norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}} =O(m^{1/4})$ holds for all $l$.
+%   Fix $\z,\z' \in \mc{\X}$.
+%   Then, with probability at least $1- \exp(-\Omega(m^{5/6}))$ over initialization,
+%   for any $\x,\x' \in \mc{\X}$ such that $\norm{\x-\z}_2,\norm{\x'-\z'}_2 \leq O( 1/m)$,  we have
+%   \begin{align}
+%       \sup_{t\geq 0}\abs{ K^{(p)}_t(\x,\x') - K^{(p)}_t(\z,\z') } = O\left( m^{-1/12}  \sqrt{\ln m}\right).
+%   \end{align}
+% \end{proposition}
+
+% 
+% In fact, the slight perturbation between $\x$ and $\z$ can be regarded as taking a slight perturbation on $\bm{W}^{(1)}$, with other $\bm{W}^{(l)} $ fixed.
+% Inspired by \citet[Lemma 8.2]{allen-zhu2019_ConvergenceTheory} (see \cref{lem:NN_forward_perturbation}), we can prove the following lemma:
+
+% \begin{lemma}
+%   \label{lem:NN_forward_perturbation2}
+%   Let $\tau\in\bk{\Omega\mpt{1/\sqrt{m}},O\mpt{{\sqrt{m}}/{(\ln m)^3}}}$, $T\subseteq [0,\infty)$ and fix ${\bm{z}} \in\tilde{B}_R$. Suppose that $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}}\leq\tau$ holds for all $t\in T$ and $l\in\cl{0,1\cdots,L}$. Then there exists a positive absolute constant $C$ such that with probability at least $1-\exp\mpt{-\Omega(m^{2/3}\tau^{2/3})}$, for all $t\in T$, $l\in\cl{0,1,\cdots,L}$ and $\x \in\tilde{B}_R$ such that $\norm{\x-\bm{z}}_2 \leq O(1/m)$, we have
+%   \begin{enumerate}[$(a)$~]
+% % \item $\norm{\bm{\alpha}^{(l)}_t(\x) - \bm{\alpha}^{(l)}_0({\bm{z}}) }_2= O\big(\tau/\sqrt{m}\big)$;
+%     \item $\norm{\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}}_0 = O(m^{2/3} \tau^{2/3})$;
+%     \item $\norm{\pt{\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}}\bm{\alpha}_{\x,t}^{(l)}}_2= O({\tau}/{\sqrt{m}})$;
+%     \item $\norm{\tilde{\bm{\alpha}}^{(l)}_{\x,t} - \tilde{\bm{\alpha}}_{\z,0}^{(l)}}_2 = O(\tau/\sqrt{m})$,
+%   \end{enumerate}
+%   when $m$ is greater than the positive constant $C$.
+% \end{lemma}
+% \begin{proof}
+%   We use mathematical induction to prove this lemma. When $l=0$, it can be easily verified that $\bs{D}_{\bs{x},t}^{(0)} - \bs{D}_{\bs{z},0}^{(0)} = \bm{O}$ and
+%   \[\norm{{\tilde{\bm{\alpha}}}_{\x,t}^{(0)} -{\tilde{\bm{\alpha}}}^{(0)}_{\bm{z},0}}_2=\norm{\tilde{\x}-\tilde{\z}}_2 = \norm{\x-{\bm{z}}}_2 \leq O(1/m),\] where $\bm{O}$ represents the zero matrix, $\tilde{\x}$ and $\tilde{\bm{z}}$ are extended vectors with an additional coordinate of $1$. Thus, all the statements hold for $l=0$. Now we assume that this lemma holds for $l=k\in\cl{0,1,\cdots,L-1}$.
+
+%   First of all, we can decompose $\bm{\alpha}^{(k+1)}_{\x,t} -\bm{\alpha}^{(k+1)}_{\z,0}$ as following:
+%   \begin{equation*}
+%     \begin{aligned}
+%       &\bm{\alpha}^{(k+1)}_{\x,t} -\bm{\alpha}^{(k+1)}_{\z,0}=
+%       \sqrt{\frac{2}{m_{k+1}}} \bm{W}^{(k)}_t \tilde{\bm{\alpha}}^{(k)}_{\x,t} - \sqrt{\frac{2}{m_{k+1}}} \bm{W}_0^{(k)}\tilde{\bm{\alpha}}^{(k)}_{\z,0}\\
+%       &\quad=\sqrt{\frac{2}{m_{k+1}}} {\Delta\bm{W}^{(k)}} \tilde{\bm{\alpha}}^{(k)}_{\x,t} + \sqrt{\frac{2}{m_{k+1}}}\bm{W}^{(k)}_0 \pt{\tilde{\bm{\alpha}}^{(k)}_{\x,t} - \tilde{\bm{\alpha}}^{(k)}_{\z,0}},
+%     \end{aligned}
+%   \end{equation*}
+%   where $\Delta\bm{W}^{(k)} = \bm{W}^{(k)}_t - \bm{W}^{(k)}_0$.
+%   From the above equation, we can deduce that
+%   $\norm{\bm{\alpha}^{(k+1)}_{\x,t} -\bm{\alpha}^{(k+1)}_{\z,0}}_2 \leq O\mpt{{\tau}/{\sqrt{m}}}$.
+
+%   Next, we use \cref{lem:Allen_Claim 8.3} to prove part $(a)(b)$. Let us consider the following choices in
+%   \cref{lem:Allen_Claim 8.3}:
+%   \begin{align*}
+%     \bm{g}&=\frac{\bm{\alpha}^{(k+1)}_{\z,0}}{\sqrt{{2}/{m_{k+1}}}\norm{\tilde{\bm{\alpha}}_{\z,0}^{(k)}}_2}=\frac{\bm{W}_0^{(k)}\tilde{\bm{\alpha}}_{\z,0}^{(k)}}{\norm{\tilde{\bm{\alpha}}_{\z,0}^{(k)}}_2}\sim\mathcal{N}(0,\bm{I}),\qquad~
+%     \bm{g}'=\frac{\bm{\alpha}^{(k+1)}_{\x,t}-\bm{\alpha}^{(k+1)}_{\z,0}}{\sqrt{{2}/{m_{k+1}}}\norm{\tilde{\bm{\alpha}}_{\z,0}^{(k)}}_2}.
+%   \end{align*}
+%   It follows that $\norm{\bm{g}'}_2\leq O(\tau/\sqrt{m})\cdot O(\sqrt{m})\leq O(\tau)$ since we have previously shown that $\norm{\tilde{\bm{\alpha}}_{\z,0}^{(k)}}_2=\Theta(1)$ in \cref{lem:Init_LayerOutputBounds}. Therefore, we can choose $\delta=\Theta(\tau)$ such that $\norm{\bm{g}'}_2\leq\delta$. Then, we can obtain
+%   \begin{align*}
+%     \bm{g}+\bm{g}'=\frac{\bm{\alpha}^{(k+1)}_{\x,t}}{\sqrt{{2}/{m_{k+1}}}\norm{\tilde{\bm{\alpha}}_{\z,0}^{(k)}}_2},\quad~\bm{D}'=\bm{D}_{\x,t}^{(k+1)} - \bm{D}_{{\bm{z}},0}^{(k+1)}\quad~\text{and}\quad~\bm{u}=\frac{\pt{\bm{D}_{\x,t}^{(k+1)} - \bm{D}_{{\bm{z}},0}^{(k+1)}}\bm{\alpha}^{(k+1)}_{\x,t}}{\sqrt{{2}/{m_{k+1}}}\norm{\tilde{\bm{\alpha}}_{\z,0}^{(k)}}_2}&,
+%   \end{align*}
+%   where $\bm{D}'$ and $\bm{u}$ are defined as in \cref{lem:Allen_Claim 8.3}. By applying \cref{lem:Allen_Claim 8.3}, we can get $\norm{\bm{D}'}_0\leq O(m^{2/3}\tau^{2/3})$ and $\norm{\bm{u}}_2\leq 2\delta$, which establish the conclusion of part $(a)(b)$.
+
+
+% % As to the second statement, we define $\bs{u}^{(l)}$ as following:
+
+% % % Let $u^{(l)} = (\bs{D}^{(l)}_{\bs{x},t} - \bs{D}^{(l)}_{\bs{z},0}) \bs{\alpha}_t^{(l)}(x)$
+
+% % \begin{equation}
+% % \begin{aligned}
+% % \bm{u}^{(l)} &:= (\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}) \bm{\alpha}^{(l)}_t(\x)=
+% % \left(\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}\right)\left(\bm{\alpha}^{(l)}_0({\bm{z}})+(\bm{\alpha}^{(l)}_t(\x)-\bm{\alpha}^{(l)}_0({\bm{z}}))\right) \\
+% % &=(\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)})\left[\sqrt{\frac{2}{m_l}}\bm{W}^{(l-1)}_0{\tilde{\bm{\alpha}}}^{(l-1)}_0({\bm{z}})+
+% % \left(\bm{\alpha}^{(l)}_t(\x)-\bm{\alpha}^{(l)}_0({\bm{z}})\right)\right],
+% % \end{aligned}
+% % \end{equation}
+
+
+% % Now we re-scale $\bm{u}^{(l)}$ by ${1}/{\norm{\tilde{\bm{\alpha}}^{(l-1)}_0({\bm{z}})}_2}$, then with Lemma \ref{lem: Recur_D0} we know (let$\bm{D}'=\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}$, $\bm{g}=\sqrt{{2}/{m_l}}\bm{W}^{(l-1)}_0{ \bm{\tilde{\alpha}}^{(l-1)}_0({\bm{z}})}/{\norm{\tilde{\bm{\alpha}}^{(l-1)}_0({\bm{z}})}_2}$ and $\bm{g}'=\big({\bm{\alpha}^{(l)}_t(\x)-\bm{\alpha}^{(l)}_0({\bm{z}})}\big)/{\norm{\tilde{\bm{\alpha}}^{(l-1)}_0({\bm{z}})}_2}$) with probability at least $1-\exp\big(-\Omega(m^{2/3} \tau^{2/3})\big)$, we have:
+% % \begin{align}
+% % \label{a2}
+% % \norm{\bm{u}^{(l)}}_0 \leq \norm{\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\bm{z}},0}^{(l)}}_0 = O\big(m^{\frac{2}{3}}\tau^\frac{2}{3}\big); \quad \text{and} \quad
+% % \norm{\bm{u}^{(l)}}_2 = O\big(\frac{\tau}{\sqrt{m}}\big).
+% % \end{align}
+
+
+%   Further, the third statement can be directly obtained from the following inequality:
+%   \begin{align*}
+%     \norm{\tilde{\bm{\alpha}}^{(l)}_{\x,t} -\tilde{\bm{\alpha}}^{(l)}_{\bm{z},0}}_2 &\leq \norm{\bm{D}^{(l)}_{{\bm{z}},0}\pt{\bm{\alpha}^{(l)}_{\x,t} - \bm{\alpha}^{(l)}_{\bm{z},0}}}_2+\norm{\pt{\bm{D}^{(l)}_{\x,t} - \bm{D}^{(l)}_{{\bm{z}},0} }\bm{\alpha}^{(l)}_{\x,t} }_2.
+%   \end{align*}
+%   Thus, the proof of this lemma is complete.
+% \end{proof}
+
+% \begin{lemma}
+%   \label{lem:NN_forward_perturbation2}
+%   Fix ${\z} \in  \mc{\X}\times\{1\}$.
+%   Suppose that $\tau \in[\Omega(1/\sqrt{m}),  O\Big({\sqrt{m}}/{(\ln m)^3}\Big)]$ and
+%   $\sup_{t \geq 0}\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}}\leq\tau$ holds for all $l$.
+%   Then, with probability at least $1-\exp({-\Omega( m^{2/3} \tau^{2/3})})$, for any $\x \in  \mc{\X}\times\{1\}$ such that $\norm{\x-\z}_2 = O(1/m)$ and $t\geq0$, we have:
+%   \begin{enumerate}[(a)]
+%     \item We can decompose $\bm{\alpha}^{(l)}_t(\x) - \bm{\alpha}^{(l)}_0({\z}) = \bm{y}^{(l)}_1 + \bm{y}^{(l)}_2$ such that
+%     \begin{align*}
+%       \norm{\bm{y}^{(l)}_1}_2 = O\big({\tau}/{\sqrt{m}}\big) \qand \norm{\bm{y}^{(l)}_2}_{\infty} = O\big({\tau\sqrt{\ln m }}/{m}\big);
+%     \end{align*}
+%     \item $\norm{\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\z},0}^{(l)}}_0 = O\big(m^{2/3} \tau^{2/3}\big)$ and $\norm{\big(\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\z},0}^{(l)}\big)\bm{\alpha}_t^{(l)}(\x)}_2= O\big({\tau}/{\sqrt{m}}\big)$;
+%     \item $\norm{\tilde{\bm{\alpha}}^{(l)}_t(\x) - \tilde{\bm{\alpha}}_0^{(l)}({\z})}_2 = O\big(\tau\sqrt{\ln m}/\sqrt{m}\big)$ and $\norm{\bm{\alpha}^{(l)}_t(\x) - \bm{\alpha}^{(l)}_0({\z}) }_2= O\big(\tau\sqrt{\ln m}/\sqrt{m}\big)$.
+%   \end{enumerate}
+% \end{lemma}
+% \begin{proof}
+%   [Proof of \cref{lem:NN_forward_perturbation2}]
+%   We prove the lemma by induction.
+%   When $l=0$, it is easy to get that $\norm{{\tilde{\bm{\alpha}}}_t^{(0)}(\x) -{\tilde{\bm{\alpha}}}^{(0)}_0({\z})}_2=\norm{\bm{\alpha}_t^{(0)}(\x) -\bm{\alpha}^{(0)}_0({\z})}_2 = \norm{\x-{\z}}_2 = O(1/m)$. Thus, all the statements hold for $l=0$.
+
+%   When $l \in \{1,2\cdots,L\}$, we assume that the lemma holds for $0,1,2\cdots,l-1$.
+
+%   $(a)$: First of all, we have
+%   \begin{align*}
+%     &\bm{\alpha}^{(l)}_t(\x) -\bm{\alpha}^{(l)}_0({\z})=
+%     \sqrt{\frac{2}{m_l}} \bm{W}^{(l-1)}_t \bm{D}^{(l-1)}_{\x,t} \bm{\alpha}^{(l-1)}_t(\x) - \sqrt{\frac{2}{m_l}} \bm{W}_0^{(l-1)} \bm{D}_{{\z},0}^{(l-1)} \bm{\alpha}^{(l-1)}_0({\z})=\cdots\\
+%     &\qquad=\sum^{l}_{a=1}\Big(\prod_{b=a+1}^{l} \sqrt{\frac{2}{m_{b}}}\bm{W}_0^{(b-1)} \bm{D}_{{\z},0}^{(b-1)}\Big)\Big(\sqrt{\frac{2}{m_a}}\big(\bm{W}^{(a-1)}_t - \bm{W}^{(a-1)}_0\big)\bm{D}^{(a-1)}_{\x,t} \bm{\alpha}^{(a-1)}_t(\x)\\
+%     &\qquad\qquad+ \sqrt{\frac{2}{m_a}}\bm{W}_0^{(a-1)}\big(\bm{D}^{(a-1)}_{\x,t} - \bm{D}^{(a-1)}_{{\z},0}\big) \bm{\alpha}^{(a-1)}_t(\x) \Big) + \Big( \prod_{b=1}^{l}\sqrt{\frac{2}{m_b}} \bm{W}_0^{(b-1)} \bm{D}^{(b-1)}_{\z,0}\Big)(\x-\z)
+
+%   \end{align*}
+
+%   holds for $l \in \{1,2,\cdots,L\}$. For the first part in $\tilde{\bm{\alpha}}^{(l)}_t(\x) -\tilde{\bm{\alpha}}^{(l)}_0({\z})$, we have
+%   \begin{align*}
+%     &\norm{\Big(\prod_{b=a+1}^{l} \sqrt{\frac{2}{m_b}}\bm{W}_0^{(b-1)} \bm{D}_{{\z},0}^{(b-1)}\Big)\Big(\sqrt{\frac{2}{m_a}}\big(\bm{W}^{(a-1)}_t - \bm{W}^{(a-1)}_0\big)\bm{D}^{(a-1)}_{\x,t} \bm{\alpha}^{(a-1)}_t(\x)\Big)}_2\\
+%     &\qquad\leq \norm{\prod_{b=a+1}^{l} \sqrt{\frac{2}{m_b}}\bm{W}_0^{(b-1)} \bm{D}_{{\z},0}^{(b-1)} }_2 \cdot \norm{\sqrt{\frac{2}{m_a}}\big(\bm{W}^{(a-1)}_t - \bm{W}^{(a-1)}_0\big)}_2 \cdot \norm{\bm{D}^{(a)}_{\x,t}}_2 \\
+%     &\qquad\qquad\qquad\qquad\cdot \Big(\norm{\bm{\alpha}^{(a-1)}_0({\z})}_2 + \norm{\bm{\alpha}^{(a-1)}_t(\x) -\bm{\alpha}^{(a-1)}_0({\z})}_2 \Big)\\
+%     &\qquad\leq O(1) \cdot O(\frac{\tau}{\sqrt{m}}) \cdot O(1) \cdot \bigg(O(1)+O\Big(\frac{\tau \sqrt{\ln m}}{\sqrt{m}}\Big)\bigg) \leq O\big(\frac{\tau}{\sqrt{m}}\big).
+%   \end{align*}
+
+
+%   For the second part in $\bm{\alpha}^{(l)}_t(\x) -\bm{\alpha}^{(l)}_0({\z})$, let
+%   \begin{align*}
+%     \bm{v}^{(a)}& \coloneqq \prod_{b=a+1}^{l} \left(\sqrt{\frac{2}{m_b}}\bm{W}_0^{(b-1)} \bm{D}_{{\z},0}^{(b-1)}\right)
+%     \sqrt{\frac{2}{m_a}}\bm{W}_0^{(a-1)}(\bm{D}^{(a-1)}_{\x,t} - \bm{D}^{(a-1)}_{{\z},0}) \bm{\alpha}^{(a-1)}_t(\x);\\
+%     \bm{u}^{(a)} &\coloneqq (\bm{D}_{\x,t}^{(a)} - \bm{D}_{{\z},0}^{(a)}) \bm{\alpha}^{(a)}_t(\x)=
+%     \left(\bm{D}_{\x,t}^{(a)} - \bm{D}_{{\z},0}^{(a)}\right)\left(\bm{\alpha}^{(a)}_0({\z})+(\bm{\alpha}^{(a)}_t(\x)-\bm{\alpha}^{(a)}_0({\z}))\right) \\
+%     &=(\bm{D}_{\x,t}^{(a)} - \bm{D}_{{\z},0}^{(a)})\left[\sqrt{\frac{2}{m_a}}\bm{W}^{(a-1)}_0{\tilde{\bm{\alpha}}}^{(a-1)}_0({\z})+
+%     \left(\bm{\alpha}^{(a)}_t(\x)-\bm{\alpha}^{(a)}_0({\z})\right)\right],
+%   \end{align*}
+%   for each $a=1,2,3,\cdots,l$.
+%   Then we can see
+%   \begin{align*}
+%     \bm{v}^{(1)}=0;\qquad 
+%     \bm{v}^{(a)} = \prod_{b=a+1}^{l} \left(\sqrt{\frac{2}{m_b}}\bm{W}_0^{(b-1)} \bm{D}_{{\z},0}^{(b-1)}\right)
+%     \sqrt{\frac{2}{m_a}}\bm{W}^{(a-1)}_0\bm{u}^{(a-1)},\quad a=2,3,\cdots,l.
+%   \end{align*}
+%   When $a\geq 2$, we have assumed that $\bm{\alpha}^{(a-1)}_t(\x)-\bm{\alpha}^{(a-1)}_0({\z}) $ 
+%   can be written as $\bm{\alpha}^{(a-1)}_t(\x) - \bm{\alpha}^{(a-1)}_0({\z}) = \bm{y}^{(a-1)}_1 + \bm{y}^{(a-1)}_2 $ 
+%   where $\norm{\bm{y}^{(a-1)}_1}_2 = O\big({\tau}/{\sqrt{m}}\big)$ and $\norm{\bm{y}^{(a-1)}_2}_{\infty} = O\big({\tau\sqrt{\ln m}}/{m}\big)$. If we re-scale $\bm{u}^{(a-1)}$ by ${1}/{\norm{\tilde{\bm{\alpha}}^{(a-2)}_0({\z})}_2}$, then with Lemma \ref{lem:Allen_Claim 8.3} (let $\bm{D}'=\bm{D}_{\x,t}^{(a-1)} - \bm{D}_{{\z},0}^{(a-1)}$, $\bm{W}=\bm{W}^{(a-2)}_0$, $\bm{h}={\bm{\alpha}^{(a-2)}_0({\z})}/{\norm{\tilde{\bm{\alpha}}^{(a-2)}_0({\z})}_2}$ and $\bm{g}=\big({\bm{\alpha}^{(a-1)}_t(\x)-\bm{\alpha}^{(a-1)}_0({\z})}\big)/{\norm{\tilde{\bm{\alpha}}^{(a-2)}_0({\z})}_2}$) we can know with probability at least $1-\exp\big(-\Omega(m^{2/3} \tau^{2/3})\big)$:
+%   \begin{align}
+%     \label{a2}
+%     \norm{\bm{u}^{(a-1)}}_0 \leq \norm{\bm{D}_{\x,t}^{(a-1)} - \bm{D}_{{\z},0}^{(a-1)}}_0 = O\big(m^{\frac{2}{3}}\tau^\frac{2}{3}\big); \quad \text{and} \quad
+%     \norm{\bm{u}^{(a-1)}}_2 = O\big(\frac{\tau}{\sqrt{m}}\big).
+%   \end{align}
+%   Then using \cref{lem:Allen_Claim 8.5} (with $\bm{u}=\bm{u}^{(a-1)}$, $\bm{v}=\bm{v}^{(a)}$ and $s=C m^{2/3}\tau^{2/3}$ such that $\norm{\bm{u}^{(a-1)}}_0\leq s$),
+%   we have probability at least $1- \exp\big(-\Omega(m^{2/3} \tau^{2/3})\big)$, one can write $\bm{v}^{(a)}=\bm{v}_1+\bm{v}_2$ for:
+%   \begin{equation*}
+%     \norm{\bm{v}_1}_2= O\big(m^{-\frac{2}{3}} \tau^\frac{4}{3}\ln m\big) \quad
+%     \text{and} \quad \norm{\bm{v}_2}_{\infty} = O\Big(\frac{\tau\sqrt{\ln m}}{m}\Big).
+%   \end{equation*}
+%   For the third part in $\bm{\alpha}^{(l)}_t(\x) -\bm{\alpha}^{(l)}_0({\z})$, by \cref{lem:Init_WeightsProductBound} we have
+%   \begin{align*}
+%     \norm{\Big( \prod_{b=1}^{l}\sqrt{\frac{2}{m_b}} \bm{W}_0^{(b-1)} \bm{D}^{(b-1)}_{\x,t}\Big)(\x-\z)}_2  = O(1) \cdot O(\frac{1}{m}) = O(\frac{1}{m})
+%   \end{align*}
+
+%   $(b)$: Now we have proved that $(a)$ holds for $l$, so we can similarly get that (\ref{a2}) holds for $a=l+1$.
+
+%   $(c)$: According to $(a)$ and the fact that for $\bm{u} \in \R^p$, $\norm{\bm{u}}_2 \leq \sqrt{p} \norm{\bm{u}}_{\infty}$,
+%   we know that
+%   \begin{equation*}
+%     \norm{\bm{\alpha}_t^{(l)}(\x) -\bm{\alpha}_0^{(l)}({\z})}_2 =O\Big(\tau\sqrt{\frac{\ln m}{m}} \Big).
+%   \end{equation*}
+
+%   As for the other term in \cref{lem:NN_forward_perturbation2}$(c)$, by $(b)$, we have
+%   \begin{equation*}
+%     \norm{\tilde{\bm{\alpha}}^{(l)}_t(\x) -\tilde{\bm{\alpha}}^{(l)}_0({\z})}_2 \leq \norm{\bm{D}^{(l)}_{{\z},0}\left(\bm{\alpha}^{(l)}_t(\x) - \bm{\alpha}^{(l)}_0({\z})\right)}_2 +\norm{\left(\bm{D}^{(l)}_{\x,t} - \bm{D}^{(l)}_{{\z},0} \right)\bm{\alpha}^{(l)}_t(\x) }_2\\
+%     = O\Big(\tau\sqrt{\frac{\ln m}{m}}\Big).
+%   \end{equation*}
+% \end{proof}
+
+% \begin{lemma}[\citet{allen-zhu2019_ConvergenceTheory} Claim 8.3]\label{claim 8.3}
+% Suppose $\delta_2 \in [0,O(1)]$ and $\delta_\infty \in \big[0,\frac{1}{4\sqrt{m}}\big]$. Suppose $W$ is a random matrix with entries drawn i.i.d from $\mathcal{N}(0,1)$. With probability at least $1- e^{-\Omega\big(m^\frac{3}{2}\delta_\infty\big)}$, the following holds. Fix any unit vector $h \in \R^m$, and for all $g\in \R^m$ that can be written  as
+% \[g= g_1+g_2\quad where \quad\norm{g_1}_2\leq \delta_2 \quad and \quad \norm{g_2}_\infty \leq \delta_\infty.\]
+% Let $D' \in \R^{m\times m}$ be the diagonal matrix where
+% \[(D')_{k,k}  =  \bm{1}_{\big(\sqrt{\frac{2}{m}}Wh+g\big)_k \geq 0} - \bm{1}_{\big(\sqrt{\frac{2}{m}}Wh\big)_k \geq 0},\quad~\forall k \in [m].\]
+% Then, letting $x=D'\left(\sqrt{\frac{2}{m}}Wh+g\right) \in \R^m$, we have
+% \[\norm{\x}_0 \leq \norm{D'}_0 \leq O(m(\delta_2)^\frac{2}{3}+\delta_\infty m^\frac{3}{2})\quad  and \quad \norm{\x}_2 \leq O(\delta_2+(\delta_\infty)^\frac{3}{2}m^\frac{3}{4}).\]
+% \end{lemma} 
+
+% In the proof of \cref{lem:NN_forward_perturbation2}, we use the following result:
+
+% \begin{lemma}[\citet{allen-zhu2019_ConvergenceTheory} Claim 8.3]
+%   \label{lem:Allen_Claim 8.3}
+%   % Suppose $\delta_2 \in [0,O(1)]$, $\delta_\infty \in \big[0,1/({4\sqrt{m}})\big]$ and $m_1 \in [1,M]$.
+%   % Suppose $\bm{W} \in \R^{m\times m_1}$ is a random matrix with entries drawn i.i.d from $\mathcal{N}(0,1)$.
+%   % With probability at least $1- \exp(-\Omega\big(m^{3/2}\delta_\infty\big))$, the following holds.
+%   % Fix any unit vector $\bm{h} \in \R^m$, and for all $\bm{g}\in \R^{m_1}$ that can be written as
+%   % \begin{align*}
+%   %   \bm{g}= \bm{g}_1+\bm{g}_2\quad \text{where} \quad\norm{\bm{g}_1}_2\leq \delta_2 \quad \text{and} \quad \norm{\bm{g}_2}_\infty \leq \delta_\infty.
+%   % \end{align*}
+%   % Let $\bm{D}' \in \R^{m\times m}$ be the diagonal matrix where
+%   % \begin{align*}
+%   % (\bm{D}')
+%   %   _{k,k}  =  \bm{1}\big\{\big(\sqrt{{2}/{m}}\bm{Wh}+\bm{g}\big)_k \geq 0\big\} - \bm{1}\big\{\big(\sqrt{{2}/{m}}\bm{Wh}\big)_k \geq 0\big\},\quad~\forall k \in [m].
+%   % \end{align*}
+%   % Then, letting $\x=\bm{D}'\left(\sqrt{{2}/{m}}\bm{Wh}+\bm{g}\right) \in \R^m$, we have
+%   % \begin{align*}
+%   %   \norm{\x}_0 \leq \norm{\bm{D}'}_0 = O\big(m(\delta_2)^\frac{2}{3}+\delta_\infty m^\frac{3}{2}\big)\quad  and \quad \norm{\x}_2 = O\big(\delta_2+(\delta_\infty)^\frac{3}{2}m^\frac{3}{4}\big).
+%   % \end{align*}
+
+%   Suppose each entry of $\bm{g} \in \mathbb{R}^m$ follows $g_i \iid \mathcal{N}(0,1)$. For any $\delta > 0$, with probability at least $1-\exp\mpt{-m^{2/3}\delta^{2/3}/25 } $, the following proposition holds:
+
+%   Select $\bm{g}' \in \mathbb{R}^m$ such that $ \norm{\bm{g}'}_2\leq\delta.$
+%   Let $\bm{D}' = \mr{diag}(D'_{kk})$ be a diagonal matrix, where the $k$-th diagonal element
+%   $D_{kk}' $ follows
+%   $$D_{k k}^{\prime}=\bs{1}\left\{\left(g+g^{\prime}\right)_{k} \geq 0\right\}-\bs{1}\left\{g_{k} \geq 0\right\},\quad k\in[m].$$
+%   If we define $\bm{u} = \bm{D}'(\bm{g}+\bm{g}')$, then it satisfies the following inequalities:
+%   \[\norm{\bm{u}}_0 \leq \norm{\bm{D}'}_0 \leq 3m^{2/3}\delta^{2/3} \quad \text{ and }\quad \norm{\bm{u}}_2 \leq 2 \delta.\]
+% \end{lemma}
+% \begin{proof}
+%   First, we define $S_0 = \cl{ j\in\bk{m}:D'_{jj}\not = 0}$ as the set of indices $j$ for which $D'_{jj}$ is non-zero. It is evident that $\norm{\bm{D}'}_0$ is equal to the cardinality of $S_0$, denoted as $|S_0|$.
+
+%   According to the definition of $\bm{D}'$, in order for $D'_{jj}$ to be non-zero, it must hold that $\abs{g_j}\leq\abs{g'_j}$. Therefore, we further define $S_1=\cl{j\in[m]:\abs{g_j}\leq\abs{g'_j}}$. Consequently, we have $S_0\subseteq S_1$ and $\norm{\bm{D}'}_0=|S_0|\leq|S_1|$.
+
+%   For any $\delta_\infty > 0$, we define $S_2 = \cl{ j \in [m]: \lvert g_j\rvert\leq 2\delta_\infty }$. Since $g_j$ follows a standard normal distribution, we can get:
+%   \begin{align*}
+%     \mathbb{P}\left(\lvert g_{j}\rvert\leq2 \delta_{\infty}\right)=2 \int_{0}^{2 \delta_{\infty}} \frac{\exp\mpt{-{x^{2}}/{2}}}{\sqrt{2 \pi}} \mathrm{d} x
+% \leq2 \int_{0}^{2 \delta_{\infty}} \frac{\mathrm{d} x}{\sqrt{2 \pi}} \leq\frac{4 \delta_{\infty}}{\sqrt{2 \pi}} 
+%     \leq\frac{8}{5} \delta_{\infty}&.
+%   \end{align*}
+%   It is easy to see that $\bs{1}\{\lvert g_j \rvert\leq 2 \delta_\infty\} \iid \mathcal{B}(1,p)$ and $\lvert S_2 \rvert = \sum\limits^m_{j=1} \bs{1} \mcl{ \lvert g_j \rvert\leq 2\delta_\infty } \sim\mathcal{B}(m,p)$, where $ p = \mathbb{P}(\lvert g_j\rvert\leq 2 \delta_\infty) \leq {8}\delta_\infty/5 $. By combining this with Bernstein's inequality, we can obtain the following result:
+%   \begin{align}
+%     \label{eq: |S1|bound}
+%     \begin{split}
+%       \mathbb{P}\left(\lvert S_{2}\rvert\leq2 m \delta_{\infty}\right) \geq \mathbb{P}\left(\lvert S_{2}\rvert\leq mp+\frac{2}{5} m \delta_{\infty}\right)
+%       \geq 1-\exp\mpt{-\frac{1}{25} m \delta_{\infty}}&.
+%     \end{split}
+%   \end{align}
+
+
+%   Next, we partition $S_1$ as follows: $S_1 = S_{1} \cap (S_{2} \cup S_{2}^{\mathrm{c}}) = (S_{1} \cap S_{2}) \cup (S_{1} \cap S_{2}^{\mathrm{c}})$. Therefore, we have $\lvert S_{1}\rvert = \lvert S_{1} \cap S_{2}\rvert + \lvert S_{1} \cap S_{2}^{\mathrm{c}}\rvert \leq \lvert S_{2}\rvert + \lvert S_{1} \cap S_{2}^{\mathrm{c}}\rvert$. It is evident that the upper bound of $|S_1|$ can be controlled using the inequality \cref{eq: |S1|bound}, thus we only need to further control $|S_1 \cap S_2^c|$ in order to obtain an estimation for $\norm{\bm{D}'}_0$. For any $j \in S_1 \cap S_2^c $, we have $\abs{ g'_{j}}\geq \abs{g_{j}}\geq\delta_{\infty}$, and thus
+%   \begin{align*}
+%     \lvert S_{1} \cap S_{2}^{\mathrm{c}}\rvert\delta_{\infty}^{2}=\sum_{j \in S_{1} \cap S_{2}^{\mathrm{c}}} \delta_{\infty}^{2} \leq\sum_{j \in S_{1} \cap S_{2}^{\mathrm{c}}}\lvert g^{\prime}_{j}\rvert ^{2} \leq \left\|g^{\prime}\right\|^{2}
+%     \qquad\Longrightarrow\qquad\lvert S_{1} \cap S_{2}^{\mathrm{c}}\rvert\leq{\left\|g^{\prime}\right\|^{2}}/{\delta_{\infty}^{2}}.
+%   \end{align*}
+%   Then we know that
+%   \begin{equation*}
+%     \begin{aligned}
+%       \lvert S_{1}\rvert \leq \lvert S_{2}\rvert +\lvert S_{1} \cap S_{2}^{\mathrm{c}}\rvert\leq2 m \delta_{\infty}+\frac{\left\|g_{1}^{\prime}\right\|^{2}}{\delta_{\infty}^{2}} \leq2 m \delta_{\infty}+\frac{\delta^{2}}{\delta_{\infty}^{2}} .
+%     \end{aligned}
+%   \end{equation*}
+%   When $m \delta_\infty = {\delta^2}/{\delta_\infty^2}$, which implies $ \delta_\infty = {\delta^{2/3}}/{m^{1/3}}$, the right-hand side of the inequality reaches its minimum value of $3m^{{2}/{3}} \delta^{{2}/{3}}$.
+
+%   Finally, we try to obtain the estimation of $\norm{\bm{u}}_2$. For $j \in S_0$, we know that $D'_{jj} = \pm 1 $. Combining the definition of $\bm{u}$ with $\lvert g_j \rvert \leq \lvert g_j' \rvert$, we have
+%   $\lvert u_{j}\rvert=\lvert g_{j}+ g^{\prime}_{j} \rvert \leq \lvert g_{j} \rvert+\lvert g^{\prime}_{j}\rvert \leq2\lvert g^{\prime}_{j} \rvert$. This implies that:
+%   \begin{align*}
+%     \norm{\bm{u}}^{2} & =\sum_{j \in S_{0}}u_{j}^{2} \leq\sum_{j \in S_{0}} 4 (g'_{j})^{2}\leq4 \delta^{2}.
+%   \end{align*}
+%   Thus, the proof of this lemma is complete.
+% \end{proof}
+
+% \begin{lemma}[\citet{allen-zhu2019_ConvergenceTheory} Claim 8.5]
+%   \label{lem:Allen_Claim 8.5}
+%   For any $2 \leq a \leq b \leq L $ and any positive integer $s= O({m}/{\ln m})$, with probability at least $1-\exp\big(-\Omega(s\ln m)\big)$, for all $\bm{u} \in \R^m$ with $\norm{\bm{u}}_2 \leq 1 $ and $\norm{\bm{u}}_0 \leq s $, letting $\bm{v}=\prod_{k=a+1}^{b} \Big(\sqrt{{2}/{m_k}}\bm{W}_0^{(k-1)} \bm{D}_{0}^{(k-1)}\Big)\sqrt{{2}/{m_a}}\bm{W}^{(a-1)}_0\bm{u}$, we can write $\bm{v}=\bm{v}_1 + \bm{v}_2$ with
+%   \[\norm{\bm{v}_1}_2 = O\big(\sqrt{{s}/{m}} \ln m\big) \quad \text{and} \quad \norm{\bm{v}_2}_\infty \leq \frac{2\sqrt{\ln m}}{\sqrt{m}}.\]
+% \end{lemma}
+
+% \begin{lemma}
+%   \label{lem:GradientBound_Deviance}
+%   Let $\tau\in\bk{\Omega\mpt{1/\sqrt{m}},O\mpt{{\sqrt{m}}/{(\ln m)^3}}}$, $T\subseteq [0,\infty)$ and fix $\bm{z}\in\tilde{B}_R$. Suppose that $\norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{F}\leq\tau$ holds for all $t\in T$ and $l\in\cl{0,1,\cdots,L}$. Then there exists a positive absolute constant $C$ such that with probability at least $1-\exp\mpt{-\Omega(m^{2/3}\tau^{2/3})}$, for all $l\in\cl{0,1,\cdots,L}$ and $\x\in\tilde{B}_R$ such that $\norm{\x-\bm{z}}_2\leq O\mpt{1/m}$, we have
+
+%   % Suppose $\sup_{t \geq 0} \norm{\bm{W}^{(l)}_t - \bm{W}^{(l)}_0 }_{\mr{F}}= O(m^{1/4}) $ holds for all $l$.
+%   % For fixed $\z \in  \tilde{B}_R$, with probability at least $1-\exp(-\Omega(m^{5/6}))$ over the random initialization,
+%   % for any $\x \in  \mc{\X}$ such that  $\norm{\x - \z}_2 =  O(1/m)  $, we have
+%   \begin{align*}
+%     \sup_{t\in T}\norm{\nabla_{\bm{W}^{(l)}} g_t(\x) - \nabla_{\bm{W}^{(l)}} g_0(\z)}_{\mr{F}} = O\mpt{m^{-1/12} \sqrt{ \ln m }}.
+%   \end{align*}
+%   when $m$ is greater than the positive constant $C$.
+% \end{lemma}
+
+% \begin{proof}
+%   Recalling \cref{eq:GradientExpr}, we have
+%   $\nabla_{\bm{W}^{(l)}} g_t(\x)=\bm{\gamma}^{(l)}_{\x,t}\tilde{\bm{\alpha}}^{(l),T}_{\x,t}$.
+%   Then,
+%   \begin{align}
+%     &\norm{\nabla_{\bm{W}^{(l)}} g_t(\x) - \nabla_{\bm{W}^{(l)}} g_0(\z)}_{\mr{F}}=\norm{\bm{\gamma}^{(l)}_{\x,t}\tilde{\bm{\alpha}}^{(l),T}_{\x,t} -\bm{\gamma}^{(l)}_{\z,0}\tilde{\bm{\alpha}}^{(l),T}_{\z,0}}_{\mr{F}}\notag \\
+%     \label{eq:Proof_Training_GradientBound_Decomp2}
+%     &\qquad \leq \norm{\bm{\gamma}^{(l)}_{\x,t} - \bm{\gamma}^{(l)}_{\z,0}}_2\norm{\tilde{\bm{\alpha}}^{(l)}_{\x,t}}_2
+%     + \norm{\bm{\gamma}^{(l)}_{\z,0}}_2\norm{\tilde{\bm{\alpha}}^{(l)}_{\x,t} - \tilde{\bm{\alpha}}^{(l)}_{\z,0}}_2.
+%   \end{align}
+
+%   According to \cref{lem:Init_WeightsProductBound}, with probability at least $1-\exp(-\Omega(m))$, we can get
+%   \[\norm{\bm{\gamma}^{(l)}_{\z,0}}_2 = O(1)\qquad\text{and}\qquad\norm{\tilde{\bm{\alpha}}_{\z,0}^{(l)}}_2 = O(1).\]
+%   On the other hand, by \cref{lem:NN_forward_perturbation2}, with probability at least $1-\exp\mpt{-\Omega(m^{2/3}\tau^{2/3})}$, for all $l\in\cl{0,1,\cdots,L}$ and $\x\in\tilde{B}_R$ such that $\norm{\x-\bm{z}}_2\leq O\mpt{1/m}$, we have
+%   $\norm{\tilde{\bm{\alpha}}^{(l)}_{\x,t} - \tilde{\bm{\alpha}}_{\z,0}^{(l)}}_2 = O({\tau }/{\sqrt{m}})$, which implies that (since $\tau = O\big({\sqrt{m}}/{(\ln m)^3}\big)$)
+%   \begin{align*}
+%     \norm{\tilde{\bm{\alpha}}_{\x,t}^{(l)}}_2
+%     \leq \norm{\tilde{\bm{\alpha}}_{\z,0}^{(l)}}_2 + \norm{\tilde{\bm{\alpha}}^{(l)}_{\x,t} - \tilde{\bm{\alpha}}_{\z,0}^{(l)}}_2 = O(1).
+%   \end{align*}
+% %  since $O\big({\sqrt{m}}/{(\ln m)^3}\big)$,
+%   Moreover, the statement $(a)$ in \cref{lem:NN_forward_perturbation2} also enable us to
+%   apply \cref{lem:backward perturbation} for $\bm{W}^{(r)'} = \bm{W}_t^{(r)} - \bm{W}_0^{(r)}$,
+%   $\bm{D}^{(r)'} =  \bm{D}^{(r)}_{\x,t} -  \bm{D}^{(r)}_{\z,0}$, yielding that with probability at least $1-\exp\mpt{-\Omega(m^{2/3}\tau^{2/3})}$, for all $l\in\cl{0,1,\cdots,L}$ and $\x\in\tilde{B}_R$ such that $\norm{\x-\bm{z}}_2\leq O\mpt{1/m}$, we have
+%   \begin{align*}
+%     \norm{{\bm{\gamma}}^{(l)}_{\x,t} - {\bm{\gamma}}^{(l)}_{\z,0}}_2
+%     = O\mpt{m^{-1/6} \tau^{1/3}\sqrt{\ln m}}.
+%   \end{align*}
+%   Plugging these bounds in \cref{eq:Proof_Training_GradientBound_Decomp2}, we can get the result.
+% \end{proof}
+% We first decompose
+% \begin{equation}
+%   \label{eq:Proof_GradientDev_Decomp}
+%   \begin{aligned}
+%     &\norm{\nabla_{\bm{W}^{(l)}} g_t(\x) - \nabla_{\bm{W}^{(l)}} g_t(\z)}_{\mr{F}} \\
+%     &\leq \norm{\nabla_{\bm{W}^{(l)}} g_t(\x) - \nabla_{\bm{W}^{(l)}} g_0(\z)}_{\mr{F}} +
+%     \norm{\nabla_{\bm{W}^{(l)}} g_0(\z) - \nabla_{\bm{W}^{(l)}} g_t(\z)}_{\mr{F}}.
+%   \end{aligned}
+% \end{equation}
+%   Since $\z$ is fixed, the second term in \cref{eq:Proof_GradientDev_Decomp} is already bounded by \cref{lem:Training_GradientBound}
+%   with $\tau \asymp m^{1/4}$.
+% %  with probability at least $1-\exp(-\Omega(m^{5/6}))$ .
+%   For the first term in \cref{eq:Proof_GradientDev_Decomp}, we recall \cref{eq:GradientExpr} to get
+
+% \onecolumngrid
+%   \begin{align}
+%     &\norm{\nabla_{\bm{W}^{(l)}} g_t(\x) - \nabla_{\bm{W}^{(l)}} g_0(\z)}_{\mr{F}}  = \norm{\tilde{\bm{\alpha}}_t^{(l)}(\x) \left(  \prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}}  \bm{W}_t^{(r)}  \bm{D}_{\x,t}^{(r)}  \right)
+%     - \tilde{\bm{\alpha}}_0^{(l)}(\z) \left(  \prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}}  \bm{W}_0^{(r)} \bm{D}_{\z,0}^{(r)} \right)}_{\mr{F}} \nonumber \\
+%     &\qquad = \norm{\tilde{\bm{\alpha}}_t^{(l)}(\x)} \norm{  \prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}}  \bm{W}_t^{(r)}  \bm{D}_{\x,t}^{(r)}   -
+%     \prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}}  \bm{W}_0^{(r)} \bm{D}_{\z,0}^{(r)} }  + \norm{\tilde{\bm{\alpha}}_t^{(l)}(\x) - \tilde{\bm{\alpha}}_0^{(l)}(\z)}
+%     \norm{  \prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}}  \bm{W}_0^{(r)} \bm{D}_{\z,0}^{(r)} }.\label{eq:Proof_GradientDev_Decomp2}
+%   \end{align}
+%   \twocolumngrid
+
+% \begin{align}
+%   \notag
+%   &\norm{\nabla_{\bm{W}^{(l)}} g_t(\x) - \nabla_{\bm{W}^{(l)}} g_0(\z)}_{\mr{F}} \\
+%   \notag
+%   & = \left\lVert\tilde{\bm{\alpha}}_t^{(l)}(\x) \left(  \prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}}  \bm{W}_t^{(r)}  \bm{D}_{\x,t}^{(r)}  \right)\right.\\
+%   &\qquad\qquad\qquad\qquad\qquad \left.- \tilde{\bm{\alpha}}_0^{(l)}(\z) \left(  \prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}}  \bm{W}_0^{(r)} \bm{D}_{\z,0}^{(r)} \right)\right\rVert_{\mr{F}} \notag\\
+%   & = \norm{\tilde{\bm{\alpha}}_t^{(l)}(\x)} \norm{  \prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}}  \bm{W}_t^{(r)}  \bm{D}_{\x,t}^{(r)}   -
+%   \prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}}  \bm{W}_0^{(r)} \bm{D}_{\z,0}^{(r)} } \nonumber\\
+%   &\qquad + \norm{\tilde{\bm{\alpha}}_t^{(l)}(\x) - \tilde{\bm{\alpha}}_0^{(l)}(\z)}
+%   \norm{  \prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}}  \bm{W}_0^{(r)} \bm{D}_{\z,0}^{(r)} }.\label{eq:Proof_GradientDev_Decomp2}
+% \end{align}
+
+
+% Then, \cref{lem:Init_WeightsProductBound} shows that
+% with probability at least $1- \exp(-\Omega(m))$,
+% \begin{align*}
+%   \norm{  \prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}}  \bm{W}_0^{(r)} \bm{D}_{\z,0}^{(r)} } = O(1),
+%   \quad \norm{\tilde{\bm{\alpha}}_0^{(l)}(\z)} = O(1).
+% \end{align*}
+% Moreover, applying \cref{lem:NN_forward_perturbation2} with $\tau  \asymp m^{1/4}$, we can control the perturbation by
+% \begin{align*}
+%   &\norm{\tilde{\bm{\alpha}}_t^{(l)}(\x) - \tilde{\bm{\alpha}}_0^{(l)}(\z)} = O\left( m^{-1/4}\sqrt {\ln m} \right),\\
+%   &\norm{\bm{D}_{\x,t}^{(l)} - \bm{D}_{{\z},0}^{(l)}}_0 = O\left( m^{5/6} \right),
+% \end{align*}
+% which hold with probability at least $1-\exp(-\Omega(m^{5/6}))$.
+% Combining the latter with the assumption of $\bm{W}_t^{(l)}$, by \cref{lem:backward perturbation} we get
+% \begin{align*}
+%     \norm{  \prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}}  \bm{W}_t^{(r)}  \bm{D}_{\x,t}^{(r)}
+%       -\prod_{r=l+1}^{L} \sqrt{\frac{2}{m_r}}  \bm{W}_0^{(r)} \bm{D}_{\z,0}^{(r)} }
+%   = O\left( m^{-\frac{1}{12}} \sqrt{\ln m} \right).
+% \end{align*}
+% Finally, plugging this estimations in \cref{eq:Proof_GradientDev_Decomp2}, we conclude
+% \begin{align*}
+%     \norm{\nabla_{\bm{W}^{(l)}} g_t(\x) - \nabla_{\bm{W}^{(l)}} g_0(\z)}_{\mr{F}}
+%     &= O(1)\cdot O\left( m^{-\frac{1}{12}} \sqrt{\ln m} \right) + O\left( m^{-\frac{1}{4}}\sqrt {\ln m} \right) \cdot O(1) \\
+%     &=  O\left( m^{-\frac{1}{12}} \sqrt{\ln m} \right).
+% \end{align*}
+
+
+% \begin{proof}
+%   [Proof of \cref{prop:Continuity_Kt}]By applying \cref{lem:GradientBound_Deviance} with $\tau \asymp m^{1/4}$, with probability at least $1 - \exp(-\Omega(m^{5/6}))$, we can obtain the following result
+%   \begin{align*}
+%     \norm{ \nabla_{\bm{W}^{(l)}} g_t(\x)- \nabla_{\bm{W}^{(l)}} g_0(\z) }_{\mr{F}}
+%     = O\mpt{ m^{-1/12}\sqrt{ \ln m}}
+%   \end{align*}
+%   when $m$ is large enough.
+%   Combining this result with \cref{lem:Init_WeightsProductBound} further implies $\norm{ \nabla_{\bm{W}^{(l)}} g_t(\x)}_{\mr{F}} = O(1)$.
+%   The same conclusion holds if we replace $\x$, $\z$ with $\x'$, $\z'$.
+%   Furthermore, we have
+%   \begin{align*}
+%      \abs{K^{(p)}_t(\x,\x') - K^{(p)}_0(\z,\z')}&\leq \sum_{l=0}^L \norm{ \nabla_{\bm{W}^{(l)}} g_t(\x)}_{\mr{F}} \norm{ \nabla_{\bm{W}^{(l)}} g_t(\x')- \nabla_{\bm{W}^{(l)}} g_0(\z') }_{\mr{F}} \\
+%     & \qquad\qquad + \sum_{l=0}^L  \norm{ \nabla_{\bm{W}^{(l)}} g_t(\x)- \nabla_{\bm{W}^{(l)}} g_0(\z) }_{\mr{F}}\norm{ \nabla_{\bm{W}^{(l)}} g_0(\z')}_{\mr{F}} \\
+%     &\qquad = O\mpt{m^{-1/12}\sqrt{ \ln m}}
+%   \end{align*}
+%   holds for all $t\in T$ with probability at least $1 - \exp\mpt{-\Omega(m^{5/6})}$ when $m$ is large enough.
+% \end{proof}
+
+% Since
+% \begin{align*}
+%   &K^{(p)}_t(\x,\x') = \ang{\nabla_{\bm{\theta}^{(p)}} g_t(\x),\nabla_{\bm{\theta}^{(p)}} g_t(\x')}
+%   \\&= \sum_{l=0}^L \ang{\nabla_{\bm{W}^{(l)}} g_t(\x), \nabla_{\bm{W}^{(l)}} g_t(\x') } + 1,
+% \end{align*}
+% we have
+% \begin{align*}
+%   &\abs{K^{(p)}_t(\x,\x')-K^{(p)}_t(\z,\z')} \\&
+%   = \abs{\sum_{l=0}^L  \ang{\nabla_{\bm{W}^{(l)}} g_t(\x),  \nabla_{\bm{W}^{(l)}} g_t(\x')} -
+%   \sum_{l=0}^L \ang{\nabla_{\bm{W}^{(l)}} g_t(\z),  \nabla_{\bm{W}^{(l)}} g_t(\z')}  } \\
+%   & \leq \sum_{l=0}^L \abs{\ang{\nabla_{\bm{W}^{(l)}} g_t(\x),  \nabla_{\bm{W}^{(l)}} g_t(\x')} - \ang{\nabla_{\bm{W}^{(l)}} g_t(\z),  \nabla_{\bm{W}^{(l)}} g_t(\z')}} \\
+%   & \leq \sum_{l=0}^L \abs{\ang{\nabla_{\bm{W}^{(l)}} g_t(\x),  \nabla_{\bm{W}^{(l)}} g_t(\x') -  \nabla_{\bm{W}^{(l)}} g_t(\z')}} \\
+%   & \quad + \sum_{l=0}^L \abs{\ang{\nabla_{\bm{W}^{(l)}} g_t(\x) - \nabla_{\bm{W}^{(l)}} g_t(\z) , \nabla_{\bm{W}^{(l)}} g_t(\z')}} \\
+%   & \leq \sum_{l=0}^L \norm{\nabla_{\bm{W}^{(l)}} g_t(\x) }_{\mr{F}} \norm{\nabla_{\bm{W}^{(l)}} g_t(\x') -\nabla_{\bm{W}^{(l)}} g_t(\z')}_{\mr{F}} \\
+%   & \quad + \sum_{l=0}^L \norm{\nabla_{\bm{W}^{(l)}} g_t(\x) - \nabla_{\bm{W}^{(l)}} g_t(\z)}_{\mr{F}} \norm{\nabla_{\bm{W}^{(l)}} g_t(\z')}_{\mr{F}}.
+% \end{align*}
+
+% Noticing that
+% \begin{align*}
+%   \norm{\nabla_{\bm{W}^{(l)}} g_t(\x)}_{\mr{F}} \leq \norm{\nabla_{\bm{W}^{(l)}} g_t(\z)}_{\mr{F}} + \norm{\nabla_{\bm{W}^{(l)}} g_t(\x) -\nabla_{\bm{W}^{(l)}} g_t(\z)  }_{\mr{F}}
+% \end{align*}
+% and
+% \begin{align*}
+%   \norm{\nabla_{\bm{W}^{(l)}} g_t(\z)}_{\mr{F}} \leq \norm{\nabla_{\bm{W}^{(l)}} g_0(\z)}_{\mr{F}} + \norm{\nabla_{\bm{W}^{(l)}} g_t(\z) -\nabla_{\bm{W}^{(l)}} g_0(\z)  }_{\mr{F}},
+% \end{align*}
+% by \cref{lem:Init_WeightsProductBound}, \cref{lem:Training_GradientBound} ($\tau \asymp m^{1/4}$) and \cref{lem:GradientBound_Deviance},
+% we know that
+% \begin{align*}
+%   \abs{K_t^{(p)}(\x,\x') - K_t^{(p)}(\z,\z')} = O\left(m^{-1/12} \sqrt{\ln m} \right)
+% \end{align*}
+% holds with probability at least $1- \exp(-\Omega(m^{5/6}))$.
+
+\subsection{Hölder continuity of \texorpdfstring{$\NTK$}{NTK}}\label{subsec:Holder_NTK}
+For convenience, let us first introduce the following definition of Hölder spaces~\citep{adams2003_SobolevSpaces}.
+For an open set $\Omega \subset \R^p$ and a real number $\alpha \in [0,1]$, let us define a semi-norm for $f : \Omega \to \R$ by
+\begin{align*}
+  \abs{f}_{0,\alpha} = \sup_{x,y \in \Omega,~x\neq y}{\abs{f(x) - f(y)}}/{\norm{x-y}^\alpha}
+\end{align*}
+and define the Hölder space by $C^{0,\alpha}(\Omega) = \left\{ f \in C(\Omega) : \abs{f}_{0,\alpha} < \infty \right\},$
+which is equipped with norm $\norm{f}_{C^{0,\alpha}(\Omega)} = \sup_{x \in \Omega} \abs{f(x)} + \abs{f}_{\alpha}$.
+Then it is easy to show that
+\begin{enumerate}[$(a)$~]
+  \item $C^{0,\alpha}(\Omega) \subseteq C^{0,\beta}(\Omega)$ if $\beta \leq \alpha$;
+  \item if $f,g \in C^{0,\alpha}(\Omega)$, then $f + g,~ fg \in C^{\alpha}(\Omega)$;
+  \item if $f \in C^{0,\alpha}(\Omega_1)$ and $g \in C^{0,\beta}(\Omega_2)$ with $\ran g \subseteq \Omega_1$, then $f\circ g \in C^{0,\alpha\beta}(\Omega_2)$.
+\end{enumerate}
+Consequently, using the formula \cref{eq:NTK_Formula}, we can show the following proposition:
+\begin{proposition}
+  \label{prop:NTK_Continuity}
+  We have $\NTK \in C^{0,s}( \tilde{B}_R \times  \tilde{B}_R)$ with $s = 2^{-L}$.
+  Particularly, there is some absolute constant $C>0$ such that
+  for any $x,x',z,z' \in  \tilde{B}_R$,
+  \begin{align}
+    \abs{\NTK(\x,\x') - \NTK(\z,\z')} \leq C R^2 \norm{(\x,\x') - (\z,\z')}^s.
+  \end{align}
+\end{proposition}
+\begin{proof}
+  Let us recall \cref{eq:NTK_Formula}.
+%  % \begin{align*}
+%  %   \NTK(\x,\x') =
+%  %   \norm{\x}\norm{\x'} \sum_{r=0}^L \kappa^{(r)}_1(\bar{u}) \prod_{s=r}^{L-1} \kappa_0(\kappa^{(s)}_1(\bar{u})) + 1.
+%  % \end{align*}
+%  % where $\bar{u} =\ang{\x,\x'}/(\norm{\x}\norm{\x'})$ and
+%  % \begin{align*}
+%  %   \kappa_0(u) =  \frac{1}{\pi}\left( \pi - \arccos u \right),\quad
+%  %   \kappa_1(u) = \frac{1}{\pi}\left[ \sqrt {1-u^2} + u (\pi - \arccos u)  \right].
+%  % \end{align*}
+%  \begin{align*}
+%    \NTK(\x,\x') =
+%    \norm{\tilde{\x}}\norm{\tilde{\x}'} \sum_{r=0}^L \kappa^{(r)}_1(\bar{u}) \prod_{s=r}^{L-1} \kappa_0\mpt{\kappa^{(s)}_1(\bar{u})} + 1.
+%  \end{align*}
+%  where $\tilde{\x} = (\x^T,1)^T$, $\tilde{\x}' = (\x'^T,1)^T$, $\bar{u} = \ang{\tilde{\x},\tilde{\x}'} / \pt{\norm{\tilde{\x}}\norm{\tilde{\x}'}}$ and
+%  \begin{align*}
+%    \begin{split}
+%      % \label{eq:A_Arccos_Formula}
+%      \kappa_0(u) &=  \frac{1}{\pi}\pt{\pi - \arccos u},\qquad~
+%      \kappa_1(u) = \frac{1}{\pi}\bk{\sqrt {1-u^2} + u (\pi - \arccos u)},
+%    \end{split}
+%  \end{align*}
+  Since $\NTK$ is symmetric, by triangle inequality it suffices to prove that $\NTK(\x_0,\cdot) \in C^{0,s}(\tilde{B}_R)$
+  with $\abs{\NTK(\x_0,\cdot)}_{0,s}$ bounded by a constant independent of $\x_0$.
+  Now, the latter is proven by
+  \begin{enumerate}[$(a)$~]
+    \item $\x \mapsto \bar{u} = \ang{{\tilde{\x}}/{\norm{\tilde{\x}}}, {\tilde{\x}_0}/{\norm{\tilde{\x}_0}}} \in C^{0,1}(\tilde{B}_R)$, where the bound of the Hölder
+    norm is independent of $\x_0$;
+    \item as functions of $\bar{u}$, both $\sqrt{1 - \bar{u}^2}$ and $\arccos \bar{u}$ belong to $C^{0,{1}/{2}}([-1,1])$, and thus
+    $\kappa_0,\kappa_1 \in C^{0,{1}/{2}}([-1,1])$;
+    \item the expression of NTK together with the properties of Hölder functions.
+  \end{enumerate}
+  % It is also easy to check that $\abs{\NTK(\x_0,\cdot)}_s$ is bounded by a constant only depending on $R$
+%  Thus, we can get the conclusion.
+\end{proof}
+
+% For any $\x,\x',\z,\z'$ such that $\norm{\x-\z}_2\leq O(1/m)$, $\norm{\x'-\z'}_2\leq O(1/m)$, with probability at least $1-\delta$ with respect to the initialization, we have
+% \begin{align*}
+% \abs{\NTK(\x,\x')-\NTK(\z,\z')}&\leq\abs{\NTK(\x,\x')-K_0(\x,\x')}+\abs{K_0(\x,\x')-K_0(\z,\z')}\\
+% &\qquad+\abs{K_0(\z,\z')-\NTK(\z,\z')}\\
+% &\leq O(m^{-1/5})+O(m^{-1/12}\sqrt{\ln m}) + O(m^{-1/5})=O(m^{-1/12}\sqrt{\ln m})
+% \end{align*}
+% when $m\geq C_1(\ln(C_2/\delta))^5$. Since the NTK does not depend on the parameters, the above bounds hold for any $\x,\x',\z,\z'$ such that $\norm{\x-\z}_2\leq O(1/m)$, $\norm{\x'-\z'}_2\leq O(1/m)$.
+
+\subsection{The kernel uniform convergence} \label{subsec:KernelUniformConvergence}
+
+% \begin{theorem}[Kernel uniform convergence, Proposition 2.3 in the main text]
+%   \label{thm:A_KernelUniform}
+%   There exists a polynomial $\operatorname{poly}(\cdot)$ such that for any given training data $\{(\x_{i},y_{i}),i\in[n]\}$ and any $\delta\in(0,1)$, when  $m\geq \operatorname{poly}(n,\lambda_0^{-1},\|\bm{y}\|_2,\ln(1/\delta))$,  we have
+%   \begin{equation*}
+%     \label{eq:A_KernelUniformConvergence}
+%     \sup_{t \geq 0} \sup_{\x,\x'\in \tilde{B}_R}\abs{K_t(\x,\x') - \NTK(\x,\x')} \leq O\left(m^{-\frac{1}{12}}\sqrt{\ln m}\right).
+%   \end{equation*}
+%   with probability at least $1-\delta$.
+
+%   For any $\delta \in (0,1)$,
+%   as long as $m \geq \mathrm{poly}\left(n,\lambda_0^{-1},\norm{\bm{y}},\ln(1/\delta)\right)$,
+%   with probability at least $1-\delta$ we have
+%   \begin{equation*}
+%     \label{eq:A_KernelUniformConvergence}
+%     \sup_{t \geq 0} \sup_{\x,\x'\in \tilde{B}_R}\abs{K_t(\x,\x') - \NTK(\x,\x')} \leq O\left(m^{-\frac{1}{12}}\sqrt{\ln m}\right).
+%   \end{equation*}
+%\end{theorem}
+
+\begin{proposition}[Kernel uniform convergence]
+  \label{prop:2_KernelUniform}
+  Denote $B_r = \{x\in \mb{R}^{d}: 1 \leq \norm{\tilde{\x}} \leq r\}$.
+  There exists a polynomial $\operatorname{poly}(\cdot)$ such that
+  for any $\delta \in (0,1)$,
+  as long as $m \geq \mathrm{poly}\left(n, \tilde{M}_{\bm{X}}, \lambda_0^{-1},\norm{\bm{y}},\ln(1/\delta),k\right)$ and $m \geq r^k$,
+  with probability at least $1-\delta$ we have
+  \begin{equation*}
+    \sup_{t \geq 0} \sup_{\x,\x'\in B_r}\abs{K_t(\x,\x') - \NTK(\x,\x')} \leq O\xkm{ r^2 m^{-\frac{1}{12}}\sqrt{\ln m}}.
+  \end{equation*}
+\end{proposition}
+
+\begin{proof}
+  First, by \cref{lem:A_lazy_regime}, we know that there exists a polynomial $\poly_1(\cdot)$ such that for any $\delta\in(0,1)$, when $m\geq\poly_1\xkm{n, \tilde{M}_{\bm{X}},\norm{\bm{y}},\lambda_0^{-1},\ln(1/\delta)}$, then with probability at least $1-\delta/2$, for all $p\in\dk{1,2}$ and $l\in\dk{0,1,\cdots,L}$, we have
+  \begin{align*}
+    \sup_{t \geq 0} \norm{\bm{W}^{(l,p)}_t - \bm{W}^{(l,p)}_0}_{\mr{F}} = O(m^{1/4}).
+  \end{align*}
+  Next, we condition on this event happens.
+  % holds with probability at least $1-\delta$ if $m\geq\mr{poly}\big(n,\lambda_0^{-1},\ln(1/\delta),\norm{\bm{y}}\big)$.
+%  we know that with probability at least $1-\delta_0$,
+
+  Since $B_r \subset \R^d$ is bounded, for any $\ep > 0$ we have an $\ep$-net $\caN_{\ep}$ (with respect to $\norm{\cdot}_2$)
+  of $\tilde{B}_R$ such that the cardinality $\abs{\caN_{\ep}} = O(r^d\ep^{-d})$
+  ~\citep[Section 4.2]{vershynin2018_HighdimensionalProbability}.
+  Specifically, we choose $\ep = m^{-2^L}$ and thus $\ln \abs{\caN_{\ep}} = O(\ln m)$ if $m \geq r^k$ and $ m \geq \poly_3(k)$.
+  Denote by
+  \[B_{\z,\z'}(\varepsilon)=\dk{(\x,\x'):\norm{\x-\z}\leq\varepsilon,~\norm{\x'-\z'} \leq \ep,~\x,\x' \in\tilde{B}_R}.\]
+  Then, fixing $\z,\z' \in \mc{N}_\varepsilon$, for any $(\x,\x') \in B_{\z,\z'}(\varepsilon)$, we have
+  \begin{align*}
+    \abs{K_t(\x,\x') - \NTK(\x,\x')}&\leq \abs{ K_t(\x,\x')  - \NTK(\z,\z') } + \abs{\NTK(\z,\z') - \NTK(\x,\x')}.
+  \end{align*}
+  Then, noticing that $K_t = (K_t^{(1)} + K_t^{(2)})/2$, we control the two terms on the right hand side by
+  \cref{cor:Training_Kernel_uniform} and \cref{prop:NTK_Continuity} respectively,
+  deriving that with probability at least $1-\delta/\xk{2|\mathcal{N}_{\varepsilon}|^2}$, for all $t\geq 0$, we have
+  \begin{align*}
+    % & \sup_{t\geq 0}\sup_{(\x,\x')\in B_{\z,\z'}(\varepsilon)} |K_t(\x,\x') - K_t(\z,\z')| = O\Big( m^{-1/12}\sqrt{\ln m}\Big), \\
+    % & \sup_{t\geq 0}\abs{K_t(\z,\z') - K_0(\z,\z')} = O\Big( m^{-1/12}\sqrt{ \ln m}\Big), \\
+    % & \abs{K_0(\z,\z') - \NTK(\z,\z')} = O(m^{-1/5}), \\
+    \begin{gathered}
+      \sup_{(\x,\x')\in B_{\z,\z'}(\varepsilon)} |K_t(\x,\x') - \NTK(\z,\z')| = O\xkm{r^2 m^{-1/12}\sqrt{\ln m}}, \\
+      \abs{\NTK(\z,\z') - \NTK(\x,\x')} = O(r^2\ep^{2^{-L}}) = O(r^2m^{-1}),
+    \end{gathered}
+  \end{align*}
+  if $m\geq C_1\ln\xkm{C_2|\mathcal{N}_{\varepsilon}|^2/\delta}^5$ for some positive absolute constants $C_1>0$ and $C_2\geq 1$.
+  
+  And there also exists a polynomial $\poly_2(\cdot)$ such that when $m\geq\poly_2\xkm{\ln(1/\delta)}$, we have $m\geq C_1\ln\xkm{C_2|\mathcal{N}_{\varepsilon}|^2/\delta}^5$, since $\ln |\mathcal{N}_{\varepsilon}| = O(\ln m)$.
+  Combining these two terms, we have
+  \begin{align*}
+    % \label{eq:Proof_KernelUniform_Ball}
+    \sup_{t \geq 0} \sup_{(\x,\x')\in B_{\z,\z'}(\ep)} \abs{K_t(\x,\x') - \NTK(\x,\x')} = O\xkm{r^2m^{-{1/12}}\sqrt{\ln m}}
+  \end{align*}
+  if $m\geq\poly_2(\ln(1/\delta))$.
+
+  Combining all of the above results and applying the union bound for all pair $\bm{z},\bm{z}'\in\mathcal{N}_\varepsilon$, with probability at least $1-\delta$, we have
+  \begin{align*}
+    \sup_{t\geq 0}\sup_{\x,\x'\in B_r}\abs{ K_{t}(\x,\x') - \NTK(\x,\x') } = O\xkm{r^2 m^{-{1}/{12}}\sqrt{\ln m}}
+  \end{align*}
+  if $m\geq\poly_1\xkm{n,\tilde{M}_{\bm{X}},\norm{\bm{y}}_2,\lambda_0^{-1},\ln(1/\delta)}  + \poly_2(\ln(1/\delta)) + \poly_3(k)$.
+  % with probability at least $1-\delta / \abs{\caN_\ep}^2$ if $m \geq\mathrm{poly}(\ln(4\abs{\caN_\ep}^2 /\delta))$,
+  % which is satisfied for $m \geq\mathrm{poly}(\ln(1 /\delta))$ (with a large constant) since $\ln \abs{\caN_{\ep}} = O(\ln m)$.
+  % Combining these four terms, we have
+  % \begin{align}
+  %   \label{eq:Proof_KernelUniform_Ball}
+  %   \sup_{t \geq 0} \sup_{(\x,\x')\in B_{\z,\z'}(\ep)} \abs{K_t(\x,\x') - \NTK(\x,\x')} = O\left(m^{-\frac{1}{12}}\sqrt{\ln m}\right).
+  % \end{align}
+  % Then, applying the union bound we show that \cref{eq:Proof_KernelUniform_Ball} holds for all pairs $(\z,\z')\in \caN_\ep$ with probability at least $1-\delta$.
+  % Since $\caN_{\ep}$ is an $\ep$-net of $\tilde{B}_R$, such $B_{\z,\z'}(\ep)$'s cover all $\x,\x'\in \tilde{B}_R$.
+  % Consequently, we conclude that \cref{eq:A_KernelUniformConvergence} holds with probability at least $1-2\delta$
+  % as long as $m\geq\mr{poly}\big(n,\lambda_0^{-1},\ln(1/\delta),\norm{\bm{y}}\big)$.
+\end{proof}
+% Similar to in \cite{lai2023_GeneralizationAbility}, we have the corollary:
+% \begin{corollary}
+%   \label{lem:UnifConverge}
+%   Denote $B_r = \dk{x \in \R^d : \norm{x} \leq m^{-1/48}}$.
+%   There exists a polynomial $\mathrm{poly}(\cdot)$ such that
+%   for any $\delta \in (0,1)$,
+%   when $m \geq \mathrm{poly}(n,\tilde{M}_{\bm{X}},\lambda_0^{-1}$, $\norm{\bm{y}},\ln(1/\delta))$,
+%   with probability at least $1-\delta$ with respect to random initialization, we have
+%   \begin{align*}
+%     \sup_{t\geq 0} \sup_{\x \in B_r} \abs{\fNTK(\x) - \fNN(\x)} \leq O(m^{-1/24}\sqrt{\ln m}).
+%   \end{align*}
+% \end{corollary}

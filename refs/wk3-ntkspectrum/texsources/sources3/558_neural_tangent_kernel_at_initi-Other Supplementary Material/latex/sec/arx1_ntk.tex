@@ -1,0 +1,348 @@
+
+\pcdelete{The smallest eigenvalue of the NTK at initialization plays a crucial role including memorization capacity, global convergence of GD, as well as generalization behavior~\citep{SD-JL-HL-LW-XZ:19,CL-LZ-MB:20,ng2021opt,ng2021hermite2,oymak2020hermite,ZJ-MT:19}.}
+\pcdelete{For models with constant depth $L=O(1)$, existing results need $m = \widetilde{\Omega}(n^2)$ for NTK at initialization to be positive definite for smooth activations~\citep{SD-JL-HL-LW-XZ:19}.} 
+In this section, we present a sharper analysis showing that  effectively linear width, i.e., $m=\widetilde{\Omega}(n)$, suffices for smooth activations to ensure the NTK at initialization is positive definite. Our analysis builds on prior work on Hermite series expansion of activation functions~\citep{oymak2020hermite,ng2020hermite1,ng2021hermite2}, which has been however restricted to multi-layer ReLU networks using the homogeneity of ReLU activations. Smooth activations are typically inhomogeneous, so we develop a related but new analysis based on {\em generalized} Hermite polynomials which work for multiple layers of inhomogeneous activations, yielding Theorem~\ref{theo:ntk0}. All detailed proofs are in Section~A of the supplementary material. 
+
+\abcomment{We have not defined $K_{\ntk}$ anywhere. Maybe define it in Section 3, and show how the Jacobian inner product can be written as sum over layerwise kernels --- can borrow this from our old writeup, will also fill up some space :-) And help the reader understand Remark 4.2 maybe }
+%
+\pccomment{I have defined the NTK now.} \abcomment{great}
+%
+\begin{restatable}[\textbf{Linear width on the number of samples $m=\tilde{\Omega}(n)$ suffices for the NTK condition at initialization}]{theo}{theontk}
+Consider Assumptions~\ref{asmp:actinit} and~\ref{asmp:scaling}. Assume that $L=O(1)$, $\phi(0)=0$, and for $l \in [L]$,
+%\begin{align*}
+$$m_{l}  = m = \Omega( n \log n  \log (Ln/\delta))~.$$  
+%\end{align*}
+Let $c_{\phi,\sigma_0} := \E_{z \sim \cN(0,\sigma_0^2)}[\phi^2(z)]$ and $\nu_0^2 := \frac{\sigma_0^2}{c_{\phi,\sigma_0}}$. Then, assuming $w^{(l)}_{0,ij}\sim \cN(0,\nu_0^2)$, $l \in [L]$, with probability at least $1- \delta - \frac{4L}{m}$ over the draw of $\{W_0^{(l)}\}_{l\in[L]}$, we have that the minimum eigenvalue of the NTK at initialization satisfies
+%\begin{align*}
+$$\lambda_{\min}( K_{\ntk}(\cdot ;\theta_0) ) \geq c_0 \lambda_1~,$$
+%\end{align*}
+for a suitable constant $c_0 > 0$ and $\lambda_1 := \lambda_{\min}(\E_{g \sim \cN(\bm{0}_{d},\nu_0^2 \I_{d})
+}[ \phi(\frac{1}{\sqrt{d}} X g) \phi(\frac{1}{\sqrt{d}} X g)^\top])$.
+\label{theo:ntk0}
+\end{restatable}
+
+\lzcomment{State assumption 1 and 2 in theorem?} \abcomment{agreed, best to state the assumptions explicitly}
+%
+\begin{remark}[\textbf{Extending to general depths}] Our results extend to the case of general depth $L$ with essentially no changes in the analysis. For general $L$, the width needs to be relaxed to $m_{l} =m= \Omega( n h_C^4(L) \log n  \log (n/\delta))$ where $h_C(L) = \sum_{i=1}^L \nu_0^{2i}$. Choosing $L = O(1)$ gives Theorem~\ref{theo:ntk0}, and choosing $L = \log \log n$ also yields $m = \widetilde{\Omega}(n)$. 
+More generally, if $\nu_0^2 \leq 1$, $h_C(L) = O(L)$, and the width $m$ has $\text{poly}(L)$ dependence; otherwise an $O(c^{O(L)})$ for some $c > 1$ dependence on $L$ appears similar to \citep{SD-JL-HL-LW-XZ:19}. \qed 
+%Further, choosing $L = \log n$ yields $m_{l} = \Omega( n^2  (\log n)^2  \log (n/\delta))$
+\end{remark}
+%
+%
+\begin{remark}[\textbf{Lower bound for $\lambda_1$ in Theorem~\ref{theo:ntk0}}]
+There are existing approaches in the literature for lower bounding $\lambda_1$ for specific (smooth) activation functions, using suitable (separability) assumptions on the input $X$~\citep{oymak2020hermite,DZ-YC-DZ-QG:20,ng2021hermite2,SD-JL-HL-LW-XZ:19}. To get an informal sense of a couple of such techniques, let $\bar{X}:=\frac{1}{\sqrt{d}}X$ so that rows of $\bar{X}$ satisfy $\|\bar{x}_i\|_2 =1$.
+\begin{enumerate}[(a)]
+    \item If $\lambda_{\min}(\bar{X} \bar{X}^T) > 0$, then the proof analysis of Theorem~\ref{theo:ntk0} can be extended to show $\lambda_1 > 0$, e.g., see Section~A.6, also~\citep{SD-JL-HL-LW-XZ:19}.
+    \item For any unit vector $v$, let $\lambda_1(v) := v^\top \E_g[\phi(\bar{X}g) \phi(\bar{X}g)^\top] v = \E_g[ \| \phi(\bar{X}g)^\top v \|_2^2]$. Note that with $\tilde{g} = \bar{X}g$, \pcedit{to show that $\lambda_1>0$,} it suffices to show $\E_{\tilde{g}}[\langle \phi(\tilde{g}), v \rangle^2] = \E_{Z = \langle \phi(\tilde{g}), v \rangle}[Z^2] > 0$ \pcedit{for any unit vector $v$}, which is violated only if $Z=0$ a.s. \pcedit{This can be proved by using the fact that $g \sim \cN(\bm{0}_{d},\nu_0^2 \I_{d})$}, properties of $\phi$, Markov's inequality, and separability in $X$~\citep{SD-JL-HL-LW-XZ:19,oymak2020hermite,ng2021hermite2}. \pccomment{Please, make sure this paragraph makes sense!}
+\end{enumerate}
+We share additional remarks on $\lambda_1$ in Section~A.6. 
+\pcedit{Finally, we point out that, although our focus is on avoiding distributional assumptions on the data, it is possible to lower bound $\lambda_1$ under such type of assumptions too, e.g.,~\cite[Theorem~3.1]{ng2020hermite1}.}%%proves that $\lambda_1$ can be lower bounded by a positive constant independent of $n$ and $d$.
+%
+%\pccomment{IT would NICE to have $\lambda_1$ with a lower bound not depending on $d$ nor $n$ to make the scaling better, so I just added an extra item on the list! Please, see section 3.3 of~\cite{ng2020hermite1}.}
+\qed 
+\label{rem:lambda1}
+\end{remark}
+
+The proof of Theorem~\ref{theo:ntk0} shown below is relatively standard in the existing literature with the particular exception of the crucial use of a new result we introduce in this paper: Theorem~\ref{theo:mineig}.
+\pcdelete{\pcedit{Notice that Theorem~\ref{theo:ntk0}'s proof crucially depends on using Theorem~\ref{theo:mineig} shown below.}} 
+
+\noindent {\em Proof of Theorem~\ref{theo:ntk0}.}
+Consider that $A^{(l)} \in \R^{n \times m_{l}}$ with $A^{(l)}_{i,:} = \alpha^{(l)}(\x_i)$, $i\in[n]$, is evaluated at the initialization vector $\theta_0$. 
+%
+The corresponding Jacobian of the neural network is
+\begin{align*}
+J = \left[ \frac{\partial A^{(L+1)}}{\partial \vec(W^{(1)})}~,\ldots, ~\frac{\partial A^{(L+1)}}{\partial \vec(W^{(L)})}~, \frac{\partial A^{(L+1)}}{\partial \v} \right]~,
+\end{align*}
+of dimensions $n \times \sum_{l=1}^L m_{l-1} m_l + m_{L+1}$ where $m_0 =d$. Then, the kernel at initialization is
+\begin{align*}
+K_{\ntk}(\cdot ;\theta_0) &= J J^\top \\
+&= \sum_{l=1}^L  \left[ \frac{\partial A^{(L+1)}}{\partial \vec(W^{(1)})}\right] \left[ \frac{\partial A^{(L+1)}}{\partial \vec(W^{(l)})}\right]^\top\\
+&~~~~+\left[\frac{\partial A^{(L+1)}}{\partial \v} \right] \left[ \frac{\partial A^{(L+1)}}{\partial \v}\right]^\top~.
+\end{align*}
+Note that
+\begin{align*}
+\left[\frac{\partial A^{(L+1)}}{\partial \v}\right] \left[  \frac{\partial A^{(L+1)}}{\partial \v}\right]^\top =  \frac{1}{m_L}A^{(L)} (A^{(L)})^\top~.
+\end{align*}
+By chain rule, it can be shown that, for any $l \in [L]$
+\begin{align*}
+\frac{\partial \alpha^{(L+1)}(\x_i)}{\partial \vec(W^{(l)})} &= \frac{1}{\sqrt{m_{l-1}}} \alpha^{(l-1)}(\x_i) D_l\\
+&~~~~\times\left( \prod_{l'=l+1}^L \frac{1}{\sqrt{m_{l'-1}}}  W^{(l')} D_{l'} \right)\frac{1}{\sqrt{m_L}} \v ~. 
+\end{align*}
+where $D_l = \text{diag}(\phi'(\tilde{\alpha}^{(l)})(\x_i)) \in \R^{m_l \times m_l}$ is a diagonal matrix whose $i$th element is the derivative of the activation function evaluated at the $i$th preactivation of layer $l$. Then, in matrix notation
+\begin{multline*}
+\left[ \frac{\partial A^{(L+1)}}{\partial \vec(W^{(l)})} \right] \left[ \frac{\partial A^{(L+1)}}{\partial \vec(W^{(l)})} \right]^\top\\ 
+= \frac{1}{m_{l-1}} A^{(l-1)} (A^{(l-1)})^\top \odot B_l B_l^\top 
+\end{multline*}
+where for $l \in [L]$
+\begin{align}
+B_l & =  D_l \left( \prod_{l'=l+1}^L \frac{1}{\sqrt{m_{l'-1}}}  W^{(l')} D_{l'} \right) \frac{1}{\sqrt{m_L}} \v ~,
+\end{align}
+where $\odot$ is the symbol for the Kronecker product operator. Now, note that in particular, note that 
+%\begin{align*}
+$B_L = \frac{1}{\sqrt{m_{L}}} D_L  \v~$,
+%\end{align*}
+and
+%\begin{align*}
+$B_{L-1} = \frac{1}{\sqrt{m_{L-1} m_{L}}} D_{L-1} W^{(L)} D_L \v$. 
+%\end{align*}
+As a result, 
+\begin{align*}
+JJ^\top & = \sum_{l=1}^L \frac{1}{m_{l-1}} A^{(l-1)} (A^{(l-1)})^\top \odot B_l B_l^\top\\
+&~~~~+ \frac{1}{m_L} A^{(L)} (A^{(L)})^\top~.
+\end{align*}
+From the Schur product theorem~ (e.g., see~\cite[Lemma 6.5]{oymak2020hermite},\cite[Theorem~3.2]{QN-PB-MM:21}), for positive semi-definite (PSD) matrices $P,Q \in \R^{n \times n}$, it holds that $\lambda_{\min}(P \odot Q) \geq \lambda_{\min}(P) \min_{i \in [n]} Q_{ii}$. Then,
+\begin{multline*}
+\lambda_{\min}(JJ^\top) \geq \sum_{l=1}^L \frac{1}{m_{l-1}} \lambda_{\min}\left(A^{(l-1)} (A^{(l-1)})^\top\right)\\
+\times\min_{i \in [n]} \| (B_l)_{i,:}\|_2^2 + \frac{1}{m_L} \lambda_{\min}\left(A^{(L)} (A^{(L)})^\top\right)~,
+\end{multline*}
+where the first inequality follows from the fact that the minimum eigenvalue of the sum of PSD matrices is lower bounded by the sum of the minimum eigenvalues of the matrices themselves. To lower bound $\lambda_{\min}(JJ^\top)$, because $A^{(l)} (A^{(l)})^\top$, $l\in[K]$, are positive semi-definite, it suffices to lower bound $\lambda_{\min}\left(A^{(L)} (A^{(L)})^\top\right)$. Following Theorem~\ref{theo:mineig} and taking $m_l = m, l \in [L]$, with probability at least $1-\delta - \frac{4L}{m}$, we have $\lambda_{\min}\left(A^{(L)} (A^{(L)})^\top\right) \geq c_0 m \lambda_1$, where $c_0 = \max_{r > 1} c_0^{(L-1,r)}$ and $c_0^{(l,r)}$ is as in Theorem~\ref{theo:mineig}. Plugging this back,
+\begin{multline*}
+\lambda_{\min}(K_{ntk}(\cdot ;\theta_0)) = \lambda_{\min}(JJ^\top)\\\geq \frac{1}{m} \lambda_{\min}\left(A^{(L)} (A^{(L)})^\top\right)\geq c_0 \lambda_1~,
+\end{multline*}
+with probability at least $1-\delta - \frac{4L}{m}$. This completes the proof. \qed
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\pcdelete{
+\pcedit{In Section~A, we show that $\lambda_{\min}( K_{\ntk}(\cdot ;\theta_0))\geq \frac{1}{m_L} \lambda_{\min}\left(A^{(L)} (A^{(L)})^\top\right) \geq c_0 \lambda_1$, and thus, in order to prove Theorem~\ref{theo:ntk0}, it suffices to find the right lower bound for $\lambda_{\min}( A^{(L)} (A^{(L)})^\top )$. We accomplish this by proving the following slightly more general result in Theorem~\ref{theo:mineig} below. 
+%However, before introducing this theorem, we introduce the important concept of generalized Hermite polynomials.
+} \abcomment{Please bring this part in the main paper, perhaps in Section 3, see my earlier comment}
+%
+\abcomment{give some context before the definition, this is a bit abrupt}}
+%
+
+\begin{remark}[\textbf{About initialiazing the last layer weight}]
+Notice that the result in Theorem~\ref{theo:ntk0} is independent on how we initialize the weights $\v$ of the last layer in the neural network. \pcedit{This follows from the fact that $\lambda_{\min}( K_{\ntk}(\cdot ;\theta_0))\geq \frac{1}{m_L} \lambda_{\min}\left(A^{(L)} (A^{(L)})^\top\right)$ from the proof of Theorem~\ref{theo:ntk0}.}\qed
+\label{rem:last_layer}
+\end{remark}
+%
+%\pcdelete{
+%\pcedit{As seen in the sketch proof of Theorem~\ref{theo:ntk0}, $\lambda_{\min}( K_{\ntk}(\cdot ;\theta_0))\geq \frac{1}{m_L} \lambda_{\min}\left(A^{(L)} (A^{(L)})^\top\right)$, and thus, in order to prove the theorem, it suffices to find the right lower bound for $\lambda_{\min}( A^{(L)} (A^{(L)})^\top )$. We accomplish this by proving the following slightly more general result in Theorem~\ref{theo:mineig} below.}}
+
+\abdelete{\pcedit{The outline of Theorem~\ref{theo:ntk0}'s proof is relatively standard in the existing literature with the particular exception of its crucial use of Theorem~\ref{theo:mineig}, which we introduce next.}} \abcomment{moved the content uup, before Theorem 4.1}
+\pcdelete{\pcedit{Notice that Theorem~\ref{theo:ntk0}'s proof crucially depends on using Theorem~\ref{theo:mineig} shown below.}} 
+
+\abedit{Next we focus our attention on Theorem~\ref{theo:mineig}, the main new result for smooth activations. The proof borrows ideas from existing related proofs for ReLU networks, however differs in an important way by handling inhomogeneity of smooth activations using {\em generalized} Hermite series expansions.}
+
+%
+\begin{restatable}[\textbf{Bound on the minimum eigenvalue of activation matrices}]{theo}{mineig}
+Consider Assumptions~\ref{asmp:actinit} and~\ref{asmp:scaling}. Assume that $L=O(1)$,  $\phi(0)=0$, and for $l \in [L]$, 
+%\begin{align*}
+$m_{l}  = m = \Omega( n \log n  \log (Ln/\delta))$.  
+%\end{align*}
+Let $c_{\phi,\sigma_0} := \E_{z \sim \cN(0,\sigma_0^2)}[\phi^2(z)]$ and $\nu_0^2 := \frac{\sigma_0^2}{c_{\phi,\sigma_0}}$. Then, assuming $w^{(l)}_{0,ij} \sim \cN(0,\nu_0^2), l \in [L]$, with probability at least $1- \delta - \frac{4L}{m}$, uniformly over $l \in [L]$ over the draw of $\{W_0^{(l)}\}_{l\in[L]}$, for any integer $r > 1$ we have
+\begin{align*}
+\lambda_{\min}( A^{(l)} (A^{(l)})^\top ) \geq c_0^{(l-1,r)} m_l \lambda_1~,
+\end{align*}
+where $c_0^{(l-1,r)}$ is a positive constant and $\lambda_1 = \lambda_{\min}(\E_{g \sim
+\cN(\bm{0}_{d},\nu^2_0 \I_{d})
+}[ \phi(\frac{1}{\sqrt{d}} X g) \phi(\frac{1}{\sqrt{d}} X g)^\top])$. 
+\pcedit{Specifically, letting} $c_{l,i} = \frac{\| \alpha^{(l)}(x_i) \|_2}{\sqrt{m_l}}$ and $(\mu_{r,0}^{(l)})^2 = \min_{i \in [n]} \left( \mu_r^{[c_{l,i}^2 \sigma^2]} (\phi) \right)^2$ \pcedit{for any integer $r > 1$ \pccomment{It seems the generalized Hermite series expansion are defined even for $r=0$, may need to double check.} and $l \in \{0,1,\ldots,L\}$, we have that}  
+%\begin{align*}
+$c_0^{(l,r)} = \left( \frac{(\mu_{r,0}^{(l)})^2}{6 c_{\phi,\sigma_0}} \right)^l \left( \frac{\sigma_0^2}{2} \right)^{3rl}$, \pcedit{where $\mu_r^{[c_{l,i}^2 \sigma^2]} (\phi)$ is the  $(c_{l,i}^2 \sigma^2)$-th generalized Hermite coefficient corresponding to the generalized Hermite series expansion of $\phi$. 
+%w.r.t.~$H_r^{[c_{l,i}^2 \sigma^2]}$.
+}
+%\end{align*}
+%Let $\mu_r^{[q]}(\phi)$, $q>0$, be the $r$-th generalized Hermite coefficient corresponding to the generalized Hermite series expansion  of $\phi$ w.r.t.~$H_r^{[q]}$. Let 
+%
+\label{theo:mineig}
+\end{restatable}
+
+\pccomment{Arindam, we need to make a comment about the conditions that guarantees the existence of a generalized Hermitian series expansion.}
+
+\begin{remark}[\textbf{The use of generalized Hermite polynomials}]
+A key unique feature of our result and proof is the use of {\em generalized} Hermite coefficients, instead of standard Hermite coefficients in prior work~\citep{oymak2020hermite,ng2020hermite1,ng2021hermite2}. Since smooth activations are typically inhomogeneous, generalized Hermite coefficients help handle multiple layers of inhomogeneous activations which seems difficult with standard Hermite coefficients. Further, our proof technique, based on Hermite expansions, is different from prior related work on smooth activations~\citep{SD-JL-HL-LW-XZ:19} and leads to a sharper sample dependence~\pcedit{$\tilde{\Omega}(n)$ instead of $\tilde{\Omega}(n^2)$}. 
+%We provide a self-contained gentle exposition to generalized Hermite expansions in Section~\ref{ssec:ghermite}. 
+\qed 
+\end{remark}
+
+\begin{definition}[\textbf{Generalized Hermite series expansion}]
+For a given positive number $a \in\R_{++}$, \abcomment{mixing up $a$ and $q$, lets use $a$ consistently} we define the normalized \emph{generalized Hermite polynomials} by \begin{equation}
+H^{[a]}_r(x)=\frac{(-1)^r}{\sqrt{r!}}e^{\frac{x^2}{2a}}\frac{d^r}{dx^r}e^{-\frac{x^2}{2a}}~, ~~~ r=0,1,\dots~. 
+\end{equation}
+For any function $g:\R\to\R$ such that $\int^{+\infty}_{-\infty}g^2(x)\frac{e^{\frac{-x^2}{2a}}}{\sqrt{2\pi a}}<\infty$, we define the \emph{$r$-th generalized Hermite coefficient} by \begin{equation}
+\mu_r^{[a]}(g)=\int^{+\infty}_{-\infty}g(x)H^{[a]}_r(x) dx~. 
+\end{equation}
+Finally, we define the \emph{generalized Hermite series expansion} of $g$ with respect to $H^{[q]}_r$ by 
+\begin{equation}
+g(x)=\sum^{\infty}_{r=0}\mu^{[a]}_r(g)H^{[a]}_r(x)~.
+\end{equation}
+\end{definition}
+
+%
+\abcomment{Again, lets give a bit of context before stating the Theorem. Maybe we can move Definition 4.1 down, after the theorem statement and maybe after Remark 4.4}\pccomment{Done!}
+
+\begin{remark}
+Since they are used in Theorem~\ref{theo:mineig}, we provide a self-contained gentle introduction to Hermite Polynomials and Hermite Series Expansions in Section~A.4.\qed
+\end{remark}
+
+We present the proof of Theorem~\ref{theo:mineig}, all missing proofs of auxiliary results are in the supplementary material.
+
+\noindent {\em Proof of Theorem~\ref{theo:mineig}.} There are three key parts to the proof: 
+\begin{enumerate}[(a)]
+\item showing that under suitable conditions such as a requirement on the width of the network, the minimum eigenvalue of $A^{(l)} (A^{(l)})^\top$ for a model with width $\tilde{\Omega}(n)$ can be lower bounded by a constant scaled version of the minimum eigenvalue of the expectation $\E_{W_0^{(l)}}[A^{(l)} (A^{(l)})^\top]$ with high-probability, i.e., a matrix concentration result; 
+\item establishing suitable upper and lower bounds for $\| \alpha^{(l)}\|_2^2$, in particular $\| \alpha^{(l)}\|_2^2 = \Theta(m_l)$ with high probability, which let us further simplify the sufficient conditions for the matrix concentration result in (a) above.
+%and also helps lower bounding the minimum eigenvalue of the expectation $\E[A^{(l)} (A^{(l)})^\top]$ in (c) below; and 
+\item lower bounding the minimum eigenvalue of the expectation $\E_{W_0^{(l)}}[A^{(l)} (A^{(l)})^\top]$ using generalized Hermite series expansion to handle multiple layers of inhomogenous activations and using the lower bounds on $\| \alpha^{(l)}\|_2^2$ as in (b) above. 
+\end{enumerate}
+Next we get into the details of each of these results.
+
+\noindent {\bf (a) Matrix Concentration.} Note that by construction $A^{(l)} = \phi( \frac{1}{\sqrt{m_{l-1}}} A^{(l-1)} (W_0^{(l)})^\top) \in \R^{n \times m_l}$, where $W_0^{(l)} \in \R^{m_{l} \times m_{l-1}}$, $w_{0,ij}^{(l)} \sim \cN(0,\nu_0^2)$ with $\nu_0^2 = \frac{\sigma_0^2}{c_{\phi,\sigma_0}}$. Through a matrix concentration bound, the minimum eigenvalue of $A^{l} (A^{l})^\top$ can be lower bounded by that of $\E_{W_0^{(l)}}[A^{(l)} (A^{(l)})^\top]$ with high probability, as shown in Lemma~\ref{lemm:highproblambda}, whose proof is in Section~A.1 of the supplementary material.
+
+\begin{restatable}[{\bf Matrix Concentration}]{lemm}{highproblambda}
+Let $A^{(l)} = \phi( \frac{1}{\sqrt{m_{l-1}}} A^{(l-1)} (W_0^{(l)})^\top) \in \R^{n \times m_l}$, where $W_0^{(l)} \in \R^{m_{l} \times m_{l-1}}$ and $w_{0,ij}^{(l)} \sim \cN(0,\sigma^2)$. Let
+\begin{multline}
+\lambda_l := \\\lambda_{\min}\left(  \E_{g \sim \cN(\bm{0}_{m_{l-1}},\sigma^2 \I_{m_{l-1}})}
+\left[ \phi \left( \frac{1}{\sqrt{m_{l-1}}} A^{(l-1)} g \right)\right.\right.\\ 
+\left.\left. \times\phi\left( \frac{1}{\sqrt{m_{l-1}}} A^{(l-1)} g \right)^\top \right] \right) ~,
+\label{eq:lambda_l}
+\end{multline}
+and
+%\begin{align}
+$m_{l} \geq \max ( n, c_2 v \max\big(1, \log(15 v)\big) \log (Ln/\delta) )$,
+%\end{align}
+where $v := \frac{2(\sqrt{\log n}+1)^2 \sigma^2 \| A^{(l-1)}\|_F^2}{c_3 \lambda_l m_{l-1}}$, and $c_2, c_3$ are absolute constants. Then, with probability at least $(1-\frac{\delta}{L})$ over the draw of $W^{(l)}_0$, we have 
+\begin{equation}
+\label{eq:lambda_min_A}
+\lambda_{\min}( A^{(l)} (A^{(l)})^\top ) \geq \frac{m_{l} \lambda_l}{4}.
+\end{equation}
+\label{lemm:highproblambda}
+\end{restatable}
+Then, in order to choose $m_l$, $l\in[L]$, appropriately for~\eqref{eq:lambda_min_A}, it suffices to upper bound $\| A^{(l-1)} \|_F^2$ and lower bound $\lambda_l$ for $\sigma^2 = \nu_0^2 = \frac{\sigma_0^2}{c_{\phi,\sigma_0}}$ in~\eqref{eq:lambda_l}.
+
+\noindent {\bf (b) Bounding $\|A^{(l)}\|_F^2$.} To bound the squared Frobenius norm $\| A^{(l)} \|_F^2$, we focus on bounding the $L_2$-norm of each row of $A^{(l)}$ and show that $\|\alpha^l(\x_i)\|_2^2 = \Theta(m_l)$, $i\in[n]$. In Lemma~\ref{lemm:alphainit1} below, whose proof is in Section~A.2 of the supplementary material, we show that the bound holds uniformly over the dataset $\{\x_i, i\in [n]\}$ with high probability.
+%
+\begin{restatable}[{\bf Bounding $\|\alpha^{(l)}\|_2^2$}]{lemm}{alphainit}
+Let $\{\alpha^{(l)}(\x_i) \in \R^{m_l}, i \in [n]\}$ be the set of outputs at layer $l$ at initialization for the set of inputs $\{ \x_i, i \in [n]\}$. Let $c_{\phi, \sigma_0} := \E_{z \sim \cN(0,\sigma_0^2)}[\phi^2(z)]$, $\nu_0^2 := \frac{\sigma_0^2}{c_{\phi,\sigma_0}}$, and $h_C(l) := \sum_{i=0}^l \nu_0^{2i}$. Let the depth $L$ be such that $\max\left(\frac{8h_C^2(L)}{c_{\phi,\sigma_0}^2} , \frac{4 h_C(L)}{c_{\phi,\sigma_0}} \right) \leq \sqrt{m_l}, l \in [L]$. Assuming the elements of $W_0^{(l)}, l \in [L]$ are drawn i.i.d.~from $\cN(0,\nu_0^2)$, with probability at least $1 - 2n\sum^L_{l=1}\frac{1}{m_l^2}$ over the draw of $\{W^{(l')}_0, l'\in [L] \}$, uniformly over $l \in [L]$ and $i \in [n]$, we have 
+\begin{multline*}
+\frac{c_{\phi,\sigma_0}}{2} m_l \leq c_{\phi,\sigma_0}\left(1 -  \frac{h_C(l)}{2h_C(L)}\right) m_l \\ \leq  \| \alpha^{(l)}(x_i) \|_2^2 \leq c_{\phi,\sigma_0} \left(1 + \frac{h_C(l)}{2h_C(L)}\right) m_l \leq \frac{3 c_{\phi,\sigma_0}}{2} m_l~.
+\end{multline*}
+\label{lemm:alphainit1}
+\end{restatable}
+As a result, by union bound, with probability at least $(1 - 2n\sum_{l=1}^L\frac{1}{m_l^2}) \geq (1 - 2\sum_{l=1}^L\frac{1}{m_l})$ for $m_l \geq n$,
+%
+%$(1 - \frac{2nL}{m^2}) \geq (1 - \frac{2L}{m})$ for $m \geq n$,
+%
+uniformly over $l \in [L]$, we have 
+%\begin{align}
+$\| A^{(l)} \|_F^2 = \sum_{i=1}^n \| \alpha_i^{(l)}(\x_i)\|_2^2 \leq \frac{3 c_{\phi,\sigma_0}}{2}n m_{l}$.
+%\label{eq:frobupper0}
+%\end{align}
+%\abcomment{for simplicity, assuming $\phi(0) =0$, satisfied by almost all activation functions folks use}
+Then, under the assumption $m_l=m$, taking  $\sigma^2=\nu_0^2 = \frac{\sigma_0^2}{c_{\phi,\sigma_0}}$ in Lemma~\ref{lemm:highproblambda}, we have $v \leq c_2 \frac{\sigma_0^2 n \log n}{\lambda_l}$, for some constant $c_2>0$. 
+%\pccomment{This bound holds if $\log n\geq 1$, which makes sense since typically $n\geq 3$; I guess we shouldn't care much about this.} 
+For $L =O(1)$, $h_C^4(L) = O(1) \leq m$. As a result, for $l \in [L]$, it suffices to have
+\begin{equation}
+\begin{aligned}
+m  &\geq \max\left( n ~,~ c_2 \frac{\sigma_0^2 n \log n}{\lambda_l}\right.\\ &\left.\qquad\qquad\times\max\left(1, \log \left( c_3 \frac{\sigma_0^2 n \log n}{\lambda_l} \right) \right) \log \frac{Ln}{\delta}  \right)\\ %\nonumber \\
+&\overset{(a)}{=} \tilde{\Omega}(n)~,
+\label{eq:m_l_lowerbound}
+\end{aligned}
+\end{equation}
+where (a) holds as long as $\lambda_l = \Omega(1)$, which is the case with high probability as we show next.
+%Thus, in terms of the dependence on the sample size $n$, $m = \tilde{\Omega}(n)$ suffices.
+
+%\abedit{... this should follow by standard analysis, including our results in Section 3, and Lemma C.1 in [NMM21], although we want to (and should be able to) drop the $-\exp(-\Omega(d))$ term in the 'bad probability' part of their result.}
+
+\noindent {\bf (c) Lower Bounding $\lambda_l$.} Next, we focus on lower bounding $\lambda_l$ \pcedit{(defined in equation~\eqref{eq:lambda_l}), for which we obtain the lemma below, whose proof is in Section~A.3 of the supplementary material.}
+%\abcomment{result below needs a bit of work}
+
+\begin{restatable}{lemm}{lambdahermite}
+Consider the same setting and assumptions as in Lemma~\ref{lemm:alphainit1}.
+%Let $c_{\phi,\sigma_0} := \E_{z \sim cN(0,\sigma_0^2)}[\phi^2(z)]$ and $\nu_0^2 := \frac{\sigma_0^2}{c_{\phi,\sigma_0}}$. 
+Let $\mu_r^{[q]}(\phi), q>0$ be the $r$-th generalized Hermite coefficient corresponding to the generalized Hermite series expansion of $\phi$ w.r.t.~$H_r^{[q]}$. Let $c_{l,i} = \frac{\norm{ \alpha^{(l)}(\x_i)}_2}{\sqrt{m_l}}$ and $(\mu_{r,0}^{(l)})^2 = \min_{i \in [n]} \left( \mu_r^{[c_{l,i}^2 \nu_0^2]} (\phi) \right)^2$. For any integer $r > 0$, with probability at least $1-2n\sum^L_{l=1}\frac{1}{m_l}$, uniformly over $l \in [L]$ we have
+\begin{align*}
+\lambda_{l+1}&=\lambda_{\min}\left(  \E_{g \sim \cN(\bm{0}_{m_{l}},\nu_0^2 \I_{m_{l}})
+}\left[ \phi\left( \frac{1}{\sqrt{m_{l}}} A^{(l)} g \right) \right.\right.\\
+&\qquad\qquad \left.\left.\times\phi\left( \frac{1}{\sqrt{m_{l}}} (A^{(l)} g)^\top\right) \right] \right) \\
+%& \geq \left( \mu_r^{[\nu_0^2]}(\phi) \right)^2 \frac{\nu_0^{6r}c_{l}^{2r}}{m_{l}^r} \lambda_{\min}( {A^{(l)}}^{\star r} ({A^{(l)}}^{\star r})^\top  ) \\
+&\geq \left( \frac{(\mu_{r,0}^{(l)})^2}{6 c_{\phi,\sigma_0}} \right)^l \left( \frac{\sigma_0^2}{2} \right)^{3rl} \lambda_{1} ~,
+\end{align*}
+with $\lambda_1 = \lambda_{\min}(\E_{g \sim
+\cN(\bm{0}_{d},\nu_0^2 \I_{d})
+}[ \phi(\frac{1}{\sqrt{d}} X g) \phi(\frac{1}{\sqrt{d}} X g)^\top])$.
+%where $\bar{A}_{l}_{(i,:)} = \| A_{l}_{(i,:)} \|_2 A_{l}_{(i,:)}$. \abcomment{the $\bar{A}$ bit can be simplified based on lower bounds on the row norms}
+\label{lemm:lambdahermite}
+\end{restatable}
+
+\pcdelete{In the proof of Lemma~\ref{lemm:lambdahermite} --- found in Section~A.3 --- we show that $\lambda_l$ can be first lower bounded in terms of the minimum eigenvalue of the inner product of matrices  ${A^{(l-1)}}^{\star r}$, whose rows are the row-wise Kronecker products of the rows of $A^{(l-1)}$~\citep{oymak2020hermite,ng2020hermite1,ng2021hermite2}, along with some products proceeding from an analysis based on generalized Hermite series expansions.}
+
+\pcedit{Finally, we have
+$$
+\lambda_{\min}(A^{(l)} (A^{(l)})^\top ) \overset{(a)}{\geq} \frac{m}{4} \lambda_l \overset{(b)}{\geq} c_0^{(l-1,r)} m \lambda_1~,
+$$
+where (a) follows from Lemma~\ref{lemm:highproblambda}, (b) from Lemma~\ref{lemm:lambdahermite} with $c_0^{(l,r)} = \left( \frac{(\mu_{r,0}^{(l)})^2}{6 c_{\phi,\sigma_0}} \right)^l \left( \frac{\sigma_0^2}{2} \right)^{3rl}$. 
+As a result of a union bound, this expression, which holds for every $l\in[L]$ according to Lemma~\ref{lemm:highproblambda} and Lemma~\ref{lemm:lambdahermite}, holds with probability at least $1-\delta - \frac{4L}{m}$. Lemma~\ref{lemm:lambdahermite} } also implies that~\eqref{eq:m_l_lowerbound} holds. This completes the proof for Theorem~\ref{theo:mineig}. \qed 
+
+\begin{remark}[\textbf{Regarding our proof techniques}]
+The proof technique \pcedit{used for Theorem~\ref{theo:mineig}} is general and quite different from influential prior work on multi-layer feedforward networks with smooth activations~\citep{SD-JL-HL-LW-XZ:19}. Indeed, our approach works for multiple layers of inhomogeneous smooth activation functions unlike prior work using basic Hermite expansions for homogenous activations especially ReLU~\citep{ng2020hermite1,ng2021hermite2}. To the best of our knowledge, our work represents the first use of generalized Hermite polynomials in such context. For the activation function $\phi$, we assume $\phi(0)=0$ for simplicity; however, this can be relaxed similar to \pcedit{the analysis done in~\citep[Section~4]{AB-PCV-LZ-MB:22} for the derivation of the Hessian bound with an explicit dependence on $\phi(0)$.} \qed 
+\end{remark}
+
+%\subsection{THE HESSIAN BOUND AND THE NTK CONDITION AT INITIALIZATION}
+
+\section{THE IMPORTANCE OF INITIALIZATION VARIANCE}
+\label{sec:discuss-inivar}
+
+\abcomment{having only one subsection to a section is odd, maybe make it a new Discussion section, where we can discuss this aspect. Also, a bit more thhought needs to be puut into this, especially the dependence on $c_{\phi,\sigma_0}$ and whhether it is $< 1$ for common activatiion functions}
+
+\pcedit{Let us define the following type of ball over parameters.}
+%
+\begin{defn}[\textbf{Spectral ball}]
+Given $\overline{\theta}\in\R^p$ of the form~\eqref{eq:theta_def} with parameters $\overline{W}^{(l)}, l \in [L], \overline{\v}$ and
+with $\| \cdot \|_2$ denoting spectral norm for matrices and $L_2$-norm for vectors, we define
+\begin{multline}
+B_{\rho, \rho_1}^{\spec}(\bar{\theta})  := \{ \theta \in \R^p ~\text{as in \eqref{eq:theta_def}} ~\mid \| W^{(\ell)} - \overline{W}^{(\ell)} \|_2 \leq \rho,\nonumber \\
+ \ell \in [L], \| \v - \bar{\v} \|_2 \leq \rho_1 \}~.\label{eq:specball} 
+\end{multline}
+\end{defn}
+
+\begin{restatable}[\textbf{Hessian Spectral Norm Bound}]{prop}{boundhess}
+\label{theo:bound-Hess}
+Consider Assumptions~\ref{asmp:actinit} and~\ref{asmp:scaling}, and that the elements of $W_0^{(l)}$, $l\in[L]$, are drawn i.i.d from $\cN(0,\nu_0^2)$, where $\nu_0^2 = \frac{\sigma_0^2}{c_{\phi,\sigma_0}}$ with $c_{\phi,\sigma_0} := \E_{z \sim \cN(0,\sigma_0^2)}[\phi^2(z)]$ \abdelete{$\sigma_0 = \frac{\sigma_1}{2\left(1 + \frac{2\sqrt{\log m}}{\sqrt{m}}\right)}, \sigma_1 > 0$}, and $\v_0$ is a random unit vector with $\norm{\v_0}_2=1$. Then, for $\theta \in B_{\rho,\rho_1}^{\spec}(\theta_0)$, 
+%$\rho_1=O(1)$ or 
+%$\rho_1=O(\poly(L))$,  
+with probability at least $1-\frac{2(L+1)}{m}$, we have 
+\begin{equation}
+\label{eq:bound_Hessian}
+   \max_{i \in [n]} ~\norm{ \nabla^2_\theta f(\theta;\x_i)}_2 \leq \frac{c_H}{\sqrt{m}}~,
+\end{equation}
+with $c_H = O(\poly(L)(1+\gamma^{2L})\pcedit{(1+\rho_1)})$ \pcedit{where 
+$\gamma := \frac{\rho}{\sqrt{m}} + 4\nu_0$.}
+%$\gamma := \frac{\rho}{\sqrt{m}} + 2\nu_0 \left(1 + \frac{\sqrt{\log m}}{\sqrt{2 m}} \right) $. 
+\end{restatable}
+%
+\proof The proof follows by a direct extension of~\citep[Theorem~4.1]{AB-PCV-LZ-MB:22}. \pcedit{Indeed, the original result in~\citep[Theorem~4.1]{AB-PCV-LZ-MB:22} can be stated as $\max_{i \in [n]} ~\norm{ \nabla^2_\theta f(\theta;\x_i)}_2 \leq \frac{\tilde{c}_H}{\sqrt{m}}$, with $\tilde{c}_H = O(\poly(L)(1+\tilde{\gamma}^{2L})(1+\rho_1))$ where 
+$\tilde{\gamma} := \frac{\rho}{\sqrt{m}} + 2\nu_0 \left(1 + \frac{\sqrt{\log m}}{\sqrt{2 m}} \right)$. We obtain~\eqref{eq:bound_Hessian} by upper bounding $\tilde{\gamma}\leq \frac{\rho}{\sqrt{m}} + 4\nu_0$ due to $\frac{\sqrt{\log m}}{\sqrt{2 m}}\leq \frac{1}{\sqrt{2}}\leq 1$. Then $\tilde{c}_H\leq c_H$ since $L\geq 1$.}  %  
+\qed 
+
+{\par \textbf{A trade-off between the Hessian bound and the NTK condition at initialization.}}
+%\label{rem:sigma_0}
+Smaller initial variance $\sigma_0^2$, based on $\sigma_1 \leq 1$ has a desirable effect on the Hessian bound, e.g., $c_H$ in Theorem~\ref{theo:bound-Hess} has a $\poly(L)$ dependence \pcedit{(see Theorem~\ref{theo:bound-Hess}) and thus is beneficial for the restricted strong convexity condition for geometric convergence in gradient descent~\citep{AB-PCV-LZ-MB:22}.} However $\sigma_1 \leq 1$ implies $\sigma_0^2 \leq \frac{1}{4}$, which may affect (exponentially decrease) the constant $c_0^{(l,r)}$ in Theorem~\ref{theo:mineig} \pcedit{and thus likewise decrease the minimum eigenvalue of the NTK since $c_0=\max_{r>1}c_0^{(L-1,r)}$ in Theorem~\ref{theo:ntk0}}. The subtlety here is that the dependence of $c_0^{(l,r)}$ on $\sigma_0^2$ is complex, involving both $c_{\phi,\sigma_0}$ and Hermite coefficient terms.  %The issue is mute for $L=O(1)$, but may present a tradeoff for large $L$.
+\pcedit{This trade-off effect is not pronounced for small $L$, e.g., $L = O(1)$ or even $L = O(\log n)$. For general (large) $L$, the trade-off may be present since it would take $m$ growing as $c^{O(L)}, c>1$ to neutralize it.}
+
+\pcedit{The motivation for studying this trade-off is as follows: for homogeneous activation functions (like ReLU), the effect of the choice for the initialization variance $\sigma_0^2$ is well understood~\citep{ZAZ-YL-ZS:19}; however, such understanding is currently limited for smooth activation functions. Our discussion on the trade-off acknowledges the fact that the choice of the variance may imply whether the NTK based analysis~\citep{CL-LZ-MB:21} or RSC based analysis~\citep{AB-PCV-LZ-MB:22} is more appropriate to understand the optimization behavior with smooth activations.}

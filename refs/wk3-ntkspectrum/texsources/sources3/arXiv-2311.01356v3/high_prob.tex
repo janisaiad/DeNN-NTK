@@ -1,0 +1,35 @@
+
+
+\section{A proposition for deriving high-probability results}
+This appendix contains a folklore proposition which is needed for proving the high-probability results derived in the present paper. For the sake of completeness, we decided to include a proof of this proposition in the present paper. It states the following:
+\begin{proposition} \label{prop:highprob}
+Let $(\Omega, \mathscr{A}, \PP)$ be a probability space, $(\Omega_1, \mathscr{A}_1)$ and $(\Omega_2, \mathscr{A}_2)$ two measurable spaces and $X: \Omega \to \Omega_1$, $Y: \Omega \to \Omega_2$ two stochastically independent random variables. Moreover, let $A \subseteq \Omega_1 \times \Omega_2$ be measurable (with respect to the product-sigma-algebra $\mathscr{A}_1 \otimes \mathscr{A}_2$), for every $x \in \Omega_1$ let some $A_2(x) \in \mathscr{A}_2$ be given and let $A_1 \in \mathscr{A}_1$. Finally, assume that 
+\begin{equation} \label{eq:implic}
+\forall \ (x,y) \in \Omega_1 \times \Omega_2: \quad x \in A_1, \ y \in A_2(x) \quad \Longrightarrow \quad (x,y) \in A.
+\end{equation}
+Then it holds
+\begin{equation*}
+\PP((X,Y) \in A) \geq \PP^{X} \left(A_1\right)\cdot \underset{x \in A_1}{\inf} \PP^{Y} \left(A_2(x)\right).
+\end{equation*}
+\end{proposition}
+
+\begin{proof}
+The condition \eqref{eq:implic} can be translated to
+\begin{equation*}
+\mathbbm{1}_{A}(x,y) \geq \mathbbm{1}_{A_1}(x) \cdot \mathbbm{1}_{A_2(x)}(y)
+\end{equation*}
+for every $(x,y) \in \Omega_1 \times \Omega_2$. Note that due to the stochastical independence of $X$ and $Y$ it holds $\PP^{(X,Y)} = \PP^X \otimes \PP^Y$. Applying Tonelli's theorem, we get
+\begin{align} \label{eq:fubini_appl}
+\PP((X,Y) \in A) &= \int_{\Omega_1 \times \Omega_2} \mathbbm{1}_A (x,y) \ \dd \PP^{(X,Y)}(x,y) = \int_{\Omega_1} \int_{\Omega_2} \mathbbm{1}_A(x,y) \ \dd \PP^Y(y) \ \dd \PP^X(x).
+\end{align}
+For fixed $x \in \Omega_1$ we get
+\begin{align*}
+\int_{\Omega_2} \mathbbm{1}_A(x,y) \ \dd \PP^Y(y) &\geq \mathbbm{1}_{A_1}(x)\int_{\Omega_2} \mathbbm{1}_{A_2(x)}(y) \ \dd \PP^Y(y) = \begin{cases} \PP^Y (A_2(x)),& x \in A_1, \\0,& x \notin A_1,\end{cases} \\
+&\geq \mathbbm{1}_{A_1}(x) \cdot \underset{x \in A_1}{\inf} \PP^Y (A_2(x)).
+\end{align*}
+Inserting this into \eqref{eq:fubini_appl} yields
+\begin{align*}
+\PP((X,Y) \in A) \geq \int_{\Omega_1}\mathbbm{1}_{A_1}(x) \cdot \underset{x \in A_1}{\inf} \PP^Y (A_2(x)) \ \dd \PP^X(x) = \PP^{X} \left(A_1\right) \cdot \underset{x \in A_1}{\inf} \PP^{Y} \left(A_2(x)\right),
+\end{align*}
+as was to be shown.
+\end{proof}
