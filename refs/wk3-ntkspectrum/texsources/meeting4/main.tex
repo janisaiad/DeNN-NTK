@@ -116,61 +116,6 @@ where $k(x,y)$ is the same NTK kernel.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Matrix Spectrum Results}
-\begin{itemize}
-\item \textbf{Condition Number:}
-  \[ \kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l) \]
-  Grows linearly with data size $n$, improves with depth $l$
-
-\item \textbf{Eigenvalue Distribution:}
-  \[ \lambda_{\text{min}} \sim \frac{3l}{4}, \quad \lambda_{\text{max}} \sim \frac{3nl}{4} \pm \xi \text{ where } \xi \sim \log(l) \]
-  Minimum scales linearly with depth, maximum scales with both depth and data size
-
-What dictate the training is the NTK matrix eigenvalues.
-
-\item \textbf{Applicability:} Valid for all Leaky ReLU activation functions
-\end{itemize}
-
-\textbf{Key Takeaway:} Deeper networks ($l \uparrow$) improve conditioning but with diminishing returns
-\end{frame}
-
-\begin{frame}{NTK-Sobolev Operator}
-    \begin{center}
-    \begin{tikzpicture}[scale=1.2]
-        % Draw the main boxes
-        \node (A) at (0,2) [draw, minimum width=2.5cm, minimum height=1cm] {$L^2(\mathbb{S}^d)$};
-        \node (B) at (5,2) [draw, minimum width=3.5cm, minimum height=1cm] {$\bigoplus\limits_{\ell=0}^{\infty} \mathbb{C}^{N(d,\ell)}$};
-        \node (C) at (0,0) [draw, minimum width=2.5cm, minimum height=1cm] {$L^2(\mathbb{S}^d)$};
-        \node (D) at (5,0) [draw, minimum width=3.5cm, minimum height=1cm] {$\bigoplus\limits_{\ell=0}^{\infty} \mathbb{C}^{N(d,\ell)}$};
-        
-        % Draw the arrows
-        \draw[->] (A) -- node[above] {$\mathcal{F}$} (B);
-        \draw[->] (A) -- node[left] {$P_s$} (C);
-        \draw[->] (B) -- node[right] {$(1+\ell)^{2s}$} (D);
-        \draw[->] (C) -- node[above] {$\mathcal{F}$} (D);
-    \end{tikzpicture}
-    \end{center}
-
-    \vspace{0.5em}
-    \textbf{Spherical Harmonics Transform:} $\mathcal{F}$ maps functions to their spectral decomposition
-    
-    \end{frame}
-
-    \begin{frame}{NTK-Sobolev Operator}
-    \textbf{Spectral Coefficients:}
-    \[ (a_{\ell,p})_i = c_iY_{\ell,p}(x_i) \]
-
-    \vspace{0.3em}
-    \textbf{NTK-Sobolev Norm:}
-    \[ \Phi_s(W) = \frac{1}{2}(y-u)^\top P_s(y-u) \]
-
-    \begin{alertblock}{Key Insight}
-        The NTK-Sobolev operator eigenvalues determine the Fourier spectrum of learned functions.
-    \end{alertblock}
-    
-    \textbf{Dimension Growth:}
-    \[ N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!} \quad \text{as } \ell \to \infty \]
-\end{frame}
 
 
 
@@ -232,25 +177,47 @@ What dictate the training is the NTK matrix eigenvalues.
 
 
 
-\section{Sobolev Spaces on Spheres}
 
-\begin{frame}{Distribution Space and Sobolev Operator}
+
+\begin{frame}{Matrix Spectrum Results}
 \begin{itemize}
-\item Let $\mathcal{D}'(\Sd)$ be the space of distributions on $\Sd$
-\item For $s \in \R$, define operator $\Ls: \mathcal{D}'(\Sd) \to \mathcal{D}'(\Sd)$:
-\[ \Ls = \ (I + (-\Lap)^{1/2})^s \]
-where $\Lap$ is the Laplace-Beltrami operator
+\item \textbf{Condition Number:}
+  \[ \kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l) \]
+  Grows linearly with data size $n$, improves with depth $l$
+
+\item \textbf{Eigenvalue Distribution:}
+  \[ \lambda_{\text{min}} \sim \frac{3l}{4}, \quad \lambda_{\text{max}} \sim \frac{3nl}{4} \pm \xi \text{ where } \xi \sim \log(l) \]
+  Minimum scales linearly with depth, maximum scales with both depth and data size
+
+What dictate the training is the NTK matrix eigenvalues.
+
+\item \textbf{Applicability:} Valid for all Leaky ReLU activation functions
 \end{itemize}
+
+\textbf{Key Takeaway:} Deeper networks ($l \uparrow$) improve conditioning but with diminishing returns
 \end{frame}
 
-\begin{frame}{Spherical Sobolev Spaces}
-\begin{itemize}
-\item Define $H^s(\Sd) = \{f \in \mathcal{D}'(\Sd) : \Ls f \in L^2(\Sd)\}$
-\item Equipped with norm:
-\[ \|f\|^2_{H^s(\Sd)} = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} |\hat{f}_{\ell,p}|^2 \]
-where $\hat{f}_{\ell,p}$ are spherical harmonic coefficients
-\end{itemize}
-\end{frame}
+\begin{frame}{NTK-Sobolev Operator}
+    \begin{center}
+    \begin{tikzpicture}[scale=1.2]
+        % Draw the main boxes
+        \node (A) at (0,2) [draw, minimum width=2.5cm, minimum height=1cm] {$L^2(\mathbb{S}^d)$};
+        \node (B) at (5,2) [draw, minimum width=3.5cm, minimum height=1cm] {$\bigoplus\limits_{\ell=0}^{\infty} \mathbb{C}^{N(d,\ell)}$};
+        \node (C) at (0,0) [draw, minimum width=2.5cm, minimum height=1cm] {$L^2(\mathbb{S}^d)$};
+        \node (D) at (5,0) [draw, minimum width=3.5cm, minimum height=1cm] {$\bigoplus\limits_{\ell=0}^{\infty} \mathbb{C}^{N(d,\ell)}$};
+        
+        % Draw the arrows
+        \draw[->] (A) -- node[above] {$\mathcal{F}$} (B);
+        \draw[->] (A) -- node[left] {$P_s$} (C);
+        \draw[->] (B) -- node[right] {$(1+\ell)^{2s}$} (D);
+        \draw[->] (C) -- node[above] {$\mathcal{F}$} (D);
+    \end{tikzpicture}
+    \end{center}
+
+    \vspace{0.5em}
+    \textbf{Spherical Harmonics Transform:} $\mathcal{F}$ maps functions to their spectral decomposition
+    
+    \end{frame}
 
 
 
@@ -271,43 +238,23 @@ where $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$
 \end{frame}
 
 
+    \begin{frame}{NTK-Sobolev Operator}
+    \textbf{Spectral Coefficients:}
+    \[ (a_{\ell,p})_i = c_iY_{\ell,p}(x_i) \]
 
-\begin{frame}{Modified Loss Function}
-\begin{itemize}
-\item Replace standard $L^2$ loss with Sobolev loss:
-\[ \frac{1}{2}\|g-N\|^2_{H^s} \text{ instead of } \frac{1}{2}\|g-N\|^2_{L^2} \]
-\item Effects of $s$ parameter:
-\begin{itemize}
-\item $s = 0$: Reduces to $L^2$ norm
-\item $s > 0$: Amplifies high-frequency components by $(1+\ell)^{2s}$
-\item $s < 0$: Dampens high-frequency components, more robust to noise
-\end{itemize}
-\end{itemize}
+    \vspace{0.3em}
+    \textbf{NTK-Sobolev Norm:}
+    \[ \Phi_s(W) = \frac{1}{2}(y-u)^\top P_s(y-u) \]
+
+    \begin{alertblock}{Key Insight}
+        The NTK-Sobolev operator eigenvalues determine the Fourier spectrum of learned functions.
+    \end{alertblock}
+    
+    \textbf{Dimension Growth:}
+    \[ N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!} \quad \text{as } \ell \to \infty \]
 \end{frame}
 
 
-\begin{frame}{Common Eigenfunctions Property}
-\begin{theorem}[Spherical Harmonics as Common Eigenfunctions]
-For rotationally invariant kernels on $\mathbb{S}^{d-1}$:
-\begin{itemize}
-\item NTK operator $\mathcal{L}$ and Sobolev operator $P_s$ share spherical harmonics $Y_{\ell,p}$ as eigenfunctions
-\item Due to rotational invariance and scalar product expansion
-\item Enables direct spectral modification analysis
-\end{itemize}
-\end{theorem}
-\end{frame}
-
-\begin{frame}{Commutation with Laplace-Beltrami}
-\begin{theorem}[Commutation Property]
-The NTK operator $\mathcal{L}$ and Sobolev operator $P_s$ commute with the Laplace-Beltrami operator $\Lap$:
-\[ \Lap \mathcal{L} = \mathcal{L} \Lap \quad \text{and} \quad \Lap P_s = P_s \Lap \]
-\begin{itemize}
-\item Due to rotational invariance
-\item Consequence of sharing spherical harmonics as eigenfunctions
-\item Implies spectral decompositions are compatible
-\end{itemize}
-\end{theorem}
-\end{frame}
 
 
 
@@ -319,6 +266,11 @@ For a 2-layer ReLU network $N: \Sd \to \R$:
 \item For $s \geq 3/2$, $N \in H^s(\Sd)$ if and only if $N$ is affine
 \end{itemize}
 \end{theorem}
+and the spectrum scales as:
+\[ \lambda_k \sim k^{2s} \quad \text{as } k \to \infty \]
+
+So we chose s to compensate the decay of the NTK operator eigenvalues.
+\item Eigenvalues decay: $\mu_\ell = \mathcal{O}(\ell^{-d})$
 \end{frame}
 
 \begin{frame}{Discretized Sobolev Loss}
@@ -332,9 +284,9 @@ where $P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}P_{
 \item And:
 \[ P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}P_{\ell,p}, \quad P_{\ell,p} = a_{\ell,p}a_{\ell,p}^\top, \quad (a_{\ell,p})_i = c_iY_{\ell,p}(x_i) \]
 \end{itemize}
-
 \textbf{Asymptotic growth:}
 \[ N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!} \quad \text{as } \ell \to \infty \]
+
 
 \end{frame}
 
@@ -384,7 +336,7 @@ where $P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}P_{
 \item Limiting NTK at EOC:
 \[ K^{\infty}(\mathbf{x}_1, \mathbf{x}_2) = \|\mathbf{x}_1\| \|\mathbf{x}_2\| \left( \sum_{k=1}^l \varrho^{\circ (k-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right) \prod_{k'=k}^{l-1} \varrho'\left(\varrho^{\circ (k'-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right)\right) \right) \mathbf{I}_{m_l} \]
 
-\item Eigenvalues decay: $\mu_\ell = \mathcal{O}(\ell^{-d})$
+
 \item \textbf{Deep NTK decay:} For $L$-layer ReLU network with $L \geq 3$:
 \[ \mu_k \sim C(d, L)k^{-d} \]
 where $C(d, L)$ depends on parity of $k$ and grows quadratically with $L$
@@ -407,6 +359,26 @@ where $C(d, L)$ depends on parity of $k$ and grows quadratically with $L$
 \textbf{Practical implication:} Analyzing inverse cosine distance matrices gives direct insight into NTK spectral properties
 \end{frame}
 
+\begin{frame}{NTK Spectrum at Edge of Chaos}
+\begin{theorem}[NTK Spectrum Bounds]
+For dataset $x_1,\cdots,x_n \in \R^{m_0}$ with no parallel points at EOC:
+\begin{itemize}
+\item Let $\limiting{\tau} = [\Vert x_i \Vert]$, $\underline{\tau}=\min_i\{\limiting{\tau}_i\}$, $\overline{\tau}=\max_i\{\limiting{\tau}_i\}$
+\item For some $W \in (1,\infty)$ with $W = \Theta_{\limiting{W}_1}(1)$, define:
+\[ \xi = \frac{3}{8} \left( \Delta_\phi^{-1} \frac{\pi}{2} W + \log\left( \Delta_\phi^{-1} \frac{3\pi}{4} W + l - 1 \right) - 1 \right) \]
+\end{itemize}
+
+\textbf{Spectral bounds:}
+\begin{itemize}
+\item First eigenvalue: $\lambda_1(\limiting{K}) \leq \overline{\tau}^2 \left( \left( 1 + \frac{3}{n} \right) \frac{1}{4} l + \left( 1 - \frac{1}{n} \right) \xi \right) + O(\cdot)$
+\item Last bulk eigenvalue: $\lambda_{m_l}(\limiting{K}) \geq \underline{\tau}^2 \left( \left( 1 + \frac{3}{n} \right) \frac{1}{4} l + \left( 1 - \frac{1}{n} \right) \xi \right) - O(\cdot)$
+\item First tail eigenvalue: $\lambda_{m_l+1}(\limiting{K}) \leq \overline{\tau}^2 \frac{1}{n} \left( \frac{3}{4} l - \xi \right) + O(\cdot)$
+\item Last eigenvalue: $\lambda_{n m_l}(\limiting{K}) \geq \underline{\tau}^2 \frac{1}{n} \left( \frac{3}{4} l - \xi \right) - O(\cdot)$
+\end{itemize}
+where $O(\cdot) = O\left( \overline{\tau}^2 \left( \Delta_\phi^{-1} + \Delta_\phi^{-2} l^{-1} + n^{-2} l \right) \right)$
+\end{theorem}
+\end{frame}
+
 
 \begin{frame}{NTK Analysis of Deep Narrow Neural Networks}
 \textbf{Theorem 1 (Scaled NTK at initialization):}
@@ -425,31 +397,7 @@ with $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random
 \textbf{Promising direction:} Limited expansion analysis for this specific architecture with infinite layers and special initialization (positive entries assumption)
 \end{frame}
 
-\begin{frame}{Path forward: Sobolev Training Framework}
-\textbf{NTK-Sobolev Operator $P_s$ on $\mathbb{S}^{d-1}$:}
-\[ P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}P_{\ell,p} \]
-where $P_{\ell,p} = a_{\ell,p}a_{\ell,p}^T$ with $(a_{\ell,p})_i = c_iY_{\ell,p}(x_i)$
 
-\textbf{Key Properties:}
-\begin{itemize}
-\item Modifies NTK spectrum via spectral exponent $2s-d$
-\item Commutes with NTK: $[K^{\infty}, P_s] = 0$ 
-\item Eigenvalues: $\lambda_i(K P_s) \approx \lambda_i(A W_l + B) \cdot \lambda_i(P_s)$
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Path forward: Sobolev Operator as Kernel Matrix}
-\textbf{Matrix Elements:}
-\[ (P_s)_{ij} = c_i c_j \cdot p_s(\langle x_i, x_j \rangle) \]
-where kernel function:
-\[ p_s(t) = \sum_{\ell=0}^{\ell_{\max}} (1+\ell)^{2s} K_\ell(t) \]
-
-\textbf{ Research directions:}
-\begin{itemize}
-\item Approximate the spectrum of the sampled kernel matrix $P_s$ (with $c_i$ as weights)
-\item Study dependence on parameters $s$, $d$, $n$, $l$ (NTK, Sobolev, and product)
-\end{itemize}
-\end{frame}
 
 
 \begin{frame}{Perspectives}
@@ -465,8 +413,6 @@ where $a = \frac{\rho\|x\|\|x'\|}{d_{in}}$ depends on input norms
 \item \textbf{Unified initialization:} Combine schemes to maintain EOC with biases
 \[ v = \frac{1}{1 + \beta^2/\alpha^2}, \quad \alpha = \frac{\rho\|x\|\|x'\|}{d_{in}} \]
 
-\item \textbf{Gaussian process analysis:} Study GP($0, \frac{\rho^2}{d_{in}}x^T x' + \beta^2$) expectations
-\[ \E_g[\sigma(g(x))\sigma(g(x'))] \text{ determines kernel structure} \]
 \end{itemize}
 \end{frame}
 
@@ -494,6 +440,35 @@ where $a = \frac{\rho\|x\|\|x'\|}{d_{in}}$ depends on input norms
 \item Compare different initialization schemes
 \item Evaluate impact of architectural modifications
 \item Benchmark against standard wide networks
+\end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}{Path forward: Sobolev Training Framework}
+\textbf{NTK-Sobolev Operator $P_s$ on $\mathbb{S}^{d-1}$:}
+\[ P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}P_{\ell,p} \]
+where $P_{\ell,p} = a_{\ell,p}a_{\ell,p}^T$ with $(a_{\ell,p})_i = c_iY_{\ell,p}(x_i)$
+
+\textbf{Key Properties:}
+\begin{itemize}
+\item Modifies NTK spectrum via spectral exponent $2s-d$
+\item Commutes with NTK: $[K^{\infty}, P_s] = 0$ 
+\item Eigenvalues: $\lambda_i(K P_s) \approx \lambda_i(A W_l + B) \cdot \lambda_i(P_s)$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Path forward: Sobolev Operator as Kernel Matrix}
+\textbf{Matrix Elements:}
+\[ (P_s)_{ij} = c_i c_j \cdot p_s(\langle x_i, x_j \rangle) \]
+where kernel function:
+\[ p_s(t) = \sum_{\ell=0}^{\ell_{\max}} (1+\ell)^{2s} K_\ell(t) \]
+
+\textbf{ Research directions:}
+\begin{itemize}
+\item Approximate the spectrum of the sampled kernel matrix $P_s$ (with $c_i$ as weights)
+\item Study dependence on parameters $s$, $d$, $n$, $l$ (NTK, Sobolev, and product)
 \end{itemize}
 \end{frame}
 

@@ -102,3 +102,64 @@
     \end{frame}
 
     
+\section{Sobolev Spaces on Spheres}
+
+\begin{frame}{Distribution Space and Sobolev Operator}
+\begin{itemize}
+\item Let $\mathcal{D}'(\Sd)$ be the space of distributions on $\Sd$
+\item For $s \in \R$, define operator $\Ls: \mathcal{D}'(\Sd) \to \mathcal{D}'(\Sd)$:
+\[ \Ls = \ (I + (-\Lap)^{1/2})^s \]
+where $\Lap$ is the Laplace-Beltrami operator
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Spherical Sobolev Spaces}
+\begin{itemize}
+\item Define $H^s(\Sd) = \{f \in \mathcal{D}'(\Sd) : \Ls f \in L^2(\Sd)\}$
+\item Equipped with norm:
+\[ \|f\|^2_{H^s(\Sd)} = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} |\hat{f}_{\ell,p}|^2 \]
+where $\hat{f}_{\ell,p}$ are spherical harmonic coefficients
+\end{itemize}
+\end{frame}
+
+
+
+
+
+
+\begin{frame}{Modified Loss Function}
+\begin{itemize}
+\item Replace standard $L^2$ loss with Sobolev loss:
+\[ \frac{1}{2}\|g-N\|^2_{H^s} \text{ instead of } \frac{1}{2}\|g-N\|^2_{L^2} \]
+\item Effects of $s$ parameter:
+\begin{itemize}
+\item $s = 0$: Reduces to $L^2$ norm
+\item $s > 0$: Amplifies high-frequency components by $(1+\ell)^{2s}$
+\item $s < 0$: Dampens high-frequency components, more robust to noise
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Common Eigenfunctions Property}
+\begin{theorem}[Spherical Harmonics as Common Eigenfunctions]
+For rotationally invariant kernels on $\mathbb{S}^{d-1}$:
+\begin{itemize}
+\item NTK operator $\mathcal{L}$ and Sobolev operator $P_s$ share spherical harmonics $Y_{\ell,p}$ as eigenfunctions
+\item Due to rotational invariance and scalar product expansion
+\item Enables direct spectral modification analysis
+\end{itemize}
+\end{theorem}
+\end{frame}
+
+\begin{frame}{Commutation with Laplace-Beltrami}
+\begin{theorem}[Commutation Property]
+The NTK operator $\mathcal{L}$ and Sobolev operator $P_s$ commute with the Laplace-Beltrami operator $\Lap$:
+\[ \Lap \mathcal{L} = \mathcal{L} \Lap \quad \text{and} \quad \Lap P_s = P_s \Lap \]
+\begin{itemize}
+\item Due to rotational invariance
+\item Consequence of sharing spherical harmonics as eigenfunctions
+\item Implies spectral decompositions are compatible
+\end{itemize}
+\end{theorem}
+\end{frame}
