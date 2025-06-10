@@ -1,0 +1,359 @@
+The neural tangent kernel (NTK) theory~\citep{jacot2018_NeuralTangent} has been widely used to explain the generalization ability of neural networks,
+which establishes a connection between neural networks and kernel methods~\citep{caponnetto2007_OptimalRates,bauer2007_RegularizationAlgorithms}.
+In the framework of kernel methods, the spectral properties, in particular the eigenvalue decay rate,
+of the kernel function are crucial in the analysis of the generalization ability.
+Although there are several previous works~\citep{bietti2019_InductiveBias,chen2020_DeepNeural,geifman2020_SimilarityLaplace,bietti2020_DeepEquals}
+investigating the spectral properties of NTKs on the sphere,
+their results are limited to the case where the input distribution is uniform on the sphere.
+Therefore, we would like to determine the spectral properties of NTKs on a general domain with a general input distribution.
+In this section, we provide some general results on the asymptotic behavior of the eigenvalues of certain type of kernels.
+As a consequence, we are able to determine the eigenvalue decay rate of NTKs on a general domain.
+
+\subsection{The integral operator and the eigenvalues}
+Let $\caX$ be a Hausdorff space and $\mu$ be a Borel measure on $\caX$.
+In the following, we always consider a continuous positive definite kernel $k(x,x') : \caX \times \caX \to \R$ such that
+\begin{align}
+  \label{eq:IntegrableKernel}
+  \int_{\caX} k(x,x) \dd \mu(x) < \infty.
+\end{align}
+We denote by $L^2 = L^2(\caX,\dd \mu)$ and $\caH$ the reproducing kernel Hilbert space (RKHS) associated with $k$.
+Introduce the integral operator $T = T_{k;\caX,\mu}: L^2 \to L^2$ by
+\begin{align}
+  \label{eq:T_Def}
+  (Tf)(x) = \int_{\caX} k(x,x') f(x') \dd \mu(x').
+\end{align}
+It is well-known~\citep{andreaschristmann2008_SupportVector,steinwart2012_MercerTheorem} that $T$ is self-adjoint, positive and trace-class (hence compact).
+Consequently, we can derive the spectral decomposition of $T$ and also the Mercer's decomposition of $k$ as
+\begin{align}
+  \label{eq:MercerDecomp}
+  T = \sum_{i\in N} \lambda_i \ang{\cdot,e_i}_{L^2} e_i, \quad\quad
+  k(x,x') = \sum_{i\in N} \lambda_i e_i(x) e_i(x'),
+\end{align}
+where $N \subseteq \mathbb{N}$ is an index set ($N = \bbN$ if the space is infinite dimensional),
+$\xk{\lambda_i}_{i \in N}$ is the set of positive eigenvalues (counting multiplicities) of $T$ in descending order
+and $\xk{e_i}_{i \in N}$ are the corresponding eigenfunction, which are an orthonormal set in $L^2(\caX,\dd \mu)$.
+%Also, the convergence of the latter series is
+To emphasize the dependence of the eigenvalues on the kernel and the measure,
+we also denote by $\lambda_i(k;\caX,\dd \mu) = \lambda_i$.
+We refer to the asymptotic rate of $\lambda_i$ as $i$ tends to infinity as the eigenvalue decay rate (EDR) of $k$ with respect to $\caX$ and $\mu$.
+
+In the kernel regression literature,
+the EDR of the kernel is closely related to the capacity condition of the corresponding reproducing kernel Hilbert space (RKHS)
+and affects the rate of convergence of the kernel regression estimator~(see, e.g., \citet{caponnetto2007_OptimalRates,lin2018_OptimalRates}).
+Particularly, a power-law decay that $\lambda_{i} \asymp i^{-\beta}$ is often assumed in the literature
+and the corresponding minimax optimal rate depends on the exponent $\beta$.
+Therefore, it would be helpful to determine such decay rate for a kernel of interest.
+
+
+
+\subsection{Preliminary results on the eigenvalues}
+\label{subsec:preliminary-results-on-the-eigenvalues}
+In this subsection, we present some preliminary results on the eigenvalues of $T$,
+which allow us to manipulate the kernel with algebraic transformations to simplify the analysis.
+%Let us first consider the scaling of the kernel.
+Let us first define the scaled kernel $(\rho \odot k)(x,x') = \rho(x) k(x,x') \rho(x')$ for some function $\rho: \caX \to \R$.
+It is easy to see the following:
+\begin{proposition}
+  \label{prop:ScaleMeasureEquiv}
+  Let $\rho: \caX \to \R$ be a measurable function such that $\rho\odot k$ satisfies \cref{eq:IntegrableKernel}.
+  Then,
+  \begin{align}
+    \lambda_i(\rho \odot k;\caX,\dd \mu) = \lambda_i(k;\caX,\rho^2 \dd \mu).
+  \end{align}
+\end{proposition}
+
+Furthermore, if $\rho$ is bounded, we can further estimate the eigenvalues using the minimax principle on the eigenvalues of self-adjoint compact positive operators.
+
+\begin{lemma}
+  \label{lem:ScaledKernel}
+  Let a measurable function $\rho: \caX \to \R$ satisfy $0\leq c \leq \rho^2(x) \leq C$.
+  Then,
+  \begin{align*}
+%    \label{eq:B_ScaledEigenvalues}
+    c \lambda_i(k;\caX,\dd \mu) \leq \lambda_i(\rho \odot k;\caX,\dd \mu) \leq C \lambda_i(k;\caX,\dd \mu),
+    \quad \forall i = 1,2,\dots.
+  \end{align*}
+  Consequently, if $\nu$ is another measure on $\caX$ such that $0 \leq c \leq \frac{\dd \nu}{\dd \mu} \leq C$,
+  then
+  \begin{align}
+    \label{eq:MeasureInv}
+    c \lambda_i(k;\caX,\dd \mu) \leq \lambda_i(k;\caX,\dd \nu) \leq C \lambda_i(k;\caX,\dd \mu), \quad \forall i = 1,2,\dots.
+  \end{align}
+\end{lemma}
+
+
+
+Now, we consider the transformation of the kernel.
+Let $\caX_1,\caX_2$ be two sets, $\varphi : \caX_1 \to \caX_2$ be a bijection and $k_2$ be a kernel over $\caX_2$.
+We define the pull-back kernel $\varphi^* k_2$ over $\caX_1$ by
+\begin{align*}
+(\varphi^* k_2) (x_1,x_1')
+  = k_2(\varphi(x_1),\varphi(x_1')).
+\end{align*}
+Moreover, suppose $\caX_1$ is a measurable space with measure $\mu_1$, we define the push-forward measure $\mu_2 = \varphi_* \mu_1$ on $\caX_2$ by
+$\mu_2(A) = \mu_1(\varphi^{-1}(A))$.
+Then, it is easy to see that:
+
+\begin{proposition}
+  \label{prop:MapKernel}
+  Let $\caX_1,\caX_2$ be two measurable spaces, $\varphi : \caX_1 \to \caX_2$ be a measurable injection,
+  $\mu_1$ be a measure on $\caX_1$ and $\mu_2 = \varphi_* \mu_1$.
+  Suppose $k_2$ is a kernel over $\caX_2$ and $k_1 = \varphi^* k_2$ satisfies \cref{eq:IntegrableKernel}.
+  Then,
+  \begin{align}
+    \label{eq:MapKernel}
+    \lambda_i(k_1;\caX_1,\dd \mu_1) = \lambda_i(k_2;\caX_2,\dd \mu_2).
+  \end{align}
+\end{proposition}
+
+%A trivial case of the above proposition is that $\caX_1 \subseteq \caX_2$ and $\varphi$ is the identity map,
+%where $k_1$ is just the restriction of $k_2$ over $\caX_1$.
+
+
+
+
+
+
+
+
+Finally, this lemma deals with the case of the sum of two kernels of different EDRs,
+which is a direct consequence of \cref{lem:A_WeylOp}.
+\begin{lemma}
+  \label{lem:B_SumEDR}
+  Let $k_1,k_2$ be two positive definite kernels on $\caX$.
+  Suppose $\lambda_i(k_1;\caX,\dd \mu) \asymp \lambda_{2i}(k_1;\caX,\dd \mu)$ and
+  $\lambda_i(k_2;\caX,\dd \mu) = O\left( \lambda_i(k_1;\caX,\dd \mu) \right)$ as $i \to \infty$.
+  Then,
+  \begin{align*}
+    \lambda_i(k_1+k_2;\caX,\dd \mu) \asymp \lambda_i(k_1;\caX,\dd \mu).
+  \end{align*}
+\end{lemma}
+
+
+\subsection{Eigenvalues of kernels restricted on a subdomain}
+
+
+Suppose we are interested in $\lambda_i(k_1;\caX_1,\dd \mu_1)$.
+If $k_1 = \varphi^* k_2$ for some transformation $\varphi$ and the EDR of $k_2$ with respect to some measure $\sigma$ on $\caX_2$
+is known or can be easily obtained,
+Then, it is tempting to combine \cref{prop:MapKernel} and \cref{lem:ScaledKernel} to obtain the EDR of $k_1$ with respect to $\mu_1$.
+However, in many cases $\varphi(\caX_1)$ is a proper subset of $\caX_2$ and $\mu_2 = \varphi_* \mu_1$ is only supported on $\varphi(\caX_1)$,
+so the Radon derivative $\frac{\dd \mu_2}{\dd \sigma}$ is not bounded from below (that is, $c=0$) and the lower bound in \cref{eq:MeasureInv} vanishes,
+which is exactly the case of the NTK that we are interested in.
+Fortunately, we can still provide such a lower bound if the kernel satisfies an appropriate invariance property.
+Considering translation invariant kernels (that is, $k(x,x') = g(x-x')$), the following result based on \citet{widom1963_AsymptoticBehavior} is very inspiring.
+
+\begin{proposition}[\citet{widom1963_AsymptoticBehavior}]
+  \label{prop:WidomResult}
+  Let $\mathbb{T}^d = [-\pi,\pi)^d$ be the $d$-dimensional torus and
+  \begin{align*}
+    k(x,x') = \sum_{\bm{n} \in \bbZ^d} c_{\bm{n}} e^{i \bm{n} \cdot x} e^{-i \bm{n} \cdot x'}
+  \end{align*}
+  be a translation invariant kernel on $\mathbb{T}^d$.
+  Suppose further that $c_{\bm{n}}$ satisfies (i) $c_{\bm{n}} \geq 0$;
+  (ii) with all $n_i$ fixed but $n_{i_0}$, $c_{\bm{n}}$, as a function of $n_{i_0}$, is nondecreasing between $-\infty$
+  and some $\bar{n} = \bar{n}(i_0)$ and nonincreasing between $\bar{n}$ and $\infty$;
+  (iii) if $\abs{\bm{n}}, \abs{\bm{m}} \to \infty$ and $\abs{\bm{n}} = O(\abs{\bm{m}})$, then $c_{\bm{m}} = O(c_{\bm{n}})$;
+  (iv) if $\abs{\bm{n}}, \abs{\bm{m}} \to \infty$ and $\abs{\bm{n}} = o(\abs{\bm{m}})$, then $c_{\bm{m}} = o(c_{\bm{n}})$.
+  Then, for a bounded non-zero Riemann-integrable function $\rho$,
+  we have
+  \begin{align*}
+    \lambda_i(k;\mathbb{T}^d, \rho^2 \dd x) \asymp \lambda_i(k;\mathbb{T}^d,\dd x).
+  \end{align*}
+\end{proposition}
+
+However, the above result is not applicable to our case since the NTKs we are interested in is not translation invariant on the torus,
+but rotation invariant on the sphere.
+Nevertheless, inspired by this result, we establish a similar result for dot-product kernels on the sphere as one of our main contribution.
+Let $\bbS^d \subset \R^{d+1}$ be the $d$-dimensional unit sphere and $\sigma$ be the Lebesgue measure on $\bbS^d$.
+We recall that a dot-product kernel $k(x,x')$ is a kernel that depends only on the dot product $u = \ang{x,x'}$ of the inputs.
+Thanks to the theory of spherical harmonics~\citep{dai2013_ApproximationTheory},
+the eigenfunctions of the integral operator $T$ and also the Mercer's decomposition of $k$ can be explicitly given by
+\begin{align}
+  \label{eq:4_k-SHDecomp}
+  k(x,x') = \sum_{n=0}^{\infty} \mu_n \sum_{l=1}^{a_n} Y_{n,l}(x) Y_{n,l}(x'),
+\end{align}
+where $\left\{ Y_{n,l}, n \geq 0,~ l=1,\dots,a_n\right\}$ is an orthonormal basis formed by spherical harmonics,
+$a_n = \binom{n+d}{n} - \binom{n-2+d}{n-2}$ is the dimension of the space of order-$n$ spherical harmonics,
+and $\mu_n$ an eigenvalue of $T$ with multiplicity $a_n$.
+To state our result, let us first introduce the following condition on the asymptotic decay rate of the eigenvalues.
+
+\begin{condition}
+  \label{cond:EDR}
+  Let $(\mu_n)_{n \geq 0}$ be a decreasing sequence of positive numbers.
+  \begin{enumerate}[(a)]
+    \item Define $N(\ep) = \max \{n : \mu_n > \ep\}$.
+    For any fixed constant $c > 0$, $N(c \ep) = \Theta(N(\ep))$ as $\ep \to 0$;
+    suppose $\ep, \delta \to 0$ with $\ep = o(\delta)$, then $N(\delta) = o(N(\ep))$.
+    \item $\triangle^{d+1} \mu_n \geq 0$ for all $n$, where $\triangle$ is the forward difference operator in \cref{def:DifferenceOperator}.
+    \item There is some constant $q \in \bbN_+$ and $D > 0$ such that for any $n \geq 0$,
+    \begin{align}
+      \label{eq:EDRDerivativeBound}
+      \sum_{l=0}^{d} \binom{\tilde{n}+l}{l} \triangle^l \mu_{\tilde{n}} \leq D \mu_n, \qq{where} \tilde{n} = qn.
+    \end{align}
+  \end{enumerate}
+\end{condition}
+
+\begin{remark}
+  \label{rem:EDR_Condition}
+  \cref{cond:EDR} is a mild condition on the decay rate and \cref{thm:EDRS} only requires that \cref{cond:EDR} holds in the asymptotic sense,
+  so this requirement is quite general.
+  For instance, this requirement is satisfied if
+  \begin{itemize}
+    \item $\mu_n \asymp n^{-\beta}$ for some $\beta > d$.
+    \item $\mu_n \asymp \exp(-c_1 n^{\beta})$ for some $c_1, \beta > 0$.
+    \item $\mu_n \asymp n^{-\beta} (\ln n)^p$ for $c_0 > 0$, $\beta > d$ and $p \in \R$, or $\beta = d$ and $p > 1$.
+  \end{itemize}
+  Furthermore, our decay rate condition aligns with existing theory,
+  as similar conditions (ii)-(iv) are also needed in \citet{widom1963_AsymptoticBehavior}.
+\end{remark}
+
+\begin{theorem}
+  \label{thm:EDRS}
+  Let $k(x,x')$ be a dot-product kernel on $\bbS^d$
+  whose corresponding eigenvalues in the decomposition \cref{eq:4_k-SHDecomp} are $(\mu_n)_{n \geq 0}$.
+  Assume that there is a sequence $(\tilde{\mu}_n)_{n \geq 0}$ satisfying \cref{cond:EDR} such that $\mu_n \asymp \tilde{\mu}_n$.
+  Then, for a bounded non-zero Riemann-integrable function $\rho$ on $\bbS^d$,
+  we have
+%  Suppose $S \subseteq \bbS^d$ has non-empty interior.
+  \begin{align}
+    \lambda_i(k;\bbS^d, \rho^2 \dd \sigma)
+    \asymp \lambda_i(k;\bbS^d, \dd \sigma).
+  \end{align}
+\end{theorem}
+
+As our main technical contribution,
+this theorem is a non-trivial generalization of the result in \citet{widom1963_AsymptoticBehavior},
+adapting it from the torus to the sphere.
+%since there are major difference between the analysis on the sphere and the torus.
+Following the basic idea of \citet{widom1963_AsymptoticBehavior}, we establish the theorem by proving first the main lemma (\cref{lem:EDRS_MainLemma}),
+but now the approach of \citet{widom1963_AsymptoticBehavior} is not applicable since the eigen-system differs greatly.
+To prove the main lemma, we utilize refined harmonic analysis on the sphere,
+incorporating the technique of Cesaro summation and the left extrapolation of eigenvalues,
+which necessitates the subtle requirement of \cref{cond:EDR}.
+Detailed proof can be found in \cref{sec:eigen-decay-on-the-sphere}.
+
+
+\cref{thm:EDRS} shows that the EDR of a dot-product kernel with respect to a general measure is the same as that of the kernel with respect to the uniform measure.
+Combined with the results in \cref{subsec:preliminary-results-on-the-eigenvalues},
+it provides a new approach to determine the EDR of a kernel on a general domain.
+One could first transform the kernel to a dot-product kernel on the sphere with respect to some measure;
+then use \cref{thm:EDRS} to show that the decay rate of the resulting dot-product kernel remains the same if we consider the uniform measure on the sphere instead;
+and finally determine the decay rate of the dot-product kernel on the entire sphere by some analytic tools.
+This approach enables us to determine the EDR of the NTKs corresponding to multilayer neural networks on a general domain.
+%which can be applied to the NTKs of interest.
+
+
+\subsection{EDR of NTK on a general domain}
+
+A bunch of previous literature
+~\citep{bietti2019_InductiveBias,chen2020_DeepNeural,geifman2020_SimilarityLaplace,bietti2020_DeepEquals}
+have analyzed the RKHS as well as the spectral properties of the NTKs on the sphere by means of the theory of spherical harmonics.
+However, these results require the inputs to be uniformly distributed on the sphere and hence do not apply to general domains with general input distribution.
+Therefore, it is of our interest to investigate the eigenvalue properties of the NTKs on a general domain with a general input distribution since it is more realistic.
+To the best of our knowledge,
+only \citet{lai2023_GeneralizationAbility} considered a non-spherical case of an interval on $\R$
+and the EDR of the NTK corresponding to a two-layer neural network,
+but their techniques are very restrictive and can not be extended to higher dimensions or multilayer neural networks.
+Thanks to the results established in previous subsections,
+we can determine the EDR of the NTKs on a general domain using the established results on their spectral properties on the whole sphere.
+
+Let us focus on the following explicit formula of the NTK, which corresponds to a multilayer neural network defined later in \cref{subsec:NN_Setting}.
+Introduce the arc-cosine kernels~\citep{cho2009_KernelMethods} by
+\begin{align}
+  \label{eq:Arccos_Formula}
+  \kappa_0(u) =  \frac{1}{\pi}\left( \pi - \arccos u \right),\quad
+  \kappa_1(u) = \frac{1}{\pi}\left[ \sqrt {1-u^2} + u (\pi - \arccos u)  \right].
+\end{align}
+Then, we define the kernel $\NTK$ on $\R^d$ by
+\begin{align}
+  \label{eq:NTK_Formula}
+  \NTK(\x,\x') =
+  \norm{\tilde{\x}} \lVert \tilde{\x}'\rVert \sum_{r=0}^L \kappa^{(r)}_1(\bar{u}) \prod_{s=r}^{L-1} \kappa_0(\kappa^{(s)}_1(\bar{u})) + 1,
+\end{align}
+where $L \geq 2$ is the number of hidden layers, $\tilde{\x} = (\x,1)/\norm{(\x,1)}$, $\bar{u} = \ang{\tilde{\x},\tilde{\x}'}$ and $\kappa^{(r)}_1$ represents $r$-times composition of $\kappa_1$,
+see, e.g., \citet{jacot2018_NeuralTangent,bietti2020_DeepEquals}.
+First, we show that $\NTK$ is strictly positive definite, the proof of which is deferred to \cref{subsec:D_PDNTK}.
+
+\begin{proposition}
+  \label{prop:NTK_PD}
+  $\NTK$ is strictly positive definite on $\R^d$,
+  that is, for distinct points $\x_1,\dots,\x_n \in \R^d$, the kernel matrix's smallest eigenvalue  $\lambda_{\min}\big(\NTK(\x_i,\x_j) \big)_{n \times n} > 0$.
+\end{proposition}
+
+
+
+\begin{theorem}
+  \label{thm:NTK_EDR}
+  Let $\mu$ be a probability measure on $\R^d$ with Riemann-integrable density $p(x)$ such that $p(x) \leq C (1+\norm{x}^2)^{-(d+3)/2}$
+  for some constant $C$.
+  Then, the EDR of $\NTK$ on $\R^d$ with respect to $\mu$ is
+  \begin{align}
+    \lambda_i(\NTK;\R^d,\dd \mu) \asymp i^{-\frac{d+1}{d}}.
+  \end{align}
+\end{theorem}
+
+\begin{remark}
+  The condition on the density $p(x)$ is satisfied by many common distributions, such as sub-Gaussian distributions or distributions with bounded support.
+  Moreover, the result on the EDR can also be established for the NTKs corresponding to other activations
+  (including homogeneous activations such as $\mr{ReLU}^\alpha(x) = \max(x,0)^\alpha$ and leaky ReLU)
+  and other network architectures (such as residual neural networks),
+  as long as the corresponding kernel can be transformed to a dot-product kernel on the sphere.
+\end{remark}
+
+
+
+\begin{proof}[of \cref{thm:NTK_EDR}]
+  Let us denote $\bbS^d_+ = \left\{ y= (y_1,\dots,y_{d+1}) \in \bbS^d : y_{d+1} >0 \right\}$
+  and introduce the homeomorphism $\Phi: \R^d \to \bbS^d_+$ by $x \mapsto \tilde{x} / \norm{\tilde{x}}$,
+  where $\tilde{x} = (x,1) \in \R^{d+1}$.
+  It is easy to show that the Jacobian and the Gram matrix are given by
+  \begin{align*}
+    J \Phi = \frac{1}{\norm{\tilde{x}}}
+    \begin{pmatrix}
+      I_d \\
+      0
+    \end{pmatrix}
+    - \frac{\tilde{x}x^T}{\norm{\tilde{x}}^3},\quad
+    G = (J\Phi)^T J \Phi = \frac{1}{\norm{\tilde{x}}^2} I_d - \frac{x x^T}{\norm{\tilde{x}}^4},\quad
+    \det G = \norm{\tilde{x}}^{-2(d+1)}.
+  \end{align*}
+  Defining the homogeneous NTK $\NTK_0$ on $\bbS^d$ by
+  \begin{align}
+    \label{eq:NTK0_Def}
+    \NTK_0(y,y') \coloneqq \sum_{r=0}^L \kappa^{(r)}_1(u) \prod_{s=r}^{L-1} \kappa_0(\kappa^{(s)}_1(u)) ,\quad u = \ang{y,y'},
+  \end{align}
+  it is easy to verify that
+  \begin{align*}
+    K_1(x,x') \coloneqq \Phi^* \NTK_0 = \sum_{r=0}^l \kappa^{(r)}_1(\bar{u}) \prod_{s=r}^{l-1} \kappa_0(\kappa^{(s)}_1(\bar{u})),
+    \quad \NTK = \norm{x} \odot K_1 + 1.
+  \end{align*}
+  Therefore, \cref{prop:ScaleMeasureEquiv} and then \cref{prop:MapKernel} yields
+  \begin{align*}
+    \lambda_i(\norm{x}\odot K_1;\caX,\dd \mu) =
+    \lambda_i(K_1;\caX, \norm{\tilde{x}}^2 \dd \mu) = \lambda_i\left(\NTK_0;\bbS^d, \Phi_*( \norm{\tilde{x}}^2 \dd \mu)\right).
+  \end{align*}
+  Moreover, denoting $\tilde{\sigma} = \Phi_*( \norm{\tilde{x}}^2 \dd \mu)$ and $p(x) = \dv{\mu}{x}$,
+  we have $\dd \tilde{\sigma} = p(x) \norm{\tilde{x}}^2 \Phi_*(\dd x)$.
+  On the other hand, the canonical uniform measure $\sigma$ on $\bbS^d_+$ is given by $\dd \sigma = \abs{\det G}^{\frac{1}{2}} \Phi_*(\dd x)$,
+  so we have
+  \begin{align*}
+    q(y) \coloneqq \dv{\tilde{\sigma}}{\sigma} =  \abs{\det G}^{-\frac{1}{2}} \norm{\tilde{x}}^2 p(x) = \norm{\tilde{x}}^{d+3} p(x),
+    \quad y \in \bbS^d_+.
+  \end{align*}
+  Therefore, the condition on $p(x)$ implies that $q(y)$ is Riemann-integrable and upper bounded.
+  Now, the EDR of the dot-product kernel $\NTK_0$ on $\bbS^d$ with respect to $\dd \sigma$ is already established in \citet{bietti2020_DeepEquals}
+  that $\lambda_i(\NTK_0;\bbS^d,\dd \sigma) \asymp i^{-\frac{d+1}{d}}$, so \cref{thm:EDRS} shows that
+  $\lambda_i\left(\NTK_0;\bbS^d, \dd{\tilde{\sigma}} \right) \asymp i^{-\frac{d+1}{d}}$.
+  Finally, the proof is completed by applying \cref{lem:B_SumEDR} to show that the extra constant does not affect the EDR\@.
+\end{proof}
+
+
+
+
+
+
+
+
+
+

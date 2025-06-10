@@ -1,0 +1,112 @@
+%!TEX root = main.tex
+
+In this section, we provide a brief review of the kernels that arise from neural networks and their approximation properties.
+
+
+\subsection{Kernels for wide neural networks}
+\label{sub:nn_kernels}
+
+Wide neural networks with random weights or weights close to random initialization naturally lead to certain dot-product kernels that depend on the architecture and activation function, which we now present,
+with a focus on fully-connected architectures.
+
+\paragraph{Random feature kernels.}
+We first consider a two-layer (shallow) network of the form $f(x) = \frac{1}{\sqrt{m}}\sum_{j=1}^m v_j \sigma(w_j^\top x)$, for some activation function~$\sigma$.
+When~$w_j \sim \mathcal N(0, I) \in \R^d$ are fixed and only~$v_j \in \R$ are trained with~$\ell_2$ regularization, this corresponds to using a random feature approximation~\cite{rahimi2007} of the kernel
+\begin{equation}
+\label{eq:rf_kernel}
+k(x, x') = \E_{w\sim \mathcal N(0, I)}[\sigma(w^\top x) \sigma(w^\top x')].
+\end{equation}
+If~$x, x'$ are on the sphere, then by spherical symmetry of the Gaussian distribution, one may show that~$k$ is invariant to unitary transformations and takes the form~$k(x, x') = \kappa(x^\top x')$ for a certain function~$\kappa$.
+More precisely, if~$\sigma(u) = \sum_{i \geq 0} a_i h_i(u)$ is the decomposition of~$\sigma$ in the basis of Hermite polynomials~$h_i$, which are orthogonal w.r.t.~the Gaussian measure, then we have~\citep{daniely2016toward}:
+\begin{equation}
+\label{eq:kappa_series}
+\kappa(u) = \sum_{i \geq 0} a_i^2 u^i.
+\end{equation}
+Conversely, given a kernel function of the form above with~$\kappa(u) = \sum_{i \geq 0} b_i u^i$ with~$b_i \geq 0$, one may construct corresponding activations using Hermite polynomials by taking
+\begin{equation}
+\label{eq:sigma_series}
+\sigma(u) = \sum_i a_i h_i(u), \quad a_i \in \{\pm \sqrt{b_i}\}.
+\end{equation}
+In the case where~$\sigma$ is~$s$-positively homogeneous, such as the ReLU~$\sigma(u) = \max(u, 0)$ (with~$s = 1$), or more generally~$\sigma_s(u) = \max(u, 0)^s$, then the kernel~\eqref{eq:rf_kernel} takes the form~$k(x, x') = \|x\|^s \|x'\|^s \kappa(\frac{x^\top x'}{\|x\| \|x'\|})$ for any~$x, x'$. This leads to RKHS functions of the form~$f(x) = \|x\|^s g(\frac{x}{\|x\|})$, with~$g$ in the RKHS of the kernel restricted to the sphere~\citep[Prop. 8]{bietti2019inductive}.
+In particular, for the step and ReLU activations~$\sigma_0$ and $\sigma_1$, the functions~$\kappa$ are given by the following arc-cosine kernels~\citep{cho2009kernel}:\footnote{Here we assume a scaling~$\sqrt{2/m}$ instead of~$\sqrt{1/m}$ in the definition of~$f$, which yields~$\kappa(1) = 1$, a useful normalization for deep networks, as explained below.}
+\begin{align}
+\kappa_0(u) = \frac{1}{\pi} \left( \pi - \arccos(u) \right),  &\qquad
+\kappa_1(u) = \frac{1}{\pi} \left( u \cdot (\pi - \arccos(u)) + \sqrt{1 - u^2} \right) \label{eq:kappa_arccos}.
+\end{align}
+Note that given a kernel function~$\kappa$, the corresponding activations~\eqref{eq:sigma_series} will generally not be homogeneous, thus the inputs to a random network with such activations need to lie on the sphere (or be appropriately normalized) in order to yield the kernel~$\kappa$.
+
+\paragraph{Extension to deep networks.}
+When considering a deep network with more than two layers and fixed random weights before the last layer, the connection to random features is less direct since the features are correlated through intermediate layers.
+Nevertheless, when the hidden layers are wide enough, one still approaches a kernel obtained by letting the widths go to infinity~\citep[see, \eg,][]{daniely2016toward,lee2018deep,matthews2018gaussian}, which takes a similar form to the multi-layer kernels of~\citet{cho2009kernel}:
+\begin{equation*}
+k^L(x, x') = \kappa^L(x^\top x') := \underbrace{\kappa \circ \cdots \circ \kappa}_{L-1\text{ times}}(x^\top x'),
+\end{equation*}
+for~$x, x'$ on the sphere,
+where~$\kappa$ is obtained as described above for a given activation~$\sigma$, and~$L$ is the number of layers.
+We still refer to this kernel as the \emph{random features} (RF) kernel in this paper, noting that it is sometimes known as the ``conjugate kernel'' or NNGP kernel (for neural network Gaussian process).
+It is usually good to normalize~$\kappa$ such that~$\kappa(1) = 1$, so that we also have~$\kappa^L(1) = 1$, avoiding exploding or vanishing behavior for deep networks.
+In practice, this corresponds to using an activation-dependent scaling in the random weight initialization, which is commonly used by practitioners~\citep{he2015delving}.
+
+
+\paragraph{Neural tangent kernels.}
+When intermediate layers are trained along with the last layer using gradient methods, the resulting problem is non-convex and the statistical properties of such approaches are not well understood in general, particularly for deep networks.
+However, in a specific over-parameterized regime, it may be shown that gradient descent can reach a global minimum while keeping weights very close to random initialization.
+More precisely,
+for a network~$f(x; \theta)$ parameterized by~$\theta$ with large width~$m$, the model remains close to its linearization around random initialization~$\theta_0$ throughout training, that is,~$f(x; \theta) \approx f(x; \theta_0) + \langle \theta - \theta_0, \nabla_\theta f(x; \theta_0) \rangle$.
+This is also known as the \emph{lazy training} regime~\citep{chizat2018note}.
+Learning is then equivalent to a kernel method with another architecture-specific kernel known as the \emph{neural tangent kernel}~\citep[NTK,][]{jacot2018neural}, given by
+\begin{equation}
+k_{\NTK}(x, x') = \lim_{m \to \infty} \langle \nabla f(x; \theta_0), \nabla f(x'; \theta_0) \rangle.
+\end{equation}
+For a simple two-layer network with activation~$\sigma$, it is then given by
+\begin{equation}
+k_{\NTK}(x, x') = (x^\top x') ~\E_w [\sigma'(w^\top x) \sigma'(w^\top x')] + \E_w [\sigma(w^\top x) \sigma(w^\top x')].
+\end{equation}
+For a ReLU network with~$L$ layers with inputs on the sphere, taking appropriate limits on the widths, one can show~\citep{jacot2018neural}: $k_{\NTK}(x, x') = \kappa^L_{\NTK}(x^\top x')$, with~$\kappa^1_{\NTK}(u) = \kappa^1(u) = u$ and for~$\ell = 2, \ldots, L$,
+\begin{align}
+\kappa^{\ell}(u) &= \kappa_1(\kappa^{\ell-1}(u)) \nonumber \\
+\kappa^{\ell}_{\NTK}(u) &= \kappa^{\ell-1}_{\NTK}(u) \kappa_0(\kappa^{\ell-1}(u)) + \kappa^{\ell}(u), \label{eq:ntk_rec}
+\end{align}
+where~$\kappa_0$ and~$\kappa_1$ are given in~\eqref{eq:kappa_arccos}.
+
+
+
+\subsection{Approximation and harmonic analysis with dot-product kernels}
+\label{sub:dp_kernel_approx}
+
+In this section, we recall approximation properties of dot-product kernels on the sphere, through spectral decompositions of integral operators in the basis of spherical harmonics.
+Further background is provided in Appendix~\ref{sec:appx_background}.
+
+\paragraph{Spherical harmonics and description of the RKHS.}
+A standard approach to study the RKHS of a kernel is through the spectral decomposition of an integral operator~$T$ given by~$Tf(x) = \int k(x, y) f(y) d \tau(y)$ for some measure~$\tau$, leading to Mercer's theorem~\citep[\eg,][]{cucker2002mathematical}.
+When inputs lie on the sphere~$\Sbb^{\dmone}$ in~$d$ dimensions, dot-product kernels of the form~$k(x, x') = \kappa(x^\top x')$ are rotationally-invariant, depending only on the angle between~$x$ and~$x'$.
+Similarly to how translation-invariant kernels are diagonalized in the Fourier basis,
+rotation-invariant kernels are diagonalized in the basis of spherical harmonics~\citep{smola2001regularization,bach2017breaking}, which lead to connections between eigenvalue decays and regularity as in the Fourier setting.
+In particular, if~$\tau$ denotes the uniform measure on~$\Sbb^{\dmone}$, then~$T Y_{k,j} = \mu_k Y_{k,j}$,
+where~$Y_{k,j}$ is the~$j$-th spherical harmonic polynomial of degree~$k$, where~$k$ plays the role of a frequency as in the Fourier case, and the number of such orthogonal polynomials of degree~$k$ is given by~$N(d,k) = \frac{2k + d - 2}{k} {k + d - 3 \choose d - 2}$, which grows as~$k^{d-2}$ for large~$k$.
+The eigenvalues~$\mu_k$ only depend on the frequency~$k$ and are given by
+\begin{equation}
+\label{eq:mu_k}
+\mu_k = \frac{\omega_{d-2}}{\omega_{d-1}} \int_{-1}^1 \kappa(t) P_k(t) (1 - t^2)^{(d-3)/2} dt,
+\end{equation}
+where~$P_k$ is the Legendre polynomial of degree~$k$ in~$d$ dimensions (also known as Gegenbauer polynomial when using a different scaling), and~$\omega_{d-1}$ denotes the surface of the sphere~$\Sbb^{d-1}$.
+Mercer's theorem then states that the RKHS~$\Hcal$ associated to the kernel is given by
+\begin{equation}
+\label{eq:rkhs_mercer}
+\Hcal = \left\{ f = \sum_{k\geq 0, \mu_k \ne 0} \sum_{j=1}^{N(d,k)} a_{k,j} Y_{k,j}(\cdot)
+	\text{~~~~s.t.~~~} \|f\|_\Hcal^2 := \sum_{k\geq 0, \mu_k \ne 0} \sum_{j=1}^{N(d,k)} \frac{a_{k,j}^2}{\mu_k} < \infty \right\}.
+\end{equation}
+In particular, if~$\mu_k$ has a fast decay, then the coefficients~$a_{k,j}$ of~$f$ must also decay quickly with~$k$ in order for~$f$ to be in~$\Hcal$, which means~$f$ must have a certain level of regularity.
+Similarly to the Fourier case, an exponential decay of~$\mu_k$ implies that the functions in~$\Hcal$ are infinitely differentiable,
+while for polynomial decay~$\Hcal$ contains all functions whose derivatives only up to a certain order are bounded, as in Sobolev spaces.
+If two kernels lead to the same asymptotic decay of~$\mu_k$ up to a constant, then by~\eqref{eq:rkhs_mercer} their RKHS norms are equivalent up to a constant, and thus they have the same RKHS.
+For the specific case of random feature kernels arising from $s$-positively homogeneous activations, \citet{bach2017breaking} shows that~$\mu_k$ decays as~$k^{-d-2 s}$ for~$k$ of the opposite parity of~$s$, and is zero for large enough~$k$ of opposite parity, which results in a RKHS that contains even or odd functions (depending on the parity of~$s$) defined on the sphere with bounded derivatives up to order~$\beta := d/2 + s$ (note that~$\beta$ must be greater than~$(d-1)/2$ in order for the eigenvalues of~$T$ to be summable and thus lead to a well-defined RKHS).
+\citet{bietti2019inductive} show that the same decay holds for the NTK of two-layer ReLU networks, with~$s = 0$ and a change of parity.
+\citet{basri2019convergence} show that the parity constraints may be removed by adding a zero-initialized additive bias term when deriving the NTK.
+We note that one can also obtain rates of approximation for Lipschitz functions from such decay estimates~\citep{bach2017breaking}.
+Our goal in this paper is to extend this to more general dot-product kernels such as those arising from multi-layer networks, by providing a more general approach for obtaining decay estimates from differentiability properties of the function~$\kappa$.
+
+\paragraph{Non-parametric regression.}
+When the data are uniformly distributed on the sphere, we may also obtain convergence rates for non-parametric regression, which typically depend on the eigenvalue decay of the integral operator associated to the marginal distribution on inputs and on the decomposition of the regression function~$f^*(x) = \E[y | x]$ on the same basis~\citep[\eg,][]{caponnetto2007optimal}.\footnote{The rates easily extend to distributions with a density w.r.t.~the uniform distribution on the sphere, although the eigenbasis on which regularity is measured is then different.}
+Then one may achieve optimal rates that depend mainly on the regularity of~$f^*$ when using various algorithms with tuned hyperparameters, but the choice of kernel and its decay may have an impact on the rates in some regimes, as well as on the difficulty of the optimization problem~\citep[see, \eg,][Section 4.3]{bach2013sharp}.
+

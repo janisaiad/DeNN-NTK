@@ -1,0 +1,73 @@
+%!TEX root = main.tex
+
+
+In this section, we provide some background on spherical harmonics needed for our study of approximation.
+See~\citep{costas2014spherical,atkinson2012spherical,ismail2005classical} for references, as well as~\citep[Appendix D]{bach2017breaking}.
+We consider inputs on the $d-1$ sphere~$\mathbb S^{\dmone} = \{x \in \R^d, \|x\| = 1\}$.
+
+We recall some properties of the spherical harmonics~$Y_{k,j}$ introduced in Section~\ref{sub:dp_kernel_approx}.
+For~$j = 1, \ldots, N(d, k)$, where~$N(d,k) = \frac{2k + d - 2}{k} {k + d - 3 \choose d - 2}$, the spherical harmonics~$Y_{k,j}$ are homogeneous harmonic polynomials of degree~$k$ that are orthonormal with respect to the uniform distribution~$\tau$ on the~$\dmone$ sphere.
+The degree~$k$ plays the role of an integer frequency, as in Fourier series, and the collection~$\{Y_{k,j}, k \geq 0, j = 1, \ldots, N(d,k)\}$ forms an orthonormal basis of~$L^2(\Sbb^{\dmone}, d\tau)$.
+As with Fourier series, there are tight connections between decay of coefficients in this basis w.r.t.~$k$, and regularity/differentiability of functions, in this case differentiability on the sphere.
+This follows from the fact that spherical harmonics are eigenfunctions of the Laplace-Beltrami operator on the sphere~$\Delta_{\Sbb^{d-1}}$~\citep[see][Proposition 4.5]{costas2014spherical}:
+\begin{equation}
+\label{eq:laplace_beltrami}
+\Delta_{\Sbb^{d-1}} Y_{k,j} = -k(k+d-2)Y_{k,j}.
+\end{equation}
+
+For a given frequency~$k$, we have the following addition formula:
+\begin{equation}
+\label{eq:spherical_addition}
+\sum_{j=1}^{N(d, k)} Y_{k,j}(x) Y_{k,j}(y) = N(d, k) P_k( x^\top y ),
+\end{equation}
+where~$P_k$ is the $k$-th Legendre polynomial in dimension~$d$ (also known as Gegenbauer polynomial when using a different scaling),
+given by the Rodrigues formula:
+\begin{equation}
+\label{eq:rodrigues}
+P_k(t) = (-1/2)^k \frac{\Gamma(\frac{d-1}{2})}{\Gamma(k + \frac{d-1}{2})} (1 - t^2)^{(3-d)/2}
+	\left(\frac{d}{dt}\right)^k (1 - t^2)^{k+(d-3)/2}.
+\end{equation}
+Note that these may also be expressed using the hypergeometric function~$\pFq{2}{1}$~\citep[see, \eg,][Section 4.5]{ismail2005classical}, an expression we will use in proof of Theorem~\ref{thm:decay} (see the proof of Lemma~\ref{lemma:phi_nu}).
+
+The polynomials~$P_k$ are orthogonal in~$L^2([-1, 1], d\nu)$ where the measure $d \nu$ is given by the weight function
+$d \nu(t) = (1 - t^2)^{(d-3)/2}dt$, and we have
+\begin{equation}
+\label{eq:legendre_norm}
+\int_{-1}^1 P_k^2(t) (1 - t^2)^{(d-3)/2}dt = \frac{\omega_{d-1}}{\omega_{d-2}} \frac{1}{N(d,k)},
+\end{equation}
+where~$\omega_{p-1} = \frac{2 \pi^{p/2}}{\Gamma(p/2)}$ denotes the surface of the sphere~$\mathbb S^{p-1}$ in~$p$ dimensions.
+Using the addition formula~\eqref{eq:spherical_addition} and orthogonality of spherical harmonics, we can show
+\begin{equation}
+\label{eq:legendre_dp}
+\int P_j( w^\top x ) P_k( w^\top y ) d \tau(w) = \frac{\delta_{jk}}{N(d,k)} P_k( x^\top y )
+\end{equation}
+We will use two other properties of Legendre polynomials, namely the following recurrence relation~\cite[Eq. 4.36]{costas2014spherical}
+\begin{equation}
+\label{eq:legendre_rec}
+t P_k(t) = \frac{k}{2k + d - 2} P_{\kmone}(t) + \frac{k + d - 2}{2k + d - 2} P_{k+1}(t),
+\end{equation}
+for $k \geq 1$, and for $k = 0$ we simply have $t P_0(t) = P_1(t)$, as well as the differential equation
+~\citep[see, \eg,][Proposition 4.20]{costas2014spherical}:
+\begin{equation}
+\label{eq:pk_ode}
+(1 - t^2) P_k''(t) + (1 - d) t P_k'(t) + k(k + d - 2) P_k(t) = 0.
+\end{equation}
+
+The Funk-Hecke formula is helpful for computing Fourier coefficients in the basis of spherical harmonics in terms of
+Legendre polynomials: for any~$j = 1, \ldots, N(d, k)$, we have
+\begin{equation}
+\label{eq:funk_hecke}
+\int f(x^\top y) Y_{k,j}(y) d \tau(y) = \frac{\omega_{d-2}}{\omega_{d-1}} Y_{k,j}(x) \int_{-1}^1 f(t) P_k(t) (1 - t^2)^{(d-3)/2} dt.
+\end{equation}
+For example, we may use this to obtain decompositions of dot-product kernels by computing Fourier coefficients of functions~$\kappa(\langle x, \cdot \rangle)$.
+Indeed, denoting
+\begin{equation*}
+\mu_k = \frac{\omega_{d-2}}{\omega_{d-1}} \int_{-1}^1 \kappa(t) P_k(t) (1 - t^2)^{(d-3)/2}dt,
+\end{equation*}
+writing the decomposition of~$\kappa(\langle x, \cdot \rangle)$ using~\eqref{eq:funk_hecke} leads to the following Mercer decomposition of the kernel:
+\begin{equation}
+\label{eq:mercer}
+\kappa(x^\top y) = \sum_{k=0}^\infty \mu_k \sum_{j=1}^{N(d,k)} Y_{k,j}(x) Y_{k,j}(y) = \sum_{k=0}^\infty \mu_k N(d,k) P_k(x^\top y).
+\end{equation}
+
+

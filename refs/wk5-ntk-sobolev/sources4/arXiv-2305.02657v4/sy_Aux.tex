@@ -1,0 +1,560 @@
+% \subsection{Results on probability inequalities}
+% \begin{lemma}\label{lem:Chi2_Binomial} 
+% Suppose the random variable $Z \sim \chi_\omega^2$, in which $\chi^2$ is a chi-square distribution and its degree of freedom $\omega$ follows a binomial distribution $\mathcal{B}(m, 1/2)$. Then for any fixed $\varepsilon \in (0,1)$, we have the inequality:
+% \[\mb{P}\mpt{\abs{Z-\frac m2}\leq \frac{\varepsilon m}2}\geq 1-4\exp\mpt{-\frac{\varepsilon^2 m}{96}}.\]
+% \end{lemma}
+
+% \begin{proof}[Proof of \cref{lem:Chi2_Binomial}]
+% Recalling the tail estimation of chi-square distribution, for $Z \sim \chi_{\omega}^2$, we have the following inequality:
+% \begin{equation}\label{eq:ChiSquare_tail}
+% \mathbb{P}\mpt{\abs{Z - \omega} \leq t |\omega=k} \geq 1- 2\exp\mpt{-\tfrac{t^2}{6(k+t)}}.
+% \end{equation} 
+% It is evident that Equation \eqref{eq:ChiSquare_tail} exhibits a similar form to our expected result. However, it is important to note that $\omega$ is a random variable following a binomial distribution, i.e., $\omega \sim \mathcal{B}(m,1/2)$. Therefore, we also need to show that $\omega$ is close to its expectation, $m/2$, with high probability.
+
+
+% Recall the tail estimation of binomial distribution, for random variable $\omega \sim \mathcal{B}(m,1/2)$, we have
+% \begin{equation}\label{eq:Binomial_tail}
+% \mathbb{P}\mpt{\abs{\omega-\frac{m}{2} } \leq t }\geq 1-2\exp\mpt{-\tfrac{t^2}{ 2(mp+t)}}.
+% \end{equation}
+% Then, we try to combine the two parts mentioned above. By applying the total probability formula, we obtain:
+% \begin{equation*}
+% \mathbb{P}\mpt{\abs{Z - \frac{m}{2}}\leq \frac{\varepsilon m}{2}} = \sum_{k=0}^{m} \mathbb{P}\mpt{\abs{
+% \chi_k^2 - \frac{m}{2}}\leq \frac{\varepsilon m}{2}\Big|\,\omega=k} \mathbb{P}(\omega=k).
+% \end{equation*}
+% Using the triangle inequality, we have $ \abs{ \chi_k^2 - {m}/{2}} \leq \abs{\chi_k^2 - \omega } + \abs{ \omega- {m}/{2}}$, and thus we can get
+
+% \begin{align}
+% \mb{P}\mpt{\abs{Z-\frac m2}\leq \frac{\varepsilon m}2}&\geq\sum_{k=0}^m\mb{P}\mpt{\abs{\chi^2_{k}-k}\leq \frac {\varepsilon m}4,\abs{k-\frac m 2}\leq\frac {\varepsilon m}4}\mb{P}\mpt{\omega=k}\nonumber\\
+% &=\sum_{k:\abs{k-m/2}\leq \varepsilon m/4}\mb{P}\mpt{\abs{\chi^2_{k}-k}\leq \frac {\varepsilon m}4}\mb{P}\mpt{\omega=k}.\label{eq:Total_prob}
+% \end{align}
+
+
+% Let $t$ in \eqref{eq:ChiSquare_tail} and \eqref{eq:Binomial_tail} be $t=\varepsilon m /4$. When $k$ satisfies $ \abs{k -m/2} \leq {\varepsilon m}/4$, we have 
+% \[\mb{P}\mpt{\abs{\chi^2_k-k}\leq \frac{\varepsilon m}4}\geq 1-2\exp\mpt{\tm\tfrac1{96}\varepsilon^2 m};\quad~ \mb{P}\mpt{\abs{\omega-\frac{m}{2}}\leq \frac{\varepsilon m}4}\geq 1-2\exp\mpt{\tm\tfrac1{24}\varepsilon^2 m}.\]
+% Then plug these inequalities into \eqref{eq:Total_prob}, , we obtain:
+% \begin{align*}
+% &\mb{P}\mpt{\abs{Z-\frac m2}\leq \frac{\varepsilon m}2}
+% \geq \sum_{k:\abs{k -m/2}\leq \varepsilon m/4} \mb{P}\mpt{ \abs{\chi_k^2 -k } \leq \frac{\varepsilon m }{4} }\mb{P}(\omega = k)
+% \\&\qquad \geq \bk{1- 2\exp\mpt{-\tfrac{1}{96}\varepsilon^2 m }} \cdot \bk{1-2 \exp\mpt{ -\tfrac{1}{24} \varepsilon^{2} m} } 
+%  \geq 1-4\exp\mpt{\tm\tfrac1{96}\varepsilon^2 m}. 
+% \end{align*}
+% Hence, we get the final result.
+
+% \end{proof}
+
+%\subsection{Results about symmetric matrix}
+%Let $\bm{A}$ be a symmetric $n\times n$ matrix.
+%We denote by $\lambda_i(\bm{A})$ the $i$-th largest eigenvalue of $\bm{A}$:
+%\begin{align*}
+%  \lambda_{\max}(\bm{A}) =  \lambda_1(\bm{A}) \geq  \lambda_2(\bm{A}) \geq \dots \geq  \lambda_n(\bm{A}) = \lambda_{\min}(\bm{A})
+%\end{align*}
+
+%The followings are classic results about symmetric matrices.
+%\begin{theorem}[Schur product]
+%  \label{thm:SchurProduct}
+%  Let $\bm{A}$ and $\bm{B}$ be two positive definite matrices.
+%  Then the element-wise (Hadamard) product $\bm{A} \odot \bm{B}$ is also positive definite.
+%\end{theorem}
+%\begin{proof}
+%  \citet[Thm 7.5.3]{horn2017_MatrixAnalysis}.
+%\end{proof}
+
+%\begin{lemma}[Weyl's inequality]
+%  \label{lem:Weyls_inequality_sym_matrix}
+%  Let $\bm{A},\bm{B}$ be symmetric.
+%  Then
+%  \begin{align*}
+%    \lambda_{i+j-1}(\bm{A}+\bm{B}) & \leq \lambda_{i}(\bm{A}) +  \lambda_{j}(\bm{B}),\quad i,j \geq 1,~ i+j-1\leq n,\\
+%    \lambda_i(\bm{A}+\bm{B}) & \geq \lambda_{i+j-1}(\bm{A}) +  \lambda_{n-j+1}(\bm{B}), \quad j = 1,\cdots,n-i.
+%  \end{align*}
+%\end{lemma}
+%\begin{proof}
+%  \citet[Theorem 4.3.1]{horn2017_MatrixAnalysis}.
+%\end{proof}
+
+
+
+%\begin{lemma}[Ostrowski]
+%  \label{lem:MatrixOstrowski}
+%  Let $\bm{A}$ be positive semidefinite and $\bm{S}$ be non-singular.
+%%  Then, for each $k$ there exists $\theta_k \in [\lambda_1(\bm{S}\bm{S}'), \lambda_n(\bm{S}\bm{S}')]$ such that
+%%  \begin{align}
+%%    \lambda_k(\bm{S}\bm{A}\bm{S}') = \theta_k \lambda_k(\bm{A}).
+%%  \end{align}
+%  Particularly, if $\bm{A}$ is positive semidefinite, then
+%  \begin{align*}
+%    \lambda_1(\bm{S}\bm{S}')\lambda_k(\bm{A}) \leq \lambda_k(\bm{S}\bm{A}\bm{S}') \leq \lambda_n(\bm{S}\bm{S}')\lambda_k(\bm{A}).
+%  \end{align*}
+%\end{lemma}
+%\begin{proof}
+%  \citet[Theorem 4.5.9]{horn2017_MatrixAnalysis}.
+%\end{proof}
+
+%\begin{remark}
+%  The previous lemma tells us that the sign of the eigenvalues will not change for $\bm{S}\bm{A}\bm{S}'$.
+%\end{remark}
+
+\subsection{Self-adjoint compact operator}
+%For a self-adjoint compact operator $A$ on a Hilbert space,
+%we denote by $\lambda^+_n(A)$ (or $\lambda^-_n(A)$) the
+%$n$-th largest (or smallest) eigenvalue of $A$.
+%
+%\begin{lemma}[Minimax principle]
+%  Let $A$ be a self-adjoint compact operator.
+%  Then
+%  \begin{align*}
+%    \lambda^+_n(A) &= \sup_{\substack{V \subseteq H \\ \dim V = n}} \inf_{\substack{x \in V \\ \norm{x} = 1}} \ang{Ax,x},\qquad~\lambda^-_n(A) = \inf_{\substack{V \subseteq H \\ \dim V = n}} \sup_{\substack{x \in V \\ \norm{x} = 1}} \ang{Ax,x}.
+%  \end{align*}
+%\end{lemma}
+
+For a self-adjoint compact positive operator $A$ on a Hilbert space,
+we denote by $\lambda_n(A)$ the $n$-th largest eigenvalue of $A$.
+The following minimax principle is a classic result in functional analysis.
+
+\begin{lemma}[Minimax principle]
+  Let $A$ be a self-adjoint compact positive operator.
+  Then
+  \begin{align*}
+    \lambda_n(A) &= \sup_{\substack{V \subseteq H \\ \dim V = n}} \inf_{\substack{x \in V \\ \norm{x} = 1}} \ang{Ax,x}.
+  \end{align*}
+\end{lemma}
+
+
+\begin{lemma}[Weyl's inequality for operators]
+  \label{lem:A_WeylOp}
+  Let $A,B$ be self-adjoint compact positive operators.
+  Then
+  \begin{align}
+    \lambda_{i+j-1}(A+B) & \leq \lambda_{i}(A) +  \lambda_{j}(B),\quad i,j \geq 1.
+%    \lambda_{i}^+(A+B) & \geq \lambda_{i+j-1}^+(A) +  \lambda_{j}^-(B),\quad i,j \geq 1
+  \end{align}
+\end{lemma}
+
+%\begin{proof}
+%%  \citet[Theorem 4.3.1]{horn2017_MatrixAnalysis}
+%\end{proof}
+
+
+\begin{lemma}
+  \label{lem:seca_SumEigenCount}
+  Let $A_1,\dots,A_k$ be self-adjoint and compact.
+  Suppose $\ep = \sum_{i=1}^k \ep_i$.
+  Denote by $N^{\pm}(\ep,T)$ the count of eigenvalues of $T$ that is strictly greater(smaller) than $\ep$ ($-\ep$).
+  We have
+  \begin{align}
+    N^{\pm}(\ep, \sum_{i=1}^k A_i) \leq \sum_{i=1}^k N^{\pm}(\ep_i,A_i),
+  \end{align}
+\end{lemma}
+\begin{proof}
+  \citet[Lemma 5]{widom1963_AsymptoticBehavior}.
+\end{proof}
+
+
+%Let $H$ be a separable Hilbert space.
+%We use $\caI_2(H)$ to represent the operator ideal of Hilbert-Schmidt operators equipped with
+%the Hilbert-Schmidt norm $\norm{\cdot}_{\mathrm{HS}}$.
+
+%\begin{theorem}
+%  [Theorem 3.8.5 in \citet{simon2015_OperatorTheory}]
+%  \label{thm:a_HSNormInt}
+%  Let $H = L^2(\Omega,\dd \mu)$ where $(\Omega,\caF,\mu)$ is a $\sigma$-finite(separable)
+%  measure space.
+%  Then any $A \in \mathcal{I}_2(H)$ has an integral kernel $k_A(x,y) \in L^2(\Omega \times \Omega,\dd \mu \otimes \dd \mu)$,
+%  such that
+%  \begin{align*}
+%  (Af)(x)
+%    = \int k_A(x,y) f(y) \dd \mu(y).
+%  \end{align*}
+%  Moreover, $\norm{A}_{\mathrm{HS}} = \norm{k_A}_{L^2(\Omega \times \Omega,\dd \mu \otimes \dd \mu)}$.
+%\end{theorem}
+
+
+\subsection{Subdomains on the sphere}
+
+%
+%We define $R_{{e},\x}$ to be the rotation on the plane spanned by $e,x$ such that
+%$R_{{e},\x} e = x$.
+%If $x = e$, we define $R_{{e},\x}$ to be the identity map.
+%If $x = -e$, we define $R_{{e},\x}$ to be the mirror over the axis $e$.
+
+Let $d(\x,\y) = \arccos\ang{\x,\y}$ be the geodesic distance on the sphere.
+The first proposition deals with the ``overlapping  area'' after rotation of two subdomains.
+
+\begin{proposition}
+  \label{prop:AreaControl}
+  Let $\Omega_1, \Omega_2 \subset \bbS^d$ be two disjoint domains with piecewise smooth boundary.
+  Fix two points ${e},\y \in \bbS^d$.
+  Suppose that for any $\x \in \bbS^d$, $R_{{e},\x}$ is an isometric transformation such that $R_{{e},\x} {e} = \x$.
+  Then, there exists some $M$ such that
+  \begin{align}
+    \abs{\left\{ \x \in \Omega_1 : R_{{e},\x} \y \in \Omega_2 \right\}} \leq
+    M d(\y,{e}) = M \arccos \ang{\y,{e}},
+  \end{align}
+\end{proposition}
+\begin{proof}
+  Let $r = d(\y,{e})$.
+  Since $R_{{e},\x}$ is isometric, we have
+  \begin{align*}
+    r = d(\y,{e}) = d(R_{{e},\x}\y, R_{{e},\x}{e}) = d(R_{{e},\x}\y,\x).
+  \end{align*}
+  Therefore, if $r < d(\x,\partial \Omega_1)$, noticing that $\x \in \Omega_1$, we have $R_{{e},\x} \y \in \overline{B}_{\x}(r) \subset \Omega_1$,
+  and hence $R_{{e},\x}\y \notin \Omega_2$.
+  Therefore,
+  \begin{align*}
+    \left\{ \x \in \Omega_1 : R_{{e},\x} \y \in \Omega_2 \right\}
+    \subseteq \left\{ \x \in \Omega_1 : d(\x,\partial \Omega_1) \leq r \right\}.
+  \end{align*}
+  The latter is a tube of radius $r$ of $\partial \Omega_1$ as defined in \citet{weyl1939_VolumeTubes}.
+  Moreover, since $\partial \Omega_1$ is piecewise smooth, the results in \citet{weyl1939_VolumeTubes} show that there is some constant $M$
+  such that
+  \begin{align*}
+    \abs{\left\{ \x \in \Omega_1 : d(\x,\partial \Omega_1) \leq r \right\}}
+    \leq M r,
+  \end{align*}
+  giving the desired estimation.
+\end{proof}
+
+
+
+This following proposition provides a decomposition of the sphere.
+\begin{proposition}
+  \label{prop:C_SphereDecomp}
+  There exists a sequence of subdomains $U_0,V_0,U_1,V_1,\dots \subseteq \bbS^d$ with piecewise smooth boundary such that
+  \begin{enumerate}[(1)]
+    \item $U_0 = \bbS^d$;
+    \item There are disjoint isometric copies $V_{i,1},\dots,V_{i,n_i}$ of $V_i$ such that
+    $U_i = \bigcup_{j=1}^{n_i} V_{i,n_i} \cup Z,$
+    where $Z$ is a null-set;
+    \item $V_i \subseteq U_{i+1}$ after some isometric transformation;
+    \item $\mathrm{diam}~V_i \to 0$.
+  \end{enumerate}
+\end{proposition}
+\begin{proof}
+  Let us denote by $S_{\bm{p}, r} = \left\{ \x \in \bbS^d \;|\; \ang{\x,\bm{p}} > \cos r \right\}$
+  the spherical cap centered at $p$ with radius $r$,
+  and $S_r = S_{{e}_{d+1},r}$, where ${e}_{d+1}$ is the unit vector for the last coordinate.
+
+  First, let $V_0 = \left\{ \x = (x_1,\dots,x_{d+1}) \in \bbS^d ~\big|~ x_i > 0,~ i=1,\dots,d+1 \right\}.$
+  Then, by reflection, there are $2^{d+1}$ isometric copies of $\Omega$
+  such that their disjoint union is whole sphere minus equators,
+  which is a null set.
+
+  To proceed, taking $\bm{p} = \frac{1}{\sqrt {d+1}}(1,\dots,1)$, for any points $\x \in V_0$, we have
+  \begin{align*}
+    \ang{\x,\bm{p}} = \frac{1}{\sqrt {d+1}}\left( x_1 + \dots + x_{d+1} \right) \geq \frac{1}{\sqrt {d+1}}.
+  \end{align*}
+  Therefore, $V_0 \subset S_{\bm{p},r_1}$ for $r_1 = \arccos \frac{1}{\sqrt {d+1}} < \frac{\pi}{2}$
+  and we may take $U_1 = S_{r_1}$.
+
+  Now suppose we have $U_i = S_{r_i}$ with $r_i < \frac{\pi}{2}$.
+  Using polar coordinate, we have the parametrization
+  \begin{align}
+    \label{eq:4_PolarCoord}
+    x_1 &= \sin \theta_1 \cdots \sin \theta_d,\quad    x_2 = \sin \theta_1 \cdots \cos \theta_d,
+    \dots,          x_{d} = \sin\theta_1 \cos \theta_2,\quad    x_{d+1} = \cos\theta_1,
+  \end{align}
+  where $\theta_d \in [0,2\pi]$ and $\theta_j \in [0,\pi]$, $j = 1,\dots,d-1$.
+  Then, the spherical cap is given by $S_r = \left\{ \x ~|~ \theta_1 < r \right\}$.
+  Let us consider the slice
+  \begin{align*}
+    V_i = \left\{ \x \in \bbS^d ~\Big|~ \theta_1 < r,\theta_j \in (0,\frac{\pi}{2}),~j=2,\dots,d-1,\
+    \theta_d \in \left(-\frac{\pi}{4},\frac{\pi}{4}\right) \right\}
+    \subset S_{r},
+  \end{align*}
+  Then, by rotation over $\theta_d$ and reflection over $\theta_{j},~j=2,\dots,d-1$
+  we can find $2^{d}$ isometric copies of $V_i$ such that their disjoint union
+  is only different with $S_{r_i}$ by the union of the boundaries of $V_i$'s,
+  which a null-set.
+
+  Now, we find some $r_{i+1} < r_i$ such that
+  $V_i \subset U_{i+1} = S_{\bm{p},r_{i+1}}$.
+  Let us take the point $\bm{p} = (p_1,\dots,p_{d+1})$ by
+  \begin{align*}
+    p_{d+1} = \cos \eta, \quad p_d = \dots = p_2 = \frac{1}{\sqrt {d-1}} \sin \eta, \quad p_1 = 0,
+  \end{align*}
+  where $\eta \in (0,r_i)$ will be determined later.
+  Suppose now $x \in V_i$ is given by \cref{eq:4_PolarCoord}.
+  We obtain that
+  $\ang{\bm{p},\x} = \cos \eta \cos \theta_1 + \frac{\sin \eta}{\sqrt {d-1}} \left( x_{d} + \dots + x_2 \right)$.
+  Noticing that $\theta_j \in [0,\frac{\pi}{2}]$ and $\abs{\theta_d} \geq \frac{\pi}{4}$, we have
+  $x_{d} + \dots + x_2 \geq \sin \theta_1 \cos \theta_d \geq \frac{1}{\sqrt {2}} \sin \theta_1$.
+%  \begin{align*}
+%    x_{d} + \dots + x_2
+%%    &= \sin \theta_1 \left( \cos \theta_2 + \sin\theta_2 \cos \theta_3 + \dots + \sin\theta_2 \cdots \sin\theta_{d-1} \cos \theta_d \right) \\
+%    & \geq \sin \theta_1 \cos \theta_d \geq \frac{1}{\sqrt {2}} \sin \theta_1.
+%  \end{align*}
+  Therefore,
+  \begin{align*}
+    \ang{\bm{p},\x} &\geq \cos \eta \cos \theta_1 + a \sin \eta \sin \theta_1, \quad a = \frac{1}{\sqrt {2(d-1)}}, \\
+    & \geq \min\left( \cos\eta,\  \cos \eta \cos r_i + a \sin \eta \sin r_i \right), \quad \text{since } \theta_1 \in (0,r_i), \\
+    &=
+    \begin{cases}
+      \cos\eta, & \tan \eta > \frac{1 - \cos r_i}{a \sin r_i}, \\
+      \cos r_i \cos \eta  + (a \sin r_i) \sin \eta, & \text{otherwise}.
+    \end{cases}
+  \end{align*}
+  We know that the second term is maximized by $\tan \eta_0 = a \tan r_i$ and
+  \begin{align*}
+    \cos r_i \cos \eta_0 + a \sin r_i \sin \eta_0  = \sqrt {\cos^2 r_i + a^2 \sin^2 r_i}.
+  \end{align*}
+  On one hand, if $\tan \eta_0 \leq \frac{1 - \cos r_i}{a \sin r_i}$,
+  we take $\eta = \eta_0$ and the minimum is taken by the second term, so
+  $\ang{\bm{p},\x}  \geq \sqrt {\cos^2 r_i + a^2 \sin^2 r_i}$
+  and $V_i \subset S_{\bm{p},r_{i+1}}$ for $r_{i+1} = \arccos \sqrt {\cos^2 r_i + a^2 \sin^2 r_i}$.
+  In this case, we have
+  \begin{align}
+    \label{eq:4_ProofRRelation1}
+    \sin^2 r_{i+1} = 1 - (\cos^2 r_i + a^2 \sin^2 r_i) = (1-a^2) \sin^2 r_i.
+  \end{align}
+  On the other hand, if $\tan \eta_0 = a \tan r_i > \frac{1 - \cos r_i}{a \sin r_i}$,
+  we take $\eta = \arctan \frac{1 - \cos r_i}{a \sin r_i}$.
+  Then, the minimum is taken by the first term and $\ang{\bm{p},\x} \geq \cos \eta$, implying
+  $V \subset S_{\bm{p},r_{i+1}}$ for $r_{i+1} = \eta$.
+  In this case, we have
+  \begin{align}
+    \label{eq:4_ProofRRelation2}
+    \tan r_{i+1} = \tan \eta = \frac{1 - \cos r_i}{a \sin r_i} < a \tan r_i.
+  \end{align}
+
+  Considering both cases \cref{eq:4_ProofRRelation1},\cref{eq:4_ProofRRelation2} and noticing that
+  $a = \frac{1}{\sqrt {2(d-1)}} \in (0,1)$,
+  we conclude that $r_{i+1} < r_i$ and $r_i \to 0$.
+%    Finally, for both cases we have $r_{i+1} < r$ and $V \subset S_{\bm{p},r_{i+1}}$, so
+%    by \cref{prop:EigenCountUpperSubdomain} we get
+%    \begin{align*}
+%        N^+(\ep,P_{S_{r_{i+1}}} T P_{S_{r_{i+1}}}) \asymp N^+(\ep,T).
+%    \end{align*}
+\end{proof}
+
+\subsection{Cesaro sum}\label{subsec:AUX_Cesaro}
+We will use Cesaro sum in our analysis of dot-product kernels.
+We also refer to \citet[Section A.4]{dai2013_ApproximationTheory}.
+\begin{definition}
+  Let $p \geq 0$.
+  The $p$-Cesaro sum $s_n$ of a sequence $a_k$ is defined by
+  \begin{align}
+    s_n^p = \frac{1}{A_n^p}\sum_{k=0}^n A_{n-k}^{p} a_{k}, \qquad A_k^{p} \coloneqq \binom{k+p}{k}.
+  \end{align}
+%  A_k^{p} \coloneqq \binom{k+p}{k} = \frac{(p+1)_k}{k!} = \frac{(k+1)_{p}}{p!}
+\end{definition}
+%\begin{remark}
+%  From definition we have
+%  \begin{align*}
+%    \sum_{k=0}^n A_{n-k}^{p} = \sum_{k=0}^n A_{k}^{p} = \sum_{k=0}^n \binom{k+p}{k} = \binom{n+p+1}{n} = A_k^{p+1}.
+%  \end{align*}
+%%  Therefore, if $a_k \equiv 1$, we have
+%%  \begin{align*}
+%%    s^{p}_n = \frac{A^{p+1}_n}{A^p_n} = \frac{p+n}{p+1}.
+%%  \end{align*}
+%
+%  If $p = 0$, we have $A_k^p = 1$ and $s_n^0 = \sum_{k=0}^n a_k$ is the ordinary sum.
+%
+%  If $p = 1$, we have $A_k^p = k+1$ and
+%  \begin{align*}
+%    s_n^1 = \frac{1}{n+1}\sum_{k=0}^n (n-k+1) a_{k} = \frac{1}{n+1} \sum_{k=0}^n \left(\sum_{r=0}^k a_k\right)
+%  \end{align*}
+%  is the mean of sums.
+%\end{remark}
+
+\begin{definition}[Difference]
+  \label{def:DifferenceOperator}
+  Let $\bm{a} = (a_k)_{k\geq 0}$ be a sequence.
+  We define the difference operator on sequence by
+  \begin{align}
+  (\triangle^0 \bm{a})
+    _k = a_k, \quad
+    (\triangle \bm{a})_k = a_{k} - a_{k+1}, \quad
+    \triangle^{p+1} \bm{a} = \triangle(\triangle^{p}\bm{a}).
+  \end{align}
+  We often write $(\triangle^{p} \bm{a})_k = \triangle^{p} a_{k}$.
+  It is easy to see that $\triangle^{p} a_{k} = \sum_{r=0}^p \binom{k}{r} (-1)^r a_{k+r}.$
+
+\end{definition}
+
+
+%Let $(a_k)_{k\geq 0}$ be a sequence such that $a_k = 0$ for $k \geq K$.
+
+\begin{definition}[Tail sum]
+  Let $\bm{a} = (a_k)_{k\geq 0}$ be a sequence.
+  Assuming all the following summations are absolutely convergent,
+  we define the tail sum operator on sequence by
+  \begin{align}
+  (S^0 \bm{a}) _k = a_k,\quad
+    (S \bm{a})_k = \sum_{r \geq k} a_r,\quad
+    S^{p+1} \bm{a} = S(S^{p}\bm{a}).
+%    \begin{aligned}
+%      & (S^0 \bm{a})_k = a_k, \\
+%      & (S \bm{a})_k = \sum_{r \geq k} a_r, \\
+%      & S^{p+1} \bm{a} = S(S^{p}\bm{a}).
+%    \end{aligned}
+  \end{align}
+  We often write $(S^{p} \bm{a})_k = S^p a_k$.
+\end{definition}
+
+The following is an elementary proposition about the connection between tail sum and difference.
+\begin{proposition}
+  \label{prop:TailSumDifference}
+  We have (a) $S^p a_n = \sum_{k=0}^{\infty} A^{p-1}_k a_{n+k}$;
+  (b) $S\triangle a_n = \triangle S a_n = a_n$;
+  (c) Consequently, $\sum_{k=0}^{\infty} A^{p}_k \triangle^{p+1} a_{n+k} = (S^{p+1} \triangle^{p+1} a)_{n} = a_n$.
+
+  % \begin{enumerate}[(1)]
+  %   \item
+  %   \begin{align}
+  %     S^p a_n = \sum_{k=0}^{\infty} A^{p-1}_k a_{n+k}.
+  %   \end{align}
+  %   \item
+  %   \begin{align}
+  %     S\triangle a_n = \triangle S a_n = a_n.
+  %   \end{align}
+  %   \item Consequently,
+  %   \begin{align*}
+  %     \sum_{k=0}^{\infty} A^{p}_k \triangle^{p+1} a_{n+k} = (S^{p+1} \triangle^{p+1} a)_{n} = a_n.
+  %   \end{align*}
+  % \end{enumerate}
+\end{proposition}
+%\begin{proof}
+%(a)
+%  Calculation shows that
+%  \begin{align*}
+%    S^p a_n = \sum_{i_1 \geq n} \sum_{i_2 \geq i_1} \cdots \sum_{i_p \geq i_{p-1}} a_{i_p} = \sum_{i_p \geq n} \sum_{n \leq i_1 \leq i_2 \cdots \leq i_{p-1} \leq i_p}  a_{i_p}
+%    = \sum_{i_p \geq n} \binom{i_p - n + p-1}{p-1} a_{i_p} = \sum_{k=0}^{\infty} A^{p-1}_k a_{n+k}.
+%  \end{align*}
+%  For part (b), we have
+%  \begin{align*}
+%    & (S\triangle \bm{a})_n = \sum_{k \geq n}\triangle a_k = \sum_{k \geq n} (a_{k} - a_{k+1}) = a_n, \\
+%    & (\triangle S \bm{a})_n = S a_{n} - Sa_{n+1} = \sum_{k \geq n} a_{k} - \sum_{k \geq n+1}a_k = a_n.
+%  \end{align*}
+%\end{proof}
+
+We have the following summation by parts formula, see also \citet[(A.4.8)]{dai2013_ApproximationTheory}.
+
+\begin{proposition}[Summation by parts]
+  \label{prop:Aux_SumByParts}
+  Let $a_k,b_k$ be two sequence and $p \in \bbN$. Then,
+  \begin{align*}
+    \sum_{k=0}^{\infty} a_k b_k = \sum_{k=0}^{\infty} \triangle^{p+1} b_k \sum_{j=0}^k A^p_{k-j}a_j
+    =  \sum_{k=0}^{\infty} \triangle^{p+1} b_k A_k^p s_k^p,
+  \end{align*}
+  where $s_k^p$ is the $p$-Cesaro mean of $a_k$.
+\end{proposition}
+
+For a function $f : [a,b] \to \R$, we can define similarly $\triangle f(x) = f(x) - f(x+1)$ and $\triangle^{p+1} f(x) = \triangle^p f(x)-\triangle^p f(x+1)$.
+The following elementary lemma provides a connection between the difference and the derivative of the function.
+\begin{lemma}
+  Let $p \in \bbN$.
+  Suppose $f \in C^p([a,a+p])$, then
+  \begin{align}
+    \label{eq:A_Difference_Derivative}
+    \triangle^p f(a) = (-1)^{p} \int_{[0,1]^p} f^{(p)}(a+t_1+\dots+t_p) \dd t_1\cdots \dd t_p.
+  \end{align}
+\end{lemma}
+%\begin{proof}
+%  We prove by induction.
+%  When $p=1$,
+%  \begin{align*}
+%      \triangle f(a) = f(a) - f(a+1) = -\int_{[0,1]} f'(a+t_1) \dd t_1.
+%  \end{align*}
+%  Suppose \cref{eq:A_Difference_Derivative} holds for $p$.
+%  Then,
+%  \begin{align*}
+%      \triangle^{p+1} f(a) &= \triangle^{p} f(a) - \triangle^{p} f(a+1) \\
+%    &= (-1)^{p} \left[ \int_{[0,1]^p}  f^{(p)}(a+\sum_{i=1}^p t_i) \dd t_1\cdots \dd t_p - \int_{[0,1]^p}  f^{(p)}(a+1+\sum_{i=1}^p t_i) \dd t_1\cdots \dd t_p \right] \\
+%    & = (-1)^{p}\int_{[0,1]^p} \left[ f^{(p)}(a+\sum_{i=1}^p t_i) - f^{(p)}(a+1+\sum_{i=1}^p t_i) \right]\dd t_1\cdots \dd t_p \\
+%    &= (-1)^{p+1}\int_{[0,1]^p}\left[ \int_{[0,1]} f^{(p+1)}(a+\sum_{i=1}^p t_i + t_{p+1}) \dd t_{p+1} \right] \dd t_1\cdots \dd t_p \\
+%    &= (-1)^{p+1}\int_{[0,1]^{p+1}}f^{(p+1)}(a+\sum_{i=1}^{p+1} t_i )\dd t_1\cdots \dd t_{p+1},
+%  \end{align*}
+%  so \cref{eq:A_Difference_Derivative} holds for $p+1$.
+%\end{proof}
+
+\begin{proposition}
+  \label{prop:Aux_Difference_Derivative}
+  Suppose that $\mu_k = c_0 (k+1)^{-\beta},~ k\geq 0$.
+  Letting $(\beta)_p \coloneqq \beta (\beta+1)\cdots (\beta+p-1)$, then
+  \begin{align*}
+    0 < \triangle^{p} \mu_k \leq c_0 (\beta)_p  (k+1)^{-(\beta+p)}.
+  \end{align*}
+\end{proposition}
+\begin{proof}
+Apply the previous lemma with $f(x) = c(x+1)^{-\beta}$ and  $f^{(p)}(x) = (-1)^p c_0 (\beta)_p (x+1)^{-(\beta+p)}$.
+%  Let $f(x) = cx^{-\beta}$.
+%  From the previous lemma, we obtain
+%  \begin{align*}
+%    \triangle^{p} \mu_k = \triangle^{p} f(k) = (-1)^{p} \int_{[0,1]^p} f^{(p)}(x+t_1+\dots+t_p) \dd t_1\cdots \dd t_p
+%  \end{align*}
+%  Calculation shows
+%  \begin{align*}
+%    f^{(p)}(x) = (-1)^p c (\beta)_p x^{-(\beta+p)},
+%  \end{align*}
+%  so
+%  \begin{align*}
+%    \triangle^{p} \mu_k &= (-1)^{p} \int_{[0,1]^p} f^{(p)}(x+t_1+\dots+y_p) \dd t_1\cdots \dd t_p \\
+%    &= c (\beta)_p \int_{[0,1]^p}(x+t_1+\dots+t_p)^{-(\beta+p)} \dd t_1\cdots \dd t_p \\
+%    & \leq c (\beta)_p x^{-(\beta+p)}.
+%  \end{align*}
+%  The positiveness also follows from the last but second expression.
+\end{proof}
+
+%\begin{proposition}
+%  \label{prop:LeftInterpolation}
+%  Suppose that $\mu_k = c k^{-\beta}$ and $p \in \bbN$.
+%  Given $N$, we can find a left interpolation sequence $\tilde{\mu}_k$ such that
+%  (1) $\tilde{\mu}_k = \mu_k$ for $k \geq N$ and $\tilde{\mu}_k \leq \mu_k$ for $k < N$;
+%  (2) $\triangle^q \tilde{\mu}_k \geq 0$ for $q = 0,\dots,p$;
+%  (3) $\tilde{\mu}_0 \leq C(\beta,p) \mu_N$.
+%%  \begin{enumerate}[(1)]
+%%    \item
+%%    \item
+%%    \item
+%%  \end{enumerate}
+%\end{proposition}
+%\begin{proof}
+%  We impose the condition $\triangle^p \tilde{\mu}_k = 0$ for $k < N$, and compute recursively to get $\triangle^{p-1} \tilde{\mu}_k,\dots, \tilde{\mu}_k$.
+%  Since $\triangle^p \mu_k > 0$, we immediately obtain that $\tilde{\mu}_k < \mu_k$ for $k < N$.
+%%  We have
+%%  \begin{align*}
+%%    \triangle^{p-1} \tilde{\mu}_{N-r} &= \sum_{k=0}^{r-1} \triangle^p \tilde{\mu}_{N-r+k} + \triangle^{p-1} \mu_N
+%%    = \triangle^{p-1} \mu_N \leq c (\beta)_{p-1} N^{-(\beta+p-1)}, \\
+%%    \triangle^{p-2} \tilde{\mu}_{N-r} &= \sum_{k=0}^{r-1} \triangle^{p-1} \tilde{\mu}_{N-r+k} + \triangle^{p-2} \mu_N \\
+%%    &\leq  \sum_{k=0}^{r-1} c (\beta)_{p-1} N^{-(\beta+p-1)} + c (\beta)_{p-2} N^{-(\beta+p-2)} \\
+%%    & \leq c (\beta)_{p-1}  N^{-(\beta+p-2)} + c (\beta)_{p-2} N^{-(\beta+p-2)} \\
+%%    &= c \left(  (\beta)_{p-1}+(\beta)_{p-2} \right) N^{-(\beta+p-2)},\\
+%%    \cdots
+%%  \end{align*}
+%  By induction, we conclude that
+%  \begin{align*}
+%    \triangle^{q} \tilde{\mu}_{N-r} \leq c \left( \sum_{s =q}^{p-1}(\beta)_{s}  \right)N^{-(\beta+q)},
+%  \end{align*}
+%  and consequently for the case $q = 0$,
+%  \begin{align*}
+%    \tilde{\mu}_{N-r} \leq c \left( \sum_{s =0}^{p-1}(\beta)_{s} \right)N^{-\beta} = \left( \sum_{s =0}^{p-1}(\beta)_{s} \right) \mu_N,\quad
+%    \forall r = 0,\dots,N-1.
+%  \end{align*}
+%\end{proof}
+
+\begin{lemma}
+  \label{lem:LeftExtrapolation}
+  Let $\bm{\mu} = (\mu_k)_{k \geq 0}$ be a sequence such that $\triangle^p \mu_k \geq 0,~\forall k \geq 0$ for some $p\geq 0$.
+  Given $N \geq 0$, we can construct a left extrapolation sequence $(\tilde{\mu}_k)_{k \geq 0}$ such that
+  \begin{enumerate}[(1)]
+    \item $\tilde{\mu}_k = \mu_k$ for $k \geq N$ and $\tilde{\mu}_k \leq \mu_k$ for $k < N$;
+    \item $\triangle^p \tilde{\mu}_k \geq 0$, $\forall k \geq 0$;
+    \item Let $\bar{\mu}_k = \mu_k - \tilde{\mu}_k$ be the residual sequence, then $\triangle^p \bar{\mu}_k \geq 0$, $\forall k \geq 0$;
+    \item The leading term satisfies
+    \begin{align*}
+      \tilde{\mu}_0 = \caL_N^p \bm{\mu} \coloneqq \sum_{l=0}^{p-1} A_N^l \triangle^l \mu_N.
+    \end{align*}
+    We remark that the $\caL_N^p$ is in the same form as the LHS of \cref{eq:EDRDerivativeBound} in \cref{cond:EDR}.
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  We define $\tilde{\mu}_k$ recursively by its $p$-differences.
+  Let $\triangle^p \tilde{\mu}_k = 0$ for $k < N$ and $\triangle^p \tilde{\mu}_k = \triangle^p \mu_k$ for $k \geq N$.
+  Then, summing up the terms iteratively yields (1), (2) and also the recursive formula:
+  \begin{align*}
+    \triangle^{p-s}\tilde{\mu}_{N-r} = \sum_{l=0}^{s-1} A^l_r \triangle^{p-s+l} \mu_{N},\quad s = 1,\dots,p,\quad r = 0,\dots,N-1,
+  \end{align*}
+  which gives (4).
+  The last statement (3) follows from the fact that $\triangle^p \bar{\mu}_k = \triangle^p \mu_k - \triangle^p \tilde{\mu}_k \geq 0$.
+\end{proof}
+

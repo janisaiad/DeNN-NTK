@@ -1,0 +1,322 @@
+%!TEX root = main.tex
+
+The proof of Theorem~\ref{thm:decay}, stated below in full as Theorem~\ref{thm:decay_full}, proceeds as follows.
+We first derive an upper bound on the decay of~$\kappa$ of the form~$k^{-d-2 \nu + 3}$ (Lemma~\ref{lemma:diff_decay}), which is weaker than the desired~$k^{-d-2 \nu + 1}$, by exploiting regularity properties of~$\kappa$ through integration by parts.
+The goal is then to apply this result on a function~$\tilde \kappa = \kappa - \psi$, where~$\psi$ is a function that allows us to ``cancel'' the leading terms in the expansions of~$\kappa$, while being simple enough that it allows a precise estimate of its decay.
+In the proof of Theorem~\ref{thm:decay_full}, we follow this strategy by considering~$\psi$ as a sum of functions of the form~$t \mapsto (1 - t^2)^\nu$ and~$t \mapsto t(1 - t^2)^\nu$, for which we provide a precise computation of the decay in Lemma~\ref{lemma:phi_nu}.
+
+
+\paragraph{Decay upper bound through regularity.}
+We begin by establishing a weak upper bound on the decay of~$\kappa$ (Lemma~\ref{lemma:diff_decay}) by leveraging its regularity up to the terms of order~$(1 - t^2)^\nu$.
+This is achieved by iteratively applying the following integration by parts lemma, which is conceptually similar to integrating by parts on the sphere by leveraging the spherical Laplacian relation~\eqref{eq:laplace_beltrami} in Appendix~\ref{sec:appx_background}, but directly uses properties of~$\kappa$ and of Legendre polynomials instead (namely, the differential equation~\eqref{eq:pk_ode}).
+We note that the final statement in Theorem~\ref{thm:decay} on infinitely differentiable~$\kappa$ directly follows from Lemma~\ref{lemma:diff_decay}.
+
+\begin{lemma}[Integration by parts lemma]
+\label{lemma:ode_recursion}
+Let~$\kappa: [-1,1] \to \R$ be a function that is~$C^\infty$ on~$(-1,1)$ and such that~$\kappa'(t) (1-t^2)^{1+\frac{d-3}{2}} = O(1)$. We have
+\begin{align}
+\int_{-1}^1 \kappa(t) P_k(t) (1-t^2)^{\frac{d-3}{2}} dt &= \frac{1}{k(k+d-2)} \Big( -\kappa(t)(1 - t^2)^{1 + \frac{d-3}{2}} P_k'(t) \Big|_{-1}^1 \\
+	&\quad+ \kappa'(t) (1 - t^2)^{1 + \frac{d-3}{2}} P_k(t) \Big|_{-1}^1  + \int_{-1}^1 \tilde \kappa(t) P_k(t) (1 - t^2)^{(d-3)/2} dt \Big),
+\end{align}
+with~$\tilde \kappa(t) = -\kappa''(t)(1 - t^2) + (d-1)t \kappa'(t)$.
+\end{lemma}
+\begin{proof}
+In order to perform integration by parts, we use the following differential equation satisfied by Legendre polynomials~\citep[see, \eg,][Proposition 4.20]{costas2014spherical}:
+\begin{equation}
+(1 - t^2) P_k''(t) + (1 - d) t P_k'(t) + k(k + d - 2) P_k(t) = 0.
+\end{equation}
+Using this equation, we may write for~$k \geq 1$,
+\begin{align}
+\label{eq:pk_ipp}
+\int_{-1}^1 \kappa(t) P_k(t) (1 - t^2)^{(d-3)/2} dt 
+	&= \frac{1}{k(k+d-2)} \Big( (d-1) \int t \kappa(t) P_k'(t) (1 - t^2)^{\frac{d-3}{2}} dt \\
+		&\qquad- \int \kappa(t) P_k''(t) (1 - t^2)^{1 + \frac{d-3}{2}}dt \Big).
+\end{align}
+We may integrate the second term by parts using
+\begin{align}
+\frac{d}{dt} \left( \kappa(t) (1 - t^2)^{1 + \frac{d-3}{2}} \right)
+	&= \kappa'(t) (1 - t^2)^{1 + \frac{d-3}{2}} - 2t(1 + (d-3)/2) \kappa(t) (1 - t^2)^{\frac{d-3}{2}} \nonumber\\
+	&= \kappa'(t) (1 - t^2)^{1 + \frac{d-3}{2}} - (d-1) t \kappa(t)(1 - t^2)^{\frac{d - 3}{2}} \label{eq:ipp_diff}.
+\end{align}
+Noting that the first term in~\eqref{eq:pk_ipp} cancels out with the integral resulting from the second term in~\eqref{eq:ipp_diff}, we then obtain
+\begin{align*}
+\int_{-1}^1 \kappa(t) P_k(t) (1 - t^2)^{(d-3)/2} dt &= \frac{1}{k(k+d-2)} \Big( -\kappa(t)(1 - t^2)^{1 + \frac{d-3}{2}} P_k'(t) \Big|_{-1}^1  \\
+	&\qquad + \int_{-1}^1 \kappa'(t) (1 - t^2)^{1 + \frac{d-3}{2}} P_k'(t) dt \Big).
+\end{align*}
+Integrating by parts once more, the second term becomes
+\begin{align}
+\int_{-1}^1 \kappa'(t) (1 - t^2)^{1 + \frac{d-3}{2}} P_k'(t) dt &= \kappa'(t) (1 - t^2)^{1 + \frac{d-3}{2}} P_k(t) \Big|_{-1}^1 \nonumber \\
+	&\quad- \int_{-1}^1 (\kappa''(t)(1 - t^2) - (d-1)t \kappa'(t)) P_k(t) (1 - t^2)^{(d-3)/2} dt.
+\end{align}
+The desired result follows.
+\end{proof}
+
+\begin{lemma}[Weak upper bound on the decay]
+\label{lemma:diff_decay}
+Let~$\kappa: [-1,1] \to \R$ be a function that is~$C^\infty$ on~$(-1,1)$ and has the following expansions around~$\pm 1$ on its derivatives:
+\begin{align}
+\kappa^{(j)}(t) &= p_{j,1}(1-t) + O((1-t)^{\nu-j}) \\
+\kappa^{(j)}(t) &= p_{j,-1}(1+t) + O((1+t)^{\nu-j}), 
+\end{align}
+for~$t \in [-1, 1]$ and $j \geq 0$, where~$p_{j,1}, p_{j,-1}$ are polynomials and~$\nu$ may be non-integer.
+Then the Legendre coefficients~$\mu_k(\kappa)$ of~$\kappa$ given in~\eqref{eq:mu_k} satisfy
+\begin{equation}
+\mu_k(\kappa) = O(k^{-d-2 \nu + 3}).
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Let~$f_0 := \kappa$ and for~$j \geq 1$
+\begin{align}
+f_j(t) := -f_{j-1}''(t)(1 - t^2) + (d-1) f_{j-1}'(t).
+\end{align}
+Then~$f_j$ is~$C^\infty$ on~$(-1,1)$ and has similar expansions to~$\kappa$ of the form
+\begin{align}
+f_j(t) &= q_{j,1}(1-t) + O((1-t)^{\nu-j}) \\
+f_j(t) &= q_{j,-1}(1+t) + O((1+t)^{\nu-j}),
+\end{align}
+for some polynomials~$q_{j,\pm 1}$.
+We may apply Lemma~\ref{lemma:ode_recursion} repeatedly as long as the terms in brackets vanish, until we obtain, for~$j = \lceil \nu + \frac{d-3}{2} \rceil - 1$,
+\begin{align*}
+\int_{-1}^1 &\kappa(t) P_k(t) (1 - t^2)^{(d-3)/2} dt \\
+	&= \frac{1}{(k(k+d-2))^{j+1}}
+\left( f_j'(t) (1 - t^2)^{1 + \frac{d-3}{2}} P_k(t) \Big|_{-1}^1 + \int_{-1}^1 f_{j+1}(t) P_k(t) (1 - t^2)^{(d-3)/2} dt \right).
+\end{align*}
+Given our choice for~$j$, we have $f_j'(t) (1 - t^2)^{1 + \frac{d-3}{2}} = O(1)$, and $f_{j+1}(t) (1 - t^2)^{(d-3)/2} = O((1-t^2)^{-1+ \epsilon})$ for some~$\epsilon > 0$. Since~$P_k(t) \in [-1, 1]$ for any~$t \in [-1, 1]$, we obtain $\mu_k(\kappa) = O(k^{-2(j+1)}) = O(k^{-d-2 \nu+3})$.
+\end{proof}
+
+\paragraph{Precise decay for simple function.}
+We now provide precise decay estimates for functions of the form~$t \mapsto (1 - t^2)^\nu$ and~$t \mapsto t(1 - t^2)^\nu$, which will lead to the dominant terms in the decomposition of~$\kappa$ in the main theorem.
+
+
+\begin{lemma}[Decay for simple functions~$\phi_\nu$ and~$\bar \phi_\nu$]
+\label{lemma:phi_nu}
+Let $\phi_\nu(t) = (1 - t^2)^\nu$, with~$\nu > 0$ non-integer, and let~$\mu_k(\phi_\nu)$ denote its Legendre coefficients in~$d$ dimensions given by~$\frac{\omega_{d-2}}{\omega_{d-1}}\int_{-1}^1 (1 - t^2)^{\nu + (d-3)/2} P_k(t) dt$.
+We have
+\begin{itemize}
+	\item $\mu_k(\phi_\nu) = 0$ if~$k$ is odd
+	\item $\mu_k(\phi_\nu) \sim C(d,\nu) k^{-d-2 \nu - 1}$ for~$k$ even, $k \to \infty$, with~$C(d,\nu)$ a constant.
+\end{itemize}
+Analogously, let $\bar \phi_\nu(t) := t(1 - t^2)^{\nu}$. We have
+\begin{itemize}
+	\item $\mu_k(\bar \phi_\nu) = 0$ if~$k$ is even
+	\item $\mu_k(\bar \phi_\nu) \sim C(d,\nu) k^{-d-2 \nu - 1}$ for~$k$ odd, $k \to \infty$, with~$C(d,\nu)$ a constant.
+\end{itemize}
+
+\end{lemma}
+\begin{proof}
+We recall the following representation of Legendre polynomials based on the hypergeometric function~\citep[\eg,][Section 4.5]{ismail2005classical}:\footnote{Here we normalize such that~$P_k(1)=1$ as is standard for Legendre polynomials, in contrast to~\citep{ismail2005classical} where the standard Jacobi/Gegenbauer normalization is used.}
+\begin{equation}
+P_k(t) = \pFq{2}{1}(-k,k+d-2;(d-1)/2;(1-t)/2),
+\end{equation}
+where the hypergeometric function is given in its generalized form by
+\begin{equation}
+\pFq{p}{q}(a_1, \ldots, a_p;b_1, \ldots, b_q;x)
+= \sum_{s=0}^\infty \frac{(a_1)_s \cdots (a_p)_s}{(b_1)_s \cdots (b_q)_s} \frac{x^s}{s!},
+\end{equation}
+where~$(a)_s = \Gamma(a+s)/\Gamma(a)$ is the rising factorial or Pochhammer symbol.
+
+Using the above definitions and the integral representation of Beta functions, we then have
+\begin{align*}
+\int_{-1}^1 (1-t^2)^{\nu + \frac{d-3}{2}} P_k(t) dt
+	&= 2^{2 \nu + d - 3} \int_{-1}^1 \left(\frac{1-t}{2}\right)^{\nu + \frac{d-3}{2}} \left(\frac{1+t}{2}\right)^{\nu + \frac{d-3}{2}} P_k(t) dt \\
+	&= 2^{2 \nu + d - 3} \sum_{s=0}^k \frac{(-k)_s (d-2+k)_s}{\left( \frac{d-1}{2}\right)_s s!} \int_{-1}^1 \left(\frac{1-t}{2}\right)^{\nu + \frac{d-3}{2} + s} \left(\frac{1+t}{2}\right)^{\nu + \frac{d-3}{2}} dt \\
+	&= 2^{2 \nu + d - 2} \sum_{s=0}^k \frac{(-k)_s (d-2+k)_s}{\left( \frac{d-1}{2}\right)_s s!} \int_{0}^1 \left(1-x\right)^{\nu + \frac{d-3}{2} + s} x^{\nu + \frac{d-3}{2}} dx \\
+	&= 2^{2 \nu + d - 2} \sum_{s=0}^k \frac{(-k)_s (d-2+k)_s}{\left( \frac{d-1}{2}\right)_s s!} \frac{\Gamma(\nu +s + \frac{d-1}{2}) \Gamma(\nu + \frac{d-1}{2})}{\Gamma(2 \nu + s + d - 1)} \\
+	&= 2^{2 \nu + d - 2} \frac{\Gamma(\nu + \frac{d-1}{2})^2}{\Gamma(2 \nu + d - 1)} \sum_{s=0}^k \frac{(-k)_s (d-2+k)_s (\nu + \frac{d-1}{2})_s}{\left( \frac{d-1}{2}\right)_s (2 \nu + d - 1)_s s!} \\
+	&= 2^{2 \nu + d - 2} \frac{\Gamma(\nu + \frac{d-1}{2})^2}{\Gamma(2 \nu + d - 1)} \pFq{3}{2}\left(\begin{matrix}
+		-k,k+d-2, \nu + (d-1)/2 \\ (d-1)/2, 2 \nu + d - 1
+	\end{matrix}\Big| 1 \right).
+\end{align*}
+
+Now, we use Watson's theorem~\citep[\eg,][Eq.~(1.4.12)]{ismail2005classical}, which states that
+\begin{equation}
+\pFq{3}{2}\left(\begin{matrix}
+		a,b,c \\ (a + b + 1)/2, 2c
+	\end{matrix}\Big|1 \right) = \frac{\Gamma(\frac{1}{2}) \Gamma(c + \frac{1}{2}) \Gamma(\frac{a+b+1}{2}) \Gamma(c + \frac{1 - a - b}{2})}{\Gamma(\frac{a+1}{2})\Gamma(\frac{b+1}{2}) \Gamma(c + \frac{1-a}{2})}.
+\end{equation}
+
+We remark that with~$a=-k, b=k+d-2, c=\nu + (d-1)/2$, our expression above is of the form of Watson's theorem, and we may thus evaluate~$\mu_k$ in closed form.
+Indeed, we have
+\begin{align}
+\pFq{3}{2}\left(\begin{matrix}
+		-k,k+d-2, \nu + (d-1)/2 \\ (d-1)/2, 2 \nu + d - 1
+	\end{matrix}\Big| 1 \right)
+	&= \frac{\Gamma(\frac{1}{2}) \Gamma(\nu + \frac{d}{2}) \Gamma(\frac{d-1}{2}) \Gamma(\nu + 1)}{\Gamma(\frac{1-k}{2}) \Gamma(\frac{d+k-1}{2}) \Gamma(\nu + \frac{k}{2} + \frac{d}{2}) \Gamma(\nu + 1 - \frac{k}{2})}.
+\end{align}
+When~$k$ is odd, then~$(1-k)/2$ is a non-positive integer so that the denominator is infinite and thus~$\mu_k$ vanishes. We assume from now on that~$k$ is even, making the denominator is finite.
+Using the following relation, for~$\epsilon \notin \Z$ and an integer~$n$:
+\begin{equation}
+\frac{\Gamma(1+\epsilon)}{\Gamma(\epsilon - n)} = \epsilon(\epsilon-1) \cdots (\epsilon - n) = (-1)^{n-1} \frac{\Gamma(n+1- \epsilon)}{\Gamma(-\epsilon)},
+\end{equation}
+we may then rewrite
+\begin{align}
+\pFq{3}{2}\left(\begin{matrix}
+		-k,k+d-2, \nu + (d-1)/2 \\ (d-1)/2, 2 \nu + d - 1
+	\end{matrix}\Big| 1 \right)
+	&= \frac{\Gamma(\nu + \frac{d}{2}) \Gamma(\frac{d-1}{2}) \Gamma(\nu + 1)}{\Gamma(-\frac{1}{2}) \Gamma(\nu + 2) \Gamma(-\nu - 1)} \frac{\Gamma(\frac{k + 1}{2}) \Gamma(\frac{k}{2} - \nu) }{\Gamma(\frac{d+k-1}{2}) \Gamma(\nu + \frac{k}{2} + \frac{d}{2})}.
+\end{align}
+When~$k \to \infty$, Stirling's formula~$\Gamma(x) \sim x^{x - \frac{1}{2}} e^{-x} \sqrt{2 \pi}$ yields the equivalent
+\begin{equation}
+\frac{\Gamma(\frac{k + 1}{2}) \Gamma(\frac{k}{2} - \nu) }{\Gamma(\frac{d+k-1}{2}) \Gamma(\nu + \frac{k}{2} + \frac{d}{2})} \sim \left(\frac{k}{2} \right)^{-d-2 \nu + 1}.
+\end{equation}
+This yields
+\begin{equation}
+\mu_k \sim C(d,\nu) k^{-d-2 \nu + 1},
+\end{equation}
+with
+\begin{align}
+C(d,\nu) &= 2^{2 \nu + d - 2} \frac{\omega_{d-2}}{\omega_{d-1}} \frac{\Gamma(\nu + \frac{d-1}{2})^2}{\Gamma(2 \nu + d - 1)} \frac{\Gamma(\nu + \frac{d}{2}) \Gamma(\frac{d-1}{2}) \Gamma(\nu + 1)}{\Gamma(-\frac{1}{2}) \Gamma(\nu + 2) \Gamma(-\nu - 1)} (1/2)^{-d-2 \nu + 1}.
+\end{align}
+
+\paragraph{Decay for~$\bar \phi_\nu$.}
+The decay for~$\bar \phi_\nu$ follows from the decay of~$\phi_\nu$ and the recurrence relation~\citep[][Eq.~(4.36)]{costas2014spherical}
+\begin{equation}
+t P_k(t) = \frac{k}{2k + d - 2}P_{k-1}(t) + \frac{k+d - 2}{2k + d - 2} P_{k+1}(t),
+\end{equation}
+which ensures the same decay with a change parity.
+\end{proof}
+
+
+
+\paragraph{Final theorem.}
+We are now ready to prove our main theorem, which differs from the simplified statement of Theorem~\ref{thm:decay} by the technical assumption that only a finite number~$r$ of terms of order between~$\nu$ and~$\nu + 1$ are present in the series expansions around~$\pm 1$.
+
+\begin{theorem}[Main theorem, full version]
+\label{thm:decay_full}
+Let~$\kappa: [-1,1] \to \R$ be a function that is~$C^\infty$ on~$(-1,1)$ and has the following expansions around~$\pm 1$:
+\begin{align}
+\kappa(t) &= p_1(1-t) + \sum_{j=1}^r c_{j,1} (1-t)^{\nu_j} + O((1-t)^{\nu_1 + 1 + \epsilon}) \\
+\kappa(t) &= p_{-1}(1+t) + \sum_{j=1}^r c_{j,-1} (1+t)^{\nu_j} + O((1+t)^{\nu_1 + 1 + \epsilon}),
+\end{align}
+for~$t \in [-1, 1]$, where~$p_1, p_{-1}$ are polynomials and~$0 < \nu_1 < \ldots < \nu_r$ are not integers and $0 < \epsilon < \nu_2 - \nu_1$.
+We also assume that the derivatives~$\kappa^{(s)}$ of~$\kappa$ have the following expansions:
+\begin{align}
+\kappa^{(s)}(t) &= p_{s,1}(1-t) + (-1)^s\sum_{j=1}^r c_{j,1} \frac{\Gamma(\nu_j + 1)}{\Gamma(\nu_j + 1 - s)} (1-t)^{\nu_j-s} + O((1-t)^{\nu_1 + 1 + \epsilon - s}) \\
+\kappa^{(s)}(t) &= p_{s,-1}(1+t) + \sum_{j=1}^r c_{j,-1} \frac{\Gamma(\nu_j + 1)}{\Gamma(\nu_j + 1 - s)} (1+t)^{\nu_j-s} + O((1+t)^{\nu_1 + 1 + \epsilon - s}),
+\end{align}
+for some polynomials~$p_{s,\pm 1}$.
+Then we have, for an absolute constant~$C(d,\nu_1)$ depending only on~$d$ and~$\nu_1$,
+\begin{itemize}[noitemsep]
+	\item For~$k$ even, if~$c_{\nu_1,1} \ne -c_{1,-1}$: $\mu_k \sim (c_{1,1} + c_{1,-1}) C(d,\nu_1) k^{-d-2 \nu_1 + 1}$;
+	\item For~$k$ even, if~$c_{1,1} = -c_{1,-1}$: $\mu_k = o(k^{-d-2 \nu_1 + 1})$;
+	\item For~$k$ odd, if~$c_{1,1} \ne c_{1,-1}$: $\mu_k \sim (c_{1,1} - c_{1,-1}) C(d,\nu_1) k^{-d-2 \nu_1 + 1}$.
+	\item For~$k$ odd, if~$c_{1,1} = c_{1,-1}$: $\mu_k =o(k^{-d-2 \nu_1 + 1})$.
+\end{itemize}
+\end{theorem}
+
+\begin{proof}
+Define the functions
+\begin{align}
+\psi_j(t) &= c_{j,1} \frac{\phi_{\nu_j}(t) + \bar \phi_{\nu_j}(t)}{2^{\nu_j + 1}} + c_{j,-1} \frac{\phi_{\nu_j}(t) - \bar \phi_{\nu_j}(t)}{2^{\nu_j + 1}} \label{eq:psij_def} \\
+	&= \frac{c_{j,1} + c_{j,-1}}{2^{\nu_j + 1}} \phi_{\nu_j}(t) + \frac{c_{j,1} - c_{j,-1}}{2^{\nu_j + 1}} \bar \phi_{\nu_j}(t),
+\end{align}
+for~$j = 1, \ldots, r$, where~$\phi_{\nu}, \bar \phi_\nu$ are defined in Lemma~\ref{lemma:phi_nu}.
+We have the asymptotic expansions:\footnote{These are obtained by writing $\psi_j(t) = (a + bt) (1 + t)^\nu (1 - t)^\nu$ and computing, \eg, the first two terms in the analytic expansion of~$t \mapsto (a + bt) (1 + t)^\nu$ around 1.}
+\begin{align*}
+\psi_1(t) &= c_{1,1} (1 - t)^{\nu_1} - \frac{(1 + \nu_1)c_{1,1} + c_{1,-1}}{2} (1 - t)^{\nu_1 + 1} + O((1 - t)^{\nu_1 + 1 + \epsilon}) \\
+\psi_1(t) &= c_{1,-1} (1 + t)^{\nu_1} + \frac{c_{1,1} - (1 + \nu) c_{1,-1}}{2} (1 + t)^{\nu_1 + 1} + O((1 + t)^{\nu_1 + 1 + \epsilon}),
+\end{align*}
+and for~$j \geq 2$,
+\begin{align*}
+\psi_j(t) &= c_{j,1} (1 - t)^{\nu_j} + O((1 - t)^{\nu_1 + 1 + \epsilon}) \\
+\psi_j(t) &= c_{j,-1} (1 + t)^{\nu_j} + O((1 + t)^{\nu_1 + 1 + \epsilon}).
+\end{align*}
+Define additionally~$\psi_{r+1}$ the same way as the other~$\psi_j$, with~$\nu_{r+1} = \nu_1 + 1$, $c_{r+1,1} = ((1 + \nu_1)c_{1,1} + c_{1,-1})/2$, and~$c_{r+1,-1} = -(c_{1,1} - (1 + \nu) c_{1,-1})/2$, which satisfies a similar asymptotic expansion as the above ones for~$j \geq 2$.
+One can check that the derivatives of the~$\psi_j$ can be expanded with the derivatives of the expansions above.
+Then, defining $\tilde \kappa = \kappa - \sum_{j=1}^{r+1} \psi_j$, we have for~$s \geq 0$,
+\begin{align}
+\tilde \kappa^{(s)}(t) &= p_{s,1}(1-t) + O((1-t)^{\nu_1 + 1 + \epsilon - s}) \\
+\tilde \kappa^{(s)}(t) &= p_{s,-1}(1+t) + O((1+t)^{\nu_1 + 1 + \epsilon - s}).
+\end{align}
+The functions~$\psi_j$ satisfy
+\begin{equation}
+\mu_k(\psi_j) = \begin{cases}
+	\frac{c_{j,1} + c_{j,-1}}{2^{\nu_j + 1}} \mu_k(\phi_{\nu_j}), &\text{ if $k$ even,}\\
+	\frac{c_{j,1} - c_{j,-1}}{2^{\nu_j + 1}} \mu_k(\bar \phi_{\nu_j}), &\text{ if $k$ odd.}\\
+\end{cases}
+\end{equation}
+By Lemma~\ref{lemma:diff_decay}, we have
+\begin{align}
+\mu_k(\kappa) &= \mu_k(\tilde \kappa) + \sum_{j=1}^r \mu_k(\psi_j) \\
+	&= \sum_{j=1}^r \mu_k(\psi_j) + O(k^{-d - 2 (\nu_1 + 1 + \epsilon) + 3}) \\
+	&= \sum_{j=1}^r \mu_k(\psi_j) + o(k^{-d - 2 \nu_{1} + 1}).
+\end{align}
+The result then follows from Lemma~\ref{lemma:phi_nu}, with a constant~$C(d, \nu_1) / 2^{\nu_1 + 1}$, where~$C(d, \nu_1)$ is given by the proof of Lemma~\ref{lemma:phi_nu}.
+\end{proof}
+
+
+\subsection{Dimension-free description}
+\label{sub:appx_dimension_free}
+While our above description of the RKHS depends on the dimension~$d$, in some cases a dimension-free description given by Taylor coefficients of the kernel~$\kappa$ at~$0$ may be useful,
+for instance for the study of kernel methods in certain high-dimensional regimes~\citep[\eg,][]{el2010spectrum,ghorbani2019linearized,liang2019risk}.
+Here we remark that such coefficients and their decay may be recovered from the Legendre coefficients in~$d$ dimensions, by taking high-dimensional limits~$d \to \infty$.
+We illustrate this on the functions~$\phi_\nu(t) = (1 - t^2)^\nu$, for which Lemma~\ref{lemma:phi_nu} provides precise estimates of the Legendre coefficients~$\mu_{k,d}(\phi_\nu)$ in~$d$ dimensions (this only serves as an instructive illustration, since in this case Taylor coefficients may be computed directly through a power series expansion of~$\phi_\nu$ using the Binomial formula).
+\begin{lemma}[Recovering Taylor coefficients of~$\phi_\nu$ through high-dimensional limits]
+\label{lemma:bk_phinu}
+Let~$b_k(\phi_\nu) := \frac{\phi_\nu^{(k)}}{k!}$ for some non-integer~$\nu > 0$. For~$k$ even, we have
+\begin{equation*}
+b_k(\phi_\nu) = C_\nu 2^k \frac{\Gamma(\frac{k + 1}{2}) \Gamma(\frac{k}{2} - \nu) }{\Gamma(k+1)},
+\end{equation*}
+for a constant~$C_\nu$ depending only on~$\nu$. This leads to an equivalent~$b_k \sim C_\nu' k^{- \nu - 1}$ for~$k \to \infty$ with~$k$ even.
+\end{lemma}
+\begin{proof}
+Assume throughout that~$k$ is even.
+Recall the expression of the Legendre coefficients~$\mu_{k,d}(\phi_\nu)$ of~$\phi_\nu$ in~$d$ dimensions (we include~$d$ as a subscript for more clarity here) from the proof of Lemma~\ref{lemma:phi_nu}:
+\begin{align}
+\mu_{k,d}(\phi_\nu) &= \frac{\omega_{d-2}}{\omega_{d-1}} \int_{-1}^1 \kappa(t) P_{k,d}(t) (1 - t^2)^{\frac{d-3}{2}} dt \\
+	&= 2^{2 \nu + d - 2} \frac{\omega_{d-2}}{\omega_{d-1}} \frac{\Gamma(\nu + \frac{d-1}{2})^2}{\Gamma(2 \nu + d - 1)} \frac{\Gamma(\nu + \frac{d}{2}) \Gamma(\frac{d-1}{2}) \Gamma(\nu + 1)}{\Gamma(-\frac{1}{2}) \Gamma(\nu + 2) \Gamma(-\nu - 1)} \frac{\Gamma(\frac{k + 1}{2}) \Gamma(\frac{k}{2} - \nu) }{\Gamma(\frac{d+k-1}{2}) \Gamma(\nu + \frac{k}{2} + \frac{d}{2})}. \label{eq:mukd_phinu}
+\end{align}
+
+Now, note that when~$d$ is large enough compared to~$k$, we may use the Rodrigues formula~\eqref{eq:rodrigues} and integration by parts to obtain the following alternative expression:
+\begin{equation*}
+\mu_{k,d}(\phi_\nu) = 2^{-k} \frac{\omega_{d-2}}{\omega_{d-1}}  \frac{\Gamma(\frac{d-1}{2})}{\Gamma(k + \frac{d-1}{2})} \int_{-1}^1 \phi_\nu^{(k)}(t) (1 - t^2)^{k + \frac{d-3}{2}} dt
+\end{equation*}
+Following similar arguments to~\citet{ghorbani2019linearized}, we may then use dominated convergence to show:
+\begin{equation*}
+\frac{\Gamma(\frac{d}{2})}{\sqrt{\pi}\Gamma(\frac{d-1}{2})} \int_{-1}^1 \phi_\nu^{(k)}(t) (1 - t^2)^{k + \frac{d-3}{2}} dt \to \phi_\nu^{(k)}(0) \quad \text{ as }d \to \infty.
+\end{equation*}
+Indeed, $\frac{\Gamma(\frac{d}{2})}{\sqrt{\pi}\Gamma(\frac{d-1}{2})} (1 - t^2)^{(d-3)/2}$ is a probability density that approaches a Dirac mass at 0 when~$d \to \infty$.
+This yields
+\begin{equation*}
+b_k(\phi_\nu) = \frac{\phi_\nu^{(k)}}{k!} = \lim_{d \to \infty} 2^{k} \frac{\omega_{d-1}}{\omega_{d-2}} \frac{\Gamma(\frac{d}{2})\Gamma(k + \frac{d-1}{2})}{\sqrt{\pi}\Gamma(\frac{d-1}{2}) \Gamma(\frac{d-1}{2}) \Gamma(k + 1)} \mu_{k,d}(\phi_\nu).
+\end{equation*}
+Plugging~\eqref{eq:mukd_phinu} and using Stirling's formula to take limits~$d \to \infty$ yields
+\begin{equation*}
+b_k(\phi_\nu) = C_\nu 2^k \frac{\Gamma(\frac{k + 1}{2}) \Gamma(\frac{k}{2} - \nu) }{\Gamma(k+1)},
+\end{equation*}
+where~$C_\nu$ only depends on~$\nu$. Using Stirling's formula once again yields the desired equivalent~$b_k(\phi_\nu) \sim C'_\nu k^{- \nu - 1}$ for~$k \to \infty$, $k$ even, with a different constant~$C'_\nu$.
+\end{proof}
+
+We note that a similar asymptotic equivalent holds for~$b_k(\bar \phi_\nu)$ for~$k$ odd.
+The next result leverages this to derive asymptotic decays of~$b_k(\kappa)$ for any~$\kappa$ of the form~$\kappa(u) = \sum_{k \geq 0} b_k(\kappa) u^k$ satisfying similar conditions as in Theorem~\ref{thm:decay_full}.
+
+\begin{corollary}[Taylor coefficients of~$\kappa$]
+Let~$\kappa: [-1,1] \to \R$ be a function admitting a power series expansion~$\kappa(u) = \sum_{k \geq 0} b_k u^k$, with the following expansions around~$\pm 1$:
+\begin{align}
+\kappa(t) &= p_1(1-t) + \sum_{j=1}^r c_{j,1} (1-t)^{\nu_j} + O((1-t)^{\lceil\nu_1\rceil + 1}) \\
+\kappa(t) &= p_{-1}(1+t) + \sum_{j=1}^r c_{j,-1} (1+t)^{\nu_j} + O((1+t)^{\lceil\nu_1\rceil + 1}),
+\end{align}
+for~$t \in [-1, 1]$, where~$p_1, p_{-1}$ are polynomials and~$0 < \nu_1 < \ldots < \nu_r$ are not integers and $0 < \epsilon < \nu_2 - \nu_1$.
+Then we have, for an absolute constant~$C(\nu_1)$ depending only on~$\nu_1$,
+\begin{itemize}[noitemsep]
+	\item For~$k$ even, if~$c_{\nu_1,1} \ne -c_{\nu_1,-1}$: $b_k \sim (c_{\nu_1,1} + c_{\nu_1,-1}) C(\nu_1) k^{- \nu_1 - 1}$;
+	\item For~$k$ even, if~$c_{\nu_1,1} = -c_{\nu_1,-1}$: $b_k = o(k^{- \nu_1 - 1})$;
+	\item For~$k$ odd, if~$c_{\nu_1,1} \ne c_{\nu_1,-1}$: $b_k \sim (c_{\nu_1,1} - c_{\nu_1,-1}) C(\nu_1) k^{- \nu_1 - 1}$.
+	\item For~$k$ odd, if~$c_{\nu_1,1} = c_{\nu_1,-1}$: $b_k =o(k^{- \nu_1 - 1})$.
+\end{itemize}
+\end{corollary}
+
+\begin{proof}
+As in the proof of Theorem~\ref{thm:decay_full}, we may construct a function~$\psi = \sum_j \alpha_j \phi_{\nu_j} + \bar \alpha_j \bar \phi_{\nu_j}$, with~$\alpha_1 = \frac{c_{1,1} + c_{1,-1}}{2^{\nu_1 + 1}}$, $\bar \alpha_1 = \frac{c_{1,1} - c_{1,-1}}{2^{\nu_1 + 1}}$ for~$j=1$, the other terms being of higher orders~$\nu_j > \nu_1$, such that~$\tilde \kappa := \kappa - \psi$ (which is also a power series with convergence radius $\geq 1$) satisfies
+\begin{align}
+\tilde \kappa(t) &= p_1(1-t) + O((1-t)^{\lceil\nu_1\rceil + 1}) \\
+\tilde \kappa(t) &= p_{-1}(1+t) + O((1+t)^{\lceil\nu_1\rceil + 1}),
+\end{align}
+It follows that~$\tilde \kappa^{(\lceil\nu_1\rceil + 1)}(1)$ is bounded, so that the Taylor coefficients of~$\tilde \kappa$, denoted~$b_k(\tilde \kappa)$, satisfy
+\begin{equation*}
+b_k(\tilde \kappa) = o(k^{- \lceil\nu_1\rceil - 1}) = o(k^{- \nu_1 - 1}).
+\end{equation*}
+The result then follows from Lemma~\ref{lemma:bk_phinu} by using the decays of~$b_k(\phi_\nu)$ and~$b_k(\bar \phi_\nu)$.
+
+\end{proof}

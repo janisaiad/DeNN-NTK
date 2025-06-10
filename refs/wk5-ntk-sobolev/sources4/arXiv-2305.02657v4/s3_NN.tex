@@ -1,0 +1,510 @@
+%
+%% \subsubsection{Kernel gradient flow}
+%\paragraph{Kernel gradient flow}
+%Since we have shown that the training process of wide neural networks can be approximated by
+%a kernel regressor,
+%we are particularly interested in the following
+%\textit{kernel gradient flow} method~\citep{zhang2005_BoostingEarly,yao2007_EarlyStopping},
+%which falls into a broader class of methods known as spectral algorithms in kernel regression
+%~\citep{bauer2007_RegularizationAlgorithms}.
+%
+%Let us introduce the sampling operator $K_{\x} : \R \to \caH$ defined by $K_{\x} y = y k(\x,\cdot)$,
+%whose adjoint $K_{\x}^* : \caH \to \R$ is given by $K_{\x}^* f = f(\x) = \ang{f,k(\x,\cdot)}_{\caH}$.
+%We also define the empirical covariance operator $T_{\X} : \caH \to \caH$ by $T_{\X} = \frac{1}{n}\sum_{i=1}^n K_{\x_{i}} K_{\x_{i}}^*.$
+%It can also be shown that $T_{\X}$ is self-adjoint and positive, and $\norm{T_{\X}} \leq \norm{T_{\X}}_1 \leq \kappa^2$.
+%Using these notations, the empirical loss can be written as
+%\begin{align}
+%  \caL(f) = \frac{1}{2n}\sum_{i=1}^n (f(\x_i) - y_i)^2 = \frac{1}{2n}\sum_{i=1}^n (K_{\x_i} f - y_i)^2,
+%\end{align}
+%and its Fréchet derivative is shown in \citet{yao2007_EarlyStopping} to be
+%\begin{align*}
+%  \nabla \caL(f) = \frac{1}{n}\sum_{i=1}^n K_{\x_i} (K_{\x_i}^* f - y_i) = T_{\X} f - g_Z,
+%\end{align*}
+%where we define $g_Z \coloneqq \frac{1}{n} \sum_{i=1}^n K_{\x_i} y_i$.
+%Therefore, we can consider the following gradient flow equation in $\caH$:
+%\begin{align}
+%  \label{eq:5_KGD_Flow}
+%  \pdv{t}f_t = - \nabla \caL(f_t) = -(T_{\X} f_t - g_Z),
+%\end{align}
+%where we set the initial value $f_0 = 0$.
+%The matrix form of \cref{eq:5_KGD_Flow} is
+%\begin{align*}
+%  \pdv{t} f_t(\x) = - k(\x,\X) (f_t(\X) - \mathbf{y}),
+%\end{align*}
+%which is in the same form as \cref{eq:2_NTK_GF}.
+%Finally, solution $\hat{f}^{\mathrm{GF}}_t$ of equation \cref{eq:5_KGD_Flow} gives the regressor of kernel gradient flow method,
+%which can be given explicitly by
+%\begin{align*}
+%   \hat{f}^{\mathrm{GF}}_t = \varphi^{\mathrm{GF}}_t(T_{\X}) g_Z,
+%    \qq{or}
+%    \hat{f}^{\mathrm{GF}}_t(\x) = k(\x,\X)\varphi^{\mathrm{GF}}_t\left(\frac{1}{n}k(\X,\X)\right) \bm{y},
+%\end{align*}
+%where $\varphi^{\mathrm{GF}}_t(z) \coloneqq (1-e^{-tz})/z$
+%defines a class of continuous function on $z \in [0,+\infty)$ and
+%$\varphi^{\mathrm{GF}}_t(T_{\X})$ (or $\varphi^{\mathrm{GF}}_t( k(\X,\X)/n)$) is understood by the spectral decomposition.
+
+In this section, using the spectral properties of the NTK obtained in the previous section,
+we derive the optimal rates of over-parameterized neural networks by combining the NTK theory and the kernel regression theory.
+Let $d$ be fixed, $\caX \subseteq \R^d$ and $\mu$ be a sub-Gaussian\footnote{
+That is, $\mu(\left\{ x \in \R^d : \norm{x} \geq t \right\}) \leq 2 \exp(-t^2 / C^2),~ \forall t \geq 0$ for some constant $C > 0$.
+}
+probability distribution supported on $\caX$ with upper bounded Riemann-integrable density.
+Suppose we are given i.i.d.\ samples $(\x_1,y_1),(\x_2,y_2),\dots,(\x_n,y_n) \in \caX \times \R$ generated from the model
+$y = f^*(\x) + \ep$,
+where $\x \sim \mu$, $f^* : \caX \to \R$ is an unknown regression function and the independent noise $\ep$ is sub-Gaussian.
+
+In terms of notations, we denote $\X = (\x_1,\dots,\x_n)$ and $\bm{y} = (y_1,\dots,y_n)^T$.
+For a kernel function $k : \caX\times\caX \to \R$, we write $k(\x,\X) = (k(\x,\x_1),\dots,k(\x,\x_n))$
+and $k(\X,\X) = \big(k(\x_i,\x_j)\big)_{n\times n}$.
+
+\subsection{Setting of the neural network}
+\label{subsec:NN_Setting}
+
+We are interested in the following fully connected ReLU neural network $f(\x;\bm{\theta})$ with $L$-hidden layers
+of widths $m_1,m_2,\dots, m_L$, where $L \geq 2$ is fixed.
+The network includes bias terms on the first and the last layers.
+To ensure that the final predictor corresponds to the kernel regressor, we consider a special mirrored architecture.
+In detail, the network model is given by the following:
+\begin{align*}
+  % \label{eq:NN_Arch}
+  \begin{split}
+    % \bm{\alpha}^{(0,p)}(\x)&=\tilde{\bm{\alpha}}^{(0,p)}(\x)=\tilde{\x}\in\mb{R}^{d+1},~p\in[2],\\
+    \bm{\alpha}^{(1,p)}(\x) & = \sqrt{\tfrac{2}{m_{1}}} \sigma\xkm{\bm{A}^{(p)}\x+\bm{b}^{(0,p)}}\in\mb{R}^{m_1},~ p\in\dk{1,2},\\
+    \bm{\alpha}^{(l,p)}(\x) & = \sqrt{\tfrac{2}{m_{l}}}\sigma\xkm{\bm{W}^{(l-1,p)}\bm{\alpha}^{(l-1,p)}(\x)}\in\mb{R}^{m_{l}},~
+    l \in \dk{2,3,\dots,L},~p\in\dk{1,2},\\
+    g^{(p)}(\x;\bm{\theta}) & = \bm{W}^{(L,p)}\bm{\alpha}^{(L,p)}(\x)+b^{(L,p)}\in\mb{R},~p\in\dk{1,2},\\
+    f(\x;\bm{\theta}) &= \frac{\sqrt{2}}{2}\zk{ g^{(1)}(\x;\bm{\theta}) - g^{(2)}(\x;\bm{\theta}) }\in\mb{R}.
+  \end{split}
+\end{align*}
+% \begin{equation}
+% \label{eq:NN_Arch}
+% \begin{aligned}
+% \bm{\alpha}^{(1,p)}(\x) &= \sqrt {\frac{2}{m_1}} \pt{\bm{A}^{(p)} \x + \bm{b}^{(0,p)}} \in \R^{m_1},\quad p =1,2 \\
+% \bm{\alpha}^{(l+1,p)}(\x) &= \sqrt {\frac{2}{m_{l+1}}} \bm{W}^{(l,p)} \sigma\mpt{\bm{\alpha}^{(l,p)}(\x)}  \in \R^{m_{l+1}}, \quad~l =1,2,\dots,L-1,~p =1,2 \\
+% g^{(p)}(\x;\bm{\theta}) &= \bm{W}^{(L,p)} \sigma\mpt{\bm{\alpha}^{(L,p)}(\x)} + b^{(L,p)}\in\mb{R},\quad p=1,2 \\
+% f(\x;\bm{\theta}) &= \frac{\sqrt{2}}{2}\mbk{g^{(1)}(\x;\bm{\theta}) - g^{(2)}(\x;\bm{\theta})}\in\mb{R}
+% \end{aligned}
+% \end{equation}
+Here, $\bm{\alpha}^{(l,p)}$ represents the hidden layers; $l\in\dk{1,2,\dots,L}$, $p\in\dk{1,2}$ stand for the index of layers and parity respectively;
+$\sigma(x) \coloneqq \max(x,0)$ is the ReLU activation (applied elementwise);
+parameters $\bm{A}^{(p)}\in\mb{R}^{m_1\times d}$, $\bm{W}^{(l,p)} \in \R^{m_{l+1} \times m_l}$, $\bm{b}^{(0,p)} \in \R^{m_{1}}$, $b^{(L,p)} \in \R$,
+where we set $m_{L+1}=1$;
+and we use $\bm{\theta}$ to represent the collection of all parameters flatten as a column vector.
+Letting $m = \min(m_1,m_2,\dots,m_{L})$, we assume that $\max(m_1,m_2,\dots,m_{L}) \leq C_{\mr{width}} m$ for some constant $C_{\mr{width}}$.
+
+%\begin{figure*}[t]%
+%  \centering
+%  \input{fig/tikz/NN_mirror_long.tikz}
+%  \caption{An illustration of the mirrored architecture considered in this paper.}
+%  \label{fig:NN}
+%\end{figure*}
+
+% \begin{figure*}[t]
+%  \centering
+%  % \input{fig/tikz/NN_mirror_above.tikz}
+%  \includegraphics[width=\textwidth]{fig/tikz/NN_mirror.pdf}
+%  \caption{An illustration of the mirrored architecture considered in this paper.}
+%  \label{fig:NN}
+% \end{figure*}
+
+
+%\xmark{A figure is needed to illustrate the architecture}
+
+% \subsection{Initialization}
+
+\paragraph{Initialization}
+Considering the mirrored architecture, we initialize the parameters in one parity to be i.i.d.\ normal and set the parameters in the other parity be the same as the corresponding ones.
+More precisely,
+\begin{align*}
+  % \label{eq:NN_Init}
+  \begin{aligned}
+    &\bm{A}^{(1)}_{i,j},\bm{W}^{(l,1)}_{i,j},\bm{b}^{(0,1)}_i,b^{(L,1)} \iid N(0,1),\quad \text{for}~l=0,1,\dots,L, \\
+    & \bm{W}^{(l,2)} = \bm{W}^{(l,1)},\quad\bm{A}^{(2)}=\bm{A}^{(1)},\quad\bm{b}^{(0,2)} = \bm{b}^{(0,1)}, \quad b^{(L,2)} = b^{(L,1)}.
+  \end{aligned}
+\end{align*}
+Such kind of ``mirror initialization'' ensures that the model output is always zero at initialization,
+which is also considered in \citet{lai2023_GeneralizationAbility}.
+
+\paragraph{Training}
+Neural networks are often trained by the gradient descent (or its variants) with respect to the empirical loss
+$\mathcal{L}(\bm{\theta}) = \frac{1}{2n}\sum_{i=1}^n (f(x_i;\bm{\theta}) - y_i)^2$.
+For simplicity, we consider the continuous version of gradient descent, namely the gradient flow for the training process.
+Denote by $\bm{\theta}_t$ the parameter at the time $t \geq 0$, the gradient flow is given by
+\begin{align}
+  \label{eq:2_GD}
+  \dot{\bm{\theta}}_t = - \nabla_{\bm{\theta}} \mathcal{L}(\bm{\theta}_t)= - \frac{1}{n} \nabla_{\bm{\theta}} f(\X;\bm{\theta}_t) (f(\X;\bm{\theta}_t) - \bm{y})
+\end{align}
+where $f(\X;\bm{\theta}_t) = (f(x_1;\bm{\theta}_t),\dots,f(x_n;\bm{\theta}_t))^T$ and $\nabla_{\bm{\theta}} f(\X;\bm{\theta}_t)$ is an $M \times n$
+matrix where $M$ is the number of parameters.
+Finally, let us denote by $\fNN(\x) \coloneqq f(\x;\bm{\theta}_t)$
+the resulting neural network predictor.
+
+\subsection{Uniform convergence to kernel regression}\label{subsec:UniformConv}
+
+Although the gradient flow \cref{eq:2_GD} is a highly non-linear and hard to analyze,
+the celebrated neural tangent kernel (NTK) theory~\citep{jacot2018_NeuralTangent} provides a way to approximate the gradient flow by a kernel regressor
+when the width of the network tends to infinity,
+which is also referred to as the \textit{lazy training regime}.
+Introducing a random kernel function $K_t(\x,\x') = \ang{\nabla_{\bm{\theta}} f(\x;\bm{\theta}_t),\nabla_{\bm{\theta}} f(\x';\bm{\theta}_t)}$,
+it is shown that $K_t(\x,\x')$ concentrates in probability to a deterministic kernel $\NTK$ called the neural tangent kernel (NTK).
+Consequently, the predictor $\fNN(\x)$ is well approximated by the kernel regressor $\fNTK(\x)$ given by the following gradient flow:
+\begin{align}
+  \label{eq:2_NTK_GF}
+  \dv{t} \fNTK(\x) = - \NTK(\x,\X) (\fNTK(\X) - \bm{y}),
+\end{align}
+where $\fNTK(\X) = (\fNTK(x_1),\dots,\fNTK(x_n))^T$.
+Thanks to the mirrored architecture, we have $\fNN(\x) \equiv 0$ at initialization and thus we also have $\fNTK(\x) \equiv 0$.
+The recursive formula of the NTK also enables us to give explicitly~\citep{jacot2018_NeuralTangent,bietti2020_DeepEquals}
+the formula of $\NTK$ in \cref{eq:NTK_Formula}.
+
+%It is clear that the gradient flow equation \cref{eq:2_GD} is a highly non-linear differential equation and hard to solve explicitly.
+%After introduced a time-varying kernel function
+%\begin{align}
+%  \label{eq:Kt_Formula}
+%  K_t(\x,\x') = \ang{\nabla_{\bm{\theta}} f(\x;\bm{\theta}_t),\nabla_{\bm{\theta}} f(\x';\bm{\theta}_t)}
+%\end{align}
+%which we called the neural network kernel(NNK) in this paper,
+%\cite{jacot2018_NeuralTangent} observed that
+%\begin{align}
+%  \label{eq:2_NN_GF}
+%  \dot{f}(\x;\bm{\theta}_t) = - \frac{1}{n} K_t(\x,\X)\left( f(\X;\bm{\theta}_t) - \bm{y} \right),
+%\end{align}
+%where $K_t(\x,\X) =  \nabla_{\bm{\theta}} f(\x;\bm{\theta}_t) \left[ \nabla_{\bm{\theta}} f(\X;\bm{\theta}_t) \right]^T$
+%is a $1\times n$ vector.
+%It might be the \eqref{eq:2_NN_GF} motivates them to introduce the neural tangent kernel.
+%Moreover, \cite{jacot2018_NeuralTangent} showed that with the random Gaussian initialization,
+%$K_t(\x,\x')$ concentrates to a time-invariant kernel called the neural tangent kernel (NTK)~\citep{jacot2018_NeuralTangent}:
+%% which is given by
+%\begin{align*}
+%  % \label{eq:NTK_Def}
+%  K_{t}(\x,\x') \overset{\mb{P}}{\rightarrow} \NTK(\x,\x')  \qq{as} {m \to \infty},
+%  % \NTK(\x,\x') \overset{p}{=} \lim_{m \to \infty}K_{t}(\x,\x')
+%  %\ang{\nabla_{\bm{\theta}} f(\x;\bm{\theta}), ~ \nabla_{\bm{\theta}} f(\x';\bm{\theta})}
+%\end{align*}
+%where $\overset{\mb{P}}{\rightarrow}$ stands for converging in probability.
+%%Moreover, thanks to the overparametrization, $K_t(\x,\x')$ is also stable during the training.
+%Thus, they considered the
+%kernel regressor $\fNTK(\x)$ given by the following gradient flow%~\citep{lee2019_WideNeural}
+%\begin{align}
+%  \label{eq:2_NTK_GF}
+%  \pdv{t} \fNTK(\x) = - \NTK(\x,\X) (\fNTK(\X) - \bm{y})
+%\end{align}
+%and illustrated that if both the equations \cref{eq:2_NN_GF} and \cref{eq:2_NTK_GF} are starting from zeros, then $\hat f^{\mathrm{NN}}_{t}(\x)$ is well approximated by $\hat f^{\mathrm{NTK}}_{t}(\x)$.
+%Since most studies of \cref{eq:2_NN_GF} assumed that $\hat{f}^{\mathrm{NTK}}_0(\x) \equiv 0$,  we adopted
+%the mirror initialization so that $\hat{f}^{\mathrm{NN}}_0(\x) \equiv 0$.
+
+%Furthermore, \citet{jacot2018_NeuralTangent} also provided an explicit recursive formula of the NTK. %\citep{jacot2018_NeuralTangent,allen-zhu2019_ConvergenceTheory}.
+%Let us define
+%\begin{align*}
+% % \label{eq:NTK_DefRecur}
+%  \begin{aligned}
+%    \Sigma_0(\x,\x') &= N_0(\x,\x') = \ang{\x,\x'} + 1
+%  \end{aligned}
+%\end{align*}
+%and for $l=1,\dots,L$,
+%\begin{align}
+%  \label{eq:NTK_DefRecur}
+%  &\begin{aligned}
+%  \Sigma_{l}(\x,\x') &= 2 \E_{(u,v)}\left[ \sigma(u) \sigma(v) \right], \\
+%     N_{l}(\x,\x') &= \Sigma_{l}(\x,\x') + 2 N_{l-1}(\x,\x') \E_{(u,v)}\left[ \dot{\sigma}(u) \dot{\sigma}(v) \right],
+%  \end{aligned}
+%\end{align}
+%where  $(u,v)\sim N(\bm{0},\bm{B}_{l-1}(\x,\x'))$, the matrix $\bm{B}_l(\x,\x')$ is defined as:
+%\[\bm{B}_l(\x,\x') =
+%\begin{pmatrix}
+%  \Sigma_l(\x,\x)  & \Sigma_l(\x,\x')  \\
+%  \Sigma_l(\x,\x') & \Sigma_l(\x',\x')
+%\end{pmatrix}\]
+%and $\dot{\sigma}(x) = \bm{1}_{\{x > 0\}}$ is the weak derivative of $\sigma(x)$.
+%The NTK associated with the network defined in this paper can be explicitly written as
+%\begin{align}
+%  \label{eq:NTK_Def0}
+%  &\NTK(\x,\x') = N_L(\x,\x') + 1.
+%\end{align}
+
+
+Although previous works
+~\citep{lee2019_WideNeural,arora2019_ExactComputation,allen-zhu2019_ConvergenceTheory}
+showed that the neural network regressor $\fNN(\x)$ can be approximated by $\fNTK(\x)$,
+most of these results are established pointwisely, namely, for fixed $\x$,
+$\sup_{t\geq 0}\abs{\fNTK(\x)-\fNN(\x)}$ is small with high probability.
+However,
+to analyze the generalization performance of $\fNN(\x)$, the convergence is further needed to be uniform over $x \in \caX$.
+Consider the simple case of two-layer neural network, \citet{lai2023_GeneralizationAbility} rigorously showed such uniform convergence.
+With more complicated analysis, we prove the uniform convergence of $\fNN(\x)$ to $\fNTK(\x)$ for multilayer neural networks.
+To state our result, let us denote by $\lambda_0 = \lambda_{\min}\left( \NTK(\X,\X) \right)$ the minimal eigenvalue of the kernel matrix,
+which, by \cref{prop:NTK_PD}, can be assumed to be positive in the following.
+%which $\lambda_0$
+%It will be shown by \cref{thm:NTK_PD} that $\NTK$ is positive definite and thus $\lambda_0 > 0$ almost surely.
+%Therefore, we will assume that $\lambda_0 > 0$ in the following.
+% Let us denote
+% \begin{align}
+%   \label{eq:2_KernelMatrix}
+%   \K_{\mathrm{NT}}(\x,\X) \coloneqq (k(\x,x_1),\dots,k(\x,x_n)),
+% %  \quad K_{\mathrm{NT}} \coloneqq \frac{1}{n}\Big(k(x_i,x_j)\Big)_{n\times n}
+% \end{align}
+% for $k(\x,y) = \NTK(\x,y)$.
+% Consider the kernel regressor $\fNTK(\x)$ define by following flow
+% \begin{align}
+%   \label{eq:2_NTK_GF}
+%   \pdv{t} \fNTK(\x) = - \K_{\mathrm{NT}}(\x,\X) (\hat{f}^{\NTK}_t(\X) - \mathbf{y})
+% \end{align}
+% with initialization $\hat{f}^{\mathrm{NTK}}_0(\x) = 0$.
+
+\begin{lemma}
+  \label{lem:UnifConverge}
+  Denote $M_{\bm{X}} = \sum_{i=1}^n \norm{x_i}_2$ and $B_r = \dk{x \in \R^d : \norm{x} \leq r}$ for $r \geq 1$.
+  There exists a polynomial $\mathrm{poly}(\cdot)$ such that
+  for any $\delta \in (0,1)$ and $k > 0$,
+  when $m \geq \mathrm{poly}(n,M_{\bm{X}},\lambda_0^{-1},$ $\norm{\bm{y}}, \ln(1/\delta), k)$ and $m \geq r^k$,
+  with probability at least $1-\delta$ with respect to random initialization, we have
+  \begin{align*}
+    \sup_{t\geq 0} \sup_{\x \in B_r} \abs{\fNTK(\x) - \fNN(\x)} \leq O(r^2 m^{-\frac{1}{12}} \sqrt {\ln m}).
+  \end{align*}
+\end{lemma}
+
+
+\cref{lem:UnifConverge} shows that as $m$ tends to infinity, $\fNN(\x)$ can be approximated uniformly by $\fNTK(\x)$ on a bounded set, which is also allowed to grow with $m$.
+Consequently, we can study the generalization performance of the neural network in the lazy training regime by that of the corresponding kernel regressor.
+
+%\begin{corollary}
+%  \label{cor:UnifConvergence}
+%  There exists a polynomial $\operatorname{poly}(\cdot)$ such that
+%  for any $\ep > 0$ and $\delta \in (0,1)$,
+%  when $m \geq \mathrm{poly}(n,\lambda_0^{-1},\norm{\bm{y}},\ln(1/\delta), 1/\ep)$,
+%  one has that
+%  \begin{align*}
+%    \sup_{t \geq 0}\abs{\norm{\fNN - f^*}_{L^2} - \norm{\fNTK - f^*}_{L^2}}
+%    \leq \ep
+%  \end{align*}
+%  holds with probability at least $1-\delta$ with respect to random initialization.
+%\end{corollary}
+
+To establish \cref{lem:UnifConverge},
+it is essential to demonstrate the uniform convergence of the kernel $K_t(\x,\x')$ towards $\NTK(\x,\x')$.
+This is achieved by first establishing the Hölder continuity of $K_t(\x,\x')$ and $\NTK(\x,\x')$,
+and then applying an $\epsilon$-net argument in conjunction with the pointwise convergence.
+Since the detailed proof is laborious, it is deferred to \cref{sec:A_NN}.
+
+
+
+\subsection{The optimal rates of the over-parameterized neural network}
+
+
+
+With the uniform convergence of the neural network to the kernel regressor established and the eigenvalue decay rate of the NTK determined,
+we can now derive the optimal rates of the over-parameterized neural network.
+Let us denote by $\caH = \caH_{\mathrm{NTK}}$ the RKHS associated with the NTK \cref{eq:NTK_Formula} on $\caX$.
+We introduce the integral operator $T$ in \cref{eq:T_Def} and recall its spectral decomposition in \cref{eq:MercerDecomp}.
+The kernel regression literature often introduce the interpolation spaces of the RKHS to characterize the regularity of the regression function
+~\citep{steinwart2012_MercerTheorem,fischer2020_SobolevNorm}.
+For $s \geq 0$, we define the interpolation space $[\caH]^s$ by
+\begin{align}
+  \zk{\caH}^s = \left\{ \sum_{i =1}^\infty a_i \lambda_i^{s/2} e_i ~\Big|~ \sum_{i =1}^\infty a_i^2 < \infty \right\}
+  \subseteq L^2,
+\end{align}
+which is equipped with the norm $\norm{\sum_{i =1}^\infty a_i \lambda_i^{s/2} e_i}_{[\caH]^s} \coloneqq \left(  \sum_{i =1}^\infty a_i^2  \right)^{1/2}$.
+It can be seen that $[\caH]^s$ is a separable Hilbert space with $\xk{\lambda_i^{s/2} e_i}_{i \geq 1}$ as its orthonormal basis.
+We also have $[\caH]^0 = L^2$ and $[\caH]^1 = \caH$.
+Moreover, when $s \in (0,1)$,
+the space $[\caH]^s$ also coincides with the space $(L^2,\caH)_{s,2}$ defined by real interpolation~\citep{steinwart2012_MercerTheorem}.
+%which provides us with
+We also denote by $B_R([\caH]^s) = \left\{ f \in [\caH]^s \mid \norm{f}_{[\caH]^s}^2 \leq R \right\}$.
+Then, we derive the following optimal rates of the neural network from the optimality result in the kernel regression~\citep{lin2018_OptimalRates}.
+
+\begin{proposition}
+  \label{prop:NN_Gen}
+  Suppose $f^* \in B_R([\caH]^s) \cap L^\infty$ for constants $s > \frac{1}{d+1}$ and $R > 0$.
+  Let us choose $t_{\mathrm{op}} = t_{\mathrm{op}}(n) \asymp n^{(d+1)/ [s(d+1)+d]}$.
+  Then, there exists a polynomial $\operatorname{poly}(\cdot)$ such that for any $\delta \in (0,1)$,
+  when $n$ is sufficiently large and the width $m \geq \mathrm{poly}(n,\ln(1/\delta),\lambda_{0}^{-1})$,
+  with probability at least $1-\delta$ with respect to random samples and random initialization,
+  \begin{align}
+    \label{eq:NN_Rate}
+    \norm{\hat{f}^{\mathrm{NN}}_{t_{\mathrm{op}}} - f^*}_{L^2}^2 \leq C \left( \ln\frac{12}{\delta} \right)^2 n^{-\frac{s(d+1)}{s(d+1)+d}},
+  \end{align}
+  where the constant $C>0$ is independent of $\delta,n$.
+  Moreover, the convergence rate in \cref{eq:NN_Rate} achieves the optimal rate in $B_R([\caH]^s)$.
+\end{proposition}
+
+The results in the kernel regression literature also allows us to provide the following sup-norm learning rate.
+
+\begin{proposition}
+  \label{prop:NN_Sup_Gen}
+  Under the settings of \cref{prop:NN_Gen}, suppose further that $s \geq 1$ and $\caX$ is bounded.
+  Then, when $n$ is sufficiently large,  with probability at least $1-\delta$,
+  \begin{align*}
+    \norm{\hat{f}^{\mathrm{NN}}_{t_{\mathrm{op}}} - f^*}_{\infty}^2 \leq C \left( \ln\frac{12}{\delta} \right)^2 n^{-\frac{(s-1)(d+1)}{s(d+1)+d}},
+  \end{align*}
+  where the constant $C>0$ is independent of $\delta,n$.
+\end{proposition}
+
+
+\begin{remark}
+  \cref{prop:NN_Gen} shows the minimax optimality of wide neural networks,
+  where optimal rate is also adaptive to the relative smoothness of the regression function to the NTK\@.
+%  The rate increases as the smoothness index $s$ increases, approaching $n^{-1}$.
+  Our result extends the result in \citet{lai2023_GeneralizationAbility} to the scenario of $d > 1$ and $L > 1$,
+  and also distinguishes with \citet{hu2021_RegularizationMatters,suh2022_NonparametricRegression} in the following aspects:
+  (1) The critical uniform convergence (\cref{lem:UnifConverge}) is not well-supported in these two works, as pointed out in \citet{lai2023_GeneralizationAbility};
+  (2) They have to assume the data distribution is uniform on the sphere, while we allow $\caX$ to be a general domain;
+  (3) They introduce an explicit $\ell_2$ regularization in the gradient descent and approximate the training dynamics by kernel ridge regression (KRR),
+  while we consider directly the kernel gradient flow and early stopping serves as an implicit regularization, which is more natural.
+  Moreover, our gradient method can adapt to higher order smoothness of the regression function and do not
+  saturate as KRR~\citep{li2023_SaturationEffect} or consequently their $\ell_2$-regularized neural networks.
+\end{remark}
+
+Moreover, using the idea in \citet{caponnetto2010_CrossvalidationBased},
+we can also show that the cross validation can be used to choose the optimal stopping time.
+Let us further assume that $\supp \mu$ is bounded and $y \in [-M,M]$ almost surely for some $M$ and introduce the truncation $L_{M}(a)=\min\{\abs{a},M\}\operatorname{sgn}(a)$.
+Suppose now we have $\tilde{n}$ extra independent samples $(\tilde{\x}_1,\tilde{y}_1),\dots,(\tilde{\x}_{\tilde{n}},\tilde{y}_{\tilde{n}})$,
+where $\tilde{n} \geq c_{\mathrm{v}} n$ for some constant $c_{\mathrm{v}} > 0$.
+Let $T_n$ be a set of stopping time candidates, we can choose the empirical stopping time by cross validation
+\begin{align}
+  \label{eq:5_StoppingTimeCV}
+  \hat{t}_{\mathrm{cv}} = \argmin_{t \in T_n}
+  \sum_{i=1}^{\tilde{n}} \left[ L_{M}\xk{\fNN(\tilde{\x}_i)} - \tilde{y}_i \right]^2.
+\end{align}
+
+\begin{proposition}
+%[Empirical stopping time]
+  \label{prop:NN_CV}
+  Under the settings of \cref{prop:NN_Gen} and the further assumptions given above,
+  let $T_n = \left\{ 1, Q, \dots,Q^{\lfloor \ln_Q n \rfloor} \right\}$ for arbitrary fixed $Q > 1$ and $\hat{t}_{\mathrm{cv}}$ be chosen from \cref{eq:5_StoppingTimeCV}.
+  Define $\hat{f}^{\mathrm{NN}}_{\mr{cv}}(x) = L_{M}\xk{\hat{f}^{\mathrm{NN}}_{\hat{t}_{\mathrm{cv}}}(x)}$.
+  Then, there exists a polynomial $\operatorname{poly}(\cdot)$
+  such that when $n$ is sufficiently large and $m \geq \mathrm{poly}(n,\ln(1/\delta),\lambda_{0}^{-1})$,
+  one has
+  \begin{align*}
+    \norm{\hat{f}^{\mathrm{NN}}_{\mr{cv}} - f^*}_{L^2}^2 \leq C \left( \ln\frac{12}{\delta} \right)^2 n^{-\frac{s(d+1)}{s(d+1)+d}}
+  \end{align*}
+  with probability at least $1-\delta$ with respect to random samples and initialization,
+  where the constant $C>0$ is independent of $\delta,n$.
+\end{proposition}
+
+Early stopping, as an implicit regularization, is necessary for the generalization of neural networks.
+The following proposition, which is a consequence of the result in \citet{li2023_KernelInterpolation},
+shows overfitted multilayer neural networks generalize poorly.
+\begin{proposition}
+  \label{prop:InterpolationNoGen}
+  Suppose further that the samples are distributed uniformly on $\bbS^d$ and the noise is non-zero.
+  Then, for any $\ep > 0$ and $\delta \in (0,1)$, there is some $c > 0$ such that when $n$ and $m$ is sufficiently large,
+  one has that
+  \begin{align*}
+    \E \zkm{\liminf_{t \to \infty} \norm{\hat{f}^{\mathrm{NN}}_t - f^*}_{L^2}^2 ~\Big|~ \X} \geq c n^{-\ep}
+  \end{align*}
+  holds with probability at least $1-\delta$.
+\end{proposition}
+
+\begin{remark}
+  \cref{prop:InterpolationNoGen} seems to contradict with the ``benign overfitting'' phenomenon~(e.g., \citet{bartlett2020_BenignOverfittinga,frei2022_BenignOverfitting}).
+  However, we point out that in these works the dimension $d$ of the input diverges with the sample size $n$,
+  while in our case $d$ is fixed, so the setting is different.
+  In fact, in the fixed-$d$ scenario, several works have argued that overfitting is harmful~\citep{rakhlin2018_ConsistencyInterpolation,beaglehole2022_KernelRidgeless,li2023_KernelInterpolation}
+  and our result is consistent with theirs.
+\end{remark}
+
+\begin{remark}
+  The requirement of uniformly distributed samples on the sphere is due to the technical condition of the embedding index in \citet{li2023_KernelInterpolation},
+  which is critical for more refined analysis in the kernel regression~\citep{fischer2020_SobolevNorm}.
+  With this condition, the requirement of $s$ in \cref{prop:NN_Gen} can further be relaxed to $s > 0$.
+  We hypothesize that this embedding index condition is also satisfied for the NTK on a general domain,
+  but we would like to leave it to future work since more techniques on function theory are needed.
+\end{remark}
+
+%\begin{remark}
+%
+%%  In order to ensure generalization of neural networks, early stopping is used as an implicit regularization.
+%%  Specifically, in the case of uniformly distributed data on $\bbS^d$ and neural networks without bias terms,
+%%  it is possible to demonstrate that overfitted multilayer neural networks cannot generalize by combining
+%%  \cref{thm:UnifConverge} and the results in \textcolor{green}{Li2023Interpolation},
+%%  thus extending the assertion made in \citet{lai2023_GeneralizationAbility}.
+%%  We believe this result can be extended to general domains, but further techniques are required for a comprehensive investigation,
+%%  which we leave for future work.
+%%  For simplicity, let us consider uniformly distributed data on $\bbS^d$ and neural networks without the bias terms.
+%%  Then, combining with \cref{thm:UnifConverge} and the results in \textcolor{green}{Li2023Interpolation},
+%%  it can be shown that overfitted multilayer neural networks can not generalize,
+%%  extending the assertion in \citet{lai2023_GeneralizationAbility}.
+%%  We hypothesize that this result can be extended to general domains,
+%%  but we would like to leave it for future work since further techniques are needed.
+%
+%\end{remark}
+
+%\subsection{Choosing stopping time with cross validation}
+%
+%The previous sections have provided a priori selection rules for determining the optimal stopping time.
+%In this section, we will demonstrate that the optimal stopping time can also be determined using a posteriori cross-validation.
+%This result is also based on the theory of kernel regression~\citep{caponnetto2010_CrossvalidationBased}.
+%
+%Let us further assume that $y \in [-M,M]$ almost surely for some $M$.
+%We introduce the truncation $L_{M}(a)=\min\{|a|,M\}\operatorname{sgn}(a)$ and the truncated regressor $L_M \hat{f}_t(\x)$,
+%where $\hat{f}_t$ can be either $\hat{f}^{\mathrm{GD}}_t$ or $\hat{f}^{\mathrm{NN}}_t$.
+%Suppose now we have $\tilde{n}$ extra independent samples $(\tilde{\x}_1,\tilde{y}_1),\dots,(\tilde{\x}_{\tilde{n}},\tilde{y}_{\tilde{n}})$,
+%where $\tilde{n} \geq c_{\mathrm{v}} n$ for some constant $c_{\mathrm{v}} > 0$.
+%Then, we can choose the empirical stopping time by cross validation
+%\begin{align}
+%  \label{eq:5_StoppingTimeCV}
+%  \hat{t}_{\mathrm{cv}} = \argmin_{t \in T_n}
+%  \sum_{i=1}^{\tilde{n}} \left( L_{M}\hat{f}_t(\tilde{\x}_i) - \tilde{y}_i \right)^2,
+%\end{align}
+%where $T_n$ is a set of stopping time candidates.
+%The regressor with empirical stopping time is given by
+%\begin{align}
+%  \label{eq:5_CVRegressor}
+%  \hat{f}_{\mathrm{cv}}(\x) \coloneqq L_M \hat{f}_{\hat{t}_{\mathrm{cv}}}(\x).
+%\end{align}
+%\citet[Section 3]{caponnetto2010_CrossvalidationBased} shown the following optimality result.
+%
+%\begin{proposition}
+%  \label{prop:5_CVOptimal}
+%  Suppose that $k$ has eigenvalue decay rate $\beta > 1$ with respect to $\mu$
+%  and $f^* \in B_R([\caH]^s)$ for some $s \geq 1$.
+%%  Let $s \geq 1$ and $\gamma \in [0,1]$.
+%%  Suppose conditions (\hyperlink{cond:A}{$\bm{A}$}) and (\hyperlink{cond:B}{$\bm{B}$}) hold.
+%%  Let $T_n = \left\{ 1,\dots,n \right\}$.
+%  Let us fix arbitrary $Q>1$ and define
+%  \begin{align}
+%    \label{eq:5_CVSet}
+%    T_n = \left\{ 1, Q, \dots,Q^{\lfloor \ln_Q n \rfloor} \right\}.
+%  \end{align}
+%  Then, for any $\delta \in (0,1)$, for sufficiently large $n$, one has
+%  \begin{align*}
+%    \norm{\hat{f}_{\mathrm{cv}}^{\mathrm{GD}} - f^*}_{L^2}^2
+%    \leq C \left( \ln \frac{6}{\delta} \right)^2 n^{-\frac{s\beta}{s\beta+1}}
+%  \end{align*}
+%  holds with probability at least $1-\delta$, where the constant $C>0$ is independent of $\delta,n$.
+%\end{proposition}
+%
+%Consequently, we can show the optimality of neural network with cross validation.
+%Similarly, we choose the empirical stopping time via \cref{eq:5_StoppingTimeCV} for $\hat{f}^{\mathrm{NN}}_t$
+%and denote by $\hat{f}^{\mathrm{NN}}_{\mathrm{cv}}$ the resulting regressor in \cref{eq:5_CVRegressor}.
+%\begin{theorem}[Empirical stopping time]
+%  \label{thm:NN_CV}
+%  Suppose $\mu$ has Lebesgue density $p(\x)$ with $0 < g \leq p(\x) \leq G < \infty$ and
+%  $f^* \in B_R([\caH_{\mathrm{NTK}}]^s)$ for some $s \geq 1$.
+%%  Under the conditions of \cref{thm:NN_Gen},
+%  For the neural network $\hat{f}^{\mathrm{NN}}_{\mathrm{cv}}$
+%  with empirical stopping time chosen from $T_n$ given in \cref{eq:5_CVSet}, there exists a polynomial $\operatorname{poly}(\cdot)$, such that
+%  when $n$ is sufficiently large and $m \geq \mathrm{poly}(n,\ln(1/\delta),\lambda_{0}^{-1})$,
+%  one has
+%  \begin{align*}
+%    \norm{\hat{f}^{\mathrm{NN}}_{\mathrm{cv}} - f^*}_{L^2}^2 \leq C \left( \ln\frac{12}{\delta} \right)^2 n^{-\frac{s(d+1)}{s(d+1)+d}}
+%  \end{align*}
+%  with probability at least $1-\delta$ with respect to random samples and initialization,
+%  where the constant $C>0$ is independent of $\delta,n$.
+%\end{theorem}
+
+%\begin{remark}
+%  \cref{prop:NN_CV} shows that if cross validation is used to select the stopping time, wide neural networks can be minimax optimal.
+%  This result justifies the effectiveness of cross validation in practice.
+%%  Moreover, slight modification of the proof of \cref{prop:5_CVOptimal} can show a broad class of parameter set $T_n$
+%%  is also admissible, including $T_n = \left\{ 1,\dots,n \right\}$.
+%\end{remark}
+
+
+
+
+
+
+
+

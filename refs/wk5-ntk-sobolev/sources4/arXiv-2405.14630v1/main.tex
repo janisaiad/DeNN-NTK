@@ -1,0 +1,2017 @@
+\documentclass{article}
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage[preprint]{neurips_2024}
+\usepackage[utf8]{inputenc} 
+\usepackage[T1]{fontenc}    
+\usepackage{hyperref}       
+\usepackage{url}            
+\usepackage{booktabs}   
+\usepackage{tabularx}
+\usepackage{amsfonts}       
+\usepackage{nicefrac}       
+\usepackage{microtype}      
+\usepackage{xcolor}         
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{tikz-3dplot} 
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{placeins}
+\usepackage{thm-restate}
+\newtheorem{theorem}{Theorem}
+\newtheorem{problem}{Problem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{definition}[theorem]{Definition}
+\newcommand*{\R}{\mathbb{R}}
+\renewcommand{\P}{\mathbb{P}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\sgn}{\operatorname{sgn}}
+\newcommand{\mc}{\mathcal}
+\newcommand{\conv}{\operatorname{conv}} 
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\sphericalcap}{Cap}
+\renewcommand{\S}{\mathbb{S}}
+\newcommand{\C}{\mathbb{C}}
+\usepackage{todonotes}
+\usepackage{bbm}
+
+
+
+\newcommand{\centered}[1]{\begin{tabular}{l} #1 \end{tabular}}
+
+
+\def\vzero{{\bm{0}}}
+\def\vone{{\bm{1}}}
+\def\vmu{{\bm{\mu}}}
+\def\vtheta{{\bm{\theta}}}
+\def\va{{\bm{a}}}
+\def\vb{{\bm{b}}}
+\def\vc{{\bm{c}}}
+\def\vd{{\bm{d}}}
+\def\ve{{\bm{e}}}
+\def\vf{{\bm{f}}}
+\def\vg{{\bm{g}}}
+\def\vh{{\bm{h}}}
+\def\vi{{\bm{i}}}
+\def\vj{{\bm{j}}}
+\def\vk{{\bm{k}}}
+\def\vl{{\bm{l}}}
+\def\vm{{\bm{m}}}
+\def\vn{{\bm{n}}}
+\def\vo{{\bm{o}}}
+\def\vp{{\bm{p}}}
+\def\vq{{\bm{q}}}
+\def\vr{{\bm{r}}}
+\def\vs{{\bm{s}}}
+\def\vt{{\bm{t}}}
+\def\vu{{\bm{u}}}
+\def\vv{{\bm{v}}}
+\def\vw{{\bm{w}}}
+\def\vx{{\bm{x}}}
+\def\vy{{\bm{y}}}
+\def\vz{{\bm{z}}}
+
+\def\mA{{\bm{A}}}
+\def\mB{{\bm{B}}}
+\def\mC{{\bm{C}}}
+\def\mD{{\bm{D}}}
+\def\mE{{\bm{E}}}
+\def\mF{{\bm{F}}}
+\def\mG{{\bm{G}}}
+\def\mH{{\bm{H}}}
+\def\mI{{\bm{I}}}
+\def\mJ{{\bm{J}}}
+\def\mK{{\bm{K}}}
+\def\mL{{\bm{L}}}
+\def\mM{{\bm{M}}}
+\def\mN{{\bm{N}}}
+\def\mO{{\bm{O}}}
+\def\mP{{\bm{P}}}
+\def\mQ{{\bm{Q}}}
+\def\mR{{\bm{R}}}
+\def\mS{{\bm{S}}}
+\def\mT{{\bm{T}}}
+\def\mU{{\bm{U}}}
+\def\mV{{\bm{V}}}
+\def\mW{{\bm{W}}}
+\def\mX{{\bm{X}}}
+\def\mY{{\bm{Y}}}
+\def\mZ{{\bm{Z}}}
+\def\mBeta{{\bm{\beta}}}
+\def\mPhi{{\bm{\Phi}}}
+\def\mLambda{{\bm{\Lambda}}}
+\def\mSigma{{\bm{\Sigma}}}
+
+\newcommand{\mm}[1]{\textcolor{blue}{MM: #1}}
+\newcommand{\kk}[1]{\textcolor{red}{KK: #1}}
+\newcommand{\hanna}[1]{\textcolor{magenta}{HT: #1}}
+\newcommand{\gm}[1]{\textcolor{orange}{#1}}
+
+
+\title{Bounds for the smallest eigenvalue of the NTK for arbitrary spherical data of arbitrary dimension} 
+
+\author{Kedar Karhadkar$^{1}$ \quad Michael Murray$^{1}$ \quad Guido Mont\'ufar$^{12}$\\
+\texttt{\{kedar,mmurray,montufar\}@math.ucla.edu }\\
+$^1$UCLA \quad $^2$Max Planck Institute for Mathematics in the Sciences}
+\begin{document}
+
+\maketitle
+
+
+\begin{abstract}
+Bounds on the smallest eigenvalue of the neural tangent kernel (NTK) are a key ingredient in the analysis of neural network optimization and memorization. However, existing results require distributional assumptions on the data and are limited to a high-dimensional setting, where the input dimension $d_0$ scales at least logarithmically in the number of samples $n$. In this work we remove both of these requirements and instead provide bounds in terms of a measure of the collinearity of the data: notably these bounds hold with high probability even when $d_0$ is held constant versus $n$. We prove our results through a novel application of the hemisphere transform.
+\end{abstract}
+
+\section{Introduction} 
+
+A popular approach for studying the optimization dynamics of neural networks is analyzing the neural tangent kernel (NTK), which corresponds to the Gram matrix obtained from the Jacobian of the network parametrization map \citep{jacot2018neural}. 
+When the network parameters are adjusted by gradient descent, the network function follows a kernel gradient descent in function space with respect to the NTK. 
+By bounding the smallest eigenvalue of the NTK away from zero it is 
+possible to obtain global convergence guarantees for gradient descent parameter optimization \citep{du2018gradient,Oymak2019TowardMO} as well as results on generalization \citep{pmlr-v97-arora19a,montanari2022interpolation}
+and data memorization capacity \citep{montanari2022interpolation,nguyen2021tight,bombari2022memorization}. 
+These key advances highlight the importance of deriving tight, quantitative bounds for the smallest eigenvalue of the NTK at initialization. 
+
+While initial breakthroughs on the convergence of gradient optimization in neural networks \citep{NEURIPS2018_54fe976b, du2019gradient,
+allenzhu2019convergence} 
+required unrealistic conditions on the width of the layers, 
+subsequent and substantive efforts have reduced the level of overparametrization required to ensure that the NTK is well conditioned at initialization \citep{zou2019improved,
+Oymak2019TowardMO}. 
+In particular, \citet{nguyenrelu,nguyen2021tight,banerjee2023neural}
+showed that layer width scaling linearly in the number of training samples $n$ suffices to bound the smallest eigenvalue 
+and \cite{montanari2022interpolation, bombari2022memorization} obtained results for networks with sub-linear layer width and the minimum possible number of parameters $\tilde{\Omega}(n)$ up to logarithmic factors. 
+However, and as discussed in Section~\ref{sec:related-work}, the bounds provided in prior works require that the data is drawn from a distribution satisfying a Lipschitz concentration property, and only hold with high probability if the input dimension $d_0$ scales as $\sqrt{n}$ \citep{bombari2022memorization} or $\text{polylog}(n)$ \citep{nguyen2021tight}. These existing results therefore require that the dimension of the data grows unbounded as the number of training samples $n$ increases and as such there is a gap in our understanding of cases where the data is sampled from a fixed, or lower-dimensional space. 
+
+In this work we present new lower and upper bounds on the smallest eigenvalue of a randomly initialized, fully connected ReLU network: 
+compared with prior work, our results hold for arbitrary data on a sphere of arbitrary dimension. 
+Our techniques are novel and rely on the hemisphere transform as well as the addition formula for spherical harmonics. 
+
+We study neural networks denoted as functions $f: \R^{d_0} \times \mc{P} \rightarrow \R$, where $\mc{P}$ is an inner product space. To be clear, $f(\vx; \vtheta)$ denotes the output of the network for a given input $\vx \in \R^{d_0}$ and parameter choice $\vtheta \in \mc{P}$. For brevity we occasionally write $f(\vx)$ in place of $f(\vx; \vtheta)$ if the context is clear. We use $n$ to denote the size of the training sample, $d_0$ the dimension of the input features, $L$ the network depth, $d_l$ the width of the $l$th layer and $\sigma: \R \rightarrow \R$ the ReLU activation function. Given $n$ input data points $\vx_1, \cdots, \vx_n \in \R^{d_0}$ we write $\mX = [\vx_1, \cdots, \vx_n] \in \R^{d \times n}$ and define $F: \mc{P} \to \R^n$ to be the evaluation of the network on these $n$ data points as a function of the parameter $\bm{\theta}$, 
+$$
+F(\bm{\theta}) = [f(\vx_1; \vtheta ), \cdots, f(\vx_n;\vtheta )]^T.
+$$
+We define the neural tangent kernel (NTK) of $F$ as
+\begin{equation} 
+\label{eq:NTK-def}
+\mK(\vtheta) = (\nabla_{\vtheta} F(\vtheta ))^*(\nabla_{\vtheta} F(\vtheta )) \in \R^{n \times n} , 
+\end{equation}
+where the gradient $\nabla$ and adjoint $*$ are taken with respect to the inner product on $\mc{P}$ and the Euclidean inner product on $\R^n$. More explicitly $[\mK(\vtheta)]_{ik} = \langle \nabla_{\vtheta} f(\vx_i; \vtheta), \nabla_{\vtheta}f(\vx_k; \vtheta) \rangle$.
+For convenience we write $\mK$ in place of $\mK(\vtheta)$. We are concerned with the minimum eigenvalue $\lambda_{\min}(\mK)$, which depends both on the input data $\mX$ and the parameter $\vtheta$. 
+We say the dataset $\vx_1, \cdots, \vx_n$ is \emph{${\delta}$-separated} for $\delta \in (0,\sqrt{2}]$ if $\min_{i\neq k} \min(\|\vx_i - \vx_k\|, \|\vx_i + \vx_k\|) \geq \delta$, which is a measure of collinearity. 
+
+\paragraph{Main contributions.} 
+Our results are for data that lies on a sphere and is $\delta$-separated for some~$\delta \in (0,\sqrt{2}]$. Unlike prior work  
+we do not make any assumptions on the distribution from which the data is sampled,  
+e.g., uniform on the sphere or Lipschitz concentrated, and 
+we do not require the input dimension $d_0$ to scale with the number of samples $n$.
+\begin{itemize}
+    \item In Theorem~\ref{thm:shallow-main} we consider shallow 
+    ReLU networks with input dimension $d_0$ and hidden width $d_1$ and prove that if $d_1 = \tilde{\Omega}(\|\mX\|^2 d_0^3 \delta^{-2})$ then with high probability $\lambda_{\min}(\mK) = \tilde{\Omega}(d_0^{-3}\delta^2)$. Furthermore, defining $\delta' = \min_{i \neq k}\|\vx_i - \vx_k\|
+    $, we have $\lambda_{\min}(\mK) = O( \delta')$. 
+    \item In Theorem \ref{thm:deep-main} we illustrate how our results for shallow networks can be extended to cover depth-$L$ networks. In particular, if the layer widths satisfy a pyramidal condition, meaning $d_l \geq d_{l+1}$ for $l \in     \{1,\cdots,L-1\}$,     $d_{L-1} \gtrsim 2^L \log(nL/ \epsilon)$ and $d_1 = \tilde{\Omega}(nd_0^3 \delta^{-4} )$, then $\lambda_{\min}(\mK) = \tilde{\Omega}(d_0^{-3}\delta^{4})$ and $\lambda_{\min}(\mK) = O(L)$ with high probability. 
+    \item Our results allow us to analyze the smallest eigenvalue of the NTK for data drawn from any distribution for which one can establish $\delta$-separation with high probability in terms of $d_0$ and $n$. For example, for shallow networks with data drawn uniformly from a sphere, in Corollary \ref{corr:uniform} we show that if $d_0d_1 = \tilde{\Omega}(n^{1 + 4/(d_0-1)})$, then with high probability $\lambda_{\min}(\mK) = \tilde{O}\left(n^{-2/(d_0-1)} \right)$ and $\lambda_{\min}(\mK) = \tilde{\Omega}\left(n^{-4/(d_0-1)} \right)$. 
+    Moreover, this bound is tight up to logarithmic factors for $d_0=\Omega(\log(n))$ matching prior findings for this regime. 
+\end{itemize}
+
+The rest of this paper is structured as follows: in Section~\ref{sec:related-work} we provide a summary of related works and compare and contrast our results with the existing state of the art; in Section~\ref{section:shallow} we present our results for shallow networks; finally in Section~\ref{sec:deep} we extend our shallow results to the deep case. 
+
+\paragraph{Notations.} 
+With regard to general points on notation we let $[n] = \{1, 2, \cdots, n\}$ denote the set of the first $n$ positive integers. If $\vx \in \R^d$ then we let $[\vx]_i$ denote the $i$th entry of $\vx$. If $f$ and $g$ are real-valued functions, we write $f \lesssim g$ or $f = O(g)$ when there exists an absolute constant $C$ such that $f(x) \leq C g(x)$ for all $x$. Similarly, we write $f \gtrsim g$ or $f = \Omega(g)$ when there exists a constant $c$ such that $f(x) \geq c g(x)$ for all $x$. We write $f \asymp g$ when $f \lesssim g$ and $f \gtrsim g$ both hold. The notation $\tilde\Omega$ hides logarithmic factors. Logarithms are generally considered to be in base $e$, though in most settings the particular choice of base can be absorbed by a constant. 
+
+
+
+
+
+
+
+
+
+
+\section{Related work} 
+\label{sec:related-work} 
+
+\paragraph{Prior work on the NTK.} 
+\citet{jacot2018neural} highlight that the optimization dynamics of neural networks are controlled by the Gram matrix of the Jacobian of the network function, an object referred to as the NTK Gram matrix, or, as we refer to it here, simply the NTK. That work also shows that in the infinite-width limit the NTK converges in probability to a deterministic kernel. 
+Of particular interest is the observation that in the infinite-width setting the network behaves like a linear model \citep{Lee2019WideNN-SHORT}. 
+Further, if a network is polynomially wide in the number of samples then the smallest eigenvalue of the NTK can be lower bounded in terms of the smallest eigenvalue of its infinite-width analog. As a result, assuming the latter is positive, global convergence guarantees for gradient descent can be obtained \citep{du2019gradient,du2018gradient,allenzhu2019convergence, zou2019improved,Lee2019WideNN-SHORT,Oymak2019TowardMO,zou2020gradient,marco,nguyenrelu, banerjee2023neural}. 
+The positive definiteness of the NTK is equivalent to the Jacobian having full rank, which can also be used to study the loss landscape \citep{NEURIPS2020_b7ae8fec, LIU202285, karhadkar2023mildly}. 
+Beyond the smallest eigenvalue, there is interest in characterizing the full spectrum of the NTK \citep{uniform_sphere_data,geifman2020similarity,NEURIPS2020_572201a4,bietti2021deep, murray2023characterizing}, which has implications on the dynamics of the empirical risk \citep{arora_exact_comp, velikanov2021explicit} as well as the generalization error \citep{cao2019towards, basri2020frequency, cui2021generalization,jin2022learning, bowman2022spectral}. Finally, although a powerful and successful tool for analyzing neural networks it must be noted that the NTK has limitations, most notably perhaps that it struggles to explain the rich feature learning commonly observed in practice  \citep{10.5555/3495724.3496995, lazy_training,NEURIPS2020_b7ae8fec}. 
+
+
+\paragraph{Prior work on the smallest eigenvalue of the NTK.}Many of the prior works discussed so far assume or prove that $\lambda_{\min}(\mK)$ is positive, but do not provide a quantitative lower bound. Here we discuss works seeking to address this issue and to which we view our work as complementary. 
+For shallow ReLU networks and data drawn uniformly from the sphere, \citet[Theorem 3]{xie2017diverse} and \citet[Theorem 3.2]{montanari2022interpolation} provide lower bounds on the smallest singular and eigenvalue value of the Jacobian and NTK respectively. 
+In addition to requiring the data to be drawn uniform from the sphere both of these results are high dimensional in the sense that for \citet[Theorem 3]{xie2017diverse} to be non-vacuous it is necessary that $d_0 = \Omega(d_1 n^2)$, while \citet[Theorem 3.2]{montanari2022interpolation} requires, as per their Assumption 3.1, that $d_0 = \tilde{\Omega}(\sqrt{n})$. 
+
+\citet[Theorem 4.1]{nguyen2021tight} derives lower and upper bounds for the smallest eigenvalue of the NTK for deep ReLU networks under standard initialization conditions assuming the data is drawn from a distribution satisfying a Lipschitz concentration property. 
+They show that the NTK is well conditioned if the network has a layer of width of order equal to the number of data points $n$ up to logarithmic factors. Concretely, if at least one layer has width linear in $n$ (ignoring logarithmic factors) and the others are at least poly-logarithmic in $n$, then  $\lambda_{\min}(\mK) = \Omega(\mu_r^2(\sigma)d_0)$ (or $\Omega(\mu_r^2(\sigma) )$ with normalized data), where $\mu_r(\sigma)$ denotes the $r$th Hermite coefficient of $\sigma$ with any even integer $r \geq 2$. 
+However, in their result the bound holds with high probability only if $d_0$ scales as $\log(n)$. 
+
+
+\citet[Theorem 1]{bombari2022memorization} derive lower and upper bounds for the smallest eigenvalue of the NTK under similar conditions as \citet[Theorem 4.1]{nguyen2021tight} aside from the following: 
+they consider smooth rather than ReLU activation functions, the widths follow a loose pyramidal topology, meaning $d_l = O(d_{l-1})$ for all $l \in [L-1]$, $d_{L-1}d_{L-2}$ scales linearly in $n$ (ignoring logarithmic factors), and there exists a $\gamma >0$ such that $n^{\gamma} = O(d_{L-1})$. 
+Under these conditions they show that $\lambda_{\min}(\mK) = \Omega(d_{L-1} d_{L-2})$ with high probability as both $d_{L-1}$ and $n$ grow. This result illustrates that for the NTK to be well conditioned it suffices that the number of neurons grows as $\tilde{\Omega}(\sqrt{n})$. The loose pyramidal condition on the widths implies $d_{L-1} d_{L-2} = O(d_0^2)$ and as 
+they also assume that $n = o(d_{L-1}d_{L-2})$ then $n = o(d_0^2)$ which in turn implies $d_0 = \Omega(\sqrt{n})$. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Shallow networks} \label{section:shallow} 
+Here we study the smallest eigenvalue of the NTK of a shallow neural network. The parameter space $\mc{P}$ of this network is $\R^{d_1 \times d_0} \times \R^{d_1}$ and it is equipped with the inner product
+\begin{align*}
+    \langle (\mW, \vv), (\mW', \vv') \rangle = \text{Trace}(\mW^T \mW') + \vv^T \vv'.
+\end{align*}
+For convenience we sometimes write $d = d_0$. 
+The neural network $f:  \R^{d_0} \times \mc{P}  \rightarrow \R$ is defined as
+\begin{equation} \label{eq:shallow-network-map}
+f(\vx ; \mW, \vv) = \frac{1}{\sqrt{d_1}} \sum_{j=1}^{d_1} v_j \sigma (\vw_j^T \vx) , 
+\end{equation}
+where $\mW = [\vw_1, \cdots, \vw_{d_1}]^T \in \R^{d_1 \times d_0}$ 
+are the inner layer weights, $\vv = [v_1, \cdots, v_{d_1}]^T\in \mathbb{R}^{d_1}$ the outer layer weights, and $\vtheta = (\mW, \vv)$. 
+We consider the ReLU activation function applied entrywise with $\sigma(z) = \max \{0, z \}$.  
+The derivative $\dot{\sigma}$ satisfies $\dot{\sigma}(z) = 1$ for $z > 0$ and $\dot{\sigma}(z) = 0$ for $z < 0$. Although $\sigma$ is not differentiable at 0, we take $\dot{\sigma}(0) = 0$ by convention. 
+Unless otherwise stated we assume that the entries of $\mW$ and $\vv$ are drawn mutually iid from a standard Gaussian distribution $\mc{N}(0, 1)$. 
+Our main result for shallow networks is the following theorem.
+
+
+\begin{restatable}{theorem}{ThmShallowMain}\label{thm:shallow-main}
+Let $d \geq 3$, $\epsilon \in (0,1)$, and $\delta, \delta' \in (0, \sqrt{2})$. Suppose that $\vx_1, \cdots, \vx_n \in \S^{d -1}$ are $\delta$-separated and $\min_{i \neq k}\|\vx_i - \vx_k\| \leq \delta'$. Define
+\[
+    \lambda = \left( 1 + \frac{d\log(1/\delta)}{\log(d)} \right)^{-3} \delta^2.
+\]
+If $d_1 \gtrsim \frac{\|\mX\|^2 }{\lambda}\log \frac{n}{\epsilon}$, then with probability at least $1 - \epsilon$, \[\lambda \lesssim \lambda_{\min}(\mK) \lesssim \delta'.\]
+\end{restatable}
+
+A proof of Theorem~\ref{thm:shallow-main} is provided in Appendix~\ref{app:shallow-main}. Suppressing logarithmic factors,  Theorem~\ref{thm:shallow-main} implies that $d_1 = \tilde{\Omega}\left(\|\mX\|^2d_0^3\delta^{-2}\right)$ suffices to ensure that $\lambda_{\min}(\mK) = \tilde{\Omega}(d_0^{-3}\delta^2)$ and $\lambda_{\min}(\mK) = O(\delta')$ with high probability (note the trivial bound $\|\mX\|^2\leq\|\mX\|_F^2\leq n$). We emphasize that unlike existing results i) we make no distributional assumptions on the data, instead only assuming a milder $\delta$-separated condition, and ii) our bounds hold with high probability even if $d_0$ is held constant. 
+
+A few further remarks are in order. 
+First, the condition $d_0 \geq 3$ is necessary because our technique relies on 
+the addition formula for spherical harmonics \cite[Theorem 4.11]{efthimiou2014spherical}; the bound we derive based on this formula (Lemma~\ref{lemma:addition-formula-bound} in Appendix~\ref{sec:app-spherical}) becomes vacuous for $d_0<3$. However, for $d_0=2$ analogous bounds could be derived using more elementary tools while the case $d_0=1$ is of little interest as only a trivial dataset is possible. Moreover, data in $\S^1$ could be embedded in $\S^2$ since we do not impose any distributional assumptions.
+
+
+Second, one can use Theorem~\ref{thm:shallow-main} to bound the smallest eigenvalue of the NTK for data drawn from the uniform distribution on the sphere by bounding $\delta$ with high probability in terms of $n$ and $d$. We use that $\delta = \Omega(n^{-2/d_0})$ and $\delta' = O(n^{-2/d_0})$ with high probability. We direct the interested reader to Appendix~\ref{app:subsec:uniform-sphere} for further details. 
+\begin{restatable}{corollary}{CorollaryUniform}\label{corr:uniform}
+    Let $d\geq 3$, $n \geq 2$, $\epsilon \in (0,1)$, $\vx_1, \cdots, \vx_n \sim U(\S^{d -1})$ be mutually iid. Define
+    \[
+    \lambda = \left(1 + \frac{\log(n/\epsilon) }{\log(d)} \right)^{-3}\left(\frac{\epsilon^2}{n^4}\right)^{1/(d - 1)}.
+    \] 
+    If $d_1 \gtrsim \frac{1}{\lambda}\left(1 + \frac{n + \log(1/\epsilon) }{d} \right)\log \frac{n}{\epsilon}$, then with probability at least $1-\epsilon$ over the data and network parameters,
+    \[
+    \lambda  \lesssim \lambda_{\min}(\mK) \lesssim \left(\frac{\log(1/\epsilon) }{n^2} \right)^{1/(d - 1) }.
+    \]
+\end{restatable}
+The above corollary implies that if $d_0d_1 = \tilde{\Omega}\left(n^{1+4/(d_0-1)} \right)$, then with high probability $\lambda_{\min}(\mK) = \tilde{\Omega}(n^{-4/(d_0 - 1)})$ and $\lambda_{\min}(\mK) = \tilde{O}(n^{-2/(d_0 - 1)})$. In particular, for data sampled uniformly from a sphere, the scaling $d_0 = {\Omega}(\log n)$ is both necessary and sufficient for $\lambda_{\min}(\mK)$ to be $\tilde{\Theta}(1)$. 
+In particular the bounds are sharp in this case. 
+
+
+
+
+
+
+
+\subsection{Proof outline for Theorem \ref{thm:shallow-main}} \label{subsec:shallow-proof-outline}
+Recall the definitions of $F(\vtheta)$ and $\mK$ in \eqref{eq:NTK-def}. For the choice of $f$ given in \eqref{eq:shallow-network-map}, a straightforward decomposition of the NTK with respect to the inner and outer weights gives
+\begin{align} \label{eq:ntk-shallow-decomp}
+    \mK = \mK_1 + \mK_2, 
+\end{align}
+where $\mK_1 = \nabla_{\mW} F(\vtheta )^* \nabla_{\mW} F(\vtheta )$ and $\mK_2 = \nabla_{\vv} F(\vtheta )^* \nabla_{\vv} F(\vtheta ) = \frac{1}{d_1}\sigma(\mW \mX)^T \sigma(\mW\mX)$. As both $\mK_1$ and $\mK_2$ are positive semi-definite, 
+\begin{equation}
+    \lambda_{\min}(\mK) \geq  \lambda_{\min}(\mK_1) +  \lambda_{\min}(\mK_2);
+\end{equation}
+see, e.g., \citet[Theorem 4.3.1]{Horn_Johnson_2012}. Our proof now follows the highlighted steps below.
+
+\paragraph{1) Bound the smallest eigenvalue in terms of the infinite-width limit.}
+We proceed to bound both $\lambda_{\min}(\mK_1)$ and $\lambda_{\min}(\mK_2)$
+in terms of the smallest eigenvalues of their infinite-width counterparts, see Lemmas \ref{lemma:K1-inf} and \ref{lemma:K2-inf} below, which act as good approximations for sufficiently wide networks.
+
+
+\begin{restatable}{lemma}{lemmaKOneinf}\label{lemma:K1-inf}
+Suppose that $\vx_1, \cdots, \vx_n \in \S^{d - 1}$. Let
+    \[\lambda_1 = \lambda_{\min}\left(\E_{\vu \sim U(\S^{d - 1}) } \left[\dot{\sigma}\left(\mX^T\vu \right)\dot{\sigma}\left(\vu^T\mX\right) \right] \right). \]
+    If $\lambda_1 > 0$ and $d_1 \gtrsim \lambda_1^{-1}\|\mX\|^2 \log \frac{n}{\epsilon}$, then with probability at least $1 - \epsilon$ \[
+    \lambda_{\min}(\mK_1) \gtrsim \lambda_1.
+    \]
+\end{restatable}
+
+\begin{restatable}{lemma}{lemmaKTwoinf}\label{lemma:K2-inf}
+    Suppose that $\vx_1, \cdots, \vx_n \in \S^{d - 1 }$. Let
+    \[\lambda_2 = d \lambda_{\min}\left(\E_{\vu \sim U(\S^{d - 1}) }\left[\sigma(\mX^T \vu)\sigma(\vu^T \mX) \right] \right). \]
+    If $\lambda_2 > 0$ and $d_1 \gtrsim  \frac{n}{\lambda_2}  \log\left(\frac{n}{\lambda_2}\right)\log \left(\frac{n}{\epsilon}\right) $, then with probability at least $1 - \epsilon$ \[\lambda_{\min}(\mK_2) \gtrsim 
+\lambda_2.
+ \] 
+\end{restatable}
+
+We prove Lemmas \ref{lemma:K1-inf} and \ref{lemma:K2-inf} in Appendices~\ref{app:lemma:K1-inf} and \ref{app:lemma:K2-inf} respectively. Observe that while the parameters of the model are initialized as Gaussian, the expectations above are taken with respect to the uniform measure on the sphere. The motivation for using the uniform measure on the sphere is that it enables us to work with spherical harmonics, for which there is the highly useful \emph{addition formula} \citep[see, e.g.,][Theorem 4.11]{efthimiou2014spherical}. The exchange of measures is possible in the case of Lemma~\ref{lemma:K1-inf} due to the scale invariance of $\dot{\sigma}$, while for Lemma~\ref{lemma:K2-inf} it is possible because $\sigma$ is homogeneous. 
+
+\paragraph{2) Interpret the infinite-width kernel in terms of a hemisphere transform.}
+Next, for a given $\mX$ and $\psi \in 
+\{\sqrt{d}\sigma, \dot{\sigma}\}$ we define the limiting NTK $\mK^{\infty}_{\psi} \in \R^{n \times n}$ as
+\begin{equation} \label{eq:uniform-limiting-NTK}
+\mK^{\infty}_{\psi} = \E_{\vu \sim U(\S^{d - 1})}\left[\psi\left( \mX^T\vu\right) \psi\left(\vu^T\mX\right) \right]. 
+\end{equation}
+Consider a fixed vector $\vz \in \S^{n-1}$ and interpret the Euclidean inner product $\langle \psi(\mX^T \vu), \vz \rangle$ as a function of $\vu \in \S^{d - 1}$. It will prove useful to think of this map as an integral transform. To this end let
+$\mathcal{M}(\S^{d - 1})$ denote the vector space of signed Radon measures on $\S^{d - 1}$ and fix $\psi \in \{\sqrt{d}\sigma, \dot{\sigma}\}$. For a signed Radon measure $\mu \in \mc{M}(\S^{d - 1})$ we introduce the integral transform $T_{\psi}\mu: \S^{d - 1} \to \R$, defined as
+\begin{equation} \label{eq:hempisphere-transform}
+(T_{\psi}\mu)(\vu) = \int_{\S^{d - 1}}\psi(\langle \vu, \vx \rangle) d\mu(\vx).
+\end{equation}
+Note for $\psi \in \{\sqrt{d}\sigma, \dot{\sigma}\}$ this is a \emph{hemisphere transform} \citep{rubin1999inversion} as the integrand $\psi(\langle \vu, \cdot \rangle)$ is supported on a hemisphere normal to $\vu$. We provide background material on the hemisphere transform in Appendix \ref{app:hemisphere}. Let $\mc{M}_{\mX} \subset \mc{M}$ denote the space of signed Radon measures supported on the data set $\{\vx_1, \cdots, \vx_n\}$. For each measure $\mu \in \mc{M}_{\mX}$ there exists a vector $\vz \in \R^{n}$ such that
+$\mu = \sum_{i = 1}^n z_i \delta_{\vx_i}$, 
+where $\delta_{\vx}$ is the Dirac measure supported on $\vx$. We write $\mu = \mu_{\vz}$ to indicate this correspondence. The following lemma relates the smallest eigenvalue of $\mK_{\psi}^{\infty}$ to the norm of the hemisphere transform of a measure supported on the data; a proof is provided in Appendix \ref{app:gram-to-hemisphere-transform}. 
+\begin{restatable}{lemma}{lemmaGradToHemi}\label{lem:gram-to-hemisphere-transform}
+ Fix $\mX \in \R^{d \times n}$ and $\psi \in \{\sqrt{d}\sigma, \dot{\sigma}\}$. 
+    For all $\vz \in \R^n$, $\langle \mK_{\psi}^{\infty}\vz, \vz \rangle = \|T_{\psi}\mu_{\vz}\|^2$. Moreover,
+    \[\lambda_{\min}(\mK_{\psi}^{\infty}) = \inf_{\|\vz\| = 1 }\|T_{\psi}\mu_{\vz}\|^2. \]
+\end{restatable}
+
+\paragraph{3) Bound the hemisphere transform norm via spherical harmonics.} We proceed to lower bound $\|T_{\psi} \mu_{\vz}\|^2$ for all $\vz \in \R^d$. Let $L^2(\S^{d - 1})$ denote the Hilbert space of real-valued, square-integrable functions with respect to the uniform probability measure on $\S^{d - 1}$, and let $\mc{C}(\S^{d - 1}) \subset L^2(\S^{d - 1})$ denote the subspace of continuous functions. For $\mu \in \mc{M}(\S^{d -1 })$ and $g \in \mc{C}(\S^{d - 1})$ we define 
+\begin{equation*}
+    \langle \mu, g \rangle := \int_{\S^{d-1}} {g(\vx)}d\mu(\vx) . 
+\end{equation*}
+
+If $g_1, \cdots, g_N \in L^2(\S^{d -1 })$ are orthonormal, in particular consider $g_r$ as spherical harmonics, then via a Bessel inequality 
+\begin{align*}
+    \|T_{\psi}\mu_{\vz}\|^2 \geq \sum_{a = 1}^N |\langle T_{\psi}\mu_{\vz}, g_a \rangle|^2
+    = \sum_{a = 1}^N |\langle \mu_{\vz}, T_{\psi}g_a \rangle|^2
+    = \sum_{a = 1}^N \left|\sum_{i = 1}^n  (T_{\psi} g_a)(\vx_i) z_i\right|^2.
+\end{align*}
+Importantly, $T_{\psi}$ is self-adjoint (see Lemma~\ref{lemma:T-self-adjoint} in Appendix~\ref{app:hemisphere} for details) and the spherical harmonics are eigenfunctions of $T_{\psi}$, i.e., $T_{\psi} g_a = \kappa_a g_a$. A summary of the key properties of spherical harmonics needed for our results are provided in Appendix~\ref{sec:app-spherical}. Therefore
+\begin{align*}
+    \|T_{\psi}\mu_{\vz}\|^2 \geq \sum_{a = 1}^N \left|\sum_{i = 1}^n  (T_{\psi} g_a)(\vx_i) z_i\right|^2 = \sum_{a = 1}^N \kappa_a^2 \left|\sum_{i = 1}^n  g_a(\vx_i) z_i\right|^2 \geq \min_a \kappa_a^2 \| \mD \vz \|_2^2 , 
+\end{align*}
+where $\mD \in \R^{N \times n}$ is a matrix with entries $[\mD]_{ai} = g_a(\vx_i)$. As a result 
+\[
+\lambda_{\min}(\mK_{\psi}^{\infty}) \geq \min_a \kappa_a^2 \sigma^2_{\min}(\mD).
+\]
+
+\paragraph{4) Bound the hemisphere transform and spherical harmonics on the data.} 
+The following result shows that if we let the functions $(g_a)_{a \in [N]}$ be spherical harmonics and allow $N$ to be sufficiently large, then we can bound the minimum singular value of $\mD$.
+In what follows let $\mc{H}_r^d$ denote the vector space of degree-$r$ harmonic homogeneous polynomials on $d$ variables. 
+
+\begin{restatable}{lemma}{lemmaMatrixSphericalHarmonic}
+\label{lem:matrix-spherical-harmonic}
+Suppose $\vx_1, \cdots, \vx_n \in \S^{d - 1}$ are $\delta$-separated. Suppose that $\beta \in \{0, 1\}$ and that $R \in \mathbb{Z}_{\geq 0}$ are such that
+$N := \sum_{r = 0}^R \dim(\mc{H}_{2r + \beta}^d)$
+satisfies $N \geq  C\left(\frac{\delta^4}{2}\right)^{-(d - 2)/2}$ where $C >0$ is a universal constant. Let $g_1, \cdots, g_N$ be spherical harmonics which form an orthonormal basis of
+$
+\bigoplus_{r = 0}^R \mc{H}_{2r + \beta}^d.$
+If $\mD \in \R^{N \times n}$ is defined as $\mD_{ai} = g_a(\vx_i)$ then
+$\sigma_{\min}(\mD) \geq \sqrt{\frac{N}{2}}. $
+\end{restatable}
+A proof of Lemma \ref{lem:matrix-spherical-harmonic} can be found in Appendix \ref{app:matrix-spherical-harmonic}. 
+By carefully choosing values for $R$ and $N$ in Lemma \ref{lem:matrix-spherical-harmonic} and performing some asymptotics on the resulting expressions, we arrive at the following bound on the hemisphere transform of a measure.
+\begin{restatable}{lemma}{CorrHemisphereTransformAsymptotics}\label{corr:hemisphere-transform-asymptotics}
+Let $d \geq 3$ and suppose that $\vx_1, \cdots, \vx_n \in \S^{d - 1}$ are $\delta$-separated. For all $\vz \in \R^n$ with $\|\vz\| \leq 1$ then
+        \[\|T_{\psi} \mu_{\vz}\|^2 \gtrsim \begin{cases}
+            \left(1 + \frac{d\log(1/\delta)}{\log d}\right)^{-3} \delta^2 & \text{ if $\psi = \dot{\sigma}$}\\
+            \left(1+ \frac{d\log(1/\delta) }{\log d}\right)^{-3}\delta^4 & \text{ if $\psi = \sqrt{d}\sigma$}.
+        \end{cases} \]      
+\end{restatable}
+
+A proof of Lemma~\ref{corr:hemisphere-transform-asymptotics} 
+is provided in Appendix~\ref{app:hemi-transform-asymp}. 
+The lower bound of Theorem~\ref{thm:shallow-main} follows by bounding $\lambda_1$, as defined in Lemma \ref{lemma:K1-inf}, using Lemma~\ref{corr:hemisphere-transform-asymptotics}. 
+
+Before proceeding to the upper bound, we pause to remark on the generality of this argument for handling other activation functions. First, we use the positive homogeneity of the activation function in order to write $\lambda_{\min}(\mK_{\psi}^{\infty})$ as the $L_2(\S^{d-1})$ norm of a function on the sphere. This is beneficial as it allows us to work with the spherical harmonics and use the associated addition formula. The ReLU activation and its derivative are also convenient with regard to computing the eigenvalues of the hemisphere transform (or more generally the eigenvalues of the integral operator). In particular, this requires evaluating integrals against Gegenbauer polynomials for which analytic expressions are available. For polynomial or piecewise polynomial activations similar results could be obtained. However, for other activations, e.g., tanh or sigmoid, such quantities appear challenging to compute.
+
+
+\paragraph{5) Upper bound.} 
+The upper bound of Theorem~\ref{thm:shallow-main} is simpler than the lower bound and hinges on the following calculation. Let $\vx_i, \vx_k$ be two data points. Then
+\begin{align*}
+    \lambda_{\min}(\mK) &\leq \frac{1}{2} (\ve_i - \ve_k)^T \mK (\ve_i - \ve_k)  = \frac{1}{2}\|\nabla_{\vtheta}f(\vx_i) - \nabla_{\vtheta}f(\vx_k)\|^2.
+\end{align*}
+Therefore it suffices to upper bound the norm of $\nabla_{\vtheta} f(\vx_i) - \nabla_{\vtheta} f(\vx_k)$. We choose $i, k \in [n]$ such that $\vx_i, \vx_k$ are the two closest points in the dataset. We then translate this into a statement about the gradients. If $\|\vx_i - \vx_k\| \leq \delta$, then with high probability over the network parameters, $\|\nabla_{\vtheta} f(\vx_i) - \nabla_{\vtheta} f(\vx_k)\|^2 \lesssim \delta$ (see Lemma~\ref{lemma:separation-gradient-shallow}), and we arrive at the desired upper bound in Theorem~\ref{thm:shallow-main}. 
+
+
+
+\section{From shallow to deep neural networks} \label{sec:deep}
+Our goal here is to detail just one approach as how the results of Section \ref{section:shallow} can be extended to deep networks. To be clear, here we consider a fully connected network with input dimension $d_0$ and $L$ layers, where each layer has width $d_1, \cdots, d_L$ respectively and $d_L = 1$. The parameter space $\mc{P}$ is a product space of matrices $\prod_{l= 1}^L \R^{d_l \times d_{l -1 } }$, equipped with the inner product
+\[
+\langle (\mW_1, \cdots, \mW_L), (\mW_1', \cdots, \mW_L') \rangle = \sum_{l = 1}^L \text{Trace}(\mW_l^T\mW_l'). 
+\]
+The feature maps $f_l: \R^{d_{0}} \times \mc{P} \to \R^{d_l}$ of the neural network are given by
+\[f_l(\vx; \vtheta) = \begin{cases}
+        \vx & l = 0\\
+         \sigma(\mW_l f_{l - 1}(\vx; \vtheta)) & l \in [L - 1]\\
+        \mW_l f_{l - 1}(\vx;\vtheta) & l = L,
+    \end{cases} 
+\]
+where $\mW_l \in \R^{d_l \times d_{l-1}}$ for all $l \in [L]$, $\vtheta = (\mW_1, \cdots, \mW_L)$ and $\sigma$ is the ReLU function $x \mapsto \max(0, x)$ applied elementwise. 
+We define the network map $f$ to be the final feature map multiplied by a normalizing constant:
+\begin{equation} \label{eq:normalization}
+f = \left(\prod_{l = 1}^{L - 1}\sqrt{\frac{2}{d_l}  }  \right)f_L.
+\end{equation}
+Given $n$ data points $\vx_1, \cdots, \vx_n$, we bound the smallest eigenvalue of the NTK \eqref{eq:NTK-def} associated with this particular choice of $f$. 
+
+\begin{restatable}{theorem}{ThmDeepMain}\label{thm:deep-main}
+    Suppose $\epsilon \in (0,1/3)$, $\delta \in (0,\sqrt{2}]$, $d_0 \geq 3$, the data $\vx_1, \vx_2, \cdots, \vx_n \in \S^{d_0 -1 }$ is $\delta$-separated and define
+    \[
+    \lambda = \left(1+ \frac{d_0\log(1/\delta) }{\log d_0}\right)^{-3}\delta^4.
+    \]
+    With regard to the network architecture, let $L \geq 3$, $d_l \geq d_{l+1}$ for all $l \in [L - 1]$, $d_{L-1} \gtrsim 2^L \log \left (\frac{nL}{\epsilon}\right)$ and $d_1 \gtrsim \tfrac{n}{\lambda} \log \left( \tfrac{n}{\lambda}\right) \log \left( \tfrac{n}{\epsilon}\right)$.
+    Then with probability at least $1- \epsilon$ over the network parameters 
+    \[
+    \lambda \lesssim \lambda_{\min}(\mK) \lesssim L . 
+    \]
+\end{restatable}
+We emphasize that these bounds make no distributional assumptions on the data other than lying on the sphere and hold even for constant $d_0$. 
+Indeed, if we consider $d_0$ as some constant then Theorem~\ref{thm:deep-main} implies that if the first layer is sufficiently wide,  $d_1 = \tilde{\Omega}(n \delta^{-4})$,
+then with high probability over the parameters $\lambda_{\min}(\mK) = \tilde{\Omega}(\delta^4)$
+and $\lambda_{\min}(\mK) = O(1)$.
+
+
+A few remarks are in order. First, the pyramidal condition on the network widths could be relaxed by more directly borrowing techniques from \cite{nguyen2021tight}. We adopt this condition as it has the advantage of making the dependence of our bounds on the network depth $L$ clearer. Second, compared with Theorem~\ref{thm:shallow-main} and ignoring log factors, we observe the lower bound differs by a factor of $\delta^2$. This arises as a result of the smallest eigenvalue of the feature Gram matrix $\mF_1^T \mF_1$ being equivalent to the Jacobian of a shallow network with respect to the second layer weights, not the inner layer weights, which has a different lower bound as per Lemma \ref{corr:hemisphere-transform-asymptotics}. 
+For reasons apparent in the proof outline below the lower bound on $\lambda_{\min}(\mK)$ lacks a dependency on $L$, however we hypothesize it should also grow linearly with $L$ thereby matching the dependency of the upper bound. 
+Finally, the upper bound itself follows a similar approach as used by \cite{nguyen2021tight} and is weak in the sense that we cannot take advantage of the dataset separation for gradients deeper into the network. We remark that this is also a common problem in the prior work of \cite{nguyen2021tight} and \cite{bombari2022memorization}, we refer the reader to the proof outline below for further details. 
+
+
+
+
+
+
+
+\subsection{Proof outline for Theorem \ref{thm:deep-main}}\label{subsec:deep-proof-sketch}
+
+The proof of the deep case is structured around the decomposition of the NTK provided in Lemma \ref{lemma:NTKdecomp} below. To state this decomposition we introduce the following quantities. For $l \in [L - 1]$ we define the feature matrices $\mF_l \in \R^{d_l \times n}$ by
+\[\mF_l = [f_l(\vx_1), \cdots, f_l(\vx_n)]. \]
+For $l \in [L - 1]$ and $\vx \in \R^d$ we define the activation patterns $\mSigma_l(\vx) \in \{0, 1\}^{d_l \times d_l}$ to be the diagonal matrices
+\[\mSigma_l(\vx) = \text{diag}(\dot{\sigma}(\mW_{l}f_{l - 1}(\vx))). \]
+Finally, we let $\textbf{1}_{n}$ denote the vector of all ones in $\R^n$.
+
+\begin{restatable}{lemma}{lemmaNTKdecomp}\label{lemma:NTKdecomp}
+     Let $\vx_1, \cdots, \vx_n \in \R^d$ be nonzero. 
+     There exists an open set $\mc{U} \subset \mc{P}$ of full Lebesgue measure such that $f(\vx_i;\cdot)$ is continuously differentiable on $\mc{U}$ for all $i \in [n]$. Moreover, for all $\bm{\theta} \in \mc{U}$ the NTK Gram matrix $\mK$ defined in \eqref{eq:NTK-def} with network function \eqref{eq:normalization} satisfies 
+    \[
+    \left( \prod_{l = 1}^{L - 1} \frac{d_l}{2}\right)\mK
+    {=} \sum_{l = 0}^{L-1} (\mF_{l}^T \mF_{l}) \odot (\mB_{l+1} \mB_{l+1}^T),
+    \]
+    where the $i$th row of $\mB_l \in \R^{n \times n_l}$     is defined as
+    \begin{align*}
+        [\mB_l]_{i,:} = \begin{cases}
+            \mSigma_l(\vx_i) \left( \prod_{k = l+1}^{L-1} \mW_k^T \mSigma_k(\vx_i) \right)\mW_L^T, &l \in [L-1],\\
+            \normalfont{\textbf{1}}_{n}, &l = L.
+        \end{cases}
+    \end{align*} 
+\end{restatable}
+For completeness we prove Lemma~\ref{lemma:NTKdecomp} in Appendix~\ref{app:deep-setting}. 
+Observe each matrix summand in Lemma~\ref{lemma:NTKdecomp} is positive semi-definite (PSD) and recall for any two PSD matrices $\mA$ and $\mB$ one has $\lambda_{\min}(\mA + \mB) \geq \lambda_{\min}(\mA) + \lambda_{\min}(\mB)$ \citep[see e.g.][Theorem 4.3.1]{Horn_Johnson_2012} and $\lambda_{\min}(\mA \odot \mB) \geq \lambda_{\min}(\mA) \min_{i \in[n]} [\mB]_{ii}$ \citep{Schur1911}. Therefore 
+\begin{align*} \label{eq:breakdown-deep-to-shallow}
+     \left( \prod_{l = 1}^{L - 1} \frac{d_l}{2}\right)\lambda_{\min}(\mK) & \geq \sum_{l = 0}^{L-1} \lambda_{\min} \left( (\mF_{l}^T \mF_{l}) \odot (\mB_{l+1} \mB_{l+1}^T)\right)    \geq \lambda_{\min}\left( \mF_{1}^T \mF_{1} \right) \min_{i \in [n]} \left\|[\mB_2]_{i,:} \right\|^2.
+\end{align*}
+
+In order to upper bound the smallest eigenvalue we follow \cite{nguyen2021tight} and analyze the Raleigh quotient $R(\vu) = \tfrac{\vu^T \mK \vu}{\| \vu\|^2}$. In particular, for any nonzero $\vu \in \R^n$ we have $\lambda_{\min}(\mK) \leq R(\vu)$ and therefore $\lambda_{\min}(\mK) \leq R(\ve_i) = [\mK]_{ii}$ for all $i \in [n]$. As a result 
+\begin{align*}
+     \left( \prod_{l = 1}^{L - 1} \frac{d_l}{2}\right)\lambda_{\min}(\mK) &\leq \left[ \sum_{l = 0}^{L-1} (\mF_l^T \mF_l) \odot (\mB_{l+1} \mB_{l+1}^T) \right]_{ii}    = \sum_{l=0}^{L-1} \| f_l(\vx_i) \|^2 \| [\mB_{l+1}]_{i,:} \|^2.
+\end{align*}
+Combining the upper and lower bounds we have 
+\begin{equation} \label{eq:min-eig-NTK-bounds1}
+    \lambda_{\min}\left( \mF_{1}^T \mF_{1}\right) \min_{i \in [n]} \|[\mB_2]_{i,:} \|^2 \leq \lambda_{\min}(\mK)  \left( \prod_{l = 1}^{L - 1} \frac{d_l}{2}\right) \leq \sum_{l=0}^{L-1} \| f_l(\vx_i) \|^2 \| [\mB_{l+1}]_{i,:} \|^2 , 
+\end{equation}
+where the right hand side holds for any $i \in [n]$. Based on \eqref{eq:min-eig-NTK-bounds1}, we proceed first by bounding the norm of the network features. We achieve this via an inductive argument, bounding the norm of the features at one layer with high probability, and then conditioning on this event to bound the norm of the features at the next layer with high probability. 
+
+\begin{restatable}{lemma}{lemmaFeatureNorms}\label{lemma:FeatureNorms}
+    Let $\vx \in \S^{d_0-1}$, $L \geq 2$ and $l \in [L-1]$. If $d_k \gtrsim l^2 \log(l/\epsilon)$ for all $k\in [l]$, then 
+    \[
+    e^{-1} \left( \prod_{h=1}^l \frac{d_h}{2}\right) \leq \| f_l(\vx) \|^2 \leq e \left( \prod_{h=1}^l \frac{d_h}{2}\right)
+    \]
+    holds with probability at least $1- \epsilon$ over the network parameters. 
+\end{restatable}
+
+A proof of Lemma \ref{lemma:FeatureNorms} is provided in Appendix \ref{app:FeatureNorms}. Next we derive upper and lower bounds on the backpropagation terms $[\mB_l]_{i,:}$. Our strategy for this is as follows: for $l\in [L-2]$, let $\mS_{l}(\vx) = \mSigma_l(\vx) \left( \prod_{k = l+1}^{L-1} \mW_k^T \mSigma_k(\vx) \right)$ and observe 
+\[
+[\mB_l]_{i,:} = \mS_{l}(\vx_i)\mW_L^T.
+\]
+Since $\vx_i \in \S^{d_0-1}$, it is sufficient to lower bound $\| \mS_{l}(\vx) \mW_L^T\|_2^2$ for an arbitrary $\vx \in \S^{d_0-1}$. As the vector $\mW_L^T \in \R^{d_{L-1}}$ is distributed as $\mW_L^T \sim \mathcal{N}(\textbf{0}_{d_{L-1}}, \textit{I}_{d_{L-1}})$, 
+following \citet[Theorem 6.3.2]{vershynin2018high}
+we have that for any $\mA \in \R^{d_l \times d_{L-1}}$ and $t \geq 0$ \begin{align*}
+    \P( | \|\mA \mW_L^T \| - \|\mA \|_F | \geq t) \leq 2 \exp \left( -\frac{Ct^2}{ \|\mA \|^2}\right)
+\end{align*}
+for some constant $C>0$. As a result, with $t = \tfrac{1}{2}\| \mA \|_F^2$ then
+\[
+\P \left( \frac{1}{4} \| \mA \|_F^2 \leq \| \mA \mW_L^T \|^2 \leq \frac{3}{4} \| \mA \|_F^2 \right) \geq 1 - \exp\left( -C\frac{\| \mA \|_F^2}{\| \mA \|^2}\right).
+\]
+In order to lower bound $\| \mS_{l}(\vx) \mW_L^T \|^2$ with high probability over the parameters it therefore suffices to condition on appropriate bounds for $\| \mS_{l}(\vx) \|_F^2$ and $\| \mS_{l}(\vx) \|_2^2$. These bounds are provided in Lemmas~\ref{lemma:Frob-S} and \ref{lemma:Op-S} in Appendices \ref{app:Frob-S} and \ref{app:Op-S} respectively. 
+With these two lemmas in place we can bound $\|\mS_{l}(\vx_i)\mW_L^T\|^2$.
+
+\begin{restatable}{lemma}{LemmaMinBTwo}\label{lemma:min-B2}
+    Let $\vx \in \S^{d_0-1}$, suppose $L \geq 3$, $d_k \geq d_{k+1}$ for all $k \in [L - 1]$ and $d_{L-1} \gtrsim 2^L \log \left (\frac{L}{\epsilon}\right)$. 
+   Then, for any $l \in [L-1]$, with probability at least $1 - \epsilon$ over the network parameters     \[
+       \|\mS_l(\vx) \mW_L^T \|^2 \asymp 2^{-L+l+1}\prod_{k = l}^{L-1} d_k . 
+    \]
+\end{restatable}
+
+By combining Lemma \ref{lemma:min-B2} with a union bound we arrive at the following corollary, relevant for the lower bound of \eqref{eq:min-eig-NTK-bounds1}.
+\begin{corollary} \label{corr:B2-lb}
+    Let $\vx_i \in \S^{d_0-1}$ for all $i \in [n]$, $L \geq 3$, $d_l \geq d_{l+1}$ for all $l \in [L - 1]$ and $d_{L-1} \gtrsim 2^L \log \left (\frac{nL}{\epsilon}\right)$. Then, for any $l \in [L-1]$, with probability at least $1 - \epsilon$ over the network parameters     \[
+    \min_{i \in [n]} \|[\mB_2]_{i,:} \|^2 \gtrsim 2^{-L} \prod_{k = 2}^{L-1} d_k . 
+    \]
+\end{corollary}
+
+The first-layer feature Gram matrix $\mF_1^T \mF_1$ in the deep case is identically distributed to $\mK_2$ in the two-layer case; see \eqref{eq:ntk-shallow-decomp} and the related definitions. Therefore we can apply Lemma \ref{lemma:K2-inf} to lower bound the smallest eigenvalue of $\mF_1^T \mF_1$. This, in combination with Corollary~\ref{corr:B2-lb}, yields the lower bound of Theorem~\ref{thm:deep-main}. 
+The upper bound follows by combining the bound on the feature norms provided by Lemma \ref{lemma:FeatureNorms} with the bound on the backpropagation terms given in Lemma \ref{lemma:min-B2}. 
+A detailed proof of Theorem~\ref{thm:deep-main} is provided in Appendix~\ref{app:thm-deep-main}. 
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Conclusion}
+
+\paragraph{Summary and implications.} 
+Quantitative bounds on the smallest eigenvalue of the NTK are a critical ingredient for many current analyses of network optimization. Prior works provide bounds which are only applicable for data drawn from particular distributions and for which the input dimension $d_0$ scales appropriately with the number of data samples $n$. This work plugs an important gap in the existing literature by providing bounds for arbitrary datasets on the sphere (including those drawn from any distribution on the sphere) in terms of a measure of their collinearity. Furthermore, these bounds are applicable for any $d_0$, in particular even $d_0$ held constant with respect to $n$.
+
+
+\paragraph{Limitations.} Our bounds currently only hold for the ReLU activation function. 
+Another limitation, also present in prior work, is that our upper bound on the smallest eigenvalue of the NTK for deep networks in Theorem~\ref{thm:deep-main} does not capture the data separation. Finally, a mild limitation of this work is that we require the data to be normalized so as to lie on the sphere. 
+
+
+
+\paragraph{Future work.}  
+The proof techniques developed here could be applied to analyze the NTK in the context of other homogeneous activation functions. 
+One could potentially relax the homogeneity condition on the activation function, or the condition of unit norm data, by considering an integral transform on the space $L^2(\R^d, \mu)$ rather than $L^2(\S^{d - 1})$, where $\mu$ denotes the standard Gaussian measure (since the weights are drawn from a Gaussian distribution). 
+Beyond fully connected networks, conducting comparable analyses in the context of other architectures, e.g., CNNs, GNNs, or transformers, would be valuable future work.
+
+\subsubsection*{Acknowledgments}
+GM and KK were partly supported by 
+NSF CAREER DMS 2145630 and DFG SPP~2298 Theoretical Foundations of Deep Learning grant 464109215. GM was also partly supported by NSF grant CCF 2212520, ERC Starting Grant 757983 (DLT), and BMBF in DAAD project 57616814 (SECAI).
+
+
+ 
+
+
+
+\newpage 
+
+\bibliography{refs}
+\bibliographystyle{refs}
+
+\newpage 
+
+\appendix
+
+
+\section{Background material}
+
+\subsection{Concentration bounds}
+In order to bound the smallest eigenvalue of the finite-width NTK in terms of the expected, or infinite width NTK, we use the following matrix Chernoff bound variant. 
+
+\begin{lemma}\label{lem:matrix-chernoff}
+    Let $R > 0$, and let $\mZ_1, \cdots, \mZ_m \in \R^{n \times n}$ be iid symmetric random matrices such that $0 \preceq \mZ_1 \preceq R\mI$ almost surely. 
+    Then
+    \[\P\left(\lambda_{\min}\left(\frac{1}{m}\sum_{j = 1}^m \mZ_j \right) \leq \frac{1}{2}\lambda_{\min}\left(\E[\mZ_1] \right) \right) \leq n \exp\left(-\frac{Cm\lambda_{\min}(\E[\mZ_1]) }{R} \right). \]
+    Here $C > 0$ is a universal constant.
+\end{lemma}
+\begin{proof}
+    By Theorem 1.1 of \cite{tropp2012user}, for all $\delta > 0$
+    \begin{align*}
+        &\P\left(\lambda_{\min}\left(\frac{1}{m} \sum_{j = 1}^m \mZ_j\right) \leq (1 - \delta)\lambda_{\min}(\E[\mZ_1])  \right)  \\&=\P\left(\lambda_{\min}\left( \sum_{j = 1}^m \mZ_j \right) \leq (1 - \delta)\lambda_{\min}\left(\sum_{j = 1}^m \E[\mZ_j] \right) \right)\\
+        &\leq n \left(\frac{e^{-\delta} }{(1 - \delta)^{1 - \delta}} \right)^{\frac{1}{R}\lambda_{\min}\left(\sum_{j = 1}^m \E[\mZ_j]\right) }\\
+        &= n \left(\frac{e^{-\delta} }{(1 - \delta)^{1 - \delta}} \right)^{\frac{m}{R}\lambda_{\min}\left(\E[\mZ_1]\right) }.
+    \end{align*}
+    Let $\delta = \frac{1}{2}$ and let $C = \frac{1}{2}\log\left(\frac{e}{2}\right) > 0$. Substituting into the above bound, we obtain
+    \begin{align*}
+        \P\left(\lambda_{\min}\left(\frac{1}{m}\sum_{j = 1}^m \mZ_j \right) \leq \frac{1}{2} \lambda_{\min}(\E[\mZ_1])\right) &\leq n \left(\frac{2}{e} \right)^{\frac{m}{2R}\lambda_{\min}(\E[\mZ_1]) }\\
+        &= n \exp\left(-\frac{C m \lambda_{\min}(\E[\mZ_1]) }{R} \right).
+    \end{align*}
+\end{proof}
+Some of our NTK bounds will depend on the operator norm of the input data matrix $\mX$, so it will be helpful to upper bound $\|\mX\|$ with high probability.
+\begin{lemma}\label{lemma:input-data-conditioning}
+    Let $\epsilon > 0$. Let $\mX = [\vx_1, \cdots, \vx_n] \in \R^{d \times n}$ be a random matrix whose columns are independent and uniformly distributed on $\S^{d - 1}$. Then with probability at least $1 - \epsilon$,
+    \[\|\mX\|^2 \lesssim 1 + \frac{n + \log \frac{1}{\epsilon} }{d}. \]
+\end{lemma}
+\begin{proof}
+    We use a covering argument. Fix $\vu \in \S^{d-1}$ and $\vv \in \S^{n - 1}$. By Lemma 2.2 of \cite{ball1997elementary}, for each $i \in [n]$ and $t \geq 0$,
+    \[\P(|\langle \vu, \vx_i \rangle| \geq t) \leq 2\exp\left(-\frac{dt^2}{2}\right).\]
+    In other words $\|\langle \vu, \vx_i \rangle\|_{\psi_2} \lesssim \frac{1}{\sqrt{d}}$. Then by Hoeffding's inequality, for all $t \geq 0$
+    \begin{align}
+        \P(|\vu^T\mX \vv|\geq t) &= \P\left(\left|\sum_{i = 1}^n [\vv]_i \langle \vu, \vx_i \rangle\right| \geq t \right)\nonumber\\
+        &\leq 2\exp\left(-C_1 dt^2 \right)\label{eqn:uXv-concentration},
+    \end{align}
+    where $C_1 > 0$ is a constant.
+
+    Let $\vu_1, \cdots, \vu_M$ be a $\left(\frac{1}{4}\right)$-covering of $\S^{d - 1}$. That is, $\vu_1, \cdots, \vu_M$ are a set of points in $\S^{d - 1}$ such that for all $\vu \in \S^{d - 1}$, there exists $j \in [M]$ such that $\|\vu - \vu_j\| \leq \frac{1}{4}$. Since the $\left(\frac{1}{4}\right)$-covering number of $\S^{d - 1}$ is at most $12^d$ \citep[see][Corollary 4.2.13]{vershynin2018high}, we can take $M \leq 12^d$. Similarly, let $\vu_1, \cdots, \vu_N$ be a $\left(\frac{1}{4}\right)$-covering of $\S^{n - 1}$ with $N \leq 12^n$. By applying a union bound to \eqref{eqn:uXv-concentration}, we obtain 
+    \begin{align*}
+        \P(|\vu_j^T \mX \vv_k| \geq t \text{ for some $j \in [M], k \in [N]$}) &\leq 2(12^{d + n})\exp\left(-C_1 d t^2\right).
+    \end{align*}
+    Hence if
+    \[
+    t = \sqrt{\frac{(d + n)\log 12 + \log \frac{2}{\epsilon}}{d} } , 
+    \]
+    then
+    \[\P(|\vu_j^T \mX \vv_k| \leq t \text{ for all $j \in [M], k \in [N]$}) \geq 1 -\epsilon. \]
+    Let us condition on this event for the rest of the proof. Now suppose that $\vu \in \S^{d - 1}$ and $\vv \in \S^{n - 1}$. By construction there exist $j \in [M]$ and $k \in [N]$ such that $\|\vu - \vu_j\| \leq \frac{1}{4}$ and $\|\vv - \vv_k\| \leq \frac{1}{4}$. Then
+    \begin{align*}
+        |\vu^T \mX \vv| &\leq |\vu_j^T \mX \vv_k| + |(\vu - \vu_j)^T\mX \vv_k| + |\vu^T \mX(\vv - \vv_k)|\\
+        &\leq t + \|\vu - \vu_j\| \cdot \|\vv_k\| \cdot \|\mX\| + \|\vu\| \cdot \|\mX\| \cdot \|\vv - \vv_k\|\\
+        &\leq t + \frac{1}{4}\|\mX\| + \frac{1}{4}\|\mX\|\\
+        &= t + \frac{1}{2}\|\mX\|.
+    \end{align*}
+    Since this holds for all $\vu \in \S^{d - 1}$ and $\vv \in \S^{n - 1}$, we obtain
+    \[\|\mX\| \leq t + \frac{1}{2}\|\mX\|. \]
+    Rearranging yields
+    \begin{align*}
+        \|\mX\|^2 &\leq 4t^2\\
+        &\lesssim 1 + \frac{n + \log \frac{1}{\epsilon} }{d}.
+    \end{align*}
+\end{proof}
+
+
+\subsection{Spherical harmonics}
+\label{sec:app-spherical}
+
+Here we review some preliminaries on spherical harmonics necessary for our main results. For further details we refer the reader to \citet{efthimiou2014spherical} and \citet[Chapter 5]{axler2013harmonic}. Let $L^2(\S^{d - 1})$ denote the Hilbert space of real-valued, square-integrable functions on the sphere $\S^{d - 1}$, equipped with the inner product
+\[
+\langle g, h \rangle = \int_{\S^{d - 1}} g(\vx) {h(\vx)} \; dS(\vx), 
+\]
+where $dS$ is the uniform probability measure on $\S^{d - 1}$. We let $\mc{C}(\S^{d - 1}) \subset L^2(\S^{d - 1})$ denote the subset of functions which are continuous. We say that a function $g: \R^d \to \R$ is \emph{harmonic} if it is twice continuously differentiable and
+\[\sum_{r = 1}^d \frac{\partial^2 g}{\partial^2 x_r}(\vx) = 0 \]
+for all $\vx \in \S^{d - 1}$. We say that a polynomial $g: \R^d \to \mathbb{R}$ is \emph{homogeneous} if there exists $r \in \mathbb{Z}_{\geq 0}$ such that
+\[g(\lambda \vx) = \lambda^r g(\vx)\]
+for all $\lambda \in \R$ and $\vx \in \R^d$. Let $\mc{H}_r^d$ denote the vector space of degree $r$ harmonic homogeneous polynomials on $d$ variables, viewed as functions $\S^{d - 1} \to \mathbb{R}$. Each space $\mc{H}_r^d$ is a finite-dimensional vector space, with
+\begin{align*}
+    \dim(\mc{H}_r^d) &= \binom{r + d - 1}{d - 1} - \binom{r + d - 3}{d - 1}\\
+    &= \frac{2r + d - 2}{r} \binom{r + d - 3}{d - 2}.
+\end{align*}
+For $\nu \geq 0$ and $r \in \mathbb{N}$, we define the \emph{Gegenbauer polynomials} $C_r^{\nu}$ by
+\[C_r^{\nu}(t) = \sum_{k = 0}^{\lfloor r/2 \rfloor }(-1)^k \frac{\Gamma(r - k + \nu) }{\Gamma(\nu)\Gamma(k + 1)\Gamma(r - 2k + 1) }(2t)^{r - 2k}. \]
+
+
+
+There exists an orthonormal basis of $\mc{H}_r^d$ consisting of functions $Y_{r,s}^d$, $1 \leq s \leq \dim(\mc{H}_r^d)$, known as \emph{spherical harmonics}. 
+The spherical harmonics in $\mc{H}_r^d$ satisfy the addition formula
+\begin{align}\label{eqn:addition-formula}
+    \sum_{s = 1}^{\dim(\mc{H}_r^d)} Y_{r,s}^d(\vx) Y_{r, s}^d(\vx') &= \frac{\dim(\mc{H}_r^d)C_r^{(d-2)/2}(\langle \vx, \vx' \rangle)\Gamma(r + 1)\Gamma(d - 2) }{\Gamma(r + d - 2)}\nonumber\\
+    &= \frac{(2r + d - 2)C_r^{(d - 2)/2}(\langle \vx, \vx' \rangle) }{d - 2}
+\end{align}
+for all $\vx, \vx' \in \S^{d-1}$. In particular, from the identity $C_r^{\nu}(1) = \frac{\Gamma(2\nu + r) }{\Gamma(2\nu)\Gamma(r + 1)}$ it follows that
+\begin{align*}
+    \sum_{s = 1}^{\dim(\mc{H}_r^d) }|Y_{r, s}^d(\vx)|^2 &= \dim(\mc{H}_r^d).
+\end{align*}
+We can orthogonally decompose $L^2(\S^{d - 1})$ into a direct sum of the spaces of spherical harmonics:
+\[L^2(\S^{d - 1}) = \bigoplus_{r = 1}^{\infty} \mc{H}_r^d. \]
+That is, the spaces $\mc{H}_r^d$ are orthogonal and their linear span is dense in $L^2(\S^{d - 1})$.
+\begin{lemma}\label{lemma:addition-formula-bound}
+    Let $\delta > 0$ and suppose that $\vx, \vx' \in \S^{d - 1}$ satisfy $\|\vx - \vx'\|, \|\vx + \vx'\| \geq \delta$. If $R \in \mathbb{Z}_{\geq 0}$, and $\beta \in \{0, 1\}$, then
+    \[\left|\sum_{r = 0}^R \sum_{s= 1}^{\dim(\mc{H}_{2r + \beta}^d) }Y_{2r + \beta, s}^d(\vx) Y_{2r + \beta, s}^d(\vx')\right| \lesssim \left(\frac{\|\vx - \vx'\|^2}{2} \right)^{-(d-2)/4 } \binom{2R + \beta + d - 1}{d - 1}^{1/2}. \]
+\end{lemma}
+\begin{proof}
+Let us define
+\[P(\vx, \vx') := \sum_{r = 0}^R \sum_{s= 1}^{\dim(\mc{H}_{2r + \beta}^d) }Y_{2r + \beta, s}^d(\vx) Y_{2r + \beta, s}^d(\vx'). \]
+By the addition formula (\ref{eqn:addition-formula}),
+   \begin{align}
+       |P(\vx, \vx')| &= \left|\sum_{r = 0}^R \frac{(4r + 2\beta + d - 2)C_{2r + \beta}^{(d-2)/2}(\langle \vx, \vx' \rangle)  }{d - 2} \right|\nonumber\\
+       &\lesssim \sum_{r = 0}^R \frac{(r + d)|C_{2r + \beta}^{(d - 2)/2}(\langle \vx, \vx' \rangle)|  }{d}.\label{eqn:sum-gegenbauer}
+   \end{align}
+   In order to bound the right hand side of the above equation, we will need a bound for the Gegenbauer polynomials $C_{2r + \beta}^{(d - 2)/2}$. By Theorem 1 of \cite{nevai1994generalized} (see also equation 2.8 of \citealt{xie2013exponential}), for all $\nu \geq \frac{1}{2}$, $r \geq 0$, and $t \in [0, 1)$,
+   \begin{align*}
+       (1 - t^2)^{\nu} C_r^{\nu}(t)^2 &\leq \frac{2e(2 + \sqrt{2}\nu) }{\pi}\frac{2^{1 - 2\nu}\pi }{\Gamma(\nu)^2 }\frac{\Gamma(r + 2\nu) }{\Gamma(r + 1)(r + \nu) }\\
+       &\lesssim \frac{\nu\Gamma(r + 2\nu) }{2^{2\nu}(r + \nu)\Gamma(\nu)^2 \Gamma(r + 1) }.
+   \end{align*}
+   Rearranging the above expression yields
+   \begin{align*}
+       |C_r^{\nu}(t)| &\lesssim \frac{\nu^{1/2}\Gamma(r + 2\nu)^{1/2}  }{2^{\nu}(r + \nu)^{1/2}\Gamma(\nu)\Gamma(r + 1)^{1/2}(1 - t^2)^{\nu/2} }.
+   \end{align*}
+   We now substitute the above bound into (\ref{eqn:sum-gegenbauer}):
+   \begin{align*}
+       |P(\vx, \vx')| &\lesssim \sum_{r = 0}^R \frac{(r + d)\left(\frac{d - 2}{2}\right)^{1/2}\Gamma\left(2r + \beta + d - 2\right)^{1/2}   }{d 2^{(d - 2)/2 }\left(2r + \beta + \frac{d - 2}{2}\right)^{1/2}\Gamma\left(\frac{d - 2}{2}\right)\Gamma(2r + \beta +  1)^{1/2}(1 - \langle \vx, \vx' \rangle^2)^{(d - 2)/4}  }\\
+       &\lesssim \frac{1}{(1 - \langle \vx, \vx'\rangle^2)^{(d - 2)/4} }\sum_{r = 0}^R \left(\frac{r + d}{d}\right)^{1/2} \frac{\Gamma(2r + \beta + d - 2)^{1/2} }{2^{(d - 2)/2}\Gamma\left(\frac{d - 2}{2}\right)\Gamma(2r + \beta + 1)^{1/2}}.
+   \end{align*}
+   The expression inside the sum is increasing as a function of $r$, so the above expression is bounded above by
+   \begin{align}
+       &\frac{1}{(1 - \langle \vx, \vx' \rangle^2)^{(d - 2)/4} }\left(\frac{R + d}{d}\right)^{1/2}\frac{\Gamma(2R + \beta + d - 2)^{1/2} }{2^{(d - 2)/2}\Gamma\left(\frac{d - 2}{2}\right)\Gamma(2R + \beta + 1)^{1/2} }\nonumber\\
+       &\lesssim \frac{1}{d^{1/2}(1 - \langle \vx, \vx' \rangle^2)^{(d - 2)/4} } \frac{\Gamma(2R + \beta + d - 1)^{1/2} }{2^{(d - 2)/2}\Gamma\left(\frac{d - 2}{2}\right)\Gamma(2R + \beta + 1)^{1/2} }.\label{eqn:gegenbauer-sum-2}
+   \end{align}
+   By Stirling's approximation,
+   \begin{align*}
+       2^{(d - 2)/2}\Gamma\left(\frac{d - 2}{2}\right) &\asymp 2^{(d - 2)/2}\left(\frac{d - 2}{2}\right)^{(d - 3)/2 } e^{-(d - 2)/2}\\
+       &= (d - 2)^{(d -3 )/2}e^{-(d - 2)/2}\\
+       &\asymp d^{-1/4}(d - 2)^{(d - 1.5)/2 }e^{-(d - 2)/2}\\
+       &\asymp d^{-1/4}\Gamma(d - 1)^{1/2}.
+   \end{align*}
+   Substituing this into (\ref{eqn:gegenbauer-sum-2}) yields
+   \begin{align*}
+       |P(\vx, \vx')| &\leq \frac{1}{d^{1/4}(1 - \langle \vx, \vx' \rangle^2)^{(d-2)/4} }\frac{\Gamma(2R + \beta + d - 1)^{1/2} }{\Gamma(d - 1)^{1/2}\Gamma(2R + \beta + 1)^{1/2} }\\
+       &\asymp \frac{d^{1/4}}{(R + d)^{1/2} (1 - \langle \vx, \vx' \rangle^2)^{(d-2)/4} } \frac{\Gamma(2R + \beta + d)^{1/2} }{\Gamma(d)\Gamma(2R + \beta + 1)^{1/2} }\\
+       &= \frac{d^{1/4}}{(R + d)^{1/2} (1 - \langle \vx, \vx' \rangle^2)^{(d-2)/4} }\binom{2R + \beta + d - 1}{d - 1}^{1/2}\\
+       &\lesssim \frac{1}{(1 - \langle \vx, \vx' \rangle^2)^{(d-2)/4} }\binom{2R + \beta + d - 1}{d - 1}^{1/2}
+   \end{align*}
+   Since $\vx, \vx' \in \S^{d - 1}$,
+   \begin{align*}
+       1 - \langle \vx, \vx' \rangle^2 &= (1 + \langle \vx, \vx' \rangle)(1 - \langle \vx, \vx' \rangle)\\
+       &= \frac{1}{4}\|\vx + \vx'\|^2 \|\vx - \vx'\|^2\\
+       &\gtrsim \frac{1}{4} \delta^4.
+   \end{align*}
+   To conclude, we rewrite
+   \begin{align*}
+       |P(\vx, \vx')| &\lesssim \left(\frac{\delta^4}{2} \right)^{-(d-2)/4 } \binom{2R + \beta + d - 1}{d - 1}^{1/2}.
+   \end{align*}
+\end{proof}
+
+
+
+
+
+
+
+\section{Preliminaries on hemisphere transforms}\label{app:hemisphere}
+Let $\mathcal{M}(\S^{d - 1})$ denote the vector space of signed Radon measures on $\S^{d - 1}$. We denote the total variation of $\mu$ by $|\mu|$. We have a natural inclusion $L^2(\S^{d - 1}) \subset \mathcal{M}(\S^{d -1})$ by associating a function $g$ to a signed measure $\mu$ defined by
+\[\mu(E) = \int_E g(\vx) dS(\vx). \]
+If $\mu \in \mc{M}(\S^{d -1 })$ and $g \in \mc{C}(\S^{d - 1})$, we define the pairing $\langle \mu, g \rangle$ by
+\[\langle \mu, g \rangle = \int_{\S^{d-1}} {g(\vx)}d\mu(\vx). \]
+This agrees with the usual definition of the inner product on $L^2(\S^{d-1})$ when $\mu \in L^2(\S^{d-1})$.
+
+Fix $\psi \in \{\sqrt{d}\sigma, \dot{\sigma}\}$. If $\mu \in \mc{M}(\S^{d - 1})$, we define its \emph{hemisphere transform} \citep{rubin1999inversion} $T_{\psi}\mu: \S^{d - 1} \to \R$ by
+\[(T_{\psi}\mu)(\bm{\xi}) = \int_{\S^{d - 1}}\psi(\langle \bm{\xi}, \vx \rangle) d\mu(\vx). \]
+As is the case with many integral transforms, a hemisphere transform increases the regularity of the functions it is applied to.
+\begin{lemma}
+    If $\mu \in \mc{M}(\S^{d - 1})$, then $T_{\psi}\mu \in L^2(\S^{d - 1})$. If $g \in L^2(\S^{d - 1})$, then $T_{\psi}g \in \mc{C}(\S^{d - 1})$.
+\end{lemma}
+\begin{proof}
+    Suppose that $\mu \in \mc{M}(\S^{d - 1})$. Then
+    \begin{align*}
+        \int_{\S^{d-1}} (T_{\psi}\mu)(\bm{\xi})^2 dS(\bm{\xi}) &= \int_{\S^{d-1}}\left|\int_{\S^{d-1}}\psi(\langle \bm{\xi}, \vx \rangle) d\mu(\vx) \right|^2 dS(\bm{\xi})\\
+        &\leq \int_{\S^{d-1}}\left|\int_{\S^{d-1}} \psi(\langle \bm{\xi}, \vx \rangle) d|\mu|(\vx) \right|^2dS(\bm{\xi})\\
+        &= \int_{\S^{d-1}} \int_{\S^{d-1}}\int_{\S^{d-1}}\psi(\langle \bm{\xi}, \vx \rangle)\psi(\langle \bm{\xi}, \vx' \rangle)d|\mu|(\vx)d|\mu|(\vx')dS(\bm{\xi})\\
+        &\leq\int_{\S^{d-1}} \int_{\S^{d-1}}\int_{\S^{d-1}}d^2 d|\mu|(\vx)d|\mu|(\vx')dS(\bm{\xi})\\
+        &= |\mu|(\S^{d-1})^2 d^2\\
+        &< \infty,
+    \end{align*}
+    so $T \mu \in L^2(\S^{d-1})$.
+
+    Now suppose that $g \in L^2(\S^{d -1})$ and $\psi = \dot{\sigma}$. Suppose that $\bm{\xi}, \bm{\xi'} \in \S^{d -1}$, and observe that
+    \begin{align*}
+        dS(\{\vx \in \S^{d - 1}: \langle \vx, \bm{\xi} \rangle > 0, \langle \vx, \bm{\xi}'\rangle \leq 0\}) &= \frac{1}{2 \pi}\arccos(\langle \bm{\xi}, \bm{\xi}' \rangle).
+    \end{align*}
+    Similarly,
+        \begin{align*}
+        dS(\{\vx \in \S^{d - 1}: \langle \vx, \bm{\xi} \rangle \leq 0, \langle \vx, \bm{\xi}'\rangle > 0\}) &= \frac{1}{2 \pi}\arccos(\langle \bm{\xi}, \bm{\xi}' \rangle),
+    \end{align*}
+    so
+        \begin{align*}
+        dS(\{\vx \in \S^{d - 1}: \dot{\sigma}(\langle \vx, \bm{\xi} \rangle)  \neq \dot{\sigma}(\langle \vx, \bm{\xi}' \rangle)   ) &= \frac{1}{ \pi}\arccos(\langle \bm{\xi}, \bm{\xi}' \rangle).
+    \end{align*}
+    We apply this calculation to bound the distance between $T_{\psi}g(\bm{\xi})$ and $T_{\psi}g(\bm{\xi'})$: 
+    \begin{align*}
+        |T_{\psi}g(\bm{\xi}) - T_{\psi}g(\bm{\xi'})|&= \left|\int_{\S^{d-1}} \dot{\sigma}(\langle \vx, \bm{\xi} \rangle) g(\vx)dS(\vx) - \int_{\S^{d-1}} \dot{\sigma}(\langle \vx, \bm{\xi}' \rangle) g(\vx)dS(\vx) \right|\\
+        &\leq \int_{\S^{d-1}}|\dot{\sigma}(\langle \vx, \bm{\xi} \rangle) - \dot{\sigma}(\langle \vx, \bm{\xi}' \rangle)|g(\vx) dS(\vx)\\
+        &\leq \|g\|_{L^{2}}\left(\int_{\S^{d-1}}|\dot{\sigma}(\langle \vx, \bm{\xi} \rangle) - \dot{\sigma}(\langle \vx, \bm{\xi}' \rangle)|^2 dS(\vx)\right)^{1/2}\\
+        &= \|g\|_{L^2} \left(dS(\{\vx \in \S^{d - 1}: \dot{\sigma}(\langle \vx, \bm{\xi} \rangle) \neq \dot{\sigma}(\langle \vx, \bm{\xi}' \rangle)) \right)^{1/2}\\
+        &= \frac{1}{\pi}\|g\|_{L^2}\sqrt{\arccos(\langle \bm{\xi}, \bm{\xi'} \rangle)}.
+    \end{align*}
+    Here the third line follows from Cauchy-Schwarz. As $\bm{\xi} \to \bm{\xi}'$, $\arccos(\langle \bm{\xi}, \bm{\xi}' \rangle) \to 0$ and so $|T_{\psi}g(\bm{\xi}) - T_{\psi}g(\bm{\xi'})| \to 0$. Therefore, $T_{\psi}g \in \mc{C}(\S^{d-1})$.
+
+    Finally suppose that $g \in L^2(\S^{d -1 })$ and $\psi = \sqrt{d}\sigma$. For all $\bm{\xi} \in \S^{d - 1}$,
+    \[|d\sigma(\langle \vx, \bm{\xi} \rangle) g(\vx)| \leq \sqrt{d}|g(\vx)| \in L^1(\S^{d -1 }). \]
+    So by the dominated convergence theorem, for all $\bm{\xi}' \in \S^{d - 1}$,
+    \begin{align*}
+        \lim_{\bm{\xi} \to \bm{\xi}'} T_{\psi}g(\bm{\xi}) &= \lim_{\bm{\xi} \to \bm{\xi'} } \int_{\S^{d-1}}\sqrt{d}\sigma(\langle \vx, \bm{\xi} \rangle) g(\vx)dS(\vx)\\
+        &= \int_{\S^{d -1 }} \lim_{\bm{\xi} \to \bm{\xi}'} \sqrt{d}\sigma(\langle \vx, \bm{\xi}\rangle) g(\vx)dS(\vx)\\
+        &= \int_{\S^{d - 1}}\sqrt{d}\sigma(\langle \vx, \bm{\xi}' \rangle)g(\vx)dS(\vx)\\
+        &= T_{\psi}g(\bm{\xi}').
+    \end{align*}
+    Therefore $T_{\psi}g \in \mc{C}(\S^{d - 1})$.
+\end{proof}
+By the above lemma, for any $\mu \in \mc{M}(\S^{d -1})$ and $g \in L^2(\S^{d - 1})$, the expressions $\langle T_{\psi}\mu, g \rangle$ and $\langle \mu, T_{\psi}g \rangle$ are well-defined and finite. In fact, they are equal to each other.
+\begin{lemma}\label{lemma:T-self-adjoint}
+    Suppose that $\mu \in \mc{M}(\S^{d - 1})$ and $g \in L^2(\S^{d - 1})$. Then
+    \[\langle T_{\psi}\mu, g \rangle = \langle \mu, T_{\psi}g \rangle. \]
+\end{lemma}
+\begin{proof}
+    We compute
+    \begin{align*}
+        \langle T_{\psi} \mu, g \rangle &= \int_{\S^{d-1}} (T_{\psi}\mu)(\bm{\xi}) {g(\bm{\xi})} dS(\xi)\\
+        &= \int_{\S^{d-1}}\int_{\S^{d-1}} \psi(\langle \vx, \bm{\xi} \rangle) {g(\bm{\xi})} d\mu(\vx) dS(\bm{\xi})\\
+        &= \int_{\S^{d-1}}\int_{\S^{d-1}} \psi(\langle \vx, \bm{\xi} \rangle) {g(\bm{\xi})} dS(\bm{\xi})d\mu(\vx)\\
+        &= \int_{\S^{d-1}} {T_{\psi}g(\vx)} d\mu(\vx)\\
+        &= \langle \mu, T_{\psi}g \rangle.
+    \end{align*}
+    It remains to justify the change in order of integration in the third line. This follows from Fubini's theorem and the calculation
+    \begin{align*}
+        \int_{\S^{d-1}}\int_{\S^{d-1}} |\psi(\langle \vx, \bm{\xi} \rangle)g(\bm{\xi})|dS(\bm{\xi}) d|\mu|(\vx)
+        &\leq \int_{\S^{d-1}} \int_{\S^{d-1}}\sqrt{d}|g(\bm{\xi})|dS(\bm{\xi})d|\mu|(\bm{x})\\
+        &= \int_{\S^{d-1}}\sqrt{d}\|g\|_{L^1} d|\mu|(\vx)
+        \\&= \sqrt{d}\|g\|_{L^1} |\mu|(\S^{d -1 })\\
+        &< \infty,
+    \end{align*}
+    where the last line follows since $g \in L^2(\S^{d-1}) \subset L^1(\S^{d-1})$.
+\end{proof}
+In order to characterize how a hemisphere transform acts on $L^2(\S^{d -1 })$ and in particular on the spherical harmonics, we will use the \emph{Funk-Hecke formula} \citep[see][]{seeley1966spherical} which states that a certain class of integral operators on $\S^{d - 1}$ has an eigendecomposition of spherical harmonics. 
+\begin{lemma}[Funk-Hecke formula]\label{lem:funk-hecke}
+    Let $\psi: [-1, 1] \to \R$ be a measurable function such that \[\int_{-1}^1 |\psi(t)|(1 - t^2)^{(d - 3)/2}dt < \infty.\]
+    Then for all $g \in \mc{H}_r^d$
+    \begin{align*}
+        \int_{\S^{d - 1}} \psi(\langle \vx, \bm{\xi}\rangle)g(\vx) dS(\vx) &= c_{r,d}g(\bm{\xi}),
+    \end{align*}
+    where
+    \begin{align*}
+        c_{r,d} &= \frac{\Gamma(r + 1)\Gamma(d - 2)\Gamma\left(\frac{d}{2}\right)  }{\sqrt{\pi}\Gamma(d - 2 + r)\Gamma\left(\frac{d - 1}{2}\right) } \int_{-1}^1 \psi(t)C_r^{(d - 2)/2}(t)(1 - t^2)^{(d - 3)/2}dt.
+    \end{align*}
+\end{lemma}
+We will now use the Funk-Hecke formula to compute the coefficients $c_{r, d}$ in the cases where $\psi = \sqrt{d}\sigma$ and $\psi = \dot{\sigma}$. In the following calculations we will use the \emph{Legendre duplication formula}
+\[\Gamma(z)\Gamma\left(z + \frac{1}{2} \right) = 2^{1 - 2z}\sqrt{\pi}\Gamma(2z) \]
+and \emph{Euler's reflection formula}
+\[\Gamma(1 - z)\Gamma(z) = \frac{\pi}{\sin \pi z}. \]
+\begin{lemma}\label{lem:gradshteyn}
+    For all $d \geq 3$ and $r \geq 0$,
+    \[\int_0^1 C_r^{(d-2)/2}(t)(1 - t^2)^{(d-3)/2}dt = \frac{\sqrt{\pi}\Gamma(d + r - 2)\Gamma\left(\frac{d - 1}{2}\right)  }{2\Gamma(d - 2) \Gamma(r + 1)\Gamma\left(1 - \frac{r}{2}\right)\Gamma\left(\frac{d + r}{2} \right) }. \]
+    and
+    \[\int_0^1 t C_r^{(d - 2)/2}(t)(1 - t^2)^{(d - 3)/2}dt = \frac{\sqrt{\pi}\Gamma(d + r - 2)\Gamma\left(\frac{d - 1}{2}\right) }{4\Gamma(d - 2)\Gamma(r + 1)\Gamma\left(\frac{3 - r}{2}\right)\Gamma\left(\frac{d + r + 1}{2}\right) }.\]
+\end{lemma}
+\begin{proof}
+    We apply the following identity \citep[see][Equation 7.311.2]{gradshteyn2014table}:
+    \begin{align*}
+        \int_0^1 t^{r + 2\rho}C_r^{\nu}(t)(1 - t^2)^{\nu - 1/2}dt &= \frac{\Gamma(2 \nu+r) \Gamma(2 \rho+r+1) \Gamma\left(\nu+\frac{1}{2}\right) \Gamma\left(\rho+\frac{1}{2}\right)}{2^{r+1} \Gamma(2 \nu) \Gamma(2 \rho+1) r ! \Gamma(r+\nu+\rho+1)}.
+    \end{align*}
+    By the Legendre duplication formula, we have 
+    \[\Gamma\left(\rho + \frac{1}{2}\right)\Gamma(\rho + 1) = 2^{-2\rho}\sqrt{\pi}\Gamma(2\rho +1) \]
+    so we can rewrite the above equation as
+    \begin{align}
+        \int_0^1 t^{r + 2\rho}C_r^{\nu}(t)(1 - t^2)^{\nu - 1/2}dt &= \frac{\sqrt{\pi} \Gamma(2 \nu + r)\Gamma(2\rho + r + 1)\Gamma\left(\nu + \frac{1}{2}\right) }{2^{2\rho + r + 1}\Gamma(2\nu)\Gamma(\rho + 1) \Gamma(r + 1)\Gamma(r + \nu + \rho + 1) }. \label{eqn:gradshteyn}
+    \end{align}
+    Substituting $\rho = -r/2$ and $\nu = (d - 2)/2$ into (\ref{eqn:gradshteyn}) yields 
+    \begin{align*}
+        \int_0^1 C_r^{(d - 2)/2}(t)(1 - t^2)^{(d - 3)/2}dt &= \frac{\sqrt{\pi}\Gamma(d + r - 2)\Gamma\left(\frac{d - 1}{2}\right) }{2\Gamma(d - 2)\Gamma\left(1 - \frac{r}{2}\right)\Gamma(r + 1)\Gamma\left(\frac{d + r}{2}\right) } , 
+    \end{align*}
+    which establishes the first identity of the claim.
+
+    Substituting $\rho = (1 - r)/2$ and $\nu = (d - 2)/2$ into (\ref{eqn:gradshteyn}) yields
+    \begin{align*}
+        \int_0^1 C_r^{(d - 2)/2}(t) (1 - t^2)^{(d - 3)/2}dt = \frac{\sqrt{\pi}\Gamma(d + r - 2)\Gamma\left(\frac{d - 1}{2}\right) }{4\Gamma(d - 2)\Gamma\left(\frac{3 - r}{2}\right)\Gamma(r + 1)\Gamma\left(\frac{d + r + 1}{2}\right) } , 
+    \end{align*}
+    which establishes the second identity of the claim. 
+\end{proof}
+
+\begin{lemma}\label{lemma:eigendecomposition-sign}
+    Suppose that $g \in \mc{H}_r^d$ and $d \geq 3$. Then for all $r \geq 0$, $T_{\dot{\sigma}}g = c_{r,d}g$, where
+    \begin{align*}
+        c_{r,d} &= \frac{\Gamma\left(\frac{d}{2}\right)}{2\Gamma\left(1 - \frac{r}{2}\right)\Gamma\left(\frac{r}{2} + \frac{d}{2}\right)  }.
+    \end{align*}
+    Moreover, if $0 \leq r \leq R$, then
+    \begin{align*}
+        |c_{2r + 1, d}| &\geq  \frac{\Gamma\left(\frac{d}{2}\right)\Gamma\left(\frac{2R + 1}{2}\right) }{2\pi \Gamma\left(\frac{d + 2R + 1}{2}\right) }.
+    \end{align*}
+\end{lemma}
+\begin{proof}
+    Let $g \in \mc{H}_r^d$. By Lemma \ref{lem:funk-hecke},
+    \[T_{\dot{\sigma}} g = c_{r, d}g, \]
+    where
+    \begin{align*}
+        c_{r,d} &= \frac{\Gamma(r + 1)\Gamma(d - 2)\Gamma\left(\frac{d}{2}\right)  }{\sqrt{\pi}\Gamma(d - 2 + r)\Gamma\left(\frac{d - 1}{2}\right) } \int_{-1}^1 \dot{\sigma}(t) C_r^{(d - 2)/2}(t)(1 - t^2)^{(d - 3)/2}dt\\
+        &= \frac{\Gamma(r + 1)\Gamma(d - 2)\Gamma\left(\frac{d}{2}\right)  }{\sqrt{\pi}\Gamma(d - 2 + r)\Gamma\left(\frac{d - 1}{2}\right) } \int_{0}^1 C_r^{(d - 2)/2}(t)(1 - t^2)^{(d - 3)/2}dt.
+    \end{align*}
+    By Lemma \ref{lem:gradshteyn}, this is equal to
+    \begin{align*}
+        \frac{\Gamma(r + 1)\Gamma(d - 2)\Gamma\left(\frac{d}{2}\right)  }{\sqrt{\pi}\Gamma(d - 2 + r)\Gamma\left(\frac{d - 1}{2}\right) } \cdot \frac{\sqrt{\pi}\Gamma(d + r - 2)\Gamma\left(\frac{d - 1}{2}\right) }{2\Gamma(d - 2)\Gamma(r + 1)\Gamma\left(1 - \frac{r}{2}\right)\Gamma\left(\frac{d + r}{2}\right)  } &= \frac{\Gamma\left(\frac{d}{2}\right) }{2\Gamma\left(1 - \frac{r}{2}\right)\Gamma\left(\frac{d + r}{2}\right) }
+    \end{align*}
+    as claimed.
+
+    Now we proceed with the second statement. We claim that whenever $0 \leq r \leq R$,
+    \[|c_{2R + 1, d}| \leq |c_{2r + 1, d}|. \]
+    We prove this by induction on $R$. For the base case $R = r$, the claim trivially holds. Now suppose that the claim holds for some $R \geq r$. Then
+    \begin{align*}
+        |c_{2(R + 1) + 1, d}| &= \left|\frac{\Gamma\left(\frac{d}{2}\right) }{2\Gamma\left(1 - \frac{2R + 3}{2}\right)\Gamma\left(\frac{2R + 3}{2} + \frac{d}{2}\right)  }\right|\\
+        &= \left|\frac{\left(-\frac{2R + 1}{2}\right)
+ \Gamma\left(\frac{d}{2}\right) }{2\Gamma\left(1 - \frac{2R + 1}{2}\right)\left(\frac{2R + 1}{2} + \frac{d}{2}\right)
+ \Gamma\left(\frac{2R + 1}{2} + \frac{d}{2}\right)  }\right|\\
+ &= |c_{2R + 1, d}| \frac{2R + 1}{2R + 1 + d}\\
+ &\leq |c_{2R + 1, d}|\\
+ &\leq |c_{2r + 1, d}| . 
+    \end{align*}
+    Hence by induction $|c_{2R + 1, d}| \leq |c_{2r + 1, d}|$ for all $0 \leq r \leq R$.
+    Now suppose that $0 \leq r \leq R$. By Euler's reflection formula,
+    \begin{align*}
+        c_{2R + 1, d} &= \frac{\Gamma\left(\frac{d}{2} \right) }{2\Gamma\left(1 - \frac{2R + 1}{2}\right) \Gamma\left(\frac{2R + 1}{2} + \frac{d}{2}\right) }\\
+        &= \frac{\Gamma\left(\frac{d}{2}\right)\sin\left(\pi \frac{2R + 1}{2} \right)\Gamma\left(\frac{2R + 1}{2}\right) }{2\pi \Gamma\left(\frac{2R + 1}{2} + \frac{d}{2}\right) }\\
+        &= \frac{\Gamma\left(\frac{d}{2}\right)(-1)^R \Gamma\left(\frac{2R + 1}{2}\right) }{2\pi \Gamma\left(\frac{2R + 1}{2} + \frac{d}{2}\right) }
+    \end{align*}
+    so
+    \begin{align*}
+        |c_{2r +1 , d}| &\geq |c_{2R + 1, d}|\\
+        &= \frac{\Gamma\left(\frac{d}{2}\right)\Gamma\left(\frac{2R + 1}{2}\right) }{2\pi \Gamma\left(\frac{d + 2R + 1}{2}\right) }.
+    \end{align*}
+\end{proof}
+\begin{lemma}\label{lem:eigendecomposition-relu}
+    Suppose that $g \in \mc{H}_r^d$ and $d \geq 3$. Then $T_{\sqrt{d}\sigma}g = c_{r, d}g$, where
+    \[c_{r, d} = \frac{\sqrt{d}\Gamma\left(\frac{d}{2}\right) }{4\Gamma\left(\frac{3 - r}{2}\right)\Gamma\left(\frac{d + r + 1}{2}\right)  }. \]
+    Moreover, if $0 \leq r \leq R$, then
+    \[|c_{2r, d}| \geq \frac{\sqrt{d}\Gamma\left(\frac{d}{2}\right) \Gamma\left(\frac{2R - 1}{2}\right) }{4\pi \Gamma\left(\frac{d + 2R + 1}{2}\right) }. \]
+\end{lemma}
+\begin{proof}
+    The proof is analogous to that of Lemma \ref{lemma:eigendecomposition-sign}. Let $g \in \mc{H}_r^d$. By Lemma \ref{lem:funk-hecke},
+    \[T_{\sqrt{d}\sigma}g = c_{r, d} g, \]
+    where
+    \begin{align*}
+        c_{r, d} &= \frac{\Gamma(r + 1)\Gamma(d - 2)\Gamma\left(\frac{d}{2}\right)  }{\sqrt{\pi}\Gamma(d - 2 + r)\Gamma\left(\frac{d - 1}{2}\right) } \int_{-1}^1 \sqrt{d}\sigma(t) C_r^{(d - 2)/2}(t)(1 - t^2)^{(d - 3)/2}dt\\
+        &= \frac{\sqrt{d}\Gamma(r + 1)\Gamma(d - 2)\Gamma\left(\frac{d}{2}\right)  }{\sqrt{\pi}\Gamma(d - 2 + r)\Gamma\left(\frac{d - 1}{2}\right) } \int_0^1 t C_r^{(d - 2)/2}(t)(1 - t^2)^{(d - 3)/2}dt.
+    \end{align*}
+    By Lemma \ref{lem:gradshteyn}, this is equal to
+    \begin{align*}
+        \frac{\sqrt{d}\Gamma(r + 1)\Gamma(d - 2)\Gamma\left(\frac{d}{2}\right)  }{\sqrt{\pi}\Gamma(d - 2 + r)\Gamma\left(\frac{d - 1}{2}\right) } \cdot \frac{\sqrt{\pi}\Gamma(d + r - 2)\Gamma\left(\frac{d - 1}{2}\right) }{4\Gamma(d - 2)\Gamma(r + 1)\Gamma\left(\frac{3 - r}{2}\right)\Gamma\left(\frac{d + r + 1}{2}\right) } &= \frac{\sqrt{d}\Gamma\left(\frac{d}{2}\right) }{4\Gamma\left(\frac{3 - r}{2}\right)\Gamma\left(\frac{d + r + 1}{2}\right)  }
+    \end{align*}
+    as claimed.
+
+    We claim that whenever $0 \leq r \leq R$,
+    \[|c_{2R, d}| \leq |c_{2r, d}|. \]
+    We prove this by induction on $R$. For the base case $R = r$, the claim trivially holds. Now suppose that the claim holds for some $R \geq r$. Then
+    \begin{align*}
+        |c_{2(R + 1)}| &= \left|\frac{\sqrt{d}\Gamma\left(\frac{d}{2} \right) }{4\Gamma\left(\frac{1 - 2R}{2} \right)\Gamma\left(\frac{d + 2R + 3}{2}\right)  }  \right|\\
+        &= \left|\frac{\left(\frac{1 - 2R }{2}\right)\sqrt{d}\Gamma\left(\frac{d}{2}\right)}{4 \Gamma\left(\frac{1 - 2R}{2}\right)\left(\frac{d + 2R + 1}{2}\right)\Gamma\left(\frac{d + 2R + 1}{2}\right) }\right|\\
+        &= c_{2R} \frac{|2R - 1|}{d + 2R + 1}\\
+        &\leq c_{2R}.
+    \end{align*}
+    Hence by induction $|c_{2R}| \leq |c_{2r}|$ for all $0 \leq r \leq R$. Now suppose that $0 \leq r \leq R$. By Euler's reflection formula,
+    \begin{align*}
+        c_{2R, d} &= \frac{\sqrt{d}\Gamma\left(\frac{d}{2}\right) }{4\Gamma\left(\frac{3 - 2R}{2}\right)\Gamma\left(\frac{d + 2R + 1}{2}\right) }\\
+        &= \frac{\sqrt{d} \Gamma\left(\frac{d}{2}\right)\sin\left(\pi \frac{2R - 1}{2} \right)\Gamma\left(\frac{2R - 1}{2}\right) }{4\pi \Gamma\left(\frac{d + 2R + 1}{2} \right) }\\
+        &= \frac{(-1)^{R + 1} \sqrt{d}\Gamma\left(\frac{d}{2}\right)\Gamma\left(\frac{2R - 1}{2}\right) }{4\pi \Gamma\left(\frac{d + 2R + 1}{2}\right) }
+    \end{align*}
+    so
+    \begin{align*}
+        |c_{2r, d}| &\geq |c_{2R, d}|\\
+        &= \frac{\sqrt{d}\Gamma\left(\frac{d}{2}\right) \Gamma\left(\frac{2R - 1}{2}\right) }{4\pi \Gamma\left(\frac{d + 2R + 1}{2}\right) }.
+    \end{align*}
+\end{proof}
+
+
+\section{Proofs for Section \ref{section:shallow}}
+
+First we observe the connection between the smallest eigenvalue of the expected NTK when the weights are drawn uniformly over the sphere versus as Gaussian.
+\begin{lemma}\label{lem:spherical-gaussian-equivalence}
+    If $\mX \in \R^{d_0 \times n}$, then
+    \[\lambda_{\min}\left(\E_{\vw \sim \mc{N}(\bm{0}_d, \mI_d) }\left[ \sigma\left( \mX^T \vw \right) \sigma\left(\vw^T \mX\right) \right] \right) = d_0\lambda_{\min}\left(\E_{\vu \sim U(\S^{d_0 - 1}) }\left[\sigma\left( \mX^T \vu \right)\sigma\left(\vu^T \mX\right) \right] \right).\]
+\end{lemma}
+\begin{proof}
+    Since the distribution of $\vw$ is rotationally invariant, we can decompose $\vw = \alpha \vu$, where $\alpha = \|\vw\|$, $\vu$ is uniformly distributed on $\S^{d_0 -1 }$, and $\alpha$ and $\vu$ are independent. Then
+    \begin{align*}
+        \lambda_{\min}\left(\E_{\vw \sim \mc{N}(\bm{0}_d, \mI_d) }\left[ \sigma\left( \mX^T \vw\right) \sigma\left(\vw^T \mX\right) \right] \right) &= \lambda_{\min}\left(\E\left[ \sigma\left( \mX^T \vw\right) \sigma\left(\vw^T \mX\right) \right] \right)\\
+        &= \lambda_{\min}\left(\E\left[\alpha^2 \sigma\left( \mX^T \vu \right) \sigma\left(\vu^T\mX\right) \right] \right)\\
+        &= \lambda_{\min}\left(\E\left[\alpha^2\right]\E\left[ \sigma\left( \mX^T \vu\right) \sigma\left(\vu^T\mX\right) \right] \right)\\
+        &= d_0 \lambda_{\min}\left(\E\left[ \sigma\left( \mX^T \vu\right) \sigma\left(\vu^T\mX\right) \right]\right). 
+    \end{align*}
+\end{proof}
+
+Lemma \ref{lem:spherical-gaussian-equivalence} is useful in that studying the expected NTK in the shallow setting for uniform weights here will prove more convenient than working directly with Gaussian weights.
+
+\subsection{Proof of Lemma \ref{lemma:K1-inf}} \label{app:lemma:K1-inf}
+\lemmaKOneinf*
+\begin{proof}
+    By the scale-invariance of $\dot{\sigma}$,
+    \begin{align*}
+        \lambda_1 = \lambda_{\min}\left(\E_{\vu \sim  \mc{N}(\bm{0}_d, \mI_d) } \left[\dot{\sigma}\left(\mX^T \vu \right)\dot{\sigma}\left(\vu^T\mX\right) \right] \right).
+    \end{align*}
+    For each $i \in [n]$ and $j \in [d_1]$,
+    \[\nabla_{\vw_j}f(\vx_i) = \frac{1}{\sqrt{d_1}} v_j \dot{\sigma}\left(\langle \vw_j^T, \vx_i \rangle\right) \vx_i \]
+    and therefore
+    \[\mK_1 = \frac{1}{d_1}\sum_{j = 1}^{d_1} \mZ_j, \]
+    where
+    \[\mZ_j = v_j^2 \left(\dot{\sigma}\left( \mX^T \vw_j \right) \dot{\sigma}\left(\vw_j^T \mX\right)\right) \odot \left(\mX^T \mX\right). \]
+    For each $j \in [d_1]$, let $\xi_j \in \{0, 1\}$ be a random variable taking value 1 if $|v_j| \leq 1$ and taking value 0 otherwise. Since $v_j$ is a standard Gaussian there exists a universal constant $C_1 > 0$ with $\E[\xi_jv_j] = C_1$ for all $j$.
+    We also define $\mZ_j' = \xi_j \mZ_j$. Note that $\mZ_j' \succeq \bm{0}$, and by the inequality $\lambda_{\max}(\mA \odot \mB) \leq \max_i [\mA]_{ii} \lambda_{\max}(\mB)$,
+    \begin{align*}
+        \|\mZ'_j\| &= \left\|\xi_jv_j^2 \left(\dot{\sigma}\left( \mX^T \vw_j \right) \dot{\sigma}\left(\vw_j \mX\right)\right) \odot \left(\mX^T \mX\right)  \right\|\\
+        &\leq \max_{i \in [n]}\left|\left(\xi_jv_j^2 \left[\dot{\sigma}\left(\mX^T \vw_j \right) \dot{\sigma}\left(\vw_j^T \mX\right)\right)\right]_{ii} \right| \cdot \left\| \mX^T \mX\right\|\\
+        &= \max_{i \in [n]} \left|\xi_j v_j^2 \dot{\sigma}\left(\vw_j^T \vx_i \right)^2 \right| \cdot \|\mX\|^2\\
+        &\leq \|\mX\|^2.
+    \end{align*}
+
+Furthermore by the inequality $\lambda_{\min}(\mA \odot \mB) \geq \min_i [\mA]_{ii} \lambda_{\min}(\mB)$,
+\begin{align*}
+    \lambda_{\min}\left(\E[\mZ_j'] \right) &= \lambda_{\min}\left(\E\left[\xi_jv_j^2\left(\dot{\sigma}\left(\mX^T \vw_j \right)\dot{\sigma}\left(\vw_j^T \mX\right)\right)  \right]\odot \left(\mX^T \mX \right) \right)\\
+    &\geq \lambda_{\min}\left(\E\left[\xi_jv_j^2\left(\dot{\sigma}\left(\mX^T \vw_j \right)\dot{\sigma}\left(\vw_j^T\mX\right)\right)  \right] \right)\min_{i \in [n]}\left|\left(\mX^T \mX\right)_{ii} \right|\\
+    &= \lambda_{\min}\left(\E\left[\xi_jv_j^2\right] \E\left[\left(\dot{\sigma}\left(\mX^T \vw_j \right)\dot{\sigma}\left(\vw_j^T\mX\right)\right)  \right] \right)\min_{i \in [n]} \|\vx_i\|^2\\
+    &= C_1\lambda_{\min}\left( \E\left[\left(\dot{\sigma}\left(\mX^T \vw_j \right)\dot{\sigma}\left(\vw_j^T\mX\right)\right)  \right] \right)\\
+    &= C_1 \lambda_1.
+\end{align*}
+So by Lemma \ref{lem:matrix-chernoff}, for all $t \geq 0$
+\begin{align*}
+    \P\left(\lambda_{\min}\left(\frac{1}{d_1}\sum_{j = 1}^{d_1}\mZ_j' \right) \leq C_1 \lambda_1 \right) &\leq \P\left(\lambda_{\min}\left(\frac{1}{d_1}\sum_{j = 1}^{d_1}\mZ_j' \right) \leq \E[\mZ_1'] \right)\\
+    &\leq n\exp\left(-\frac{C_2 d_1 \lambda_1 }{\|\mX\|^2} \right)
+\end{align*}
+where $C_2 > 0$ is a constant. Since $\mZ_j \succeq \mZ_j'$ for all $j \in [d_1]$, if $d_1 \geq \frac{1}{C_2\lambda_1}\|\mX\|^2 \log\left(\frac{n}{\epsilon}\right)$, then
+\begin{align*}
+    \P\left(\lambda_{\min}\left(\frac{1}{d_1}\sum_{j  =1}^{d_1}\mZ_j \right) \leq C_1 \lambda_1 \right) &\leq n \exp\left(-\frac{C_2d_1 \lambda_1}{\|\mX\|^2}\right)\\
+    &\leq \epsilon.
+\end{align*}
+\end{proof}
+
+
+\subsection{Proof of Lemma \ref{lemma:K2-inf}} \label{app:lemma:K2-inf}
+
+\begin{lemma}
+    Suppose that $\vx_1, \cdots, \vx_n \in \S^{d_0 -1 }$. Let
+    \[\lambda_2 = d_0\lambda_{\min}\left(\E_{\vu \sim U(\S^{d_0 - 1}) }\left[\sigma( \mX^T \vu )\sigma(\vu^T \mX) \right] \right). \]
+    If $\lambda_2 > 0$ and $d_1 \gtrsim  \frac{n}{\lambda_2}  \log\left(\frac{n}{\lambda_2}\right)\log \left(\frac{n}{\epsilon}\right) $, then with probability at least $1 - \epsilon$, $\lambda_{\min}(\mK_2) \geq 
+ \frac{\lambda_2}{4}$. 
+\end{lemma}
+\begin{proof}
+    Note that by Lemma \ref{lem:spherical-gaussian-equivalence},
+    \[\lambda_2 = \lambda_{\min}\left(\E_{\vw \sim \mc{N}(\bm{0}_d, \mI_d) }\left[ \sigma\left( \mX^T \vw\right) \sigma\left(\vw^T \mX\right) \right] \right). \]
+    For each $i \in [n]$ and $j \in [d_1]$,
+    \[\nabla_{v_j} f(\vx_i) = \frac{1}{\sqrt{d_1}} \sigma(\vw_j^T \vx_i)\]
+    and therefore
+    \[\mK_2 = \frac{1}{d_1} \sum_{j = 1}^{d_1}  \mZ_j,\]
+    where
+    \[\mZ_j = \sigma\left( \mX^T \vw_j\right)\sigma\left(\vw_j^T \mX\right).\]
+   By \citet[Theorem 6.3.2]{vershynin2018high}, for each $j \in [d_1]$
+   \begin{align*}
+       \left\| \left\|\mX^T \vw_j \right\| \right\|_{\psi_2} &\lesssim  \left\| \left\|\mX^T \vw_j \right\| - \left\| \mX^T\right\|_F  \right\|_{\psi_2} + \|\mX^T\|_F\\
+       &\lesssim \|\mX^T\| + \|\mX^T\|_F\\
+       &\lesssim \|\mX^T\|_F\\
+       &= \|\mX\|_F\\
+       &= \sqrt{n}.
+   \end{align*}
+   So by Hoeffding's inequality, for all $t \geq 0$
+   \begin{align}
+    \P\left(\left\|\mX^T \vw_j \right\|^2 \geq t \right) = \P\left(\left\|\mX^T \vw_j \right\| \geq \sqrt{t} \right) \leq 2\exp\left(-\frac{C_1t}{n } \right)\label{eq:activation-exp-tail}
+   \end{align}
+   for some constant $C_1 > 0$. Let $s = \frac{n}{C_1}\log \frac{4n}{\lambda_2C_1} $. For each $j \in [d_1]$ let $\xi_j \in \{0, 1\}$ be a random variable taking value 1 if $\|\mX^T \vw_j\|^2 \leq s$ and taking value 0 otherwise. Let $\mZ_j' = \xi_j \mZ_j$. For each $j \in [m]$, $\mZ_j' \succeq 0$, and
+   \begin{align*}
+       \left\|\mZ_j'\right\| &=  \left\|\xi_j \sigma\left( \mX^T \vw_j \right)\sigma\left(\vw_j^T \mX\right) \right\|\\
+       &= \left\|\xi_j \sigma\left(\mX^T \vw_j\right) \right\|^2\\
+       &\leq s.
+   \end{align*}
+   Moreover,
+   \begin{align*}
+       \left\|\E[\mZ_j] - \E[\mZ_j'] \right\| &= \left\|\E\left[(1 - \xi_j) \sigma\left( \mX^T \vw_j \right)\sigma\left(\vw_j^T \mX \right) \right] \right\|\\
+       &\leq \E\left[(1 - \xi_j)\left\|\sigma\left( \mX^T \vw_j \right)\sigma\left(\vw_j^T \mX \right) \right\|\right]\\
+       &= \E\left[(1 - \xi_j)\left\|\sigma\left(\mX^T \vw_j\right) \right\|^2 \right]\\
+       &= \frac{1}{2} \E\left[(1 - \xi_j)\left\|\mX^T \vw_j \right\|^2 \right]\\
+       &= \frac{1}{2}\int_{s}^{\infty}\P\left(\left\|\mX^T \vw_j\right\|^2 \geq t \right)dt\\
+       &\leq 2 \int_s^{\infty}\exp\left(-\frac{C_1t}{n} \right)dt\\
+       &= \frac{2n}{C_1}\exp\left(-\frac{C_1s}{n} \right)\\
+       &= \frac{\lambda_2}{2}.
+   \end{align*}
+   Here we used (\ref{eq:activation-exp-tail}) in line 6. By Weyl's inequality,
+   \[\lambda_{\min}(\E[ \mZ_j']) \geq \lambda_{\min}(\E[\mZ_j]) - \left\|\E[\mZ_j] - \E[\mZ_j']\right\| = \lambda_2 - \frac{\lambda_2}{2} = \frac{\lambda_2}{2}. \]
+   By Lemma \ref{lem:matrix-chernoff},
+   \begin{align*}
+       \P\left(\lambda_{\min}\left(\frac{1}{d_1}\sum_{j = 1}^{d_1} \mZ_j' \right) \leq \frac{\lambda_2}{4}  \right) &\leq \P\left(\lambda_{\min}\left(\frac{1}{m}\sum_{j = 1}^m \mZ_j'\right) \leq \frac{1}{2} \lambda_{\min}(\E[\mZ_1']) \right)\\
+       &\leq n \exp\left(-\frac{C_2d_1 \lambda_{\min}(\E[\mZ_1']) }{s} \right)\\
+       &\leq n \exp\left(\frac{-C_2 d_1 \lambda_2  }{2s} \right).
+   \end{align*}
+   Since $\mZ_j' \preceq \mZ_j$ for all $j$, for $d_1 \geq \frac{2s}{C_2\lambda_2} \log \frac{n}{\epsilon}$ this implies
+   \begin{align*}
+       \P\left(\lambda_{\min}\left(\frac{1}{d_1}\sum_{j = 1}^{d_1}\mZ_j \right) \leq \frac{\lambda_2}{4} \right) &\leq n \exp\left(-\frac{C_2d_1 \lambda_2}{2s}\right)\\
+       &\leq \epsilon.
+   \end{align*}
+   In other words,
+    \[\P\left(\lambda_{\min}(\mK_2) \geq \frac{\lambda_2}{4}\right) \geq 1 - \epsilon. \]
+\end{proof}
+
+
+\subsection{Proof of Lemma \ref{lem:gram-to-hemisphere-transform}} \label{app:gram-to-hemisphere-transform}
+
+
+\lemmaGradToHemi*
+\begin{proof}
+    We compute
+    \begin{align*}
+        \langle \mK_{\psi}^{\infty}\vz, \vz \rangle &= \E_{\vw \sim U(\S^{d - 1})}\left[\left| \psi\left(\vw^T \mX \right) \vz \right|^2 \right]\\
+        &= \int_{\S^{d - 1}} \left| \psi\left(\vw^T \mX\right) \vz \right|^2 dS(\vw)\\
+        &= \int_{\S^{d - 1}}\left|\sum_{i = 1}^n \psi(\langle \vw, \vx_i \rangle) z_i\right|^2 dS(\vw)\\
+        &= \int_{\S^{d - 1}}\left|\int_{\S^{d - 1}} \psi(\langle \vw, \vx \rangle) d\mu_{\vz}(\vx) \right|^2dS(\vw)\\
+        &= \int_{\S^{d - 1}} \left| T_{\psi} \mu_{\vz}(\vw)\right|^2 dS(\vw)\\
+        &= \|T_{\psi}\mu_{\vz}\|^2
+    \end{align*}
+    which establishes the first part of the result. The second part of the result follows immediately by writing
+    \[\lambda_{\min}(\mK_{\psi}^{\infty}) = \inf_{\|\vz\| = 1} \langle \mK_{\psi}^{\infty}\vz, \vz \rangle = \inf_{\|\vz\| = 1} \|T_{\psi}\mu_{\vz}\|^2. \]
+\end{proof}
+
+\subsection{Proof of Lemma \ref{lem:matrix-spherical-harmonic}} \label{app:matrix-spherical-harmonic}
+
+\lemmaMatrixSphericalHarmonic*
+
+\begin{proof}
+    Note that
+    \begin{align*}
+        N = \sum_{r = 0}^R \left(\binom{2r + \beta + d - 1}{d - 1} - \binom{2r + \beta + d - 3}{d - 1}  \right)
+        = \binom{2R + \beta + d - 1}{d - 1}.
+    \end{align*}
+    Let us write $\mD = [\vd_1, \cdots, \vd_n]$. Fix $i, k \in [n]$ with $i \neq k$. By the addition formula (\ref{eqn:addition-formula}),
+    \begin{align*}
+        \|\vd_i\|^2 &= \sum_{a = 1}^N g_a(\vx_i)^2\\
+        &= \sum_{r = 0}^R \sum_{s = 1}^{\dim(\mc{H}_{2r +\beta}^d) }Y_{r,s}^d(\vx_i)^2\\
+        &= \sum_{r = 0}^R \dim(\mc{H}_{2r + \beta}^d)\\
+        &= N.
+    \end{align*}
+     By Lemma \ref{lemma:addition-formula-bound} and $\delta$-separation, there exists a constant $C > 0$ such that 
+     \begin{align*}
+         |\langle \vd_i, \vd_k \rangle| &= \left|\sum_{a = 1}^N g_a(\vx_i)g_a(\vx_k)\right|\\
+         &\leq C\left(\frac{\delta^4 }{2} \right)^{-(d-2)/4}\binom{2R + \beta + d - 1 }{d -1 }^{1/2}\\
+         &= C N^{1/2}\left(\frac{\delta^4 }{2} \right)^{-(d-2)/4}.
+     \end{align*}
+     Suppose that 
+     \[N \geq 2C^2\left(\frac{\delta^4}{2}\right)^{-(d - 2)/2}. \]
+     
+     Observe that $\sigma_{\min}(\mD)$ is the square root of the minimum eigenvalue of $\mD^T \mD$. By the Gershgorin circle theorem, the minimum eigenvalue of $\mD^T \mD$ is at least
+    \begin{align*}
+        \min_{i \in [n]}\left(|(\mD^T\mD)_{ii}| - \sum_{k \neq i}|\mD^T\mD|_{ik} \right) &= \min_{i \in [n]}\left(\|\vd_i\|^2 - \sum_{k \neq i}|\langle \vd_i, \vd_k \rangle|\right)\\
+        &\geq \frac{N}{2}.
+    \end{align*}
+    The result follows.
+\end{proof}
+
+
+
+
+
+
+\subsection{Proof of Lemma \ref{corr:hemisphere-transform-asymptotics}} \label{app:hemi-transform-asymp}
+\begin{lemma}\label{lemma:hemisphere-transform-asymptotics-implicit}
+    Let $\epsilon \in (0, 1)$ and let $\delta > 0$. Suppose that $\vx_1, \cdots, \vx_n \in \S^{d - 1}$ form a $\delta$-separated dataset. Let $R \in \mathbb{N}$ be such that
+    \[\binom{2R + d - 1}{d - 1} \geq C\left(\frac{\delta^4}{2}\right)^{-(d - 2)/2} \]
+    where $C > 0$ is a universal constant. Then
+    \begin{align*}
+        \|T_{\psi}\mu_{\vz}\|^2 \gtrsim \begin{cases}
+            (d + R)^{1/2}d^{-1/2} R^{-3/2} & \text{ if $\psi = \dot{\sigma}$}\\
+            (d + R)^{-1/2}d^{1/2}R^{-3/2} & \text{if $\psi = \sqrt{d}\sigma$}
+        \end{cases} 
+    \end{align*}
+    for all $\vz \in \R^n$ with $\|\vz\| \leq 1$.
+\end{lemma}
+\begin{proof}
+    Let $C$ be the same constant as in Lemma \ref{lem:matrix-spherical-harmonic} and suppose that
+    \[\binom{2R + d - 1}{d - 1} \geq C\left(\frac{\delta^4}{2}\right)^{-(d - 2)/2}. \]
+    Let $\beta \in \{0, 1\}$ satisfy $\beta = 1$ when $\psi = \dot{\sigma}$ and $\beta = 0$ when $\psi = d\sigma$.
+    Let $N = \sum_{r = 0}^R \dim(\mc{H}_{2r + \beta}^d)$.
+    Note that
+    \begin{align*}
+        N &= \sum_{r = 0}^R\left(\binom{2r + d + \beta - 1}{d - 1} - \binom{2r + d + \beta - 3}{d - 1} \right) \\&= \binom{2R + d + \beta - 1}{d - 1}\\
+        &\geq \binom{2R + d - 1}{d - 1}\\
+        &\geq C\left(\frac{\delta^4}{2}\right)^{-(d - 2)/2}.
+    \end{align*}
+    Let $g_1, \cdots, g_N$ be spherical harmonics forming an orthonormal basis of $\bigoplus_{r = 1}^R \mc{H}_{2r - 1}^d$, and let $\mB \in \R^{N \times n}$ be the matrix defined by $\mB_{ai} = g_a(\vx_i)$. By Lemma \ref{lem:matrix-spherical-harmonic}, $\sigma_{\min}(\mB) \geq \sqrt{\frac{N}{2} }$ with probability at least $1 - \epsilon$. Since the functions $g_a$ are orthonormal,
+    \begin{align*}
+        \|T_{\psi}\mu_{\vz}\|^2 &\geq \sum_{a = 1}^N  |\langle T_{\psi}\mu_{\vz}, g_a \rangle|^2.
+    \end{align*}
+    By Lemma \ref{lemma:T-self-adjoint} the above expression is equal to
+    \begin{align*}
+        \sum_{a = 1}^N |\langle \mu_{\vz}, T_{\psi} g_a \rangle|^2 &= \sum_{r = 0}^R\sum_{s = 1}^{\dim\left(\mc{H}_{2r + \beta}^d \right) } \left|\langle \mu_{\vz}, T_{\psi}Y_{2r + \beta, s} \rangle \right|^2.
+    \end{align*}
+    By Lemmas \ref{lemma:eigendecomposition-sign} and \ref{lem:eigendecomposition-relu}, $T_{\psi} Y_{2r + \beta, s} = c_{2r + \beta,d} Y_{2r + \beta, s}$, where $c_{2r + \beta} \in \R$ and
+    \begin{align}\label{eq:coefficient-asymptotics}
+        |c_{2r + \beta,d}| &\gtrsim \begin{cases}
+           \frac{\Gamma\left(\frac{d}{2}\right)\Gamma\left(\frac{2R + 1}{2}\right) }{\Gamma\left(\frac{d + 2R + 1}{2}\right) } & \text{ if $\psi = \dot{\sigma}$}\\
+           \frac{\sqrt{d}\Gamma\left(\frac{d}{2}\right)\Gamma\left(\frac{2R - 1}{2}\right) }{\Gamma\left(\frac{d + 2R + 1}{2}\right) } & \text{ if $\psi = \sqrt{d}\sigma$.}
+        \end{cases}
+    \end{align}
+    Hence
+    \begin{align*}
+        \|T_{\psi}\mu_{\vz}\|^2 &\geq \sum_{r = 0}^R \sum_{s = 1}^{\dim\left(\mc{H}_{2r + \beta}^d\right) }|c_{2r + \beta, d}|^2 |\langle \mu_{\vz}, Y_{2r + \beta, s} \rangle|^2\\
+        &\geq \min_{0 \leq r \leq R}\left(|c_{2r + \beta, d}|^2 \right)\sum_{r = 0}^R \sum_{s = 1}^{\dim\left(\mc{H}_{2r + \beta}^d\right)}|\langle \mu_{\vz}, Y_{2r + \beta, s} \rangle|^2\\
+        &= \min_{0 \leq r \leq R}\left(|c_{2r + \beta, d}|^2 \right)\sum_{a = 1}^N |\langle \mu_{\vz}, g_a \rangle|^2\\
+        &= \min_{0 \leq r \leq R}\left(|c_{2r + \beta, d}|^2 \right)\sum_{a = 1}^N \left|\sum_{i = 1}^n z_i g_a(\vx_i) \right|^2\\
+        &= \min_{0 \leq r \leq R}\left(|c_{2r + \beta, d}|^2 \right) \|\mB \vz\|^2\\
+        &\geq \min_{0 \leq r \leq R}\left(|c_{2r + \beta, d}|^2 \right)\sigma_{\min}(\mB)^2\\
+        &\geq \frac{N}{2}\min_{0 \leq r \leq R}\left(|c_{2r + \beta, d}|^2 \right).
+    \end{align*}
+    So by (\ref{eq:coefficient-asymptotics}),
+    \begin{align}
+        \|T_{\psi}\mu_{\vz}\|^2 &\gtrsim \begin{cases}
+           \frac{N\Gamma\left(\frac{d}{2}\right)^2\Gamma\left(\frac{2R + 1}{2}\right)^2 }{\Gamma\left(\frac{d + 2R + 1}{2}\right)^2 } & \text{ if $\psi = \dot{\sigma}$}\\
+           \frac{Nd^2\Gamma\left(\frac{d}{2}\right)^2\Gamma\left(\frac{2R - 1}{2}\right)^2 }{\Gamma\left(\frac{d + 2R + 1}{2}\right)^2 } & \text{ if $\psi = d\sigma$.}
+        \end{cases}
+    \end{align}
+    We now separately analyze the cases where $\psi = \dot{\sigma}$ and $\psi = d\sigma$.
+
+    \textbf{Case 1: $\psi = \dot{\sigma}$}. In this case
+    \begin{align*}
+        \|T_{\psi}\mu_{\vz}\|^2 &\gtrsim N\frac{ \Gamma\left(\frac{d}{2}\right)^2 \Gamma\left(\frac{2R + 1}{2}\right)^2 }{\Gamma\left(\frac{d + 2R + 1}{2}\right)^2 }\\
+        &= \binom{2R + d}{d - 1}\cdot \frac{ \Gamma\left(\frac{d}{2}\right)^2 \Gamma\left(\frac{2R + 1}{2}\right)^2 }{\Gamma\left(\frac{d + 2R + 1}{2}\right)^2 }\\
+        &= \frac{\Gamma(2R + d + 1) }{\Gamma(d)\Gamma(2R + 2) } \cdot \frac{ \Gamma\left(\frac{d}{2}\right)^2 \Gamma\left(\frac{2R + 1}{2}\right)^2 }{\Gamma\left(\frac{d + 2R + 1}{2}\right)^2 }.
+    \end{align*}
+    Then by Stirling's approximation,
+    \begin{align*}
+        \|T_{\psi}\mu_{\vz}\|^2 &\gtrsim \frac{(2R + d + 1)^{2R + d + 1/2}e^{-2R - d - 1 }  }{d^{d -1/2}e^{-d}(2R + 2)^{2R + 3/2}e^{-2R - 2}  } \cdot \frac{\left(\frac{d}{2}\right)^{d - 1}e^{-d}\left(\frac{2R + 1}{2}\right)^{2R} e^{-2R - 1}  }{\left(\frac{d + 2R + 1}{2}\right)^{d + 2R} e^{-d - 2R - 1}  }\\
+        &\gtrsim (d + 2R + 1)^{1/2} d^{-1/2}\left(\frac{2R + 1}{2R + 2}\right)^{2R}(2R + 2)^{-3/2}\\
+        &\gtrsim (d + 2R + 1)^{1/2}d^{-1/2} (2R + 2)^{-3/2}\\
+        &\gtrsim (d + R)^{1/2}d^{-1/2} R^{-3/2}.
+    \end{align*}
+    Here the third inequality follows from the observations
+    \begin{align*}
+        \left(\frac{2R + 1}{2R + 2}\right)^{2R} > 0
+    \end{align*}
+    and
+    \begin{align*}
+        \lim_{R \to \infty}\left(\frac{2R + 1}{2R + 2}\right)^{2R} = \lim_{R \to \infty}\left(1 - \frac{1}{2R +2}\right)^{2R} = e^{-1}.
+    \end{align*}
+    \textbf{Case 2: $\psi = \sqrt{d}\sigma$}. In this case
+    \begin{align*}
+        \|T_{\psi}\mu_{\vz}\|^2 &\gtrsim N\frac{ d \Gamma\left(\frac{d}{2}\right)^2 \Gamma\left(\frac{2R - 1}{2}\right)^2 }{\Gamma\left(\frac{d + 2R + 1}{2}\right)^2 }\\
+        &=\binom{2R + d - 1}{d  - 1}\cdot \frac{ d \Gamma\left(\frac{d}{2}\right)^2 \Gamma\left(\frac{2R - 1}{2}\right)^2 }{\Gamma\left(\frac{d + 2R + 1}{2}\right)^2 }\\
+        &= \frac{\Gamma(2R + d) }{\Gamma(d)\Gamma(2R + 1) }\cdot \frac{ d \Gamma\left(\frac{d}{2}\right)^2 \Gamma\left(\frac{2R - 1}{2}\right)^2 }{\Gamma\left(\frac{d + 2R + 1}{2}\right)^2 }.
+    \end{align*}
+    Then by Stirling's approximation,
+    \begin{align*}
+        \|T_{\psi}\mu_{\vz}\|^2 &\gtrsim \frac{(2R + d)^{2R + d - 1/2}e^{-2R - d} }{d^{d - 1/2}e^{-d}(2R + 1)^{2R + 1/2}e^{-2R - 1} } \cdot \frac{d \left(\frac{d}{2}\right)^{d -1 }e^{-d}\left(\frac{2R - 1}{2}\right)^{2R - 2}e^{-2R + 1} }{\left(\frac{d + 2R + 1}{2}\right)^{d + 2R } e^{-d - 2R - 1} }\\
+        &\gtrsim (d + 2R)^{-1/2}\left(\frac{d + 2R}{d + 2R + 1}\right)^{d + 2R}d^{1/2}(2R - 1)^{-2}(2R + 1)^{1/2}\left(\frac{2R - 1}{2R + 1}\right)^{2R}\\
+        &\gtrsim (d + 2R)^{-1/2}d^{1/2} R^{-3/2}\left(\frac{d + 2R}{d + 2R + 1}\right)^{d + 2R}\left(\frac{2R - 1}{2R + 1}\right)^{2R}\\
+        &= (d + 2R)^{-1/2} d^{1/2}\left(1 - \frac{1}{d + 2R + 1}\right)^{d + 2R}\left(1 - \frac{2}{2R + 1}\right)^{2R} \\
+        &\gtrsim (d + R)^{-1/2}d^{1/2}R^{-3/2}.
+    \end{align*}
+    Hence we have established the desired bound on $\|T_{\psi}\mu_{\vz}\|^2$ in all cases.
+\end{proof}
+
+\CorrHemisphereTransformAsymptotics*
+\begin{proof}
+    We will consider multiple cases depending on the relative scaling of $d$ and $n$. Let $C > 0$ be the same constant as in Lemma \ref{lemma:hemisphere-transform-asymptotics-implicit}. First suppose that $d \geq C\left(\frac{\delta^4}{2} \right)^{-(d - 2)/2}$. Let $R = 1$. Then
+    \[\binom{2R + d - 1}{d - 1} = d \geq C\left(\frac{\delta^4}{2}\right)^{(d - 2)/2}. \]
+    By Lemma \ref{lemma:hemisphere-transform-asymptotics-implicit}, $\|T_{\psi}\mu_{\vz}\|^2 \gtrsim 1$ in this case. 
+    
+    Next suppose that $d \leq C\left(\frac{\delta^4}{2}\right)^{-(d - 2)/2}$ and $\sqrt{d} \log d \geq (8\log(1 + C) + 16 d)\log \frac{2}{\delta}$. Let \[R = \left\lceil    \frac{\log(1 + C) + 2d \log(2/\delta) }{\log d} \right\rceil.\] Note that since $d \leq \left(\frac{\delta^4}{2}\right)^{-(d - 2)/2}$, we have
+    \begin{align*}
+         \frac{\log(1 + C) +2d \log(2/\delta)}{\log d} \geq \frac{2d\log(2/\delta) }{\frac{d - 2}{2}\log(2/\delta^4) } \geq 1
+    \end{align*}
+    and therefore
+    \begin{align*}
+        R \leq  \frac{2\log(1 + C) +4d\log(2/\delta) }{\log d} \leq \frac{\sqrt{d}}{4}.
+    \end{align*}
+    By definition,
+    \[R \geq \frac{\log(1 + C) + 2d\log(2/\delta) }{\log(d)} \]
+    so that
+    \begin{align*}
+        \binom{2R + d - 1}{d - 1} &\geq \left(\frac{2R + d - 1}{2R}\right)^{2R}\\
+        &\geq \left(\frac{d}{2R}\right)^{2R}\\
+        &= \exp\left(2R(\log (d) - \log(2R) \right)\\
+        &\geq \exp\left(2R\left(\log(d) - \log\left(\sqrt{d}\right)\right) \right)\\
+        &= \exp\left(R \log d \right)\\
+        &\geq \exp(\log(1 + C) + 2d\log(2/\delta))\\
+        &\geq C\left(\frac{2}{\delta}\right)^{2d}\\
+        &\geq C\left(\frac{2}{\delta^4}\right)^{(d - 2)/2}.
+    \end{align*}
+    Then by Lemma \ref{lemma:hemisphere-transform-asymptotics-implicit}, the following bounds hold. If $\psi = \dot{\sigma}$, then
+    \begin{align*}
+        \|T_{\psi}\mu_{\vz}\|^2 &\gtrsim (d + R)^{1/2}d^{-1/2}R^{-3/2}\\
+        &\gtrsim R^{-3/2}\\
+        &\gtrsim \left(1  +\frac{d \log(1/\delta) }{\log d}\right)^{-3/2}\\
+        &\gtrsim \left(1 + \frac{d \log(1/\delta)}{\log d}\right)^{-3} \delta^2.
+    \end{align*}
+    If $\psi = \sqrt{d}\sigma$, then
+    \begin{align*}
+        \|T_{\psi}\mu_{\vz}\|^2 &\gtrsim (d + R)^{-1/2}d^{1/2}R^{-3/2}\\
+        &\gtrsim (d + \sqrt{d})^{-1/2}d^{1/2}R^{-3/2}\\
+        &\gtrsim R^{-3/2}\\
+        &\gtrsim \left(1 + \frac{ d\log(2/\delta)}{\log d}\right)^{-3/2}\\
+        &\gtrsim \left(1 + \frac{\log(n/\epsilon)}{\log d}\right)^{-3} \delta^4.
+    \end{align*}
+    Finally suppose that $\sqrt{d} \log d \leq (8 \log(1 + C) + 16 d) \log \frac{2}{\delta}$ and let $R = \left\lceil (1 + 2C)d\left(\frac{2}{\delta}\right)^{2(d - 2)/(d - 1)}\right\rceil $. Then
+    \begin{align*}
+        R &\lesssim  1 + d\left(\frac{2}{\delta}\right)^{2(d - 2)/(d -1) }\\
+        &\leq (1 + d)\left(\frac{2}{\delta}\right)^{2(d - 2)/(d - 1) }\\
+        &\leq \left(1 + \sqrt{d}\right)^2 \left(\frac{2}{\delta}\right)^{2(d - 2)/(d - 1)}\\
+        &\lesssim \left(1 + \frac{d \log(1/\delta)}{\log(d)}\right)^2\left(\frac{2}{\delta}\right)^{2(d - 2)/(d - 1)}\\
+        &\lesssim \left(1 + \frac{d \log(1/\delta)}{\log(d)}\right)^2 \delta^{-2}
+    \end{align*}
+    and
+    \begin{align*}
+        \binom{2R + d - 1}{d - 1} &\geq \left(\frac{2R + d - 1}{d - 1}\right)^{d -1 }\\
+        &\geq \left(\frac{R}{d}\right)^{d -1 }\\
+        &\geq \left(1 + \frac{2C}{d}\right)^{d - 1}\left(\frac{2}{\delta}\right)^{2/(d - 2)}.\\
+        &\geq \frac{2C(d - 1)}{d}\left(\frac{2}{\delta}\right)^{2/(d - 2)}\\
+        &\geq C\left(\frac{2}{\delta}\right)^{2/(d - 2)}.
+    \end{align*}
+    So by Lemma \ref{lemma:hemisphere-transform-asymptotics-implicit} the following bounds hold. If $\psi = \dot{\sigma}$, then
+    \begin{align*}
+        \|T_{\psi}\mu_{\vz}\|^2 &\gtrsim (d + R)^{1/2}d^{-1/2}R^{-3/2}\\
+        &\gtrsim (1 + d)^{-1/2}R^{-1}\\
+        &\gtrsim \left(1 + \frac{d\log(1/\delta) }{\log d} \right)^{-1}\left(1 + \frac{d\log(1/\delta) }{\log d}\right)^{-2} \delta^2\\
+        &= \left(1 + \frac{d\log(1/\delta) }{\log d} \right)^{-3} \delta^{2}.
+    \end{align*}
+    If $\psi = \sqrt{d}\sigma$, then
+    \begin{align*}
+        \|T_{\psi}\mu_{\vz}\|^2 &\gtrsim (d + R)^{-1/2}d^{1/2}R^{-3/2}\\
+        &\gtrsim \left(d + d\left(\frac{2}{\delta} \right)^{2(d - 2)/(d - 1)}  \right)^{-1/2}d^{1/2}\left(d\left(\frac{2}{\delta}\right)^{2(d - 2)/(d - 1)}\right)^{-3/2}\\
+        &\gtrsim d^{-3/2}\left(1 + \left(\frac{2}{\delta}\right)^{2(d -2 )/(d - 1)}\right)^{-1/2}\left(\frac{2}{\delta}\right)^{-3(d - 2)/(d - 1) }\\
+        &\gtrsim (1 + d)^{-3/2}\left(\frac{2}{\delta}\right)^{-4(d-2)/(d -1 )}\\
+        &\gtrsim \left(1 + \frac{d\log(1/\delta) }{\log d}\right) \delta^4.
+    \end{align*}
+    Hence we have shown the desired bound on $\|T_{\psi}\mu_{\vz}\|^2$ in all cases.
+\end{proof}
+
+
+
+
+
+    
+
+\subsection{Upper bound on the minimum eigenvalue of the NTK}
+\label{app:upper-bound-min-eigenvalue}
+Our strategy to upper bound $\lambda_{\min}(\mK)$ will be to prove that if two data points $\vx, \vx'$ are close, then the Jacobian of the network does not separate points too much. We will need to find upper bounds for both $\|\sigma(\mW \vx) - \sigma(\mW \vx')\|$ and $\|\dot{\sigma}(\mW \vx) - \dot{\sigma}(\mW \vx')\|$.  
+\begin{lemma}\label{lemma:feature-map-regularity}
+    Let $\epsilon \in (0, 1)$. Suppose that $\vx, \vx' \in \S^{d - 1}$ with $\|\vx - \vx'\| = \delta$. If $d_1 = \Omega\left(\log \frac{1}{\epsilon}\right)$, then with probability at least $1 - \epsilon$,
+    \[\|\sigma(\mW\vx) - \sigma(\mW\vx')\| \lesssim \delta \sqrt{d_1}. \]
+\end{lemma}
+\begin{proof}
+    Note that $\|\sigma(\mW \vx) - \sigma(\mW \vx')\|^2$ can be written a sum of iid subexponential random variables:
+    \[\|\sigma(\mW \vx) - \sigma(\mW \vx')\|^2 = \sum_{j = 1}^{d_{1}} (\sigma(\langle \vw_j, \vx \rangle) - \sigma(\langle \vw_j, \vx' \rangle )^2. \]
+    Since the entries of each $\vw_j$ are iid standard Gaussian random variables and $\sigma$ is $1$-Lipschitz,
+    \begin{align*}
+        \|(\sigma(\langle \vw_j, \vx \rangle) - \sigma(\langle \vw_j, \vx' \rangle) )^2\|_{\psi_1} &= \|\sigma(\langle \vw_j, \vx \rangle) - \sigma(\langle \vw_j, \vx' \rangle)\|_{\psi_2}^2\\
+        &\leq \|\langle \vw_j, \vx - \vx' \rangle\|_{\psi_2}^2\\
+        &= \|\vx - \vx'\|^2\\
+        &= \delta^2.
+    \end{align*}
+    Moreover,
+    \begin{align*}
+        \E[(\sigma(\langle \vw_j, \vx \rangle) - \sigma(\langle \vw_j, \vx' \rangle) )^2 ] &\leq  \E[|\langle \vw_j, \vx - \vx' \rangle|^2 ]\\
+        &= \|\vx - \vx'\|^2\\
+        &= \delta^2.
+    \end{align*}
+    So by Bernstein's inequality, for all $t \geq 0$
+    \begin{align*}
+        &\P\left(\|\sigma(\mW \vx) - \sigma(\mW \vx')\|^2 \geq \delta^2d_1 + t  \right) \\&\leq \P\left(\|\sigma(\mW \vx) - \sigma(\mW \vx')\|^2 \geq \E[\|\sigma(\mW \vx) - \sigma(\mW \vx')\|^2 ] + t  \right)\\
+        &\leq 2 \exp\left(-C\min\left(\frac{t^2}{d_1 \delta^4}, \frac{t}{\delta^2} \right) \right)
+    \end{align*}
+    where $C > 0$ is a universal constant. Setting $t =  \delta^2 d_1$ with $d_1 \geq \frac{1}{C} \log \frac{2}{\epsilon}$ yields
+    \begin{align*}
+        \P(\|\sigma(\mW \vx) - \sigma(\mW \vx')\|^2 \geq 2\delta^2 d_1) \leq 2 \exp\left(-C d_1 \right) \leq \epsilon.
+    \end{align*}
+     This establishes the result.
+\end{proof}
+\begin{lemma}\label{lemma:cosine-probabilities}
+    Suppose that $\vx, \vx' \in \S^{d-1}$. If $\vw \sim \mc{N}(\bm{0}, \mI_d)$, then
+    \[\P(\dot{\sigma}(\langle \vw, \vx \rangle) \neq \dot{\sigma}(\langle \vw, \vx' \rangle)) \asymp  \|\vx - \vx'\|.  \]
+\end{lemma}
+\begin{proof}
+    Recall that for $\vx, \vx' \in \S^{d - 1}$,
+    \[\P(\dot{\sigma}(\langle \vw, \vx \rangle) \neq \dot{\sigma}(\langle \vw, \vx' \rangle)) =  \frac{\theta}{\pi} , \]
+    where $\theta$ is the angle formed by $\vx$ and $\vx'$; that is, $\theta \in [0, \pi]$ with \[\cos(\theta) = \langle \vx, \vx' \rangle = 1 - \frac{1}{2}\|\vx - \vx'\|^2. \]
+    By Taylor's theorem, $1 - \cos(\theta) = \frac{1}{2}\theta^2 + O(\theta^3)$, so $1 - \cos(\theta) \asymp \theta^2$ for $\theta \in [0, \pi]$. This implies that $\theta^2 \asymp \|\vx - \vx'\|^2$, so $\theta \asymp \|\vx - \vx'\|$ and therefore
+    \[\P(\dot{\sigma}(\langle \vw, \vx \rangle) \neq \dot{\sigma}(\langle \vw, \vx' \rangle)) \asymp \|\vx - \vx'\|. \]
+\end{proof}
+
+\begin{lemma}\label{lemma:activation-pattern-lipschitz}
+    Let $\epsilon \in (0, 1)$. Suppose that $\vx, \vx' \in \S^{d - 1}$ with $\|\vx - \vx'\| \leq \delta$. If $d_1 = \Omega\left(\frac{1}{\delta}\log \frac{1}{\epsilon}\right)$, then with probability at least $1 - \epsilon$,
+    \[\|\vv \odot \dot{\sigma}(\mW \vx) - \vv \odot \dot{\sigma}(\mW \vx)\| \lesssim \sqrt{\delta d_1}.\]
+\end{lemma}
+\begin{proof}
+    Observe that
+    \[\|\dot{\sigma}(\mW \vx) - \dot{\sigma}(\mW \vx')\|^2 = 4\sum_{j = 1}^{d_1} Z_j = 4|\mc{S}|, \]
+    where $Z_j \in \{0, 1\}$ is equal to 1 if
+    \[\dot{\sigma}(\langle \vw_j, \vx \rangle) \neq \dot{\sigma}(\langle \vw_j, \vx' \rangle) \]
+    and 0 otherwise, and $\mc{S}$ consists of the $j \in [d_1]$ such that $Z_j = 1$. The $Z_j$ are iid Bernoulli random variables with parameter $p$, where $p \asymp \delta$ by Lemma \ref{lemma:cosine-probabilities}. By Chernoff's inequality \citep[see][Theorem 2.3.1]{vershynin2018high}, for all $t \geq d_1p$
+    \begin{align*}
+        \P\left(|\mc{S}| \geq t\right) &\leq e^{-d_1 p}\left(\frac{e d_1p}{t} \right)^t
+    \end{align*}
+    Then setting $t = ed_1p$ with $d_1 \geq \frac{1}{p}\log \frac{4}{\epsilon}$ yields
+    \begin{align*}
+        \P\left(|\mc{S}| \geq ed_1 \delta \right) &\leq \P\left(|\mc{S}| \geq ed_1 p \right)\\
+        &\leq e^{-d_1p}\\
+        &\leq \frac{\epsilon}{4}.
+    \end{align*}
+    By the lower bound of Chernoff's inequality, for all $t \leq d_1p$
+    \begin{align*}
+        \P(|\mc{S}| \leq t) &\leq e^{-d_1p }\left(\frac{ed_1 p}{t}\right)^t.
+    \end{align*}
+    Then setting $t = \frac{d_1p}{e}$ with $d_1 \geq \frac{2}{e - 2} \frac{1}{p} \log \frac{4}{\epsilon}$ yields
+    \begin{align*}
+        \P\left(|\mc{S}| \leq \frac{d_1p}{2} \right) &\leq \exp\left(-\frac{e - 2}{e}d_1p \right)\\
+        &\leq \frac{\epsilon}{4}.
+    \end{align*}
+    Therefore, with probability at least $ 1- \frac{\epsilon}{2}$,
+    \[\frac{d_1\delta}{e}\leq |\mc{S}| \leq ed_1\delta. \]
+    Let us denote this event by $\omega$. Observe that
+    \begin{align*}
+        \|\vv \odot \dot{\sigma}(\mW \vx)  -  \vv \odot \dot{\sigma}(\mW \vx')\|^2 &= 2\sum_{j \in \mc{S}}v_j^2
+    \end{align*}
+    and recall that $v_j^2 \sim \mc{N}(0, 1)$ for all $j \in [d_1]$. By Bernstein's inequality, for all $t \geq 0$
+    \begin{align*}
+        \P\left(\frac{1}{2}\|\vv \odot \dot{\sigma}(\mW\vx) - \vv \odot \dot{\sigma}(\mW\vx')\|^2 \geq |\mc{S}| + t \;\; \middle| \;\; \mc{S} \right) &\leq 2\exp\left(-C_1 \min\left(\frac{t^2}{|\mc{S}| }, t \right) \right)
+    \end{align*}
+    where $C_1 > 0$ is a universal constant. Setting $t = |\mc{S}|$ yields
+    \begin{align*}
+        \P\left(\|\vv \odot \dot{\sigma}(\mW\vx) - \vv \odot \dot{\sigma}(\mW\vx')\| \geq 2\sqrt{|\mc{S}|} \;\; \middle| \;\; \mc{S} \right) &\leq 2\exp\left(-C_1|\mc{S}|\right).
+    \end{align*}
+    Then
+    \begin{align*}
+        &\P\left(\|\vv \odot \dot{\sigma}(\mW\vx) - \vv \odot \dot{\sigma}(\mW\vx')\| \leq 2\sqrt{ed_1 \delta}\right)
+        \\&\geq\P\left(\|\vv \odot \dot{\sigma}(\mW\vx) - \vv \odot \dot{\sigma}(\mW\vx')\| \leq 2\sqrt{ed_1 \delta}  ,\; \omega \right) \\&\geq \P\left(\|\vv \odot \dot{\sigma}(\mW\vx) - \vv \odot \dot{\sigma}(\mW\vx')\| \leq 2\sqrt{|\mc{S}|}  ,\; \omega \right)
+        \\&\geq \E\left[\P\left(\|\vv \odot \dot{\sigma}(\mW\vx) - \vv \odot \dot{\sigma}(\mW\vx')\| \leq 2\sqrt{|\mc{S}|}   \;\; \middle|\;\; \mc{S}\right)1_{\omega}\right]\\
+        &\geq \E\left[\left(1 - 2\exp\left(-C_1|\mc{S}|\right)\right) 
+ 1_{\omega}\right]\\
+ &\geq \left(1 - 2\exp\left(-C_1\frac{d_1 \delta}{e} \right)\right)\P(\omega)\\
+ &\geq \left(1 - 2\exp\left(-C_1\frac{d_1 \delta}{e} \right)\right)\left(1 - \frac{\epsilon}{2}\right),
+    \end{align*}
+    where we used that $\omega$ is measurable with respect to $\mc{S}$ in the fourth line.  So if $d_1 \geq \frac{e}{C_1 \delta} \log \frac{4}{\epsilon}$, then
+    \begin{align*}
+        \P\left(\|\vv \odot \dot{\sigma}(\mW\vx) - \vv \odot \dot{\sigma}(\mW\vx')\| \leq 2\sqrt{ed_1 \delta}\right) &\geq \left(1 - \frac{\epsilon}{2}\right)\left(1 - \frac{\epsilon}{2}\right)\\
+        &\geq 1 - \epsilon.
+    \end{align*}
+\end{proof}
+\begin{lemma}\label{lemma:frob-bounds-diagonal}
+    Suppose that $\vx \in \S^{d - 1}$. If $d_1 = \Omega\left(\log \frac{1}{\epsilon}\right)$, then with probability at least $1 - \epsilon$,
+    \[\|\vv \odot \dot{\sigma}(\mW \vx)\| \lesssim \sqrt{d_1}. \]
+\end{lemma}
+\begin{proof}
+    Since $\dot{\sigma}(\langle \vw_j, \vx \rangle) \in \{0, 1\}$ for all $j \in [d_1]$,
+    \begin{align*}
+        \|\vv \odot \dot{\sigma}(\mW \vx)\|^2 &= \sum_{j = 1}^{d_1} v_j^2 \dot{\sigma}(\langle \vw_j, \vx \rangle)\\
+        &\leq \sum_{j = 1}^{d_1}v_j^2.
+    \end{align*}
+    Since the entries $v_j$ are iid standard Gaussian random variables, Bernstein's inequality implies for all $t \geq 0$
+    \begin{align*}
+        \P(\|\vv \odot \dot{\sigma}(\mW \vx)\|^2 \geq d_1 + t) &\leq \P\left(\sum_{j = 1}^{d_1}v_j^2 \geq d_1 + t\right)\\
+        &\leq 2\exp\left(-C\min\left(\frac{t^2}{d_1}, t \right) \right).
+    \end{align*}
+    Setting $t = d_1$ with $d_1 \geq \frac{1}{C} \log \frac{2}{\epsilon}$ yields
+    \begin{align*}
+        \P(\|\vv \odot \dot{\sigma}(\mW \vx)\|^2 \geq 2d_1) \leq 2 \exp(-C d_1) \leq \epsilon.
+    \end{align*}
+    
+\end{proof}
+Now we prove our main lemma which we will use to relate the separation between data points to the NTK.
+\begin{lemma}\label{lemma:separation-gradient-shallow}
+    Let $\vx, \vx' \in \S^{d-1}$ with $\|\vx - \vx'\| \leq \delta \leq 2$. Let $\epsilon \in (0, 1)$. If $d_1 = \Omega\left(\frac{1}{\delta} \log \frac{1}{\epsilon}\right)$, then with probability at least $1 - \epsilon$,
+    \begin{align*}
+        \|\nabla_{\vtheta} f(\vx) - \nabla_{\vtheta} f(\vx')\| \lesssim \sqrt{\delta}.
+    \end{align*}
+\end{lemma}
+\begin{proof}
+    By Lemma \ref{lemma:activation-pattern-lipschitz},
+    if $d_1 \gtrsim  \frac{1}{\delta}\log \frac{1}{\epsilon}$,
+    then with probability at least $1 - \frac{\epsilon}{4}$,
+    \[\|\vv \odot \dot{\sigma}(\mW\vx) - \vv \odot \dot{\sigma}(\mW \vx')\| \lesssim \sqrt{\delta d_1}. \]
+
+Let us denote this event by $\omega_1$. By Lemma \ref{lemma:frob-bounds-diagonal}, if $d_1 \gtrsim \log \frac{1}{\epsilon}$, then with probability at least $1 - \frac{\epsilon}{4}$,
+\[\|\vv \odot \dot{\sigma}(\mW \vx) \| \lesssim \sqrt{d_1}. \]
+Let us denote this event by $\omega_2$. If both $\omega_1$ and $\omega_2$ occur, then
+\begin{align*}
+    &\|\nabla_{\mW_1}f(\vx) - \nabla_{\mW_1}f(\vx')\|_F\\&= \frac{1}{\sqrt{d_1}}\|(\vv \odot \dot{\sigma}(\mW\vx)) \otimes \vx - (\vv \odot \dot{\sigma}(\mW\vx')) \otimes \vx'\|_F\\
+    &\leq \frac{1}{\sqrt{d_1}}\|(\vv \odot \dot{\sigma}(\mW\vx)) \otimes \vx - (\vv \odot \dot{\sigma}(\mW\vx)) \otimes \vx'\|_F \\&+ \frac{1}{\sqrt{d_1}}\|(\vv \odot \dot{\sigma}(\mW\vx)) \otimes \vx' - (\vv \odot \dot{\sigma}(\mW\vx')) \otimes \vx'\|_F\\
+    &\leq \frac{1}{\sqrt{d_1}} \|\vv \odot \dot{\sigma}(\mW\vx)\| \cdot \|\vx - \vx'\| + \frac{1}{\sqrt{d_1}}\|\vv \odot \dot{\sigma}(\mW\vx) - \vv \odot \dot{\sigma}(\mW\vx')\|\cdot \|\vx'\|\\
+    &\lesssim \frac{1}{\sqrt{d_1}}\sqrt{d_1} \delta + \frac{1}{\sqrt{d_1}}\sqrt{\delta d_1}\\
+    &\lesssim \sqrt{\delta}.
+\end{align*}
+By Lemma \ref{lemma:feature-map-regularity}, if $d_l \gtrsim \log \frac{1}{\epsilon}$, then with probability at least $1 - \frac{\epsilon}{2}$,
+\begin{align*}
+    \|\nabla_{\mW_2}f(\vx) - \nabla_{\mW_2}f(\vx')\| &= \frac{1}{\sqrt{d_1}}\|f_1(\vx) - f_1(\vx')\|\\
+    &\lesssim \delta.
+\end{align*}
+Let us denote this event by $\omega_3$. If $\omega_1, \omega_2$, and $\omega_3$ all occur (which happens with probability at least $1 - \epsilon)$, then
+\begin{align*}
+    \|\nabla_{\vtheta}f(\vx) - \nabla_{\vtheta}f(\vx')\| &\lesssim \|\nabla_{\mW_1}f(\vx) - \nabla_{\mW_1}f(\vx')\|_F + \|\nabla_{\mW_2}f(\vx)  - \nabla_{\mW_2}f(\vx')\|\\
+    &\lesssim \sqrt{\delta} + \delta\\
+    &\lesssim \sqrt{\delta}.
+\end{align*}
+\end{proof}
+
+
+\subsection{Proof of Theorem \ref{thm:shallow-main}}\label{app:shallow-main}
+
+
+\ThmShallowMain*
+
+\begin{proof} 
+    First we prove the lower bound. Let $\lambda_1$ be as it is defined in Lemma \ref{lemma:K1-inf}. By Lemma \ref{lem:gram-to-hemisphere-transform},
+     \begin{align*}
+     &\lambda_1 = \inf_{\| \vz \| = 1} \| T_{\dot{\sigma}} \mu_{\vz} \|^2.
+     \end{align*}
+     Let
+     \[
+     \lambda = \left( 1 + \frac{d\log(1/\delta)}{\log(d)} \right)^{-3} \delta^2.
+    \]
+    By Lemma \ref{corr:hemisphere-transform-asymptotics}, $\lambda_1 \geq C_1\lambda$ for some constant $C_1 > 0$. By Lemma \ref{lemma:K1-inf}, there exist constants $C_2, C_3 > 0$ such that if $d_1 \geq \frac{C_2}{\lambda_1}\|\mX\|^2 \log \frac{n}{\epsilon}$ then
+    \begin{align}
+        \P(\lambda_{\min}(\mK_1) < C_3 \lambda_1) \leq \frac{\epsilon}{2}.\label{eqn:C3lambda1-conditional}
+    \end{align}
+    Then for such $d_1$,
+    \begin{align*}
+        \P(\lambda_{\min}(\mK_1) \geq C_3C_1 \lambda) \geq 1 - \frac{\epsilon}{2}.
+    \end{align*}
+    This establishes the lower bound.
+
+    Next we prove the upper bound. Let $i, k \in [n]$ be two indices with $i \neq k$ such that $\|\vx_i - \vx_k\| \leq \delta'$. If $d_1 \gtrsim \frac{1}{\lambda}\log \frac{1}{\epsilon} \gtrsim \frac{1}{\delta'} \log \frac{1}{\epsilon}$, then by Lemma \ref{lemma:separation-gradient-shallow} there exists $C_4 > 0$ such that
+    \begin{align*}
+        \P(\|\nabla_{\vtheta}f(\vx_i)  - \nabla_{\vtheta}f(\vx_k)\|^2 \geq C_4\delta') \geq 1 - \frac{\epsilon}{2}.
+    \end{align*}
+    Let us denote this event by $\omega$. If $\omega$ occurs, then
+    \begin{align*}
+        \lambda_{\min}(\mK) &\lesssim (\ve_i - \ve_k)^T \mK (\ve_i - \ve_k)\\
+        &= \| \nabla_{\vtheta}f(\vx) - \nabla_{\vtheta}f(\vx_k)\|^2\\
+        &\lesssim \delta'.
+    \end{align*}
+    Hence, with probability at least $1 - \frac{\epsilon}{2}$, $\lambda_{\min}(\mK) \lesssim \delta'$. This establishes the upper bound for the minimum eigenvalue. The two-sided bound then immediately follows from a union bound.
+\end{proof}
+\subsection{Uniform data on a sphere}\label{app:subsec:uniform-sphere}
+Our main bounds for the smallest eigenvalue of the NTK are stated in terms of the amount of separation between data points. To interpret our results in terms of probability distributions on the sphere, we will use a couple of lemmas which quantify the amount of separation for data which is uniformly distributed.
+
+For $\delta \in (0, 1/2)$ and $\vx \in \S^{d -1 }$, we define the spherical cap
+    \[\text{Cap}(\vx, \delta) = \{\vy \in \S^{d - 1}: \|\vy - \vx\| \leq \delta\}. \]
+    and the double spherical cap
+    \begin{align*}
+        \text{DoubleCap}(\vx, \delta) = \text{Cap}(\vx, \delta) \cup \text{Cap}(-\vx, \delta).
+    \end{align*}
+    By Lemma 2.3 of \cite{ball1997elementary},
+    \begin{align}
+     dS(\text{Cap}(\vx, \delta)) \geq \frac{1}{2}\left(\frac{\delta}{2}\right)^{d - 1}.\label{eqn:spherical-cap-lower-bound}
+    \end{align}    
+    We can also obtain a corresponding upper bound on the volume of a spherical cap.
+    \begin{lemma}\label{lemma:spherical-cap-upper-bound}
+        For $\vx \in \S^{d - 1}$ and $\delta \in (0, 1/2)$,
+        \[dS(\sphericalcap(\vx, \delta)) \leq \frac{4\sqrt{\pi}(C\delta)^{d - 1} }{d^2}. \]
+        Here $C > 0$ is a universal constant.
+    \end{lemma}
+    \begin{proof}
+        For $\phi \in [0, \pi]$, let $\mc{S}_{\phi}$ denote the set of all $\vx' \in \S^{d - 1}$ such that the angle between $\vx$ and $\vx'$ is at most $\phi$ (that is, $\langle \vx, \vx' \rangle \geq \cos(\phi)$). The measure of $\mc{S}_{\phi}$ is given by
+    \begin{align*}
+        \frac{B(\sin^2(\phi); (d-1)/2, 1/2) }{B((d - 1)/2, 1/2)}
+    \end{align*}
+    \citep[see, e.g.][]{li2010concise}. Here the numerator refers to the incomplete beta function and the denominator refers to the beta function. We can bound
+    \begin{align*}
+        B\left(\sin^2(\phi); \frac{d - 1}{2}, \frac{1}{2}\right) &= \int_0^{\sin^2(\phi)} t^{(d-3)/2 }(1 - t)^{-1/2}dt\\
+        &\leq \int_0^{\sin^2(\phi)}t^{(d - 3)/2}dt\\
+        &= \frac{2}{d - 1} \sin(\phi)^{d - 1}.
+    \end{align*}
+    and
+    \begin{align*}
+        B\left(\frac{d - 1}{2}, \frac{1}{2}\right) &= \frac{\Gamma\left(\frac{d -1}{2}\right)\Gamma\left(\frac{1}{2}\right) }{\Gamma\left(\frac{d}{2}\right) }\\
+        &\geq \frac{\Gamma\left(\frac{d - 2}{2}\right)\sqrt{\pi} }{\Gamma\left(\frac{d}{2}\right) }\\
+        &= \frac{2 \sqrt{\pi}}{d - 2}.
+    \end{align*}
+    The above two bounds imply
+    \begin{align}
+        dS(\mc{S}_{\phi}) \leq \frac{4\sqrt{\pi}\sin(\phi)^{d - 1} }{(d - 1)(d - 2) } \leq \frac{4\sqrt{\pi}\sin(\phi)^{d - 1} }{d^2} \leq \frac{4\sqrt{\pi}\phi^{d -1 } }{d^2}.\label{eqn:angular-cap-volume}
+    \end{align}
+    Now suppose that $\vx' \in \text{Cap}(\vx, \delta)$. Then $\|\vx - \vx'\| \leq \delta$, so $1 - \langle \vx, \vx' \rangle \leq 2\delta^2$. Let $\phi = \arccos(\langle \vx, \vx' \rangle)$ be the angle between $\vx$ and $\vx'$. By Taylor's theorem, $\cos(\phi) = 1 - \frac{\phi^2}{2} + O(\phi^3)$, so $1 - \cos(\phi) \asymp \phi^2$ for $\phi \in [0, \pi]$. Thus
+    \[2\delta^2 \geq 1 - \langle \vx, \vx' \rangle = 1 - \cos(\phi) \asymp \phi^2. \]
+    So the angle between $\vx$ and $\vx'$ is at most $C\delta$ for some universal constant $C > 0$. It follows that $\text{Cap}(\vx, \delta) \subseteq \mc{S}_{C\delta}$. Finally by (\ref{eqn:angular-cap-volume}),
+    \begin{align*}
+        dS(\sphericalcap(\vx, \delta)) \leq \frac{4\sqrt{\pi}(C\delta)^{d - 1} }{d^2}.
+    \end{align*}
+    \end{proof}
+        Since $\delta \leq \frac{1}{2}$, the sets $\text{Cap}(\vx, \delta)$ and $\text{Cap}(-\vx, \delta)$ are disjoint by the triangle inequality. Hence
+    \begin{align*}
+        dS(\text{DoubleCap}(\vx, \delta)) &= 2 \text{Cap}(\vx, \delta)
+    \end{align*}
+    and in particular by Lemma \ref{lemma:spherical-cap-upper-bound}
+    \begin{align}
+         dS(\text{DoubleCap}(\vx, \delta)) \leq \frac{4\sqrt{\pi}(C\delta)^{d - 1} }{d^2}. \label{eqn:double-spherical-cap-bound}
+    \end{align}
+    for a constant $C > 0$.
+
+\begin{lemma}\label{lemma:sphere-separation}
+    Suppose that $n \geq 2$ and $\epsilon \in (0, 1)$. If $\vx_1, \cdots, \vx_n \in \S^{d - 1}$ are independent and uniformly distributed on $\S^{d - 1}$, then with probability at least $1 - \epsilon$, the dataset is $\delta$-separated with
+    \[\delta  \gtrsim \left(\frac{\epsilon}{n^2}\right)^{1/(d - 1)}.  \]
+\end{lemma}
+\begin{proof}
+    Let $\ve = [1, 0, \cdots, 0]^T \in \S^{d - 1}$. For each $\vx \in \S^{d - 1}$, there exists an orthogonal matrix $\mO_x$ such that $\mO_x \vx = \ve$. Note that for all $\vx \in \S^{d - 1}$ and $i \in [n]$, $\mO_x \vx_i \stackrel{d}{=} \vx_i$. Let $i, k \in [n]$ with $i \neq k$. Then for all $\delta \in (0, 1/2)$,
+    \begin{align*}
+        \P(\|\vx_i - \vx_k\| \leq \delta \text{ or } \|\vx_i + \vx_k\| \leq \delta) &= \E[\P(\|\vx_i - \vx_k\| \leq \delta \text { or } \|\vx_i + \vx_k\| \leq \delta \mid \vx_k) ]\\
+        &= \E[\P(\|\mO_{x_k}\vx_i - \mO_{x_k}\vx_k\| \leq \delta \text { or } \|\mO_{\vx_k}\vx_i + \mO_{\vx_k} \vx_k\| \leq \delta \mid \vx_k) ]\\
+        &= \E[\P(\|\mO_{x_k}\vx_i - \ve\| \leq \delta \text{ or } \|\mO_{\vx_k}\vx_i + \ve\| \leq \delta \mid \vx_k) ]\\
+        &= \E[\P(\|\vx_i - \ve\| \leq \delta \text{ or } \|\vx_i + \ve\| \leq \delta \mid \vx_k) ]\\
+        &= \P(\|\vx_i - \ve\| \leq \delta \text{ or } \|\vx_i + \ve\| \leq \delta).
+    \end{align*}
+    The expression on the final line is the measure of $\text{DoubleCap}(\ve, \delta)$, and by (\ref{eqn:double-spherical-cap-bound}) is bounded above by
+    \[\frac{4\sqrt{\pi}(C\delta)^{d - 1} }{d^2},\]
+    where $C > 0$ is a constant.
+    So
+    \begin{align*}
+        \P(\|\vx_i - \vx_k\| \leq \delta \text{ or } \|\vx_i + \vx_k\| \leq \delta \;\; \text{ for some } i \neq k) &\leq \sum_{i \neq k}\P(\|\vx_i - \vx_k\| \leq \delta \text{ or } \|\vx_i + \vx_k\| \leq \delta)\\
+        &\leq \frac{4\sqrt{\pi}n^2(C\delta)^{d - 1} }{d^2}.
+    \end{align*}
+    Setting $\delta = \min\left(\frac{1}{4}, \frac{1}{C}\left(\frac{\epsilon d^2}{4\sqrt{\pi}n^2} \right)^{1/(d - 1)}\right)$, we obtain
+    \begin{align*}
+        \P(\|\vx_i - \vx_k\| \leq \delta \text{ or } \|\vx_i + \vx_k\| \leq \delta \;\; \text{ for some } i \neq k) &\leq \epsilon.
+    \end{align*}
+    Therefore, for this value of $\delta$, the dataset is $\delta$-separated with probability at least $1 - \epsilon$. To conclude, note that
+    \begin{align*}
+        \frac{1}{C}\left(\frac{\epsilon d^2}{4\sqrt{\pi}n^2} \right)^{1/(d - 1)} \gtrsim \left(\frac{\epsilon}{n^2}\right)^{1/(d - 1)}
+    \end{align*}
+    since
+    \[\lim_{d \to \infty} \left(\frac{d^2}{4\sqrt{\pi}}\right)^{1/(d - 1)} = 1. \]
+\end{proof}
+\begin{lemma}\label{lemma:sphere-antiseparation}
+    Suppose that $n \geq 2$ and $\epsilon \in (0, 1)$. If $\vx_1, \cdots, \vx_n \in \S^{d - 1}$ are selected iid from $U(\S^{d - 1})$, then with probability at least $1 - \epsilon$, there exist $i, k \in [n]$ with $i \neq k$ such that
+    \[\|\vx_i - \vx_k\|  \lesssim \left(\frac{\log(1/\epsilon) }{n^2} \right)^{1/(d - 1) }.  \]
+\end{lemma}
+\begin{proof}
+    Let $\ve = [1, 0, \cdots, 0]^T \in \S^{d - 1}$. For each $\vx \in \S^{d - 1}$, there exists an orthogonal matrix $\mO_x$ such that $\mO_x \vx = \ve$. Note that for all $\vx \in \S^{d - 1}$ and $i \in [n]$, $\mO_x \vx_i \stackrel{d}{=} \vx_i$. Let $i, k \in [n]$ with $i \neq k$. Then for all $\delta \in (0, 1/2)$,
+    \begin{align*}
+        \P(\|\vx_i - \vx_k\| \leq \delta) &= \E[\P(\|\vx_i - \vx_k\| \leq \delta \mid \vx_k) ]\\
+        &= \E[\P(\|\mO_{x_k}\vx_i - \mO_{x_k}\vx_k\| \leq \delta \mid \vx_k) ]\\
+        &= \E[\P(\|\mO_{x_k}\vx_i - \ve\| \leq \delta \mid \vx_k) ]\\
+        &= \E[\P(\|\vx_i - \ve\| \leq \delta \mid \vx_k) ]\\
+        &= \P(\|\vx_i - \ve\| \leq \delta).
+    \end{align*}
+    The expression on the final line is the measure of $\text{Cap}(\ve, \delta)$, and by Lemma 2.3 of \cite{ball1997elementary} it is bounded below by $\frac{1}{2}\left(\frac{\delta}{2}\right)^{d - 1}$. For each $i \in [n]$, let $\omega_i$ denote the event that $\|\vx_j - \vx_k\| > \delta$ for all $j, k \in [1, i]$ with $j \neq k$. Trivially $\P(\omega_1) = 1$. If $\omega_i$ occurs for some $i \in [1, n - 1]$, then the sets $\text{Cap}(\vx_j, \delta/2)$ for $j \in [i]$ are disjoint. Indeed, if $\vx \in \text{Cap}(\vx_j, \delta/2) \cap \text{Cap}(\vx_k, \delta/2)$, then by the triangle inequality
+    \[\|\vx_j - \vx_k\| \leq \|\vx - \vx_j\| + \|\vx - \vx_k\| \leq \frac{\delta}{2} + \frac{\delta}{2} = \delta \]
+    which contradicts $\omega_i$. Now since these smaller spherical caps are disjoint, we can bound
+    \begin{align*}
+        dS\left(\cup_{j = 1}^i\{\vx \in \S^{d - 1}: \|\vx - \vx_j\| \leq \delta \}\right) &\geq dS\left(\cup_{j = 1}^i\{\vx \in \S^{d - 1}: \|\vx - \vx_j\| \leq \delta/2 \}\right)\\
+        &= dS\left(\cup_{j = 1}^i \text{Cap}(\vx_j, \delta/2)\right)\\
+        &= \sum_{j = 1}^i dS(\text{Cap}(\vx_j, \delta/2))\\
+        &\geq \sum_{j = 1}^i \frac{1}{2}\left(\frac{\delta}{4}\right)^{d - 1}\\
+        &= \frac{i}{2}\left(\frac{\delta}{4}\right)^{d - 1}.
+    \end{align*}
+    Since $\vx_{i + 1}$ is chosen independently from $\vx_1, \cdots, \vx_i$, this implies
+    \begin{align*}
+        \P(\omega_{i + 1} \mid \omega_i) &= \P(\|\vx_{i + 1} - \vx_j\| > \delta \;\; \forall j \in [i] \mid \omega_i)\\
+        &\leq 1 - \frac{i}{2}\left(\frac{\delta}{4}\right)^{d - 1}.
+    \end{align*}
+    By repeatedly conditioning we obtain
+    \begin{align*}
+        \P(\|\vx_j - \vx_k\| > \delta \;\; \forall j, k \in [n]) &= \P(\omega_n)\\
+        &= \P(\omega_1)\prod_{i = 2}^n \P(\omega_i \mid \omega_1, \cdots, \omega_{i - 1})\\
+        &= \prod_{i = 2}^n \P(\omega_i \mid \omega_{i - 1})\\
+        &\leq \prod_{i = 2}^n \left(1 - \frac{i}{2}\left(\frac{\delta}{4}\right)^{d -1 }\right)\\
+        &\leq \prod_{i = 2}^n \exp\left(-\frac{i}{2}\left(\frac{\delta}{4}\right)^{d - 1}\right)\\
+        &\leq \exp\left(-\frac{n^2}{2}\left(\frac{\delta}{4}\right)^{d - 1}\right).
+    \end{align*}
+    Let us set $\delta = \min\left(\frac{1}{4}, 4\left( \frac{2}{n^2}\log \frac{1}{\epsilon} \right)^{\frac{1}{d -1 }} 
+ \right)$. The above bounds imply that
+ \[\P(\|\vx_j - \vx_k\| > \delta \;\; \forall j, k \in [n]) \leq \epsilon \]
+ so with probability at least $1 - \epsilon$, there exist $i, k \in [n]$ such that $\|\vx_i - \vx_k\| \leq \delta$ with
+ \[\delta \lesssim \left(n^{-2}\log \frac{1}{\epsilon}\right)^{1/(d - 1) } \]
+ which is what we needed to show.
+\end{proof}
+\CorollaryUniform*
+\begin{proof}
+    By Lemma \ref{lemma:input-data-conditioning}, with probability at least $1 - \frac{\epsilon}{4}$,
+    \[\|\mX\|^2 \lesssim \left(1 + \frac{n + \log \frac{1}{\epsilon} }{d}\right). \]
+    Let us denote this event by $\omega_1$. Let us define
+    \[\delta := \min_{i \neq k} \min(\|\vx_i - \vx_k\|, \|\vx_i+ \vx_k\|) \]
+    and
+    \[\delta' := \min_{i \neq k} \|\vx_i - \vx_k\|. \]
+    In particular, the dataset $\vx_1, \cdots, \vx_n$ is $\delta$-separated. By Lemma \ref{lemma:sphere-separation}, with probability at least $1 - \frac{\epsilon}{4}$,
+    \begin{align*}
+        \delta \gtrsim  \left(\frac{\epsilon}{n^2}\right)^{1/(d - 1)}.
+    \end{align*}
+    Let us denote this event by $\omega_2$. By Lemma \ref{lemma:sphere-antiseparation}, with probability at least $1 - \frac{\epsilon}{4}$,
+    \[\delta' \lesssim  \left(\frac{\log(1/\epsilon) }{n^2} \right)^{1/(d - 1)}. \]
+    Let us denote this event by $\omega_3$. We condition on $\omega_1, \omega_2,$ and $\omega_3$ for the remainder of the proof.
+    Define
+    \[\lambda' = \left(1 + \frac{d\log(1/\delta) }{\log(d)}\right)^{-3} \delta^2 \]
+    and
+    \[\lambda = \left(1 + \frac{\log(n/\epsilon)}{\log(d)}\right)^{-3}\left(\frac{\epsilon^2}{n^4}\right)^{1/(d - 1)};\]
+    note that
+    \begin{align*}
+        \lambda' &\gtrsim \left(1 + \frac{d \log\left( (n^2/\epsilon)^{1/(d-1)}\right) }{\log(d)} \right)^{-3}\left(\frac{\epsilon}{n^2}\right)^{2/(d - 1)}\\
+        &\gtrsim \left(1 + \frac{\log(n/\epsilon)}{\log(d)}\right)^{-3}\left(\frac{\epsilon^2}{n^4}\right)^{1/(d - 1)}\\
+        &= \lambda.
+    \end{align*}
+
+    By Theorem \ref{thm:shallow-main}, if
+    \[d_1 \gtrsim \frac{1}{\lambda}\left(1 + \frac{n + \log(1/\epsilon)}{d}\right) \log\left(\frac{n}{\epsilon}\right) \gtrsim \frac{1}{\lambda'}\|\mX\|^2 \log\left(\frac{n}{\epsilon}\right),  \]
+    then with probability at least $1 - \frac{\epsilon}{4}$ over the network weights,
+    \begin{align*}
+        \lambda_{\min}(\mK) \gtrsim \lambda' \gtrsim \lambda
+    \end{align*}
+    and
+    \begin{align*}
+        \lambda_{\min}(\mK) \lesssim \delta' \lesssim \left(\frac{\log(1/\epsilon)}{n^2}\right)^{1/(d - 1)}.
+    \end{align*}
+    This is exactly the bound that we needed to show. By taking a union bound over all of the favorable events, it follows that this event happens with probability at least $1 - \epsilon$.
+\end{proof}
+\section{Proof of Theorem \ref{thm:deep-main}}
+
+\subsection{Recap of the deep setting} \label{app:deep-setting}
+Recall for the deep case we consider fully connected networks with $L$ layers and denote the layer widths with positive integers, $d_0, \cdots, d_L$ where $d_0 = d$ and $d_L = 1$. For $l \in [L - 1]$ we define the feature matrices $\mF_l \in \R^{d_l \times n}$ as
+\[\mF_l = [f_l(\vx_1), \cdots, f_l(\vx_n)]. \]
+For $l \in [L - 1]$ and $\vx \in \R^d$ we define the activation patterns $\mSigma_l(\vx) \in \{0, 1\}^{d_l \times d_l}$ to be the diagonal matrices
+\[\mSigma_l(\vx) = \text{diag}(\dot{\sigma}(\mW_{l}f_{l - 1}(\vx))). \]
+
+Lemma \ref{lemma:NTKdecomp} provides a useful decomposition of the NTK.
+
+\lemmaNTKdecomp*
+\begin{proof}
+   
+  
+For any $i \in [n]$, observe that $f(\vx_i, \cdot)$ is a PAP function \cite[Definition 5]{10.5555/3495724.3496288} and therefore $f(\vx_i, \cdot)$ is differentiable almost everywhere \cite[Proposition 4]{10.5555/3495724.3496288}. As the union of $n$ null sets is also a null set, we conclude that there exists an open set $U$ of full measure such that for all $i \in [n]$ then $f(\vx_i, \theta)$ is differentiable for any $\theta \in U$. 
+
+Let $\tfrac{\partial f}{ \partial \vtheta}$ denote the true derivative of $f$ with respect to $\vtheta$ when it exists and be the minimum norm sub-gradient otherwise. Using \cite[Corollary 13]{10.5555/3495724.3496288} then
+ \[
+    \left( \prod_{l = 1}^{L - 1} \frac{d_l}{2}\right)\mK \stackrel{a.e.}{=} \frac{\partial F_L(\vtheta)}{\partial \vtheta }^T  \frac{\partial F_L(\vtheta)}{\partial \vtheta } = \sum_{l = 1}^{L} \frac{\partial F_L(\vtheta)}{\partial \mW_l }^T  \frac{\partial F_L(\vtheta)}{\partial \mW_l },
+    \]
+    where $\tfrac{\partial F_L(\vtheta)}{\partial \mW_l} \in \mR^{d_ld_{l-1} \times n}$. By inspection, to prove the result claimed it therefore suffices to show for any $l \in  [L]$, $\theta \in U$ and $i,j \in [n]$ that
+    \begin{equation}\label{eq:decom-prf-element}
+       \langle  \tfrac{\partial f_L(\vx_i; \vtheta)}{\partial \mW_{l} }, \tfrac{\partial f_L(\vx_j; \vtheta)}{\partial \mW_{l} } \rangle   = \left( f_{l-1}(\vx_i)^T f_{l-1}(\vx_j; \vtheta) \right) \left( [\mB_{l}]_{i,:}^T [\mB_{l}]_{j,:} \right).
+    \end{equation}
+    First observe
+    \begin{align*}
+        \langle  \tfrac{\partial f_L(\vx_i; \vtheta)}{\partial \mW_L }, \tfrac{\partial f_L(\vx_j; \vtheta)}{\partial \mW_L } \rangle &= f_{L-1}(\vx; \vtheta)^Tf_{L-1}(\vx; \vtheta) \times 1
+    \end{align*}
+    therefore establishing \eqref{eq:decom-prf-element} for $l = L$. To establish \eqref{eq:decom-prf-element} for $l \in [L-1]$, recall for $k \in [L-1]$ that $\mSigma_k(\vx) = \text{diag}\left( \dot{\sigma}(\mW_k f_{k-1}(\vx))\right)$ and define $\mSigma_L(\vx) = 1$. Observe for $1 \leq l < k$, $k \in [L]$ that
+    \begin{equation} \label{eq:decomp-prf-1}
+    \frac{\partial f_{k}(\vx; \vtheta)}{ \partial \mW_l } = \mSigma_k(\vx) \mW_k  \frac{\partial f_{k-1}(\vx;\vtheta) }{\partial \mW_{l}}
+    \end{equation}
+    while for $k=l$
+    \begin{equation} \label{eq:decomp-prf-2}
+         \frac{\partial f_{k}(\vx; \vtheta)}{ \partial \mW_k } = \mSigma_k(\vx) \otimes f_{k-1}(\vx; \vtheta)^T.
+    \end{equation}
+    As a result,
+    \begin{align*}
+        \frac{\partial f_L(\vx; \vtheta)}{\partial \theta_l } &=  \mW_L\left(\prod_{k = 1}^{L-l + 1} \mSigma_{L-k}(\vx) \mW_{L-k} \right) \frac{\partial f_{l}(\vx; \vtheta)}{ \partial \mW_l }\\
+        &= \mW_L\left(\prod_{k = 1}^{L-l + 1} \mSigma_{L-k}(\vx) \mW_{L-k} \right) \left(\mSigma_l(\vx) \otimes f_{l-1}(\vx; \vtheta)\right)
+    \end{align*}
+    where the first equality arises from iterating \eqref{eq:decomp-prf-1} and the second by applying \eqref{eq:decomp-prf-2}. Proceeding,
+    \begin{align*}
+        &\left \langle  \frac{\partial f_L(\vx_i)}{\partial \theta_l }, \frac{\partial f_L(\vx_j)}{\partial \theta_l } \right \rangle \\
+        &= \left( f_{l-1}(\vx_i)^T f_{l-1}(\vx_j) \right) \left( \left(\mSigma_l(\vx_i) \prod_{k = l+1}^{L-1} \mW_{k}^T \mSigma_{k}(\vx_i)  \right) \mW_L^T \right)^T \left(\left( \mSigma_l(\vx_j) \prod_{k = l+1}^{L-1} \mW_{k}^T \mSigma_{k}(\vx_j) \right) \mW_L^T \right) \\
+        &= \left( f_{l-1}(\vx_i)^T f_{l-1}(\vx_j) \right) \left( [\mB_{l}]_{i,:}^T [\mB_{l}]_{j,:} \right)
+    \end{align*}
+    as claimed.
+\end{proof}
+
+
+
+
+\subsection{Proof of Lemma \ref{lemma:FeatureNorms}} \label{app:FeatureNorms} 
+\begin{lemma} \label{lemma:feature-norm-helper1}
+    Let $\vz \in \R^d$ be a fixed vector and $\mW \in \R^{m \times d}$ a random matrix with mutually iid elements $[\mW]_{ij} \sim \mathcal{N}(0,1)$ for all $i \in [m]$ and $j \in [d]$. Consider the random vector $\vy \in \R^{m}$ defined as $\vy = \sigma(\mW \vz)$ where $\sigma$ denotes the ReLU function applied elementwise. For $\delta \in (0,1)$ if $m \gtrsim \delta^{-2}\log(1/ \epsilon)$ then
+    \[
+      \P\left((1 - \delta)\frac{m}{2}\| \vz \|^2 \leq \| \vy \|^2 \leq (1 + \delta)\frac{m}{2}\| \vz \|^2 \right) \geq 1 - \epsilon.
+    \]
+\end{lemma}
+\begin{proof}
+    For $i\in [m]$ define $Z_i = \tfrac{\vw_i^T\vz}{\| \vz \|}$, then $Z_i \sim \mathcal{N}(0,1)$ are mutually iid. Let $B_i = \mathbbm{1}(Z_i>0)$, note by symmetry $B_i \sim \text{Ber}(1/2)$, furthermore these random variables for $i \in [n]$ are also mutually iid with respect to one another. As $y_i = \| \vz \|B_i Z_i$ then
+    \begin{align*}
+    \| \vy \|_2^2 
+    &= \| \vz \|^2 \sum_{i=1}^m B_i Z_i^2.
+    \end{align*}
+    For convenience let $\vy' = \vy / \| \vz\| $and define $\mathcal{S} = \{ i \in [n] \; : \; B_i = 1 \}$, then 
+    \[
+    \|\vy' \|^2 = \sum_{i\in \mathcal{S}} Z_i^2 \sim \chi^2(|\mathcal{S}|).
+    \]
+    From \cite[Lemma 1]{10.1214/aos/1015957395} we have for any $t>0$
+    \begin{align*}
+        \P \left( | \left(\| \vy'\|^2 - | \mathcal{S}| \right) | \geq 2 \sqrt{ |\mathcal{S}| t}   \right) \leq 2\exp(-t).
+    \end{align*}
+    For $\delta_1 \in (0,1)$ let $t=\tfrac{|\mathcal{S}| \delta_1^2}{4}$, then 
+    \[
+    \P \left( (1 - \delta_1)|\mathcal{S} | \leq \| \vy' \|^2 \leq (1 + \delta_1)|\mathcal{S} | \right) \geq 1 - 2 \exp \left( -\frac{|\mathcal{S}| \delta_1^2}{4}  \right).
+    \] 
+    Observe $|\mathcal{S}| = \sum_{i=1}^{m} B_i \sim \text{Bin}(m, 1/2)$. With $\delta_2 \in (0,1)$ then applying Hoeffding's inequality we have
+    \begin{align*}
+    \P\left( (1 - \delta_2) \frac{m}{2} \leq \sum_{i=1}^{m} B_i \leq (1 + \delta_2) \frac{m}{2}  \right) &\geq 1 - 2 \exp \left( -\frac{\delta_2^2 m}{2}\right).
+    \end{align*}
+    Let $\omega$ denote the event that $(1 - \delta_2)\tfrac{m}{2} \leq |\mathcal{S} | \leq (1 + \delta_2)\tfrac{m}{2}$. If $m \geq \frac{16}{\delta_1^2\delta_2^2 (1 - \delta_2 )} \log(4 / \epsilon)$ then
+    \begin{align*}
+        &\P\left((1 - \delta_1)(1- \delta_2)\frac{m}{2} \leq \| \vy' \|^2 \leq (1 + \delta_1)(1 + \delta_2)\frac{m}{2} \right)\\ &\geq \P\left((1 - \delta_1)(1- \delta_2)\frac{m}{2} \leq \| \vy' \|^2 \leq (1 + \delta_1)(1 + \delta_2)\frac{m}{2}\; \mid \; \omega\right) \P(\omega)\\
+        &\geq  \P\left( (1 - \delta_1)|\mathcal{S} | \leq \| \vy'\|^2 \leq (1 + \delta_1)|\mathcal{S} | \; \mid \; \omega \;\right)\P(\omega)\\
+        & \geq \left( 1 - 2 \exp \left( -\frac{(1 - \delta_2) \delta_1^2m}{8}  \right) \right) \left(1 - 2 \exp \left( -\frac{\delta_2^2 m}{2}\right) \right)\\
+         & \geq \left( 1 - \frac{\epsilon}{2}\right)\left( 1 - \frac{\epsilon}{2}\right)\\
+        & \geq 1 -\epsilon.
+    \end{align*}
+    For some $\delta \in (0,1)$ let $\delta_2 = \delta_1 = \delta/3$, then if $m \geq 1944\delta^{-2}\log(4 / \epsilon)$ we have
+    \[
+        \P\left((1 - \delta)\frac{m}{2} \leq \| \vy' \|^2 \leq (1 + \delta)\frac{m}{2} \right) \geq 1 - \epsilon
+    \]
+    from which the result claimed follows.
+\end{proof}
+
+
+
+\lemmaFeatureNorms*
+
+\begin{proof}
+    For $k\in [l]$ let $\omega_k$ denote the event that the inequality
+    \[
+    \left(1 - \frac{1}{l} \right)^k \left( \prod_{h=1}^k \frac{d_h}{2}\right) \leq \| f_k(\vx) \|^2 \leq \left(1 + \frac{1}{l} \right)^k\left( \prod_{h=1}^k \frac{d_h}{2}\right) 
+    \]
+    holds. We proceed by induction to establish that $\P(\omega_k) \geq ( 1 - \tfrac{\epsilon}{l})^k$ for all $k \in [l]$. For the base case note that $f_1(\vx) = \sigma(\mW_1 \vx)$ and $\| \vx \|^2 = 1$. Applying Lemma \ref{lemma:feature-norm-helper1} with $\delta = \frac{1}{l}$, if $d_1 \gtrsim l^2 \log(l/\epsilon)$ then $\P(\omega_1) \geq 1 - \tfrac{\epsilon}{l}$. Now suppose for $k \in [l-1]$ that $\P(\omega_k) \geq ( 1 - \tfrac{\epsilon}{l})^k$. Note
+    \begin{align*}
+    \P(\omega_{k+1}) \geq \P(\omega_{k+1} \mid \omega_k) \P(\omega_k) \geq \P(\omega_{k+1} \mid \omega_k) ( 1 - \tfrac{\epsilon}{l})^k
+    \end{align*}
+    Recall $f_{k+1}(\vx) = \sigma(\mW_1 f_{k}(\vx))$. Conditioned on $\omega_k$, then again applying Lemma \ref{lemma:feature-norm-helper1} with $\delta = \frac{1}{l}$ and as $d_{k+1} \gtrsim l^2 \log(l/\epsilon)$ we have
+    \[
+    \P(\omega_{k+1}\mid \omega_k) \geq 1 - \tfrac{\epsilon}{l}
+    \]
+    which completes the proof of the induction hypothesis. As $(1 - \epsilon/l)^l \geq 1 - \epsilon$ and $ e^{-1} \leq (1 - 1/l)^l \leq (1 + 1/l)^l \leq e$ then
+    \[
+      e^{-1} \left( \prod_{h=1}^l \frac{d_h}{2}\right) \leq \| f_l(\vx) \|^2 \leq e \left( \prod_{h=1}^l \frac{d_h}{2}\right) 
+    \]
+    holds with probability at least $1-\epsilon$.
+\end{proof}
+
+
+\subsection{Proof of Lemma \ref{lemma:Frob-S}}\label{app:Frob-S}
+
+\begin{restatable}{lemma}{LemmaFrobS}\label{lemma:Frob-S}
+    Let $\vx \in \S^{d_0-1}$, $L \geq 2$ and assume $d_k \gtrsim L^2 \log \left(\frac{L}{\epsilon}\right)$ for all $k \in [L - 1]$. For any $l \in [L - 1]$ with probability at least $1 - \epsilon$ over the network parameters the following holds,
+    \[
+     \| \mS_{l}(\vx) \|_F^2 \asymp 2^{-L+l+1} \prod_{k = l}^{L-1} d_k.
+    \]
+\end{restatable}
+
+\begin{proof}
+    In what follows for convenience we define an empty product of scalars or matrices as the scalar one.
+    Let $K \in \{L - 1\}$, $l \in [K]$, and for some arbitrary $\vx \in \S^{d_0-1}$ define
+    \begin{align*}
+        \mS_{l,K} &= \mSigma_l(\vx) \prod_{k = l+1}^{K} \mW_k^T \bm{\Sigma}_k(\vx).
+    \end{align*}
+    Let $\omega_{l,K}$ denote the event
+    \begin{equation}\label{eq:frob-norm-K}
+    \frac{1}{2} \left(1 - \frac{1}{L}\right)^K \leq \|\mS_{l, K}\|_F^2\prod_{k = l}^K \frac{2}{d_l} \leq 2\left(1 + \frac{1}{L}\right)^K
+    \end{equation}
+    It suffices to lower bound the probability of the event $\omega_{l, L-1}$. Let $\mc{F}_{K}$ denote the $\sigma$-algebra generated by $\mW_1, \cdots, \mW_{K}$ and note that $\mS_{l,K} \in \mc{F}_{K}$. Let $\gamma_l$ denote the event that $f_l(\vx) \neq 0$, then
+    \begin{align*}
+        \P(\omega_{l, L-1}) &\geq \P(\omega_{l, L-1} \mid \omega_{l, L-2} ) \P(\omega_{l, L-2})\\
+        &\geq \P(\omega_{l, L-1} \mid \omega_{l, L-2} ) \P(\omega_{l, L-2} \mid \omega_{l, L-3})\P(\omega_{l, L-3})\\
+        & \geq \left(\prod_{h = l}^{L-2} \P(\omega_{l, h+1} \mid \omega_{l, h}) \right) \P(\omega_{l,l} \mid \gamma_l) \P(\gamma_l).
+    \end{align*}
+    Fixing $\epsilon \in (0,1)$, our goal is to show each term in this product is at least $(1 - \tfrac{\epsilon}{L})$: indeed, if this is true then
+    \begin{align*}
+        \P(\omega_{l, L-1}) \geq \left(1 - \frac{\epsilon}{L} \right)^{L-l} \geq 1 - \epsilon
+    \end{align*}
+    and our task is complete. To this end, first observe that as $d_k \gtrsim L^2 \log(L / \epsilon)$ for all $k \in [L-1]$, then $\P(\gamma_l) \geq 1 - \tfrac{\epsilon}{L}$ by Lemma \ref{lemma:FeatureNorms}. Proceeding to the term $\P(\omega_{l,l} \mid \gamma_l)$, recall $[\bm{\Sigma}_l(\vx)]_{jj}=\mathbbm{1}([\mW_l f_{l-1}(\vx)]_j>0)$. By symmetry the diagonal entries of $\bm{\Sigma}_l(\vx)$ are mutually iid Bernoulli random variables with parameter $\frac{1}{2}$. Therefore, using Hoeffding's inequality for all $t \geq 0$ 
+    \begin{align*}          
+    \P\left(\left|\|\bm{\Sigma}_l(\vx)\|_F^2 - \frac{d_l}{2}\right| \geq t \; \middle|\; \gamma_l \right) \leq 2 \exp\left(-\frac{t^2}{d_l}\right).
+    \end{align*}
+    Let $t = d_l$, if $d_l \geq \log \frac{2L}{\epsilon}$ then with $K\geq 1$, $L\geq 2$ it follows that
+    \begin{align*}
+        \P(\omega_{l,l} \mid \gamma_l)
+        &= \P\left(\frac{1}{2}\left(1 - \frac{1}{L}\right)^K \leq \|\bm{\Sigma}_l(\vx)\|_F^2 \frac{2}{d_l} \leq 2\left(1 + \frac{1}{L}\right)^K \; \middle| \; \gamma_l \right)\\
+        &\geq \P\left(\frac{1}{2} \leq \|\bm{\Sigma}_l(\vx)\|_F^2 \frac{2}{d_l} \leq \frac{3}{2} \; \middle| \; \gamma_l \right)\\
+        &\geq 1 - \P\left(\left|\|\bm{\Sigma}_l(\vx)\|_F^2 - \frac{d_l}{2}\right| \geq \frac{d_l}{4} \; \middle|\; \gamma_l \right)\\
+        &\geq 1 - \frac{\epsilon}{L}.
+    \end{align*} 
+    We now proceed to analyze $\P(\omega_{l, h+1} \mid \omega_{l, h})$ for $h \in [l, K-1]$. Note if $\omega_{l, h}$ is true then $\|\mS_{l, h} \|_F^2 > 0$. By definition this implies $\| \bm{\Sigma}_l(\vx) \|_F^2 > 0$, however, if $f_h(\vx) = 0$ then  $\| \bm{\Sigma}_l(\vx) \|_F^2 = 0$. Therefore $\omega_{l, h}$ being true implies $f_h(\vx) \neq 0$. For convenience in what follows we denote the $j$th column of $\mW_{h+1}$ as $\vw_j$. By definition
+    \[
+        \mS_{l, h+1} = \mS_{l, h}\mW_{h+1}^T \bm{\Sigma}_{h+1}(\vx),
+    \]
+    therefore,
+    \begin{align*}
+        \E[\|\mS_{l, h+1}\|_F^2 \mid \mc{F}_{h} ] &= \E[\|\mS_{l, h} \mW_{h+1}^T \bm{\Sigma}_{h+1}(\vx)\|_F^2  \mid \mc{F}_{h} ]\\
+        &= \E\left[\sum_{j = 1}^{d_{h+1}} \left\|\mS_{l, h}\vw_j\right\|^2 \dot{\sigma}(\langle \vw_j, f_{h}(\vx) \rangle) \; \middle| \; \mc{F}_{h}\right].
+    \end{align*}
+    As highlighted already, if we condition on $\omega_{l, h}$ then $f_h(\vx)\neq 0$ and therefore the random variables $(\dot{\sigma}(\langle \vw_j, f_{h}(\vx) \rangle))_{j \in d_{h+1}}$ are mutually iid Bernoulli random variables with parameter $\frac{1}{2}$. Again by symmetry $\dot{\sigma}(\langle \vw_j, f_{h}(\vx) \rangle)$ is independent of $\| \mS_{l, h}\vw_j \|^2 $. Therefore conditioned on $\omega_{l,h}$
+    \begin{align*}
+        \sum_{j = 1}^{d_{h+1}}\E[\|\mS_{l, h}\vw_j\|^2 \mid \mc{F}_{d_{h+1}} ]\E[\dot{\sigma}(\langle \vw_j, f_{h}(\vx) \rangle) \mid \mc{F}_{h} ]
+        &= \frac{1}{2}\sum_{j = 1}^{d_{h+1}}\E[\|\mS_{l, h}\vw_j\|^2 \mid \mc{F}_{h} ]\\
+        &= \frac{1}{2}\sum_{j = 1}^{d_{h+1}}\|\mS_{l, h}\|_F^2\\
+        &= \frac{d_{h+1}}{2}\|\mS_{l, h}\|_F^2.
+    \end{align*}
+    Moreover, under the same conditioning
+    \begin{align*}
+        \left\|\left\|\mS_{l, h}\vw_j\right\|^2 \dot{\sigma}(\langle \vw_j, f_{h}(\vx) \rangle)  \right\|_{\psi_1} &\leq \| \|\mS_{l, h}\vw_j\|^2 \|_{\psi_1}\\
+        &= \| \|\mS_{l, h}\vw_j\| \|_{\psi_2}^2\\
+        &\lesssim \|\mS_{l, h}\|_F^2
+    \end{align*}
+   where the last line follows from Theorem 6.3.2 of \cite{vershynin2018high}. As a result, conditioned on $\omega_{l,h}$ then using Bernstein's inequality \cite[Theorem 2.8.1]{vershynin2018high} there exists an absolute constant $c$ such that for all $t \geq 0$ 
+    \begin{align*}
+        \P\left(\left|\|\mS_{l, h+1}\|_F^2 -\frac{d_{h+1}}{2}\|\mS_{l, h}\|_F^2\right| \geq  t \; \middle| \; \mc{F}_{h} \right) &\leq 2\exp\left(-c \min\left(\frac{t^2}{d_{h+1}\|\mS_{l, h}\|_F^4 }, \frac{t}{\|\mS_{l, h}\|_F^2} \right) \right).
+    \end{align*}
+    If $d_{h+1} \geq \frac{4L^2}{c} \log \frac{2L}{\epsilon}$ and $t = \frac{d_{h+1}\|\mS_{l, h}\|_F^2 }{2L }$ then conditioning on $\omega_{l,h}$ we obtain
+    \begin{align*}
+        \P\left(\left|\|\mS_{l, h+1}\|_F^2 -\frac{d_K}{2}\|\mS_{l, h}\|_F^2\right| \geq  \frac{d_{h+1} }{2L}\|\mS_{l, h}\|_F^2 \; \middle| \; \mc{F}_{h} \right) &\leq \frac{\epsilon}{L}.
+    \end{align*}
+    As a result, for any $h \in [l, K-1]$ we have $\P(\omega_{l, h+1} \mid \omega_{l,h }) \geq 1 - \tfrac{\epsilon}{L}$ from which the result claimed follows.
+\end{proof}
+
+
+\subsection{Proof of Lemma \ref{lemma:Op-S}} \label{app:Op-S}
+
+
+\begin{restatable}{lemma}{LemmaOpS}\label{lemma:Op-S}
+    Let $\vx \in \S^{d_0-1}$, $L \geq 3$ and assume $d_k \geq d_{k + 1}$ and $d_k \gtrsim  \sqrt{\log \frac{1}{\epsilon} }$ for all $k \in [L - 1]$. For any $l \in [L-1]$ with probability at least $1 - \epsilon$ over the network parameters the following holds,
+    \[
+    \left\| \mS_l(\vx) \right\|^2 \lesssim \prod_{k = l}^{L - 2}d_{k}.
+    \]
+\end{restatable}
+
+\begin{proof}
+    By Theorem 4.4.5 of \cite{vershynin2018high}, for any $k \in [L-1]$ and all $t \geq 0$
+    \[
+        \P\left(\|\mW_k\| \leq C(\sqrt{d_{k - 1}} + \sqrt{d_{k}} + t)  \right) \geq 1 - 2 e^{-t^2}.
+    \]
+    As $d_{k-1} \geq d_{k} \geq \sqrt{\log \frac{2L}{\epsilon} }$, then setting $t = \sqrt{\log \frac{2}{\epsilon} } $ yields
+    \begin{align*}
+        \P\left(\|\mW_k\| \leq 3C_1 \sqrt{d_{k - 1}} \right) &\geq \P\left(\|\mW_k\| \leq C(\sqrt{d_{k - 1}} + \sqrt{d_k} + t)\right)\\
+        &\geq 1 - \frac{\epsilon}{L}.
+    \end{align*}
+    Using a union bound it follows that
+    \[
+    \P\left(\|\mW_k\| \leq 3C_1 \max \{ \sqrt{d_{l -1 }},  \sqrt{d_{l }}\} \;\; \forall k \in [ L - 1] \right) \geq 1 - \epsilon.
+    \]
+    Note that $\| \mSigma_k(\vx) \| \leq 1 $ for all $ k \in [L-1]$, therefore conditional on the above event we have
+    \begin{align*}
+        \| \mS_{l}(\vx)\| &= \left\|\mSigma_{l}(\vx) \left(\prod_{k = l+1}^{L - 1}\mW_k^T \mSigma_k(\vx)\right) \right\| \\
+        &\leq \|\mSigma_{l}(\vx)\|\left(\prod_{k = l+1}^{L - 1}\|\mW_k\| \|\mSigma_k(\vx)\|\right)\\
+        &\leq \prod_{k = l+1}^{L - 1}\|\mW_k\|\\
+        &\lesssim \prod_{k = l}^{L - 2}\sqrt{d_{k}}.
+    \end{align*}
+    To conclude we square both sides.
+\end{proof}
+
+
+
+\subsection{Proof of Lemma \ref{lemma:min-B2}}
+
+\LemmaMinBTwo*
+
+
+
+\begin{proof}
+    Let $\vx \in \S^{d_0-1}$ be arbitrary and recall $\mS_{l}(\vx) = \mSigma_l(\vx) \left( \prod_{k = l+1}^{L-1} \mW_k^T \mSigma_k(\vx) \right)$. Also recall that $\mW_L^T \in \R^{d_{L-1}}$ is distributed as $\mW_L^T \sim \mathcal{N}(\textbf{0}_{d_{L-1}}, \textit{I}_{d_{L_1}})$. Therefore by \citet[Theorem 6.3.2]{vershynin2018high} for any $\mA \in \R^{d_2 \times d_{L-1}}$ and $t \geq 0$
+    \begin{align*}
+        \P( | \|\mA \mW_L^T \|_2 - \|\mA \|_F | \geq t) \leq 2 \exp \left( -\frac{Ct^2}{ \|\mA \|_2^2}\right)
+    \end{align*}
+    for some constant $C>0$. As a result, with $t = \tfrac{1}{2}\| \mA \|_F^2$ then for some constant $C>0$
+    \[
+    \P \left( \frac{1}{4} \| \mA \|_F^2 \leq \| \mA \mW_L^T \|_2^2 \leq \frac{3}{4} \| \mA \|_F^2 \right) \geq 1 - \exp\left( -C\frac{\| \mA \|_F^2}{\| \mA \|_2^2}\right).
+    \]
+    Therefore, in order to lower bound $\| \mS_{l}(\vx) \mW_L^T\|_2^2$ with high probability it suffices to condition on a suitable upper bound for $\| \mS_{L-1}(\vx) \|_2^2$ and a suitable lower bound for $\| \mS_{L-1}(\vx) \|_F^2$. Let $\omega$ denote the event that both
+    \[
+    \| \mS_l \|_F^2 \asymp 2^{L-l-1}\prod_{k=l}^{L-1} d_k 
+    \]
+    and 
+    \[
+    \| \mS_l(\vx) \|^2 \lesssim \prod_{k=l}^{L-2} d_{k} 
+    \]
+    are true. Combining Lemmas \ref{lemma:Frob-S} and \ref{lemma:Op-S} using a union bound, then as long as $L \geq 3$, $d_k \geq d_{k+1}$ and $d_k \gtrsim L^2\log \frac{nL}{\epsilon}$ for all $k \in [L - 1]$ then $\P(\omega) \geq 1 - \tfrac{\epsilon}{2}$. As a result and aslo as $d_{L-1} \gtrsim 2^L \log(2 / \epsilon)$ then 
+    \begin{align*}
+    \P \left(  \| \mS_l(\vx)  \mW_L^T \|_2^2 \asymp 2^{L-l-1}\prod_{k=l}^{L-1} d_k  \right) & \geq \P \left(  \| \mS_l(\vx)  \mW_L^T \|_2^2 \asymp 2^{L-l-1}\prod_{k=l}^{L-1} d_k \; \mid \; \omega  \right) \P(\omega)\\
+    & \geq \P \left( \frac{1}{4} \| \mS_l(\vx)  \|_F^2 \leq \| \mS_l(\vx)  \mW_L^T \|_2^2 \leq \frac{3}{4} \| \mS_l(\vx) \|_F^2  \; \mid \; \omega \right)  \P(\omega) \\
+    &\geq 1 - \exp\left( -C 2^{-L} \frac{ \prod_{k=l}^{L-1} d_k}{\prod_{k=l}^{L-2} d_{k}} \right)\P(\omega)\\
+    & \geq 1 - \exp\left( -C 2^{-L} d_{L-1} \right)\P(\omega)\\
+    & \geq \left(1 - \frac{\epsilon}{2} \right)\left(1 - \frac{\epsilon}{2} \right)\\
+    & \geq 1 - \epsilon
+    \end{align*}
+    as claimed.
+\end{proof}
+
+
+\subsection{Proof of Theorem \ref{thm:deep-main}} \label{app:thm-deep-main}
+
+\ThmDeepMain*
+
+
+
+\begin{proof}
+    Recall \eqref{eq:min-eig-NTK-bounds1},
+    \[
+    2^{L-1}\left( \prod_{l = 1}^{L - 1}\frac{1}{d_l}\right) \lambda_{\min}\left( \mF_{1} \mF_{1}^T \right) \min_{i \in [n]} \|[\mB_2]_{i,:} \|^2 \leq \lambda_{\min}(\mK) \leq  2^{L-1}\left( \prod_{l = 1}^{L - 1}\frac{1}{d_l}\right) \sum_{l=0}^{L-1} \| f_l(\vx_i) \|^2 \| [\mB_{l+1}]_{i,:} \|^2,
+    \]
+    where the upper bound holds for any $i \in [n]$. We start by analyzing the lower bound. Observe that $ \mF_1\mF_1^T= \sigma(\mW_1 \mX)^T \sigma(\mW_1 \mX)$ has the same distribution as $d_1 \mK_2$ in the shallow setting; see \eqref{eq:ntk-shallow-decomp}. Let $\lambda_2$ be defined as in Lemma \ref{lemma:K2-inf}:
+    \[
+    \lambda_2 = d_0 \lambda_{\min} \left( \E_{\vu \sim U(\S^{d_0 -1})}\left[ \sigma(\vu^T\mX)^T\sigma(\vu^T\mX) \right]\right) = \lambda_{min}\left( \mK_{\sqrt{d_0} \sigma}^{\infty} \right).
+    \]
+    As the dataset $\vx_1, \vx_2, \cdots, \vx_n \in \S^{d_0 -1}$ is $\delta$-separated then by Lemma \ref{corr:hemisphere-transform-asymptotics}
+    \[
+    \lambda_2 \gtrsim  \left(1+ \frac{d_0\log(1/\delta) }{\log d_0}\right)^{-3}\delta^4.
+    \]
+    Furthermore, if $d_1 \gtrsim \tfrac{n}{\lambda_2} \log \left( \tfrac{n}{\lambda_2}\right) \log \left( \tfrac{n}{\epsilon}\right)$ then by Lemma \ref{lemma:K2-inf}
+    \[
+    \lambda_{\min}(\mF_1\mF_1^T) \gtrsim d_1 \lambda_2
+    \]
+    with probability at least least $1-\tfrac{\epsilon}{4}$ and as a result 
+    \[
+    \lambda_{\min}(\mF_1\mF_1^T) \gtrsim d_1 \left(1 + \frac{\log(n / \epsilon)}{\log(d_0)} \right)^{-3} \delta^4
+    \]
+    with probability at least $1- \tfrac{\epsilon}{4}$. Furthermore, as $L \geq 3$, $d_l \geq d_{l+1}$ for all $l \in [L - 1]$ and $d_{L-1} \gtrsim 2^L \log \left (\frac{4nL}{\epsilon}\right)$ then
+    \[
+    \min_{i \in [n]} \|[\mB_2]_{i,:} \|^2 \gtrsim 2^{-L} \prod_{k = 2}^{L-1} d_k
+    \]
+    with probability at least $1 - \tfrac{\epsilon}{4}$. Via a union bound we conclude that the condition
+    \begin{align*}
+      2^{L-1}\left( \prod_{l = 1}^{L - 1}\frac{1}{d_l}\right) \lambda_{\min}(\mF_1\mF_1^T)  \min_{i \in [n]} \|[\mB_2]_{i,:} \|^2 & \gtrsim \left(1 + \frac{\log(n / \epsilon)}{\log(d_0)} \right)^{-3} \delta^4
+    \end{align*}
+    holds with probability at least $1 - \tfrac{\epsilon}{2}$. Fixing some $i\in [n]$, for the upper bound observe trivially by construction that
+    \begin{align*}
+        \| f_0(\vx_i) \|^2 \| [\mB_1]_{i,:} \|^2 = 1.
+    \end{align*}
+    By assumption $d_k \gtrsim L^2 \log(4L^2/\epsilon)$ for all $k \in [L-1]$. With $l \in [0, L-1]$ then by Lemma \ref{lemma:FeatureNorms}
+    \[
+    \| f_l(\vx_i) \|^2 \lesssim 2^{-l}\prod_{k=1}^{l} d_k
+    \]
+    holds with probability at least $1- \tfrac{\epsilon}{4L}$. Likewise by Lemma \ref{lemma:Frob-S} for $l \in [2, L]$,
+    \[
+    \| [\mB_{l}]_{i,:} \|^2 = \| \mS_l(\vx_i)\mW_L^T \| \lesssim 2^{-L+l+1} \prod_{k=l}^{L-1} d_k
+    \]
+    with probability at least $1- \tfrac{\epsilon}{4L}$. Combining these via a union bound then for any $l \in [0, L-1]$,
+    \[
+     \| f_l(\vx_i) \|^2 \| [\mB_{l}]_{i,:} \|^2 \lesssim 2^{-L+1} \prod_{k=1}^{L-1} d_k
+    \]
+    holds with probability at least $1- \tfrac{\epsilon}{2L}$. Again using a union bound now over the layers, it follows that
+    \begin{align}
+        2^{L-1}\left( \prod_{l = 1}^{L - 1}\frac{1}{d_l}\right) \sum_{l=0}^{L-1} \| f_l(\vx_i) \|^2 \| [\mB_{l+1}]_{i,:} \|^2 \lesssim L 2^{L-1}\left( \prod_{l = 1}^{L - 1}\frac{1}{d_l}\right)  2^{-L+1} \left( \prod_{l=1}^{L-1} d_l \right) = L
+    \end{align}
+    with probability at least $1 - \tfrac{\epsilon}{2}$. As a result, using a final union bound we conclude both the upper and lower bounds hold with probability at least $1-\epsilon$.
+\end{proof}
+\end{document}

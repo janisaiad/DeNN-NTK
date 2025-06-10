@@ -1,0 +1,403 @@
+
+\documentclass{article} % For LaTeX2e
+\usepackage{iclr2023_conference,times}
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+\input{math_commands.tex}
+
+\usepackage{hyperref}
+\usepackage{url}
+
+\iclrfinalcopy
+
+\title{Tuning Frequency Bias in Neural Network Training with Nonuniform Data}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+\author{Annan Yu \\
+Center for Applied Mathematics \\ 
+Cornell University \\
+\texttt{ay262@cornell.edu}
+\And
+Yunan Yang\\
+Mathematics Department\\ 
+Cornell University \\
+\texttt{yy837@cornell.edu}
+\And 
+Alex Townsend\\
+Mathematics Department\\ 
+Cornell University \\
+\texttt{townsend@cornell.edu}
+}
+
+\begin{document}
+
+\maketitle
+
+
+\begin{abstract}
+Small generalization errors of over-parameterized neural networks (NNs) can be partially explained by the frequency biasing phenomenon, where gradient-based algorithms minimize the low-frequency misfit before reducing the high-frequency residuals. Using the Neural Tangent Kernel (NTK), one can provide a theoretically rigorous analysis for training where data are drawn from constant or piecewise-constant probability densities. Since most training data sets are not drawn from such distributions, we use the NTK model and a data-dependent quadrature rule to theoretically quantify the frequency biasing of NN training given fully nonuniform data. By replacing the loss function with a carefully selected Sobolev norm, we can further amplify, dampen, counterbalance, or reverse the intrinsic frequency biasing in NN training.
+\end{abstract}
+
+\section{Introduction}
+Neural networks (NNs) are often trained in supervised learning on a small data set. They are observed to provide accurate predictions for a large number of test examples that are not seen during training. A mystery is how training can achieve quite small generalization errors in an overparameterized NN and a so-called ``double-descent'' risk curve~\citep{belkin2019reconciling}. In recent years, a potential answer has emerged called ``frequency biasing,'' which is the phenomenon that in the early epochs of training, an overparameterized NN finds a low-frequency fit of the training data while higher frequencies are learned in later epochs~\citep{rahaman2019spectral,yang2019fine,xu2020frequency}. Currently, frequency biasing is theoretically understood via the Neural Tangent Kernel (NTK)~\citep{jacot2018neural} for uniform  training data~\citep{arora,cao2019towards,basri} and data distributed according to a piecewise constant probability measure~\citep{basri2020frequency}. However, most training data sets in practice are highly clustered and not uniform. Yet, frequency biasing is still observed during NN training~\citep{fridovich2021spectral}, even though the theory is absent.  This paper proves that frequency biasing is present when there is nonuniform training data by using a new viewpoint based on a data-dependent quadrature rule. We use this theory to propose new loss functions for NN training that accelerate its convergence and improve stability with respect to noise. 
+
+A NN function is a map $\NN : \mathbb{R}^d \rightarrow \mathbb{R}$ given by 
+\begin{align*}
+    \NN(\mathbf{x}) = \mathbf{W}_{N_L}\sigma\left( \mathbf{W}_{N_L-1}\sigma\left(\cdots\left( \mathbf{W}_2\sigma\left(\mathbf{W}_1\mathbf{x} + {\mathbf{b}_1}\right) + {\mathbf{b}_2}\right)+\cdots\right) + {\mathbf{b}_{N_L-1}}\right) + {\mathbf{b}_{N_L}},
+\end{align*}
+where $\mathbf{W}_{i} \in \R^{m_{i}\times m_{i-1}}$ are weights, $m_0 = d$, $\mathbf{b}_i \in \R^{m_i}$ are biases, and $N_L$ is the number of layers. Here,
+$\sigma$ is the activation function and applied entry-wise to a vector, i.e., $\sigma(\mathbf a)_j = \sigma( \mathbf{a}_{j})$. In supervised learning, the goal of NN training is to learn weights and bias terms in a NN function, which we denote by $\NN(\mathbf x)$, given training data $(\mathbf{x}_i,y_i)$ for $1\leq i\leq n$, where $\mathbf{x}_i\in\mathbb{R}^d$ and $y\in\mathbb{R}$. To introduce a continuous perspective, we assume that there is an underlying function $g: \mathbb{R}^d\rightarrow \mathbb{R}$ such that $y_i = g(\mathbf{x}_i)$ for $1\leq i\leq n$ and the $\mathbf{x}_i$'s are distributed according to a distribution $\mu(\mathbf{x})$. The training procedure is often a gradient-based optimization algorithm that minimizes the residual in the squared $L^2(d\mu)$ norm, i.e.,  
+\begin{equation}\label{eq:framework1}
+    \Phi(\mathbf{W}) = \frac{1}{2}   \int_{\R^d}  | g(\mathbf{x}) - \NN(\mathbf{x};\mathbf{W})|^2 d\mu(\mathbf{x}) \approx \frac{1}{2n} \sum_{i=1}^n  |y_i - \NN(\mathbf{x}_i;\mathbf{W})|^2,
+\end{equation}
+where $\mathbf{W}$ represents the weights and bias terms. In this paper, we consider ReLU NNs, which are NNs for which the activation function is the ReLU function given by ${\rm ReLU}(t) = \max(t,0)$. The ReLU activation function has a useful multiplicative property that ${\rm ReLU}(\alpha t) = \alpha {\rm ReLU}(t)$ for any $\alpha > 0$. Due to this property, we assume that the training samples are normalized so that $\mathbf{x}_1,\ldots,\mathbf{x}_n\in\mathbb{S}^{d-1}$. Similar to most theoretical studies investigating frequency biasing, we restrict ourselves to 2-layer NNs~\citep{arora,basri,suyang,cao2019towards}.
+
+To study NN training, it is common to consider the dynamics of $\Phi(\mathbf{W})$ as one optimizes the weights and biases in $\mathbf{W}$. For example, the gradient flow of the NN weights is given by $\frac{d\mathbf{W}}{dt} = - \frac{\partial \Phi}{\partial \mathbf{W}}$. Define the residual $z(\mathbf{x};\mathbf{W}) =  g(\mathbf{x}) - \mathcal{N}(\mathbf{x};\mathbf{W}) $. We have%\footnote{\revise{In~\Cref{sec:genNTK}, we explain how this can be extended to classification tasks with the cross-entropy loss.}}
+\begin{equation}\label{eq:residual_dynamics}
+    \frac{d z(\mathbf{x};\mathbf{W}) }{dt} = -  \int_{\sS^{d-1}} K(\mathbf{x},\mathbf{x}';\mathbf{W}) z(\mathbf{x}';\mathbf{W}) d\mu(\mathbf{x}'),
+\end{equation}
+where $K(\mathbf{x},\mathbf{x}';\mathbf{W}) = \big  \langle \frac{\partial \mathcal{N}(\mathbf{x};\mathbf{W}) }{\partial \mathbf{W}},\frac{ \partial \mathcal{N}(\mathbf{x}';\mathbf{W})}{\partial \mathbf{W}}  \big \rangle$. Under the assumptions that the weights do not change much during training, one can consider the NTK in the mean-field regime given the underlying time-independent distribution of $\mathbf{W}$, i.e., $K^\infty(\mathbf{x},\mathbf{x}') = \mathbb{E}_\mathbf{W} [K(\mathbf{x},\mathbf{x}';\mathbf{W})]$~\citep{du}. Based on~\cref{eq:residual_dynamics}, one can understand the decay of the residual by studying the reproducing kernel Hilbert space (RKHS)
+through a spectral decomposition of the integral operator $\mathcal{L}$ defined by $(\mathcal{L} z)(\mathbf{x}) = \int K^\infty(\mathbf{x},\mathbf{x}') z(\mathbf{x}') d\mu(\mathbf{x}')$. 
+Most results in the literature require $\mu(\mathbf{x})$ to be the uniform distribution over the sphere so that the eigenfunctions of $\mathcal{L}$ are spherical harmonics and the eigenvalues have explicit forms~\citep{cao2019towards,basri,scetbon2021spectral}. These explicit formulas for the eigenvalues and eigenfunctions of $\mathcal{L}$ rely on the Funk--Hecke theorem, which provides a formula allowing one to express an integral over a hypersphere by an integral over an interval~\citep{seeley1966spherical}.  The frequency biasing of NN training can be explained by the fact that low-degree spherical harmonic polynomials are eigenfunctions of $\mathcal{L}$ associated with large eigenvalues~\citep{basri}. Thus, for uniform training data, the optimization of the weights and biases of an NN tends to fit the low-frequency components of the residual first.
+
+When $\mu(\mathbf{x})$ is nonuniform, it is difficult to analyze the spectral properties of $\mathcal{L}$ and thus the frequency biasing properties of NN training. Since the Funk--Hecke formula no longer holds, there are only a few special cases where frequency biasing is understood~\cite[Sec.~4.3]{williams2006gaussian}. Although one may derive asymptotic bounds for the eigenvalues~\citep{widom1963asymptotic,widom1964asymptotic,bach2002kernel}, it is very hard to obtain formulas for the eigenfunctions, and one usually relies on numerical approximations~\citep{baker1977numerical}.  For the ReLU-based NTK, \citep{basri2020frequency} provided explicit eigenfunctions assuming that the $\mu(\mathbf{x})$ is piecewise constant on $\mathbb{S}^1$, but this analysis does not generalize to higher dimension. To study the frequency biasing of NN training, one needs to understand both the eigenvalues and eigenfunctions of $\mathcal{L}$, and this remains a significant challenge for a general $\mu(\mathbf{x})$ due to the absence of the Funk--Hecke formula.
+
+To overcome this challenge, we take a radically different point-of-view. While it is standard to discretize the integral in~\cref{eq:framework1} using a Monte Carlo-like average, we discretize it using a data-dependent quadrature rule where the nodes are at the training data. That is, we investigate frequency biasing of NN training when minimizing the residual in the standard squared $L^2$ norm: 
+\begin{equation}\label{eq:framework2}
+    \widetilde \Phi(\mathbf{W}) = \frac{1}{2}   \int_{\sS^{d-1}}  | g(\mathbf{x}) - \NN(\mathbf{x};\mathbf{W})|^2 d\mathbf{x} \approx \frac{1}{2} \sum_{i=1}^n  c_i |y_i - \NN(\mathbf{x}_i;\mathbf{W})|^2,
+\end{equation}
+where $c_1,\ldots,c_n$ are the quadrature weights associated with the (nonuniform) input data $\mathbf{x}_1,\ldots,\mathbf{x}_n$. If $\mathbf{x}_1,\ldots,\mathbf{x}_n$ are drawn from a uniform distribution over the hypersphere, then one can select $c_i = A_d/n$ for $1\leq i\leq n$, where $A_d$ is the Lebesgue measure of the hypersphere; otherwise, one can choose any quadrature weights so that the integration rule is accurate (see~\cref{sec:quaderr}). If $\mathbf{x}_1,\ldots,\mathbf{x}_n$ are drawn at random from $\mu(\mathbf{x})$, then it is often reasonable to select $c_i = 1/(n p(\mathbf{x}_i))$, where $d\mu(\mathbf{x}) = p(\mathbf{x}) d\mathbf{x}$. While $c_1,\ldots,c_n$ depend on $\mathbf{x}_1,\ldots,\mathbf{x}_n$, the continuous expression for $\widetilde \Phi(\mathbf{W})$ is always unaltered in~\cref{eq:framework2}. Therefore, we can use the Funk--Hecke formula to analyze the eigenvalues and eigenfunctions of $\tilde{\mathcal{L}}$ defined by $(\tilde{\mathcal{L}} z)(\mathbf{x}) = \int_{\sS^{d-1}} K^\infty(\mathbf{x},\mathbf{x}') z(\mathbf{x}') d\mathbf{x}'$, allowing us to understand frequency biasing.
+
+In this paper, we propose to minimize the residual in a squared Sobolev $H^s$ norm for a carefully selected $s\in\mathbb{R}$. Unlike the $L^2$ norm (the case of $s=0$), the $H^s$ norm for $s\neq 0$ has its own frequency bias. For $s>0$, $H^s$ penalizes high frequencies more than low, while for $s<0$, low frequencies are penalized the most. We implement the squared $H^s$ norm using a quadrature rule, which induces a different integral operator $\mathcal{L}_s$. We analyze the eigenvalues and eigenfunctions of $\mathcal{L}_s$, and consequently, the frequency biasing in the NN training using the Funk--Hecke formula. Given our new understanding of frequency biasing, we select $s$ so that the $H^s$ norm amplifies, dampens, counterbalances, or reverses the natural frequency biasing from an overparameterized NN training.
+
+{\bf Contributions.} 
+We have three main contributions. 
+
+(1) From our quadrature point-of-view, we analyze the frequency biasing in training a 2-layer overparameterized ReLU NN with nonuniform training data. In Theorem~\ref{thm.freqbias}, we show that the theory of frequency biasing in~\citep{basri} for uniform training data continues to hold in the nonuniform case up to quadrature errors. In Theorem~\ref{thm.quaderr}, we provide control of the quadrature errors.
+
+(2) We use our knowledge of frequency biasing to modify the usual squared $L^2$ loss function to a squared $H^s$ norm. By carefully selecting $s$, we can amplify, dampen, counterbalance, or reverse the intrinsic frequency biasing in NN training and accelerate the observed convergence of gradient-based optimization procedures. 
+
+(3) A potential issue with the $H^s$ norm is the difficulties of implementing with high-dimensional training data. Using an image dataset of dimension $28^2=784$, we show how to use an encoder-decoder architecture to implement a practical version of the squared $H^s$ norm loss and adjust the frequency biasing in NN training to suppress noises of different frequencies. (see Figure~\ref{fig:autoencoder}). 
+
+\section{Preliminaries and notation}\label{section.prelim}
+For $d>1$, let $g: \sS^{d-1} \rightarrow \R$ be a square-integrable function defined on $\sS^{d-1}$. The function $g$ can be expressed in a spherical harmonic expansion given by 
+\begin{equation}\label{eq:g_lp}
+g(\mathbf{x}) = \sum_{\ell=0}^\infty \sum_{p=1}^{N(d,\ell)} \hat{g}_{\ell,p} Y_{\ell,p}(\mathbf{x}), \qquad \hat{g}_{\ell,p} = \int_{\mathbb{S}^{d-1}}g(\mathbf{x}) {Y_{\ell,p}}(\mathbf{x}) d\mathbf{x},
+\end{equation}
+where $Y_{\ell,p}$ is the spherical harmonic function of degree $\ell$ and order $p$. Here, $N(d,\ell)$ is the number of spherical harmonic functions of degree $\ell$ so that $N(d,0) = 1$ and $N(d,\ell) = (2\ell+d-2)\Gamma(\ell+d-2)/(\Gamma(\ell+1)\Gamma(d-1))$ for $\ell\geq 1$. The set $\{Y_{\ell,p}\}_{\ell \geq 0,1 \leq p \leq N(d,\ell)}$ is an orthonormal basis for $L^2(\sS^{d-1})$. Let $\mathcal{H}^d_\ell$ be the span of $\{Y_{\ell,p}\}_{p=1}^{N(d,\ell)}$. Let $\Pi_\ell^d = \bigoplus_{j=0}^\ell \mathcal{H}_j^d$ be the space of spherical harmonics of degree $\leq\ell$.
+
+Given distinct training data $\{\mathbf{x}_i\}_{i=1}^n$ from $\sS^{d-1}$ and evaluations $y_i = g(\mathbf{x}_i)$ for $1\leq i\leq n$, our goal is to understand the intrinsic  frequency-biasing behavior of training a 2-layer ReLU NN given by   
+\begin{equation}\label{eq:NN}
+    \NN(\mathbf{x}) = \frac{1}{\sqrt{m}} \sum_{r=1}^m a_r {\rm ReLU}(\mathbf{w}_r^\top \mathbf{x} + {b}_r), \qquad {\rm ReLU}(t) = \max(t,0),
+\end{equation}
+where $m$ is the number of neurons, $\mathbf{w}_1,\ldots,\mathbf{w}_m$ and $a_1,\ldots,a_m$ are weights, and ${b}_1,\ldots,{b}_m$ are the bias terms. We begin with the same setup as in~\cite{basri2020frequency}: assuming that (1) $\mathbf{w}_1,\ldots,\mathbf{w}_m$ are initialized independently and identically distributed (iid) from Gaussian random variables with covariance matrix $\kappa^2\mathbf{I}$, where $\kappa > 0$, (2) the bias terms are initialized to zero, and (3) $a_1,\ldots,a_m$ are initialized iid as $+1$ with probability $1/2$ and $-1$ otherwise, and $\{a_r\}$ are not updated during the training process.%\footnote{\revise{We believe, however, that the results represented in this paper can be extended to the case where $\{a_r\}$ are trainable. See~\citep{cao2019towards,du}, for example.}}
+
+We use a gradient-based optimization scheme to train for the weights and biases and aim to minimize the residual defined by a symmetric positive definite matrix $\mathbf{P}$, which can be neatly written as 
+\begin{equation}\label{eq:GeneralLossFunction}
+    \Phi_{\mathbf{P}}(\mathbf{W}) = \frac{1}{2} (\mathbf{y} - \mathbf{u})^\top \mathbf{P} (\mathbf{y} - \mathbf{u}),
+\end{equation} 
+where $\mathbf{y} = (g(\mathbf{x}_1), \ldots, g(\mathbf{x}_n))^\top$ and $\mathbf{u} = (\NN(\mathbf{x}_1), \ldots, \NN(\mathbf{x}_n))^\top$. For example, we have $\mathbf{P} = n^{-1} \mathbf{I}$ in~\cref{eq:framework1} and $\mathbf{P} = {\rm diag}(c_1,\ldots,c_n)$ in~\cref{eq:framework2}. Recall that $\mathbf{W}$ represents all the weights and biases of the NN. Given the loss function, we train the NN based on the gradient descent algorithm:
+\begin{equation}\label{eq.gradientdescent}
+ {\mathbf{w}}_r(k+1) - {\mathbf{w}}_r(k) = -\eta \frac{\partial \Phi_{\mathbf{P}}}{\partial {\mathbf{w}}_r},\qquad 
+    {b}_r(k+1) - {b}_r(k) = -\eta \frac{\partial \Phi_{\mathbf{P}}}{\partial {b}_r},
+\end{equation}
+where $k$ is the iteration number and $\eta > 0$ is the learning rate. The matrix $\mathbf{P}$ induces an inner product $\pairp{\boldsymbol{\xi}}{\boldsymbol{\zeta}} = \boldsymbol{\xi}^\top \mathbf{P} \boldsymbol{\zeta}$, which leads to a finite-dimensional Hilbert space with the norm $\norm{\boldsymbol{\xi}}_{\mathbf{P}} = \sqrt{\pairp{\boldsymbol{\xi}}{\boldsymbol{\xi}}}$. Given a matrix $\mathbf{A} \in \R^{n \times n}$, we define its operator norm %$\normp{\mathbf{A}}$ to be
+$\normp{\mathbf{A}} = \sup_{\boldsymbol{\xi} \in \R^n, \normp{\boldsymbol{\xi}} = 1} \normp{\mathbf{A} \boldsymbol{\xi}}$. We also define a finite positive number that depends on $\mathbf{P}$:
+\revise{
+\begin{equation}
+    M_{\mathbf{P}} \!=\!\!\! \sup_{\boldsymbol{\xi} \in \R^n, \norm{\boldsymbol{\xi}}_2 = 1} \!\!\! \normp{\boldsymbol{\xi}} \!=\!\!\! \sup_{\boldsymbol{\xi} \in \R^n \setminus \{\mathbf{0}\}} \!\! \sqrt{\!\frac{\boldsymbol{\xi}^\top \mathbf{P} \boldsymbol{\xi}}{\boldsymbol{\xi}^\top\boldsymbol{\xi}}} \!=\!\!\! \sup_{\boldsymbol{\zeta} \in \R^n \setminus \{\mathbf{0}\}}\!\! \sqrt{\!\frac{\boldsymbol{\zeta}^\top \mathbf{P}^{1/2} \mathbf{P} \mathbf{P}^{1/2} \boldsymbol{\zeta}}{\boldsymbol{\zeta}^\top \mathbf{P}^{1/2}\mathbf{P}^{1/2} \boldsymbol{\zeta}}} \!=\!\!\! \sup_{\boldsymbol{\zeta} \in \R^n, \normp{\boldsymbol{\zeta}} = 1} \!\!\! \norm{\mathbf{P}\boldsymbol{\zeta}}_2.
+    \label{eq:constants}
+\end{equation}
+Note that by the third expression in~\cref{eq:constants}, we also have $M_{\mathbf{P}} \!=\! \norm{\mathbf{P}^{1/2}}_2 \!=\! \sqrt{\norm{\mathbf{P}}_2}$.} Furthermore, we define the matrix $\mathbf{H}^\infty \in \R^{n \times n}$ by
+\begin{equation}\label{eq.Hinf}
+    H^\infty_{ij} = \mathbb{E}_{\substack{\mathbf{w} \sim \mathcal{N}(\mathbf{0},\kappa^2\mathbf{I})}}\left[\frac{{\mathbf{x}}_i^\top{\mathbf{x}}_j + 1}{2} \mathbb{I}_{\{\mathbf{w}^\top \mathbf{x}_i, \mathbf{w}^\top \mathbf{x}_j \geq 0\}}\right] = \frac{({\mathbf{x}}_i^\top {\mathbf{x}}_j + 1) (\pi - \arccos(\mathbf{x}_i^\top \mathbf{x}_j))}{4\pi}.
+\end{equation}
+Note that due to the introduction of the biases, $\mathbf{H}^\infty$ is slightly different than the one in~\citep{du,arora}. In fact, in contrast with~\citep{du}, $\mathbf{H}^\infty$ defined in~\cref{eq.Hinf} is positive definite regardless of the distribution of the training data, as shown in the supplementary material.
+\begin{prop}\label{thm.HisSPD}
+If $\mathbf{x}_1, \ldots, \mathbf{x}_n$ are distinct, then $\mathbf{H}^\infty$ in~\cref{eq.Hinf} is symmetric and positive definite.
+\end{prop}
+As a consequence of Proposition~\ref{thm.HisSPD}, the matrix $\mathbf{H}^\infty \mathbf{P}$ has positive eigenvalues, which we denote by $\lambda_{n-1} \geq \cdots \geq \lambda_0 > 0$. One can view $\mathbf{H}^\infty$ as coming from sampling a continuous kernel ${K}^\infty: \sS^{d-1} \times \sS^{d-1} \rightarrow \R$ given by
+\begin{equation}
+    {K}^\infty(\mathbf{x}, \mathbf{y}) = {K}^\infty(\langle \mathbf{x},\mathbf{y}\rangle) = \frac{(\langle \mathbf{x},\mathbf{y}\rangle + 1) (\pi - \arccos(\langle \mathbf{x},\mathbf{y}\rangle))}{4\pi},
+    \label{eq:Keigenvalues}
+\end{equation}
+where $\langle \cdot,\cdot\rangle$ is the $\ell^2$ inner-product. It is convenient to view $\mathbf{H}^\infty$ as being a discretization of ${K}^\infty$ as the eigenvalues and eigenfunctions of ${K}^\infty$ are known explicitly via the Funk--Hecke formula~\citep{basri}. It follows that
+\begin{equation}\label{eq:Keigenvalues2}
+    \int_{\sS^{d-1}} {K}^\infty(\mathbf{x},\mathbf{y}) Y_{\ell,p}(\mathbf{y}') d\mathbf{y} = \mu_\ell Y_{\ell,p}(\mathbf{x}), \qquad \ell\geq 0.
+\end{equation}
+The explicit formulas for $\mu_\ell$ with $\ell\geq 0$ are given in the supplementary material. We find that $\mu_\ell > 0$ for all $\ell$ and $\mu_\ell$ is asymptotically  $\mathcal{O}(\ell^{-d})$ for large $\ell$~\citep{basri,bietti2019inductive}.
+
+\section{The convergence of neural network training with a general loss function}\label{sec:general}
+Given the NN model in~\cref{eq:NN} and a general loss function $\Phi_{\mathbf{P}}$ in~\cref{eq:GeneralLossFunction}, we are interested in the convergence rate of NN training. We study this by analyzing the convergence rate for each harmonic component. We start by presenting a convergence result that holds for any SPD matrix $\mathbf{P}$. \revise{It says that up to an error $\boldsymbol{\epsilon}$, which can be made arbitrarily small by taking $\kappa$ small enough and $m$ large enough, the residual of the NN at the $k$th iteration is approximately $\left(\mathbf{I} - 2\eta \mathbf{H}^\infty\mathbf{P}\right)^k \mathbf{y}$.}
+
+\begin{thm}\label{thm.decoupledmain}
+In~\cref{eq:NN}, suppose that $\mathbf{w}_1,\ldots,\mathbf{w}_m$ are initialized iid from Gaussian random variables with covariance matrix $\kappa^2\mathbf{I}$, ${b}_1, \ldots, {b}_m$ are initialized to zero, and $a_1,\ldots,a_m$ are initialized iid as $+1$ with probability $1/2$ and $-1$ otherwise. Suppose the NN is trained with training data $(\mathbf{x}_i,y_i)$ for $1\leq i\leq n$, loss function $\Phi_{\mathbf{P}}$ in~\cref{eq:GeneralLossFunction} for a symmetric positive definite matrix $\mathbf{P}$, and the training procedure is the gradient descent update rule~\cref{eq.gradientdescent} with step size $\eta$. Let $\NN_k$ be the NN function after the $k$th iteration and $\mathbf{u}(k) = (\NN_k(\mathbf{x}_1), \ldots, \NN_k(\mathbf{x}_n))$, where $\NN_0$ is the initial NN function. Let an accuracy goal $0 < \epsilon < 1$, a probability of failure $0 < \delta < 1$, and a time span $T > 0$ be given. Then, there exist constants $C_1, C_2 > 0$ that depend only on the dimension $d$ such that if $0 \leq \eta \leq 1/(2M_{\mathbf{P}}^2n)$ (see~\cref{eq:constants}), $\kappa \leq C_1 \epsilon M_{\mathbf{P}}^{-1} \sqrt{\delta/n}$, and $m$ satisfies
+\begin{equation}\label{eq.mkapparestriction}
+    \begin{aligned}
+    m \geq C_2\! \left(\!\frac{M_{\mathbf{P}}^6 n^3}{\kappa^2  \epsilon^2}\! \left(\lambda_0^{-4} \!+\! \eta^4 T^4 \epsilon^4\right) \!+\! \frac{M_{\mathbf{P}}^4 n^2 \log(n/\delta)}{\epsilon^2}\! \left(\lambda_0^{-2} \!+\! \eta^2 T^2 \epsilon^2\right)\!\!\right),
+\end{aligned}
+\end{equation}
+then with probability $\geq 1 - \delta$, we have
+\begin{equation}
+    \mathbf{y} - \mathbf{u}(k) = \left(\mathbf{I} - 2\eta \mathbf{H}^\infty\mathbf{P}\right)^k \mathbf{y} + \boldsymbol{\epsilon}(k), \qquad \normp{\boldsymbol{\epsilon}(k)} \leq \epsilon, \qquad 0 \leq k \leq T.
+\end{equation}
+Here, $\mathbf{H}^\infty$ is defined in~\cref{eq.Hinf}, $\mathbf{y} \!=\! (g(\mathbf{x}_1), \ldots, g(\mathbf{x}_n))^\top$, and $\lambda_0$ is the smallest eigenvalue of $\mathbf{H}^\infty\mathbf{P}$.
+\end{thm}
+We defer the proof to the supplementary material, which uses techniques from~\citep{suyang}. The main idea behind the proof is that $\mathbf{I} - 2\eta \mathbf{H}^\infty\mathbf{P}$ is close to the transition matrix for the residual $\mathbf{y} - \mathbf{u}(k)$ when $m$ is large. By taking $\kappa$ small, we can control the size of $\mathbf{u}(0)$ and therefore obtain $\mathbf{y} - \mathbf{u}(k) \approx (\mathbf{I} - 2\eta \mathbf{H}^\infty\mathbf{P})^k (\mathbf{y} - \mathbf{u}(0)) \approx (\mathbf{I} - 2\eta \mathbf{H}^\infty\mathbf{P})^k \mathbf{y}$. Furthermore, $M_{\mathbf{P}}^2 n$ is an upper bound on $\lambda_{n-1}$, the maximum eigenvalue of $\mathbf{H}^\infty\mathbf{P}$. Therefore, our rate of convergence does not vanish as the number of training data points $n\rightarrow\infty$, provided that $M_{\mathbf{P}} = \mathcal{O}(n^{-1/2})$. This is the case when $\mathbf{P} = n^{-1}\mathbf{I}$, which corresponds to~\cref{eq:framework1}. So, we overcome the vanishing convergence rate issue that appears in previous analyses of frequency biasing~\citep{arora,basri}. \revise{As $\eta$ decreases, the gradient descent algorithm gets closer to the gradient flow algorithm~\citep{du}, which allows us to more accurately quantify the frequency biasing (see~\cref{sec:L2}).}
+
+\section{Frequency biasing with an $\mathbf{L^2}$-based loss function}\label{sec:L2}
+The standard mean-squared loss function in~\cref{eq:framework1} corresponds to setting $c_i = 1/n$ for $1\leq i\leq n$ in~\cref{eq:framework2}. When $\mu$ is uniform, \cref{eq:framework1} and~\cref{eq:framework2} are equivalent; when $\mu$ is nonuniform, we introduce a quadrature rule with nodes $\mathbf{x}_1,\ldots,\mathbf{x}_n$ and weights $c_1,\ldots,c_n$ to approximate the standard $L^2$ loss function~\cref{eq:framework2}. The weights are selected so that for low-frequency functions $f:\sS^{d-1}\rightarrow\mathbb{R}$, the quadrature error 
+\begin{equation} \label{eq:QuadratureRule} 
+E_{\boldsymbol{c}}(f) = \int_{\sS^{d-1}} f(\mathbf{x}) d\mathbf{x} - \sum_{i=1}^n c_i f(\mathbf{x}_i)
+\end{equation} 
+is relatively small.\footnote{\revise{In the case where we do not have a good quadrature rule associated with $\{\mathbf{x}_i\}_{i=1}^n$, we could only have very limited understanding of the spectral property of the target function given its values at $\{\mathbf{x}_i\}_{i=1}^n$, making frequency bias a void topic. Hence, we assume the existence of a good quadrature rule for theoretical purposes.}}
+A reasonable quadrature rule has positive weights for numerical stability and satisfies $\sum_{i=1}^n c_i = A_d$ so that it exactly integrates constants. The continuous squared $L^2$ loss function based on the Lebesgue measure is then discretized to be the square of a weighted discrete $\ell^2$ norm (see~\cref{eq:framework2}). Hence, we take $\mathbf{P} = \mathbf{D}_{\boldsymbol{c}} = \text{diag}(c_1, \ldots, c_n)$, which is positive definite as the $c_i$'s are positive. For a vector $\mathbf{v} \in \R^n$, we write $\norm{\mathbf{v}}_{\boldsymbol{c}}^2 = \mathbf{v}^\top \mathbf{D}_{\boldsymbol{c}}\mathbf{v}$ and set $c_{\text{max}} = \max_{1\leq i\leq n} \{c_i\}$. 
+
+We now apply Theorem~\ref{thm.decoupledmain} to study the frequency biasing of NN training with the squared $L^2$ loss function~\cref{eq:framework2}. We state these results in terms of quadrature errors. Recall our continuous setup where we assume that the training data is taken from a function $g:\sS^{d-1}\rightarrow \mathbb{R}$ so that $y_i = g(\mathbf{x}_i)$ for $1\leq i\leq n$. We further assume that $g$ is bandlimited with bandlimit $L$ where $g = g_0 + \cdots + g_L$ and $g_\ell \in \mathcal{H}_\ell^d$ for $0 \leq \ell \leq L$. We define our quadrature errors as 
+\begin{equation} 
+    e^a_{j,\ell,p} \!=\! E_{\boldsymbol{c}}(g_j Y_{\ell,p}), \;\; e^b_{i,\ell,p} \!=\! E_{\boldsymbol{c}}(\!K^\infty\!(\mathbf{x}_i, \cdot) Y_{\ell,p}), \;\;
+    e^c_{j,\ell}
+    \!=\! E_{\boldsymbol{c}}(g_j g_{\ell}), \;\; e^d_{i,\ell} 
+    \!=\! E_{\boldsymbol{c}}(\!K^\infty\!(\mathbf{x}_i, \cdot) g_{\ell}),
+\label{eq:QuadratureErrors} 
+\end{equation} 
+where $1 \leq i \leq n$, $j, \ell \geq 0$, and $1 \leq p \leq N(d,\ell)$, and we interpret $g_\ell = 0$ when $\ell > L$.
+
+\subsection{A frequency-based formula for the training error}
+We obtain a similar result to~\cite[Thm.~4.1]{arora} when using the standard squared $L^2$ loss function~\cref{eq:framework2}, except our step size does not depend on $\lambda_0$. Instead of expressing the training error in terms of the eigenvalues and eigenvectors of ${\mathbf{H}}^\infty \mathbf{D}_{\boldsymbol{c}}$, we directly relate the training error to the frequency component of the target function $g$ and the eigenvalues of the continuous kernel $K^\infty$.
+
+\begin{thm}\label{thm.freqbias}
+Under the same setup and assumptions of Theorem~\ref{thm.decoupledmain}, let $\mathbf{P} = \mathbf{D}_{\boldsymbol{c}}$ and $M_{\mathbf{P}} = \sqrt{c_{\text{max}}}$. If $g:\sS^{d-1}\rightarrow\mathbb{R}$ is a bandlimited function with bandlimit $L$ and $1 - 2\eta\mu_\ell > 0$ for all $0 \leq \ell \leq L$ (see~\cref{eq:Keigenvalues2}), then with probability $\geq 1-\delta$ we have
+\begin{equation}\label{eq.L2freqbias}
+    \| \mathbf{y} \!-\! \mathbf{u}(k) \|_{\boldsymbol{c}} \!=\! \sqrt{\!\sum_{\ell=0}^L \left(1\!-\!2\eta\mu_\ell\right)^{2k} \!\norm{g_\ell}^2_{L^2} \!+\! \varepsilon_1(k)} \!+\! \varepsilon_2 \!+\! \varepsilon_3(k), \quad \abs{\varepsilon_3(k)} \leq \epsilon,\quad 0\leq k\leq T,
+\end{equation}
+where $\varepsilon_1(k)$ and $\varepsilon_2$ satisfy
+\begin{align*}
+    \abs{\varepsilon_1(k)} \leq \bigg|\sum_{j=0}^L \sum_{\ell=0}^L \left(1\!-\!2\eta\mu_j\right)^k \left(1\!-\!2\eta\mu_\ell\right)^k e^c_{j,\ell}\bigg|, \qquad \abs{\varepsilon_2} \leq \sum_{\ell=0}^L \frac{\sqrt{A_d}}{\mu_\ell} \max_{1 \leq i \leq n} \abs{e^d_{i,\ell}}.
+\end{align*}
+\end{thm}
+The proof of Theorem~\ref{thm.freqbias} is postponed to the supplementary material. \revise{The idea is that by~\Cref{thm.decoupledmain}, we know $\mathbf{y} - \mathbf{u}(k) = \left(\mathbf{I} - 2\eta \mathbf{H}^\infty\mathbf{D_c}\right)^k \mathbf{y} +  \boldsymbol{\varepsilon}_3(k)$. Using Funk--Hecke formula and quadrature, we have that $1-2\eta\mu_\ell$ are roughly the eigenvalues of $\mathbf{I} - 2\eta \mathbf{H}^\infty\mathbf{D_c}$ and $\mathbf{y}_\ell = (g_\ell(\mathbf{x}_1), \ldots, g_\ell(\mathbf{x}_n))^\top$ are associated eigenvectors. Hence, $\mathbf{y} - \mathbf{u}(k) \approx \sum_{\ell=0}^L (1-2\eta\mu_\ell)^{k} \mathbf{y}_\ell$. This can be made precise by introducing $\varepsilon_2$. Finally, up to some quadrature error $\varepsilon_1$, we have $\langle{g_j},{g_\ell}\rangle_{L^2} \approx A_d n^{-1} \mathbf{y}_j^\top \mathbf{y}_\ell$, which gives us~\cref{eq.L2freqbias}.} Since $\sum_{i=1}^n c_i = A_d$, For a fixed data distribution $\mu$, we expect that $c_{\text{max}} = \mathcal{O}(n^{-1})$ as $n\rightarrow\infty$ so that $\eta$ does not decay as $n \rightarrow \infty$. Up to a quadrature error, $\normc{\mathbf{y} - \mathbf{u}(k)}$ is close to the $L^2$ norm of the residual function $g - \NN_k$. Explicit formulas for the eigenvalues $\{\mu_\ell\}$ (see~\cref{eq:Keigenvalues2}) are given in~\citep{basri}, and it was shown that $\mu_\ell=\mathcal{O}(\ell^{-d})$~\citep{bietti2019inductive}. \Cref{thm.freqbias} demonstrates the frequency bias in NN training as the rate of convergence for frequency $0\leq \ell\leq L$ is $1-2\eta\mu_\ell$, which is close to $1$ when $\ell$ is large. \revise{As $\eta \rightarrow 0$, we have $(1-2\eta\mu_\ell)^{2t/\eta} \rightarrow e^{-4\mu_\ell t}$, which is the rate of convergence for frequency using gradient flow.} Therefore, we expect that NN training approximates the low-frequency content of $g$ faster than its high-frequency one, which is similar to the case of training with uniform data~\citep{basri}.
+
+\subsection{Estimating the quadrature errors}\label{sec:quaderr}
+We now quantify the quadrature errors in~\Cref{thm.freqbias}. If we can design a quadrature rule at the training data $\mathbf{x}_1,\ldots,\mathbf{x}_n$ such that the quadrature error satisfies 
+\begin{equation}\label{eq:e_nk^s}
+    \abs{E_\mathbf{c}(h)} = \bigg|\int_{\sS^{d-1}} h(\mathbf{x}) d\mathbf{x} - \sum_{i=1}^n c_i h(\mathbf{x}_i)\bigg| \leq \gamma_{n,\ell} \norm{h}_{L^\infty}, \qquad h \in \Pi_{\ell}^d, \quad \ell \geq 0,
+\end{equation}
+for some constant $\gamma_{n,\ell} \geq 0$, then we can bound the terms in~\cref{eq:QuadratureErrors}. We expect that for each fixed $\ell$, $\gamma_{n,\ell} \rightarrow 0$ as $n \rightarrow \infty$ as this is saying that  integrals can be calculated more accurately for a large number of quadrature nodes. Under the reasonable assumption that our quadrature rule satisfies~\cref{eq:e_nk^s}, we can bound the quadrature errors appearing in~\Cref{thm.freqbias}. 
+
+\begin{thm}\label{thm.quaderr}
+Under the same assumptions of~\Cref{thm.freqbias}, and that the quadrature rule satisfies~\cref{eq:e_nk^s}, there exist constants $C_1, C_2 > 0$ only depending on the dimension $d$ such that the terms $|\varepsilon_1(k)|$ and $|\varepsilon_2|$ in~\Cref{thm.freqbias} satisfy
+\begin{equation*}
+    \abs{\varepsilon_1(k)} \!\leq\! C_1 \!\left(\!\frac{L^3}{\ell} \!+\! L^2 \gamma_{n,\ell}\!\right) \max_{0\leq j\leq L} \norm{g_j}_{L^\infty}\!, \qquad \abs{\varepsilon_2} \!\leq\! C_2 \!\left(\!\frac{L^2}{\ell} \!+\! L\gamma_{n,\ell}\!\right) \max_{0\leq j\leq L} \norm{g_j}_{L^\infty} \!\sum_{j=0}^L \mu_j^{-1}\! 
+\end{equation*}
+for all $k \geq 0$, $\ell \geq 1$, where $g = g_0 +\cdots+g_L$ with $g_j\in\mathcal{H}_j^d$.
+\end{thm}
+
+The proof is in the supplementary material. \Cref{thm.quaderr} states that $\varepsilon_1(k)$ and $\varepsilon_2$ can be made arbitrarily small if the quadrature errors converges to $0$ as the number of nodes $n\rightarrow\infty$. In particular, if there is a sequence $\{\ell_n\}$ that increases to $\infty$ such that the quadrature rule is exact for all functions $h \in \Pi_{\ell_n}^d$, i.e., $E_{\mathbf{c}}(h) = 0$, where $\ell_n \rightarrow \infty$ (see e.g.~\citep{mhaskar}), the rates of convergence of $\varepsilon_1(k)$ and $\varepsilon_2$ are both $\mathcal{O}(1/\ell_n)$ for a fixed $g$. Without the quadrature being exact, we still have nice convergence provided the quadrature errors are small, as the following corollary shows.
+\begin{cor}\label{cor.quaderr}
+Suppose there exists a sequence $\ell_n \rightarrow \infty$ such that $\gamma_{n,\ell_n} \rightarrow 0$ as $n \rightarrow \infty$. Then, for a fixed $L \geq 0$, we have $\max_{k \geq 0, g \in \Pi_L^d} \abs{\varepsilon_1(k)} / \norm{g}^2_{L^2}$ and $\max_{g \in \Pi_L^d} \abs{\varepsilon_2} / \norm{g}_{L^2} \rightarrow 0$ as $n \rightarrow \infty$.
+\end{cor}
+
+\Cref{cor.quaderr} shows that as $n$ increases, the quadrature errors $\varepsilon_1(k)$ and $\varepsilon_2$ converge to zero. Moreover, this convergence is uniform in the sense that it does not depend on the specific choice of $g \in \Pi_L^d$. Here, we normalize $\varepsilon_1(k)$ and $\varepsilon_2$ by $\norm{g}_{L^2}^2$ and $\norm{g}_{L^2}$, respectively, to obtain the ``relative" quadrature errors that do not scale when $g$ is multiplied by a scalar (see~(\ref{eq.L2freqbias})).
+
+\section{Frequency biasing with a Sobolev-norm loss function}\label{sec:sobolev}
+
+The frequency biasing during the training of an overparameterized NN has several consequences. In some situations, worse convergence rates for high-frequency components of a function are beneficial since the NN training procedure is less sensitive to the oscillatory noise in the data, acting as a low-pass filter. This significantly improves the generalization error of overparameterized NNs. However, in other situations, NN training struggles to accurately learn the high-frequency content of $g$, resulting in slow convergence. To precisely control the frequency biasing of NN training, we propose to train a NN with a loss function that has intrinsic spectral bias. One such example is the so-called Sobolev norm.  % new texts below
+\revise{Let $\mathcal{D}'(\sS^{d-1})$ be the space of distributions on $\sS^{d-1}$. Given $s \in \R$, consider $\mathcal{L}^s:\mathcal{D}'(\sS^{d-1}) \mapsto \mathcal{D}'(\sS^{d-1})$, where $\mathcal{L}^s = \big(I + \left( - \Delta \right)^{1/2}\big)^s$ and $\Delta$ is the Laplace--Beltrami operator on the sphere. We follow~\citep{barcelo2021fourier} and define the spherical Sobolev space $H^{s}(\sS^{d-1}) = \{f \in \mathcal{D}'(\sS^{d-1}): \mathcal{L}^s f \in L^2(\sS^{d-1}) \}$, equipped with a norm equivalent to eq.~(1.24) in~\citep{barcelo2021fourier},
+% \[
+%     H^{s}(\sS^{d-1}) = \bigg\{f \in \mathcal{D}(\sS^{d-1}) \; \bigg| \;
+%     \|f\|_{H^s(\sS^{d-1})}^2 = \sum_{\ell=0}^\infty \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}|\hat{f}_{\ell,p}|^2 < \infty\bigg\},
+% \]
+\[
+    \|f\|_{H^s(\sS^{d-1})}^2 = \sum_{\ell=0}^\infty \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}\left|\hat{f}_{\ell,p}\right|^2,
+\]
+}where $\hat{f}_{\ell,p}$ are the spherical harmonic coefficients of $f$ (see~\cref{eq:g_lp}) and $N(d,\ell)$ is given in~\Cref{section.prelim}. We propose to set the loss function to be $\frac{1}{2}\norm{g-\NN}_{H^s}^2$ in replace of $\frac{1}{2}\norm{g-\NN}_{L^2}^2$ in~\cref{eq:framework2}. When $s = 0$, the $H^0$ Sobolev norm reduces to the $L^2$ norm as all spherical harmonic coefficients have an equal weight of $1$. If $s > 0$, then the high-frequency spherical harmonic coefficients are amplified by $(1+\ell)^{2s}$. The high-frequency components of the residual are then penalized more in the loss function. Hence, we expect the NN training to learn the high-frequency components faster with the squared $H^s$ loss function than the case of eq.~\eqref{eq:framework2}. Similarly, if $s < 0$, then the high-frequency spherical harmonic coefficients are dampened by $(1+\ell)^{2s}$. Consequently, one expects that the NN training process captures the high-frequency components of the residual more slowly with the squared $H^s$ loss function. However, when $s < 0$, we expect that the training is more robust to high-frequency noise in the training data. By tuning the parameter $s$, we can control the frequency biasing in NN training (see Theorem~\ref{thm.sobconvergence}). The choice of $s$ for a particular application can be determined from theory or by cross-validation.
+
+First, we justify that the residual function is indeed in $H^s$. Since we assume that $g$ is bandlimited, $g \in H^s$ for all $s \in \R$. \Cref{prop.sobolev} shows that we could consider $s < 3/2$ for ReLU-based NN.
+\begin{prop}\label{prop.sobolev}
+Suppose $\NN: \sS^{d-1} \rightarrow \R$ is a 2-layer ReLU NN (see~\cref{eq:NN}). Then, we have $\NN \in H^s(\sS^{d-1})$ for all $s < 3/2$. Moreover, if $s \geq 3/2$, $\NN \in H^s(\sS^{d-1})$ if and only if $\NN$ is affine.
+\end{prop}
+
+The proof is deferred to the supplementary material. When $s \geq 3/2$, the residual function $\NN-g$ may not be in $H^s$. However, we can still use the truncated sum to a maximum frequency $\lmax$ to train the NN, although the sum can no longer be interpreted as an approximation of some Sobolev norm at the continuous level. We discretize the Sobolev-based loss function as
+\begin{equation}\label{eq.sobolevloss}
+    \Phi_s(\mathbf{W}) = \frac{1}{2} \sum_{\ell = 0}^{\lmax} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} \left(\sum_{i=1}^n c_i Y_{\ell,p}(\mathbf{x}_i) (g-\NN)(\mathbf{x}_i)\right)^2 = 
+   \frac{1}{2} (\mathbf{y} - \mathbf{u})^\top \mathbf{P}_s (\mathbf{y} - \mathbf{u}),
+\end{equation}
+where $\mathbf{u}$ and $\mathbf{y}$ follow~\cref{eq:GeneralLossFunction}, and $\mathbf{P}_s = \sum_{\ell=0}^{\lmax} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} \mathbf{P}_{\ell,p}$, $\mathbf{P}_{\ell,p} = \mathbf{a}_{\ell,p} \mathbf{a}_{\ell,p}^\top$, and $(\mathbf{a}_{\ell,p})_i = c_i Y_{\ell,p}(\mathbf{x}_i)$. We assume that $\mathbf{P}_s$ is positive definite, which requires that $(\lmax+1)^2 \geq n$. Next, we present our convergence theorem for Sobolev training.
+\begin{thm}\label{thm.sobconvergence}
+Suppose $g \in \Pi_L^d$ and $\Phi_s$ is the loss function in~eq.~\eqref{eq.sobolevloss}, where $\mathbf{P}_s$ is positive definite and $\lmax \geq L$. Under the assumptions of Theorem~\ref{thm.decoupledmain}, if $1 - 2\eta\mu_\ell (1+\ell)^{2s} > 0$ for all $0 \leq \ell \leq L$, then with probability $\geq 1-\delta$ over the random initialization, we have
+\[
+    \mathbf{y} - \mathbf{u}(k) = \sum_{\ell=0}^L \left(1-2\eta\mu_\ell(1+\ell)^{2s}\right)^k \mathbf{y}^\ell + \boldsymbol{\varepsilon}_1 + \boldsymbol{\varepsilon}_2(k), \qquad \|\boldsymbol{\varepsilon}_2(k)\|_{\mathbf{P}_s} \leq \epsilon, \qquad 0\leq k\leq T,
+\]
+where $\mathbf{y}^\ell = (g_\ell(\mathbf{x}_1), \ldots, g_\ell(\mathbf{x}_n))^\top$ and $\boldsymbol{\varepsilon}_1$ satisfies
+\begin{align*}
+   \|\boldsymbol{\varepsilon}_1\|_{\mathbf{P}_s} \!\leq\! \sum_{\ell = 0}^L \mu_\ell^{-1} \! \|\boldsymbol{\varepsilon}_1^\ell\|_{\mathbf{P}_s}, \quad (\varepsilon_1^\ell)_i \!=\! e_{i,\ell}^d \!+\! \sum_{j = 0}^{\lmax} \frac{(1\!+\!j)^{2s}}{(1\!+\!\ell)^{2s}}\!\sum_{p=1}^{N(d,j)}\! e^a_{\ell,j,p}\! \left(\mu_j Y_{j,p}(\mathbf{x}_i) \!+\! e_{i,j,p}^b\right).
+\end{align*}
+\end{thm}
+%\revise{The proof of~\cref{thm.sobconvergence} is very similar to that of~\cref{thm.freqbias}. The main difference is that the approximated eigenvalues of $\mathbf{I} - 2\eta\mathbf{H}^\infty \mathbf{P}_s$ are now $1-2\eta\mu_\ell(1+\ell)^{2s}$ due to the intrinsic frequency bias of the new loss function induced by $\mathbf{P}_s$.}
+Compared to Theorem~\ref{thm.freqbias}, Theorem~\ref{thm.sobconvergence} says that up to the level of quadrature errors, the convergence rate of the degree-$\ell$ component is $1-2\eta\mu_\ell(1+\ell)^{2s}$. In particular, since $\mu_\ell = \mathcal{O}(\ell^{-d})$, there is an $s^* > 0$, which depends on $d$, such that $(1+\ell)^{2s^*} \mu_\ell$ can be bounded from above and below by positive constant that are independent of $\ell$ for all $\ell\geq 0$. This means for any $s > s^*$, we expect to reverse the frequency biasing behavior of NN training. Figure~\ref{fig:FrequencyBiasingRainbow} shows the reversal of frequency biasing as $s$ increases from $-1$ to $4$ (see~\cref{sec:test1}). 
+
+\begin{figure}
+\centering
+\begin{minipage}{.32\textwidth}
+\begin{overpic}[height = 3cm]{figures-1D/nodes.eps}
+\put(42,-4) {$\cos \theta$}
+\put(-8,30) {\rotatebox{90}{$\sin \theta$}}
+\end{overpic} 
+\end{minipage}
+\hspace{-1cm}
+\begin{minipage}{.32\textwidth}
+\begin{overpic}[width=.9\textwidth]{figures-1D/Figure2a}
+\put(42,-2) {epochs}
+\put(0,30) {\rotatebox{90}{loss}}
+\end{overpic} 
+\end{minipage}
+\hspace{-0.5cm}
+\begin{minipage}{.32\textwidth}
+\begin{overpic}[width=.9\textwidth]{figures-1D/Figure2b}
+\put(34,-2) {frequency $\ell$}
+\put(0,0) {\rotatebox{90}{number of iterations}}
+\end{overpic} 
+\end{minipage} 
+\comment{
+\begin{subfigure}{0.3\textwidth}
+\includegraphics[width = \textwidth]{figures-1D/uniform_train.eps}
+\subcaption{$\ell^2$-loss-based training}
+\label{fig:uniform_train-1D}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.3\textwidth}
+\includegraphics[width = \textwidth]{figures-1D/weighted_train.eps}
+\subcaption{$L^2$-loss-based training}
+\label{fig:weighted_train-1D}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.3\textwidth}
+\includegraphics[width = \textwidth]{figures-1D/iterations.eps}
+\subcaption{Rate of convergence}
+\end{subfigure}
+}
+\caption{Left: the nonuniform data $\mathbf{x} = (\cos\theta ,\sin \theta)$ on the unit circle ($\sS^1$). Middle: the change of frequency loss for $\ell = 1$ (blue), $5$ (red) and $9$ (yellow) against the number of iterations for loss function $\Phi$ (solid lines) and $\widetilde \Phi$ (dash lines). Right: the number of iterations for the NN training to achieve a fixed loss threshold in learning $g_\ell(\mathbf x) = \sin(\ell\theta)$ for $3\leq \ell\leq 10$ given the loss function $\widetilde \Phi$ while the black line represents the $\mathcal O(\ell^2)$ rate based on the analysis in~\citep{basri}.\label{fig:weighted-1D}}
+\end{figure}
+
+\section{Experiments and discussion}\label{sec:experiments}
+
+\begin{figure} 
+\centering
+\begin{overpic}[width=.85\textwidth]{figures/rainbow.eps}
+\put(5,10) {\rotatebox{90}{$|\widehat{\mathcal{N}}(\ell) - \hat{g}(\ell)|$}}
+\put(51,-1) {$s$}
+\put(28.5,3.5) {\color{black}\vector(0,1){25}}
+\put(57.7,3.5) {\color{black}\vector(0,1){25}}
+\put(22,33) {ReLU NTK $L^2$}
+\put(24,30) {freq.~bias}
+\put(51,30) {min.~freq.~bias}
+\put(58,14){\makebox(33,5){\upbracefill}}
+\put(68,13) {high-to-low}
+\put(69,10) {freq.~bias}
+\put(13,14){\makebox(22,5){\upbracefill}}
+\put(18,20) {low-to-high}
+\put(19,17.5) {freq.~bias}
+\end{overpic}
+\caption{Frequency-biasing during NN training with a squared $H^s$ loss function. The blue-to-red rainbow corresponds to low-to-high frequency losses $|\widehat{\mathcal{N}}(\ell) - \hat{g}(\ell)|$ for the frequency index $\ell$ ranging from $1$ (blue) to $9$ (red) with nonuniform training data, respectively. Here, an overparameterized 2-layer ReLU NN $\mathcal{N}(\mathbf{x})$ is trained for $5000$ epochs to learn function $g(\mathbf{x}) = \tilde g(\theta) =  \sum_{\ell=1}^{9} \sin (\ell\theta)$ on $\sS^1$ given the $H^s$ loss with $-1\leq s\leq 4$. The inversion of the rainbow as $s$ increases demonstrates the reversal of the frequency biasing phenomenon with the squared Sobolev $H^s$ loss.}
+\label{fig:FrequencyBiasingRainbow} 
+\end{figure} 
+
+This section presents three experiments with synthetic and real-world datasets to investigate the frequency biasing of NN training using squared $L^2$ loss and squared $H^s$ loss. The first two experiments learn functions on $\sS^{1}$ and $\sS^{2}$, respectively. In the third test, we train an autoencoder on the MNIST dataset for a denoising task. One can find more details in the supplementary material.
+
+\subsection{Learning trigonometric polynomials on the unit circle}\label{sec:test1}
+First, we consider learning a function on $\mathbb{S}^1$. We create a set of $n = 1140$ nonuniform data $\{\mathbf{x}_i\}_{i=1}^n$, as seen in~\Cref{fig:weighted-1D}, and compute the quadrature weights $\{c_i\}_{i=1}^{n}$ for the loss function $\widetilde \Phi$ in~\cref{eq:framework2}. We train a 2-layer ReLU NN to learn $g(\mathbf{x}) = \tilde g(\theta) = \sum_{\ell=1}^9 \sin(\ell \theta)$, where $\mathbf{x} = (\cos\theta, \sin\theta)$. We define the frequency loss $|\widehat{\mathcal{N}}(\ell) - \hat g(\ell) |$ where
+$\widehat{\mathcal{N}}$ and $\hat{g}$ are the Fourier coefficients of $\mathcal{N}$ and $g$, respectively. In~\Cref{fig:weighted-1D}, we plot the frequency loss for $\ell=1,5,9$ in different colors to illustrate how well the NN fits each frequency component. The solid and dash lines correspond to the loss function $\Phi$ in~\cref{eq:framework1} and $\widetilde \Phi$ in~\cref{eq:framework2}, respectively. The comparisons show that the frequency biasing is more evident given the loss function $\widetilde \Phi$. This observation collaborates the theoretical statements in~\Cref{thm.freqbias}. There is no guarantee that frequency biasing always exists when using $\Phi$ as the loss function for nonuniform data training, which is also observed here. Moreover, \Cref{fig:weighted-1D} also shows that it takes asymptotically $\mathcal{O}(\ell^2)$ iterations to learn the $\ell$th frequency $\sin(\ell\theta)$ given the loss function $\widetilde \Phi$. A similar plot appears in~\cite{basri} for uniform data training.
+
+We also use the squared $H^s$ norm as the loss function to learn $g$. After $5000$ epochs, we plot the $\ell$th frequency loss with $\ell$ ranging from $1$ (blue) to $9$ (red) in~\Cref{fig:FrequencyBiasingRainbow}, given different $s$ values. As $s$ increases, the higher-frequency components are learned faster. When $s> 2$,  the frequency biasing is entirely reversed in the sense that higher-frequency parts are learned faster than the lower-frequency ones rather than a low-frequency biasing under the squared $L^2$ loss (see~\Cref{thm.freqbias}). The gradually changing ``rainbow'' in~\Cref{fig:FrequencyBiasingRainbow} demonstrates that the smoothing property of an overparameterized NN can be compensated by the intrinsic high-frequency biasing of the $H^s$ loss function for a large enough $s$, corroborating~\Cref{thm.sobconvergence}.
+
+\begin{figure}
+\centering
+\begin{minipage}{.32\textwidth}
+\begin{overpic}[width=.9\textwidth]{figures-2D/s2-m10.eps}
+\put(42,-2) {epochs}
+\put(0,18) {\rotatebox{90}{loss}}
+\end{overpic} 
+\end{minipage}
+\begin{minipage}{.32\textwidth}
+\begin{overpic}[width=.9\textwidth]{figures-2D/s2-00.eps}
+\put(42,-2) {epochs}
+\put(0,18) {\rotatebox{90}{loss}}
+\end{overpic} 
+\end{minipage}
+\begin{minipage}{.32\textwidth}
+\begin{overpic}[width=.9\textwidth]{figures-2D/s2-25.eps}
+\put(42,-2) {epochs}
+\put(0,18) {\rotatebox{90}{loss}}
+\end{overpic} 
+\end{minipage} 
+\caption{Frequency losses for $\ell=4$ (blue), $10$ (red), and $20$ (yellow), when learning a function on $\sS^2$ using different squared $H^s$ loss function. Compared to low-frequency biasing in the cases of $s=-1$ (left) and $s=0$ (middle), we observe a high-frequency biasing when $s = 2.5$ (right).\label{fig:2D}}
+\end{figure}
+
+\subsection{Learning spherical harmonics on the unit sphere}\label{sec:test2}
+Similar to the previous example in $\sS^1$, we design an experiment on $\sS^2$. We utilize a data set $\{\mathbf{x}_i\}_{i=1}^n$ in~\citep{wright2015} where $n = 2500$, which comes with carefully designed positive quadrature weights $\{c_i\}_{i=1}^n$. We test the squared $H^s$ norm as the loss function in NN training with training data coming from a function $g(\mathbf{x}) = \sum_{\ell=0, \ell\text{ even}}^{30} Y_{\ell,0}$ defined on $\sS^2$ that involves more high-frequency components than the $\sS^1$ example. The training results are shown in~\Cref{fig:2D} with different $s$ values. The natural low-frequency biasing of NN in the case of $L^2$-based training (the case of $s=0$) is enhanced when $s=-1$, and is totally reversed when $s=2.5$.
+
+\begin{figure}
+\centering
+\begin{subfigure}{0.22\textwidth}
+\includegraphics[width = \textwidth]{figures-MNIST/llowblur.eps}
+\subcaption{blurred image}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.22\textwidth}
+\includegraphics[width = \textwidth]{figures-MNIST/llow-1.eps}
+\subcaption{$s = -1.0$}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.22\textwidth}
+\includegraphics[width = \textwidth]{figures-MNIST/llow0.eps}
+\subcaption{$s = 0.0$}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.22\textwidth}
+\includegraphics[width = \textwidth]{figures-MNIST/llow1.eps}
+\subcaption{$s = 1.0$}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.22\textwidth}
+\includegraphics[width = \textwidth]{figures-MNIST/highblur.eps}
+\subcaption{blurred image}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.22\textwidth}
+\includegraphics[width = \textwidth]{figures-MNIST/high-1.eps}
+\subcaption{$s = -1.0$}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.22\textwidth}
+\includegraphics[width = \textwidth]{figures-MNIST/high0.eps}
+\subcaption{$s = 0.0$}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.22\textwidth}
+\includegraphics[width = \textwidth]{figures-MNIST/high1.eps}
+\subcaption{$s = 1.0$}
+\end{subfigure}
+\caption{The output of a squared $H^s$ loss-trained autoencoder on a typical test image when the input images are contaminated by low-frequency noise (top row) and high-frequency noise (bottom row).}
+\label{fig:autoencoder}
+\end{figure}
+
+\subsection{Autoencoder on the MNIST dataset}\label{sec:test3}
+The idea of Sobolev training is also useful for high-dimensional training data. Here, we present the results of the autoencoder for image denoising using the MNIST dataset~\cite{MNIST}. In Figure~\ref{fig:autoencoder}, the outputs of the autoencoder are presented when trained with the squared $H^s$ norm as the loss function. We contaminate the dataset with random low-frequency noise (top row) and high-frequency noise (bottom row). When high-frequency noise is present, the $H^{s}$ loss function generally performs better with $s < 0$, while the case of $s > 0$ helps image deblurring when the input image suffers from low-frequency noise. This corroborates our discussion in~\Cref{sec:sobolev}.
+
+%\section{Conclusions}
+%We observe a frequency biasing in NN training even with nonuniform training data. Instead of the standard mean-squared loss function in~\cref{eq:framework1}, we propose the use of a different loss function in~\cref{eq:framework2}, which involves quadrature weights and has a natural continuous analogue. With~\cref{eq:framework2}, we prove that frequency biasing always exists with nonuniform data and rigorously analyze it using the Funk--Hecke formula. While the frequency biasing phenomena of NN training improves its generalization error, it also makes it difficult to learn highly oscillatory components of a function. By changing the loss function to a squared Sobolev-based loss function, we can control the frequency biasing in NN training, which can accelerate NN training convergence and improve stability.
+
+\bibliography{references}
+\bibliographystyle{iclr2023_conference}
+
+\input{supplement}
+
+\end{document}

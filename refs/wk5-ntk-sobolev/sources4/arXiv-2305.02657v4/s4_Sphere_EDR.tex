@@ -1,0 +1,616 @@
+In this section we provide the proof of our key result, \cref{thm:EDRS}.
+The proof idea follows the same line as \citet{widom1963_AsymptoticBehavior}:
+we first establish the key lemma (\cref{lem:EDRS_MainLemma}) and then use the decomposition of domains on the sphere to show \cref{thm:EDRS}.
+The key technical contribution here lies in the proof of \cref{lem:EDRS_MainLemma} where
+we apply a refined analysis on bounding the spherical harmonics using the Cesaro summation.
+
+
+%Let us fix the dimension $d$ and consider the sphere $\bbS^d = \left\{ \x \in \R^{d+1} \mid \norm{\x} = 1 \right\}$.
+%We denote by $\sigma$ the Lebesgue measure on $\bbS^d$ and $\omega_d$ be the surface area of $\bbS^d$, i.e., $\omega_d = \int_{\bbS^d} \dd \sigma$.
+For a compact self-adjoint operator $T$, we denote by $N^{\pm}(\ep,T)$ the count of eigenvalues of $T$
+that is strictly greater (smaller) than $\ep$ ($-\ep$).
+We denote by $P_{\Omega}$ the operator of the multiplication of the characteristic function $\bm{1}_{\Omega}$.
+For convenience, we will use $C$ to represent some positive constant that may vary in each appearance in the proof.
+
+\subsection{Spherical harmonics}
+Let us first introduce spherical harmonics and some properties that will be used.
+We refer to \citet{dai2013_ApproximationTheory} for more details.
+Let $\sigma$ be the Lebesgue measure on $\bbS^d$ and $L^2(\bbS^d)$ be the (real) Hilbert space equipped with the inner product
+\begin{align*}
+  \ang{f,g}_{L^2(\bbS^d)} = \frac{1}{\omega_{d}}\int_{\bbS^d} f g~ \dd \sigma.
+\end{align*}
+By the theory of spherical harmonics, the eigen-system of the Laplace-Beltrami operator $\Delta_{\bbS^d}$,
+the spherical Laplacian, gives an orthogonal direct sum decomposition
+$L^2(\bbS^d) = \bigoplus_{n=0}^{\infty} \caH^d_n(\bbS^d)$,
+%\begin{align*}
+%  L^2(\bbS^d) = \bigoplus_{n=0}^{\infty} \caH^d_n(\bbS^d),
+%\end{align*}
+where $\caH^d_n(\bbS^d)$
+is the restriction of $n$-degree homogeneous harmonic polynomials with $d+1$ variables on $\bbS^d$
+and each element in $\caH^d_n(\bbS^d)$ is an eigen-function of $\Delta_{\bbS^d}$ with eigenvalue $-n(n+d-1)$.
+This gives an orthonormal basis
+\begin{align*}
+  \left\{ Y_{n,l},\ l = 1,\dots,a_n,\ n = 1,2,\dots \right\}
+\end{align*}
+of $L^2(\bbS^d)$, where
+$a_n = \binom{n+d}{n} - \binom{n-2+d}{n-2} \asymp n^{d-1}$
+%\begin{align}
+%  \label{eq:4_An}
+%  a_n = \binom{n+d}{n} - \binom{n-2+d}{n-2}
+%\end{align}
+is the dimension of $\caH^d_n(\bbS^d)$ and $Y_{n,l} \in \caH^d_n(\bbS^d)$.
+We also notice that
+\begin{align}
+  \label{eq:SH_DimensionCount}
+  \sum_{n\leq N} a_n = C^N_{N+d} + C^{N-1}_{N-1+d} \asymp N^d.
+\end{align}
+Moreover, the summation
+\begin{align}
+  Z_n(\x,\y) = \sum_{l=1}^{a_n} Y_{n,l}(\x)Y_{n,l}(\y)
+\end{align}
+is invariant of selection of orthonormal basis $Y_{n,l}$
+and $Z_n$'s are called zonal polynomials.
+When $d \geq 2$, we have
+\begin{align}
+  \label{eq:Zonal_Gegenbauer}
+  Z_n(\x,\y) = \frac{n+\lambda}{\lambda} C_n^{\lambda}(u),\quad u = \ang{\x,\y},\; \lambda = \frac{d-1}{2},
+\end{align}
+where $C_n^\lambda$ is the Gegenbauer polynomial.
+%We recall that the Gegenbauer polynomials are usually defined by the following power series
+%\begin{align}
+%  \sum_{n=0}^{\infty} C_n^{\lambda}(t) \alpha^n = \frac{1}{(1-2t\alpha+\alpha^2)^\lambda}.
+%\end{align}
+
+The key property of spherical harmonics is the following Funk-Hecke formula
+\citep[Theorem 1.2.9]{dai2013_ApproximationTheory}.
+\begin{proposition}[Funk-Hecke formula]
+  \label{prop:seca_FunkFormula}
+  Let $d \geq 3$ and $f$ be an integrable function such that $\int_{-1}^1 \abs{f(t)} (1-t^2)^{d/2-1} \dd t$ is finite.
+  Then for every $Y_n \in \caH^d_n(\bbS^d)$,
+  \begin{align}
+    \label{eq:C_FunkHecke}
+    \frac{1}{\omega_d}\int_{\bbS^d} f(\ang{\x,\y}) Y_n(\y) \dd \sigma(\y) = \mu_n(f) Y_n(\x),\quad \forall \x \in \bbS^{d},
+  \end{align}
+  where $\mu_n(f)$ is a constant defined by
+  $\mu_n(f) = \omega_d \int_{-1}^1 f(t) \frac{C_n^\lambda(t)}{C_n^\lambda(1)} (1-t^2)^{\frac{d-2}{2}} \dd t.$
+\end{proposition}
+
+
+We also need the following theorem relating to the Cesaro sum of zonal polynomials.
+Readers may refer to \cref{subsec:AUX_Cesaro} for a definition of the Cesaro sum.
+
+\begin{proposition}
+  \label{prop:seca_CesaroJacobiPoly}
+  Let
+  \begin{align}
+    \label{eq:C_CesaroKn}
+    K_n = \frac{1}{A_n^d}\sum_{k=0}^n A_{n-k}^{d} \frac{k+\lambda}{\lambda} C^{\lambda}_k(u),
+  \end{align}
+  be the $d$-Cesaro sum of $\frac{k+\lambda}{\lambda}C_k^\lambda$.
+  Then,
+  \begin{align}
+    \label{eq:C_Kn_PositiveAndBound}
+    0 \leq K_n(u) \leq C n^{-1} (1-u+n^{-2})^{-(\lambda+1)},\quad \forall n \geq 1
+  \end{align}
+  for some positive constant $C$.
+\end{proposition}
+\begin{proof}
+  Please refer to \citet[Theorem 2.4.3 and Lemma 2.4.6]{dai2013_ApproximationTheory}.
+\end{proof}
+%Moreover,
+%We also have
+%\begin{align}
+%    C_n^{\lambda}(t) = \frac{(2\lambda)_n}{(\lambda+\frac{1}{2})_n} P^{(\lambda-\frac{1}{2},\lambda-\frac{1}{2})}_n(t),
+%\end{align}
+%where $P^{(\alpha,\beta)}_n(\x)$ is the Jacobi polynomial and $(a)_n = a(a+1)\cdots (a+n-1)$ is the rising factorial.
+
+\subsection{Dot-product kernel on the sphere}
+Comparing \cref{eq:C_FunkHecke} with \cref{eq:T_Def},
+the Funk-Hecke formula shows that $Y_n$ is an eigenfunction of any dot-product kernel $k(\x,\y) = f(\ang{\x,\y})$ on the sphere.
+Therefore, a dot-product kernel $k(\x,\y)$ always admits the following Mercer and spectral decompositions
+\begin{align}
+  \label{eq:C_Mercer}
+  k(\x,\y) = \sum_{n=0}^{\infty} \mu_n \sum_{l=1}^{a_n} Y_{n,l}(\x)Y_{n,l}(\y),
+  \quad
+  T = \sum_{n=0}^{\infty} \mu_n \sum_{l=1}^{a_n} Y_{n,l} \otimes Y_{n,l}.
+\end{align}
+Here we notice that $\mu_n$ is an eigenvalue having multiplicity $a_n$ and it should not be confused with $\lambda_i$
+where multiplicity are counted.
+In the view of \cref{eq:C_Mercer}, we may connect a dot-product kernel as well as the corresponding integral operator with the sequence
+$(\mu_n)_{n \geq 0}$.
+
+
+%Therefore, in the rest of this section, we always assume $T$ is an operator of the form \cref{eq:C_Multiplier}.
+Moreover, since each $\mu_n$ is of multiplicity $a_n$, \cref{eq:SH_DimensionCount} gives
+\begin{align}
+  \label{eq:ConnectionMultiplicity}
+  N^+(\ep,T) = \sum_{n \leq N(\ep)} a_n \asymp N(\ep)^d,
+\end{align}
+where $N(\ep) = \max \{n : \mu_n > \ep\}$ as defined in \cref{cond:EDR} (a).
+This gives a simple relation between the asymptotic rates $\lambda_i$ and $\mu_n$.
+
+\subsection{The main lemma}
+The following main lemma is essential in the proof of our final result,
+which is a spherical version of the main lemma in \citet{widom1963_AsymptoticBehavior}.
+Since the eigen-system is now given by the spherical harmonics,
+the approach in \citet{widom1963_AsymptoticBehavior} can not be applied.
+The proof is now based on refined harmonic analysis on the sphere with the technique of Cesaro summation and the left extrapolation of eigenvalues.
+
+\begin{lemma}
+  \label{lem:EDRS_MainLemma}
+  Let $T$ be given by \cref{eq:C_Mercer} with the descending eigenvalues $\bm{\mu} = (\mu_n)_{n \geq 0}$.
+  Suppose further that $(\mu_n)_{n \geq 0}$ satisfies \cref{cond:EDR}.
+  Let $\Omega_1,\Omega_2$ be two disjoint domains with piecewise smooth boundary.
+  Then, we have
+  \begin{align}
+    N^{\pm}(\ep,P_{\Omega_1}T P_{\Omega_2}+P_{\Omega_2}T P_{\Omega_1}) = o(N^+(\ep,T)),\qq{as} \ep \to 0.
+  \end{align}
+
+\end{lemma}
+
+\begin{proof}
+
+  Let $\delta > \ep > 0$ and $\delta$ will be determined later.
+  Take $M_\delta =\min\{n : \mu_n \leq \delta\} \leq M_{\ep} = \min\{n : \mu_n \leq \ep\}$.
+  Using \cref{lem:LeftExtrapolation} for $p = d+1$ with \cref{cond:EDR},
+  we can first construct a sequence $\bm{\mu}^{(1)}$ as the left extrapolation of $\bm{\mu}$ at $qM_{\ep}$,
+  then construct a sequence $\bm{\mu}^{(2)}$ as the left extrapolation of the residual sequence $\bm{\mu} - \bm{\mu}^{(1)}$ at $qM_\delta$,
+  and denote $\bm{\mu}^{(3)} = \bm{\mu} - \bm{\mu}^{(1)} - \bm{\mu}^{(2)}$, where $q$ is the integer specified in \cref{cond:EDR}
+  Then, the three sequences satisfy
+  \begin{align}
+    \label{eq:C_MuDecomp}
+    \begin{aligned}
+      & \mu_n = \mu_n^{(1)} + \mu_n^{(2)} + \mu_n^{(3)},   \quad \triangle^{d+1}\mu_n^{(i)} \geq 0,~ i=1,2,3; \\
+      & \mu_0^{(1)} = \caL_{qM_{\ep}}^{d+1} \bm{\mu} \leq D \mu_{M_{\ep}} \leq D \ep; \\
+      &\mu_n^{(2)} = 0,~\forall n \geq qM_{\ep},\quad
+      \mu_0^{(2)} = \caL_{qM_\delta}^{d+1} (\bm{\mu} - \bm{\mu}^{(1)}) \leq \caL_{qM_\delta}^{d+1} \bm{\mu} \leq D \delta; \\
+      &\mu_n^{(3)} = 0,~\forall n \geq qM_\delta,
+    \end{aligned}
+  \end{align}
+  where the control $\caL_{qM_{\delta}}^{d+1} \bm{\mu} \leq C \mu_M$ comes from \cref{eq:EDRDerivativeBound}.
+  Now, we define $T_i$ to be the integral operator associated with $\bm{\mu}^{(i)}$, that is,
+  $T_i = \sum_{n=0}^{\infty} \mu_{n}^{(i)} \sum_{l=1}^{a_n} Y_{n,l} \otimes Y_{n,l}.$
+  Let $N_i^{+}(\ep)$ be the count of eigenvalues of $P_{\Omega_1}T_i P_{\Omega_2}+P_{\Omega_2}T_i P_{\Omega_1}$ greater than $\ep$.
+  By \cref{lem:seca_SumEigenCount} we have
+  \begin{align}
+    \label{eq:Proof_MainLemma_N_decomp}
+    N^+( (2D+1)\ep, P_{\Omega_1}T P_{\Omega_2}+P_{\Omega_2}T P_{\Omega_1} )
+    \leq N_1^+(2D\ep) + N_2^+(\ep) + N_3^+(0).
+  \end{align}
+
+  For $N_1^+(2D\ep)$, we notice that $\norm{T_1} \leq D \ep$ and hence
+  \begin{align*}
+    \norm{P_{\Omega_1}T_1 P_{\Omega_2}+P_{\Omega_2}T_1 P_{\Omega_1}} \leq 2 D \ep,
+  \end{align*}
+  which implies that
+  \begin{align}
+    \label{eq:Proof_MainLemma_N1_Bound}
+    N_1^+(2D\ep) = 0.
+  \end{align}
+
+
+  For $N_3^+(0)$,  since $\mu_{n}^{(3)} \neq 0$ only when $n < qM_\delta$, so
+  \begin{align}
+    \label{eq:Proof_MainLemma_N3_Bound}
+    N_3^+(0) \leq 2 \mathrm{Rank}(T_3) \leq 2 \sum_{n < qM_{\delta}} a_n \leq 2 C q^d \sum_{n < M_{\delta}}a_n = 2 C N^+(\delta,T),
+  \end{align}
+  where we use \cref{eq:SH_DimensionCount} in the third inequality
+  and $\sum_{n < M_{\delta}}a_n = N^+(\delta,T)$ (notice that $\mu_n$ is an eigenvalue of multiplicity $a_n$).
+
+
+%        For $N_3^+(2\ep)$, since $\mu_{k,3} \leq \ep$, so $\norm{T_3} \leq \ep$ and thus $\norm{P_{\Omega_1}T_i P_{\Omega_2}+P_{\Omega_2}T_i P_{\Omega_1}} \leq 2\ep$,
+%        implying that it has no eigenvalue $ > \ep$ and
+%        \begin{align}
+%            N_3^+(2\ep) = 0.
+%        \end{align}
+
+  It remains to bound $N_2^+(\ep)$.
+  First, by definition of the HS-norm and \citet[Theorem 3.8.5]{simon2015_OperatorTheory}, we have
+  \begin{align}
+    \label{eq:Proof_MainLemma_N2_Int}
+    \ep^2 N_2^+(\ep) & \leq \norm{P_{\Omega_1}T_2 P_{\Omega_2}+P_{\Omega_2}T_2 P_{\Omega_1}}_{\mathrm{HS}}^2
+    = 2 \int_{\Omega_1} \int_{\Omega_2} \abs{\sum_{n} \mu_n^{(2)} Z_n(\x,\y)}^2 \dd \y \dd \x \eqqcolon 2 I.
+  \end{align}
+  Fixing an interior point ${e}$ of $\Omega_2$,
+  we introduce an isometric transform $R_{{e},\x}$ such that $R_{{e},\x} {e} = \x$.
+  It can be taken to be the rotation over the plane spanned by ${e},\x$ if they are not parallel,
+  to be the identity map if $\x = {e}$ and to be reflection if $\x = -{e}$.
+  Then, since $R_{{e},\x}$ is isometric and $Z_n(\x,\y)$ depends only on $\ang{\x,\y}$, we have
+  \begin{align*}
+    I &= \int_{\Omega_1} \int_{\Omega_2} \abs{\sum_{n} \mu_n^{(2)} Z_n(\x,\y)}^2 \dd \y \dd \x
+    = \int_{\Omega_1}\int_{\Omega_2} \abs{\sum_{n} \mu_n^{(2)} Z_n(R_{{e},\x}^{-1} \x,R_{{e},\x}^{-1} \y)}^2 \dd \y \dd \x \\
+    &= \int_{\Omega_1}\int_{\Omega_2} \abs{\sum_{n} \mu_n^{(2)} Z_n({e},R_{{e},\x}^{-1} \y)}^2 \dd \y \dd \x
+    = \int_{\Omega_1}\int_{R_{{e},\x}^{-1} \Omega_2}\abs{\sum_{n} \mu_n^{(2)} Z_n({e},\y)}^2 \dd \y \dd \x \\
+    &= \iint_{\bbS^d \times \bbS^d} \bm{1}\left\{ \x \in \Omega_1,~ \y \in R_{{e},\x}^{-1} \Omega_2 \right\} \abs{\sum_n \mu_n^{(2)} Z_n({e},\y)}^2 \dd \x \dd \y \\
+    & = \int_{\bbS^d}\left( \int_{\bbS^d} \bm{1}\left\{ \x \in \Omega_1,~ R_{{e},\x} \y \in \Omega_2 \right\} \dd \x \right) \abs{\sum_n \mu_n^{(2)} Z_n({e},\y)}^2 \dd \y  \\
+    &= \int_{\bbS^d} \abs{\left\{ \x \in \Omega_1 : R_{{e},\x} \y \in \Omega_2 \right\}} \abs{\sum_n \mu_n^{(2)} Z_n({e},\y)}^2 \dd \y \\
+    & \leq \int_{\bbS^d} \abs{\left\{ \x \in \Omega_1 : R_{{e},\x} \y \in \Omega_2 \right\}} \abs{\sum_{n} \mu_n^{(2)} Z_n({e},\y)}^2 \dd \y \\
+    & \leq C \int_{\bbS^d} \arccos \ang{\y,{e}}  \abs{\sum_{n} \mu_n^{(2)} Z_n({e},\y)}^2 \dd \y,
+  \end{align*}
+  where the last inequality comes from \cref{prop:AreaControl}.
+  Let $\eta > 0$ (which will be determined later), we decompose the last integral into two parts:
+  \begin{align*}
+    I = I_1 + I_2 = \int_{\ang{\y,{e}} > 1-\eta}  + \int_{\ang{\y,{e}} < 1-\eta} \arccos \ang{\y,{e}} \abs{\sum_{n} \mu_n^{(2)} Z_n({e},\y)}^2 \dd \y.
+%%    \label{eq:Proof_MainLemma_I1}
+%    I_1 &= \int_{\ang{\y,{e}} > 1-\eta} \arccos \ang{\y,{e}} \abs{\sum_{n} \mu_n^{(2)} Z_n({e},\y)}^2 \dd \y, \\
+%%    \label{eq:Proof_MainLemma_I2}
+%    I_2 &= \int_{\ang{\y,{e}} < 1-\eta} \arccos \ang{\y,{e}} \abs{\sum_{n} \mu_n^{(2)} Z_n({e},\y)}^2 \dd \y.
+  \end{align*}
+
+  For $I_1$, using the estimation $\arccos u \leq C \sqrt {1-u}$,
+  we obtain
+  \begin{align*}
+    I_1 \leq \int_{\ang{\y,{e}} > 1-\eta} C\eta^{\frac{1}{2}} \abs{\sum_{n} \mu_n^{(2)} Z_n({e},\y)}^2 \dd \y
+    \leq C\eta^{\frac{1}{2}} \int_{\bbS^d}  \abs{\sum_{n} \mu_n Z_n({e},\y)}^2 \dd \y
+    = C\eta^{\frac{1}{2}} \sum_n a_n (\mu_{n}^{(2)})^2.
+%    \leq C \eta^{\frac{1}{2}} \left( \sum_{n \geq M_{\delta}} a_n \mu_n^2 + \sum_{n< M_{\delta}} a_n (\mu_{n}^{(2)})^2 \right).
+%    & \leq C \eta^{\frac{1}{2}} \left( \sum_{n : \mu_n < \delta} a_n \mu_n^2 + C^2 \delta^2 \sum_{n\leq M_{\delta}} a_n \right).
+  \end{align*}
+  Using \cref{eq:C_MuDecomp}, we get
+  \begin{align}
+    \notag
+    I_1 & \leq C\eta^{\frac{1}{2}} \sum_n a_n (\mu_{n}^{(2)})^2
+    \leq C\eta^{\frac{1}{2}} \sum_{n < qM_\ep}a_n (\mu_{0}^{(2)})^2
+    \leq C\eta^{\frac{1}{2}} q^d \sum_{n < M_\ep} a_n (\mu_{0}^{(2)})^2 \\
+    &\leq C\eta^{\frac{1}{2}} N^+(\ep,T) \delta^2,
+    \label{eq:Proof_MainLemma_I1_Bound}
+  \end{align}
+  where we use \cref{eq:SH_DimensionCount} again in the third inequality.
+%  For the first term in \cref{eq:Proof_MainLemma_I1_Decomp},
+%  \cref{cond:EDR} (b) gives
+%  \begin{align*}
+%    \sum_{n \geq M_{\delta}} a_n \mu_n^2 \leq C_1 \delta^2 \sum_{n > M_{\delta}} a_n = C_1 \delta^2 N^+(\delta,T).
+%  \end{align*}
+%  For the second term in \cref{eq:Proof_MainLemma_I1_Decomp}, since $\mu_n^{(2)} \leq \mu_{0,2} \leq C_2 \delta$, we have
+%  \begin{align*}
+%    \sum_{n < M_{\delta}} a_n (\mu_{n}^{(2)})^2 \leq \sum_{n < M_{\delta}} a_n (\mu_0^{(2)})^2 = (\mu_0^{(2)})^2 N^+(\delta,T)
+%    \leq C \delta^2 N^+(\delta,T).
+%  \end{align*}
+%  Therefore, we obtain
+%  \begin{align}
+%    \label{eq:Proof_MainLemma_I1_Bound}
+%    I_1 \leq C \eta^{\frac{1}{2}} N^+(\delta,T) \delta^2.
+%  \end{align}
+
+  For $I_2$, recalling \cref{eq:Zonal_Gegenbauer} and denoting $u = \ang{\y,{e}}$, we have
+  \begin{align*}
+    I_2    = \int_{-1}^{1-\eta} \abs{\sum_{n} \mu_n^{(2)} \frac{n+\lambda}{\lambda}  C_n^{\lambda}(u)}^2 \left( 1-u^2 \right)^{\frac{d-2}{2}} \arccos u \dd u,
+  \end{align*}
+  where $\lambda = \frac{d-1}{2}$.
+  Using summation by parts (\cref{prop:Aux_SumByParts}), we obtain
+  \begin{align*}
+    \sum_{n} \mu_n^{(2)} \frac{k+\lambda}{\lambda}  C_n^{\lambda}(u) = \sum_n \triangle^{d+1} \mu_n^{(2)}  A_n^d K_n(u) ,
+  \end{align*}
+  where $K_n$  is the $d$-Cesaro sum of $C^{\lambda}_k(u)$ as in \cref{eq:C_CesaroKn}.
+  Moreover, \cref{eq:C_Kn_PositiveAndBound} in \cref{prop:seca_CesaroJacobiPoly} yields
+  \begin{align*}
+    \abs{\sum_{n} \mu_n \frac{k+\lambda}{\lambda}  C_n^{\lambda}(u)}
+    &= \sum_n \triangle^{d+1} \mu_n^{(2)} A_n^d K_n(u)
+    \leq C (1-u)^{-(\lambda+1)} \sum_n A_n^d \triangle^{d+1}\mu_n^{(2)} \\
+    & = C (1-u)^{-(\lambda+1)} \mu_{0,2} \leq C (1-u)^{-(\lambda+1)} \delta ,
+  \end{align*}
+  where the last but second equality comes from  \cref{prop:TailSumDifference}.
+  Plugging this estimation back into $I_2$, we obtain
+  \begin{align}
+    \label{eq:Proof_MainLemma_I2_Bound}
+    I_2 & \leq C  \delta^2  \int_{-1}^{1-\eta} (1-u)^{-2(\lambda+1)} \left( 1-u^2 \right)^{\frac{d-2}{2}} (1-u)^{1/2} \dd u
+    \leq  C \delta^2  \eta^{-\frac{d-1}{2}}.
+  \end{align}
+
+  Now we obtain the estimations \cref{eq:Proof_MainLemma_I1_Bound} and \cref{eq:Proof_MainLemma_I2_Bound}.
+  Taking $\eta = N^+(\delta,T)^{-\frac{2}{d}}$, we have
+  \begin{align*}
+    I \leq I_1 + I_2 \leq C\delta^2 N^+(\ep,T)^{\frac{d-1}{d}},
+  \end{align*}
+  so \cref{eq:Proof_MainLemma_N2_Int} yields
+  \begin{align}
+    \label{eq:Proof_MainLemma_N2_Bound}
+    N_2^+(\ep) \leq C \left( \frac{\delta}{\ep} \right)^2 N^+(\ep,T)^{\frac{d-1}{d}}.
+  \end{align}
+
+  Finally, plugging \cref{eq:Proof_MainLemma_N1_Bound}, \cref{eq:Proof_MainLemma_N2_Bound} and \cref{eq:Proof_MainLemma_N3_Bound} into
+  \cref{eq:Proof_MainLemma_N_decomp}, we have
+  \begin{align*}
+    N^+( (2D+1)\ep, P_{\Omega_1}T P_{\Omega_2}+P_{\Omega_2}T P_{\Omega_1} )
+    \leq 2N^+(\delta,T) + C \left( \frac{\delta}{\ep} \right)^2 N^+(\ep,T)^{\frac{d-1}{d}}.
+  \end{align*}
+  Now, \cref{eq:ConnectionMultiplicity} allows us to derive a similar condition on $N^+(\ep,T)$ as (a) in \cref{cond:EDR}.
+  Therefore, taking $\delta = \ep N^+(\ep,T)^{\frac{1}{4d}}$ so that $\ep = o(\delta)$, we obtain $N^+(\delta,T) = o\left( N^+(\ep,T) \right)$,
+  so
+  \begin{align*}
+    N^+((2D+1)\ep, P_{\Omega_1}T P_{\Omega_2}+P_{\Omega_2}T P_{\Omega_1} )
+    \leq o\left( N^+(\ep,T) \right) + C N^+(\ep,T)^{\frac{2d-1}{2d}} = o\left( N^+(\ep,T) \right).
+  \end{align*}
+  Since $D$ is a fixed constant and $N^+(\ep/(2D+1),T)  = \Theta(N^+(\ep,T)) $,
+  replacing $\ep$ by $\ep/(2D+1)$ yields the desired result.
+
+  The proof of the case $N^{-}(\ep,P_{\Omega_1}T P_{\Omega_2}+P_{\Omega_2}T P_{\Omega_1})$ is similar.
+\end{proof}
+
+
+%\begin{remark}
+%  From the proof it can be seen that the assumption $\mu_n = c n^{-\beta}$ is essential.
+%  We
+%
+%\end{remark}
+
+\subsection{The main result}
+The following is a direct corollary of \cref{lem:ScaledKernel}.
+We present it here since it will be frequently used later.
+
+\begin{corollary}
+  \label{cor:EigenCountUpperSubdomain}
+  Suppose $\Omega_1 \subseteq \Omega_2$.
+  Then, $N^+(\ep, P_{\Omega_1}TP_{\Omega_1}) \leq N^+(\ep,P_{\Omega_2}TP_{\Omega_2}).$
+\end{corollary}
+
+We first prove the following lemma about dividing a domain into isometric subdomains,
+which will be used recursively in the proof later.
+
+\begin{lemma}
+  \label{lem:C_EigenCountAsympSubdomain}
+  Let $T$ be the same in \cref{lem:EDRS_MainLemma}.
+  Let $S \subseteq \bbS^d$ and suppose $N^+(\ep, P_{S} T P_{S}) \asymp N^+(\ep,T)$ as $\ep \to 0$.
+  Suppose further that $\Omega \subseteq \bbS^d$ is a subdomain with piecewise smooth boundary and
+  there exists isometric copies $\Omega_1,\dots,\Omega_m$ of $\Omega$ such that their disjoint union
+  (with a difference of a null-set) is $S$.
+  Then, there is some constant $c > 0$ such that for small $\ep$,
+  \begin{align}
+    \label{eq:EigenCountAsympSubdomain}
+    c N^+(\ep,T) \leq  N^+(\ep, P_{\Omega} T P_{\Omega}) \leq N^+(\ep,T).
+  \end{align}
+\end{lemma}
+\begin{proof}
+  The upper bound follows from \cref{cor:EigenCountUpperSubdomain}.
+  Now we consider the lower bound.
+  Since $\Omega_1,\dots,\Omega_m$ form a disjoint cover of $S$, we have
+  \begin{align*}
+    P_{S} T P_{S} = (\sum_{i=1}^m P_{\Omega_i}) T (\sum_{j=1}^m P_{\Omega_j}) = \sum_{i} P_{\Omega_i} T P_{\Omega_i}
+    + \sum_{i < j} \left( P_{\Omega_i} T P_{\Omega_j} + P_{\Omega_j} T P_{\Omega_i} \right).
+  \end{align*}
+  Using \cref{lem:seca_SumEigenCount}, we get
+  \begin{align*}
+    N^+(2\ep, T)
+    \leq N^+(\ep, \sum_{i} P_{\Omega_i} T P_{\Omega_i})
+    + \sum_{i < j} N^+\left( \frac{1}{C_m^2}\ep,  P_{\Omega_i} T P_{\Omega_j} + P_{\Omega_j} T P_{\Omega_i} \right),
+  \end{align*}
+  and thus
+  \begin{align*}
+    N^+(\ep, \sum_{i} P_{\Omega_i} T P_{\Omega_i})
+    \geq N^+(2\ep, P_{S} T P_{S})
+    -\sum_{i < j} N^+\left( \frac{1}{C_m^2}\ep,  P_{\Omega_i} T P_{\Omega_j} + P_{\Omega_j} T P_{\Omega_i} \right).
+  \end{align*}
+
+  Noticing the fact that $\Omega_i$ are disjoint and isometric with $\Omega$, for the left hand side we obtain
+  \begin{align*}
+    N^+(\ep, \sum_{i} P_{\Omega_i} T P_{\Omega_i}) = \sum_{i} N^+(\ep, P_{\Omega_i} T P_{\Omega_i})
+    = m N^+(\ep, P_{\Omega} T P_{\Omega}).
+  \end{align*}
+  On the other hand, by \cref{lem:EDRS_MainLemma},
+  \begin{align*}
+    N^+\left( \frac{1}{C_m^2}\ep,  P_{\Omega_i} T P_{\Omega_j} + P_{\Omega_j} T P_{\Omega_i} \right)
+    = o\left( N^+\left(\frac{1}{C_m^2}\ep, T\right) \right) = o\left( N^+(\ep,T) \right),
+  \end{align*}
+  where we notice that $N^+(c \ep, T) \asymp N^+(\ep,T)$ for fixed $c > 0$ by (a) in \cref{cond:EDR}.
+  Plugging in the two estimation and using $N^+(\ep,T) \asymp  N^+(\ep,  P_{S} T P_{S})$, we obtain
+  \begin{align*}
+    N^+(\ep, P_{\Omega} T P_{\Omega})
+    & \geq \frac{1}{m}N^+(2\ep,  P_{S} T P_{S}) - o\left( N^+(\ep,T) \right)
+    \geq c N^+(2 \ep,T) - o\left( N^+(\ep,T) \right) \\
+    & \geq c N^+(\ep,T) - o\left( N^+(\ep,T) \right),
+  \end{align*}
+  which proves the desired lower bound.
+\end{proof}
+
+
+%Finally, we prove the following theorem so that the result is in line with \citet{widom1963_AsymptoticBehavior}.
+%Note that Theorem 3.9 in the main text is a special case of it by setting $\rho(\x) = \bm{1}_{S}(\x)$.
+%\begin{theorem}
+%  \label{thm:EDRS_rho}
+%  Suupose $k(\x,\y)$ is a bounded dot-product kernel on $\bbS^d$
+%  such that the coefficient $\mu_n$ in the decomposition \cref{eq:C_Mercer} satisfies
+%  $\mu_n \asymp n^{-\beta}$ for some $\beta > d$.
+%  Let $\rho \geq 0$ be a non-zero bounded Riemann-integrable function on $\bbS^d$.
+%  Then,
+%  \begin{align}
+%    \lambda_i\big(\rho(\x) k(\x,\y)\rho(\y) ;\bbS^d, \dd \sigma\big)
+%    \asymp \lambda_i(k;\bbS^d, \dd \sigma) \asymp i^{-\frac{\beta}{d}}.
+%  \end{align}
+%\end{theorem}
+
+After all these preparation, we can prove \cref{thm:EDRS}:
+
+\paragraph{Proof of \cref{thm:EDRS}}
+% \begin{proof}[Proof of \cref{thm:EDRS}]
+Let $T$ be the integral operator associated with $k$.
+%  Then, the integral operator corresponding to $\rho \odot k$ is $M_\rho T M_\rho$
+%  and we estimate its eigenvalues.
+We start with the case of $\rho = \bm{1}_{S}$ is the indicator of an open set $S$ and $\mu_n = \tilde{\mu}_n$.
+Then from \cref{prop:ScaleMeasureEquiv} it suffices to consider $P_S T P_S$.
+Since the asymptotic behavior of $N^+(\ep,A)$ determines uniquely $\lambda_i(A)$,
+it suffices to prove that $N^+(\ep,P_{S} T P_{S}) \asymp N^+(\ep,T)$.
+%Moreover, from  \cref{prop:C_EigenCountUpperSubdomain}, we only need to prove an upper bound.
+
+We take the sequence $U_0,V_0,U_1,V_1,\dots \subseteq \bbS^d$ of subdomains given in \cref{prop:C_SphereDecomp}
+and prove that $N^+(\ep,P_{U_{ii}} T P_{U_{i}}) \asymp N^+(\ep,T)$ by induction.
+The initial case follows from $U_0 = \bbS^d$.
+Suppose $N^+(\ep,U_i) \asymp N^+(\ep,T)$, by \cref{lem:C_EigenCountAsympSubdomain}
+and the fact that there are isometric copies of $V_i$ whose disjoint union is $U_i$, we obtain
+$N^+(\ep,P_{V_i} T P_{V_i}) \asymp N^+(\ep,T).$
+Moreover, since $V_i \subseteq U_{i+1}$, by \cref{cor:EigenCountUpperSubdomain} again,
+we have
+\begin{align*}
+  N^+(\ep,P_{V_i} T P_{V_i}) \leq N^+(\ep,P_{U_{i+1}} T P_{U_{i+1}}) \leq N^+(\ep,T)
+\end{align*}
+and thus $N^+(\ep,P_{U_{i+1}} T P_{U_{i+1}}) \asymp N^+(\ep,T)$.
+
+Now we have shown that $N^+(\ep,P_{U_i} T P_{U_{i}}) \asymp N^+(\ep,T)$.
+Since $S$ is an open set and $\operatorname{diam}~U_i \to 0$,
+we can find some $U_i \subseteq S$, and hence
+$N^+(\ep,P_{S} T P_{S}) \asymp N^+(\ep,T) $ by \cref{cor:EigenCountUpperSubdomain}.
+
+For the general case of $\mu_n$,
+let $T_-$ and $T_+$ be the integral operators defined similarly to \cref{eq:C_Mercer} by the sequences
+$c_1 \tilde{\mu}_n$ and $c_2 \tilde{\mu}_n$ respectively.
+Then, $T_- \preceq T \preceq T_+$ and thus $P_{\Omega} T_- P_{\Omega}\preceq P_{\Omega} T P_{\Omega} \preceq P_{\Omega} T_+ P_{\Omega}$,
+implying that
+\begin{align*}
+  \lambda_i\left(P_{S} T_- P_{S}\right)
+  \leq \lambda_i\left(P_{S} T P_{S}\right)
+  \leq \lambda_i\left(P_{S} T_+ P_{S}\right)
+\end{align*}
+and the results are obtained immediately from the previous case.
+
+Finally, suppose $\rho$ is a bounded Riemann-integrable function that is non-zero.
+The upper bound is proven by \cref{lem:ScaledKernel} with boundedness of $\rho$.
+For the lower bound, we assert that there is an open set $\Omega$ such that
+$\rho(\x)^2 \geq c > 0$ on $\Omega$.
+Then, by \cref{lem:ScaledKernel} again, we conclude that
+\begin{align*}
+  \lambda_i(k;\bbS^d, \rho^2 \dd \sigma) \geq
+  \lambda_i(k; \Omega,\rho^2 \dd \sigma) \geq c \lambda_i(k;\Omega,\dd \sigma)
+  \asymp \lambda_i(k;\bbS^d, \dd \sigma)
+\end{align*}
+Now we prove the assertion.
+Since $\rho$ is Riemann-integrable, the set of discontinuity is a null-set.
+If $\rho(\x) = 0$ for all the continuity point, then $\rho(\x) = 0, $ a.e., which contradicts to the assumption that $\rho$ is non-zero.
+So there is a continuity point $\x_0$ such that $\rho(\x_0) > 0$, and $\Omega$ can be taken as a small neighbour of $\x_0$.
+
+
+
+\subsection{Discussion on \cref{cond:EDR}}
+\label{subsec:EDR_Cond_Discussion}
+
+In this subsection, we discuss some sufficient conditions that \cref{cond:EDR} holds.
+The first proposition shows the basic relation between the difference and the derivative if $\mu_n$ is given by a function $f$,
+which is a direct consequences of \cref{eq:A_Difference_Derivative}
+%For a sequence $\bm{\mu} = (\mu_n)_{n \geq 0}$, let us define the difference operator
+%\begin{align}
+%  \caL_N^p \bm{\mu} \coloneqq \sum_{l=0}^{p-1} A_N^l \triangle^l \mu_N = \sum_{l=0}^{p-1}\binom{N+l}{l} \triangle^l \mu_N,
+%\end{align}
+%which is in the same form as the LHS of \cref{eq:EDRDerivativeBound}.
+
+\begin{proposition}
+  Suppose $\mu_n = f(n)$ for some function $f(x)$ defined on $\R_{\geq 0}$.
+  Then,
+  \begin{enumerate}[(1)]
+    \item If $(-1)^p f^{(p)}(x) \geq 0,~\forall x \geq N_0$,  then $\triangle^p \mu_n \geq 0,~\forall n \geq N_0$.
+    \item If $(-1)^{p+1}f^{(p+1)}(x) \geq 0,~\forall x \geq N_0$, then
+    $\triangle^p \mu_n \leq f^{(p)}(n),~\forall n \geq N_0$.
+  \end{enumerate}
+\end{proposition}
+%\begin{proof}
+%%  (1) is a direct consequence of \cref{eq:A_Difference_Derivative}.
+%%  For (2), we also use \cref{eq:A_Difference_Derivative} and notice that $(-1)^p f^{(p)}(x)$ is decreasing.
+%\end{proof}
+
+The next lemma shows that bounding the highest order term in \cref{eq:EDRDerivativeBound} is sufficient.
+
+\begin{lemma}
+  If $\binom{n+d}{d} \triangle^d \mu_n \leq B_n$ holds for a decreasing sequence $B_n$ for all $n \geq 0$.
+  Then, $\binom{n+l}{l} \triangle^l \mu_n \leq \frac{d}{l} B_n$  holds for all $1 \leq l \leq d$.
+  Consequently, if $B_{qn} \leq D' \mu_n$ for some $q \in \bbN_+$ and $D' >0$, then \cref{eq:EDRDerivativeBound} holds.
+\end{lemma}
+\begin{proof}
+  We prove the result by induction.
+  Suppose the statement holds for $l+1$, then
+  \begin{align*}
+    \binom{n+l}{l} \triangle^l \mu_n
+    &=\binom{n+l}{l} \sum_{k \geq n} \triangle^{l+1} \mu_k
+    \leq \binom{n+l}{l}\sum_{k \geq n} \frac{d}{l+1} B_k \binom{k+l+1}{l+1}^{-1} \\
+    &\leq \binom{n+l}{l} \frac{d}{l+1} B_n \sum_{k \geq n} \binom{k+l+1}{l+1}^{-1} \\
+    &=  \binom{n+l}{l} \frac{d}{l+1} B_n \frac{n! (l+1)!}{l(n+l)!}
+    = \frac{d}{l} B_n.
+  \end{align*}
+\end{proof}
+
+Combining the previous two results yields the following corollary.
+
+\begin{corollary}
+  \label{cor:EDR_Cond_Derivative}
+  Suppose $\mu_n = f(n)$ for some function $f(x)$ defined on $\R_{\geq 0}$.
+  Then a sufficient condition that (b,c) in \cref{cond:EDR} holds for $n \geq N_0$ is that
+  \begin{align}
+    \label{eq:EDR_Cond_Derivative}
+    (-1)^{d+1}f^{(d+1)}(x) \geq 0 \qq{and} (-1)^d x^d f^{(d)}(qx) \leq D' f(x),\quad\forall x \geq N_0
+  \end{align}
+  for some $q \in \bbN_+$ and $D' > 0$.
+\end{corollary}
+
+
+\begin{proposition}
+  For each of the following formulations of $\mu_n$,
+  there is a sequence $(\mu_n)_{n\geq 0}$ that \cref{cond:EDR} is satisfied and the formulation holds when $n$ is sufficiently large.
+  \begin{itemize}
+    \item $\mu_n = c_0 n^{-\beta}$ for $c_0 > 0$ and $\beta > d$;
+    \item $\mu_n = c_0 \exp(-c_1 n^{\beta})$ for $c_0,c_1,\beta > 0$;
+    \item $\mu_n = c_0 n^{-\beta} (\ln n)^p$ for $c_0 > 0$, $\beta > d$ and $p \in \R$, or $\beta = d$ and $p > 1$.
+  \end{itemize}
+\end{proposition}
+\begin{proof}
+  The condition (a) is obviously satisfied by these asymptotic rates.
+  We verify (b,c) by \cref{cor:EDR_Cond_Derivative} when $n \geq N_0$ for some large $N_0$ and take a left extrapolation of $\mu_n$
+  as in \cref{lem:LeftExtrapolation} so the conditions hold for all $n \geq 0$.
+  \begin{itemize}
+    \item For $\mu_n = f(n)= c_0 n^{-\beta}$, we have $(-1)^p f^{(p)}(x) = c_0 (\beta)_p x^{-(\beta+p)}$,
+    where $(\beta)_p = \beta (\beta+1)\cdots (\beta+p-1)$, so \cref{eq:EDR_Cond_Derivative} holds for $q=1$ and $D' = (\beta)_p$.
+    \item For $\mu_n = f(n) = c_0 \exp(-c_1 n^{\beta})$, it is easy to show that
+    \begin{align*}
+    (-1)
+      ^p f^{(p)}(x) \asymp c_0 (c_1 \beta)^p x^{p(\beta-1)} \exp(-c_1 x^{\beta}) \qq{as} x \to \infty,
+    \end{align*}
+    so \cref{eq:EDR_Cond_Derivative} holds if we take $q = 2$ since the exponential term is dominating.
+    \item For $\mu_n = f(n) = c_0 n^{-\beta} (\ln n)^p$, we have
+    \begin{align*}
+    (-1)
+      ^p f^{(p)}(x) \asymp c_0 (\beta)_p x^{-(\beta+p)} (\ln x)^{p} \qq{as} x \to \infty,
+    \end{align*}
+    so \cref{eq:EDR_Cond_Derivative} still holds for $q = 1$.
+  \end{itemize}
+\end{proof}
+
+%The following proposition gives the relation between $\lambda_i,~\mu_n$ and $N^+(\ep,T)$.
+%The proof is omitted since it is elementary.
+
+%\begin{proposition}
+%  \label{prop:C_MukAsymptoticBehavior}
+%  Suppose $T$ is given by \cref{eq:C_Mercer} with $\mu_n \asymp n^{-\beta}$ for some $\beta > d$.
+%  Then, we have
+%  $(a)$ $N^+(\ep,T) \asymp \ep^{-d/\beta}$;
+%  $(b)$ $\lambda_i(T) \asymp i^{-\beta/d}$;
+%  $(c)$ Let $A$ be a self-adjoint compact and positive operator satisfying $N^+(\ep,A) \asymp N^+(\ep,T)$,
+%  then $\lambda_i(A) \asymp i^{-\beta/d}$.
+%\end{proposition}
+%\begin{proof}
+%  For (1), since $d$ is fixed, we obtain
+%  \begin{align*}
+%    \sum_{n\leq N} a_n = C^N_{N+d} + C^{N-1}_{N-1+d} \asymp N^d.
+%  \end{align*}
+%  Suppose that $C_1 n^{-\beta} \leq \mu_n \leq C_2 n^{-\beta}$ for $C_1,C_2 > 0$.
+%  Then,
+%  \begin{align*}
+%    N^+(\ep,T) = \# \left\{ i ~\big|~ \lambda_i > \ep \right\}
+%    = \sum_{n : \mu_n > \ep} a_n
+%    \leq \sum_{n : C_2 n^{-\beta} > \ep} a_n
+%    = \sum_{n \leq C_2^{1/\beta} \ep^{-1/\beta}} a_n \lesssim \ep^{-\frac{d}{\beta}},
+%  \end{align*}
+%  and
+%  \begin{align*}
+%    N^+(\ep,T) = \sum_{n : \mu_n > \ep} a_n \geq \sum_{n : C_1 n^{-\beta} > \ep} a_n = \sum_{n \leq C_1^{1/\beta}  \ep^{-1/\beta}} a_n
+%    \gtrsim \tilde{C}_1 \ep^{-\frac{d}{\beta}}.
+%  \end{align*}
+%
+%  Since (2) is a special case for (3), it suffices to prove (3).
+%  Suppose $\left\{ \lambda_i \right\}$ is the set of decreasing eigenvalues of $A$.
+%  Taking $\ep = \lambda_i$, we get
+%  \begin{align*}
+%    i \geq N^+(\lambda_i,A) \gtrsim N^+(\lambda_i,T) \gtrsim \lambda_i^{-d/\beta},
+%  \end{align*}
+%  so $\lambda_i \lesssim  i^{-\beta/d}$.
+%  On the other hand, taking $\ep = (1-\delta) \lambda_i < \lambda_i$ for some small $\delta > 0$, we get
+%  \begin{align*}
+%    i \leq N^+((1-\delta)\lambda_i,A) \lesssim N^+((1-\delta) \lambda_i,T) \lesssim \lambda_i^{-d/\beta},
+%  \end{align*}
+%  so $\lambda_i \gtrsim i^{-\beta/d}$ and we finish the proof.
+%\end{proof}
+
