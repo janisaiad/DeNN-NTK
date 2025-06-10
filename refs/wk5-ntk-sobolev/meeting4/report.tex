@@ -1,5 +1,6 @@
 \documentclass{article}
 
+
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -588,12 +589,12 @@ Gegenbauer polynomials become Legendre polynomials: $P_\ell^{(1/2)}(t) = P_\ell(
 
 The zonal kernel representation provides explicit bounds on the eigenvalues of $P_s$.
 
-\textbf{Eigenvalue Bounds for P_s}: Since $P_s$ has known spectral structure, its eigenvalues satisfy:
+Eigenvalue Bounds for P_s: Since $P_s$ has known spectral structure, its eigenvalues satisfy:
 \[ 1 \leq \lambda_i(P_s) \leq (1 + \ell_{\max})^s \]
 
 The condition number is simply $\kappa(P_s) = (1 + \ell_{\max})^s$, growing exponentially in both $s$ and $\ell_{\max}$.
 
-\textbf{Practical Implications}:
+Practical Implications:
 \begin{itemize}
 \item The zonal kernel $p_s(t)$ can be precomputed and stored for efficient matrix construction
 \item Eigenvalue bounds guide the choice of regularization parameters
@@ -613,7 +614,7 @@ For $f^L_\theta$ initialized appropriately, as $L \to \infty$:
 where
 \[ \tilde{\Theta}^\infty(x, x') = (x^T x' + 1 + \E_g[\sigma(g(x))\sigma(g(x'))]) I_{d_{out}} \]
 with $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random field).
-\end{theorem}
+\end{theorem>
 
 For comparison, the infinite–width two–layer ReLU NTK on the sphere is
 \[
@@ -634,80 +635,40 @@ This framework provides a promising direction for analyzing deep narrow networks
 
 \subsection{Research Perspectives for Deep Narrow Networks}
 
-\textbf{Architectural modifications}:
-   \begin{itemize}
-\item \textbf{Unit concatenation}: Combine multiple narrow networks to increase expressivity
-\item \textbf{Skip connections}: Investigate ResNet-style connections:
-  \[ \tilde{\Theta}^\infty_{\text{skip}}(x, x') = \tilde{\Theta}^\infty(x, x') + \text{skip terms} \]
-   \end{itemize}
+Several key areas emerge for advancing research on deep narrow networks. From an architectural perspective, we can explore unit concatenation by combining multiple narrow networks to increase expressivity. Additionally, investigating ResNet-style skip connections could yield modified kernels of the form:
+\[ \tilde{\Theta}^\infty_{\text{skip}}(x, x') = \tilde{\Theta}^\infty(x, x') + \text{skip terms} \]
 
-\textbf{Initialization studies}:
-\begin{itemize}
-\item \textbf{Alternative initializations}: Explore different schemes beyond current setup
-\item \textbf{$\beta \to 0$ limit}: Analyze behavior when bias variance vanishes:
-  \[ v = \frac{1}{1 + \beta^2/\alpha^2} \to 1 \text{ as } \beta \to 0 \]
-\item \textbf{Complex kernel structures}: Find initializations that yield more intricate kernel forms
-\end{itemize}
+\textbf{Initialization Considerations} form another critical research direction. Beyond the current setup, alternative initialization schemes warrant investigation. Of particular interest is the $\beta \to 0$ limit case, where the bias variance vanishes, leading to:
+\[ v = \frac{1}{1 + \beta^2/\alpha^2} \to 1 \text{ as } \beta \to 0 \]
+Furthermore, discovering initializations that yield more intricate kernel forms could expand the expressivity of these networks.
 
-\textbf{Theoretical extensions}:
-\begin{itemize}
-\item Extension of Hayou \& Yang's work on ResNets showing "wide and deep limits commute"
-\item Mean field analysis for deep narrow frameworks
-\item Careful analysis of stochasticity in initialization (not dropout)
-\item Experimental validation on practical tasks
-\end{itemize}
+\textbf{Theoretical Development} offers several exciting research directions. Recent work by Hayou & Yang demonstrated that "wide and deep limits commute" for ResNets - extending these results to narrow networks would be a natural next step. We should develop mean field analysis techniques specifically adapted for deep narrow frameworks, as this would provide valuable insights into their behavior. Additionally, a deeper understanding of initialization stochasticity (distinct from dropout) combined with thorough experimental validation on real-world tasks would significantly advance our knowledge in this area.
 
 \section{Conclusions and Future Directions}
 
 \subsection{Summary of Key Results}
 
-This document presents a comprehensive analysis of Neural Tangent Kernel spectral properties and their modification through Sobolev training. The main contributions include:
+Our analysis of Neural Tangent Kernel spectral properties and their modification through Sobolev training has yielded several important insights:
 
-\begin{enumerate}
-\item \textbf{Eigenvalue scaling laws}: Established relationships $\mu_\ell \sim \ell^{-\alpha}$ for NTK operator eigenvalues and their impact on learning dynamics
+We established clear eigenvalue scaling laws showing that $\mu_\ell \sim \ell^{-\alpha}$ for NTK operator eigenvalues, which directly impacts learning dynamics. We also illuminated the crucial distinction between discrete NTK matrix eigenvalues and continuous operator eigenvalues, revealing how sampling affects spectral properties.
 
-\item \textbf{Matrix vs. Operator distinction}: Clarified the fundamental difference between discrete NTK matrix eigenvalues and continuous operator eigenvalues, showing how sampling affects spectral properties
+The Sobolev training framework proved particularly powerful, as the operator $P_s$ modifies the NTK spectrum via the spectral exponent $2s-d$, giving us precise control over learned frequency components. For deep networks, we derived scaling laws for condition numbers $\kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l)$ and characterized eigenvalue distributions with respect to depth $l$ and data size $n$.
 
-\item \textbf{Sobolev training framework}: Demonstrated how the operator $P_s$ modifies the NTK spectrum via the spectral exponent $2s-d$, enabling control over learned frequency components
-
-\item \textbf{Deep network analysis}: Provided scaling laws for condition numbers $\kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l)$ and eigenvalue distributions with respect to depth $l$ and data size $n$
-
-\item \textbf{Spherical harmonic framework}: Established the commutation property $[K^{\infty}, P_s] = 0$ and common eigenfunctions for rotationally invariant kernels
-\end{enumerate}
+Our analysis of rotationally invariant kernels revealed an elegant mathematical structure - the commutation property $[K^{\infty}, P_s] = 0$ and the existence of common eigenfunctions in the spherical harmonic framework.
 
 \subsection{Research Challenges and Open Questions}
 
-\begin{enumerate}
-\item \textbf{Unified framework}: Different papers assume varying domains, initializations, architectures, and activations. A unified theoretical framework remains to be developed.
-
-\item \textbf{Beyond spherical domains}: Extension of harmonic analysis from spheres to general spaces $L^2(\gamma)$ represents a significant theoretical challenge.
-
-\item \textbf{Optimal width scaling}: Achieving linear scaling in $\lambda_{\min}$ with minimal width requirements.
-
-\item \textbf{Broad activation coverage}: Extending from ReLU to general inhomogeneous activations using harmonic analysis.
-
-\item \textbf{Experimental validation}: Systematic experimental verification of theoretical predictions across different architectures and tasks.
-\end{enumerate}
+The field currently faces several significant challenges. We still lack a unified theoretical framework, as different research efforts make varying assumptions about domains, initializations, architectures, and activations. A major theoretical hurdle lies in extending harmonic analysis from spherical domains to general spaces $L^2(\gamma)$. We continue to pursue optimal width scaling with minimal width requirements for linear scaling in $\lambda_{\min}$. The field would greatly benefit from extending beyond ReLU to analyze general inhomogeneous activations using harmonic analysis. Perhaps most importantly, we need systematic experimental verification of our theoretical predictions across diverse architectures and tasks.
 
 \subsection{Research Roadmap}
 
-\textbf{Near-term objectives}:
-\begin{itemize}
-\item Study narrow NTK behavior to identify simplifications before developing general approaches
-\item Incorporate Sobolev framework into spherical harmonic analysis with experimental validation
-\item Unify initialization schemes and architectural assumptions across different theoretical frameworks
-\end{itemize}
+In the near term, we should focus on understanding narrow NTK behavior to identify potential simplifications before developing more general approaches. It's crucial that we integrate the Sobolev framework with spherical harmonic analysis and validate our findings experimentally. We also need to work toward unifying initialization schemes and architectural assumptions across different theoretical frameworks to build a stronger foundation.
 
-\textbf{Long-term goals}:
-\begin{itemize}
-\item Extend harmonic analysis from spherical to general domains with experimental validation
-\item Develop complete theory for deep narrow networks with practical applications
-\item Create unified spectral theory encompassing all major NTK variants and training modifications
-\end{itemize}
+Looking further ahead, we envision extending harmonic analysis from spherical to general domains while maintaining strong experimental validation. Developing a complete theory for deep narrow networks with clear practical applications remains a central goal. Ultimately, we aim to create a unified spectral theory that encompasses all major NTK variants and training modifications, advancing our fundamental understanding of neural networks.
 
-The convergence of spectral analysis, harmonic analysis, and neural network theory opens promising avenues for understanding and controlling the learning dynamics of deep networks through their spectral properties.
+The convergence of spectral analysis, harmonic analysis, and neural network theory opens exciting possibilities for understanding and controlling the learning dynamics of deep networks through their spectral properties.
 
-\paragraph{Sobolev perspective.}  Because the learning operator under Sobolev training is $\mathcal T_s = KP_s$, a practical strategy is to tune the exponent $s$ as a function of the data size~$n$.  When $n$ grows the condition number of $K$ deteriorates ($\kappa(K)\sim n$), yet multiplying by $P_s$ amplifies high–frequency modes and can flatten the composite spectrum.  Making $s$ larger for large $n$ therefore counterbalances the conditioning of $K$.  A precise estimate of $\kappa(P_s)$ is still missing and remains an open problem for future work.
+\paragraph{Sobolev perspective.} The learning operator under Sobolev training, $\mathcal T_s = KP_s$, suggests a practical strategy: adjusting the exponent $s$ based on the data size $n$. As $n$ increases, the condition number of $K$ deteriorates ($\kappa(K)\sim n$), but multiplication by $P_s$ amplifies high-frequency modes and can flatten the composite spectrum. By increasing $s$ for larger $n$, we can counterbalance $K$'s conditioning. However, we still lack a precise estimate of $\kappa(P_s)$ - an important problem that warrants future investigation.
 
 \newpage
 
@@ -751,7 +712,7 @@ For $f^L_\theta$ initialized appropriately, as $L \to \infty$:
 where
 \[ \tilde{\Theta}^\infty(x, x') = (x^T x' + 1 + \E_g[\sigma(g(x))\sigma(g(x'))]) I_{d_{out}} \]
 with $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random field).
-\end{theorem}
+\end{theorem>
 
 For comparison, the infinite–width two–layer ReLU NTK on the sphere is
 \[
@@ -887,7 +848,7 @@ The learning dynamics are governed by:
 For the Gaussian setting, eigenvalues scale as:
 \[ \lambda_\alpha \sim \hat{k}(|\alpha|^{1/2}) \cdot (1 + |\alpha|)^s \]
 where the first term decays exponentially for typical NTK kernels, while the second grows polynomially.
-\end{theorem}
+\end{theorem>
 
 \textbf{Critical Insight}: The Gaussian measure introduces natural regularization through exponential decay of the kernel's Fourier transform, making high-frequency components automatically suppressed.
 
@@ -923,7 +884,7 @@ For $N$ points per dimension, we work with the finite torus $(\mathbb{Z}/N\mathb
 The NTK matrix $K$ and Sobolev matrix $P_s$ on the torus commute:
 \[ KP_s = P_sK \]
 because both are circulant matrices diagonalized by the discrete Fourier transform.
-\end{theorem}
+\end{theorem>
 
 \subsubsection{Computational Advantages}
 
@@ -978,162 +939,81 @@ Let $\mathcal{L}_{\text{torus}}[\tilde{f}]$ be the loss function on the torus. T
 \[ \mathcal{L}_{[0,1]^d}[f] \leq C \cdot \mathcal{L}_{\text{torus}}[\tilde{f}] \]
 where the constant $C$ depends on the dimension $d$ and the symmetrization procedure. Note that $C$ suffers from the curse of dimensionality, typically growing exponentially as $C \sim 2^{cd}$ for some constant $c > 0$, which limits the practical applicability to moderate dimensions.
 
-\begin{proof}[Proof Sketch]
-The key insight is that the original function $f$ is recovered by restricting $\tilde{f}$ to $[0,1]^d$. The Sobolev norm of $\tilde{f}$ controls the Sobolev norm of $f$ due to the systematic construction, with additional regularity coming from the reflection symmetries.
+\begin{proof}[Sketch of proof]
+The central idea rests on a simple but powerful observation: when we symmetrize a function $f$ defined on the cube $[0,1]^d$ to obtain $\tilde{f}$ on the torus, we can always recover the original function by restricting $\tilde{f}$ to the initial domain. This construction preserves essential properties because symmetry by reflection introduces additional regularity that reinforces control of Sobolev norms. In other words, the "good" properties of $\tilde{f}$ automatically transfer to $f$, which justifies that analysis on the torus is sufficient to understand behavior on the cube.
 \end{proof}
 
-\textbf{Practical Advantages}:
-\begin{enumerate}
-\item \textbf{Universal applicability}: Any function on $[0,1]^d$ can be analyzed
-\item \textbf{Preservation of structure}: Key properties (smoothness, polynomial approximation bounds) transfer
-\item \textbf{Computational efficiency}: Leverage FFT-based algorithms
-\item \textbf{Theoretical tractability}: Full spectral analysis applies
-\end{enumerate}
+This approach offers several remarkable practical advantages. First, it applies universally: any function defined on the unit cube can be analyzed via this symmetrization technique. Important properties like regularity and polynomial approximation bounds transfer naturally from the periodic domain to the original domain. From an algorithmic perspective, this method allows exploiting optimized FFT algorithms, offering considerable computational efficiency. Finally, complete spectral analysis remains applicable, which preserves the theoretical tractability of the approach.
 
 \subsubsection{Practical Implementation}
 
-\textbf{Matrix Construction}:
-\begin{enumerate}
-\item Symmetrize the target function $f$ to obtain $\tilde{f}$
-\item Compute periodized kernel values $k_{per}(x_i, x_j)$
-\item Apply FFT to obtain $\hat{k}_{per}(k)$
-\item Construct $P_s$ in Fourier space: diagonal with entries $(1 + \|k\|^2)^s$
-\item Compute $KP_s$ as element-wise product in Fourier domain
-\item Extract results for original domain $[0,1]^d$
-\end{enumerate}
+To implement this strategy, we proceed in several natural steps. We begin by symmetrizing the target function $f$ to obtain its periodic version $\tilde{f}$. Then, we compute the values of the periodized kernel $k_{per}(x_i, x_j)$ at the sampling points. A fast Fourier transform provides $\hat{k}_{per}(k)$, the spectral coefficients of the kernel. The Sobolev operator $P_s$ is then constructed directly in Fourier space as a diagonal matrix with entries $(1 + \|k\|^2)^s$. The product $KP_s$ is computed simply as an element-wise product in the frequency domain. Finally, we extract the results for the original domain $[0,1]^d$.
 
-\textbf{Complexity Comparison}:
-\begin{itemize}
-\item \textbf{Sphere}: $\mathcal{O}(n^2 L^{d-1})$ for harmonics up to degree $L$
-\item \textbf{Torus}: $\mathcal{O}(N^d \log N)$ for $N^d$ grid points
-\item \textbf{Symmetrized Torus}: $\mathcal{O}(N^d \log N)$ with 4× memory overhead in 2D
-\end{itemize}
+Comparing computational complexities reveals the advantage of the toroidal domain. On the sphere, harmonic analysis requires a cost of $\mathcal{O}(n^2 L^{d-1})$ for harmonics up to degree $L$. The simple torus offers a complexity of $\mathcal{O}(N^d \log N)$ for $N^d$ grid points. Even the symmetrized torus maintains this complexity $\mathcal{O}(N^d \log N)$, with only a memory overhead factor of 4 in dimension 2.
 
-\subsubsection{Key Computational Advantage: Orthogonality by Sampling}
+Since diagonalization is already known (Fourier modes), no numerical resolution of eigenvectors is necessary: an FFT directly provides all eigenvalues. Thus, for each mesh resolution $N$ and each network depth or width $L$, we can compute the complete spectrum of the NTK matrix sampled on the torus and empirically establish scaling laws ($\lambda_{\min}$, $\lambda_{\max}$, $\kappa$) with a cost of $\mathcal{O}(N^{d}\log N)$, much lower than on the sphere.
 
-\textbf{Fundamental Difference}: The toroidal domain provides a crucial computational advantage over spherical domains through the orthogonality properties of Fourier modes under uniform sampling.
+\subsubsection{The Major Computational Advantage: Sampling Orthogonality}
 
-\textbf{Fourier Orthogonality}: For uniform sampling on $[0,1]$, discrete Fourier modes are exactly orthogonal:
+The toroidal domain presents a decisive computational advantage compared to spherical domains, and this advantage stems from a remarkable mathematical property: the exact orthogonality of Fourier modes under uniform sampling.
+
+Specifically, when uniformly sampling on $[0,1]$, discrete Fourier modes satisfy a perfect orthogonality relation:
 \[ \frac{1}{N} \sum_{j=0}^{N-1} e^{2\pi i k_1 j/N} e^{-2\pi i k_2 j/N} = \delta_{k_1, k_2 \bmod N} \]
 
-\textbf{Explicit Eigenvector Construction}:
-For the $d$-dimensional torus with $N^d$ uniform grid points $\mathbf{x}_{j_1,\ldots,j_d} = (j_1/N, \ldots, j_d/N)$, the eigenvectors of any circulant matrix (including $K$ and $P_s$) are:
+This property allows us to explicitly construct the eigenvectors. For the $d$-dimensional torus with $N^d$ uniform grid points $\mathbf{x}_{j_1,\ldots,j_d} = (j_1/N, \ldots, j_d/N)$, the eigenvectors of any circulant matrix (including $K$ and $P_s$) are simply written:
 \[ \mathbf{v}_{\mathbf{k}}[j_1, \ldots, j_d] = \frac{1}{N^{d/2}} \prod_{i=1}^d e^{2\pi i k_i j_i/N} \]
 where $\mathbf{k} = (k_1, \ldots, k_d) \in \{0, 1, \ldots, N-1\}^d$.
 
-\textbf{Explicit Eigenvalue Access}:
-Since we know the eigenvectors explicitly, we can compute eigenvalues of $K$ directly:
+Since we know the eigenvectors explicitly, computing the eigenvalues of $K$ becomes direct:
 \[ \lambda_{\mathbf{k}}(K) = \mathbf{v}_{\mathbf{k}}^* K \mathbf{v}_{\mathbf{k}} = \sum_{i,j=1}^{N^d} K_{ij} e^{2\pi i \mathbf{k} \cdot (\mathbf{x}_i - \mathbf{x}_j)/N} \]
 
-\textbf{Real-Valued Representation}:
-For real functions, we can use cosine and sine modes:
+For real-valued functions, we can work with more familiar cosine and sine modes:
 \begin{align}
 \text{Cosine modes:} \quad &\mathbf{c}_{\mathbf{k}}[j_1, \ldots, j_d] = \sqrt{\frac{2^d}{N^d}} \prod_{i=1}^d \cos(2\pi k_i j_i/N) \\
 \text{Sine modes:} \quad &\mathbf{s}_{\mathbf{k}}[j_1, \ldots, j_d] = \sqrt{\frac{2^d}{N^d}} \prod_{i=1}^d \sin(2\pi k_i j_i/N)
 \end{align}
 
-\begin{remark}[Contrast with Spherical Harmonics]
-\textbf{Spherical Domain Limitation}: Spherical harmonics $Y_{\ell,p}(\mathbf{x})$ are \emph{not} orthogonal under uniform sampling on the sphere. This creates several challenges:
+To fully appreciate this advantage, we must compare it with the limitations of the spherical domain. Spherical harmonics $Y_{\ell,p}(\mathbf{x})$ are \emph{not} orthogonal under uniform sampling on the sphere. This limitation leads to several difficulties: the eigenvectors of the NTK matrix $K$ cannot be written in closed form, specialized quadratures like Gauss-Legendre must be used, matrix diagonalization becomes necessary to find eigenvectors, and discrete orthogonality is only valid asymptotically with approximation errors.
 
-\begin{itemize}
-\item \textbf{No explicit eigenvectors}: The eigenvectors of the NTK matrix $K$ cannot be written in closed form
-\item \textbf{Specialized quadratures required}: Gauss-Legendre or other sophisticated integration schemes needed
-\item \textbf{Computational overhead}: Matrix diagonalization required to find eigenvectors
-\item \textbf{Approximation errors}: Discrete orthogonality only holds asymptotically
-\end{itemize}
+Conversely, the exact orthogonality of Fourier modes under uniform sampling completely transforms the computational landscape. We obtain an explicit spectral decomposition where all eigenvectors are known analytically. Fast algorithms become possible: FFT provides eigenvalue computation in $\mathcal{O}(N^d \log N)$. Discrete analysis becomes exact, without approximation errors in the spectral decomposition. Finally, implementation is drastically simplified: standard FFT libraries suffice.
 
-\textbf{Toroidal Advantage}: The exact orthogonality of Fourier modes under uniform sampling means:
-\begin{itemize}
-\item \textbf{Explicit spectral decomposition}: All eigenvectors known analytically
-\item \textbf{Fast algorithms}: FFT provides $\mathcal{O}(N^d \log N)$ eigenvalue computation
-\item \textbf{Exact discrete analysis}: No approximation errors in spectral decomposition
-\item \textbf{Implementation simplicity}: Standard FFT libraries suffice
-\end{itemize}
-\end{remark}
-
-\textbf{Practical Implications}:
-\begin{enumerate}
-\item \textbf{Direct eigenvalue computation}: $\lambda_{\mathbf{k}}(K) = \text{FFT}[\text{first row of } K]_{\mathbf{k}}$
-\item \textbf{Efficient matrix-vector products}: $K\mathbf{v} = \text{IFFT}[\text{FFT}[\mathbf{v}] \odot \boldsymbol{\lambda}]$
-\item \textbf{Spectral filtering}: Easy implementation of frequency-dependent operations
-\item \textbf{Condition number analysis}: Direct access to $\kappa(K) = \max_{\mathbf{k}} \lambda_{\mathbf{k}} / \min_{\mathbf{k}} \lambda_{\mathbf{k}}$
-\end{enumerate>
+These properties translate into important practical implications. Direct eigenvalue computation is simple: $\lambda_{\mathbf{k}}(K) = \text{FFT}[\text{first row of } K]_{\mathbf{k}}$. Matrix-vector products become efficient: $K\mathbf{v} = \text{IFFT}[\text{FFT}[\mathbf{v}] \odot \boldsymbol{\lambda}]$. Spectral filtering is easily implemented for frequency-dependent operations. Condition number analysis becomes direct: $\kappa(K) = \max_{\mathbf{k}} \lambda_{\mathbf{k}} / \min_{\mathbf{k}} \lambda_{\mathbf{k}}$.
 
 This orthogonality property fundamentally changes the computational landscape, making toroidal domains particularly attractive for large-scale NTK analysis and optimization bound derivation.
 
 \subsubsection{Kronecker Structure and Vandermonde Diagonalization}
 
-\textbf{Tensor Product Structure}: The key computational advantage stems from the separable structure of the hypercube domain, which allows us to express all operations as Kronecker products.
+The key computational advantage comes from the separable structure of the hypercube domain, which allows expressing all operations as Kronecker products. This simple geometric property has profound algorithmic consequences.
 
-\textbf{Kronecker Factorization}: The $d$-dimensional DFT factorizes as:
+The Kronecker factorization reveals that the $d$-dimensional DFT naturally decomposes:
 \[ \mathbf{F}_d = \mathbf{F}_1 \otimes \mathbf{F}_1 \otimes \cdots \otimes \mathbf{F}_1 \]
 
-\textbf{1D DFT Matrix Structure}: The fundamental building block is the Vandermonde-type matrix:
+The fundamental building block is the 1D DFT matrix, which has a Vandermonde-type structure:
 \[ (\mathbf{F}_1)_{jk} = \frac{1}{\sqrt{N}} e^{2\pi i jk/N}, \quad j,k = 0, 1, \ldots, N-1 \]
 
-This is a scaled DFT matrix with the crucial property:
+This scaled DFT matrix possesses the crucial property of being unitary:
 \[ \mathbf{F}_1^* \mathbf{F}_1 = \mathbf{I}_N \]
 
-\textbf{Sobolev Loss Computation via Kronecker Products}:
-The Sobolev matrix $P_s$ on the hypercube can be written as:
+To compute the Sobolev loss via Kronecker products, the Sobolev matrix $P_s$ on the hypercube is written:
 \[ P_s = \sum_{\mathbf{k}} (1 + \|\mathbf{k}\|^2)^s \mathbf{v}_{\mathbf{k}} \mathbf{v}_{\mathbf{k}}^* \]
 
-Using the Kronecker structure:
+Exploiting the Kronecker structure:
 \[ P_s = \mathbf{F}_d^* \text{diag}((1 + \|\mathbf{k}\|^2)^s) \mathbf{F}_d \]
 
-\textbf{Practical Algorithm}: 
-\begin{enumerate}
-\item \textbf{Forward FFT}: $\hat{\mathbf{f}} = \mathbf{F}_d \mathbf{f}$ using $d$ successive 1D FFTs
-\item \textbf{Spectral multiplication}: $\hat{\mathbf{g}}_{\mathbf{k}} = (1 + \|\mathbf{k}\|^2)^s \hat{\mathbf{f}}_{\mathbf{k}}$ (element-wise)
-\item \textbf{Inverse FFT}: $\mathbf{g} = \mathbf{F}_d^* \hat{\mathbf{g}}$ using $d$ successive 1D IFFTs
-\end{enumerate>
+The practical algorithm then becomes very simple. Perform a forward FFT: $\hat{\mathbf{f}} = \mathbf{F}_d \mathbf{f}$ using $d$ successive 1D FFTs. Then a spectral element-wise multiplication: $\hat{\mathbf{g}}_{\mathbf{k}} = (1 + \|\mathbf{k}\|^2)^s \hat{\mathbf{f}}_{\mathbf{k}}$. Finally, an inverse FFT: $\mathbf{g} = \mathbf{F}_d^* \hat{\mathbf{g}}$ using $d$ successive 1D inverse FFTs.
 
-\textbf{DFT as Vandermonde Matrix}:
-The 1D DFT matrix is a Vandermonde matrix with roots of unity:
+It is instructive to note that the 1D DFT matrix is a Vandermonde matrix with roots of unity:
 \[ (\mathbf{F}_1)_{jk} = \frac{1}{\sqrt{N}} \omega_N^{jk} \text{ where } \omega_N = e^{2\pi i/N} \]
 
-\textbf{Key Insight}: The DFT matrix $\mathbf{F}_1$ diagonalizes circulant matrices, which are precisely the discretizations of translation-invariant operators on the torus.
+The key insight is that the DFT matrix $\mathbf{F}_1$ diagonalizes circulant matrices, which are precisely the discretizations of translation-invariant operators on the torus. For a circulant matrix $\mathbf{C}$ with first row $\mathbf{c}$, the eigenvalues are obtained directly: $\text{eigenvalues}(\mathbf{C}) = \text{FFT}(\mathbf{c})$.
 
-\textbf{Eigenvalue Access}:
-For circulant matrix $\mathbf{C}$ with first row $\mathbf{c}$:
-\[ \text{eigenvalues}(\mathbf{C}) = \text{FFT}(\mathbf{c}) \]
+Computational complexity analysis reveals the substantial gains of this approach. The naive approach requires $\mathcal{O}(N^{2d})$ for full matrix operations. The Kronecker FFT costs only $\mathcal{O}(d \cdot N^d \log N)$ for all spectral operations. In terms of memory, we go from $\mathcal{O}(N^{2d})$ for explicit matrices to $\mathcal{O}(N^d)$.
 
-\textbf{Computational Complexity Analysis}:
-\begin{itemize}
-\item \textbf{Naive approach}: $\mathcal{O}(N^{2d})$ for full matrix operations
-\item \textbf{Kronecker FFT}: $\mathcal{O}(d \cdot N^d \log N)$ for all spectral operations
-\item \textbf{Memory}: $\mathcal{O}(N^d)$ instead of $\mathcal{O}(N^{2d})$ for explicit matrices
-\end{itemize>
+The implementation strategy leverages these structural properties. Precompute spectral multipliers by storing $(1 + \|\mathbf{k}\|^2)^s$ for all frequency modes. In-place FFT usage minimizes memory allocation. Exploit symmetry: real functions have conjugate-symmetric spectra. Batch processing allows applying transformations to multiple functions simultaneously.
 
-\textbf{Implementation Strategy}:
-\begin{enumerate}
-\item \textbf{Precompute spectral multipliers}: Store $(1 + \|\mathbf{k}\|^2)^s$ for all frequency modes
-\item \textbf{Use in-place FFTs}: Minimize memory allocation
-\item \textbf{Leverage symmetry}: Real functions have conjugate symmetric spectra
-\item \textbf{Batch processing}: Apply to multiple functions simultaneously
-\end{enumerate>
+A concrete numerical implementation plan can be organized around a few central functions. The function \texttt{sobolev\_transform(f, s)} applies $(I + (-\Delta)^{1/2})^s$ to a function $f$. The function \texttt{ntk\_eigenvalues(kernel\_type, N, d)} computes NTK eigenvalues via FFT. \texttt{composite\_spectrum(K\_evals, s)} multiplies NTK and Sobolev spectra. Finally, \texttt{optimization\_bounds(f, K, s)} derives convergence rates.
 
-\begin{remark}[Numerical Implementation Plan]
-We will implement this framework with the following components:
-
-\textbf{Core Functions}:
-\begin{itemize}
-\item \texttt{sobolev\_transform(f, s)}: Apply $(I + (-\Delta)^{1/2})^s$ to function $f$
-\item \texttt{ntk\_eigenvalues(kernel\_type, N, d)}: Compute NTK eigenvalues via FFT
-\item \texttt{composite\_spectrum(K\_evals, s)}: Multiply NTK and Sobolev spectra
-\item \texttt{optimization\_bounds(f, K, s)}: Derive convergence rates
-\end{itemize}
-
-\textbf{Optimization Focus}:
-\begin{itemize}
-\item Exploit NumPy/SciPy's optimized FFT implementations
-\item Use vectorized operations for spectral multiplications
-\item Implement memory-efficient algorithms for large $N^d$
-\item Provide both exact and approximate variants for different precision needs
-\end{itemize>
-
-This implementation will demonstrate the practical advantages of the toroidal framework for large-scale NTK-Sobolev analysis.
-\end{remark>
+The optimization focus allows exploiting optimized NumPy/SciPy FFT implementations, using vectorized operations for spectral multiplications, implementing memory-efficient algorithms for large $N^d$, and providing both exact and approximate variants depending on precision needs. This implementation demonstrates the practical advantages of the toroidal framework for large-scale NTK-Sobolev analysis.
 
 \subsection{Domain Selection Criteria}
 
@@ -1144,29 +1024,5 @@ This implementation will demonstrate the practical advantages of the toroidal fr
 \end{itemize}
 
 \newpage
-
-\subsection{Comparison with Two–Layer NTK}
-
-For reference, the (infinite-width) two–layer ReLU NTK on the sphere reads
-\[
-  K^{(2)}(x,y)=\|x\|\,\|y\|\,\Bigl(\tfrac{\pi-\theta}{\pi}\,\cos \theta + \tfrac{\sin\theta}{\pi}\Bigr),
-\]
-where $\theta=\arccos(\langle x,y\rangle)$.  Its spherical–harmonic eigenvalues satisfy
-\[
-  \mu_\ell^{(2)}\;\asymp\;\ell^{-(d+1)}.
-\]
-
-In the deep–narrow limit the limiting kernel (Theorem~1) has eigenvalues
-\[
-   \mu_\ell^{(\text{dn})}\;\asymp\;C(L,d)\,\ell^{-d}, \qquad C(L,d)\propto L,
-\]
-which decay more slowly and grow linearly with depth $L$.  Consequently
-\begin{itemize}
-  \item the top eigenvalue of $K^{(\text{dn})}$ is roughly $L$ times larger than for $K^{(2)}$;
-  \item the spectrum is flatter, hence the condition number
-        $\kappa\bigl(K^{(\text{dn})}\bigr)\approx\kappa\bigl(K^{(2)}\bigr)/L$ improves with depth.
-\end{itemize}
-
-This comparison highlights that depth compensates partly for the poor conditioning intrinsic to the two–layer kernel.
 
 \end{document}
