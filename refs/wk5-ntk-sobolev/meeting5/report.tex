@@ -238,18 +238,9 @@ Both eigenvalues scale linearly with depth, but the condition number grows as $n
 
 \textbf{Key Insight}: The training dynamics are dictated by the NTK matrix eigenvalues, not the operator eigenvalues. Deeper networks ($l \uparrow$) improve conditioning but with diminishing returns.
 
-\section{Sobolev Training and NTK Spectral Modification}
 
-\subsection{NTK-Sobolev Operator Framework}
+\newpage
 
-The key innovation in Sobolev training is the modification of the standard $L^2$ loss to incorporate high-order derivatives. The NTK-Sobolev operator $P_s$ acts on the sphere $\mathbb{S}^{d-1}$ with the commutation property:
-
-\textbf{Spherical Harmonics Transform}: Let $\mathcal{F}$ denote the mapping from $L^2(\mathbb{S}^d)$ to the spectral domain $\bigoplus_{\ell=0}^{\infty} \mathbb{C}^{N(d,\ell)}$, where $N(d,\ell)$ is the dimension of the $\ell$-th spherical harmonic space.
-
-The Sobolev operator $P_s$ is defined through its action in Fourier space:
-\[ P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}P_{\ell,p} \]
-
-where $P_{\ell,p} = a_{\ell,p}a_{\ell,p}^T$ with spectral coefficients $(a_{\ell,p})_i = c_iY_{\ell,p}(x_i)$.
 \section{Main Proofs}
 
 \subsection{Proof 1: Sobolev Loss as Fractional Laplacian}
@@ -350,14 +341,42 @@ Therefore, the learning operator is indeed $\mathcal{T}_s = K^{\infty} \circ (I 
 \end{proof}
 
 \subsection{Proof 3: Spectral Properties of the Composite Operator}
-
 \begin{theorem}[Spectrum of NTK-Sobolev Operator]
 The eigenvalues of the composite operator $\mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s$ are given by the product of individual eigenvalues: $\mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s$.
-\end{theorem>
+\end{theorem}
 
 \begin{proof}
-\textit{[To be completed]}
+Since both operators $K^{\infty}$ and $(I + (-\Delta)^{1/2})^s$ share the same eigenfunctions (spherical harmonics $Y_{\ell,p}$), we can analyze their composition through eigenvalues:
+
+1) For the NTK operator $K^{\infty}$:
+   \[ K^{\infty} Y_{\ell,p} = \mu_\ell^{(K)} Y_{\ell,p} \]
+
+2) For the Sobolev operator $(I + (-\Delta)^{1/2})^s$:
+   \[ (I + (-\Delta)^{1/2})^s Y_{\ell,p} = (1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p} \]
+
+3) Therefore, for their composition:
+   \begin{align*}
+   \mathcal{T}_s Y_{\ell,p} &= K^{\infty} \circ (I + (-\Delta)^{1/2})^s Y_{\ell,p} \\
+   &= K^{\infty}((1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p}) \\
+   &= (1 + \sqrt{\ell(\ell + d - 2)})^s \cdot \mu_\ell^{(K)} Y_{\ell,p}
+   \end{align*}
+
+Thus, $\mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s$ are indeed the eigenvalues of the composite operator.
 \end{proof}
+
+
+\subsection{NTK-Sobolev Operator Framework}
+
+The key innovation in Sobolev training is the modification of the standard $L^2$ loss to incorporate high-order derivatives. The NTK-Sobolev operator $P_s$ acts on the sphere $\mathbb{S}^{d-1}$ with the commutation property:
+
+\textbf{Spherical Harmonics Transform}: Let $\mathcal{F}$ denote the mapping from $L^2(\mathbb{S}^d)$ to the spectral domain $\bigoplus_{\ell=0}^{\infty} \mathbb{C}^{N(d,\ell)}$, where $N(d,\ell)$ is the dimension of the $\ell$-th spherical harmonic space.
+
+The Sobolev operator $P_s$ is defined through its action in Fourier space:
+\[ P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}P_{\ell,p} \]
+
+where $P_{\ell,p} = a_{\ell,p}a_{\ell,p}^T$ with spectral coefficients $(a_{\ell,p})_i = c_iY_{\ell,p}(x_i)$.
+
+
 
 \subsection{Proof 4: Commutation of Discrete Matrix Operators}
 
@@ -527,20 +546,8 @@ The NTK operator $K^{\infty}$ and Sobolev operator $P_s$ commute:
 This holds for any sampling distribution $\rho(x)$ on $\mathbb{S}^{d-1}$ and implies that spectral decompositions are compatible.
 \end{theorem}
 
+
 \newpage
-
-\section{Deep NTK Analysis and Theoretical Results}
-
-\subsection{NTK at Edge of Chaos}
-
-For MLPs with $(a,b)$-ReLU activation $\phi(s) = as + b|s|$, the Edge of Chaos initialization requires:
-\begin{itemize}
-\item Initialization: $\sigma^2 = (a^2+b^2)^{-1}$
-\item Key parameter: $\Delta_\phi = \frac{b^2}{a^2+b^2}$ (for standard ReLU: $\Delta_\phi = 0.5$)
-\item Cosine map: $\varrho(\rho) = \rho + \Delta_\phi \frac{2}{\pi}\left( \sqrt{1-\rho^2} - \rho \arccos(\rho) \right)$
-\end{itemize}
-
-The Edge of Chaos is the unique initialization that remains invariant to network depth, preventing activation explosion or vanishing.
 
 \section{Reconciling NTK matrix spectrum and Sobolev Training}
 
@@ -667,121 +674,25 @@ Practical Implications:
 \end{itemize}
 
 
-
-\section{Deep Narrow Neural Networks}
-
-\subsection{Scaled NTK at Initialization}
-
-\begin{theorem}[Theorem 1: Scaled NTK at Initialization]
-For $f^L_\theta$ initialized appropriately, as $L \to \infty$:
-\[ \tilde{\Theta}^L_0(x, x') \xrightarrow{p} \tilde{\Theta}^\infty(x, x') \]
-where
-\[ \tilde{\Theta}^\infty(x, x') = (x^T x' + 1 + \E_g[\sigma(g(x))\sigma(g(x'))]) I_{d_{out}} \]
-with $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random field).
-\end{theorem>
-
-For comparison, the infinite–width two–layer ReLU NTK on the sphere is
-\[
-  K^{(2)}(x,y)=\|x\|\,\|y\|\,\Bigl(\tfrac{\pi-\theta}{\pi}\,\cos \theta + \tfrac{\sin\theta}{\pi}\Bigr),\qquad \theta=\arccos(\langle x,y\rangle).
-\]
-Equivalently, in dot-product form
-\[
-  k^{(2)}(x,y)=\langle x,y\rangle\,\arccos\bigl(-\langle x,y\rangle\bigr)+\sqrt{1-\langle x,y\rangle^{2}}.
-\]
-
-\textbf{Alternative formulation}: $\kappa_1(\cos(u) \cdot v)$ where:
-\begin{itemize}
-\item $v = \frac{1}{1 + \beta^2/\alpha^2}$, where $\beta$ is the bias variance
-\item $\alpha = \frac{\|x\| \|x'\| \rho}{d_{in}}$, where $\cos(u)$ is the cosine distance between $x, x'$
-\end{itemize}
-
-This framework provides a promising direction for analyzing deep narrow networks through limited expansion analysis.
-
-\subsection{Research Perspectives for Deep Narrow Networks}
-
-Several key areas emerge for advancing research on deep narrow networks. From an architectural perspective, we can explore unit concatenation by combining multiple narrow networks to increase expressivity. Additionally, investigating ResNet-style skip connections could yield modified kernels of the form:
-\[ \tilde{\Theta}^\infty_{\text{skip}}(x, x') = \tilde{\Theta}^\infty(x, x') + \text{skip terms} \]
-
-\textbf{Initialization Considerations} form another critical research direction. Beyond the current setup, alternative initialization schemes warrant investigation. Of particular interest is the $\beta \to 0$ limit case, where the bias variance vanishes, leading to:
-\[ v = \frac{1}{1 + \beta^2/\alpha^2} \to 1 \text{ as } \beta \to 0 \]
-Furthermore, discovering initializations that yield more intricate kernel forms could expand the expressivity of these networks.
-
-\textbf{Theoretical Development} offers several exciting research directions. Recent work by Hayou & Yang demonstrated that "wide and deep limits commute" for ResNets - extending these results to narrow networks would be a natural next step. We should develop mean field analysis techniques specifically adapted for deep narrow frameworks, as this would provide valuable insights into their behavior. Additionally, a deeper understanding of initialization stochasticity (distinct from dropout) combined with thorough experimental validation on real-world tasks would significantly advance our knowledge in this area.
-
-\section{Conclusions and Future Directions}
-
-\subsection{Summary of Key Results}
-
-Our analysis of Neural Tangent Kernel spectral properties and their modification through Sobolev training has yielded several important insights:
-
-We established clear eigenvalue scaling laws showing that $\mu_\ell \sim \ell^{-\alpha}$ for NTK operator eigenvalues, which directly impacts learning dynamics. We also illuminated the crucial distinction between discrete NTK matrix eigenvalues and continuous operator eigenvalues, revealing how sampling affects spectral properties.
-
-The Sobolev training framework proved particularly powerful, as the operator $P_s$ modifies the NTK spectrum via the spectral exponent $2s-d$, giving us precise control over learned frequency components. For deep networks, we derived scaling laws for condition numbers $\kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l)$ and characterized eigenvalue distributions with respect to depth $l$ and data size $n$.
-
-Our analysis of rotationally invariant kernels revealed an elegant mathematical structure - the commutation property $[K^{\infty}, P_s] = 0$ and the existence of common eigenfunctions in the spherical harmonic framework.
-
-\subsection{Research Challenges and Open Questions}
-
-The field currently faces several significant challenges. We still lack a unified theoretical framework, as different research efforts make varying assumptions about domains, initializations, architectures, and activations. A major theoretical hurdle lies in extending harmonic analysis from spherical domains to general spaces $L^2(\gamma)$. We continue to pursue optimal width scaling with minimal width requirements for linear scaling in $\lambda_{\min}$. The field would greatly benefit from extending beyond ReLU to analyze general inhomogeneous activations using harmonic analysis. Perhaps most importantly, we need systematic experimental verification of our theoretical predictions across diverse architectures and tasks.
-
-\subsection{Research Roadmap}
-
-In the near term, we should focus on understanding narrow NTK behavior to identify potential simplifications before developing more general approaches. It's crucial that we integrate the Sobolev framework with spherical harmonic analysis and validate our findings experimentally. We also need to work toward unifying initialization schemes and architectural assumptions across different theoretical frameworks to build a stronger foundation.
-
-Looking further ahead, we envision extending harmonic analysis from spherical to general domains while maintaining strong experimental validation. Developing a complete theory for deep narrow networks with clear practical applications remains a central goal. Ultimately, we aim to create a unified spectral theory that encompasses all major NTK variants and training modifications, advancing our fundamental understanding of neural networks.
-
-The convergence of spectral analysis, harmonic analysis, and neural network theory opens exciting possibilities for understanding and controlling the learning dynamics of deep networks through their spectral properties.
-
-\paragraph{Sobolev perspective.} The learning operator under Sobolev training, $\mathcal T_s = KP_s$, suggests a practical strategy: adjusting the exponent $s$ based on the data size $n$. As $n$ increases, the condition number of $K$ deteriorates ($\kappa(K)\sim n$), but multiplication by $P_s$ amplifies high-frequency modes and can flatten the composite spectrum. By increasing $s$ for larger $n$, we can counterbalance $K$'s conditioning. However, we still lack a precise estimate of $\kappa(P_s)$ - an important problem that warrants future investigation.
-
 \newpage
 
-\bibliographystyle{plain}
-\begin{thebibliography}{10}
 
-\bibitem{yang2021deeper}
-Yahong Yang and Juncai He.
-\newblock Deeper or wider: A perspective from optimal generalization error with sobolev loss.
-\newblock In \emph{Advances in Neural Information Processing Systems}, 2021.
 
-\bibitem{golikov2022neural}
-Eugene Golikov, Eduard Pokonechnyy, and Vladimir Korviakov.
-\newblock Neural tangent kernel: A survey.
-\newblock \emph{arXiv preprint arXiv:2208.13614}, 2022.
+\section{Deep NTK Analysis and Theoretical Results}
 
-\bibitem{yaida2019non}
-Sho Yaida.
-\newblock Non-gaussian processes and neural networks at finite widths.
-\newblock In \emph{Mathematical and Scientific Machine Learning Conference}, pages 165--192, 2020.
 
-\bibitem{yang2019tensor}
-Greg Yang.
-\newblock Tensor programs i: Wide feedforward or recurrent neural networks of any architecture are gaussian processes.
-\newblock \emph{arXiv preprint arXiv:1910.12478}, 2019.
+\subsection{NTK at Edge of Chaos}
 
-\bibitem{yang2020tensor}
-Greg Yang.
-\newblock Tensor programs ii: Neural tangent kernel for any architecture.
-\newblock \emph{arXiv preprint arXiv:2006.14548}, 2020.
+For MLPs with $(a,b)$-ReLU activation $\phi(s) = as + b|s|$, the Edge of Chaos initialization requires:
+\begin{itemize}
+\item Initialization: $\sigma^2 = (a^2+b^2)^{-1}$
+\item Key parameter: $\Delta_\phi = \frac{b^2}{a^2+b^2}$ (for standard ReLU: $\Delta_\phi = 0.5$)
+\item Cosine map: $\varrho(\rho) = \rho + \Delta_\phi \frac{2}{\pi}\left( \sqrt{1-\rho^2} - \rho \arccos(\rho) \right)$
+\end{itemize}
 
-\bibitem{dyer2019asymptotics}
-Ethan Dyer and Guy Gur-Ari.
-\newblock Asymptotics of wide networks from feynman diagrams.
-\newblock \emph{arXiv preprint arXiv:1909.11304}, 2019.
+The Edge of Chaos is the unique initialization that remains invariant to network depth, preventing activation explosion or vanishing.
 
-\bibitem{huang2019dynamics}
-Jiaoyang Huang and Horng-Tzer Yau.
-\newblock Dynamics of deep neural networks and neural tangent hierarchy.
-\newblock \emph{arXiv preprint arXiv:1909.08156}, 2019.
 
-\bibitem{banerjee2023neural}
-Anindya Banerjee, Pedro Cisneros-Velarde, Liyu Zhu, and Mikhail Belkin.
-\newblock Neural tangent kernel at initialization: Linear width suffices.
-\newblock In \emph{Uncertainty in Artificial Intelligence}, pages 176--186. PMLR, 2023.
-
-\end{thebibliography}
-
-\section{Deep NTK Analysis}
 
 \subsection{Deep NTK Properties}
 
@@ -864,6 +775,43 @@ This framework provides a promising direction for analyzing deep narrow networks
 \item Careful analysis of stochasticity in initialization (not dropout)
 \item Experimental validation on practical tasks
 \end{itemize}
+
+
+
+
+
+\section{Conclusions and Future Directions}
+
+\subsection{Summary of Key Results}
+
+Our analysis of Neural Tangent Kernel spectral properties and their modification through Sobolev training has yielded several important insights:
+
+We established clear eigenvalue scaling laws showing that $\mu_\ell \sim \ell^{-\alpha}$ for NTK operator eigenvalues, which directly impacts learning dynamics. We also illuminated the crucial distinction between discrete NTK matrix eigenvalues and continuous operator eigenvalues, revealing how sampling affects spectral properties.
+
+The Sobolev training framework proved particularly powerful, as the operator $P_s$ modifies the NTK spectrum via the spectral exponent $2s-d$, giving us precise control over learned frequency components. For deep networks, we derived scaling laws for condition numbers $\kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l)$ and characterized eigenvalue distributions with respect to depth $l$ and data size $n$.
+
+Our analysis of rotationally invariant kernels revealed an elegant mathematical structure - the commutation property $[K^{\infty}, P_s] = 0$ and the existence of common eigenfunctions in the spherical harmonic framework.
+
+\subsection{Research Challenges and Open Questions}
+
+The field currently faces several significant challenges. We still lack a unified theoretical framework, as different research efforts make varying assumptions about domains, initializations, architectures, and activations. A major theoretical hurdle lies in extending harmonic analysis from spherical domains to general spaces $L^2(\gamma)$. We continue to pursue optimal width scaling with minimal width requirements for linear scaling in $\lambda_{\min}$. The field would greatly benefit from extending beyond ReLU to analyze general inhomogeneous activations using harmonic analysis. Perhaps most importantly, we need systematic experimental verification of our theoretical predictions across diverse architectures and tasks.
+
+\subsection{Research Roadmap}
+
+In the near term, we should focus on understanding narrow NTK behavior to identify potential simplifications before developing more general approaches. It's crucial that we integrate the Sobolev framework with spherical harmonic analysis and validate our findings experimentally. We also need to work toward unifying initialization schemes and architectural assumptions across different theoretical frameworks to build a stronger foundation.
+
+Looking further ahead, we envision extending harmonic analysis from spherical to general domains while maintaining strong experimental validation. Developing a complete theory for deep narrow networks with clear practical applications remains a central goal. Ultimately, we aim to create a unified spectral theory that encompasses all major NTK variants and training modifications, advancing our fundamental understanding of neural networks.
+
+The convergence of spectral analysis, harmonic analysis, and neural network theory opens exciting possibilities for understanding and controlling the learning dynamics of deep networks through their spectral properties.
+
+\paragraph{Sobolev perspective.} The learning operator under Sobolev training, $\mathcal T_s = KP_s$, suggests a practical strategy: adjusting the exponent $s$ based on the data size $n$. As $n$ increases, the condition number of $K$ deteriorates ($\kappa(K)\sim n$), but multiplication by $P_s$ amplifies high-frequency modes and can flatten the composite spectrum. By increasing $s$ for larger $n$, we can counterbalance $K$'s conditioning. However, we still lack a precise estimate of $\kappa(P_s)$ - an important problem that warrants future investigation.
+
+\newpage
+
+
+
+
+
 
 \section{Alternative Domains: Gaussian and Toroidal Extensions}
 
@@ -1124,14 +1072,52 @@ A concrete numerical implementation plan can be organized around a few central f
 
 The optimization focus allows exploiting optimized NumPy/SciPy FFT implementations, using vectorized operations for spectral multiplications, implementing memory-efficient algorithms for large $N^d$, and providing both exact and approximate variants depending on precision needs. This implementation demonstrates the practical advantages of the toroidal framework for large-scale NTK-Sobolev analysis.
 
-\subsection{Domain Selection Criteria}
-
-\begin{itemize}
-\item \textbf{Sphere $\mathbb{S}^{d-1}$}: Natural for directional data, rotation invariance
-\item \textbf{Gaussian $\mathbb{R}^d$}: Infinite domain with natural regularization  
-\item \textbf{Torus $\mathbb{T}^d$}: Finite domain, efficient computation, no boundary effects
-\end{itemize}
 
 \newpage
 
+
+\bibliographystyle{plain}
+\begin{thebibliography}{10}
+
+\bibitem{yang2021deeper}
+Yahong Yang and Juncai He.
+\newblock Deeper or wider: A perspective from optimal generalization error with sobolev loss.
+\newblock In \emph{Advances in Neural Information Processing Systems}, 2021.
+
+\bibitem{golikov2022neural}
+Eugene Golikov, Eduard Pokonechnyy, and Vladimir Korviakov.
+\newblock Neural tangent kernel: A survey.
+\newblock \emph{arXiv preprint arXiv:2208.13614}, 2022.
+
+\bibitem{yaida2019non}
+Sho Yaida.
+\newblock Non-gaussian processes and neural networks at finite widths.
+\newblock In \emph{Mathematical and Scientific Machine Learning Conference}, pages 165--192, 2020.
+
+\bibitem{yang2019tensor}
+Greg Yang.
+\newblock Tensor programs i: Wide feedforward or recurrent neural networks of any architecture are gaussian processes.
+\newblock \emph{arXiv preprint arXiv:1910.12478}, 2019.
+
+\bibitem{yang2020tensor}
+Greg Yang.
+\newblock Tensor programs ii: Neural tangent kernel for any architecture.
+\newblock \emph{arXiv preprint arXiv:2006.14548}, 2020.
+
+\bibitem{dyer2019asymptotics}
+Ethan Dyer and Guy Gur-Ari.
+\newblock Asymptotics of wide networks from feynman diagrams.
+\newblock \emph{arXiv preprint arXiv:1909.11304}, 2019.
+
+\bibitem{huang2019dynamics}
+Jiaoyang Huang and Horng-Tzer Yau.
+\newblock Dynamics of deep neural networks and neural tangent hierarchy.
+\newblock \emph{arXiv preprint arXiv:1909.08156}, 2019.
+
+\bibitem{banerjee2023neural}
+Anindya Banerjee, Pedro Cisneros-Velarde, Liyu Zhu, and Mikhail Belkin.
+\newblock Neural tangent kernel at initialization: Linear width suffices.
+\newblock In \emph{Uncertainty in Artificial Intelligence}, pages 176--186. PMLR, 2023.
+
+\end{thebibliography}
 \end{document}
