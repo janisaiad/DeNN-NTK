@@ -54,6 +54,12 @@
 
 \section{Introduction and Objectives}
 
+\begin{frame}
+\begin{center}
+\huge{Introduction and Objectives}
+\end{center}
+\end{frame}
+
 \begin{frame}{Key Objectives and Scaling Laws}
 \textbf{Three fundamental objectives:}
 \begin{enumerate}
@@ -90,6 +96,12 @@ $$K^{\infty}(x_i, x_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \theta)}{\p
 \end{frame}
 
 \section{Optimization Bounds via Spectral Factorization}
+
+\begin{frame}
+\begin{center}
+\huge{Optimization Bounds via Spectral Factorization}
+\end{center}
+\end{frame}
 
 \begin{frame}{Fundamental Factorization Strategy}
 \begin{itemize}
@@ -144,6 +156,12 @@ $$K^{\infty}(x_i, x_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \theta)}{\p
 
 \section{NTK Matrix Structure and Spectrum}
 
+\begin{frame}
+\begin{center}
+\huge{NTK Matrix Structure and Spectrum}
+\end{center}
+\end{frame}
+
 \begin{frame}{NTK Matrix Structure}
 \textbf{Example for 3 points} $x_1, x_2, x_3 \in \mathbb{R}^d$:
 \[
@@ -190,6 +208,12 @@ k(x_i,x_j) = x_i^T x_j \cdot \arccos(-\langle x_i,x_j \rangle) + \sqrt{1-\langle
 
 \section{Sobolev Training and Spectral Modification}
 
+\begin{frame}
+\begin{center}
+\huge{Sobolev Training and Spectral Modification}
+\end{center}
+\end{frame}
+
 \begin{frame}{NTK-Sobolev Operator Framework}
 \textbf{Key innovation:} Modification of the standard $L^2$ loss to incorporate high-order derivatives.
 
@@ -221,24 +245,34 @@ This holds for any sampling distribution $\rho(x)$ on $\mathbb{S}^{d-1}$.
 \end{theorem}
 \end{frame}
 
-\section{Main Proofs}
+\section{Main Proofs (proper contribution)}
+
+\begin{frame}
+\begin{center}
+\huge{Main Proofs}
+\vspace{0.5cm}
+\large{(proper contribution)}
+\end{center}
+\end{frame}
 
 \begin{frame}{Proof 1: Sobolev Loss as Fractional Laplacian}
 \begin{theorem}[Fractional Laplacian Representation of Sobolev Loss]
 For a function $f \in H^s(\mathbb{S}^{d-1})$ with $s > 0$, the Sobolev loss can be written as:
 \[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\sigma(x) \]
 where $(I + (-\Delta)^{1/2})^s$ is the fractional Laplacian operator of order $s$.
+
+Moreover, for any smooth manifold $\mathcal{M}$ without boundary, by Stokes' theorem (since the divergence of a gradient field integrates to zero on a boundaryless manifold):
+\[ \mathcal{L}_s[f] = \int_{\mathcal{M}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\text{vol}(x) \]
 \end{theorem}
 
 \textbf{Proof sketch:}
 \begin{itemize}
 \item Spherical harmonic expansion: $f(x) = \sum_{\ell,p} \hat{f}_{\ell,p} Y_{\ell,p}(x)$
 \item Laplacian action: $(-\Delta)^{1/2}_{\mathbb{S}^{d-1}} Y_{\ell,p}(x) = \sqrt{\ell(\ell + d - 2)} Y_{\ell,p}(x)$
-\item Bilinear form via orthonormality of spherical harmonics
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Proof 2: NTK Operator Multiplication by Sobolev Operator}
+\begin{frame}{Proof 2: NTK Operator Multiplication by Sobolev Operator (proper contribution)}
 \begin{theorem}[NTK-Sobolev Composition]
 Under Sobolev training, the learning operator is given by the composition:
 \[ \mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s \]
@@ -248,12 +282,12 @@ Under Sobolev training, the learning operator is given by the composition:
 \begin{itemize}
 \item Standard gradient descent: $\frac{df}{dt} = -K^{\infty}(f - y)$
 \item Sobolev loss: $\mathcal{L}_s(\theta) = \frac{1}{2}\|f(\cdot; \theta) - y\|^2_{H^s}$
-\item Chain rule via fractional operator
+\item Chain rule: $\frac{df}{dt} = -K^{\infty} \nabla_f \left(\frac{1}{2}\int_{\mathbb{S}^{d-1}} (f-y)(I + (-\Delta)^{1/2})^s(f-y) d\sigma\right)$
 \item Resulting dynamics: $\frac{df}{dt} = -K^{\infty} \circ (I + (-\Delta)^{1/2})^s (f - y)$
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Proof 3: Spectral Properties of the Composite Operator}
+\begin{frame}{Proof 3: Spectral Properties of the Composite Operator (proper contribution)}
 \begin{theorem}[Spectrum of NTK-Sobolev Operator]
 The eigenvalues of the composite operator $\mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s$ are given by the product of individual eigenvalues:
 \[ \mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s \]
@@ -262,7 +296,7 @@ The eigenvalues of the composite operator $\mathcal{T}_s = K^{\infty} \circ (I +
 \textbf{Direct consequence:} Commutation and common eigenfunctions allow simple multiplication of spectra.
 \end{frame}
 
-\begin{frame}{Proof 4: Commutation of Discrete Matrix Operators}
+\begin{frame}{Proof 4: Commutation of Discrete Matrix Operators (proper contribution)}
 \begin{theorem}[Matrix Commutation]
 The discrete matrices $K$ and $P_s$ commute: $KP_s = P_sK$.
 \end{theorem}
@@ -297,6 +331,12 @@ For the NTK-Sobolev operator, eigenvalues follow the scaling laws:
 
 \section{Practical Implementation and Discretization}
 
+\begin{frame}
+\begin{center}
+\huge{Practical Implementation and Discretization}
+\end{center}
+\end{frame}
+
 \begin{frame}{From Sobolev Loss to Discrete Matrix Operator}
 \textbf{Two integral formulations:}
 
@@ -327,11 +367,42 @@ where $\mu_n = \frac{1}{n}\sum_{i=1}^n \delta_{x_i}$
 \textbf{Fourier decomposition:}
 \[ \mathcal{L}_s[f] = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} |\hat{f}_{\ell,p}|^2 \]
 
-\textbf{Dimension growth:}
-\[ N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!} \quad \text{determines complexity} \]
+\textbf{Curse of dimensionality:}
+\[ N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!} \quad \text{for large $\ell$} \]
 \end{frame}
 
+
+
+\begin{frame}{Zonal Kernel Representation of $P_s$ (proper contribution)}
+  \begin{theorem}[Zonal Kernel Representation]
+  The Sobolev matrix $P_s$ can be written as a zonal kernel:
+  \[ (P_s)_{ij} = p_s(\langle x_i, x_j \rangle) \]
+  where
+  \[ p_s(t) = \sum_{\ell=0}^{\ell_{\max}} (1 + \sqrt{\ell(\ell + d - 2)})^s \frac{N(d,\ell)}{\text{Area}(\mathbb{S}^{d-1})} P_\ell^{((d-2)/2)}(t) \]
+  \end{theorem}
+  
+  \textbf{Eigenvalue bounds for $P_s$:}
+  \[ 1 \leq \lambda_i(P_s) \leq (1 + \ell_{\max})^s \]
+  
+  \textbf{Condition number:} $\kappa(P_s) = (1 + \ell_{\max})^s$
+  
+  \textbf{Practical implications:}
+  \begin{itemize}
+  \item Zonal kernel $p_s(t)$ can be precomputed with legendre kernels
+  \item Condition number to calculate ! remains a multiplicative constant
+
+  \end{itemize}
+  \end{frame}
+
+
+
 \section{Deep NTK Analysis}
+
+\begin{frame}
+\begin{center}
+\huge{Deep NTK Analysis}
+\end{center}
+\end{frame}
 
 \begin{frame}{Deep NTK Properties}
 \textbf{Limiting NTK at EOC for $L$-layer networks:}
@@ -363,6 +434,12 @@ where $C(d, L)$ depends on parity of $k$ and grows quadratically with $L$.
 
 \section{Deep Narrow Neural Networks}
 
+\begin{frame}
+\begin{center}
+\huge{Deep Narrow Neural Networks}
+\end{center}
+\end{frame}
+
 \begin{frame}{Scaled NTK at Initialization}
 \begin{theorem}[Scaled NTK at Initialization]
 For $f^L_\theta$ initialized appropriately, as $L \to \infty$:
@@ -372,7 +449,7 @@ where
 with $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$.
 \end{theorem}
 
-\textbf{Alternative formulation:} $\kappa_1(\cos(u) \cdot v)$ where:
+\textbf{Alternative formulation (proper contribution):} $\kappa_1(\cos(u) \cdot v)$ where:
 \begin{itemize}
 \item $v = \frac{1}{1 + \beta^2/\alpha^2}$, where $\beta$ is bias variance
 \item $\alpha = \frac{\|x\| \|x'\| \rho}{d_{in}}$, where $\cos(u)$ is cosine distance
@@ -389,18 +466,10 @@ where $\theta=\arccos(\langle x,y\rangle)$. Spherical harmonic eigenvalues:
   \mu_\ell^{(2)}\;\asymp\;\ell^{-(d+1)}
 \]
 
-\textbf{In the deep-narrow limit:}
-\[
-   \mu_\ell^{(\text{dn})}\;\asymp\;C(L,d)\,\ell^{-d}, \qquad C(L,d)\propto L
-\]
-
 \textbf{Consequences:}
 \begin{itemize}
-  \item Maximum eigenvalue of $K^{(\text{dn})}$ about $L$ times larger than for $K^{(2)}$
-  \item Flatter spectrum: $\kappa\bigl(K^{(\text{dn})}\bigr)\approx\kappa\bigl(K^{(2)}\bigr)/L$
+  \item Worth trying to investigate a better init scheme for deep narrow networks (without UAT) for more complex NTK
 \end{itemize}
-
-\textbf{Conclusion:} Depth partially compensates for poor conditioning of the two-layer kernel.
 \end{frame}
 
 \begin{frame}{Research Perspectives for this immediate findings}
@@ -429,12 +498,20 @@ where $\theta=\arccos(\langle x,y\rangle)$. Spherical harmonic eigenvalues:
 
 \section{Alternative Domains (my proper contribution)}
 
+\begin{frame}
+\begin{center}
+\huge{Alternative Domains}
+\vspace{0.5cm}
+\large{(my proper contribution)}
+\end{center}
+\end{frame}
+
+\begin{frame}{Gaussian Domain: $L^2(\mathbb{R}^d, \mu)$}
+
+  
 Those questions were told to be interesting but not to be investigated now in the literature.
 To apply integration by parts well, we need to have a domain without a boundary !
 
-
-
-\begin{frame}{Gaussian Domain: $L^2(\mathbb{R}^d, \mu)$}
 \textbf{Framework:} Gaussian measure $d\mu = (2\pi)^{-d/2} e^{-\|x\|^2/2} dx$
 
 \textbf{Ornstein-Uhlenbeck operator:} $\mathcal{L}_{OU} = -\Delta + x \cdot \nabla$
@@ -460,11 +537,15 @@ To apply integration by parts well, we need to have a domain without a boundary 
 \[
    e_k(x) \;=\; e^{2\pi i k\cdot x}, \qquad k\in\mathbb Z^d
 \]
-
-\textbf{Sobolev operator:} Diagonal in this basis
+\textbf{Sobolev operator:} Diagonal in this basis with Kronecker factorization
 \[
-   P_s^{(\mathbb{T}^d)}\,e_k\;=\;\bigl(1+\|k\|^2\bigr)^{s}\,e_k
+   P_s^{(\mathbb{T}^d)}\,e_k\;=\;\bigl(1+\|k\|^2\bigr)^{s}\,e_k = \bigotimes_{i=1}^d \bigl(1+k_i^2\bigr)^{s}\,e_{k_i}
 \]
+\textbf{Kronecker formula:} For uniform sampling with $N$ points per dimension
+\[
+P_s = F_N^{-1} \bigotimes_{i=1}^d \text{diag}\bigl((1+k_i^2)^s\bigr) F_N
+\]
+where $F_N$ is the DFT matrix and $k_i \in \{-N/2,\ldots,N/2-1\}$ are the discrete frequencies
 
 \textbf{Composite spectrum:} $\lambda_k^{(KP_s)} = \widehat{k}_{\text{per}}(k)\,(1+\|k\|^2)^{s} \sim \|k\|^{2s-\alpha}$
 
@@ -477,12 +558,20 @@ But I've made computations by hand, we can do very fast experiments for a whole 
 
 \section{Reconciliation and Unified Framework (my proper contribution)}
 
+\begin{frame}
+\begin{center}
+\huge{Reconciliation and Unified Framework}
+\vspace{0.5cm}
+\large{(my proper contribution)}
+\end{center}
+\end{frame}
+
 \begin{frame}{Unified Spectral Viewpoint}
 \textbf{Reconciling the geometric view of NTK and functional view of Sobolev training:}
 
 \textbf{Shared invariance:}
 \begin{itemize}
-\item Matrices $K$ and $P_s$ rotationally invariant
+\item Matrices $K$ and $P_s$ rotationally invariant for homogeneous activations
 \item Entries depend only on inner product $\langle x_i, x_j \rangle$
 \end{itemize}
 
@@ -494,28 +583,14 @@ But I've made computations by hand, we can do very fast experiments for a whole 
 \end{enumerate}
 \end{frame}
 
-\begin{frame}{Zonal Kernel Representation of $P_s$}
-\begin{theorem}[Zonal Kernel Representation]
-The Sobolev matrix $P_s$ can be written as a zonal kernel:
-\[ (P_s)_{ij} = p_s(\langle x_i, x_j \rangle) \]
-where
-\[ p_s(t) = \sum_{\ell=0}^{\ell_{\max}} (1 + \sqrt{\ell(\ell + d - 2)})^s \frac{N(d,\ell)}{\text{Area}(\mathbb{S}^{d-1})} P_\ell^{((d-2)/2)}(t) \]
-\end{theorem}
-
-\textbf{Eigenvalue bounds for $P_s$:}
-\[ 1 \leq \lambda_i(P_s) \leq (1 + \ell_{\max})^s \]
-
-\textbf{Condition number:} $\kappa(P_s) = (1 + \ell_{\max})^s$
-
-\textbf{Practical implications:}
-\begin{itemize}
-\item Zonal kernel $p_s(t)$ can be precomputed
-\item Gegenbauer expansion enables fast multipole-type acceleration
-\item Numerical stability analysis guided by condition number
-\end{itemize}
-\end{frame}
 
 \section{Conclusions and Future Directions}
+
+\begin{frame}
+\begin{center}
+\huge{Conclusions and Future Directions}
+\end{center}
+\end{frame}
 
 \begin{frame}{Summary of Key Results}
 \textbf{Main contributions:}
