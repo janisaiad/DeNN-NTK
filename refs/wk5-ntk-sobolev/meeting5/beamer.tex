@@ -66,6 +66,86 @@
 $$K^{\infty}(x_i, x_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \theta)}{\partial \theta}, \frac{\partial f(\mathbf{x}_j; \theta)}{\partial \theta} \right\rangle$$
 \end{frame}
 
+\begin{frame}{Motivation: Optimization Bounds under NTK Perspective}
+\textbf{Primary objective:} Establish optimization bounds under the NTK perspective for neural network regression and solving partial differential equations (PDEs).
+
+Recent work by Yang \& He has already established robust generalization and approximation bounds for deep super-ReLU networks, demonstrating that deep networks can achieve optimal generalization rates under Sobolev loss while simultaneously enabling efficient approximation of functions in Sobolev spaces through architectural depth.
+
+However, an important gap remains: optimization bounds in the NTK regime are largely unexplored. While we understand how well these networks can generalize and what functions they can represent, the fundamental question of how efficiently they can be trained remains unanswered from a rigorous theoretical perspective.
+\end{frame}
+
+\begin{frame}{Research Goals and NTK Perspective}
+Our spectral analysis aims to fill this theoretical gap by establishing a comprehensive understanding of convergence rates through the lens of NTK spectral properties, revealing how these properties determine optimization convergence rates in practice.
+
+Additionally, we seek to characterize the intricate relationships between network depth, data size, and optimization difficulty through matrix conditioning analysis. Finally, our framework elucidates how Sobolev training modifies the underlying spectrum to favor certain frequency components, providing practitioners with principled approaches to control learning dynamics.
+
+This NTK perspective proves particularly relevant for PDE applications, where fine control of Fourier components directly determines the quality of the numerical solution, making the intersection of spectral analysis and optimization theory essential for advancing computational mathematics.
+\end{frame}
+
+\section{Optimization Bounds via Spectral Factorization}
+
+\begin{frame}{Fundamental Factorization Strategy}
+A fundamental advantage of our approach lies in the factorization of the Sobolev-modified learning operator as $\mathcal{T}_s = K^{\infty} \circ P_s$.
+
+This decomposition allows us to disentangle the effects of the neural network architecture (encoded in the NTK matrix $K^{\infty}$) from the regularization effects of Sobolev training (encoded in the operator $P_s$).
+
+By leveraging the commutation property $[K^{\infty}, P_s] = 0$ that arises from rotational invariance, we can study each component separately and then combine their spectral properties through simple multiplication of eigenvalues.
+
+This factorization strategy enables us to focus specifically on deriving optimization bounds for the NTK matrix alone, characterizing how the spectral properties depend on architectural parameters such as network depth $L$, width $N$, and more sophisticated architectural choices like parabolic width profiles $m_\ell = m^{\ell^2}$ for MLPs at the edge of chaos.
+\end{frame}
+
+\begin{frame}{Perturbation Theory Framework}
+To achieve these optimization bounds, we employ a systematic perturbation theory approach that treats finite-width effects as corrections to the infinite-width limit.
+
+Our starting point is the infinite-width regime where $N \to \infty$, in which the neural network behavior is completely characterized by the NTK operator. The spectrum of this infinite-width NTK serves as our "theoretical unperturbed spectrum" $H_0$, representing the ideal baseline for optimization analysis.
+
+The key insight is that finite width $N$ introduces systematic corrections to this ideal behavior. We can formulate the finite-width system as $H = H_0 + V$, where $H_0$ represents the infinite NTK operator and $V$ captures the perturbation due to finite width, typically scaling as $\mathcal{O}(1/N)$.
+
+This perturbative framework allows us to systematically compute how architectural choices affect the spectrum and, consequently, optimization convergence rates.
+\end{frame}
+
+\begin{frame}{Advanced Mathematical Tools and Deeper-vs-Wider Question}
+The calculation of these perturbative corrections requires advanced tools from modern neural network theory, particularly the NTK hierarchy and Feynman diagram techniques developed by researchers like Yaida, as well as the Tensor Programs framework introduced by Yang.
+
+These methods, inspired by quantum field theory, provide systematic approaches to compute higher-order corrections beyond the standard NTK approximation. The NTK hierarchy treats the standard kernel as the leading term in an expansion, while higher-order terms capture more complex neuronal interactions that become important at finite width.
+
+This perturbative approach naturally addresses the fundamental "deeper versus wider" question in neural network design. By fixing a total parameter budget $P$ and expressing the finite-width corrections in terms of both depth $L$ and effective width $N = P/L$, we can analytically determine whether increasing depth or width provides better optimization guarantees.
+\end{frame}
+
+\begin{frame}{Finite-Width Corrections and NTK Hierarchy}
+The finite-width NTK expansion takes the explicit form:
+\begin{align}
+\Theta^{NTH}(x_1, x_2) &= \Theta(x_1, x_2) + n^{-1}\mathbb{E}[\mathcal{O}^{(1)}_{2,0}(x_1, x_2)] \nonumber \\
+&\quad - n^{-1}\mathbb{E}[\mathcal{O}^{(1)}_{3,0}(x_1, x_2, \vec{x})\Theta^{-1}(\vec{x}, \vec{x})f^{(0)}_0(\vec{x})] \nonumber \\
+&\quad + n^{-1}\vec{y}^T \Theta^{-1}(\vec{x}, \vec{x})\mathbb{E}[\mathcal{O}^{(1)}_{4,0}(x_1, x_2, \vec{x}, \vec{x})] \Theta^{-1}(\vec{x}, \vec{x})\vec{y} \nonumber \\
+&\quad + \text{higher order terms}
+\end{align}
+
+These corrections capture how the idealized infinite-width behavior degrades in practice, requiring sophisticated mathematical machinery including tensor algebra and careful treatment of statistical dependencies between network parameters.
+
+The tensors $\mathcal{O}^{(1)}_{4,0}$ and $\mathcal{O}^{(1)}_{3,0}$ represent higher-order interaction terms that require detailed investigation to understand their impact on the spectral properties and optimization dynamics.
+\end{frame}
+
+\begin{frame}{Novel Territory: NTK Analysis within Lazy Training Regime}
+The investigation of the NTK matrix $K^{\infty}$ under finite-width corrections represents genuinely new territory that extends beyond the current state of knowledge.
+
+While existing literature has established important results about bounding the smallest eigenvalue through width scaling laws, these works fundamentally differ from our proposed approach. Research such as that by Banerjee et al. has demonstrated that growing network width quadratically or linearly with depth $L$ can provide rigorous bounds on $\lambda_{\min}(K)$ with probability statements depending on network width $N$, depth $L$, and sample size.
+
+However, these existing approaches do not assume operation within the Neural Tangent Kernel regime. Instead, they utilize the NTK definition as a mathematical tool while conducting extensive linear algebraic analysis without the crucial assumption that the network actually behaves according to NTK dynamics during training.
+
+Our proposed research path represents a conceptually different approach that explicitly assumes NTK regime validity and then investigates how finite-width corrections affect optimization bounds within this constrained setting.
+\end{frame}
+
+\begin{frame}{Strategic Component-wise Investigation}
+Our factorization approach $\mathcal{T}_s = K^{\infty} \circ P_s$ reveals an important strategic advantage that significantly simplifies the research program.
+
+Since we have successfully disentangled the Sobolev operator $P_s$ from the neural network kernel $K^{\infty}$, we can now focus on investigating each component independently before combining their effects. This separation transforms an inherently complex joint optimization problem into two more manageable subproblems, each amenable to specialized mathematical techniques.
+
+For the Sobolev operator $P_s$, the investigation can proceed through well-designed experimental frameworks that leverage Fourier analysis on various domains. These experiments can systematically explore how different values of the Sobolev parameter $s$ modify the spectral structure, providing empirical validation of our theoretical predictions about frequency bias and learning dynamics.
+
+The investigation of the NTK matrix $K^{\infty}$ under finite-width corrections opens new theoretical questions about the interplay between kernel constancy, spectral properties, and architectural parameters within the lazy training regime.
+\end{frame}
+
 \begin{frame}{Choice of Spherical Domain}
 \textbf{Focus on spherical domains} $\mathbb{S}^{d-1}$:
 
