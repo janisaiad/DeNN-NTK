@@ -7,11 +7,11 @@
 \usepackage{amsthm}
 
 \newtheorem{proposition}{Proposition}
-\newtheorem{remark}{Remarque}
-\newtheorem{proof}{Preuve}
-\newtheorem{theorem}{Théorème}
+\newtheorem{remark}{Remark}
+\newtheorem{proof}{Proof}
+\newtheorem{theorem}{Theorem}
 
-\title{Le NTK et ses corrections au premier ordre}
+\title{The NTK and its First-Order Corrections}
 \author{}
 \date{}
 
@@ -19,97 +19,95 @@
 
 \maketitle
 
-\begin{proposition}[Formule pour $K_\theta(x_1,x_2)$]
-Étant donné $x_1,x_2 \in \mathbb{R}^{m_0}$, l'entrée $K_\theta(x_1,x_2) \in \mathbb{R}^{m_l \times m_l}$ est égale à :
+\begin{proposition}[Formula for $K_\theta(x_1,x_2)$]
+Given $x_1,x_2 \in \mathbb{R}^{m_0}$, the entry $K_\theta(x_1,x_2) \in \mathbb{R}^{m_l \times m_l}$ equals:
 \begin{equation}
 \sigma^{-2} \sum_{k=1}^{l-1} m q_k X_k(x_1,x_2,\theta_{1:k-1})A_l B_{k+1,l}(x_1,\theta_{1:l-1})B_{k+1,l}(x_2,\theta_{1:l-1})^*A_l^* + X_l(x_1,x_2,\theta_{1:l-1})I_{m_l}
 \end{equation}
 \end{proposition}
 
-\section{Corrections au premier ordre}
+\section{Corrections at First Order}
 
-Les corrections au premier ordre pour les réseaux de neurones de grande largeur peuvent être obtenues en considérant les termes d'ordre $\mathcal{O}(n^{-1})$ dans le développement asymptotique. Pour le NTK (Neural Tangent Kernel), ces corrections sont particulièrement importantes car elles décrivent comment le noyau évolue pendant l'entraînement.
+First-order corrections for wide neural networks can be obtained by considering terms of order $\mathcal{O}(n^{-1})$ in the asymptotic expansion. For the NTK (Neural Tangent Kernel), these corrections are particularly important as they describe how the kernel evolves during training.
 
-\begin{remark}[Lien avec le NTK]
-La formule du NTK donnée dans la Proposition 6 est la base pour dériver les corrections $O_3$ et $O_4$. En effet, $O_3$ peut être obtenu en prenant le gradient de cette formule par rapport aux paramètres du réseau, car le NTK est essentiellement la dérivée de la fonction du réseau par rapport à ses paramètres.
+\begin{remark}[Connection with the NTK]
+The NTK formula given in Proposition 6 is the basis for deriving the corrections $O_3$ and $O_4$. Indeed, $O_3$ can be obtained by taking the gradient of this formula with respect to the network parameters, since the NTK is essentially the derivative of the network function with respect to its parameters.
 
-Plus précisément, les corrections au premier ordre $O_3$ sont de l'ordre de $\mathcal{O}(n^{-1})$ et décrivent comment le noyau évolue pendant l'entraînement. Ces corrections sont cruciales car :
+More precisely, the first-order corrections $O_3$ are of order $\mathcal{O}(n^{-1})$ and describe how the kernel evolves during training. These corrections are crucial because:
 \begin{itemize}
-\item Elles représentent la première déviation par rapport au comportement à largeur infinie
-\item Elles permettent de quantifier précisément l'erreur d'approximation faite en considérant le noyau comme constant
-\item Elles montrent que les corrections au noyau pendant la descente de gradient stochastique sont d'ordre $\mathcal{O}(n^{-1})$, ce qui améliore la borne précédente de $\mathcal{O}(n^{-1/2})$
+\item They represent the first deviation from infinite-width behavior
+\item They allow precise quantification of the approximation error made when considering the kernel as constant
+\item They show that kernel corrections during stochastic gradient descent are of order $\mathcal{O}(n^{-1})$, which improves the previous bound of $\mathcal{O}(n^{-1/2})$
 \end{itemize}
 
-Pour obtenir $O_3$, on intègre les équations différentielles du système couplé qui décrit l'évolution du réseau, en ne gardant que les termes d'ordre $\mathcal{O}(n^{-1})$. Cette correction devient constante aux temps longs, ce qui indique une stabilisation du comportement du réseau.
+To obtain $O_3$, we integrate the differential equations of the coupled system that describes the network evolution, keeping only terms of order $\mathcal{O}(n^{-1})$. This correction becomes constant at long times, indicating a stabilization of the network behavior.
 \end{remark}
 
-\section{Dérivation des corrections au premier ordre}
+\section{Derivation of First-Order Corrections}
 
-\begin{proof}[Preuve de la dérivation de $O_3$ à partir du NTK]
-Commençons par rappeler les définitions essentielles :
+\begin{proof}[Detailed proof of the derivation of $O_3$]
+Let $l \ge 2$ be the number of layers and $m_0,\dots ,m_l$ the widths. For each $k\in\{1,\dots ,l\}$ we denote $A_k\in \mathbb R^{m_k\times m_{k-1}}$ the weight matrix of layer $k$. For an input $x\in\mathbb R^{m_0}$ we define the activation of the first layer by $x_1(x)=x$ and for $k\ge 2$
+\[
+ x_k(x,\theta_{1:k-1})\;=\;m_{k-1}^{-1/2}\,\phi\bigl(N_{k-1}(x,\theta_{1:k-1})\bigr),\qquad N_{k-1}(x,\theta_{1:k-1})\;=\;m^{q_{k-1}/2}A_{k-1}x_{k-1}(x,\theta_{1:k-2}).
+\]
+The scalar derivative of the activation is denoted
+\[
+ x'_k(x,\theta_{1:k-1})\;=\;m_{k-1}^{-1/2}\,\phi'\bigl(N_{k-1}(x,\theta_{1:k-1})\bigr).
+\]
+We associate to this derivative the diagonal matrix $D_k(x,\theta_{1:k-1})=\operatorname{diag}(x'_k(x,\theta_{1:k-1}))\in \mathbb R^{m_{k-1}\times m_{k-1}}$. For $1\le k<l$ we finally define the backpropagation matrix
+\[
+ B_{k+1,l}(x,\theta_{1:l-1})\;=\;\prod_{s=k+1}^{l-1} m^{q_s/2}\,A_s\,D_{s}(x,\theta_{1:s-1})
+\]
+(the product is ordered from left to right by increasing indices).
 
-\begin{enumerate}
-\item Les activations sont définies par récurrence pour $k \in [2:l]$ :
-\[ x_k(x, \theta_{1:k-1}) = m_{k-1}^{-\frac{1}{2}} \phi(N_{k-1}(x, \theta_{1:k-1})) \in \mathbb{R}^{m_{k-1}} \]
+The previous Proposition gives for all $x_1,x_2\in\mathbb R^{m_0}$
+\[
+ K_{\theta}(x_1,x_2)=\sigma^{-2}\sum_{k=1}^{l-1}m q_k X_k(x_1,x_2,\theta_{1:k-1})A_l B_{k+1,l}(x_1,\theta_{1:l-1})B_{k+1,l}(x_2,\theta_{1:l-1})^{*}A_l^{*}+X_l(x_1,x_2,\theta_{1:l-1})I_{m_l}.
+\]
+We now fix a parameter $\theta_{\mu}$ belonging to layer $p$ with $1\le p\le l-1$ and consider the derivative $\partial_{\theta_{\mu}}K_{\theta}(x_1,x_2)$. Terms with index $k<p$ do not depend on $\theta_{\mu}$, so their derivative is zero. The term $k=p$ explicitly contains $A_p$ and produces after differentiation the main contribution
+\[
+ \partial_{\theta_{\mu}}\Bigl(m q_p X_p A_l B_{p+1,l}(x_1)B_{p+1,l}(x_2)^{*}A_l^{*}\Bigr).
+\]
+For each $k>p$ the dependence on $\theta_{\mu}$ appears only through the factor $B_{k+1,l}$. In this product $B_{k+1,l}$ the matrix $A_p$ is separated from subsequent matrices by at least one diagonal matrix $D_{p+1}(x)$ which contains $\phi'$. The derivative of $D_{p+1}(x)$ with respect to a coefficient of $A_p$ is proportional to $\phi''$. When the activation is ReLU, we have $\phi''=0$ almost everywhere; the contribution of these derivatives is therefore zero for almost all realizations of $\theta$. Consequently all terms in the sum with index strictly greater than $p$ vanish after differentiation.
 
-\item Les dérivées des activations sont données par :
-\[ x_k'(x,\theta_{1:k-1}) = m_{k-1}^{-\frac{1}{2}} \phi'(N_{k-1}(x,\theta_{1:k-1})) \in \mathbb{R}^{m_{k-1}} \]
-
-\item La matrice $B_{k,l}$ représente la backpropagation de la couche $k$ à $l$ et est définie par :
-\[ B_{k,l}(x,\theta_{1:l-1}) = \prod_{i=k}^{l-1} m^{\frac{q_i}{2}} A_i D_{x_i'(x,\theta_{1:i-1})} \]
-où $D_{x_i'}$ est la matrice diagonale contenant les dérivées de l'activation.
-
-Pour dériver $O_3$, considérons un paramètre $\theta_\mu$ dans la couche $p$. En dérivant la formule du NTK par rapport à $\theta_\mu$, nous devons :
-
-1) Dériver la somme de $k=1$ à $p-1$ : ces termes ne dépendent pas de $\theta_\mu$ donc leur dérivée est nulle.
-
-2) Pour $k=p$ : nous devons dériver le terme :
-\[ m q_p X_p(x_1,x_2,\theta_{1:p-1})A_l B_{p+1,l}(x_1,\theta_{1:l-1})B_{p+1,l}(x_2,\theta_{1:l-1})^*A_l^* \]
-
-3) Pour $k > p$ : nous devons dériver les termes contenant $B_{k+1,l}$ qui dépendent de $\theta_\mu$ via la matrice $D_{x_k'}$.
-
-La clé de la preuve réside dans le fait que pour ReLU et ses variantes, la dérivée seconde $\phi''$ est nulle presque partout (sauf aux points de non-différentiabilité). Ainsi, lorsque nous dérivons $D_{x_k'}$ qui contient $\phi'$, nous obtenons zéro presque partout.
-
-Par conséquent, les seuls termes non nuls dans la dérivée proviennent de la dérivée directe du terme $k=p$, ce qui nous donne la structure de $O_3$ comme correction au premier ordre.
-
-Plus précisément, pour ReLU($\phi(x) = \max(0,x)$) :
-\[ \phi'(x) = \begin{cases} 1 & \text{si } x > 0 \\ 0 & \text{si } x < 0 \end{cases} \]
-et $\phi''(x) = 0$ presque partout.
-
-Cette propriété est cruciale car elle implique que les corrections d'ordre supérieur ($O_4$ et au-delà) qui proviendraient des dérivées d'ordre supérieur de $\phi$ sont nulles, simplifiant considérablement l'analyse des corrections au premier ordre.
+It follows that the derivative of $K_{\theta}(x_1,x_2)$ with respect to $\theta_{\mu}$ reduces to the single term arising from $k=p$. By introducing the operator
+\[
+ O_3(x_1,x_2,x_3)=\partial_{\theta_{\mu}}K_{\theta}(x_1,x_2)\quad(\text{$x_3$ implicitly denotes the dependence on }\theta_{\mu}),
+\]
+we obtain an object of order $\mathcal O\bigl(n^{-1}\bigr)$ when the width $n$ of each layer grows, which constitutes the desired first-order correction. The next term $O_4$ would arise from second-order derivatives but these would again require the appearance of $\phi''$ and are consequently zero for ReLU, so that $O_4$ does not contribute. The sum in the NTK formula can therefore be truncated at index $p$ for the study of this derivative.
 \end{proof}
 
-\section{Analyse spectrale et corrections en largeur finie}
+\section{Spectral Analysis and Finite-Width Corrections}
 
-\begin{theorem}[Décomposition spectrale du NTK]
-Pour un réseau de largeur finie $N$, la plus petite valeur propre du NTK admet la décomposition suivante :
+\begin{theorem}[Spectral decomposition of the NTK]
+For a finite-width network $N$, the smallest eigenvalue of the NTK admits the following decomposition:
 \[ \lambda_{\min}(K_\theta) \geq al + \frac{b}{N} + o(\frac{1}{N}) \]
-où :
+where:
 \begin{itemize}
-\item $al$ est le terme asymptotique correspondant au NTK à largeur infinie ($N \to \infty$)
-\item $\frac{b}{N}$ est la correction au premier ordre provenant des termes $O_3$ et $O_4$
-\item $o(\frac{1}{N})$ représente les termes d'ordre supérieur négligeables
+\item $al$ is the asymptotic term corresponding to the infinite-width NTK ($N \to \infty$)
+\item $\frac{b}{N}$ is the first-order correction arising from terms $O_3$ and $O_4$
+\item $o(\frac{1}{N})$ represents negligible higher-order terms
 \end{itemize}
 \end{theorem}
 
 \begin{proof}
-Cette décomposition découle de l'analyse des corrections $O_3$ et $O_4$ :
+This decomposition follows from the analysis of corrections $O_3$ and $O_4$:
 
-1) Le terme $al$ provient de la formule du NTK à largeur infinie. Il croît linéairement avec la profondeur $l$ du réseau car chaque couche contribue de manière additive à la valeur propre minimale.
+1) The term $al$ comes from the infinite-width NTK formula. It grows linearly with the network depth $l$ because each layer contributes additively to the minimal eigenvalue.
 
-2) Les corrections $O_3$ et $O_4$ sont d'ordre $\frac{1}{N}$ car elles proviennent des fluctuations finies dans la largeur du réseau. Plus précisément :
-   \[ \Vert O_3 \Vert = \mathcal{O}(\frac{1}{N}) \quad \text{et} \quad \Vert O_4 \Vert = \mathcal{O}(\frac{1}{N}) \]
+2) The corrections $O_3$ and $O_4$ are of order $\frac{1}{N}$ because they arise from finite fluctuations in the network width. More precisely:
+   \[ \Vert O_3 \Vert = \mathcal{O}(\frac{1}{N}) \quad \text{and} \quad \Vert O_4 \Vert = \mathcal{O}(\frac{1}{N}) \]
 
-3) La somme de ces corrections donne le terme $\frac{b}{N}$, où $b$ est une constante qui dépend de l'architecture du réseau et de l'activation ReLU.
+3) The sum of these corrections gives the term $\frac{b}{N}$, where $b$ is a constant that depends on the network architecture and the ReLU activation.
 
-Cette décomposition est fondamentale car elle montre que :
+This decomposition is fundamental because it shows that:
 \begin{enumerate}
-\item Le comportement asymptotique du NTK ($al$) domine pour les réseaux larges
-\item Les corrections en $\frac{1}{N}$ deviennent significatives pour les réseaux de largeur modérée
-\item La positivité de $\lambda_{\min}(K_\theta)$ est garantie pour $N$ suffisamment grand
+\item The asymptotic behavior of the NTK ($al$) dominates for wide networks
+\item The $\frac{1}{N}$ corrections become significant for networks of moderate width
+\item The positivity of $\lambda_{\min}(K_\theta)$ is guaranteed for sufficiently large $N$
 \end{enumerate}
 
-Cette garantie de positivité est cruciale car elle assure la convergence de l'apprentissage par descente de gradient dans le régime de largeur finie.
+This positivity guarantee is crucial as it ensures the convergence of gradient descent learning in the finite-width regime.
 \end{proof}
 
 \end{document}
