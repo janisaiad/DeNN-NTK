@@ -54,6 +54,12 @@
 
 \section{Introduction and Objectives}
 
+\begin{frame}
+\begin{center}
+\huge{Introduction and Objectives}
+\end{center}
+\end{frame}
+
 \begin{frame}{Key Objectives and Scaling Laws}
 \textbf{Three fundamental objectives:}
 \begin{enumerate}
@@ -65,6 +71,49 @@
 \textbf{NTK Definition:}
 $$K^{\infty}(x_i, x_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \theta)}{\partial \theta}, \frac{\partial f(\mathbf{x}_j; \theta)}{\partial \theta} \right\rangle$$
 \end{frame}
+
+\begin{frame}{Motivation: Optimization Bounds under NTK Perspective}
+\begin{itemize}
+\item \textbf{Primary objective:} Establish optimization bounds under NTK perspective for neural network regression and PDE solving - like showing that with probability $1-\delta$, after time $t$ of training, $\|f_t - f^*\|_2 \leq \epsilon$ for appropriate choices of network width and depth
+
+\item \textbf{Existing foundation:} Yang \& He established robust generalization and approximation bounds for deep super-ReLU networks under Sobolev loss
+
+\item \textbf{Critical gap:} Optimization bounds are largely unexplored in the feature learning regime and after the initialization - we know generalization and approximation capabilities but not training efficiency
+\item \textbf{Research impact:} Particularly relevant for PDE applications where fine control of Fourier components determines numerical solution quality, but optimization bounds remain largely unexplored under Sobolev loss settings
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Research Goals and NTK Perspective}
+\begin{itemize}
+\item \textbf{Convergence rates:} Establish comprehensive understanding of how NTK spectral properties determine optimization convergence rates in practice
+
+\item \textbf{Matrix conditioning:} Characterize intricate relationships between network depth, data size, and optimization difficulty through matrix analysis
+
+\item \textbf{Frequency control:} Proved that Sobolev training modifies the underlying spectrum in a disentangled manner - the composite operator $\mathcal{T}_s = K^{\infty} \circ P_s$ factorizes independently on both sphere and torus domains, enabling precise control of frequency components
+
+\item \textbf{PDE applications:} Direct relevance for Deep Ritz Method, Deep Galerkin Method, and Physics-Informed Neural Networks (PINNs) where spectral properties determine convergence rates and solution accuracy
+\end{itemize}
+\end{frame}
+
+\section{Optimization Bounds via Spectral Factorization}
+
+\begin{frame}
+\begin{center}
+\huge{Optimization Bounds via Spectral Factorization}
+\end{center}
+\end{frame}
+
+\begin{frame}{Fundamental Factorization Strategy}
+\begin{itemize}
+\item \textbf{Key factorization:} Sobolev-modified learning operator as $\mathcal{T}_s = K^{\infty} \circ P_s$ disentangles architecture from regularization effects
+
+\item \textbf{Commutation property:} $[K^{\infty}, P_s] = 0$ from rotational invariance allows separate study of each component
+\item \textbf{Spectral factorization:} The NTK data matrix spectrum remains separable as a product $\lambda_i(KP_s) = \lambda_i(K) \cdot \lambda_i(P_s)$, allowing us to disentangle architectural effects (through $K$) from loss function effects (through $P_s$)
+
+\item \textbf{Training dynamics:} This spectral factorization dictates the training trajectory, with architectural choices affecting $\lambda_i(K)$ - including depth $L$, width $N$, and sophisticated profiles like $m_\ell = m\ell^2$ for MLPs at edge of chaos - while Sobolev order $s$ independently controls $\lambda_i(P_s)$
+\end{itemize}
+\end{frame}
+
 
 \begin{frame}{Choice of Spherical Domain}
 \textbf{Focus on spherical domains} $\mathbb{S}^{d-1}$:
@@ -106,6 +155,12 @@ $$K^{\infty}(x_i, x_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \theta)}{\p
 \end{frame}
 
 \section{NTK Matrix Structure and Spectrum}
+
+\begin{frame}
+\begin{center}
+\huge{NTK Matrix Structure and Spectrum}
+\end{center}
+\end{frame}
 
 \begin{frame}{NTK Matrix Structure}
 \textbf{Example for 3 points} $x_1, x_2, x_3 \in \mathbb{R}^d$:
@@ -153,6 +208,12 @@ k(x_i,x_j) = x_i^T x_j \cdot \arccos(-\langle x_i,x_j \rangle) + \sqrt{1-\langle
 
 \section{Sobolev Training and Spectral Modification}
 
+\begin{frame}
+\begin{center}
+\huge{Sobolev Training and Spectral Modification}
+\end{center}
+\end{frame}
+
 \begin{frame}{NTK-Sobolev Operator Framework}
 \textbf{Key innovation:} Modification of the standard $L^2$ loss to incorporate high-order derivatives.
 
@@ -184,24 +245,34 @@ This holds for any sampling distribution $\rho(x)$ on $\mathbb{S}^{d-1}$.
 \end{theorem}
 \end{frame}
 
-\section{Main Proofs}
+\section{Main Proofs (proper contribution)}
+
+\begin{frame}
+\begin{center}
+\huge{Main Proofs}
+\vspace{0.5cm}
+\large{(proper contribution)}
+\end{center}
+\end{frame}
 
 \begin{frame}{Proof 1: Sobolev Loss as Fractional Laplacian}
 \begin{theorem}[Fractional Laplacian Representation of Sobolev Loss]
 For a function $f \in H^s(\mathbb{S}^{d-1})$ with $s > 0$, the Sobolev loss can be written as:
 \[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\sigma(x) \]
 where $(I + (-\Delta)^{1/2})^s$ is the fractional Laplacian operator of order $s$.
+
+Moreover, for any smooth manifold $\mathcal{M}$ without boundary, by Stokes' theorem (since the divergence of a gradient field integrates to zero on a boundaryless manifold):
+\[ \mathcal{L}_s[f] = \int_{\mathcal{M}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\text{vol}(x) \]
 \end{theorem}
 
 \textbf{Proof sketch:}
 \begin{itemize}
 \item Spherical harmonic expansion: $f(x) = \sum_{\ell,p} \hat{f}_{\ell,p} Y_{\ell,p}(x)$
 \item Laplacian action: $(-\Delta)^{1/2}_{\mathbb{S}^{d-1}} Y_{\ell,p}(x) = \sqrt{\ell(\ell + d - 2)} Y_{\ell,p}(x)$
-\item Bilinear form via orthonormality of spherical harmonics
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Proof 2: NTK Operator Multiplication by Sobolev Operator}
+\begin{frame}{Proof 2: NTK Operator Multiplication by Sobolev Operator (proper contribution)}
 \begin{theorem}[NTK-Sobolev Composition]
 Under Sobolev training, the learning operator is given by the composition:
 \[ \mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s \]
@@ -211,12 +282,12 @@ Under Sobolev training, the learning operator is given by the composition:
 \begin{itemize}
 \item Standard gradient descent: $\frac{df}{dt} = -K^{\infty}(f - y)$
 \item Sobolev loss: $\mathcal{L}_s(\theta) = \frac{1}{2}\|f(\cdot; \theta) - y\|^2_{H^s}$
-\item Chain rule via fractional operator
+\item Chain rule: $\frac{df}{dt} = -K^{\infty} \nabla_f \left(\frac{1}{2}\int_{\mathbb{S}^{d-1}} (f-y)(I + (-\Delta)^{1/2})^s(f-y) d\sigma\right)$
 \item Resulting dynamics: $\frac{df}{dt} = -K^{\infty} \circ (I + (-\Delta)^{1/2})^s (f - y)$
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Proof 3: Spectral Properties of the Composite Operator}
+\begin{frame}{Proof 3: Spectral Properties of the Composite Operator (proper contribution)}
 \begin{theorem}[Spectrum of NTK-Sobolev Operator]
 The eigenvalues of the composite operator $\mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s$ are given by the product of individual eigenvalues:
 \[ \mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s \]
@@ -225,7 +296,7 @@ The eigenvalues of the composite operator $\mathcal{T}_s = K^{\infty} \circ (I +
 \textbf{Direct consequence:} Commutation and common eigenfunctions allow simple multiplication of spectra.
 \end{frame}
 
-\begin{frame}{Proof 4: Commutation of Discrete Matrix Operators}
+\begin{frame}{Proof 4: Commutation of Discrete Matrix Operators (proper contribution)}
 \begin{theorem}[Matrix Commutation]
 The discrete matrices $K$ and $P_s$ commute: $KP_s = P_sK$.
 \end{theorem}
@@ -260,6 +331,12 @@ For the NTK-Sobolev operator, eigenvalues follow the scaling laws:
 
 \section{Practical Implementation and Discretization}
 
+\begin{frame}
+\begin{center}
+\huge{Practical Implementation and Discretization}
+\end{center}
+\end{frame}
+
 \begin{frame}{From Sobolev Loss to Discrete Matrix Operator}
 \textbf{Two integral formulations:}
 
@@ -290,11 +367,42 @@ where $\mu_n = \frac{1}{n}\sum_{i=1}^n \delta_{x_i}$
 \textbf{Fourier decomposition:}
 \[ \mathcal{L}_s[f] = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} |\hat{f}_{\ell,p}|^2 \]
 
-\textbf{Dimension growth:}
-\[ N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!} \quad \text{determines complexity} \]
+\textbf{Curse of dimensionality:}
+\[ N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!} \quad \text{for large $\ell$} \]
 \end{frame}
 
+
+
+\begin{frame}{Zonal Kernel Representation of $P_s$ (proper contribution)}
+  \begin{theorem}[Zonal Kernel Representation]
+  The Sobolev matrix $P_s$ can be written as a zonal kernel:
+  \[ (P_s)_{ij} = p_s(\langle x_i, x_j \rangle) \]
+  where
+  \[ p_s(t) = \sum_{\ell=0}^{\ell_{\max}} (1 + \sqrt{\ell(\ell + d - 2)})^s \frac{N(d,\ell)}{\text{Area}(\mathbb{S}^{d-1})} P_\ell^{((d-2)/2)}(t) \]
+  \end{theorem}
+  
+  \textbf{Eigenvalue bounds for $P_s$:}
+  \[ 1 \leq \lambda_i(P_s) \leq (1 + \ell_{\max})^s \]
+  
+  \textbf{Condition number:} $\kappa(P_s) = (1 + \ell_{\max})^s$
+  
+  \textbf{Practical implications:}
+  \begin{itemize}
+  \item Zonal kernel $p_s(t)$ can be precomputed with legendre kernels
+  \item Condition number to calculate ! remains a multiplicative constant
+
+  \end{itemize}
+  \end{frame}
+
+
+
 \section{Deep NTK Analysis}
+
+\begin{frame}
+\begin{center}
+\huge{Deep NTK Analysis}
+\end{center}
+\end{frame}
 
 \begin{frame}{Deep NTK Properties}
 \textbf{Limiting NTK at EOC for $L$-layer networks:}
@@ -326,6 +434,12 @@ where $C(d, L)$ depends on parity of $k$ and grows quadratically with $L$.
 
 \section{Deep Narrow Neural Networks}
 
+\begin{frame}
+\begin{center}
+\huge{Deep Narrow Neural Networks}
+\end{center}
+\end{frame}
+
 \begin{frame}{Scaled NTK at Initialization}
 \begin{theorem}[Scaled NTK at Initialization]
 For $f^L_\theta$ initialized appropriately, as $L \to \infty$:
@@ -335,7 +449,7 @@ where
 with $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$.
 \end{theorem}
 
-\textbf{Alternative formulation:} $\kappa_1(\cos(u) \cdot v)$ where:
+\textbf{Alternative formulation (proper contribution):} $\kappa_1(\cos(u) \cdot v)$ where:
 \begin{itemize}
 \item $v = \frac{1}{1 + \beta^2/\alpha^2}$, where $\beta$ is bias variance
 \item $\alpha = \frac{\|x\| \|x'\| \rho}{d_{in}}$, where $\cos(u)$ is cosine distance
@@ -352,21 +466,13 @@ where $\theta=\arccos(\langle x,y\rangle)$. Spherical harmonic eigenvalues:
   \mu_\ell^{(2)}\;\asymp\;\ell^{-(d+1)}
 \]
 
-\textbf{In the deep-narrow limit:}
-\[
-   \mu_\ell^{(\text{dn})}\;\asymp\;C(L,d)\,\ell^{-d}, \qquad C(L,d)\propto L
-\]
-
 \textbf{Consequences:}
 \begin{itemize}
-  \item Maximum eigenvalue of $K^{(\text{dn})}$ about $L$ times larger than for $K^{(2)}$
-  \item Flatter spectrum: $\kappa\bigl(K^{(\text{dn})}\bigr)\approx\kappa\bigl(K^{(2)}\bigr)/L$
+  \item Worth trying to investigate a better init scheme for deep narrow networks (without UAT) for more complex NTK
 \end{itemize}
-
-\textbf{Conclusion:} Depth partially compensates for poor conditioning of the two-layer kernel.
 \end{frame}
 
-\begin{frame}{Research Perspectives}
+\begin{frame}{Research Perspectives for this immediate findings}
 \textbf{Architectural modifications:}
 \begin{itemize}
 \item Unit concatenation: Combine multiple narrow networks
@@ -382,100 +488,92 @@ where $\theta=\arccos(\langle x,y\rangle)$. Spherical harmonic eigenvalues:
 
 \textbf{Theoretical extensions:}
 \begin{itemize}
-\item Extension of Hayou \& Yang's work on ResNets
+\item Extension of Hayou \& Yang's work on ResNets (but in a mean field approach that is not easily generalizable)
 \item Mean field analysis for deep narrow frameworks
 \item Experimental validation on practical tasks
 \end{itemize}
 \end{frame}
 
-\section{Alternative Domains}
+
+
+\section{Alternative Domains (my proper contribution)}
+
+\begin{frame}
+\begin{center}
+\huge{Alternative Domains}
+\vspace{0.5cm}
+\large{(my proper contribution)}
+\end{center}
+\end{frame}
 
 \begin{frame}{Gaussian Domain: $L^2(\mathbb{R}^d, \mu)$}
+
+  
+Those questions were told to be interesting but not to be investigated now in the literature.
+To apply integration by parts well, we need to have a domain without a boundary !
+
 \textbf{Framework:} Gaussian measure $d\mu = (2\pi)^{-d/2} e^{-\|x\|^2/2} dx$
 
 \textbf{Ornstein-Uhlenbeck operator:} $\mathcal{L}_{OU} = -\Delta + x \cdot \nabla$
 
 \textbf{Eigenfunctions:} Hermite polynomials $H_{\alpha}(x)$ with eigenvalues $|\alpha|$
 
-\textbf{NTK structure:} Translation-invariant $K^{\infty}(x, y) = k(x - y)$
+\textbf{NTK is not translation-invariant} $K^{\infty}(x, y) = k(x - y)$ but it is invariant under rotations
 
 \textbf{Composite spectrum:} $\lambda_\alpha \sim \hat{k}(|\alpha|^{1/2}) \cdot (1 + |\alpha|)^s$
 
 \textbf{Critical insight:} Gaussian measure introduces natural regularization via exponential decay of the kernel's Fourier transform.
 \end{frame}
 
-\begin{frame}{Toroidal Domain: $\mathbb{T}^d$}
-\textbf{Torus construction:} $\mathbb{T}^d$ obtained by gluing opposite faces of the unit cube $[0,1]^d$
+
+
+\begin{frame}{Toroidal Domain: $\mathbb{T}^d$ (proper contribution)}
+
+  Suppose you have a dataset over $[0,1]^d$ and you want to learn a function on this domain.
+
+  You can use a neural network with periodic boundary conditions, you glue opposite faces of the unit cube $[0,1]^d$ to get a torus.
 
 \textbf{Fourier basis:} Fourier modes as orthonormal basis
 \[
    e_k(x) \;=\; e^{2\pi i k\cdot x}, \qquad k\in\mathbb Z^d
 \]
-
-\textbf{Sobolev operator:} Diagonal in this basis
+\textbf{Sobolev operator:} Diagonal in this basis with Kronecker factorization
 \[
-   P_s^{(\mathbb{T}^d)}\,e_k\;=\;\bigl(1+\|k\|^2\bigr)^{s}\,e_k
+   P_s^{(\mathbb{T}^d)}\,e_k\;=\;\bigl(1+\|k\|^2\bigr)^{s}\,e_k = \bigotimes_{i=1}^d \bigl(1+k_i^2\bigr)^{s}\,e_{k_i}
 \]
-
-\textbf{Periodic NTK:} $k_{\text{per}}(x,y)=\sum_{n\in\mathbb Z^d} k\bigl(x, y+n\bigr)$
+\textbf{Kronecker formula:} For uniform sampling with $N$ points per dimension
+\[
+P_s = F_N^{-1} \bigotimes_{i=1}^d \text{diag}\bigl((1+k_i^2)^s\bigr) F_N
+\]
+where $F_N$ is the DFT matrix and $k_i \in \{-N/2,\ldots,N/2-1\}$ are the discrete frequencies
 
 \textbf{Composite spectrum:} $\lambda_k^{(KP_s)} = \widehat{k}_{\text{per}}(k)\,(1+\|k\|^2)^{s} \sim \|k\|^{2s-\alpha}$
 
 \textbf{Computational cost:} FFT enables $\mathcal O\bigl(N^d\log N\bigr)$ for matrix-vector products.
+But I've made computations by hand, we can do very fast experiments for a whole range of init/arch/functions and this case is not yet validated in the literature.
+(done in the report)
 \end{frame}
 
-\begin{frame}{Key Computational Advantage of Torus}
-\textbf{Fundamental difference:} Orthogonality of Fourier modes under uniform sampling.
 
-\textbf{Fourier orthogonality:}
-\[ \frac{1}{N} \sum_{j=0}^{N-1} e^{2\pi i k_1 j/N} e^{-2\pi i k_2 j/N} = \delta_{k_1, k_2 \bmod N} \]
 
-\textbf{Explicit construction of eigenvectors:}
-\[ \mathbf{v}_{\mathbf{k}}[j_1, \ldots, j_d] = \frac{1}{N^{d/2}} \prod_{i=1}^d e^{2\pi i k_i j_i/N} \]
+\section{Reconciliation and Unified Framework (my proper contribution)}
 
-Since the diagonalization is already known (Fourier modes), no numerical eigenvector computation is needed: an FFT directly provides all eigenvalues. We can therefore, for each grid resolution $N$ and each network depth or width $L$, compute the complete spectrum of the NTK matrix sampled on the torus and empirically derive scaling laws ($\lambda_{\min}$, $\lambda_{\max}$, $\kappa$) with cost $\mathcal{O}(N^{d}\log N)$, much lower than on the sphere.
+\begin{frame}
+\begin{center}
+\huge{Reconciliation and Unified Framework}
+\vspace{0.5cm}
+\large{(my proper contribution)}
+\end{center}
 \end{frame}
-
-\begin{frame}{Domain Selection Criteria}
-\textbf{Domain comparison:}
-
-\begin{itemize}
-\item \textbf{Sphere $\mathbb{S}^{d-1}$}: Natural for directional data, rotational invariance
-\item \textbf{Gaussian $\mathbb{R}^d$}: Infinite domain with natural regularization
-\item \textbf{Torus $\mathbb{T}^d$}: Finite domain, efficient computation, no boundary effects
-\end{itemize}
-
-\textbf{Favored symmetries:}
-\begin{itemize}
-\item \textbf{Translation invariance}: Favors Fourier modes
-\item \textbf{Gaussian weighting}: Favors Hermite polynomials
-\end{itemize}
-
-\textbf{Computational complexity:}
-\begin{itemize}
-\item \textbf{Sphere}: $\mathcal{O}(n^2 L^{d-1})$ for harmonics up to degree $L$
-\item \textbf{Torus}: $\mathcal{O}(N^d \log N)$ for $N^d$ grid points
-\item \textbf{Symmetrized torus}: $\mathcal{O}(N^d \log N)$ with 4× memory overhead in 2D
-\end{itemize}
-\end{frame}
-
-\section{Reconciliation and Unified Framework}
 
 \begin{frame}{Unified Spectral Viewpoint}
 \textbf{Reconciling the geometric view of NTK and functional view of Sobolev training:}
 
 \textbf{Shared invariance:}
 \begin{itemize}
-\item Matrices $K$ and $P_s$ rotationally invariant
+\item Matrices $K$ and $P_s$ rotationally invariant for homogeneous activations
 \item Entries depend only on inner product $\langle x_i, x_j \rangle$
 \end{itemize}
-
-\textbf{Matrix commutation:} $K P_s = f(G)g(G) = g(G)f(G) = P_s K$
-
-\textbf{Simultaneous diagonalization:} Same set of eigenvectors
-
-\textbf{Product of eigenvalues:}
-\[ \lambda_i(K P_s) = \lambda_i(K) \cdot \lambda_i(P_s) \]
 
 \textbf{Proposed strategy:}
 \begin{enumerate}
@@ -485,28 +583,14 @@ Since the diagonalization is already known (Fourier modes), no numerical eigenve
 \end{enumerate}
 \end{frame}
 
-\begin{frame}{Zonal Kernel Representation of $P_s$}
-\begin{theorem}[Zonal Kernel Representation]
-The Sobolev matrix $P_s$ can be written as a zonal kernel:
-\[ (P_s)_{ij} = p_s(\langle x_i, x_j \rangle) \]
-where
-\[ p_s(t) = \sum_{\ell=0}^{\ell_{\max}} (1 + \sqrt{\ell(\ell + d - 2)})^s \frac{N(d,\ell)}{\text{Area}(\mathbb{S}^{d-1})} P_\ell^{((d-2)/2)}(t) \]
-\end{theorem}
-
-\textbf{Eigenvalue bounds for $P_s$:}
-\[ 1 \leq \lambda_i(P_s) \leq (1 + \ell_{\max})^s \]
-
-\textbf{Condition number:} $\kappa(P_s) = (1 + \ell_{\max})^s$
-
-\textbf{Practical implications:}
-\begin{itemize}
-\item Zonal kernel $p_s(t)$ can be precomputed
-\item Gegenbauer expansion enables fast multipole-type acceleration
-\item Numerical stability analysis guided by condition number
-\end{itemize}
-\end{frame}
 
 \section{Conclusions and Future Directions}
+
+\begin{frame}
+\begin{center}
+\huge{Conclusions and Future Directions}
+\end{center}
+\end{frame}
 
 \begin{frame}{Summary of Key Results}
 \textbf{Main contributions:}
@@ -516,7 +600,6 @@ where
 
 \item \textbf{Matrix vs. Operator distinction}: Fundamental difference between discrete and continuous eigenvalues
 
-\item \textbf{Sobolev training framework}: NTK spectrum modification via spectral exponent $2s-d$
 
 \item \textbf{Deep network analysis}: Scaling laws for condition numbers and eigenvalue distributions
 
@@ -526,35 +609,124 @@ where
 \textbf{Key formula:} $\lambda_\ell \sim \ell^{s-d}$ determines spectral properties and learning dynamics.
 \end{frame}
 
-\begin{frame}{Research Challenges and Open Questions}
+
+
+\begin{frame}{Immediate simple challenges and open questions (not to investigate now)}
 \begin{enumerate}
 \item \textbf{Unified framework}: Different papers with varying domains, initializations, architectures, activations
 
-\item \textbf{Beyond spherical domains}: Extension of harmonic analysis to general spaces $L^2(\gamma)$
+\item Extension of harmonic analysis to general spaces $L^2(\gamma)$
 
-\item \textbf{Optimal width scaling}: Achieve linear scaling in $\lambda_{\min}$ with minimal width
+\item  Extension from ReLU to general inhomogeneous activations
 
-\item \textbf{Broad activation coverage}: Extension from ReLU to general inhomogeneous activations
-
-\item \textbf{Experimental validation}: Systematic verification of theoretical predictions
+\item \textbf{Experimental validation}: Systematic verification of theoretical predictions because some of the results are not yet validated
 \end{enumerate}
 
 \textbf{Sobolev perspective:} Increase exponent $s$ with data size $n$ to counterbalance conditioning of $K$. Precise estimate of $\kappa(P_s)$ remains an open problem.
 \end{frame}
 
+
+
+  
+\begin{frame}{Component-wise Investigation}
+  \begin{itemize}
+  \item \textbf{Disentangling NTK and Sobolev:} Factorization $\mathcal{T}_s = K^{\infty} \circ P_s$ simplifies research by enabling independent investigation of each component
+  
+  \item For a specific domain, we can investigate the spectrum of $P_s$ via experimental frameworks with Fourier analysis
+  
+  \item Study of $K^{\infty}$ under finite-width corrections opens new questions about lazy training regime
+  \end{itemize}
+  \end{frame}
+
+
+
+\begin{frame}{Perturbation Theory Framework}
+  \begin{itemize}
+    \item Systematic expansion in powers of $1/n$ for computation of training dynamics
+    
+    \item Experimental validation of $\mathcal{O}(1/n)$ training dynamics under gradient flow
+    
+    \item Finite-width networks require analysis beyond leading-order asymptotics
+    
+    \item Diagrammatic techniques reveal correlation function scaling at infinite width
+    
+    \item Three key modifications to infinite-width behavior:
+    \begin{itemize}
+      \item Initial NTK $\Theta_0$ receives width-dependent corrections
+      \item Network updates become nonlinear in learning rate
+      \item NTK becomes time-dependent during training
+    \end{itemize}
+    
+    \item Perturbative expansion: $H = H_0 + \frac{1}{n}H_1 + \frac{1}{n^2}H_2 + ...$
+    
+    \item Each $H_k$ term captures neuron interactions at finite width
+    
+    \item Expansion controls finite-size effects in optimization
+  \end{itemize}
+\end{frame}
+  
+
+
+\begin{frame}{Finite-Width Corrections and NTK Hierarchy}
+  \textbf{Finite-width NTK expansion:}
+  \begin{align}
+  \Theta^{NTH}(x_1, x_2) &= \Theta(x_1, x_2) + n^{-1}\mathbb{E}[\mathcal{O}^{(1)}_{2,0}(x_1, x_2)] \nonumber \\
+  &\quad - n^{-1}\mathbb{E}[\mathcal{O}^{(1)}_{3,0}(x_1, x_2, \vec{x})\Theta^{-1}(\vec{x}, \vec{x})f^{(0)}_0(\vec{x})] \nonumber \\
+  &\quad + n^{-1}\vec{y}^T \Theta^{-1}(\vec{x}, \vec{x})\mathbb{E}[\mathcal{O}^{(1)}_{4,0}(x_1, x_2, \vec{x}, \vec{x})] \Theta^{-1}(\vec{x}, \vec{x})\vec{y} \nonumber
+  \end{align}
+  
+  \begin{itemize}
+  \item \textbf{Degradation capture:} Corrections show how idealized infinite-width behavior degrades in practice
+  
+  \item \textbf{Mathematical machinery:} Requires tensor algebra and careful treatment of statistical dependencies
+  
+  \item \textbf{Interaction terms:} Tensors $\mathcal{O}^{(1)}_{4,0}$ and $\mathcal{O}^{(1)}_{3,0}$ represent higher-order interactions affecting spectral properties
+  
+  \item \textbf{Impact analysis:} Detailed investigation needed to understand effect on optimization dynamics
+  \end{itemize}
+  \end{frame}
+
+
+
+  \begin{frame}{Advanced Mathematical Tools and Deeper-vs-Wider Question}
+  \begin{itemize}
+  \item \textbf{What we already know:} We already have spectrum estimates for the NTK matrix in infinite-width, we need to treat the other terms
+  
+  \item \textbf{Higher-order corrections:} Higher orders capture complex neuronal interactions at finite width
+  
+  \item \textbf{Deeper-vs-wider:} Then we fix parameter budget $P$, express corrections in terms of depth $L$ and width $N = P/L$
+  
+  \item \textbf{Optimization guarantees:} Analytically determine whether increasing depth or width provides better optimization guarantees
+  \end{itemize}
+  \end{frame}
+  
+  
+  \begin{frame}{NTK Analysis without Lazy Training Regime}
+  \begin{itemize}
+  \item \textbf{New territory:} From that investigation of NTK matrix $K^{\infty}$ we can extend to the feature learning regime
+  
+  \item \textbf{Existing approaches:} Previous work (e.g., Banerjee et al.) bounds $\lambda_{\min}(K)$ but doesn't assume NTK regime operation
+  
+  \item \textbf{Key difference:} Our approach explicitly assumes NTK regime validity and investigates finite-width corrections within this setting
+  
+  \item \textbf{Novel questions:} Opens theoretical questions about interplay between kernel constancy, spectral properties, and architectural parameters
+  \end{itemize}
+  \end{frame}
+
+
+
 \begin{frame}{Research Roadmap}
 \textbf{Near-term objectives:}
 \begin{itemize}
-\item Study narrow NTK behavior to identify simplifications
-\item Incorporate Sobolev framework into spherical harmonic analysis
-\item Unify initialization schemes and architectural assumptions
+\item Compute the NTK pertubation matrix to get immediate spectrum bounds for finite width
+\item Also Unify initialization schemes (for eg no bias and EOC) and architectural assumptions
+\item Study narrow NTK behavior to identify complexifications
 \end{itemize}
 
 \textbf{Long-term goals:}
 \begin{itemize}
-\item Extend harmonic analysis from spherical to general domains
-\item Develop complete theory for deep narrow networks
-\item Create unified spectral theory encompassing all major NTK variants
+\item $P_s$ matrix is a zonal kernel, can be investigated trying to get a better conditionning number multiplicative constant
+\item Develop more general theory for deep narrow networks (for other initialization without UAT)
 \end{itemize}
 
 \textbf{Vision:} The convergence of spectral analysis, harmonic analysis, and neural network theory opens promising avenues for understanding and controlling learning dynamics of deep networks via their spectral properties.
