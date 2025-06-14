@@ -1,0 +1,1819 @@
+\documentclass[english]{article}
+\pdfoutput=1
+\usepackage[a4paper,lmargin=70pt,rmargin=70pt]{geometry}
+
+\usepackage{microtype}
+\usepackage{babel}
+\usepackage{graphicx}
+\usepackage[position=b]{subcaption}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[colorlinks=true,urlcolor=blue,anchorcolor=blue,citecolor=blue,filecolor=blue,linkcolor=blue,menucolor=blue,linktocpage=true]{hyperref}
+\usepackage{cite}
+
+\newtheorem{thm}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{cor}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+
+\newcommand{\dho}{\partial}
+
+\newcommand{\bR}{\ensuremath{\mathbb{R}}}
+
+\newcommand{\cC}{\ensuremath{\mathcal{C}}}
+\newcommand{\cN}{\ensuremath{\mathcal{N}}}
+\newcommand{\cM}{\ensuremath{\mathcal{M}}}
+\newcommand{\cO}{\ensuremath{\mathcal{O}}}
+\newcommand{\cT}{\ensuremath{\mathcal{T}}}
+\newcommand{\cP}{\ensuremath{\mathcal{P}}}
+
+\newcommand{\Gset}{\Gamma'(C)}
+
+\newcommand{\Din}{\ensuremath{D_{\mathrm{in}}}}
+\newcommand{\DL}{\mathrm{DL}}
+
+\newcommand{\fnl}{f_{\mathrm{nl}}}
+\newcommand{\hfnl}{\hat{f}_{\mathrm{nl}}}
+
+\newcommand{\es}[2] {\begin{align} \label{#1} #2 \end{align}}
+
+\DeclareMathOperator{\trace}{Tr}
+
+\newcommand{\lexp}{\mathbb{E}\left[}
+\newcommand{\lexpp}[1]{\mathbb{E}_{#1}\left[}
+\newcommand{\rexp}{\right]}
+
+\newcommand{\lvarp}[1]{\mathrm{Var}_{#1}\left[}
+
+\newcommand{\pcite}[1]{\cite{#1}}
+
+\begin{document}
+
+\title{Asymptotics of Wide Networks \\ from Feynman Diagrams}
+
+\author{Ethan Dyer\thanks{Authors listed alphabetically.}
+  \\ Google \\ Mountain View, CA
+  \\ \texttt{edyer@google.com}
+  \and
+  Guy Gur-Ari\footnotemark[1]
+  \\ Google \\ Mountain View, CA
+  \\ \texttt{guyga@google.com}
+}
+
+\maketitle
+\begin{abstract}
+ Understanding the asymptotic behavior of wide networks is of considerable interest.
+  In this work, we present a general method for analyzing this large width behavior.
+  The method is an adaptation of Feynman diagrams, a standard tool for computing multivariate Gaussian integrals.
+  We apply our method to study training dynamics, improving existing bounds and deriving new results on wide network evolution during stochastic gradient descent.
+  Going beyond the strict large width limit, we present closed-form expressions for higher-order terms governing wide network training, and test these predictions empirically.
+\end{abstract}
+
+\tableofcontents{}
+
+\section{Introduction}
+Neural networks achieve remarkable performance on a wide array of machine learning tasks,
+yet a complete analytic understanding of deep networks remains elusive.
+One promising approach is to consider the large width limit, in which the number of neurons in one or several layers is taken to be large.
+In this limit one can use a mean-field approach to better understand the network's properties at initialization \pcite{Neal1996, lee2018deep}, as well as its training dynamics \pcite{daniely2017sgd, ntk}. Additional related works are cited below.
+
+Suppose that $f(x)$ is the network function evaluated at an input $x$. Let us denote the vector of model parameters by $\theta$, whose elements are initially chosen to be i.i.d. Gaussian.
+In this work we consider a class of functions we call \emph{correlation functions}, obtained by taking the ensemble averages of $f$, its products, and its derivatives with respect to the parameters $\theta$, evaluated on arbitrary inputs.
+Here are a few examples of correlation functions.
+\begin{align}
+  \lexpp{\theta} f(x_1) f(x_2) \rexp \,,\;
+  \sum_\mu \lexpp{\theta} \frac{\dho f(x_1)}{\dho \theta^\mu} \frac{\dho f(x_2)}{\dho \theta^\mu} \rexp \,,\;
+  \sum_{\mu,\nu} \lexpp{\theta}
+  \frac{\dho f(x_1)}{\dho \theta^\mu}
+  \frac{\dho f(x_2)}{\dho \theta^\nu}
+  \frac{\dho^2 f(x_3)}{\dho \theta^\mu \dho \theta^\nu}
+  f(x_4)
+  \rexp \,. \label{eq:cexample}
+\end{align}
+Correlation functions often show up in the study of wide networks.
+For example, the first correlation function in \eqref{eq:cexample} plays a central role in the Gaussian Process picture of wide networks \pcite{lee2018deep}, and has been used to diagnose signal propagation in wide networks \pcite{DBLP:journals/corr/abs-1711-04735}.
+The second example in \eqref{eq:cexample} is the ensemble average of the Neural Tangent Kernel (NTK), which controls the evolution of wide networks under gradient flow \pcite{ntk}, and the third example shows up when computing the time derivative of the NTK with MSE loss.
+
+While correlation functions can be computed analytically in some special cases \pcite{NIPS2009_3628}, they are not analytically tractable in general.
+In this work, we present a method for bounding the asymptotic behavior of such functions at large width.
+Derivation of the method relies on Feynman diagrams \pcite{Feynman:1949zx}, a technique for calculating multivariate Gaussian integrals, and specifically on the 't Hooft expansion \pcite{tHooft:1973alw}.
+However, applying the method is straightforward and does not require any knowledge of Feynman diagrams.
+
+\paragraph{Our contribution.}
+\begin{enumerate}
+\item We present a general method for bounding the asymptotic behavior of \emph{correlation functions}.
+  The method is an adaptation of Feynman diagrams to the case of wide neural networks.
+  The adaptation involves a novel treatment of derivatives of the network function, an element that is not present in the original theoretical physics formulation.
+\item We apply the method to the study of wide network evolution under gradient descent.
+  We improve on existing results for gradient flow \pcite{ntk} by deriving tighter bounds, and extending the analysis to the case of stochastic gradient descent (SGD).
+  Going beyond the infinite-width limit, we present a formalisn for deriving finite-width corrections to network evolution, and present explicit formulas for the first order correction.
+  To our knowledge, this is the first time this correction has been calculated.
+\item As additional applications of our method, in Appendix~\ref{app:discLinEvo} we show that in the large width limit the SGD updates are linear in the learning rate, and in Appendix~\ref{app:spectrum} we discuss finite width corrections to the spectrum of the Hessian.
+\end{enumerate}
+
+\paragraph{Limitations of our approach.} 
+The main result of this paper is a conjecture.
+We test our predictions extensively using numerical experiments, and prove the conjecture in some cases, but we do not have a proof that applies to all the cases we tested, including for deep networks with general non-linearities.
+Furthermore, our method can only be used to derive asymptotic bounds at large width; it does not produce the width-independent coefficient, which is often of interest.
+
+\paragraph{Related work.}
+For additional works on wide networks, including relating them to Gaussian processes, see \cite{g.2018gaussian, novak2019bayesian, garriga-alonso2018deep, yang2019scaling, pennington2017geometry, pennington2018spectrum, schoenholz2017correspondence, xiao2018dynamical, chen2018dynamical, daniely2016toward, 2019arXiv190206720L, du2018gradient, du2018gradient2, allen2018convergence}.
+For additional works discussing the training dynamics of wide networks see \cite{geiger2019scaling, arora2019fine}.
+For a previous use of diagrams in this context, see \cite{NIPS2017_6857}. 
+
+The Neural Tangent Hierarchy presented in \pcite{huang2019dynamics}, published during the completion of this version, has significant overlap with the recursive differential equations \eqref{short_tower} presented below.
+\\
+
+The rest of the paper is organized as follows.
+In Section~\ref{sec:main} we present our main conjecture and supporting evidence.
+In Section~\ref{sec:applications} we apply the method to gradient descent evolution of wide networks, and 
+in Section~\ref{sec:feynman} we present details on Feynman diagrams, which is the basic technique used in our proofs.
+We conclude with a Discussion.
+Proofs, additional applications, and details can be found in the Appendices.
+\\
+
+\noindent\textbf{Note}: An earlier version of this work appeared in the ICML 2019 workshop, Theoretical Physics for Deep Learning \pcite{fdworkshop}.
+\section{Correlation function asymptotics}\label{sec:main}
+
+In this section we present our main result: a method for computing asymptotic bounds on correlation functions of wide networks.
+We present the result as a conjecture, supported by analytic and empirical evidence.
+
+\subsection{Notation}\label{sec:notation}
+Let $f(x) \in \bR$ be the network output of a deep linear network with $d$ hidden layers and input $x \in \bR^{\Din}$, defined by
+\begin{align}
+  f(x) = n^{-1/2} V^T \sigma(n^{-1/2} W^{d-1} \cdots \sigma(n^{-1/2} W^1 \sigma(U x))) \,. \label{eq:fdl}
+\end{align}
+Here $U \in \bR^{n \times \Din}$, $V \in \bR^n$, $W^1,\dots,W^{d-1}$ are weight matrices of dimension $n$, and $\sigma:\bR\to\bR$ is the non-linearity.\footnote{
+We take all layers widths to be equal to $n$ for simplicity, but our results hold in the more general case where all widths scale linearly with $n$.}
+We denote the vector of all model parameters by $\theta$.
+At initialization, the elements of $\theta$ are independent Gaussian variables, with each element $\theta^\mu \sim \cN(0,1)$.
+The corresponding distribution of $\theta$ is denoted by $\cP_0$.\footnote{
+We use $\mu,\nu,\dots$ to denote $\theta$ indices, $i,j,\dots$ to denote individual weight matrix and weight vector indices, and $\alpha,\beta,\dots$ for input dimension indices.}
+
+Let us now define \emph{correlation functions}, the class of functions that is the focus of this work.
+These functions involve derivative tensors of the network function.
+We denote the rank-$k$ derivative tensor by
+$
+  T_{\mu_1 \dots \mu_k}(x;f) := \dho^k f(x) / \dho \theta^{\mu_1} \cdots \dho \theta^{\mu_k} \,.
+$
+For $k=0$ we define $T(x;f):=f(x)$, and still refer to this as a derivative tensor for consistency.
+
+\begin{definition} \label{def:corr}
+  A \emph{correlation function} is the expectation value of a product of derivative tensors, evaluated at arbitrary inputs, where the tensor indices are summed in pairs over all the model parameters.
+  A general correlation function $C$ takes the form
+  \begin{align}
+    C(x_1,\dots,x_m) :=
+    \!\! \sum_{\mu_1,\dots,\mu_{k_m}} \!\!
+    \Delta_{\mu_1 \dots \mu_{k_m}}^{(\pi)}
+    \lexpp{\theta}
+    T_{\mu_1 \dots \mu_{k_1}} (x_1)
+    T_{\mu_{k_1+1} \dots \mu_{k_2}} (x_2)
+    \cdots
+    T_{\mu_{k_{m-1}+1} \dots \mu_{k_m}} (x_m)
+    \rexp \,. \label{eq:corr}
+  \end{align}
+  Here, $0 \le k_1 \le \cdots \le k_{m-1} \le k_m$ are integers,\footnote{When $k_a=k_{a-1}$, the tensor $T(x_{a})$ has no derivatives.} $m$ and $k_m$ are even, $\pi \in S_{k_m}$ is a permutation, and
+  $
+    \Delta_{\mu_1 \dots \mu_{k_m}}^{(\pi)} =
+    \delta_{\mu_{\pi(1)} \mu_{\pi(2)}} \cdots \delta_{\mu_{\pi(k_m-1)} \mu_{\pi(k_m)}} \,.
+  $
+  We use $\delta$ to denote the Kronecker delta.
+\end{definition}
+If two derivative tensors in a correlation function have matching indices that are summed over, we say that they are \emph{contracted}.
+For example, the correlation function $\sum_\mu \lexpp{\theta} \dho f(x_1) / \dho \theta^\mu \cdot \dho f(x_2) / \dho \theta^\mu  \rexp$ has one pair of contracted tensors.
+See \eqref{eq:cexample} for additional examples of correlation functions.
+
+\subsection{Asymptotic bounds on wide networks}
+
+We now present our main conjecture, which allows us to place asymptotic bounds on general correlation functions of wide networks.
+\begin{conjecture}\label{conj:main}
+  Let $C(x_1,\dots,x_m)$ be a correlation function.
+  The \emph{cluster graph} $G_C(V,E)$ of $C$ is a graph with vertices $V=\{v_1,\dots,v_m\}$ and edges $E=\{(v_i,v_j) \,|\, (T(x_i),T(x_j))\mathrm{~contracted~in~ }C\}$.
+  Suppose that the cluster graph $G_C$ has $n_e$ connected components with an even size (even number of vertices), and $n_o$ components of odd size.
+  Then $C(x_1,\dots,x_m) = \cO(n^{s_C})$, where
+  \begin{align}
+    s_C = n_e + \frac{n_o}{2} - \frac{m}{2} \,. \label{eq:s}
+  \end{align}
+\end{conjecture}
+We will refer to the connected components of a cluster graph $G_C$ as the clusters of $C$.
+Table~\ref{tab:empscaling} lists examples of bounds derived using the Conjecture for several correlation functions.
+The intuition behind Conjecture~\ref{conj:main} comes from the following result for deep linear networks.
+\begin{thm}\label{thm:main}
+  Conjecture~\ref{conj:main} holds for correlation functions of networks with linear activations.
+\end{thm}
+Let us discuss the intuition behind this theorem.
+Computing correlation functions of deep linear networks amounts to evaluating Gaussian integrals with polynomial integrands in $\theta$.
+One can evaluate such integrals using Isserlis' theorem, which tells us how to express moments of multivariate Gaussian variables in terms of their second moments.
+For example, given centered Gaussian variables $z_1,...,z_4$,
+\begin{align}
+  \lexpp{z} z_1 z_2 z_3 z_4 \rexp &=
+  \lexpp{z} z_1 z_2 \rexp \lexpp{z} z_3 z_4 \rexp +
+  \lexpp{z} z_1 z_3 \rexp \lexpp{z} z_2 z_4 \rexp +
+  \lexpp{z} z_1 z_4 \rexp \lexpp{z} z_2 z_3 \rexp \,.
+\end{align}
+Therefore, correlation functions of deep linear networks can be expressed in terms of the covariances $\lexpp{\theta} U_{i\alpha} U_{j\beta} \rexp = \delta_{ij} \delta_{\alpha\beta}$, $\lexpp{\theta} V_i V_j \rexp = \delta_{ij}$, and $\lexpp{\theta} W_{ij}^{(l)} W_{kl}^{(l)} \rexp = \delta_{ik} \delta_{jl}$.
+For example, for a deep linear network with 2 hidden layers, we have
+\begin{align}
+  \lexpp{\theta} f(x_1) f(x_2) \rexp
+  &= \frac{1}{n^2} \lexpp{\theta} V^T W U x_1 V^T W U x_2 \rexp
+  =
+  \frac{x_1^T x_2}{n^2} \sum_{i,k}^n \delta_{ik} \delta_{ik} \sum_{j,l}^n \delta_{jl} \delta_{jl}
+  = x_1^T x_2
+  \,.
+\end{align}
+Every correlation function of a deep linear network can be similarly reduced to sums over products of Kronecker delta functions and width-independent functions of the inputs.
+The asymptotic large width behavior is determined by these sums over delta functions, which are tedious to compute by hand.
+Feynman diagrams are a graphical tool for computing these sums, allowing us to obtain the asymptotic behavior with minimal effort.
+This tool, which is described in detail in Section~\ref{sec:feynman}, is used to prove Theorem~\ref{thm:main}.
+
+For networks with non-linear activations we further show the following
+\begin{thm}\label{thm:nonlin}
+  Conjecture~\ref{conj:main} holds for (1) networks with ReLU activations, where all inputs are set to be equal, and for (2) networks with one hidden layer and smooth activation.
+\end{thm}
+For case (1), the idea behind the proof is to put an asymptotic bound on the ReLU network in terms of a corresponding deep linear network.
+For case (2), the basic idea is that each network function contains a single sum over the width, and by keeping track of these sums using Feynman diagrams we are able to bound the asymptotic behavior.
+We refer the reader to Appendix~\ref{app:non-lin} for details. 
+
+\subsection{Numerical experiments}
+
+Table~\ref{tab:empscaling} lists asymptotic bounds on several correlation functions, derived using Conjecture~\ref{conj:main}.
+These are compared against the asymptotic behavior computed using numerical experiments.
+In addition to the results presented here, we performed experiments using the same correlation functions and experimental setup, but with weights sampled uniformly from $\{\pm 1\}$ instead of from a Gaussian distribution.
+The results are shown in Appendix~\ref{app:nonGauss}.
+In all cases tested, we found that Conjecture~\ref{conj:main} holds.
+In most cases, we find that the bound is tight.
+For cases where the bound is not tight, a tight bound can be obtained using the complete Feynman diagram analysis presented below.
+\begin{table}[ht!]
+ \centering
+ \bgroup
+ \def\arraystretch{1.5} 
+ \begin{tabular}{c|cc|ccc}
+   Correlation function $C$ & $n_e,n_o$ & $s_C$ & lin. & ReLU & tanh \\
+   \hline
+   $\lexpp{\theta} f(x_1) f(x_2) \rexp$
+                        & 0,2 & 0 & -0.02 & 0.003 & -0.02 \\
+   $\lexpp{\theta} f(x_1) f(x_2) f(x_3) f(x_4) \rexp$
+                     & 0,4 & 0 & -0.01 & 0.03 & -0.03 \\
+   $\sum_\mu \lexpp{\theta} \dho_\mu f(x_1) \dho_\mu f(x_2) \rexp$
+                     & 1,0 & 0 & 0.00 & 0.00 & 0.00 \\
+   $\sum_{\mu,\nu} \lexpp{\theta}
+   \dho_\mu f(x_1) \dho_\nu f(x_2) \dho_{\mu,\nu} f(x_3) f(x_4)
+   \rexp$
+                     & 0,2 & -1 & -0.98 & -1.03 & -1.01 \\
+   $\sum_{\mu,\nu,\rho} \lexpp{\theta}
+   \dho_\mu f(x_1) \dho_\nu f(x_2) \dho_\rho f(x_3)
+   \dho_{\mu,\nu,\rho} f(x_4)
+   \rexp$
+                     & 1,0 & -1 & -2.01 & -2.01 & -0.98 \\
+   $\sum_{\mu,\nu,\rho,\sigma} \lexpp{\theta}
+   \dho_\mu f(x_1) \dho_\nu f(x_2) \dho_{\mu,\nu} f(x_3)
+   \dho_\rho f(x_4) \dho_\sigma f(x_5) \dho_{\rho,\sigma} f(x_6)
+   \rexp$
+                     & 0,2 & -2 & -2.05 & -2.01 & -1.99
+ \end{tabular}
+ \egroup
+ \caption{Examples of bounds on correlation functions obtained from Conjecture~\ref{conj:main}. 
+   The 3 right-most columns list numerical results for fully-connected networks with 3 hidden layers and with linear, ReLU, and tanh activations.
+   The numerical results are obtained by computing the correlation functions for networks with widths $2^7,2^8,\dots,2^{13}$, each averaged over 1,000 initializations, and fitting the exponent.
+   Inputs are chosen to be random vectors of dimension 4.
+ }
+ \label{tab:empscaling}
+\end{table}
+
+
+
+\section{Applications to training dynamics}
+\label{sec:applications}
+
+In this section we apply Conjecture~\ref{conj:main} to study the evolution of wide networks under gradient flow and gradient descent.
+We begin by briefly reviewing existing results.
+\newcommand{\Dtr}{D_{\mathrm{tr}}}
+Let $\Dtr$ be a training set of size $M$, and let $L = \sum_{(x,y) \in \Dtr} \ell(x, y)$ be the MSE loss, with single sample loss $\ell(x,y) = \frac{1}{2} (f(x) - y)^2$.
+The gradient flow equation is $\frac{d\theta}{dt} = -\nabla_\theta L$.
+The evolution of the network function under gradient flow is given by
+\es{NTK}{
+  \frac{df(x)}{dt}=-\sum_{(x',y') \in \Dtr}\Theta(x,x') \frac{\dho \ell(x',y')}{\dho f}  \,.
+}
+Here, $\Theta$ is the Neural Tangent Kernel (NTK), defined by 
+$ \Theta(x_1, x_2) := \nabla_\theta f^T(x_1) \nabla_\theta f(x_2) $.
+The authors of \cite{ntk} showed that the kernel is constant during training up to $\cO(n^{-1/2})$ corrections.
+This leads to a dramatic simplification in training dynamics \pcite{ntk,2019arXiv190206720L}.
+In particular, for MSE loss the network map evaluated on the training data evolves as
+$f(t)=y+e^{-t\Theta^{(0)}}(f^{(0)}-y)$.\footnote{
+  Here we are using condensed notation:
+  $\Theta^{(0)}$ and $f^{(0)}$ are values at initialization, and $f$, $f^{(0)}$, $y$ are treated as vectors in training set space. The kernel $\Theta^{(0)}$ is a square matrix in the same space.
+}
+We will use our technology to derive a tighter bound on finite-width corrections to the kernel during training and present explicit formulas for the leading correction.
+
+The following result is useful in analyzing the behavior of correlation functions under gradient flow. 
+\begin{lemma}\label{lemma:timeDerivs}
+  Let $C(\vec{x}) = \lexpp{\theta} F(\vec{x}) \rexp$ be a correlation function, where $\vec{x} = (x_1,\dots,x_m)$, and suppose that $C = \cO(n^{s_C})$ for $s_C$ as defined in Conjecture~\ref{conj:main}.
+  Then $\lexpp{\theta} \frac{d^k F(\vec{x})}{dt^k} \rexp = \cO(n^{s_C})$ for all $k$.
+\end{lemma}
+Here we prove the statement for $k=1$. Appendix~\ref{sec:gradientFlow} contains a proof for the general case.
+\begin{proof}[proof ($k=1$).]
+  Let $C$ have $n_e$ even clusters and $n_o$ odd clusters.
+  Consider the correlation function
+  \begin{align}
+    \lexpp{\theta} \frac{dF(\vec{x})}{dt} \rexp = - \sum_{\mu} \sum_{x'\in\Dtr} \lexpp{\theta} \frac{\dho F(\vec{x})}{\dho \theta^\mu} \frac{\dho f(x')}{\dho \theta^\mu} f(x') \rexp \,.
+  \end{align}
+  Denote by $n_e'$ ($n_o'$) the number of even (odd) clusters in this correlation function, which has $m'=m+2$ derivative tensors.
+  One can check that either $(n_e',n_o')=(n_e+1,n_o)$ or $(n_e',n_o')=(n_e-1,n_o+2)$, depending on whether the $\dho_\mu F$ derivative is acting on an odd or even cluster in $F$.\footnote{Here we are extending the use of the term cluster to refer to derivative tensors in the integrand itself.}
+  Therefore, $n'_e + \frac{n'_o}{2} - \frac{m'}{2} \le s_C$.
+\end{proof}
+
+With this result, it is easy to understand the constancy of the NTK at large width.
+The first derivative of the NTK is given by
+\es{ntk_diff}{
+\lexpp{\theta} \frac{d\Theta(x_{1},x_{2})}{dt} \rexp &
+\,=\,-\sum_{x'\in\Dtr}^{M}\sum_{\mu,\nu}
+\lexpp{\theta}
+\frac{\partial^{2}f(x_1)}{\partial\theta^{\mu}\partial\theta^{\nu}}\frac{\partial f(x_2)}{\partial\theta^{\mu}}\frac{\partial f(x')}{\partial\theta^{\nu}}f(x')
+\rexp + (x_{1}\leftrightarrow x_{2}) \,.
+}
+This correlation function has $n_e=0$, $n_o=2$, and $m=4$, and is therefore $\cO(n^{-1})$ by Conjecture~\ref{conj:main}.
+By Lemma~\ref{lemma:timeDerivs}, all higher-order time derivatives of the NTK are $\cO(n^{-1})$ as well.
+If we now assume that the time-evolved kernel $\Theta(t)$ is analytic in training time $t$, and that we are free to exchange the Taylor expansion in time with the large width limit, then we find that $\lexpp{\theta} \Theta(t)-\Theta(0) \rexp = \sum_{k=1}^\infty \frac{t^k}{k!} \lexpp{\theta} \frac{d^k\Theta(0)}{dt^k} \rexp = \cO(n^{-1})$ for any fixed $t$.
+This bound, which is tighter than that found in \cite{ntk}, was noticed empirically in \cite{2019arXiv190206720L} as well as in our own experiments, see Figure~\ref{fig:ntk_diff_evo}.
+
+This analysis can be extended to show that $\lexpp{\theta} \Theta(t) - \Theta(0) \rexp = \cO(n^{-1})$ for SGD as well. The technique is similar, and again relies on Conjecture \ref{conj:main}. We refer the reader to Appendix~\ref{app:ntk} for details.
+These results improve on existing ones in several ways.
+  Our method applies to the case of SGD as well as to networks where all layer widths are increased simultaneously --- a setup that has proven to be difficult to analyze.
+  In addition, the $\cO(n^{-1})$ bound we derive on kernel corrections during SGD is empirically tight, and improves on the existing bound of $\cO(n^{-1/2})$ which was derived for gradient flow \pcite{ntk}.
+
+
+\subsection{Finite width corrections}
+
+Next, we will compute the explicit time dependence of $\Theta$ and $f$ at order $\cO(n^{-1})$ under gradient flow.
+This is the leading correction to the infinite width result.
+We define the functions $O_1(x):=f(x)$ and
+\es{operator_def}{
+  O_{s}(x_1,\ldots,x_{s}):=\sum_{\mu}\frac{\partial O_{s-1}(x_1,\ldots,x_{s-1})}{\partial\theta_{\mu}}\frac{\partial f(x_{s})}{\partial\theta_\mu}\,,
+  \quad s \ge 2 \,.
+}
+Notice that $O_2 = \Theta$ is the kernel.
+It is easy to check that
+\es{short_tower}{
+\frac{dO_s(x_1,\ldots,x_{s})}{dt}& =-\sum_{(x',y')\in\Dtr} O_{s+1}(x_1,\ldots,x_{s},x')(f(x')-y')\,, \quad s \ge 1 \,.
+}
+    We can use equations \eqref{operator_def} and \eqref{short_tower} to solve for the evolution of the kernel and network map. Notice that each function $O_s$ has $s$ derivative tensors and a single cluster. As a result, correlation functions involving operators with larger $s$ are increasingly suppressed in width.
+In particular, $\lexpp{\theta}dO_4/dt\rexp=-\sum_{x\in\Dtr}\lexpp{\theta}O_5(x)f(x)\rexp = \cO(n^{-2})$ at all times, using Conjecture~\ref{conj:main} and Lemma~\ref{lemma:timeDerivs}. Thus to solve for $f$ and $\Theta$ at $\mathcal{O}(n^{-1})$ we can set $O_{s}=0$ for all $s\geq5$. 
+
+Let us denote the time-evolved kernel by $\Theta(t)=\Theta^{(0)}+\Theta_{1}(t)+\mathcal{O}(n^{-2})$, where $\Theta^{(0)}$ is the kernel at initialization, and $\Theta_1(t)$ is the $\cO(n^{-1})$ correction we are seeking.
+Integrating equations \eqref{short_tower} starting with $s=4$, we find
+\es{Theta1}{
+\Theta_{1}(x_1,x_2; t)=&-\int_{0}^{t}dt^{\prime}\sum_{x\in D_{\textrm{tr}}}O_3^{(0)}(x_1,x_2,x)\Delta f(x;t^{\prime})\nonumber\\
+&+\int_{0}^{t}dt^{\prime}\int_{0}^{t'}dt^{\prime\prime}\sum_{x,x'\in D_{\textrm{tr}}}O_4^{(0)}(x_1,x_2,x,x')\Delta f(x';t^{\prime\prime})\Delta f(x;t^{\prime}) \,.
+}
+Here we have introduced the notation $\Delta f(x;t)=e^{-t \Theta_0}(f^{(0)}-y)$.
+A detailed derivation can be found in Appendix~\ref{app:corrections}.
+There we also evaluate the integrals in \eqref{Theta1} in terms of the NTK spectrum.
+
+To obtain the $\cO(n^{-1})$ correction to the network map (evaluated for simplicity on the training data), we further integrate \eqref{short_tower} for $s=1$ and find
+\es{eq:NLO_expressions}{
+    f(t) &= f_{0}(t)
+    -e^{-t\Theta^{(0)}} \int_{0}^{t} dt^{\prime} e^{t^{\prime} \Theta^{(0)}} 
+    \Theta_{1}
+    (t^{\prime})  e^{-t^{\prime} \Theta^{(0)}} (f^{(0)}-y)+\mathcal{O}(n^{-2})\,.
+  }
+Here we have denote the infinite width evolution by $f_{0}(t) = y + e^{-t\Theta^{(0)}} (f^{(0)} - y)$. Figures~\ref{fig:ntk_detail_evol} and \ref{fig:Theta_detail_evol} compare these predictions against empirical results.
+
+
+\begin{figure}[ht!]
+    \centering
+    \subcaptionbox{Mean deviation from init.\label{fig:ntk_diff_evo}}{\includegraphics[width=2.2in]{new_figs/theta_mean}}\hspace{-1.5em}
+    \subcaptionbox{$f$ beyond leading order.\label{fig:ntk_detail_evol}}{\includegraphics[width=2.2in]{new_figs/f_evol_main}}\hspace{-1.5em}
+    \subcaptionbox{Kernel evolution.\label{fig:Theta_detail_evol}}{\includegraphics[width=2.2in]{new_figs/Theta_evol_narrow}}
+    \caption{Empirical verification of predicted asymptotics. 
+      (a) The mean deviation of the NTK from its initial value for a variety of widths and activation functions. The fit (dashed) matches well with the predicted $\cO(n^{-1})$ asymptotics.
+      (b-c) Comparison between the empirical evolution (solid) and the $\mathcal{O}(n^{-1})$ predicted evolution (dashed) for the network function and the kernel.
+      All experiments were performed on two-class MNIST, computing a single randomly-chosen component of $\Theta$ or $f$.
+      See Appendix~\ref{app:expDetails} for additional experimental details.
+    }
+    \label{fig:experiments}
+\end{figure}
+
+
+\section{Feynman diagrams for deep linear networks}
+\label{sec:feynman}
+In this section we present the Feynman diagram technique, and show how it allows us to compute the asymptotic behavior of correlation functions.
+We end this section with a proof of Theorem~\ref{thm:main} for the case of networks with a single hidden layer and linear activations.
+
+Given a correlation function $C$, we map it to a family of graphs called Feynman diagrams.
+The graphs are independent of the inputs, and are defined as follows.
+\begin{definition}\label{def:feynman}
+  Let $C(x_1,\dots,x_m)$ be a correlation function for a network with $d$ hidden layers.
+  The family $\Gamma(C)$ is the set of all graphs that have the following properties.
+  \begin{enumerate}
+  \item There are $m$ vertices $v_1,\dots,v_m$, each of degree $d+1$.
+  \item Each edge has a type $t \in \{ U,W^1,\dots,W^{d-1},V \}$. Every vertex has one edge of each type.
+  \item If two derivative tensors $T_{\mu_1,\dots,\mu_k}(x_i),T_{\nu_1,\dots,\nu_{k'}}(x_j)$ are contracted $k$ times in $C$, the graph must have at least $k$ edges (of any type) connecting the vertices $v_i,v_j$.
+  \end{enumerate}
+  The graphs in $\Gamma(C)$ are called the \emph{Feynman diagrams} of $C$.
+\end{definition}
+
+\paragraph{Single hidden layer.} 
+For the rest of this section we focus on networks with a single hidden layer.
+We refer the reader to Appendix~\ref{app:deep_linear_fd} for a full treatment of deep linear networks.
+For networks with one hidden layer and linear activation, the network output is $f(x) = n^{-1/2} V^T U x$.
+Consider the correlation function $C(x_1,x_2) = \lexpp{\theta} f(x_1)f(x_2) \rexp$.
+We have
+\begin{align}
+  C(x_1,x_2) &= 
+  \frac{1}{n} \sum_{i,j}^n \sum_{\alpha,\beta}^{\Din}
+  \lexpp{V} V_i V_j \rexp \lexpp{U} U_{i\alpha} \, U_{j\beta} \rexp
+  x_1^\alpha x_2^\beta
+  = \frac{x_1^T x_2}{n} \sum_{i,j}^n \delta_{ij} \delta_{ij} 
+  = x_1^T x_2 \,. \label{eq:fsqr_main}
+\end{align}
+As the factors of $x_1$ and $x_2$ are independent of $n$, we see that $C(x_1,x_2) = \cO(n^0)$. 
+Notice that there are two relevant contributions to this answer: each factor of the network function in the integrand contributes $n^{-1/2}$, and the summed-over product of Kronecker deltas contributes $n$.
+Other details, such as the input dependence, are irrelevant.
+Feynman diagrams allow us to encode only those details that affect the $n$ scaling, ignoring the rest.
+
+The set $\Gamma(C)$ for the correlation function \eqref{eq:fsqr_main} consists of a single Feynman diagram, shown in Figure~\ref{fig:f_sqr_1hl_0}.
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.15\textwidth}
+      \includegraphics[width=\textwidth]{new_figs/f_2_1hl}
+      \caption{}
+      \label{fig:f_sqr_1hl_0}
+    \end{subfigure}
+\quad \quad \quad \quad 
+    \begin{subfigure}[b]{0.30\textwidth}
+        \includegraphics[width=\textwidth]{new_figs/f_4_1hla}
+        \caption{}
+        \label{fig:f_4_1hla}
+    \end{subfigure}
+\quad \quad \quad \quad 
+    \begin{subfigure}[b]{0.15\textwidth}
+        \includegraphics[width=\textwidth]{new_figs/f_4_1hlb}
+        \caption{}
+        \label{fig:f_4_1hlb}
+    \end{subfigure}
+    \caption{Feynman diagram examples. (a) The Feynman diagram of $\lexpp{\theta} f(x) f(x') \rexp$. (b)-(c) The feynman diagrams of $\lexpp{\theta} f(x_1) f(x_2) f(x_3) f(x_4) \rexp$;
+      additional, equivalent diagrams are not shown.
+    } \label{fig:dl_4_1hl_0}
+\end{figure}
+The asymptotic bound on a correlation function is obtained by the following result, which is due to \cite{tHooft:1973alw}.
+\begin{thm}\label{thm:rules}
+  Let $C(x_1,\dots,x_m)$ be a correlation function with one hidden layer and linear activation.
+  Then $C = \cO(n^s)$ where $s = \max_{\gamma \in \Gamma(C)} l_\gamma - \frac{m}{2}$, and $l_\gamma$ is the number of loops in $\gamma$.
+\end{thm}
+Let us give some intuition for Theorem~\ref{thm:rules}. 
+Each Feynman diagram $\gamma$ encodes a subset of the terms contributing to the correlation function.
+To get the asymptotic bound on the correlation function, we sum over the contributions of individual diagrams.
+We can compute the asymptotic behavior of a single diagram $\gamma$ using the following \emph{Feynman rules}: (1) each vertex contributes a factor of $n^{-1/2}$, and (2) each loop contributes a factor of $n$.
+Therefore, if a diagram has $l_\gamma$ loops, its contribution to the correlation function scales as $n^{l_\gamma - m/2}$.
+Rule (1) is due to the explicit $n^{-1/2}$ factor in the network definition. 
+Rule (2) follows from applying Isserlis' theorem, as follows.
+Each covariance factor (such as the factor $\lexp V_i V_j \rexp = \delta_{ij}$ in eq. \eqref{eq:fsqr_main}) corresponds to an edge in a Feynman diagram.
+A loop in the diagram corresponds to a sum over a product of Kronecker deltas, yielding a factor of $n$.
+
+Returning to our example, the graph in Figure~\ref{fig:f_sqr_1hl_0} has two vertices and one closed loop, so we recover the asymptotic behavior $\cO(n^0)$ from Theorem~\ref{thm:rules}.
+As another example, consider the correlation function $C(x_1,x_2,x_3,x_4) = \lexpp{\theta} f(x_1) f(x_2) f(x_3) f(x_4) \rexp$.
+It has two Feynman diagrams, shown in Figures~\ref{fig:f_4_1hla} and \ref{fig:f_4_1hlb}.
+Using the Feynman rules, we find that the disconnected graph represents terms that scale as $\cO(n^0)$, while the connected graph represents terms that scale as $\cO(n^{-1})$.
+Therefore, $C(x_1,x_2,x_3,x_4) = \cO(n^0)$.
+This is an example of a more general phenomenon, that connected graphs vanish faster at large $n$ compared with disconnected graphs.
+
+\paragraph{Correlation functions with derivatives.}
+
+We now extend the Feynman diagram technique to correlation functions that include derivatives of $f$.\footnote{We are not aware of a physics application in which such derivatives are included in a Feynman diagram description of correlation functions.
+Therefore, to our knowledge our treatment of these derivatives is novel both in machine learning and in physics.}
+As a concrete example, consider the correlation function $C(x,x') = \lexpp{\theta} \Theta(x,x') \rexp$, where $\Theta$ is the kernel defined in Section~\ref{sec:applications}.
+For a single hidden layer, we have
+\begin{align}
+  C(x,x') 
+  = \sum_{i=1}^n \lexpp{\theta} 
+  \frac{\dho f(x)}{\dho U_i} \frac{\dho f(x')}{\dho U_i} + 
+  \frac{\dho f(x)}{\dho V_i} \frac{\dho f(x')}{\dho V_i}
+  \rexp \,.
+\end{align}
+The two derivative tensors in this correlation function are contracted: their indices are set to be equal and summed over.
+Therefore, according to Definition~\ref{def:feynman}, $\Gamma(C)$ includes all diagrams in which the corresponding vertices share at least one edge.
+The resulting diagrams are shown in Figure~\ref{fig:ntk_sqr_1hl_0}.
+The edges forced by the contraction are explicitly marked by dashed lines for clarity, but mathematically they are ordinary edges.
+We see that in fact there is only one diagram contributing to this correlation function --- the same one shown in Figure~\ref{fig:f_sqr_1hl_0}.
+Following the Feynman rules, we find that $\lexpp{\theta} \Theta(x,x') \rexp = \cO(n^0)$.
+
+The fact that contracted derivatives should be mapped to forced edges in the Feynman diagrams is proved in Appendix~\ref{app:deep_linear_fd}.
+The basic reason behind this rule is the relation $\sum_k \frac{\dho V_i}{\dho V_k} \frac{\dho V_j}{\dho V_k} = \delta_{ij} = \lexp V_i V_j \rexp$.
+Namely, when derivatives act in pairs they yield a Kronecker delta factor ($\delta_{ij}$), which is equal to the factor obtained from a covariance ($\lexp V_i V_j \rexp$).
+While Isserlis' theorem instructs us to sum over all possible covariance configurations (and therefore over all possible edge configurations), a pair of summed derivative leads to a particular covariance factor.
+Therefore, we should only consider graphs that include the edge corresponding to this covariance factor.
+
+\begin{figure}
+  \centering
+\begin{subfigure}[b]{0.17\textwidth}
+        \includegraphics[width=\textwidth]{new_figs/df_2_1hla}
+        \caption{}
+        \label{fig:df_2_1hla}
+    \end{subfigure}
+    \quad\quad\quad\quad\quad
+\begin{subfigure}[b]{0.17\textwidth}
+        \includegraphics[width=\textwidth]{new_figs/df_2_1hlb}
+        \caption{}
+        \label{fig:df_2_1hlb}
+    \end{subfigure}
+  \caption{Feynman diagrams for $\lexpp{\theta} \Theta(x,x') \rexp$ with one hidden layer. The dashed vertical line represents vertices forced by contracted derivatives.}
+  \label{fig:ntk_sqr_1hl_0}
+\end{figure}
+
+We are now ready to prove Theorem~\ref{thm:main} for the case of single hidden layer with linear activations.
+A proof for the general case can be found in Appendix~\ref{app:deep_linear_fd}.
+\begin{proof}[Proof (Theorem~\ref{thm:main}, one hidden layer).]
+  Let $C(x_1,\dots,x_m)$ be a correlation function for a network with a single hidden layer and linear activation.
+  Let $G_C(V,E)$ be the cluster graph of $C$, and let $\gamma(V,E') \in \Gamma(C)$ be a Feynman diagram.
+  Notice that $E \subset E'$.
+  Indeed, $E'$ contains an edge corresponding to each pair of contracted derivative tensors in $C$, and $E=\{(v_i,v_j) \,|\, (T(x_i),T(x_j))\mathrm{~contracted~in~ }C\}$.
+  In addition, notice that $\gamma$ only contains connected components (\emph{i.e.} loops) with an even number of vertices, because every vertex has exactly one edge of each type.
+  Therefore, $n_\gamma \le n_e + \frac{n_o}{2}$, where $n_\gamma$ is the number of loops in $\gamma$, and $n_e$ ($n_o$) is the number of even (odd) components in $G_C$.
+  The bound is saturated when every even component of $G_C$ belongs to a different component of $\gamma$, and pairs of odd components in $G_C$ belong to different components of $\gamma$.
+  From Theorem~\ref{thm:rules}, we have that $C = \cO(n^s)$ where $s = \max_{\gamma \in \Gamma(C)} n_\gamma - \frac{m}{2} \le n_e + \frac{n_o}{2} - \frac{m}{2}$.
+\end{proof}
+
+
+\section{Discussion}
+
+Ensemble averages of the network function and its derivatives are an important class of functions that often show up in the study of wide neural networks.
+Examples include the ensemble average of the train and test losses, the covariance of the network function, and the Neural Tangent Kernel \pcite{ntk}.
+In this work we presented Conjecture~\ref{conj:main}, which allows one to derive the asymptotic behavior of such functions at large width.
+
+For the case of deep linear networks, we presented a complete analytic understanding of the Conjecture based on Feynman diagrams.
+In addition, we presented empirical and anlytic evidence showing that the Conjecture also holds for deep networks with non-linear activations, as well as for networks with non-Gaussian initialization.
+We found that the Conjecture holds in all cases we tested.
+
+The basic tools presented in this work can be applied to many aspects of wide network research, greatly simplifying theoretical calculations.
+We presented several applications of our method to the asymptotic behavior of wide networks during stochastic gradient descent, and additional applications are presented in Appendix~\ref{app:app_details}.
+We were able to improve upon known results by tightening existing bounds, and by applying the technique to SGD as well as to gradient flow.
+In addition, we took a step beyond the infinite width limit, deriving closed-form expressions for the first finite-width correction to the network evolution.
+These novel results open the door to studying finite-width networks by systematically expanding around the infinite width limit.
+
+A central question in the study of wide networks is whether the infinite width limit is a good model for describing the behavior of realistic deep networks \pcite{2018arXiv181207956C,2019arXiv190608899G,DBLP:journals/corr/abs-1906-08034}.
+In this work we take a step toward answering this question, by working out the next order in a perturbative expansion around the infinite width limit, potentially bringing us closer to an analytic description of finite-width networks.
+We hope that the techniques presented here provide a basis to systematically answering these and other questions about the behavior of wide networks. 
+
+\section*{Acknowledgements}
+
+The authors would like to thank
+Alex Alemi,
+Yasaman Bahri,
+Boris Hanin,
+Jared Kaplan,
+Jaehoon Lee,
+Behanm Neyshabur,
+Sam Schoenholz,
+Sylvia Smullin,
+and
+Jascha Sohl-Dickstein
+for useful discussion.
+The authors would especially like to thank Ying Xiao for extensive comments on early versions of this manuscript.
+
+\appendix
+
+\section{Experimental details and additional results}\label{app:expDetails}
+
+\subsection{Non-Gaussian initialization}
+\label{app:nonGauss}
+
+In Table~\ref{tab:empscaling} we listed asymptotic bounds on several correlation functions, where the model parameters were initialized from a Gaussian distribution.
+Table~\ref{tab:empscalingNonGauss} shows additional results using the same experimental setup, but with weights sampled uniformly from $\{\pm 1\}$.
+We again find good agreement with the predictions of Conjecture~\ref{conj:main}.
+
+\begin{table}[ht!]
+ \centering
+ \bgroup
+ \def\arraystretch{1.5} 
+ \begin{tabular}{c|cc|ccc}
+   Correlation function $C$ & $n_e,n_o$ & $s_C$ & lin. & ReLU & tanh \\
+   \hline
+   $\lexpp{\theta} f(x_1) f(x_2) \rexp$
+                        & 0,2 & 0 & 0.00 & 0.00 & 0.02 \\
+   $\lexpp{\theta} f(x_1) f(x_2) f(x_3) f(x_4) \rexp$
+                     & 0,4 & 0 & -0.07 & 0.06 & -0.02 \\
+   $\sum_\mu \lexpp{\theta} \dho_\mu f(x_1) \dho_\mu f(x_2) \rexp$
+                     & 1,0 & 0 & 0.00 & 0.00 & 0.00 \\
+   $\sum_{\mu,\nu} \lexpp{\theta}
+   \dho_\mu f(x_1) \dho_\nu f(x_2) \dho_{\mu,\nu} f(x_3) f(x_4)
+   \rexp$
+                     & 0,2 & -1 & -1.02 & -1.01 & -0.97 \\
+   $\sum_{\mu,\nu,\rho} \lexpp{\theta}
+   \dho_\mu f(x_1) \dho_\nu f(x_2) \dho_\rho f(x_3)
+   \dho_{\mu,\nu,\rho} f(x_4)
+   \rexp$
+                     & 1,0 & -1 & -2.00 & -1.99 & -2.02 \\
+   $\sum_{\mu,\nu,\rho,\sigma} \lexpp{\theta}
+   \dho_\mu f(x_1) \dho_\nu f(x_2) \dho_{\mu,\nu} f(x_3)
+   \dho_\rho f(x_4) \dho_\sigma f(x_5) \dho_{\rho,\sigma} f(x_6)
+   \rexp$
+                     & 0,2 & -2 & -2.05 & -2.01 & -1.99
+ \end{tabular}
+ \egroup
+ \caption{Examples of bounds on correlation functions obtained from Conjecture~\ref{conj:main}.
+   The experimental setup is the same as in Table~\ref{tab:empscaling}, but the model parameters are sampled uniformly from $\{\pm 1\}$ instead of from a Gaussian distribution.
+   We find good agreement with the theoretical predictoins, and in many cases the bound is tight.
+ }
+ \label{tab:empscalingNonGauss}
+\end{table}
+
+
+\subsection{Experimental details}
+
+The experiments in Figure~\ref{fig:experiments} were performed on two-class MNIST, computing a single randomly-chosen component of the kernel $\Theta$.
+Sub-figure (a) uses networks trained for 1024 steps with learning rate 1.0 and 1000 samples per class, averaged over 100 initializations.
+Each curve in figure (b) represents a single instance of the network map evaluated on a random image over the corse of training. The models were trained with 10 samples per class and learning rate 0.1. The input to the network is normalized by the square root of the input dimension as in \pcite{ntk}
+\es{norm}{
+f(x) = n^{-1/2} V^T \sigma(n^{-1/2} W^{d-1} \cdots \sigma(n^{-1/2} W^1 \sigma(D_{\rm in}^{-1/2}U x)))\,.
+}
+
+\section{Feynman diagrams for deep linear networks}\label{app:deep_linear_fd}
+
+Feynman diagrams can be used to derive asymptotic upper bounds on deep linear networks in the large width limit.
+In this section we describe the method in detail, and use it to prove Theorem~\ref{thm:main}.
+
+\subsection{Feynman diagrams and double-line diagrams}
+\label{sec:dn}
+
+In this section we build on the results of Section~\ref{sec:feynman} and consider correlation functions of deep linear networks with $d$ hidden layers.
+The network function was defined in \eqref{eq:fdl}, and here we set the activation $\sigma$ to be the identity.
+Definition~\ref{def:feynman} describes how to map a correlation function $C$ to $\Gamma(C)$, a family of graphs called Feynman diagrams.
+The Feynman diagram method relies on Isserlis' theorem, which allows us to express arbitrary moments of multivariate Gaussian variables in terms of their covariance.
+\begin{thm}[Isserlis] \label{thm:isserlis}
+  Let $z=(z_1,\dots,z_l)$ be a centered multivariate Gaussian variable. For any positive integer $k$,
+  \begin{align}
+    \lexpp{z} z_{i_1} \cdots z_{i_{2k}} \rexp &=
+    \frac{1}{2^{k} k!}
+    \sum_{\pi \in S_{2k}}
+    \lexp z_{i_{\pi(1)}} z_{i_{\pi(2)}} \rexp
+    \lexp z_{i_{\pi(3)}} z_{i_{\pi(4)}} \rexp \cdots
+    \lexp z_{i_{\pi(2k-1)}} z_{i_{\pi(2k)}} \rexp \,, \label{eq:isserlis}
+    \\
+    \lexpp{z} z_{i_1} \cdots z_{i_{2k-1}} \rexp &= 0
+    \,.
+  \end{align}
+  In particular, if the covariance matrix of $z$ is the identity then
+  \begin{align}
+    \lexpp{z} z_{i_1} \cdots z_{i_{2k}} \rexp &=
+    \frac{1}{2^{k} k!}
+    \sum_{\pi \in S_{2k}}
+    \delta_{i_{\pi(1)} i_{\pi(2)}}
+    \delta_{i_{\pi(3)} i_{\pi(4)}} \cdots
+    \delta_{i_{\pi(2k-1)} i_{\pi(2k)}} \,.
+  \end{align}
+\end{thm}
+Using this theorem, a correlation function $C$ can be expressed as a sum over permutations as in \eqref{eq:isserlis}.
+Each term in this sum maps to a Feynman diagram in $\Gamma(C)$.
+
+As an example, consider the correlation function $C(x,x') = \lexpp{\theta} f(x) f(x') \rexp$ for a network with 2 hidden layers.
+An explicit calculation gives
+\begin{align}
+  C(x,x') &= 
+  \frac{1}{n^2} \sum_{i,j,k,l}^n \sum_{\alpha,\beta}^{\Din}
+  \lexpp{\theta} V_i W^1_{ij} U_{j\alpha} V_{k} W^1_{kl} U_{l\beta} \rexp x_\alpha x'_\beta 
+  \label{eq:fsqr0} \\ &=
+  \frac{1}{n^2} \sum_{i,j,k,l}^n \sum_{\alpha,\beta}^{\Din}
+  \lexpp{V} V_i V_{k} \rexp
+  \lexpp{W} W^1_{ij} W^1_{kl} \rexp
+  \lexpp{U} U_{j\alpha} \, U_{l\beta} \rexp
+  x_\alpha x'_\beta 
+  \label{eq:fsqr1} \\
+  &= \frac{x^T x'}{n^2} \sum_{i,k=1}^n \delta_{ik} \delta_{ik}
+  \sum_{j,l=1}^n \delta_{jl} \delta_{jl} 
+  = x^T x' = \cO(n^0) \,. \label{eq:fsqr}
+\end{align}
+To get from \eqref{eq:fsqr0} to \eqref{eq:fsqr1}, we applied Isserlis' theorem for every choice of indices $i,j,k,l,\alpha,\beta$. 
+We find that there is at most one permutation $\pi$ of the network parameters such that the covariances do not vanish.
+This is because the covariance of parameters across different layers vanishes identically (for example $\lexpp{\theta}V_iW^1_{jk}\rexp=0$).
+Correspondingly, this correlation function has a single Feynman diagram, shown in Figure~\ref{fig:f2_2_sl}.
+
+For networks with one hidden layer, we saw in Section~\ref{sec:feynman} that the asymptotic behavior is determined by the number of loops in a graph.
+This observation does not immediately generalize to networks with general depth, because it is not obvious how to count loops in diagrams such as the one in Figure~\ref{fig:f2_2_sl}.
+The problem can be traced back to the fact that weight matrices have covariances of the form $\lexp W_{ij} W_{kl} \rexp = \delta_{ik} \delta_{jl}$ involving two Kronecker deltas, but the procedure described so far assumes that each covariance (and each edge in the graph) corresponds to a single Kronecker delta.
+
+A similar question appeared in the context of theoretical physics, and the correct generalization is due to \cite{tHooft:1973alw}.
+The idea is to treat each Feynman diagram as the triangulation of a Riemann surface, and to define the number of loops in a graph to be the number of faces of the triangulation.
+In practice, this involves mapping each Feynman diagram to a new \emph{double-line diagram}: A graph in which each edge corresponds to a single Kronecker delta factor, and loops correspond to triangulation faces of the original diagram.
+\begin{definition} \label{def:dl}
+  Let $\gamma \in \Gamma(C)$ be a Feynman diagram for a correlation function $C$ involving $k$ derivative tensors for a network of depth $d$.
+  Its \emph{double-line graph}, $\DL(\gamma)$ is a graph with $kd$ vertices of degree 2, defined by the following blow-up procedure.
+  \begin{itemize}
+  \item Each vertex $v^{(i)}$ in $\gamma$ is mapped to $d$ vertices $v^{(i)}_1,\dots,v^{(i)}_{d}$ in $\DL(\gamma)$.
+  \item Each edge $(v^{(1)},v^{(2)})$ in $\gamma$ of type $W^l$ is mapped to two edges $(v^{(1)}_l,v^{(2)}_l)$, $(v^{(1)}_{l+1},v^{(2)}_{l+1})$.
+  \item Each edge $(v^{(1)},v^{(2)})$ in $\gamma$ of type $U$ is mapped to a single edge $(v^{(1)}_1,v^{(2)}_1)$.
+  \item Each edge $(v^{(1)},v^{(2)})$ in $\gamma$ of type $V$ is mapped to a single edge $(v^{(1)}_d,v^{(2)}_d)$.
+  \end{itemize}
+  The number of \emph{faces} in $\gamma$ is given by the number of loops in the double-line graph $\DL(\gamma)$.
+\end{definition}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.3\textwidth}
+      \centering
+      \includegraphics[width=0.6\textwidth]{new_figs/f_2_2hl_sl}
+      \caption{Feynman diagram}
+      \label{fig:f2_2_sl}
+    \end{subfigure}\ \ \ \ \ \ \ \ 
+    \begin{subfigure}[b]{0.3\textwidth}
+      \centering
+      \includegraphics[width=0.57\textwidth]{new_figs/f_2_2hl_dl}
+      \caption{Double-line diagram}
+      \label{fig:f2_2_dl}
+    \end{subfigure}
+    \caption{Feynman diagrams for $\lexpp{\theta} f(x) f(x') \rexp$ with 2 hidden layers.
+      Notice that the $U,V$ edges in the Feynman diagram map to single edges in the double-line diagram, while the $W$ edge maps to a double edge.}
+    \label{fig:f2_2hl_sldl}
+\end{figure}
+Figure~\ref{fig:f2_2hl_sldl} shows the Feynman diagram and corresponding double-line diagram for $\lexpp{\theta} f(x) f(x') \rexp$ with 2 hidden layers.
+We can interpret this Feynman diagram as a triangulation of the disc: a 2-dimensional surface with a single boundary.
+The triangulation has 2 vertices, 3 edges corresponding to the edges of the Feynman diagram, and 2 faces correponding to the loops of the double-line diagram.
+Figure~\ref{fig:dl_2pt_4pt} shows additional examples of double-line diagrams, and Figure~\ref{fig:ntk_sqr_2hl} shows the double-line diagrams of a correlation function with derivatives.
+As explained in Section~\ref{sec:feynman}, contracted derivative tensors in a correlation function $C$ map to forced edges in $\Gamma(C)$, and these are marked with dashed lines on the diagrams.
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}[b]{0.36\textwidth}
+        \includegraphics[width=\textwidth]{new_figs/f_4_2hla}
+        \caption{}
+        \label{fig:dl_4_2hla_0}
+    \end{subfigure}
+\ \ \ \ \ \ \ \ \ \ \quad \quad \quad \quad 
+    \begin{subfigure}[b]{0.18\textwidth}
+        \includegraphics[width=\textwidth]{new_figs/f_4_2hlb}
+        \caption{}
+        \label{fig:dl_4_2hlb_0}
+    \end{subfigure}
+    \caption{Double-line diagrams for $\lexpp{\theta} f(x_1) f(x_2) f(x_3) f(x_4) \rexp$ for a deep linear network with 2 hidden layers.} \label{fig:dl_2pt_4pt}
+\end{figure}
+\begin{figure}[ht!]
+  \centering
+  \begin{subfigure}[b]{0.6\textwidth}
+    \includegraphics[width=\textwidth]{new_figs/ntk_2hl.pdf}
+  \end{subfigure}
+  \caption{Double-line graphs describing the expectation value of the NTK, $\lexpp{\theta} \Theta \rexp$, for a deep linear network with two hidden layers.
+    Crossed edges mark the edges that are forced by contracted derivatives.
+    The derivative can act on either $U$, $V$, or $W^1$, and therefore there are three diagrams.
+    Each diagram has 2 vertices and 2 faces, and therefore the correlation function is $\cO(n^0)$ according to the Feynman rules.}\label{fig:ntk_sqr_2hl}
+\end{figure}
+
+Generally, every Feynman diagram of a deep linear network can be interpreted as the triangulation of a 2-dimensional manifold with at least one boundary.
+Intuitively, the presence of the boundary is due to the fact that the $U,V$ weights at both ends of network have only one dimension that scales linearly with the width.
+As a result, in the double-line diagrams the $U,V$ edges become single lines rather than double lines.
+These `missing' lines translate into fewer faces in the triangulation, and the `missing' faces can be geometrically interpreted as boundaries in the corresponding surface.\footnote{
+  One can consider the \emph{cyclic model} 
+  $\tilde{f}(x) = n^{-(d+1)/2} \trace \left( \tilde{V} W^{d-1} \cdots W^1 \tilde{U} \right) x$ with 1D input $x$, in which all the weight tensors $\tilde{U},\tilde{V},W^1,\dots,W^{d-1}$ are $n\times n$ matrices.
+  The Feynman diagram construction for this model is similar to the deep linear case, except that all edges in the Feynman diagram map to double edges in the double-line diagrams.
+  Such diagrams can be interpreted as triangulations of surfaces with no boundaries.
+  Unlike the deep network diagrams, they have no `missing' loops.
+  }
+
+The discussion above is summarized by the following result, due to \cite{tHooft:1973alw}, that describes how the asymptotic behavior of a general correlation function can be computed using the Feynman rules for deep linear networks.
+\begin{thm}\label{thm:feynDL}
+  Let $C(x_1,\dots,x_m)$ be a correlation function of a deep linear network with $d$ hidden layers, and let $\gamma \in \Gamma(C)$ be a Feynman diagram.
+  The diagram represents a subset of terms that contribute to $C$, and its asymptotic behavior is determined by the Feynman rules: the subset is $\cO(n^{s_\gamma})$ where $s_\gamma = l_\gamma - \frac{dm}{2}$, and $l_\gamma$ is the number of loops in the double-line diagram $\DL(\gamma)$.
+ Furthremore, the correlation function is $C = \cO(n^s)$, where $s = \max_{\gamma\in\Gamma(C)} s_\gamma$.
+\end{thm}
+The intuition for the formula $s_\gamma = l_\gamma - \frac{dm}{2}$ is similar to the single hidden layer case, Theorem~\ref{thm:rules}.
+The term $l_\gamma$ counts the number of factors of the form $\sum_{i_1,\dots,i_k} \delta_{i_1 i_2} \delta_{i_2 i_3} \cdots \delta_{i_k i_1} = n$ that appear in the Correlation function after applying Isserlis' theorem.
+The term $\left( -\frac{dm}{2} \right)$ is due to the explicit $n^{-d/2}$ normalization of the network function.
+
+\subsection{Asymptotics of deep linear networks}\label{app:adln}
+
+We now prove Theorem~\ref{thm:main}.
+The theorem follows from the following lemma, again due to \cite{tHooft:1973alw}, that relates the asymptotic behavior to the number of connected components in a Feynman diagram.
+\begin{lemma}\label{lemma:asympBound}
+  Let $C(x_1,\dots,x_m)$ be a correlation function for a deep linear network.
+  Let $c_\gamma$ be the number of connected components of a graph $\gamma \in \Gamma(C)$. 
+  Then $C = \cO(n^s)$, where
+  \begin{align}
+    s = \max_{\gamma \in \Gamma(C)} c_\gamma - \frac{m}{2} \,. \label{eq:dl_bound_total}
+  \end{align}
+\end{lemma}
+\begin{proof}
+We prove the result for 1D inputs ($\Din=1$), and it is easy to generalize to arbitrary input dimension.
+Let $\gamma \in \Gamma(C)$ be a Feynman diagram and let $\gamma'$ be a connected component of $\gamma$ with $v_{\gamma'}$ vertices.
+Notice that we can apply the Feynman rules of Theorem~\ref{thm:feynDL} separately to each component $\gamma'$ and find a bound $\cO(n^{s_{\gamma'}})$.
+Then, $\gamma = \cO(n^{s_\gamma})$ where $s_\gamma = \sum_{\gamma'} s_{\gamma'}$, and the sum runs over the connected components of $s_\gamma$.
+We will show below that $s_{\gamma'} \le 1 - \frac{v_{\gamma'}}{2}$, and therefore $s_\gamma \le c_\gamma - \frac{m}{2}$, which is sufficient to prove \eqref{eq:dl_bound_total}.
+
+Let us prove the remaining statement about $s_{\gamma'}$.
+The Euler character of the graph $\gamma'$ with $v=v_{\gamma'}$ vertices, $e$ edges and $f$ faces is $\chi = v - e + f$.
+The degree of each vertex in the graph is $d+1$, and therefore $e = \frac{(d+1)v}{2}$.
+Using Theorem~\ref{thm:feynDL} the graph is $\cO(n^{s_{\gamma'}})$ where $s_{\gamma'} = f - \frac{dv}{2}$.
+We therefore find that $\chi = \frac{v}{2} + s_{\gamma'}$.
+The graph $\gamma'$ is a triangulation of some connected surface with at least one boundary.
+The Euler character for such a surface is bounded by $\chi \le 1$, and therefore $s_{\gamma'} \le 1 - \frac{v}{2}$.
+\end{proof}
+
+Let us now prove Theorem~\ref{thm:main}.
+\begin{proof}
+  Let $C(x_1,\dots,x_m)$ be a correlation function for a deep linear network.
+  Suppose that the cluster graph $G_C$ has $n_e$ even size components and $n_o$ odd size components.
+  Let $\gamma \in \Gamma(C)$ be a Feynman diagram with $c_\gamma$ connected components.
+  We will show that $c_\gamma \le n_e + \frac{n_o}{2}$.
+  It then follows immediately from Lemma~\ref{lemma:asympBound} that $C = \cO(n^s)$ where $s = n_e + \frac{n_o}{2} - \frac{m}{2}$, concluding the proof.
+
+  Let us derive the bound on $c_\gamma$.
+  First, all vertices that belong to a given cluster (a component of $G_C$) will also belong to the same connected component in $\gamma$.
+  This is because every edge in $G_C$ is also an edge in $\gamma$ (note that $G_C$ and $\gamma$ have the same set of vertices).
+  Therefore, $c_\gamma \le n_e + n_o$.
+  Second, note that every connected component of the graph $\gamma$ has an even number of vertices.
+  Indeed, each edge has a type $t$, and each vertex has exactly one edge of each type.
+  Therefore, a connected component with $v$ vertices has $\frac{v}{2}$ edges of each type, and so $v$ must be even.
+  It follows that the vertices of even clusters can form their own connected components in a Feynman diagrams, while odd clusters must be connected in sets of 2 or more to form connected components.
+  The bound on $c_\gamma$ then follows.
+\end{proof}
+
+
+
+\section{Non-Linearities}
+\label{app:non-lin}
+
+In previous sections we presented the Feynman diagram method for computing the large width asymptotics of correlation functions.
+In this section we show that the method applies as-is for deep networks with ReLU non-linearities and all-equal inputs, as well as to networks with a single hidden layer, a broader class of non-linearities, and arbitrary inputs.
+Theorem~\ref{thm:nonlin} follows immediately from the results presented in this section.
+
+\subsection{Deep networks with ReLU non-linearities}
+
+\newcommand{\hW}{\hat{W}}
+\newcommand{\hU}{\hat{U}}
+\newcommand{\hV}{\hat{V}}
+\newcommand{\hD}{\hat{D}}
+
+The following result guarantees that the presence of ReLU non-linearities does not change the asymptotic upper bound compared with linear activations, when all inputs are the same.
+\begin{thm}\label{thm:deep_relu}
+  Let $f_{\rm nl}$ be a network function of the form \eqref{eq:fdl} with ReLU activation.
+  Let $f$ be a network with the same architecture but with linear activation.
+  Let $C(x_1,\dots,x_m;\fnl)$ be a correlation function of the deep network $\fnl$ with width $n$, and let $f$ be a deep linear network with the same width and depth.
+  Suppose that all inputs are the same, $x_1 = x_2 = \cdots = x_m$.
+  Then
+  \begin{align}
+    C(x_1,\dots,x_m;\fnl) = \cO(C(x_1,\dots,x_m;f)) \,.
+  \end{align}
+\end{thm}
+Intuitively, we will rely on the fact that for ReLU networks we can, in some cases, treat the binary neuron activations as being statistically independent of the weights.
+This result is due to \pcite{hanin2018products}.
+Given this result, we can bound the contribution of the binary activations, and the remaining Gaussian integral is equivalent to that found in a deep linear network.
+The proof does not work for correlation functions with non-equal inputs, because in that case the independence result of \cite{hanin2018products} no longer holds.
+\begin{proof}
+  We can write the network function as
+  \begin{align}
+    \fnl(x) &= n^{-d/2} V^T D^{d}(x) W^{d-1} D^{d-1}(x) W^{d-2} \cdots D^2(x) W^1 D^1(x) U x \,,
+    \\
+    D^j(x) &:= H(W^{j-1} \sigma(W^{j-2} \cdots \sigma(U x))) \,,\quad j=1,\dots,d \,.
+  \end{align}
+  Here, $H$ is the Heaviside step function acting elementwise on its vector argument.
+  We now introduce the construction from \cite{hanin2018products}.
+  Let $\xi^j,\eta^j$, $j=1,\dots,d$ be diagonal matrices of dimension $n$, whose diagonal elements are $\pm 1$-Bernoulli($p$) variables with $p=\frac{1}{2}$.
+  We define the new variables
+  \begin{align}
+    \hat{U} := \xi^1 U \,,\quad
+    \hat{V} := \eta^{d} V \,,\quad
+    \hat{W}^j := \xi^{j+1} W^j \eta^j \,,\quad j=1,\dots,d \,.
+  \end{align}
+  Let $\hfnl$ be a network function with the same architecture as $\fnl$ but using the re-defined weights.
+  We define
+  \begin{align}
+    \hfnl(x) &= n^{-d/2} \hV^T \hD^{d}(x) \hW^{d-1} \cdots \hD^2(x) \hW^1 \hD^1(x) \hU x 
+    \\ &= n^{-d/2} V^T \rho^d \hD^{d}(x) W^{d-1} \rho^{d-1} \cdots \rho^2 \hD^2(x) W^1 \rho^1 \hD^1(x) U x \,,
+    \\
+    \hD^{j}(x) &:= H(\hW^{j-1} \sigma(\hW^{j-2} \cdots \sigma(\hU x))) \,,\quad j=1,\dots,d \,,
+    \\
+    \rho^j &:= \eta^j \xi^j \,,\quad j=1,\dots,d \,.
+  \end{align}
+  The following was shown in \cite{hanin2018products}.
+  \begin{enumerate}
+  \item $\fnl$ and $\hfnl$ are equal in distribution.
+  \item $\{\hD^j(x), \, \rho^j, \, j=1,\dots,d\}$ are independent of $\{U,V,W^1,\dots,W^{d-1}\}$.
+  \item $\{\hD^j(x), \, j=1,\dots,d\}$ are independent of each other for fixed $x$. 
+    The diagonal entries of each diagonal matrix $\hD^j(x)$ are independent, and take the values $\{0,1\}$ with probability $\frac{1}{2}$.
+  \end{enumerate}
+  Now, the correlation function can be written as
+  \begin{align}
+    C(x_1,\dots,x_m;\fnl) &= \lexpp{\theta} F(x_1,\dots,x_m;\fnl) \rexp 
+    = \lexpp{\theta,\eta,\xi} F(x_1,\dots,x_m;\hfnl) \rexp
+    \label{eq:fnlhfnl} \,. 
+  \end{align}
+  The second equality follows from the fact that $\fnl \overset{d}{=} \hfnl$.
+  Let us assume for now that the correlation function has no contracted derivatives.
+  The we have
+  \begin{align}
+    &C(x_1,\dots,x_m;\fnl) = \lexpp{\theta,\eta,\xi} \hfnl(x_1) \cdots \hfnl(x_m) \rexp
+    \\ &\quad =
+         \frac{1}{n^{dm/2}}
+         \sum_{\vec{i}}^n \sum_{\vec{\alpha}}^{\Din}
+         \lexp \prod_{l=1}^m V_{i_{l,d}} \rexp
+         \left( \prod_{l'=1}^{d-1} \lexp \prod_{l''=1}^m W^{l'}_{i_{l'',l'+1},i_{l'',l'}} \rexp \right)
+         \lexp \prod_{l=1}^m U_{i_{l,1},\alpha_l} \rexp E_{\vec{i},\vec{\alpha}} \,.
+         \label{eq:cumb}
+  \end{align}
+  Here, $\vec{i} = \{i_{1,1},\dots,i_{m,d}\}$ and $\vec{\alpha} = \{\alpha_1,\dots,\alpha_m\}$, and
+  \begin{align}
+    E_{\vec{i},\vec{\alpha}} := 
+    \lexp \prod_{l=1}^d \prod_{l'=1}^m \rho^l_{i_{l',l}} \hD^l_{i_{l',l}}(x_{l'}) \rexp
+    \prod_{l=1}^m x^l_{\alpha_l} \,.
+  \end{align}
+  In writing the equation \eqref{eq:cumb} we used the facts that $\hD,\rho$ are independent of the parameters, and that parameters in different layers are independent.
+  We now use Theorem~\ref{thm:isserlis} (Isserlis), which says that each of the expectation values over products of $V$, $W^j$, and $U$ elements is equal to a sum over permutations, where each term is a product over Kronecker delta functions --- the covariance matrices of the parameters.
+  \begin{align}
+    C(x_1,\dots,x_m;\fnl) = \frac{1}{n^{dm/2}}
+      \sum_{\sigma_1,\dots,\sigma_{d+1} \in S_m}
+      \sum_{\vec{i}}^n \sum_{\vec{\alpha}}^{\Din} \tilde{\Delta}^{\vec{\sigma}}_{\vec{i},\vec{\alpha}} E_{\vec{i},\vec{\alpha}}
+    \,. \label{eq:permsum}
+  \end{align}
+  Here, $\tilde{\Delta}^{\vec{\sigma}}_{\vec{i},\vec{\alpha}}$ is a product of Kronecker delta functions.
+  The precise form of this object will not be important for our purpose, though it can be easily derived using Theorem~\ref{thm:isserlis}.
+
+  We can now bound the correlation function as follows.
+  \begin{align}
+    |C(x_1,\dots,x_m;\fnl)|
+    &\le \frac{1}{n^{dm/2}}
+      \sum_{\sigma_1,\dots,\sigma_{d+1} \in S_m} 
+      \sum_{\vec{i}}^n \sum_{\vec{\alpha}}^{\Din} \tilde{\Delta}^{\vec{\sigma}}_{\vec{i},\vec{\alpha}}
+      \left| E_{\vec{i},\vec{\alpha}} \right|
+    \\ &\le
+         \frac{E_{\rm max}}{n^{dm/2}}
+         \sum_{\sigma_1,\dots,\sigma_{d+1} \in S_m} 
+         \sum_{\vec{i}}^n \sum_{\vec{\alpha}}^{\Din} \tilde{\Delta}^{\vec{\sigma}}_{\vec{i},\vec{\alpha}}
+    \\ &=
+         E_{\rm max} |C(v,\dots,v;f)|
+    \,.
+  \end{align}
+  Here, $E_{\rm max} = \max_{\vec{i},\vec{\alpha}} \left| E_{\vec{i},\vec{\alpha}} \right|$, and $v \in \bR^{\Din}$ is the all-ones vector.
+  The diagonal elements of $\rho^l,\hD^l(x)$ are identical variables.
+  Therefore, $E_{\vec{i},\vec{\alpha}}$ only takes an $\cO(1)$ number of values in the large width limit.
+  Note that each of these values are independent of $n$, and therefore $E_{\rm max} = \mathcal{O}(1)$.
+  We managed to bound the correlation function for $\fnl$ in terms of the correlation function for the corresponding linear network $f$ with fixed inputs.
+  The asymptotics of the linear-network correlation function do not depend on the inputs, and therefore this concludes the proof.
+\end{proof}
+
+
+\subsection{Single hidden layer networks}
+
+For networks with a single hidden layer, defined by
+\es{logit_repeated}{
+\fnl(x)&=\frac{1}{\sqrt{n}}\sum_{i=1}^{n}V_{i}\sigma(U_{i}^T x)\,,
+}
+we can extend our asymptotic analysis to smooth non-linearities.
+We will show in Theorem~\ref{thrm:nl_scaling} that for any correlation function $C$, we have
+\begin{align}\label{1hl_nl_scaling}
+  C(x_1,\dots,x_m;\fnl) &= \cO(C(x_1,\dots,x_m;f)) \,,
+\end{align}
+where $f$ is a deep linear network of equal width and sufficient depth.
+Therefore, computing the asymptotics using Feynman diagrams for deep linear networks yields a bound on networks with a single hidden layer and smooth non-linearities.
+
+Before delving into the proof of this claim, we consider a few simple examples.
+Let us begin with the correlation function $\lexpp{\theta} \fnl(x)\fnl(x^{\prime})\rexp$.
+\es{twopoint}{
+\lexpp{\theta} \fnl(x)\fnl(x^{\prime})\rexp&=\frac{1}{n}\sum_{i,j}^{n}\lexpp{\theta} V_{i}V_{j}\sigma(U_{i}^T x)\sigma(U_{j}^T x^{\prime})\rexp\\
+&=\frac{1}{n}\sum_{i}^{n}\lexpp{\theta}\sigma(U_{i}^T x)\sigma(U_{i}^T x^{\prime})\rexp \,=\, \mathcal{O}(1)\,.
+}
+Here we used two facts.
+First, the weights $V_{i}$ are unaffected by the non-linearity, so we can carry out the $V$ integral.
+Second, the summand in the last equation, $\lexp\sigma(U_{i}^T x)\sigma(U_{i}^T x^{\prime})\rexp$, is independent of both $i$ and $n$ because $U_i$ are i.i.d. variables.
+
+Next, consider the following correlation function.
+For simplicity, here we set the input dimension to be $\Din=1$, and we set all inputs to 1; this does not change the asymptotics.
+\es{nontrivexp}{
+  \lexpp{\theta} \frac{d\Theta}{dt}\rexp&=
+  \sum_{j,k}^n \lexpp{\theta} \fnl\frac{\dho^2 \fnl}{\dho U_{j} \dho V_{k}}
+  \frac{\dho \fnl}{\dho U_{j}} \frac{\dho \fnl}{\dho V_{k}}\rexp\cr
+  &=\frac{1}{n^{2}} \sum_{i_{1}, i_{2}}^n \lexpp{\theta}
+  V_{i_{1}} V_{i_{2}} \sigma(U_{i_{1}}) \sigma^{\prime}(U_{i_{2}}) \sigma^{\prime}(U_{i_{2}}) \sigma(U_{i_{2}})\rexp\cr
+  &=\frac{1}{n^{2}} \sum_{i_{1}}^n \lexpp{\theta} \sigma(U_{i_{1}})^2 \sigma^{\prime}(U_{i_{1}})^2
+  \rexp\cr
+  &=\mathcal{O}(n^{-1})\,.
+} 
+In the last line, we again used the fact that the summands are equal and independent of $n$.
+
+In general, a correlation function $C(x_1,\dots,x_m;\fnl)$ can be reduced to the form
+\es{general_term}{
+C &= \frac{1}{n^{m/2}}\sum_{\alpha=1}^{K}\sum_{i_{1},\ldots,i_{r_{\alpha}}}^{n} \mathcal{S}^{(\alpha)}_{i_{1}\ldots i_{r_{\alpha}}}
+\,, \\
+\mathcal{S}_{i_{1}\ldots i_{r_{\alpha}}}^{(\alpha)} &:= \lexpp{U} \left(\sigma^{(\ell_{1}^{\alpha})}(U_{i_{1}}^T x_{\bar{\sigma}_{\alpha}(1)})\cdots\sigma^{(\ell_{k_{1}}^{\alpha})}(U_{i_{1}}^T x_{\bar{\sigma}_{\alpha}(k_{1}^{\alpha})})\right) \times \cdots \times
+\right. \cr &\quad \qquad \,\, \left.
+\left(\sigma^{(\ell^{\alpha}_{m+1-k^{\alpha}_{r_{\alpha}}})}(U_{i_{r_{\alpha}}}^T x_{\bar{\sigma}_{\alpha}(m+1-k^{\alpha}_{r_{\alpha}})})\cdots\sigma^{(\ell^{\alpha}_{m})}(U_{i_{r_{\alpha}}}^T x_{\bar{\sigma}_{\alpha}(m)})\right)F^{(\alpha)}(x_{1},\dots,x_{m})\rexp
+\,.\nonumber\\
+}
+This form is obtained by carrying out the $V_{i}$ integrals, as well as all the sums that can be trivially carried out due to the presence of Kronecker deltas.
+Here, the $\alpha$ sum represents a sum over all $K$ terms that appear from performing the $V_{i}$ integrals using Isserlis' theorem;
+$\sigma^{(\ell)}$ denotes the $\ell$-th derivative of the non-linearity;
+$k_{s}^{\alpha}$ is the number of $\sigma^{(\cdot)}(U^{T}_{i_{s}}x)$ factors sharing the $i_{s}$ index;
+$\bar{\sigma}_{\alpha} \in S_m$ is a permutation; and $F^{(\alpha)}$ is a function whose exact form is not important for us.
+We will denote by $r_{\textrm{max}}$ the maximum number of index sums appearing in \eqref{general_term}, namely $r_{\rm max}:=\max_{\alpha}r_{\alpha}$.
+
+Our approach to establishing the asymptotic scaling will be to first bound the maximum number of index sums appearing in any term in our correlation function, written in the form \eqref{general_term}, and then to argue that the summands are bounded by an $n$-independent constant.
+
+Let us introduce a family of diagrams, $\Gset$, which are different in general than the Feynman diagrams.
+A given diagram $g\in \Gset$ is constructed as follows.
+\begin{definition}\label{def:sumdiagram}
+  Let $C(x_1,\dots,x_m;\fnl)$ be a correlation function, where $\fnl$ is the output of a network with one hidden layer, defined in \eqref{logit_repeated}.
+  The family $\Gset$ is the set of all graphs that have the following properties.
+  \begin{itemize}
+  \item Each derivative tensor in $C$ is mapped to a vertex in the graph.
+  \item Each edge has a type that corresponds to one of the weight vectors $U$ or $V$.
+  \item Each vertex has exactly one edge of $V$ type.
+  \item If two derivative tensors are contracted in $C$, the graph must have at least one edge (of any type) connecting the corresponding vertices for each contraction.
+  \end{itemize}
+\end{definition} 
+The reason for introducing this graphical structure is that it allows us to make two important statements.
+If we define $\tilde{c}_{g}$ the number of connected components in a graph $g \in \Gset$ and $\tilde{c}_{\textrm{max}} := \textrm{max}_{g\in \Gset}\tilde{c}_{g}$ then the following holds.
+\begin{enumerate}
+\item The maximal number of sums appearing in a correlation function of the form \eqref{general_term} is $\tilde{c}_{\textrm{max}}$.
+\item $\tilde{c}_{\textrm{max}} = c_{\textrm{max}}$, where $c_{\textrm{max}}$ is the maximal number of connected components in the family of Feynman diagrams corresponding to a correlation function $C(x_1,\ldots, x_m;f_{d})$, where $f_{d}$ is a deep linear network with $d$ hidden layers, and $d$ is large enough that none of the derivative tensors vanish.\footnote{Note that any derivative tensor of $f$ that has rank greater than $d$ vanishes.}
+\end{enumerate}
+These two results, combined with a bound on the summands occurring in $C(x_1,\ldots,x_m;\fnl)$ will establish the bound \eqref{1hl_nl_scaling}.
+
+\begin{lemma} \label{lemma:number_of_sums}
+A correlation function $C$ has $r_{\textrm{max}} = \tilde{c}_{\textrm{max}}$. 
+\end{lemma}
+\begin{proof}
+Each vertex corresponds to a derivative tensor, $T_{\mu_{1}\ldots\mu_{k}}$, which contains a single sum over paired $U_{i}$ and $V_{i}$ indices.
+If two vertices are connected by one or more edges, there is a Kronecker delta factor that sets the corresponding indices to be equal (due either to a derivative contraction, or to a $V$ covariance), reducing the number of sums by one.
+The result is that any connected component of a graph $g \in \Gset$ corresponds to a single sum, and the total numer of index sums corresponding to a particular graph is $\tilde{c}_{g}$, the number of connected components. As a result, the maximum number of sums corresponding to the collection of graphs $\Gset$ is $\tilde{c}_{\textrm{max}}$.
+\end{proof}
+\begin{lemma} \label{lemma:1hlconcomps}
+The maximal number of connected components, $\tilde{c}_{\textrm{max}}$, over the collection of graphs $\Gset$ corresponding to $C(x_1,\dots,x_m;\fnl)$ is bounded by the maximal number of components, $c_{\textrm{max}}$, over the collection $\Gamma(C)$ corresponding to $C(x_1,\dots,x_m;f_{d})$ of Feynman diagrams, where $f_{d}$ is a deep linear network of sufficient depth $d$.
+\end{lemma}
+\begin{proof}
+  Let $n_e(n_o)$ be the number of even(odd) clusters in the cluster graph $G_C$ of $C(x_1,\dots,x_m;f_d)$. The cluster graph, $G_C$ is a subgraph of any graph $g\in \Gset$. We can thus think about the embedding of even and odd clusters into $g$.
+  In any graph $g \in \Gset$, an even cluster may belong to its own connected component, while for odd clusters there must be an even number of them in any connected component.
+  This is because an even (odd) cluster contains an even (odd) number of factors of $V$, which must be paired up in any connected component.
+  We find that
+\es{tildecmax_bound}{
+\tilde{c}_{\textrm{max}} = n_e+\frac{n_o}{2}\leq c_{\textrm{max}}\,.
+}
+The last inequality was used below Lemma~\ref{lemma:asympBound} in the proof of Theorem~\ref{thm:main}.
+\end{proof}
+
+\begin{thm}\label{thrm:nl_scaling}
+Let $C(x_1,\dots,x_m;\fnl)$ be a correlation function for a one hidden layer network.
+Let $c_{\rm max}$  be the maximal number of connected components over the collection of graphs $\Gamma(C)$ corresponding to $C(x_1,\dots,x_m;f_d)$, where $f_d(x)$ is a deep linear network map, with 
+with depth $d$ greater than or equal to the maximum number of derivatives appearing in any single derivative tensor in $C$.
+Then $C = \cO(n^s)$ where $s = c_{\rm max} - \frac{m}{2}$. Furthermore,
+  \begin{align}
+    C(x_1,\dots,x_m;\fnl) &= \cO(C(x_1,\dots,x_m;f)) \,.
+  \end{align}
+\end{thm}
+\begin{proof}
+  The correlation function in \eqref{general_term} can be bound as
+  \begin{align}
+    |C(x_1,\dots,x_m;\fnl)| \le
+    \frac{1}{n^{m/2}}
+    \sum_{\alpha=1}^{K}\sum_{i_1,\ldots,i_r}^{n} \left| \mathcal{S}^{(\alpha)}_{i_{1},\ldots,i_{r_{\alpha}}} \right| \,.
+    \label{termbound}
+  \end{align}
+  For fixed inputs, $\mathcal{S}_{i_{1},\ldots,i_{r_{\alpha}}}^{(\alpha)}$ can take at most $\cO(1)$ different values as a function of its indices, and the values are independent of $n$.
+This is because the variables $U_i$ are identical.
+We define $s_{\textrm{max}}$ as the maximum value of $|\mathcal{S}_{i_{1},\ldots,i_{r_{\alpha}}}^{(\alpha)}|$ as a function of $\alpha$ and the indices. Combining this with the above lemmas we can then write.
+  \begin{align}
+    |C(x_1,\dots,x_m;\fnl)| \leq Ks_{\textrm{max}} n^{c_{\textrm{max}}-m/2} \,.
+    \label{termbound}
+  \end{align}
+  The result of the theorem follows from Lemma~\ref{lemma:asympBound}.
+\end{proof}
+
+
+\section{Correlation function asymptotics}
+\label{app:asymp}
+
+In this section we prove several general results about correlation function asymptotics in the large width limit.
+Throughout this section, we assume that Conjecture~\ref{conj:main} holds.
+
+
+\subsection{Variance asymptotics}
+
+Conjecture~\ref{conj:main} can be used to bound the variance of the integrands that appear inside correlation functions.
+\begin{lemma}\label{lemma:variance}
+  Let $\tilde{C}(x_1,\dots,x_{m}) = \lexpp{\theta} F_\theta(x_1,\dots,x_m) \rexp$ be a correlation function, and let $G_C$ be the cluster graph of $C$ with $n_e$ even components and $n_o$ odd components.
+  Assume Conjecture~\ref{conj:main} holds such that $C = \cO(n^{s_C})$, where $s_C = n_e + \frac{n_o}{2} - \frac{m}{2}$.
+  Then $\mathrm{Var}_\theta \left[ F_\theta(x_1,\dots,x_m) \right] = \cO(n^{2s_C})$.
+\end{lemma}
+\begin{proof}
+  To bound the variance, it is enough to bound the correlation function
+  \begin{align}
+    \tilde{C}(x_1,\dots,x_{2m}) := \lexpp{\theta} F_\theta(x_1,\dots,x_m) F_\theta(x_{m+1},\dots,x_{2m}) \rexp
+    \,,
+  \end{align}
+  because $\mathrm{Var}_\theta \left[ F_\theta(x_1,\dots,x_m) \right] \le \tilde{C}(x_1,\dots,x_m,x_1,\dots,x_m)$.
+  The correlation function $\tilde{C}$ has $2n_e$ even clusters and $2n_o$ odd clusters.
+  It follows from Conjecture~\ref{conj:main} that $\tilde{C} = \cO(n^{2s_C})$.
+\end{proof}
+As a corrolary, notice that if $C = \cO(n^{s})$ according to Conjecture~\ref{conj:main}, then typical realizations of the integrand will also be $\cO(n^s)$.
+In other words, the asymptotic bound of Conjecture~\ref{conj:main} holds for typical initializations, not just in expectation.
+
+Table~\ref{tab:empscalingVar} shows empirical results for the variance of several functions.
+In all cases we find that the bound of Lemma~\ref{lemma:variance} holds.
+For $\sum_\mu \lvarp{\theta} \dho_\mu f(x_1) \dho_\mu f(x_2) \rexp$ we prove a tight bound below in Appendix~\ref{app:ntk} for deep linear networks.
+\begin{table}[ht!]
+ \centering
+ \bgroup
+ \def\arraystretch{1.5} 
+ \begin{tabular}{c|cc|ccc}
+   Function & $n_e,n_o$ & $2s_C$ & lin. & ReLU & tanh \\
+   \hline
+   $\lvarp{\theta} f(x_1) f(x_2) \rexp$
+                        & 0,2 & 0 & -0.08 & -0.00 & -0.02 \\
+   $\lvarp{\theta} f(x_1) f(x_2) f(x_3) f(x_4) \rexp$
+                     & 0,4 & 0 & -0.03 & 0.02 & -0.05 \\
+   $\sum_\mu \lvarp{\theta} \dho_\mu f(x_1) \dho_\mu f(x_2) \rexp$
+                     & 1,0 & 0 & -1.01 & -1.02 & -0.99 \\
+   $\sum_{\mu,\nu} \lvarp{\theta}
+   \dho_\mu f(x_1) \dho_\nu f(x_2) \dho_{\mu,\nu} f(x_3) f(x_4)
+   \rexp$
+                     & 0,2 & -2 & -2.1 & -2.13 & -2.14 \\
+   $\sum_{\mu,\nu,\rho} \lvarp{\theta}
+   \dho_\mu f(x_1) \dho_\nu f(x_2) \dho_\rho f(x_3)
+   \dho_{\mu,\nu,\rho} f(x_4)
+   \rexp$
+                     & 1,0 & -2 & -4.02 & -4.1 & -3.05 \\
+   $\sum_{\mu,\nu,\rho,\sigma} \lvarp{\theta}
+   \dho_\mu f(x_1) \dho_\nu f(x_2) \dho_{\mu,\nu} f(x_3)
+   \dho_\rho f(x_4) \dho_\sigma f(x_5) \dho_{\rho,\sigma} f(x_6)
+   \rexp$
+                     & 0,2 & -4 & -4.09 & -4.14 & -4.01 
+ \end{tabular}
+ \egroup
+ \caption{Bounds on variances obtained from Lemma~\ref{lemma:variance}, where the predicted exponent is $2s_C$, compared with empirical results. 
+   The predicted exponent is $2s_C$, and the 3 right-most columns list the empirical exponents.
+   The experimental setup is the same as that of Table~\ref{tab:empscaling}.
+ }
+ \label{tab:empscalingVar}
+\end{table}
+
+
+\subsection{Gradient Flow}\label{sec:gradientFlow}
+
+The following results are used in the gradient flow calculations of Section~\ref{sec:applications}.
+
+\begin{lemma}\label{lemma:subgraph}
+  Let $G'$ be a graph with $m'$ vertices, $n'_e$ even components, and $n'_o$ odd components.
+  Let $G$ be a subgraph of $G'$ with $m$ vertices, $n_e$ even components, and $n_o$ odd components.
+  Then $s(n_e, n_o, m) \ge s(n'_e, n'_o, m')$ where $s(a,b,c) := a + \frac{b-c}{2}$.
+\end{lemma}
+\begin{proof}
+  It is enough to show that $s(n_e,n_o,m)$ does not increase if we (1) add a vertex to $G$, or (2) add an edge to $G$, because $G'$ can be obtained from $G$ by performing such operations finitely many times.
+  Adding a vertex to $G$ changes $n_e \mapsto n_e$, $n_o \mapsto n_o+1$, and $m \mapsto m+1$, leaving $s(n_e,n_o,m)$ unchanged.
+  Next, if we add an edge to $G$ then $m$ does not change, and there are 4 possibilities for how $n_e$ and $n_o$ change.
+  \begin{enumerate}
+  \item The edge connects two even components.
+    Then $n_e \mapsto n_e-1$, $n_o \mapsto n_o$, and $s(n_e,n_o,m)$ decreases by 1.
+  \item The edge connects two odd components.
+    Then $n_e \mapsto n_e + 1$, $n_o \mapsto n_o - 2$, and $s(n_e,n_o,m)$ does not change.
+  \item The edge connects an even component and an odd component.
+    Then $n_e \mapsto n_e - 1$, $n_o \mapsto n_o$, and $s(n_e,n_o,m)$ decreases by 1.
+  \item The edge connects two vertices that belong to the same component.
+    In this case $n_e$, $n_o$, and $s(n_e,n_o,m)$ do not change.
+  \end{enumerate}
+\end{proof}
+
+We now prove Lemma~\ref{lemma:timeDerivs} giving the scaling of time derivatives of correlation functions at initialization. We prove the result for polynomial loss functions. Extension to more general loss functions requires interchanging the large width limit and the Taylor expansion of the loss, which we do not discuss.
+\begin{proof}[proof (Lemma~\ref{lemma:timeDerivs})]
+  Notice that
+  \begin{align}
+    \lexpp{\theta}\frac{d^{k} F(x_1,\ldots,x_m)}{d t^k}\rexp &=
+    \lexpp{\theta}
+    \left(\sum_\mu \sum_{(x',y')\in D_{\rm tr}}\frac{\partial\ell(x',y')}{\partial f}\frac{\partial f(x')}{\partial\theta^{\mu}}\frac{\partial}{\partial\theta^{\mu}}\right)^{k}F(x_1,\ldots,x_m)
+    \rexp\,.
+  \end{align}
+  On the right-hand side we have a linear combination $\sum_A \alpha_A C_A$ of correlation functions $C_A$, where the coefficients depend on the training set labels.
+  Here we used the polynomial loss assumption.
+  For each correlation function $C_A$, its integrand can be obtained from $F$ by finitely many operations of the form (1) multiply the integrand by $f(x)$ for some input $x$, and (2) act with a pair of contracted derivatives on two of the derivative tensors.
+  In the cluster graph representation, these two operations correspond to (1) adding a vertex, and (2) adding an edge.
+  Therefore, the cluster graph $G_C$ of $C = \lexpp{\theta} F \rexp$ is a subgraph of the cluster graph $G_{C_A}$ of each one of the correlation functions $C_A$.
+  By Lemma~\ref{lemma:subgraph} we have that $C_A = \cO(n^{s_C})$ for all $A$, and therefore the bound applies to $\lexpp{\theta} d^kF/dt^k \rexp$ as well.
+\end{proof}
+
+
+\subsection{Stochastic Gradient descent}
+In this section we show that the asymptotics of a correlation function do not change under stochastic gradient descent (SGD) updates.
+Let $C(x_1,\dots,x_m) = \lexpp{\theta\sim\cP_0} F_\theta(x_1,\dots,x_m) \rexp$ be a correlation function, where $F_\theta$ is the integrand which explicitly depends on the parameters $\theta$.
+Under a single SGD step, the parameters are updated as $\theta_{t+1} = \theta_t - \eta \nabla L_t(\theta_t)$, where $L$ is the mini-batch loss at time $t$.
+Let $\cP_t$ denote the distribution of parameters at step $t$, where $\cP_0$ is the initial distribution.
+We define the evolved correlation function at step $t$ to be
+\begin{align}
+  C_t(x_1,\dots,x_m) := \lexpp{\theta\sim\cP_t} F_\theta(x_1,\dots,x_m) \rexp \,.
+\end{align}
+We have the following
+\begin{thm} \label{thm:constantScaling}
+  Let $C$ be a correlation function for a network with linear activations, and assume that Conjecture~\ref{conj:main} holds, namely $C = \cO(n^{s_C})$ where $s_C$ is defined in the Conjecture.
+  If $C_t$ is the evolved correlation function after $t$ SGD steps, then $C_t = \cO(n^{s_C})$.
+\end{thm}
+\begin{proof}
+  Notice that
+  \begin{align}
+    C_{t+1} &= \lexpp{\theta \sim \cP_{t+1}} F_\theta \rexp = \lexpp{\theta \sim \cP_{t}} F_{\theta - \eta \nabla L(\theta)} \rexp \,.
+  \end{align}
+  The integrand $F_\theta$ can be written as a product of derivative tensors of the form $T_{\mu_1\dots\mu_k}(x;\theta)$, with contracted derivatives.
+  Suppose that the network has $d$ hidden layers.
+  Then under an SGD step, we have
+  \begin{align}
+    T_{\mu_1\dots\mu_l}(x;\theta - \eta \nabla L_t(\theta))
+    &= \sum_{k=0}^{d+1} \frac{(-\eta)^k}{k!}
+      \sum_{\nu_1\dots\nu_k} \frac{\dho L_t}{\dho \theta^{\nu_1}} \cdots \frac{\dho L_t}{\dho \theta^{\nu_k}}
+      T_{\mu_1\dots\mu_l\nu_1\dots\nu_k}(x;\theta)
+    \\ &= 
+         \sum_{k=0}^{d+1} \frac{(-\eta)^k}{k!}
+         \sum_{x'_{1},\dots,x'_{k}\in D_{B}}\left[
+         \frac{\dho L_t}{\dho f(x'_{1})} \cdots \frac{\dho L_t}{\dho f(x'_{k})}\right.\nonumber\\
+         & \left. \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \times\sum_{\nu_1,\dots,\nu_k} 
+         T_{\nu_1}(x'_{1}) \cdots T_{\nu_k}(x'_{k})
+         T_{\mu_1\dots\mu_l\nu_1\dots\nu_k}(x)\right]
+         \,. \label{eq:Tevolve}
+  \end{align}
+  Here $D_{B}$ is the mini-batch, and $x'_a$ are mini-batch samples.
+  The $k$ sum is truncated because higher-order derivatives of $f$ vanish.
+
+  We can now see how taking a gradient descent step affects the cluster graph.
+  After taking a step, each derivative tensor in $C_t$ is replaced by a sum (over $k,x'_1,\dots,x'_k$).
+  Each term in the combination of these sums is a correlation function, whose cluster graph is a subgraph of $C$.
+  Therefore, by Lemma~\ref{lemma:subgraph}, $C_t = \cO(n^{s_C})$.
+\end{proof}
+We note that for general activation functions the sum in \eqref{eq:Tevolve} may be infinite.
+In this case, to complete the proof we would need to show that the infinite sum obeys the same bound as each individual term in the sum.
+We leave this for future work.
+
+\section{Applications}\label{app:app_details}
+Here we present several applications of our Feynman diagram method for computing large width asymptotics.
+We assume throughout this section that Conjecture~\ref{conj:main} holds.
+
+
+\subsection{Neural Tangent Kernel}
+\label{app:ntk}
+
+In this section we prove two results regarding the NTK at large width.
+We show that the kernel converges in probability, and that during gradient descent it is constant up to $\cO(n^{-1})$ corrections.
+
+\begin{thm}
+  The Neural Tangent Kernel $\Theta$ of a deep linear network converges in probability in the large width limit, and its variance is $\cO(n^{-1})$.
+\end{thm}
+Conjecture~\ref{conj:main} is not sufficient for proving this theorem, as we need to use a more detailed Feynman diagram argument.
+Therefore, we only prove the theorem for the case of deep linear networks.
+\begin{proof}
+First, we will show that $\mathrm{Var}[\Theta] = \cO(n^{-1})$.
+Given a model function $f$, the variance is given by
+\begin{align}
+  \mathrm{Var}[\Theta(x,x')] &= A(x,x') - B(x,x') \,,
+  \label{eq:varTheta} \\
+  A(x,x') &= 
+  \sum_{\mu,\nu}
+  \lexp
+  \frac{\dho f^{(1)}(x)}{\dho \theta_\mu} \frac{\dho f^{(2)}(x')}{\dho \theta_\mu}
+  \frac{\dho f^{(3)}(x)}{\dho \theta_\nu} \frac{\dho f^{(4)}(x')}{\dho \theta_\nu}
+  \rexp \,,
+  \label{eq:varTheta_A} \\
+  B(x,x') &= 
+  \sum_{\mu,\nu}
+  \lexp \frac{\dho f^{(1)}(x)}{\dho \theta_\mu} \frac{\dho f^{(2)}(x')}{\dho \theta_\mu} \rexp 
+  \lexp \frac{\dho f^{(3)}(x)}{\dho \theta_\nu} \frac{\dho f^{(4)}(x')}{\dho \theta_\nu} \rexp  \,.
+  \label{eq:varTheta_B}
+\end{align}
+Here $f^{(1)} = \cdots = f^{(4)} = f$; we introduced the superscripts so we can easily refer to individual factors.
+The crux of the argument is that the set of Feynman diagrams representing the expression \eqref{eq:varTheta} includes only connected graphs.
+Assuming this is the case, according to the bound \eqref{eq:dl_bound_total} these diagrams will all scale as $\cO(n^{(2-4)/2}) = \cO(n^{-1})$ and so will the variance, completing the proof.
+To see why only connected graphs contribute, notice that 
+\begin{itemize}
+\item $A(x,x')$ includes all diagrams in which the vertices corresponding to $f^{(1)},f^{(2)}$ share an edge, and also the vertices $f^{(3)},f^{(4)}$ share an edge (due to the explicit derivatives); 
+\item $B(x,x')$ includes all diagrams in which \textit{all} edges are either between
+  $f^{(1)},f^{(2)}$ or between $f^{(3)},f^{(4)}$.
+\end{itemize}
+Therefore, in the full expression \eqref{eq:varTheta}, the only remaining diagrams (\textit{i.e.} the diagrams that do not cancel between the two terms) are those that include
+\begin{itemize}
+\item an edge connecting $f^{(1)},f^{(2)}$,
+\item an edge connecting $f^{(3)},f^{(4)}$, and
+\item an edge connecting one of $f^{(1)},f^{(2)}$ to one of $f^{(3)},f^{(4)}$.
+\end{itemize}
+These diagrams are all connected graphs, and this completes the proof that $\mathrm{Var}[\Theta] = \cO(n^{-1})$.
+
+Here and above we have established that $\mathrm{Var}[\Theta] = \cO(n^{-1})$ and $\lexp \Theta \rexp = \cO(n^0)$.
+More generally, let us consider a random variable $O$ equal to the product of $f$ and its derivatives, where the derivatives indices are fully summed in pairs.
+As we will now show, if $\lexp O \rexp = \cO(n^0)$ and $\mathrm{Var}[O] = \cO(n^{-1})$ then (1) the limit $\lim_{n\to\infty} \lexp O \rexp$ exists, and (2) $O$ converges in probability to this limit.
+In particular, the NTK is an example of such a random variable, and so this will conclude the proof that the NTK converges in probability.
+
+First, consider the mean.
+There is a finite number of diagrams contributing to $\lexp O \rexp$, and each has a well-defined $n$ scaling.
+Therefore, we can write
+\begin{align}
+  \lexp O \rexp &= \sum_{k=0}^{k_{\rm max}} \frac{c_k}{n^k} 
+\end{align}
+for some values of $k_{\rm max} \ge 0$ (integer) and $c_0,c_1,\ldots \in \bR$.
+We see that the mean has a well-defined large $n$ limit,
+\begin{align}
+  \lim_{n\to\infty} \lexp O \rexp = c_0 \,.
+\end{align}
+Next, let us show that $O - \lexp O \rexp$ converges in probability using Chebyshev's inequality.
+Indeed, by the variance assumption there exists $\tilde{c} > 0$ such that
+\begin{align}
+  P(|O - \lexp O \rexp| > \epsilon) \le
+  \frac{\mathrm{Var} [O]}{\epsilon^2} \le
+  \frac{\tilde{c}}{n \epsilon^2} \to 0 \,.
+\end{align}
+Combining the facts that $O - \lexp O \rexp \to_p 0$ and $\lexp O \rexp \to c_0$, we find that $O$ converges in probability to $c_0$.
+\end{proof}
+
+Next, we show that the large width NTK is constant during training, and compute the asymptotics of the higher-order terms.
+The following argument is phrased for deep linear networks.
+More generally, the same argument holds for deep networks with smooth non-linear activations under the additional assumption that the large width limit and Taylor series can be exchanged (note that for such networks, the network function is analytic in the weights).
+
+\begin{thm}\label{thm:constNTK}
+  Let $f(x)$ be the network output of a deep linear network with MSE loss $L$.
+  Let $\Theta_t(x,x')$ be the Neural Tangent Kernel at SGD step $t$, for some inputs $x,x'$.
+  Then in the large width limit, the kernel is constant in $t$ in expectation, and
+  \begin{align}
+    \lexpp{\theta\sim\cP_0} \Theta_t(x,x') - \Theta_0(x,x') \rexp &= \cO(n^{-1})\,,\\
+    \mathrm{Var}_{\theta\sim\cP_0} \left[ \Theta_t(x,x') - \Theta_0(x,x') \right] &= \cO(n^{-2}) \,.
+  \end{align}
+\end{thm}
+\begin{proof}
+  It is enough to show that
+  $
+    \lexpp{\theta\sim\cP_0} \Theta_1(x,x') - \Theta_0(x,x') \rexp = \cO(n^{-1}) \,.
+  $
+  It then follows from Theorem~\ref{thm:constantScaling} that $\lexpp{\theta\sim\cP_0} \Theta_{t+1}(x,x') - \Theta_t(x,x') \rexp = \cO(n^{-1})$ for all $t$, and therefore
+  \begin{align}
+    \lexpp{\theta\sim\cP_0} \Theta_t(x,x') - \Theta_0(x,x') \rexp =
+    \sum_{t'=0}^{t-1} \lexpp{\theta\sim\cP_0} \Theta_{t'+1}(x,x') - \Theta_{t'}(x,x') \rexp = \cO(n^{-1}) \,,
+  \end{align}
+  concluding the proof.
+  We have
+  \begin{align}
+    \lexpp{\theta\sim\cP_0} \Theta_1(x,x') - \Theta_0(x,x') \rexp
+    = \sum_{\begin{smallmatrix}k,l=0 \\ k+l \ge 1\end{smallmatrix}}^{d+1} \frac{(-\eta)^{k+l}}{k!l!}
+    \sum_\mu \mathbb{E}_{\theta\sim\cP_0}\Bigg[
+      &\sum_{\mu_1,\dots,\mu_k} \frac{\dho L}{\dho \theta^{\mu_1}} \cdots \frac{\dho L}{\dho \theta^{\mu_k}}
+      T_{\mu\mu_1\dots\mu_k}(x)
+        \cr
+      &\sum_{\nu_1,\dots,\nu_l} \frac{\dho L}{\dho \theta^{\nu_1}} \cdots \frac{\dho L}{\dho \theta^{\nu_l}}
+      T_{\mu\nu_1\dots\nu_l}(x')
+      \Bigg] \,.
+  \end{align}
+  The fact that the $k,l$ sums are truncated at $d+1$ follows from using linear activations, as higher-order derivatives of the network function vanish in this case.
+  All terms in the sum over $k,l$ include a tensor product of the form $\sum_{\mu,\vec{\mu},\vec{\nu}} T_{\mu\mu_1\dots\mu_k}(x) T_{\mu\nu_1\dots\nu_l}(x') (\cdots)$ with either $k \ge 1$ or $l \ge 1$, where $(\cdots)$ stands for additional derivative tensor factors.
+  Therefore, all terms in the $k,l$ sum are correlation functions that have a cluster of size at least 3, including $T(x)$, $T(x')$, and at least one other tensor contracted through the $\mu_1$ or $\nu_1$ index.
+  It follows from the Conjecture that each term in the sum is $\cO(n^{-1})$.
+  Lemma~\ref{lemma:variance} then implies that the variance of these updates is $\cO(n^{-2})$.
+\end{proof}
+
+
+\subsection{Wide network evolution is linear in the learning rate}\label{app:discLinEvo}
+
+In this section we prove that, at large width, the NTK determines the evolution of the network function not just for continuous-time gradient descent but also for discrete-time gradient descent.
+A similar result holds for stochastic gradient descent, using a stochastic kernel.\footnote{The perspective presented here helps understand the results of \pcite{2019arXiv190206720L} where it was observed empirically that linearized evolution is a good description of wide networks even for relatively large learning rates.}
+Again we prove the deep linear case explicitly, but the result holds for deep networks with smooth non-linear activations under the additional assumption that the large width limit and Taylor series can be exchanged.
+
+\begin{thm}\label{thm:etalin}
+  Let $f(x)$ be the network output of a deep linear network, and let $f_t(x)$ be the evolved function after $t$ gradient descent steps, defined by $\theta_{t+1} = \theta_t - \eta \nabla L(\theta_t)$.
+  In the large width limit, each gradient descent step update of $f_t$ is linear in the learning rate $\eta$.
+  Furthermore,
+  \begin{align}
+    \lexpp{\theta} f_{t+1}(x) - f_t(x) \rexp &=
+    -\eta \sum_{(x',y')\in D_{\rm tr}} \lexpp{\theta} \Theta_0(x,x') \frac{\dho \ell_t(x',y')}{\dho f} \rexp
+    + \cO(n^{-1}) \,. \label{eq:ftpft}
+  \end{align}
+  Here, $\Theta_0$ is the NTK at initialization and $\ell_t$ is the single-sample loss at time $t$.
+\end{thm}
+\begin{proof}
+  For a deep linear network, under a single gradient descent step we have
+  \begin{align}
+    \lexpp{\theta} f_{t+1}(x) - f_t(x) \rexp &=
+    \sum_{k=1}^{d+1} \frac{(-\eta)^k}{k!}
+    \sum_{\mu_1,\dots,\mu_k}
+    \lexpp{\theta}
+    \frac{\dho^k f_t(x)}{\dho \theta^{\mu_1} \cdots \dho \theta^{\mu_k}}
+    \frac{\dho L_t}{\dho \theta^{\mu_1}} \cdots \frac{\dho L_t}{\dho \theta^{\mu_k}}
+    \rexp
+    \\ &=
+    -\eta \sum_{(x',y')\in D_{\rm tr}}
+    \lexpp{\theta}
+    \Theta_t(x,x')
+    \frac{\dho \ell_t(x',y')}{\dho f}
+    \rexp
+    \cr &\quad
+    +
+    \sum_{k=2}^{d+1} \frac{(-\eta)^k}{k!}
+    \sum_{\mu_1,\dots,\mu_k}
+    \lexpp{\theta}
+    \frac{\dho^k f_t(x)}{\dho \theta^{\mu_1} \cdots \dho \theta^{\mu_k}}
+    \frac{\dho L_t}{\dho \theta^{\mu_1}} \cdots \frac{\dho L_t}{\dho \theta^{\mu_k}}
+    \rexp
+    \,. 
+  \end{align}
+  First, consider the sum over $k$ in \eqref{eq:ftpft}.
+  Each term in the sum is a correlation function for which the cluster graph contains a connected subgraph of size at least 3, and is therefore $\cO(n^{-1})$ by Lemma~\ref{lemma:subgraph} and Theorem~\ref{thm:main}.
+  In the remaining $\cO(\eta)$ term, by the same argument as Theorem~\ref{thm:constNTK} we can replace $\Theta_t = \Theta_0 + \cO(n^{-1})$ in the correlation function.
+  The result is equation \eqref{eq:ftpft}.
+\end{proof}
+As mentioned above, we note that the proof goes through when using stochastic gradient descent updates, with the difference that in \eqref{eq:ftpft} we should sum over mini-batch samples instead of over the entire training set.
+
+
+\subsection{Spectral properties of the NTK and the Hessian}\label{app:spectrum}
+With an eye towards understanding the structure of the loss landscape at large width and as another example use case of our approach, we investigate the relation between the spectra of the Hessian, and the NTK. 
+
+Among other observations, we present an argument that for a network with $d$ hidden layers and MSE loss, the top $\Din$ ordered eigenvalues of the Hessian, $\lambda_{i}^{(H)}$, are related to those of the kernel $\lambda_{i}^{(\Theta)}$ by
+\es{evrel}{
+\lexpp{\theta}\lambda_{i}^{(H)} - \lambda_{i}^{(\Theta)}\rexp&=
+\left\{
+\begin{array}{l l }
+\mathcal{O}(n^{-1/2}) &, d = 1\\
+\mathcal{O}(n^{-1}) &, d > 1
+\end{array}
+\right.\,.
+}
+The remaining Hessian eigenvalues vanish at large width as $\mathcal{O}(n^{-1/2})$ for one hidden layer networks and $\mathcal{O}(n^{-1})$ for deeper networks.\footnote{Empirically we actually find the even stronger bound $\lexpp{\theta}\lambda_{i}^{(H)} - \lambda_{i}^{(\Theta)}\rexp=\mathcal{O}(n^{-1})$ for the top $\Din$ eigenvalue differences and $\mathcal{O}(n^{-1/2})$ for the remaining eigenvalues in the one hidden layer case. We can gain insight into this improved scaling through the perspective of degenerate eigenvalue perturbation theory \pcite{trefethen97}, but this is outside the scope of the current presentation.}
+This is experimentally corroborated in Figure \ref{fig:ev_diff}.
+
+The Hessian of a general loss takes the form,
+\es{Hessian}{
+H_{\mu\nu}&=\sum_{(x,y)\in D_{\rm tr}}\Big[\underbrace{\frac{\partial^{2}\ell(x,y)}{\partial f^{2}}\frac{\partial f(x)}{\partial\theta^{\mu}}\frac{\partial f(x)}{\partial\theta^{\nu}}}_{\mathcal{A}_{\mu\nu}}
++\underbrace{\frac{\partial\ell(x,y)}{\partial f}\frac{\partial^{2}f(x)}{\partial\theta^{\mu}\partial\theta^{\nu}}}_{\mathcal{B}_{\mu\nu}}\Big]\,.
+}
+The moments of $H$ are a useful way to understand its spectrum. As in other examples that we have seen, traces of powers of $\mathcal{B}$ lead to connected diagrams with higher and higher numbers of vertices, and so scale as increasingly negative powers of $n$. 
+More explicitly, traces involving powers of $\mathcal{B}$ contain multiple contracted derivative tensors. 
+As a result, taking the average of these traces over the weight distribution leads to correlation functions where the associated cluster graph, $G_C$, contain subgraphs with at least three connected vertices. By Lemma~\ref{lemma:subgraph} and Conjecture~\ref{conj:main} these correlation functions vanish at infinite width.
+For example $\lexpp{\theta}\trace\left(\mathcal{A}\mathcal{B}\right)\rexp=\mathcal{O}(1/n)$.
+There is a single exception to this, as can be easily seen in figure \ref{fig:d2f2_1hl}, $\lexpp{\theta}\trace(\mathcal{B}^{2})\rexp$ is $\mathcal{O}(1)$.
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.2\textwidth}
+        \includegraphics[width=\textwidth]{new_figs/B_2}
+    \end{subfigure}
+      \caption{A prototypical diagram corresponding to $\lexpp{\theta}\textrm{Tr}\left(\mathcal{B}^{2}\right)\rexp$}\label{fig:d2f2_1hl}
+\end{figure}
+Thus most moments of the Hessian are equal to moments of $\mathcal{A}$ in expectation.\footnote{For the first moment in linear or ReLU networks, $\trace{\mathcal{B}}=0$.}
+\es{hessArel}{
+\lexpp{\theta}\trace\left(H^{m}\right)\rexp&=
+\left\{\begin{array}{ll}
+\lexpp{\theta}\trace\left(\mathcal{A}^{m}\right)\rexp&, m\neq 2\\
+\lexpp{\theta}\trace\left(\mathcal{A}^{2}\right)\rexp + \lexpp{\theta}\trace\left(\mathcal{B}^{2}\right)\rexp&, m=2
+\end{array}\right.+\mathcal{O}(1/n)\,.
+}
+What's more, we can relate moments of $\mathcal{A}$ to those of the kernel, as both are built out of two logit derivatives. 
+Explicitly,
+\es{AThetaRel}{
+\trace(\mathcal{A}^{m})&=\trace((M\Theta)^{m})\,,
+}
+and so the moments of the Hessian are also related to those of the kernel.\footnote{Here we have argued for relations relating the mean of moments. It is not too difficult to see that these relations will also hold for typical realizations. This follows from Lemma \ref{lemma:variance}.
+}
+\es{hessThetarel}{
+\lexpp{\theta}\trace\left(H^{m}\right)\rexp&=
+\left\{\begin{array}{ll}
+\lexpp{\theta}\trace\left((M\Theta)^{m}\right)\rexp&,m\neq 2\\
+\lexpp{\theta}\trace\left((M\Theta)^{2}\right)\rexp + \lexpp{\theta}\trace\left(\mathcal{B}^{2}\right)\rexp&, m=2
+\end{array}\right.+\mathcal{O}(1/n)\,.
+}
+Here, we have defined,
+\es{Mdef}{
+M(x_{a},x_{b})&=\delta_{ab}\frac{\partial^{2}\ell(x_a,y_a)}{\partial f^{2}}\ \ \ :(x_a,y_a)\in D_{\rm tr}\,.
+}
+For the case of MSE loss, we can go even further. In that case, $M(x_{a},x_{b})=\delta_{ab}$ and $\mathcal{B}$ decays to zero during training. We thus have,
+\es{hessArelMSE}{
+\begin{array}{ll}
+\textrm{Initially:} & \lexpp{\theta}\trace\left(H^{m}\right)\rexp =
+\left\{\begin{array}{ll}
+\lexpp{\theta}\trace\left(\Theta^{m}\right)\rexp&, m\neq 2\\
+\lexpp{\theta}\trace\left(\Theta^{2}\right)\rexp + \lexpp{\theta}\trace\left(\mathcal{B}^{2}\right)\rexp&, m=2
+\end{array}\right.+\mathcal{O}(1/n)\\
+\,\\
+\textrm{At late times:} &  \lexpp{\theta}\trace\left(H^{m}\right)\rexp \to \lexpp{\theta}\trace\left(\Theta^{m}\right)\rexp\,\quad \forall m\,.
+\end{array}
+}
+
+These results indicate that the only difference between the spectra of the Hessian and the NTK come from $\mathcal{B}$ and that $\mathcal{B}$ must have eigenvalues which scale as $1/\sqrt{\textrm{dim}(\mathcal{B})}$. As $\textrm{dim}(B)=\mathcal{O}(n)$ for one hidden layer networks and $\mathcal{O}(n^{2})$ for deep networks we are left with the relation \eqref{evrel} between the eigenvalues of $\Theta$ and $H$. As the network trains, the difference between these eigenvalues gets even smaller. 
+These results are confirmed experimentally in Figure \ref{fig:ev_diff} and Figure \ref{fig:moments}.
+  \begin{figure}
+     \centering
+     \begin{subfigure}[b]{0.46\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{new_figs/ev_diff}
+         \caption{Hessian and NTK e.v. difference.}
+         \label{fig:top_ev_diff}
+     \end{subfigure}
+ \ \ \ \ \ \ \ \ \ \ 
+     \begin{subfigure}[b]{0.46\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{new_figs/top_evs}
+         \caption{Degenerate spectrum.}
+         \label{fig:repeatedspec}
+     \end{subfigure}
+     \caption{(a) The mean difference between the top eigenvalues of the NTK and the Hessian at initializations for a two hidden layer ReLU network of varying width match well with the predicted $\mathcal{O}(n^{-1})$ behavior. The mean is taken over 100 instances per width on two-class MNIST with 10 images per class. (b) The top 10 eigenvalues of both the Hessian and the NTK for a two-layer ReLU network of width 2048 trained on a \textbf{three-class} subset of MNIST. The top eigenvalues match well and show aspects of the repeated $N_{\textrm{class}}$ structure predicted at large width. The eigenvalues of $H$ are computed using the lanczos algorithm.} \label{fig:ev_diff}
+ \end{figure}
+ 
+ \begin{figure}
+     \centering
+     \begin{subfigure}[b]{0.46\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{new_figs/mom_diff}
+         \caption{Relative moment differences}
+         \label{fig:mom_diff}
+     \end{subfigure}
+ \ \ \ \ \ \ \ \ \ \ 
+     \begin{subfigure}[b]{0.46\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{new_figs/Bmom}
+         \caption{Second moment of $\mathcal{B}$}
+         \label{fig:bmom}
+     \end{subfigure}
+     \caption{Relation between the spectrum of the Hessian and NTK. (a) The first 4 moments of $H$ and $\Theta$ for two hidden layer ReLU networks. At initialization the first third and fourth moments are numerically similar, while the relative difference of the second moment is $\mathcal{O}(1)$. After training all moments are numerically close. (b) The root mean square eigenvalue of the $\mathcal{B}$ matrix shows good agreement with the predicted $1/\sqrt{n}$ fall off for single hidden layer ReLU networks. Experiments were performed on ReLU networks trained on two-class MNIST with 100 images per class. Moments of the NTK were computed exactly, while moments of the Hessian and $\mathcal{B}$ were computed by randomly sampling 1000 vectors and using Hutchinson's trick.} \label{fig:moments}
+ \end{figure}
+\paragraph{Multi-class.}
+This story can be generalized to multi-class neural network maps. In this case the logit is a map $f^{A}:\mathbb{R}^{\Din}\rightarrow \mathbb{R}^{N_\textrm{class}}$, and the NTK has two class indices. 
+\es{classyNTK}{
+\Theta^{AB}(x,x^{\prime})&=\frac{\partial f^{A}(x)}{\partial\theta^{\mu}}\frac{\partial f^{B}(x^{\prime})}{\partial\theta^{\mu}}\,.
+}
+Expression \eqref{hessThetarel} relating the moments of the Hessian to the NTK still holds in this context provided we take $\trace\left((M\Theta)^{m}\right)\rightarrow \trace\left((M_{AB}\Theta^{AB})^{m}\right)$, with the more general matrix,
+\es{classyMdef}{
+M_{AB}(x_{a},x_{b})=\delta_{ab}\frac{\partial\ell(x_a,y_a)}{\partial f^{A}\partial f^{B}} \ \ \ :(x_a,y_a) \in D_{\rm tr}\,.
+}
+
+At large width, the NTK approaches the identity matrix in class space, $\Theta^{AB}\rightarrow N_{\textrm{class}}^{-1}\delta^{AB}\trace\left(\Theta\right)$ \pcite{ntk}. This implies that the NTK spectrum consists of $N_{\textrm{class}}$ repeated copies.
+This has consequences for the spectrum of the Hessian at large width.
+For instance, for the case of MSE error it also implies $N_{\textrm{class}}$ repeated copies of the Hessian spectrum (See Figure \ref{fig:repeatedspec}).
+It is intriguing to think this could serve as a path towards understanding the emergence of the $N_{\textrm{class}}$ (or $N_{\textrm{class}}-1$) large eigenvalues and corresponding subspace observed in the Hessian spectrum \pcite{sagun2016eigenvalues, sagun2017empirical, gur2018gradient, ghorbani2019investigation, papyan2019measurements}. 
+
+\subsection{Higher-order network evolution}\label{app:corrections}
+
+In this section we will explain how to compute higher-order corrections to training dynamics.
+In principle, this prescription allows one to compute model dynamics as an expansion in $1/n$ to arbitrary order.
+We apply this explicitly to compute the $\mathcal{O}(1/n)$ training dynamics. 
+In Figure \ref{fig:nlo_time_dep}, we present experimental confirmation of our predictions for the evolution of the NTK.
+In the main text, we presented these results for the special case of gradient flow with MSE loss.
+
+So far we have mostly been using diagrammatic techniques to understanding the leading order scaling of correlation functions. It is interesting to try and understand finite width networks by asking how training dynamics are modified beyond the leading order asymptotics.
+There are three clear sources of corrections to the leading behavior.
+\begin{enumerate}
+\item The initial kernel, $\Theta_{0}$, receives finite width corrections.
+\item The linear (in learning rate) update for the network function, equation \eqref{eq:ftpft}, is modified away from infinite width.
+\item The kernel is not constant at finite width. 
+\end{enumerate}
+The first source of corrections is automatically taken into account in typical empirical settings, as the finite-width $\Theta_0$ can be computed explicitly.
+The other sources of corrections are non-trivial, and will be the focus of this section.
+We begin by explaining how to take into account the non-constancy of the kernel order by order in $1/n$, while maintaining the continuous time approximation.
+Next, we back away from the continuous time limit and write down the full discrete evolution.
+We introduce a method to compute arbitrary order corrections, and explicitly work out the corrections at order $1/n$ for MSE loss.
+\subsubsection{Continuous time.}
+Continuous time evolution of the model function in neural networks is governed by the differential equation
+\es{basic_diff}{
+\frac{df(x;t)}{dt}&=-\sum_{(x',y')\in D_{\rm tr}}\Theta(x,x';t)\frac{\partial \ell(x',y')}{\partial f}\,.
+}
+As we have discussed at length, in the large width limit, this equation simplifies and $\Theta(t)$ is asymptotically constant \pcite{ntk}. Our goal is to move beyond this leading behavior at large width and solve \eqref{basic_diff} order-by-order in a $1/n$ expansion.
+In Section~\ref{sec:applications} we described how to compute the $\mathcal{O}(n^{-1})$ corrections for the case of MSE loss. Here we explain how to handle corrections more generally as well as giving a more detailed discussion of the MSE case. 
+
+The network map $f$ and kernel, $\Theta$ are members of the following family of operators.
+\es{operator_def_app}{
+  O_{s}(x_1,\ldots,x_{s};t):=\sum_{\mu}\frac{\partial O_{s-1}(x_1,\ldots,x_{s-1};t)}{\partial\theta_{\mu}}\frac{\partial f(x_{s};t)}{\partial\theta_\mu}\,,
+  \quad s \ge 2 \,,
+}
+with $O_{1}:=f$. Here, as above, $O_{2} = \Theta$ is the kernel. With a general loss function, these operators satisfy.
+\es{derivative_relation}{
+\frac{dO_s(x_1,\ldots,x_{s};t)}{dt}& =-\sum_{(x',y')\in\Dtr} O_{s+1}(x_1,\ldots,x_{s},x';t)\frac{\partial \ell(x',y';t)}{\partial f}\,, \quad s \ge 1 \,.
+}
+Equations \eqref{operator_def_app} and \eqref{derivative_relation}. Give an infinite tower of first order ODEs, the solution of which gives the time evolution of the network map and the kernel.
+\es{tower_written_out}{
+\frac{df(x_1;t)}{dt}&=-\sum_{(x,y)\in D_{\rm tr}}\Theta(x_1,x;t)\frac{\partial\ell(x,y)}{\partial f}\nonumber\\
+\frac{d\Theta(x_1,x_2;t)}{dt}&=-\sum_{(x,y)\in D_{\rm tr}}O_3(x_1,x_2,x;t)\frac{\partial \ell(x,y)}{\partial f}\nonumber\\
+\frac{dO^{(1)}(x,x^{\prime},x^{\prime\prime};t)}{dt}&=-\sum_{(x,y)\in D_{\rm tr}}O_{4}(x_1,x_2,x_3,x;t)\frac{\partial \ell(x,y)}{\partial f}\\
+&\vdots\nonumber
+}
+Solving this infinite tower is not feasible. If we wish to work to a given order in an expansion in $1/n$, however, there is a dramatic simplification, which makes a solution possible. Firstly, we can truncate these equations.
+To see this note that the operators $O_s$ contain $s$ contracted derivative tensors.
+As a result, by Lemma~\ref{lemma:subgraph} and Conjecture~\ref{conj:main}, correlation functions involving the operators, $O_s$ satisfy
+\es{operator_scaling}{
+\lexpp{\theta}O_{s}(x_1,\ldots,x_s;t)F(\vec{x};t)\rexp = \left\{\begin{array}{ll}
+\mathcal{O}\left(n^{\frac{2-s}{2}}\right)&, s\, \textrm{even}\\
+\mathcal{O}\left(n^{\frac{1-s}{2}}\right) &, s\, \textrm{odd}
+\end{array}\right.\,,
+} 
+where $F(\vec{x};t)$ is arbitrary additional contribution to the integrand.
+
+Thus, if we wish to work to solve for the time evolution up to corrections which scale as $\mathcal{O}(n^{-r})$ we can truncate the tower at $s=2r$ and set $O_{2r}(t)$ to be equal to its initial value. Note that the leading order solution, \eqref{basic_diff}, is the result of this procedure with $r=1$ and the results presented in the main text for the $\mathcal{O}(n^{-1})$ evolution correspond to $r=2$.
+
+The truncation provides a dramatic simplification, however it is not immediately clear how to solve even the truncated differential equations in \eqref{derivative_relation}. We now describe how to organize the perturbative expansion of the operators $O_s(t)$ (including $f$ and $\Theta$) in such a way that the differential equations become tractable. 
+
+The central idea is to write each operator, $O_s(t)$, as an expansion.
+\es{expanded_ops}{
+O_s(x_1,\ldots,x_s;t)&=\sum_{r=\lfloor\frac{s-1}{2}\rfloor}^{\infty}O_s^{(r)}(x_1,\ldots,x_s;t)
+}
+
+where each order $O_s^{(r)}$ captures the $\mathcal{O}(n^{-r})$ evolution of $O_s$. For example,
+\es{expanded_ops_example}{
+f(x_1;t)&=f^{(0)}(x_1;t)+f^{(1)}(x_1;t)+\cdots\nonumber\\
+\Theta(x_1,x_2;t)&=\Theta^{(0)}(x_1,x_2;t)+\Theta^{(1)}(x_1,x_2;t)+\cdots\nonumber\\
+O_3(x_1,x_2,x_3;t)&=O_3^{(1)}(x_1,x_2,x_3;t)+O_3^{(2)}(x_1,x_2,x_3;t)+\cdots\\
+&\quad\!\!\!\vdots\nonumber
+}
+The notation $O_s^{(r)}$ means both that any correlation function containing $O_s^{(r)}$ is $\mathcal{O}(n^{-r})$ and, by Lemma~\ref{lemma:variance}, that typical realizations of the operators scale as $\mathcal{O}(n^{-r})$.\footnote{Note that in Section \ref{sec:applications} we used the alternate notation $\Theta_1$ for $\Theta^{(1)}$.}
+
+Once the operators $O_s$ are organized in this way, solving the differential equations \eqref{basic_diff} is tractable. As the differential equations describing the evolution of $O_s^{(r)}$ for $r>0$ only depend on the time dependent solutions of $O_s^{(r-1)}$, we can iteratively solve for the $O_s^{(r)}$ order by order. For example, in Section~\ref{sec:applications}, we used the leading order solution for $f$ and $\Theta$ to solve for $\Theta^{(1)}$.
+
+In principle this procedure can be extended to arbitrary order in $1/n$. Before going onto explain the finite step corrections to this procedure, we reproduce the results of section \ref{sec:applications} in more detail. 
+
+\paragraph{MSE continuous time example.}
+
+The MSE loss is,
+\es{MSE}{
+L^{\textrm{MSE}}&=\frac{1}{2}\sum_{(x,y)\in D_{\rm tr}}\left(f(x)-y_{a}\right)^{2}
+}
+As such the update equation simplifies to,
+\es{MSE_update}{
+\frac{df(x;t)}{dt}&=-\sum_{(x',y')\in D_{\rm tr}}\Theta(x,x';t)\left(f(x';t)-y'\right)\,,
+}
+The leading order solution to equation \eqref{MSE_update} is exponential, kernel evolution,
+\es{lo_sol}{
+f^{(0)}(t)&=y+e^{-t\Theta_{0}}(f_{0}-y)\\
+\Theta^{(0)}(t)&=\Theta_{0}\,.
+}
+Here we are using a condensed notation where $f_0:=f^{(0)}(0)$, $\Theta_0:=\Theta^{(0)}(0)$. Equation \eqref{lo_sol} is a vector equation with $f_0$, $f^{(0)}(t)$, and $y$ are vectors over the training set and the leading order kernel $\Theta_0$ is a square matrix over the same space.
+
+As discussed above to study the $\mathcal{O}(1/n)$ evolution, we can truncate the set of equations in \eqref{derivative_relation} at $s=4$, and set $O_{4}(t)=O_{4}^{(1)}(t)=O_{4}(0)$ up to corrections which scale as $\mathcal{O}(n^{-2})$.
+
+Moving up a rung in \eqref{derivative_relation}, we have
+\es{truncated_eqs2}{
+\frac{dO_3(x_1,x_2,x_3;t)}{dt}&=-\sum_{(x,y)\in D_{\rm tr}}O_4(x_1,x_2,x_3,x;t)\left(f(x;t)-y\right)\,.
+}
+To solve for $O_3^{(1)}(t)$, i.e. neglecting $\mathcal{O}(n^{-2})$ corrections, we can plug in the leading order approximations, to $O_4(t)$ and $f(t)$.
+\es{truncated_eqs2_simp}{
+\frac{dO_3^{(1)}(x_1,x_2,x_3;t)}{dt}&=-\sum_{(x,y)\in D_{\rm tr}}O_4(x_1,x_2,x_3,x;0)\left(f^{(0)}(x;t)-y\right)\,.
+}
+This gives,
+\es{integrated_eqO1}{
+  O^{(1)}_{3}(x_1,x_2,x_3;t)&=O_{3}(x_1,x_2,x_3;0)-\int_{0}^{t}dt^{\prime}\sum_{(x,y)\in D_{\rm tr}}O_{4}(x_1,x_2,x_3,x;0)\left(f^{(0)}(x;t)-y\right)\,.
+ }
+Using the explicit form of $f^{(0)}(t)$ we can write,
+\es{expO1LO}{
+  O^{(1)}_{3}(\vec{x};t)&=O_{3}(\vec{x};0)-\sum_{a}O_{4}(\vec{x};0)\cdot\left(\Theta^{-1}_{0}(1-e^{-t\Theta_{0}})(f_{0}-y)\right) \,.
+  }
+ Here we are again using a condensed notation. $\vec{x}=(x_1,x_2,x_3)$. $f_0$ and $y$ are vectors over the training set while $\Theta_0$ is a square matrix, and $O_{4}(\vec{x};0)$ is also a vector over the training set, with the value $O_4(\vec{x},x';0)$ on the point $x'\in D_{\rm tr}$.
+
+Moving one more step up the ladder gives
+\es{nlo_theta}{
+  \Theta(x_1,x_2;t)&=\Theta_{x_1,x_2;0}+\Theta^{(1)}(x_1,x_2;t)+\mathcal{O}(n^{-2})\,,\nonumber\\
+  \Theta^{(1)}(x_1,x_2;t) &= -\int_{0}^{t}dt^{\prime}\sum_{(x,y)\in D_{\rm tr}}O^{(1)}_{3}(x_1,x_2,x;t')\left(f^{(0)}(x;t')-y\right) \,.
+}
+Plugging in $O^{(1)}_{3}$, and using the eigen-decomposition of $\Theta_{0}$ to perform the integrals gives,
+\begin{align}
+\Theta^{(1)}(\vec{x};t)=&-\sum_{i}\frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})\left[1-e^{-t\lambda_{i}}\right]\nonumber\\
+&+\sum_{ij}\frac{1}{\lambda_{j}}(\hat{e}_{i}^{T}O_{4}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})\left[\frac{1-e^{-t\lambda_{i}}}{\lambda_{i}}-\frac{1-e^{-t(\lambda_{i}+\lambda_{j})}}{\lambda_{i}+\lambda_{j}}\right]\,.\label{ThetaNLOExpint}
+\end{align}
+Here, we have introduced the eigenvectors, $\hat{e}_{i}$, which are vectors over the training dataset and eigenvalues $\lambda_{i}$ of the initial kernel, $\Theta_{0}$. The vector $\vec{x}=(x_1,x_2)$ as $\Theta$ depends on two inputs. $O_{3}(\vec{x};0)$ is a vector over the dataset while $O_{4}(\vec{x};0)$ is a square matrix and $\Delta f_{0}:=f_{0}-y$ is a vector over the training data.
+
+Finally, we can plug in the expression \eqref{nlo_theta} into \eqref{MSE_update} and give the sub-leading behavior for $f(t)$
+\es{nlo_f}{
+\frac{df(x;t)}{dt}&=-\sum_{(x,y)\in D_{\rm tr}}\left(\Theta(x,x';0)+\Theta^{(1)}(x,x';t)\right)\left(f(x';t)-y\right)+\mathcal{O}(n^{-2})\\
+f(t)&=y+e^{-\Theta_{0}t}\left(1-\int_{0}^{t}dt^{\prime}e^{t'\Theta_{0}}\Theta^{(1)}(t^{\prime})e^{-t'\Theta_{0} }\right)\left(f_{0}-y\right)\,.
+}
+This completes the full $\mathcal{O}(n^{-1})$ time dependance.This prediction for the $\mathcal{O}(1/n)$ time dependence is confirmed experimentally in Figure~\ref{fig:nlo_time_dep}.
+ \begin{figure}
+     \centering
+     \begin{subfigure}[b]{.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{new_figs/f_evol_wide}
+         \caption{Evolution of network map.}
+         \label{fig:f_evol_wide}
+     \end{subfigure}
+    \begin{subfigure}[b]{.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{new_figs/Theta_evol_wide_diff}
+         \caption{Evolution of NTK.}
+         \label{fig:Theta_evol_wide}
+     \end{subfigure}
+     
+     \begin{subfigure}[b]{.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{new_figs/f_evol_narrow}
+         \caption{Evolution of network map for a narrower network.}
+         \label{fig:f_evol_narrow}
+     \end{subfigure}
+     \begin{subfigure}[b]{.49\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{new_figs/Theta_evol_narrow_diff}
+         \caption{Evolution of NTK for a narrower network.}
+         \label{fig:Theta_evol_narrow}
+     \end{subfigure}
+     \caption{Single instance evolution for a randomly selected element of the NTK and network map. Theoretical predictions at $\mathcal{O}(n^{-1})$ are represented by dashed lines, while the true network evolution is shown in solid. (a-b) Wide networks show excellent agreement with predictions. (c-d) Predictions match reasonably well even down to modest widths.
+All plots correspond to single training runs on 2-class MNIST with 10 samples per class. The learning rate is 0.1 for all runs. All runs reach training accuracy 1. 
+} \label{fig:nlo_time_dep}
+ \end{figure}
+
+Note, one consequence of \eqref{ThetaNLOExpint} is that the $\mathcal{O}(1/n)$ corrections to $\Theta$ go to a constant at late times.
+\es{ThetaLateTimes}{
+  \Theta^{(1)}_\infty
+  &:=
+  \lim_{t\rightarrow\infty}\Theta^{(1)}(t)
+  \,=\, -\sum_{i}\frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})
++\sum_{ij}\frac{1}{\lambda_{i}(\lambda_{i}+\lambda_{j})}(\hat{e}_{i}^{T}O_{4}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})\,.
+}
+And the asymptotic evolution of $\Delta f(t)$ is again constant kernel evolution, but with a corrected kernel.
+\es{asymp_f}{
+f(t)&\rightarrow y+e^{-t(\Theta_{0}+\Theta_{\infty}^{(1)})}\left(f_{0}-y\right)\,.
+}
+
+
+It is worth noting that these predictions are quite detailed, giving the full time dependence, rather than just the overall scaling with width. In deriving these results and in the discrete time analysis below, we implicitly make an assumption that we can control the discrete time corrections or in the continuous time case that $f(t)$, $\Theta(t)$ and all the $O_s(t)$ are differentiable. This relies on being able to differentiate through the activation function. For non-smooth activations such as ReLU, this assumption is suspect, and indeed the evolution is more subtle in the ReLU case and a full analysis is left to future work. For this reason we present experimental results for networks with smooth activation functions. 
+
+\subsubsection{Discrete time.}
+With the $1/n$ corrections to continuous time evolution under our belts, it is possible to also keep track of corrections coming from the discrete update step.
+The essential point, that it is possible to solve iteratively, order by order in $1/n$ is  not changed.
+To see this we can look at how the update equations are modified.
+Beginning with the network output update equation, we have,
+\begin{align}
+f_{t+1}(x)-f_{t}(x) &=-\eta\sum_{(x',y')\in D_{\rm tr}} \Theta_{t}(x,x') \frac{\partial\ell_{t}(x',y')}{\partial f}\nonumber\\
+&\quad +\frac{\eta^{2}}{2}\sum_{\mu\nu}\frac{\partial^{2}f_{t}(x)}{\partial\theta^{\mu}\partial\theta^{\nu}}g^{\mu}_{t}g^{\nu}_{t}-\frac{\eta^{3}}{3!}\sum_{\mu\nu\rho}\frac{\partial^{3}f_{t}(x)}{\partial\theta^{\mu}\partial\theta^{\nu}\partial\theta^{\rho}}g^{\mu}_{t}g^{\nu}_{t}g^{\rho}_{t}+\cdots\,.\label{disc_logit_update}
+\end{align}
+In Section~\ref{app:discLinEvo} we argued that the $\cO(\eta^2)$ terms vanish at large width.
+In more detail, each factor of the gradient, $g^{\mu}$, contains a contracted derivative tensor. Thus, the cluster graph for correlation functions involving the $\eta^{2}$ term will always contain three contracted vertices and thus the correlation functions will scale as $\mathcal{O}(n^{-1})$. The $\eta^{3}$ term will give four vertices, and thus also scale as $\mathcal{O}(1/n)$, the $\eta^{4}$ contribution will be $\mathcal{O}(1/n^{2})$ and so on.
+
+Just as in the continuous time case this equation is still solvable order by order in $1/n$.
+What we mean by solvable is the following. All terms on the RHS appearing with $f_{t}$ are already higher order as a result of their derivative structure. This means, just as in the continuous case, we can use the lower order solution of $f_{t}$ in the gradient terms on the RHS to solve for $f_{t}$ on the LHS. 
+
+Similarly, the update equation for $\Theta$ receives discrete time modifications.
+\es{disc_theta_update}{
+\Theta_{t+1}(x_1,x_2)- \Theta_{t}(x_1,x_2)&=-\eta \sum_{a}O_{3;t}(x_1,x_2,x)\frac{\partial \ell_{t}(x,y)}{\partial f}+\frac{\eta^{2}}{2}\sum_{\mu\nu}\frac{\partial^{2}\Theta_{t}(x_1,x_2)}{\partial\theta^{\mu}\partial\theta^{\nu}}g^{\mu}_{t}g^{\nu}_{t}+\cdots\,.
+}
+Here we have adopted a notation where, $\vec{x}=(x_1,\ldots,x_s)$. Just as for $f$, increased powers in $\eta$ are increasingly suppressed in $n$ and we can iteratively solve this equation using solutions at leading orders in $n$ to solve for sub-leading behavior. 
+
+More generally the tower of differential equations defined recursively in \eqref{derivative_relation} becomes
+\es{discrete_relation}{
+O_{s;t+1}(\vec{x}) - O_{s;t}(\vec{x})=&-\sum_{(x',y')\in\Dtr} O_{s+1;t}(\vec{x},x')\frac{\partial \ell(x',y';t)}{\partial f}\nonumber\\
+&+\sum_{k=2}^{\infty}\frac{\eta^{k}}{k!}\sum_{\mu_1,\mu_2,\dots,\mu_k}\frac{\partial^{k}O_{s;t+1}(\vec{x})}{\partial \theta_{\mu_1}\partial \theta_{\mu_2}\dots\partial\theta_{\mu_k}}g_{\mu_1}g_{\mu_2}\cdots g_{\mu_k}
+\,, \quad s \ge 1 \,.
+}
+
+As in the continuous time case, at a given order in $n$, we can truncate this tower and use lower order solutions to solve for the time evolution up to the desired order.
+To ground this discussion in a concrete use case, we again walk through the $1/n$ corrections for MSE loss, now in discrete time.
+\paragraph{MSE discrete time example.}
+\*
+
+For discrete time evolution, the leading order behavior of the model map is
+\es{lo_sol_disc}{
+f_{t}^{(0)}&=\left(1-\eta\Theta_{0}\right)^{t}\left(f_{0}-y\right)\\
+\Theta^{(0)}_{t}&=\Theta_{0}\,.
+}
+At next order we can proceed by solving the truncated set of equations in \eqref{discrete_relation}.
+The first equation, for $O_{4;t}$ still gives a constant solution,
+\es{truncated_eqs1_disc}{
+O_{4;t}^{(1)}&=O_{4;0}\,.
+}
+Here, both the discrete and continuous time terms that would appear on the RHS are $\mathcal{O}(1/n^{2})$.
+
+Next, we must solve for $O_{3;t}$. The discrete time update is,
+\es{O1_update_disc}{
+O_{3;t+1}(\vec{x})-O_{3;t}(\vec{x})&=
+-\eta \sum_{(x',y')\in D_{\rm tr}}O_{4;t}(\vec{x},x')\left(f_{t}(x')-y'\right)
++\frac{\eta^{2}}{2}\sum_{\mu\nu}\frac{\partial^{2}O_{3;t}(\vec{x})}{\partial\theta^{\mu}\partial\theta^{\nu}}g^{\mu}_{t}g^{\nu}_{t}+\cdots\,.
+}
+To order $1/n$ we can drop the order $\eta^{2}$ and higher terms, as they contain expressions with 5 or more contracted derivative tensors.
+Thus at this order, we are left with the discrete analogue of \eqref{truncated_eqs2}.
+\es{O1_update_disc_leading}{
+O_{3;t+1}(\vec{x})-O_{3;t}(\vec{x})&=-\sum_{(x',y')\in D_{\rm tr}}O_{4;t}(\vec{x},x')\left(f_t(x')-y'\right)\,.
+}
+which we can sum to get the discrete version of \eqref{integrated_eqO1},
+\es{O1_disc_leading}{
+O^{(1)}_{3;t}(\vec{x})&=O_{3;0}(\vec{x})-\eta\sum_{t^{\prime}=1}^{t}\sum_{(x',y')\in D_{\rm tr}}O_{4;0}(\vec{x},x')\left( f_{0;t}(x')-y'\right)\,.
+}
+Explicitly, this takes the form
+\es{O1_disc_leading_exp}{
+O^{(1)}_{3;t}(\vec{x})&=O_{3;0}(\vec{x})-O_{4;0}(\vec{x})\cdot\left(\Theta_{0}^{-1}(1-\eta\Theta_{0})(1-(1-\eta\Theta_{0})^{t})\left(f_{0}-y\right)\right)\,.
+}
+Here we have adopted notation similar to above, where $O_{4;0}(\vec{x})$ is a vector over the training dataset.
+
+So far, this procedure has been a discrete analogue of what we have done in the continuous time case, however as we move on to compute $\Theta$ and $f$ we will have to keep track of the novel corrections, which vanish in continuous time. Explicitly, at order $1/n$ the discrete update for $\Theta_{t}$ is given by,
+\begin{align}
+\Theta_{t+1}^{(1)}(\vec{x}) - \Theta_{t}^{(1)}(\vec{x})&=-\eta \sum_{a}O_{3;t}^{(1)}(\vec{x},x')\left(f_{t}^{(0)}(x')-y'\right)\nonumber\\
+&\quad +\frac{\eta^{2}}{2}\sum_{x',x'',y',y''\in D_{\rm tr}}\sum_{\mu\nu}\frac{\partial^{2}\Theta_{0}(\vec{x})}{\partial\theta^{\mu}\partial\theta^{\nu}}\frac{\partial f_{0}(x')}{\partial\theta^{\mu}}\frac{\partial f_{0}(x'')}{\partial\theta^{\nu}}\left(f_{t}^{(0)}(x')-y'\right)\left(f_{t}^{(0)}(x'')-y''\right)\,.\label{disc_theta_update_nlo}
+\end{align}
+This can be summed to give $\Theta_{t}^{(1)}$.
+
+To move up to the neural network map itself there is one additional complication. The $\mathcal{O}(\eta^{2}/n)$ term, $\sum_{\mu\nu}\frac{\partial^{2}f_t(x)}{\partial\theta^{\mu}\partial\theta^{\nu}}\frac{\partial f_{t}(x')}{\partial\theta^{\mu}}\frac{\partial f_{t}(x'')}{\partial\theta^{\nu}}$, in \eqref{disc_logit_update} has non trivial time dependence. We can deal with this just as we have been doing, by taking an extra time derivative and integrating. 
+Defining,
+\es{o1tildedef}{
+O_{1,1;t}(x_1,x_2,x_2)&:=\sum_{\mu\nu}\frac{\partial^{2}f_t(x_1)}{\partial\theta^{\mu}\partial\theta^{\nu}}\frac{\partial f_{t}(x_2)}{\partial\theta^{\mu}}\frac{\partial f_{t}(x_3)}{\partial\theta^{\nu}}\,.
+}
+We have 
+\es{o1tdepdiff}{
+O_{1,1;t+1}^{(1)}(\vec{x})-O_{1,1;t}^{(1)}(\vec{x})&=-\eta\sum_{(x',y')\in D_{\rm tr}}\sum_{\mu}\frac{\partial O_{1,1;0}(\vec{x})}{\partial\theta^{\mu}}\frac{\partial f^{(0)}_{t}(x')}{\partial\theta^{\mu}}\left(f_{t}^{(0)}(x')-y'\right)\,,
+}
+with the solution,
+\es{o1tdepsol}{
+O_{1,1;t}^{(1)}(\vec{x})&=O_{1,1;0}(\vec{x})-\sum_{\mu}\frac{\partial O_{1,1;0}(\vec{x})}{\partial\theta^{\mu}}\frac{\partial f_{0}}{\partial\theta^{\mu}}\cdot\left(\Theta_{0}^{-1}(1-\eta\Theta_{0})(1-(1-\eta\Theta_{0})^{t})\Delta f_{0}\right)_{a}\,.
+}
+This can in turn be plugged into the update equation for $f_{t}$.
+\begin{align}
+f_{t+1}(x)-f_{t}(x) &=-\eta\sum_a \left(\Theta_{0}(x,x_a)+\Theta_{t}^{(1)}(x,x_a)\right)\left(f_{t}(x_a)-y_a\right)\nonumber\\
+&\quad +\frac{\eta^{2}}{2}\sum_{a,b}O_{1,1;t}^{(1)}(x,x_a,x_b)\left(f_{t}^{(0)}(x_a)-y_a\right)\left(f_{t}^{(0)}(x_b)-y_b\right)\nonumber\\
+&\quad-\frac{\eta^{3}}{3!}\sum_{a,b,c}\frac{\partial^{3}f_{0}(x)}{\partial\theta^{\mu}\partial\theta^{\nu}\partial\theta^{\rho}}\frac{\partial f_{0}(x_{a})}{\partial\theta^{\mu}}\frac{\partial f_{0}(x_{b})}{\partial\theta^{\nu}}\frac{\partial f_{0}(x_{c})}{\partial\theta^{\rho}}\left(f_{t}(x_a)-y_a\right)\left(f_{t}(x_b)-y_b\right)\left(f_{t}(x_c)-y_c\right)\,.\label{disc_f_update_partial}
+\end{align}
+Here $(x_{a},y_{a})$ are elements of the training set $D_{\rm tr}$ and summed over. This equation can be solved to give $f_{t}^{(1)}$.
+\es{disc_f_update_nlo}{
+f_{t}^{(1)}&=(1-\eta\Theta_{0})^{t}\sum_{t'=1}^{t}(1-\eta\Theta_{0})^{-(t'+1)}\left[-\eta\Theta_{\textrm{NLO},\,t'}(1-\eta\Theta_{0})^{t'}\Delta f_{0}+\textrm{Disc}_{t'}\right]\,.
+}
+Where $\textrm{Disc}_{t}$ contains the discrete derivative updates at $\mathcal{O}(1/n)$.
+\begin{align}
+\textrm{Disc}_{t}:=&\frac{\eta^{2}}{2}\sum_{a,b}O^{(1)}_{1,1;\,t}(x_{a},x_{b})\left(f_{t}(x_a)-y_a\right)\left(f_{t}(x_b)-y_b\right)\nonumber\\
+&-\frac{\eta^{3}}{3!}\sum_{a,b,c}\frac{\partial^{3}f_{0}}{\partial\theta^{\mu}\partial\theta^{\nu}\partial\theta^{\rho}}\frac{\partial f_{0}(x_{a})}{\partial\theta^{\mu}}\frac{\partial f_{0}(x_{b})}{\partial\theta^{\nu}}\frac{\partial f_{0}(x_{c})}{\partial\theta^{\rho}}\left(f_{t}(x_a)-y_a\right)\left(f_{t}(x_b)-y_b\right)\left(f_{t}(x_c)-y_c\right)\,.\label{Discdef}
+\end{align}
+These expressions may look fairly intimidating. The key point is that all terms in the summand in \eqref{disc_theta_update_nlo} and thus \eqref{disc_f_update_nlo} are known functions of time and initial data, just as in the continuous time setting.
+
+\bibliography{large-width-feynman}
+\bibliographystyle{unsrt}
+\end{document}

@@ -1,0 +1,910 @@
+\documentclass[11pt, reqno]{amsart}
+
+\setcounter{secnumdepth}{3}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{array,booktabs,tabularx}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{color}
+\usepackage{esint}
+\usepackage{mathtools}
+\usepackage{dsfont}
+\usepackage{ esint }
+\usepackage{enumitem}
+%\usepackage{showlabels}
+\usepackage{comment}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem*{thm}{Theorem}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{Thm}[theorem]{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{Lem}[theorem]{Lemma}
+\newtheorem*{conjecture}{Conjecture}
+\newtheorem*{nonumbthm}{Theorem}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+
+\newtheoremstyle{named}{}{}{\itshape}{}{\bfseries}{.}{.5em}{\thmnote{#3 }#1} \theoremstyle{named} \newtheorem*{namedtheorem}{Theorem}
+
+
+\newtheorem{example}{Example}
+\newtheorem{Note}{Note}
+\newtheorem*{Notation}{Notation}
+
+\newcommand{\tf}{\Rightarrow}
+\newcommand{\leb}{\lambda}
+\newcommand{\W}{\Omega}
+\newcommand{\R}{{\mathbb R}}
+\newcommand{\Z}{{\mathbb Z}}
+\newcommand{\N}{{\mathbb N}}
+%\newcommand{\C}{{\mathbb C}}
+\newcommand{\E}[1]{{\mathbb E}\left [#1\right]}
+\renewcommand{\P}{{\mathbb P}}
+\newcommand{\ep}{\varepsilon}
+\newcommand{\bfa}{0}
+\newcommand{\h}{h}
+\newcommand{\uu}{\underline{u}}
+\newcommand{\mB}{\mathcal B}
+\newcommand{\cs}{$\clubsuit$}
+\newcommand{\gives}{\ensuremath{\rightarrow}}
+\newcommand{\x}{\ensuremath{\times}}
+\newcommand{\setst}[2]{\ensuremath{ \left\{ #1\,\right|\left.\,#2 \right\}}}
+\newcommand{\hcal}{\ensuremath{\mathcal H}}
+\newcommand{\e}{\mathbb E}
+\newcommand{\K}{K}
+
+\newcommand{\abs}[1]{\ensuremath{\left| #1 \right|}}
+\newcommand{\lr}[1]{\ensuremath{\left(#1 \right)}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\inprod}[2]{\ensuremath{\left\langle#1,#2\right\rangle}}
+\newcommand{\twomat}[4]{\ensuremath{ \left(\begin{array}{cc} #1 & #2 \\
+#3 & #4 \end{array}\right)}}
+
+\newcommand{\twiddle}[1]{\ensuremath{\widetilde{#1}}}
+\newcommand{\Union}{\ensuremath{\bigcup}}
+
+ \newcommand{\note}[1]{\marginpar{\scriptsize{#1}}}
+\newcommand{\w}{\omega}
+\newcommand{\dell}{\ensuremath{\partial}}
+\newcommand{\set}[1]{\ensuremath{\{#1\}}}
+\newcommand{\poisson}[2]{\ensuremath{\{#1,\,#2\}}}
+%\newcommand{\supp}{\text{\ensuremath{\supp}}}
+\newcommand{\Di}[2]{\ensuremath{\frac{\partial #2}{\partial #1}}}
+\newcommand{\curly}{\ensuremath{\mathcal}}
+\newcommand{\Esub}[2]{{\mathbb E}_{#1}\left [#2\right]}
+\renewcommand{\a}{0}
+\newcommand{\mN}{\mathcal N}
+\newcommand{\mM}{\mathcal M}
+\newcommand{\mF}{\mathcal F}
+\newcommand{\Kw}{K_{\mathrm{w}}}
+\newcommand{\Kb}{K_{\mathrm{b}}}
+\newcommand{\Dww}{\Delta_{\mathrm{ww}}}
+\newcommand{\Dwb}{\Delta_{\mathrm{wb}}}
+\newcommand{\Dbb}{\Delta_{\mathrm{bb}}}
+\newcommand{\mE}[1]{\mathcal E\left(#1\right)}
+
+
+\def\Xint#1{\mathchoice 
+{\XXint\displaystyle\textstyle{#1}}% 
+{\XXint\textstyle\scriptstyle{#1}}% 
+{\XXint\scriptstyle\scriptscriptstyle{#1}}% 
+{\XXint\scriptscriptstyle\scriptscriptstyle{#1}}% 
+\!\int} 
+\def\XXint#1#2#3{{\setbox0=\hbox{$#1{#2#3}{\int}$} \vcenter{\hbox{$#2#3$}}\kern-.5\wd0}} 
+\def\avint{\Xint-}
+
+\DeclareMathOperator{\Relu}{ReLU}
+\DeclareMathOperator{\diam}{diam}
+\DeclareMathOperator{\act}{act}
+\DeclareMathOperator{\Act}{Act}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\len}{len}
+\DeclareMathOperator{\corr}{Corr}
+\DeclareMathOperator{\wt}{wt}
+
+%\newtheorem{note}{Note}
+
+%-----------------------------------------------------------------------------------------------------------------------------------
+
+\title[NTK at Finite Depth and Width]{Finite Depth and Width Corrections to the Neural Tangent Kernel}
+\author[Boris Hanin and Mihai Nica]{Boris Hanin$^{\,*}$ and Mihai Nica}
+
+
+\address{Department of Mathematics, Texas A\&M University}
+\email[B. Hanin]{bhanin@math.tamu.edu}
+\address{Department of Mathematics, University of Toronto}
+\email[B. Hanin]{mnica@math.utoronto.edu}
+\setcounter{section}{0}
+
+\thanks{$\,^{\,*}$ BH is supported by NSF grant DMS-1855684. This work was done partly while BH was visiting Facebook AI Research in NYC and partly while BH was visiting the Simons Institute for the Theory of Computation in Berkeley. He thanks both for their hospitality.}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+     We prove the precise scaling, at finite depth and width, for the mean and variance of the neural tangent kernel (NTK) in a randomly initialized ReLU network. The standard deviation is exponential in the ratio of network depth to width. Thus, even in the limit of infinite overparameterization, the NTK is not deterministic if depth and width simultaneously tend to infinity. Moreover, we prove that for such deep and wide networks, the NTK has a non-trivial evolution during training by showing that the mean of its first SGD update is also exponential in the ratio of network depth to width. This is sharp contrast to the regime where depth is fixed and network width is very large. Our results suggest that, unlike relatively shallow and wide networks, deep and wide ReLU networks are capable of learning data-dependent features even in the so-called lazy training regime. 
+\end{abstract}
+
+\section{Introduction}
+Modern neural networks typically overparameterized: they have many more parameters than the size of the datasets on which they are trained. That some setting of parameters in such networks can interpolate the data is therefore not surprising. But it is \textit{a priori} unexpected that not only can such interpolating parameter values can be found by stochastic gradient descent (SGD) on the highly non-convex empirical risk but that the resulting network function not only interpolates but also extrapolates to unseen data. In an overparameterized neural network $\mN$ individual parameters can be difficult to interpret, and one way to understand training is to rewrite the SGD updates
+\[\Delta \theta_p ~~=~~ -\leb ~\frac{\partial \mathcal L}{ \partial \theta_p},\qquad p=1,\ldots, P\]
+of trainable parameters $\theta=\set{\theta_p}_{p=1}^P$ with a loss $\mathcal L$ and learning rate $\leb$ as kernel gradient descent updates for the values $\mN(x)$ of the function computed by the network:
+\begin{equation}\label{E:functional-GD}
+\Delta \mN(x)~~=~~-\leb \inprod{K_{\mN}(x,\cdot)}{\nabla \mathcal L (\cdot)}~~=~~-\frac{\leb}{\abs{\mathcal B}}\sum_{j=1}^{\abs{\mathcal B}} K_{\mN}(x,x_j) \frac{\partial \mathcal L}{\partial \mN}(x_j,y_j).
+\end{equation}
+Here $\mathcal B = \set{(x_1,y_1),\ldots, (x_{\abs{\mathcal B}},y_{\abs{\mathcal B}})}$ is the current batch, the inner product is the empirical $\ell_2$ inner product over $\mathcal B$, and $K_{\mN}$ is the \textit{neural tangent kernel} (NTK):
+\[K_{\mN}(x,x')~~=~~\sum_{p=1}^P \frac{\partial \mN}{\partial \theta_p}(x)\frac{\partial \mN}{\partial \theta_p}(x').\]
+Relation \eqref{E:functional-GD} is valid to first order in $\lambda.$ It translates between two ways of thinking about the difficulty of neural network optimization:
+\begin{enumerate}
+\item[(i)] The parameter space view where the loss $\mathcal L$, a complicated function of $\theta\in \R^{\#\text{parameters}},$ is minimized using gradient descent with respect to a simple (Euclidean) metric;
+\item[(ii)] The function space view where the loss $\mathcal L$, which is a simple function of the network mapping $x\mapsto \mN(x)$, is minimized over the manifold $\mM_{\mN}$ of all functions representable by the architecture of $\mN$ using gradient descent with respect to a potentially complicated Riemannian metric $K_{\mN}$ on $\mM_{\mN}.$
+\end{enumerate}
+A remarkable observation of Jacot et. al. in \cite{jacot2018neural} is that $K_{\mN}$ simplifies dramatically when the network depth $d$ is fixed and its width $n$ tends to infinity. In this setting, by the universal approximation theorem \cite{cybenko1989approximation,hornik1989multilayer}, the manifold $\mM_{\mN}$ fills out any (reasonable) ambient linear space of functions. The results in \cite{jacot2018neural} then show that the kernel $K_{\mN}$ in this limit is frozen throughout training to the infinite width limit of its average $\E{K_{\mN}}$ at initialization, which depends on the depth and non-linearity of $\mN$ but not on the dataset. 
+
+This reduction of neural network SGD to kernel gradient descent for a fixed kernel can be viewed as two separate statements. First, at initialization, the distribution of $K_{\mN}$ converges in the infinite width limit to the delta function on the infinite width limit of its mean $\E{K_{\mN}}$. Second, the infinite width limit of SGD dynamics in function space is kernel gradient descent for this limiting mean kernel for any fixed number of SGD iterations. This shows that as long as the loss $\mathcal L$ is well-behaved with respect to the network outputs $\mN(x)$ and $\E{K_{\mN}}$ is non-degenerate in the subspace of function space given by values on inputs from the dataset, SGD for infinitely wide networks will  converge with probability $1$ to a minimum of the loss. Further, kernel method-based theorems show that even in this infinitely overparameterized regime neural networks will have non-vacuous guarantees on generalization \cite{wei2018regularization}. 
+
+But replacing neural network training by gradient descent for a fixed kernel in function space is also not completely satisfactory for several reasons. First, it shows that no feature learning occurs during training for infinitely wide networks in the sense that the kernel $\E{K_{\mN}}$ (and hence its associated feature map) is data-independent. In fact, empirically, networks with finite but large width trained with initially large learning rates often outperform NTK predictions at infinite width. One interpretation is that, at finite width, $K_{\mN}$ evolves through training, learning data-dependent features not captured by the infinite width limit of its mean at initialization. In part for such reasons, it is important to study both empirically and theoretically finite width corrections to $K_{\mN}$. Another interpretation is that the specific NTK scaling of  weights at initialization \cite{chizat2018note,chizat2018global, mei2019mean, mei2018mean, rotskoff2018parameters, rotskoff2018neural} and the implicit small learning rate limit \cite{li2019towards} obscure important aspects of SGD dynamics. Second, even in the infinite width limit, although $K_{\mN}$ is deterministic, it has no simple analytical formula for deep networks, since it is defined via a layer by layer recursion. In particular, the exact dependence, even in the infinite width limit, of $K_{\mN}$ on network depth is not well understood.
+
+Moreover, the joint statistical effects of depth and width on $K_{\mN}$ in \textit{finite size networks} remain unclear, and the purpose of this article is to shed light on the simultaneous effects of depth and width on $K_{\mN}$ for finite but large widths $n$ and any depth $d$. Our results apply to fully connected ReLU networks at initialization for which we will show:
+\begin{enumerate}
+\item In contrast to the regime in which the depth $d$ is fixed but the width $n$ is large, $K_{\mN}$ is \textit{not} approximately deterministic at initialization so long as $d/n$ is bounded away from $0$. Specifically, for a fixed input $x$ the normalized on-diagonal second moment of $K_{\mN}$ satisfies
+\[\frac{\E{K_{\mN}(x,x)^2}}{\E{K_{\mN}(x,x)}^2}~\simeq~\exp(5 d/n)\lr{1+O(d/n^2)}.\]
+Thus, when $d/n$ is bounded away from $0$, even when both $n,d$ are large, the standard deviation of $K_{\mN}(x,x)$ is at least as large as its mean, showing that its distribution at initialization is not close to a delta function. See Theorem \ref{T:NTK}.\\
+\item Moreover, when $\mathcal L$ is the square loss, the average of the SGD update $\Delta K_{\mN}(x,x)$ to $K_{\mN}(x,x)$ from a batch of size one containing $x$ satisfies
+\[\frac{\E{\Delta K_{\mN}(x,x)}}{\E{K_{\mN}(x,x)}}~\simeq~\frac{d^2}{n n_0}\exp(5 d/n)\lr{1+O(d/n^2)},\]
+where $n_0$ is the input dimension. Therefore, if $d^2/nn_0>0,$ the NTK will have the potential to evolve in a data-dependent way. Moreover, if $n_0$ is comparable to $n$ and $d/n>0$ then it is possible that this evolution will have a well-defined expansion in $d/n.$ See Theorem \ref{T:deriv}. 
+\end{enumerate}
+In both statements above, $\simeq$ means is bounded above and below by universal constants. We emphasize that our results hold at finite $d,n$ and the implicit constants in both $\simeq$ and in the error terms $O(d/n^2)$ are independent of $d,n.$ Moreover, our precise results, stated in \S \ref{S:formal} below, hold for networks with variable layer widths. We have denoted network width by $n$ only for the sake of exposition. The appropriate generalization of $d/n$ to networks with varying layer widths is the parameter
+\[\beta~:=~\sum_{i=1}^d \frac{1}{n_j},\]
+which in light of the estimates in (1) and (2) plays the role of an inverse temperature. 
+
+\subsection{Prior Work}
+A number of articles \cite{bietti2019inductive,dyer2018asymptotics,lee2019wide,yang2019scaling} have followed up on the original NTK work \cite{jacot2018neural}. Related in spirit to our results is the article \cite{dyer2018asymptotics}, which uses Feynman diagrams to study finite width corrections to general correlations functions (and in particular the NTK). The most complete results obtained in \cite{dyer2018asymptotics} are for deep linear networks but a number of estimates hold general non-linear networks as well. The results there, like in essentially all previous work, fix the depth $d$ and let the layer widths $n$ tend to infinity. The results here and in \cite{hanin2018neural, hanin2018products,hanin2018start}, however, do not treat $d$ as a constant, suggesting that the $1/n$ expansions (e.g. in \cite{dyer2018asymptotics}) can be promoted to $d/n$ expansions. Also, the sum-over-path approach to studying correlation functions in randomly initialized ReLU nets was previously taken up for the foward pass in \cite{hanin2018start} and for the backward pass in \cite{hanin2018neural} and \cite{hanin2018products}. 
+
+\subsection{Implications and Future Work} Taken together (1) and (2) above (as well as Theorems \ref{T:NTK} and \ref{T:deriv}) show that in fully connected ReLU nets that are both deep and wide the neural tangent kernel $K_{\mN}$ is genuinely stochastic and enjoys a non-trivial evolution during training. This suggests that in the overparameterized limit $n,d\gives \infty$ with $d/n\in (0,\infty)$, the kernel $K_{\mN}$ may learn data-dependent features. Moreover, our results show that the fluctuations of both $K_{\mN}$ and its time derivative are exponential in the inverse temperature $\beta = d/n.$ 
+
+It would be interesting to obtain an exact description of its statistics at initialization and to describe the law of its trajectory during training. Assuming this trajectory turns out to be data-dependent, our results suggest that the double descent curve \cite{belkin2018reconciling,belkin2019two,spigler2018jamming} that trades off complexity vs. generalization error may display significantly different behaviors depending on the mode of network overparameterization.
+
+However, it is also important to point out that the results in \cite{hanin2018neural, hanin2018products,hanin2018start} show that, at least for fully connected ReLU nets, gradient-based training is not numerically stable unless $d/n$ is relatively small (but not necessarily zero). Thus, we conjecture that there may exist a ``weak feature learning'' NTK regime in which network depth and width are both large but $0<d/n\ll 1$. In such a regime, the network will be stable enough to train but flexible enough to learn data-dependent features. In the language of \cite{chizat2018note} one might say this regime displays weak lazy training in which the model can still be described by a stochastic positive definite kernel whose fluctuations can interact with data. 
+
+Finally, it is an interesting question to what extent our results hold for non-linearities other than ReLU and for network architectures other than fully connected (e.g. convolutional and residual). Typical ConvNets, for instance, are significantly wider than they are deep, and we leave it to future work to adapt the techniques from the present article to these more general settings. 
+
+
+\section{Formal Statement of Results}\label{S:formal}
+Consider a ReLU network $\mN$ with input dimension $n_0$, hidden layer widths $n_1,\ldots, n_{d-1}$, and output dimension $n_{d}=1$. We will assume that the output layer of $\mN$ is linear and initialize the biases in $\mN$ to zero. Therefore, for any input $x\in \R^{n_0},$ the network $\mN$ computes $\mN(x)=x^{(d)}$ given by
+\begin{equation}\label{E:N-def}
+x^{(0)}=x,\quad y^{(i)}~:=~\widehat{W}^{(i)}x^{(i-1)},\quad x^{(i)}:=\Relu(y^{(i)}),\qquad i=1,\ldots, d,
+\end{equation}
+where for $i=1,\ldots, d-1$
+\begin{equation}\label{E:W-def}
+\widehat{W}^{(d)}~:=~(1/n_{i-1})^{-1/2}W^{(i)},\quad \widehat{W}^{(i)}~:=~(2/n_{i-1})^{-1/2}W^{(i)},\qquad W_{\alpha,\beta}^{(i)}~\sim~\mu\,\,\,i.i.d.,
+\end{equation}
+and $\mu$ is a fixed probability measure on $\R$ that we assume has a density with respect to Lebesgue measure and satisfies:
+\begin{equation}\label{E:mu-def}
+\mu\text{ is symmetric around }0,\qquad \Var[\mu]~=~1,\qquad \int_{-\infty}^\infty x^4d\mu(x)~=~\mu_4<\infty.
+\end{equation}
+The three assumptions in \eqref{E:mu-def} hold for vitually all standard network initialization schemes. The on-diagonal NTK is
+\begin{equation}\label{E:K-def}
+K_{\mN}(x,x)~:=~\sum_{j=1}^d\sum_{\alpha=1}^{n_{j-1}}\sum_{\beta=1}^{n_j}
+\bigg(\frac{\partial \mN}{\partial W_{\alpha,\beta}^{(j)}}(x)\bigg)^2+\sum_{j=1}^d \sum_{\beta=1}^{n_j}\bigg(\frac{\partial \mN}{\partial b_{\beta}^{(j)}}(x)\bigg)^2.
+\end{equation}
+We emphasize that although we have initialized the biases to zero, they are not removed them from the list of trainable parameters. Our first result is the following:
+\begin{theorem}[Mean and Variance of NKT on Diagonal at Init]\label{T:NTK}
+We have
+\[\E{K_{\mN}(x,x)}~=~d\lr{\frac{1}{2}+\frac{\norm{x}_2^2}{n_0}}.\]
+Moreover, we have that $\E{K_{\mN}(x,x)^2}$ is bounded above and below by universal constants times
+\begin{align*}
+\exp\lr{5\beta}\lr{\frac{d^2\norm{x}_2^4}{n_0^2}~+~ \frac{d\norm{x}_2^2}{n_0} \sum_{j=1}^d e^{-5 \sum_{i=1}^{j} \frac{1}{n_i}} ~+~\sum_{\substack{i,j=1\\ i\leq j}}^d e^{-5 \sum_{i=1}^{j} \frac{1}{n_i}}},\qquad \beta~=~\sum_{i=1}^{d}\frac{1}{n_i}
+\end{align*}
+times a multiplicative error $\lr{1+O\lr{\sum_{i=1}^d \frac{1}{n_i^2}}}$, where $f \simeq g$ means $f$ is bounded above and below by universal constants times $g.$ In particular, if all the hidden layer widths are equal (i.e. $n_i=n$, for $i=1,\ldots, d-1$), we have
+\[\frac{\E{K_{\mN}(x,x)^2}}{\E{K_{\mN}(x,x)}^2}~\simeq~\exp\left(5\beta\right)\lr{1+O\lr{\beta/n}},\qquad \beta = d/n.\]
+\end{theorem}
+
+
+\noindent This result shows that in the deep and wide double scaling limit 
+\[n_i,d\gives \infty,\qquad 0<\lim_{n_i,d\gives \infty}\sum_{i=1}^d \frac{1}{n_i}<\infty,\]
+the NTK does \emph{not} converge to a constant in probability. This is contrast to the wide and shallow regime $n_i\gives \infty$ and $d<\infty.$ is fixed.
+
+Our next result shows that when $\mathcal L$ is the square loss $K_{\mN}(x,x)$ is not frozen during training. To state it, fix an input $x\in \R^{n_0}$ to $\mN$ and define $\Delta K_{\mN}(x,x)$ to be the update from one step of SGD with a batch of size $1$ containing $x$ (and learning rate $\lambda$). 
+\begin{theorem}[Mean of Time Derivative of NTK on Diagonal at Init]\label{T:deriv}
+ We have that $\E{\lambda^{-1}\Delta K_{\mN}(x,x)}$ is bounded above and below by universal constants times
+\[\left[\frac{\norm{x}_2^4}{n_0^2}\sum_{\substack{i_1,i_2=1\\i_i<i_2}}^d \sum_{\ell=i_1}^{i_2-1} \frac{1}{n_\ell} e^{-5/n_\ell-6\sum_{i=i_1}^{\ell}\frac{1}{n_i}}
+~+~
+\frac{\norm{x}_2^2}{n_0}\sum_{\substack{i_i,i_2=1\\i_1<i_2}}^d e^{-5\sum_{i=1}^{i_1} \frac{1}{n_i}}\sum_{\ell=i_1}^{i_2-1} \frac{1}{n_\ell} e^{-6\sum_{i=i_1+1}^{\ell-1}\frac{1}{n_i}}\right]\exp\lr{5\beta}\]
+times a multiplicative error of size $\lr{1+O\lr{\sum_{i=1}^d\frac{1}{n_i^2}}}$, where as in Theorem \ref{T:NTK}, $\beta = \sum_{i=1}^d 1/n_i.$ In particular, if all the hidden layer widths are equal (i.e. $n_i=n$, for $i=1,\ldots, d-1$), we find
+\[\frac{\E{\Delta K_{\mN}(x,x)}}{\E{K_{\mN}(x,x)}}~\simeq~ \frac{d\beta}{n_0}\exp\lr{5\beta}\lr{1+O\lr{d/n^2}},\qquad \beta ~=~ d/n.\]
+\end{theorem}
+
+Observe that when $d$ is fixed and $n_i=n\gives \infty,$ the pre-factor in front of $\exp\lr{5d/n}$ scales like $1/n$. This is in keeping with the results from \cite{dyer2018asymptotics,jacot2018neural}. Moreover, it shows that if  $d,n,n_0$ grow in any way so that $d\beta/n_0 = d^2/n n_0 \gives 0$, the update $\Delta K_{\mN}(x,x)$ to $K_{\mN}(x,x)$ from the batch $\set{x}$ at initialization will have mean $0.$ It is unclear whether this will be true also for larger batches and when the arguments of $K_{\mN}$ are not equal. In contrast, if $n_i\simeq n$ and $\beta= d/n$ is bounded away from $0,\,\infty$, and the $n_0$ is proportional to $d,$ the average update $\E{\Delta K_{\mN}(x)}$ has the same order of magnitude as $\E{K_{\mN}(x)}$. 
+
+\subsection{Organization for the Rest of the Article} The remainder of this article is structured as follows. First, in \S \ref{S:notation} we introduce some notation about paths and edges in the computation graph of $\mN$. This notation will be used in the proofs of Theorems \ref{T:NTK} and \ref{T:deriv}, which are outlined in \S \ref{S:outline} and particularly in \S \ref{S:idea} where give an in-depth but informal explanation of our strategy for computing moments of $K_{\mN}$ and its time derivative. Then, \S \ref{S:w-moments-pf}-\S\ref{S:wb-moments-pf} give the detailed argument. The computations in \S \ref{S:w-moments-pf} explain how to handle the contribution to $K_{\mN}$ and $\Delta K_{\mN}$ coming only from the weights of the network. They are the most technical and we give them in full detail. Then, the discussion in \S \ref{S:b-moments-pf} and \S \ref{S:wb-moments-pf} show how to adapt the method developed in \S \ref{S:w-moments-pf} to treat the contribution of biases and mixed bias-weight terms in $K_{\mN},K_{\mN}^2$ and $\Delta K_{\mN}$. Since the arguments are simpler in these cases, we omit some details and focus only on highlighting the salient differences. 
+
+
+\section{Notation}\label{S:notation} In this section, we introduce some notation, adapted in large part from \cite{hanin2018products}, that will be used in the proofs of Theorems \ref{T:NTK} and \ref{T:deriv}. For $n\in \N$, we will write
+\[[n]~:=~\set{1,\ldots, n}.\]
+It will also be convenient to denote 
+\[[n]_{even}^k~:=~\set{a\in [n]^k~|~\text{every entry in }a\text{ appears an even number of times}}.\]
+Given a ReLU network $\mN$ with input dimension $n_0,$ hidden layer widths $n_1,\ldots, n_{d-1}$, and output dimension $n_d=1$, its \textit{computational graph} is a directed multipartite graph whose vertex set is the disjoint union $[n_0]\coprod \cdots \coprod [n_d]$ and in which edges are all possible ways of connecting vertices from $[n_{i-1}]$ with vertices from $[n_i]$ for $i=1,\ldots, d.$ The vertices are the \textit{neurons} in $\mN$, and we will write for $\ell\in \set{0,\ldots, d}$ and $\alpha \in [n_\ell]$
+\begin{equation}
+    z(\ell, \alpha)~:=~\text{neuron number }\alpha\text{ in layer }\ell. 
+\end{equation}
+\begin{definition}[Path in the computational graph of $\mN$]
+Given $0\leq \ell_1<\ell_2\leq d$ and $\alpha_1\in[n_{\ell_1}], \, \alpha_2\in [n_{\ell_2}]$, a  \textit{path} $\gamma$ in the computational graph of $\mN$ from neuron $z(\ell_1, \alpha_1)$ to neuron $z(\ell_2, \alpha_2)$ is a collection of neurons in layers $\ell_1,\ldots, \ell_2$:
+\begin{equation}\label{E:gamma-def}
+\gamma~=~\lr{\gamma(\ell_1),\ldots, \gamma(\ell_2)},\qquad \gamma(j)\in [n_j],\quad \gamma(\ell_1)=\alpha_1,\, \gamma(\ell_2)=\alpha_2.
+\end{equation}
+\end{definition} 
+\noindent Further, we will write
+\[Z^k~=~\set{(z_1,\ldots, z_k)~|~ z_j\text{ are neurons in }\mN}.\]
+Given a collection of neurons 
+\[
+Z~=~\lr{z(\ell_1, \alpha_1),\ldots, z(\ell_k,\alpha_k)}\in Z^k
+\]
+we denote by 
+\[\Gamma_Z^k~:=~\left\{\lr{\gamma_1,\ldots, \gamma_k}~\big|~\substack{\gamma_j\text{ is a path starting at neuron }z(\ell_j,\alpha_j)\\\text{ ending at the output neuron }z(d,1)}\right\}\]
+Note that with this notation, we have $\gamma_i \in \Gamma_{z(\ell_i,\alpha_i)}^1$ for each $i=1,\ldots,k$. For $\Gamma\in \Gamma_Z^k,$ we also set
+\[\Gamma(\ell)~=~\set{\alpha\in [n_\ell]~|~\exists j\in [k]\text{ s.t. } \gamma_j(\ell)=k}.\]
+Correspondingly, we will write
+\begin{equation}\label{E:abs-Gamma}
+\abs{\Gamma(\ell)}~:=~\# \text{ distinct elements in }\Gamma(\ell).
+\end{equation}
+If each edge $e$ in the computational graph of $\mN$ is assigned a weight $\widehat{W}_e$, then associated to a path $\gamma$ is a collection of weights:
+\begin{equation}\label{E:W-gamma-def}
+\widehat{W}_{\gamma}^{(i)}~:=~\widehat{W}_{\lr{\gamma(i-1),\gamma(i)}}.
+\end{equation}
+\begin{definition}[Weight of a path in the computational graph of $\mN$]
+Fix $0\leq \ell\leq d$, and let $\gamma$ be a path in the computation graph of $\mN$ starting at layer $\ell$ and ending at the output. The weight of a this path at a given input $x$ to $\mN$ is
+\begin{equation}\label{E:path-weight-def}
+    \wt(\gamma)~:=~\widehat{W}_\gamma^{(d)} \prod_{j=\ell+1}^{d-1} \widehat{W}_\gamma^{(j)}{\bf 1}_{\set{\gamma\text{ open at }x}},
+\end{equation}
+where
+\[{\bf 1}_{\set{\gamma\text{ open at }x}} ~=~\prod_{i=\ell}^d \xi_{\gamma}^{(i)}(x),\qquad \xi_{\gamma}^{(\ell)}(x)~:=~{\bf 1}_{\set{y_{\gamma}^{(\ell)}>0}},\]
+is the event that all neurons along $\gamma$ are open for the input $x.$ Here $y^{(\ell)}$ is as in \eqref{E:N-def}. 
+\end{definition}
+\noindent Next, for an edge $e\in [n_{i-1}]\x [n_i]$ in the computational graph of $\mN$ we will write 
+\begin{equation}\label{E:edge-def}
+\ell(e)~=~i
+\end{equation}
+for the layer of $e.$ In the course of proving Theorems \ref{T:NTK} and \ref{T:deriv}, it will be useful to associate to every $\Gamma\in \Gamma^k(\vec{n})$ an \textit{unordered multi-set} of edges $E^\Gamma.$
+\begin{definition}[Unordered multisets of edges and their endpoints]\label{D:unordered_multisets}
+For $n,n',\ell\in \N$ set
+\[\Sigma^k(n,n')~=~\set{(\alpha_1,\beta_1),\ldots, (\alpha_k,\beta_k)~|~(\alpha_j,\beta_j)\in [n]\x [n']}\]
+to be the \textit{unordered multiset} of edges in the complete directed bi-paritite graph $K_{n,n'}$ oriented from $[n]$ to $[n'].$ For every $E\in \Sigma^k(n,n')$ define its left and right endpoints to be
+\begin{align}
+L(E)~&:=~\set{\alpha\in [n]~|~\exists j=1,\ldots, k \text{ s.t. } \alpha=\alpha_j}\\
+R(E)~&:=~\set{\beta\in [n']~|~\exists j=1,\ldots, k \text{ s.t. } \beta=\beta_j}, 
+\end{align}
+where $L(E),R(E)$ are \textit{unordered multi-sets}.
+\end{definition}
+
+\noindent Using this notation, for any collection $Z=\lr{z(\ell_1,\alpha_1),\ldots, z(\ell_k,\alpha_k)}$ of neurons and $\Gamma = \lr{\gamma_1,\ldots, \gamma_k}\in \Gamma_Z^k,$ define for each $\ell\in [d]$ the associated unordered multiset
+\[E^\Gamma(\ell)~:=~\set{(\alpha, \beta)\in [n_{\ell-1},n_\ell]~|~\exists j=1,\ldots, k\text{ s.t. } \gamma_j(\ell-1)=\alpha,\, \gamma_j(\ell)=\beta}\]
+of edges between layers $\ell-1$ and $\ell$ that are present in $\Gamma.$ Similarly, we will write
+\begin{equation}\label{E:Sigma-def}
+   \Sigma_Z^k~:=~\set{\lr{E(0),\ldots, E(d)}\in \Sigma^k(n_0,n_1)\times \cdots\times \Sigma^k(n_{d-1},n_d)~|~\exists \Gamma\in \Gamma_Z^k\text{ s.t. } E(\ell)=E^\Gamma(\ell),\,\, \ell\in [d] } 
+\end{equation}
+for the set of all possible edge multisets realized by paths in $\Gamma_Z^k.$ On a number of occasions, we will also write
+\[\Sigma_{Z, even}^k~:=~\set{E\in \Sigma_Z^k~|~\text{every edge in }E\text{ appears an even number of times}}\]
+and correspondingly
+\[\Gamma_{Z,even}^k~:=~\set{\Gamma\in \Gamma_{Z}^k~|~E^{\Gamma}\in \Sigma_{Z,even}^k}.\]
+We will moreover say that for a path $\gamma$ an edge $e=(\alpha,\beta)\in [n_{i-1}]\x [n_i]$ in the computational graph of $\mN$ belongs to $\gamma$ (written $e\in \gamma$) if 
+\begin{equation}\label{E:edge-in-path}
+\gamma(i-1)~=~\alpha,\qquad \gamma(i)~=~\beta.
+\end{equation}
+Finally, for an edge $e=(\alpha,\beta)\in [n_{i-1}]\x [n_i]$ in the computational graph of $\mN$, we set
+\[W_e~=~W_{\alpha,\beta}^{(i)},\qquad \widehat{W}_e~=~\widehat{W}_{\alpha,\beta}^{(i)}\]
+for the normalized and unnormalized weights on the edge corresponding to $e$ (see \eqref{E:W-def}). 
+
+\section{Overview of Proof of Theorems \ref{T:NTK} and \ref{T:deriv}}\label{S:outline}
+The proofs of Theorems \ref{T:NTK} and \ref{T:deriv} are so similar that we will prove them at the same time. In this section and in \S \ref{S:idea} we present an overview of our argument. Then, we carry out the details in \S \ref{S:w-moments-pf}-\S\ref{S:wb-moments-pf} below. Fix an input $x\in \R^{n_0}$ to $\mN.$ Recall from \eqref{E:K-def} that
+\[K_{\mN}(x,x)~=~\Kw~+~\Kb,\]
+where we've set
+\begin{align}
+\label{E:K-decomp}  \Kw~&:=~\sum_{\text{weights } w}
+\bigg(\frac{\partial \mN}{\partial w}(x)\bigg)^2,\qquad \Kb~:=~\sum_{\text{biases }b}\bigg(\frac{\partial \mN}{\partial b}(x)\bigg)^2
+\end{align}
+and have suppressed the dependence on $x,\mN.$ Similarly, we have
+\[-\frac{1}{2\lambda}\Delta K_{\mN}(x,x)~=~\Dww~+~2\Dwb~+~\Dbb,\]
+where we have introduced 
+\begin{align*}
+  \Dww~&:=~\sum_{\text{weights }w,w'} \frac{\partial\mN }{\partial w}(x)\frac{\partial^2\mN }{\partial w\partial w'}(x)\frac{\partial\mN }{\partial w'}(x)\lr{\mN(x)-\mN_*(x)}\\
+  \Dwb~&:=~\sum_{\text{weight }w,\text{ bias }b} \frac{\partial\mN }{\partial w}(x)\frac{\partial^2\mN }{\partial w\partial b}(x)\frac{\partial\mN }{\partial b}(x)\lr{\mN(x)-\mN_*(x)}\\
+  \Dbb~&:=~\sum_{\text{biases }b,b'} \frac{\partial\mN }{\partial b}(x)\frac{\partial^2\mN }{\partial b\partial b}(x)\frac{\partial\mN }{\partial b'}(x)\lr{\mN(x)-\mN_*(x)}
+\end{align*}
+and have used that the loss on the batch $\set{x}$ is given by $\mathcal{L}(x)=\frac{1}{2}\lr{\mN(x)-\mN_*(x)}^2$ for some target value $\mN_*(x).$ To prove Theorem \ref{T:NTK} we must estimate the following quantities:
+\[\E{\Kw},\quad\E{\Kb},\quad \E{\Kw^2},\quad \E{\Kw\Kb},\quad \E{\Kb^2}.\]
+To prove Theorem \ref{T:deriv}, we must control in addition
+\[\E{\Dww},\quad \E{\Dwb},\quad \E{\Dbb}.\]
+The most technically involved computations will turn out to be those involving only weights: namely, the terms $\E{\Kw}, \E{\Kw^2},  \E{\Dww}.$ These terms are controlled by writing each as a sum over certain paths $\gamma$ that traverse the network from the input to the output layers. The corresponding results for terms involving the bias will then turn out to be very similar but with paths that start somewhere in the middle of network (corresponding to which bias term was used to differentiate the network output). The main result about the pure weight contributions to $K_{\mN}$ is the following 
+\begin{proposition}[Pure weight moments for $K_{\mN}, \Delta K_{\mN}$]\label{P:w-moments}
+  We have
+\[\E{\Kw}~=~\frac{d}{n_0}\norm{x}_2^2.\]
+Moreover, 
+\[\E{\Kw^2}~\simeq~\frac{d^2}{n_0^2}\norm{x}_2^4\exp\lr{5\beta}\lr{1+O\lr{\sum_{i=1}^d \frac{1}{n_i^2}}},\qquad \beta~:=~ \sum_{i=1}^{d}\frac{1}{n_i}.\]
+Finally, 
+\[\E{\Dww}~\simeq~ \frac{\norm{x}_2^4}{n_0^2}\left[\sum_{\substack{i_1,i_2=1\\i_i<i_2}}^d \sum_{\ell=i_1}^{i_2-1} \frac{1}{n_\ell} e^{-5/n_\ell-6\sum_{i=i_1}^{\ell-1}\frac{1}{n_i}}\right]\exp\lr{5\beta}\lr{1+O\lr{\sum_{i=1}^d\frac{1}{n_i^2}}}.\]
+\end{proposition}
+We prove Proposition \ref{P:w-moments} in \S \ref{S:w-moments-pf} below. The proof already contains all the ideas necessary to treat the remaining moments. In \S \ref{S:b-moments-pf} and \S \ref{S:wb-moments-pf} we explain how to modify the proof of Proposition \ref{P:w-moments} to prove the following two Propositions:
+\begin{proposition}[Pure bias moments for $K_{\mN}, \Delta K_{\mN}$]\label{P:b-moments}
+  We have
+\[\E{\Kb}~=~\frac{d}{2}.\]
+Moreover, 
+\[\E{\Kb^2}~\simeq~\left[\sum_{\substack{i,j=1\\ i\leq j}}^d e^{-5\sum_{\ell = 1}^j \frac{1}{n_i}}\right]\exp\lr{5\sum_{i=1}^d\frac{1}{n_i}}\lr{1+O\lr{\sum_{i=1}^d \frac{1}{n_i^2}}}.\]
+Finally, with probability $1,$
+\[\Dbb~=~ 0.\]
+\end{proposition}
+\begin{proposition}[Mixed bias-weight moments for $K_{\mN}, \Delta K_{\mN}$]\label{P:wb-moments}
+  We have
+\[\E{\Kb\Kw}~\simeq~\frac{d\norm{x}_2^2}{n_0} \left[\sum_{j=1}^d e^{-5 \sum_{i=1}^j \frac{1}{n_i}}\right] \exp\lr{5\sum_{i=1}^d\frac{1}{n_i}}\lr{1+O\lr{\sum_{i=1}^d\frac{1}{n_i^2}}}.\]
+Further, 
+\[\E{\Dwb}~\simeq~  \frac{\norm{x}_2^2}{n_0}\exp\lr{5\sum_{i=1}^d \frac{1}{n_i}}\left[\sum_{\substack{i,j=1\\j<i}}^d e^{-5\sum_{\alpha=1}^j \frac{1}{n_\alpha}}\sum_{\ell=j}^{i-1} \frac{1}{n_\ell} e^{-6\sum_{\alpha=j+1}^{\ell-1}\frac{1}{n_\alpha}}\right]\lr{1+O\lr{\sum_{i=1}^d \frac{1}{n_i^2}}}.\]
+\end{proposition}
+
+\noindent The statements in Theorems \ref{T:NTK} and \ref{T:deriv} that hold for general $n_i$ now follow directly from Propositions \ref{P:w-moments}-\ref{P:wb-moments}. To see the asymptotics in Theorem \ref{T:NTK} when $n_i\simeq n,$ we find after some routine algebra that when $n_i=n$, the second moment $\E{K_{\mN}(x,x)^2}$ equals
+\[\exp(5d/n)\left[n^2\lr{1-e^{-5d/n}-5\frac{d}{n}e^{-5d/n}}~+~\frac{d n\norm{x}_2^2}{n_0}\lr{1-e^{-5d/n}}+\frac{d^2}{n_0^2}\norm{x}_2^4~+~O\lr{\frac{1}{n}}\right]\]
+up to a multiplicative error of $1+O(d/n^2).$ When $d/n$ is small, this expression is bounded above and below by a constant times
+\[d^2\exp(5d/n)\lr{1+\frac{\norm{x}_2^2}{n_0}}^2.\]
+Thus, since Propositions \ref{P:w-moments} and \ref{P:b-moments} also give
+\[\E{K_{\mN}(x,x)}~\simeq~d\lr{1 + \frac{\norm{x_0}_2^2}{n_0}},\]
+we find that when $d/n$ is small, 
+\[\frac{\E{K_{\mN}(x,x)^2}}{\E{K_{\mN}(x,x)}^2}~\simeq~ \exp(5d/n)\lr{1+O(d^2/n)}.\]
+Similarly, if $d/n$ is large but $d/n^2$ is small, then, still assuming $n_i=n,$ we find $\E{K_{\mN}(x,x)^2}$ is well-approximated by
+\[\frac{d^2\norm{x}_2^4}{n_0^2}\exp(5d/n)\]
+and so 
+\[\frac{\E{K_{\mN}(x,x)^2}}{\E{K_{\mN}(x,x)}^2}~\simeq~ \exp(5d/n)\lr{1+O(d^2/n)}\]
+in this regime as well, confirming the behavior of $\E{K_{\mN}(x,x)^2}$ when $n_i\simeq n$ in Theorem \ref{T:NTK}. A similar Taylor expansion gives the analogous expression in Theorem \ref{T:deriv}.
+
+\subsection{Idea of Proof of Propositions \ref{P:w-moments}-\ref{P:wb-moments}}\label{S:idea} Before turning to the details of the proof of Propositions \ref{P:w-moments}-\ref{P:wb-moments} below, we give an intuitive explanation of the key steps in our sum-over-path analysis of the moments of $\Kw,\Kb,\Dww,\Dwb,\Dbb.$ Since the proofs of all three Propositions follow a similar structure and Proposition \ref{P:w-moments} is the most complicated, we will focus on explaining how to obtain the first $2$ moments of  $\Kw$. The first moment of $\Dww$ has a similar flavor. Since the biases are initialized to zero and $\Kw$ involves only derivatives with respect to the weights, for the purposes of analyzing $\Kw$ the biases play no role. Without the biases, the output of the neural network, $\mN(x)$ can be express as a weighted sum over paths in the computational graph of the network:
+
+\begin{equation*}
+\mN(x)~=~\sum_{a=1}^{n_0}x_a \sum_{\gamma\in \Gamma_{a}^1}\wt(\gamma),
+\end{equation*}
+where the weight of a path $\wt(\gamma)$ was defined in \eqref{E:path-weight-def} and includes both the product of the weights along $\gamma$ and the condition that every neuron in $\gamma$ is open at $x$. The path $\gamma$ begins at some neuron in the input layer of $\mN$ and passes through a neuron in every subsequent layer until ending up at the unique neuron in the output layer (see \eqref{E:gamma-def}). Being a product over edge weights in a given path, the derivative of $\wt(\gamma)$ with respect to a weight $W_e$ on an edge $e$ of the computational graph of $\mN$ is:
+
+\begin{equation} \label{E:deriv}
+\frac{\partial \wt(\gamma)}{\partial W_{e}} = \frac{\wt(\gamma)}{W_{e}} {\bf 1}_{\{e \in \gamma\}}.
+\end{equation}
+
+\noindent There is a subtle point here that $\wt(\gamma)$ also involves indicator functions of the events that neurons along $\gamma$ are open at $x.$ However, with probability $1$, the derivative with respect to $W_e$ of these indicator functions is identically $0$ at $x.$ The details are in Lemma \ref{L:non-deg}.
+
+Because $\Kw$ is a sum of derivatives squared (see \eqref{E:K-decomp}), ignoring the dependence on the network input $x$, the kernel $\Kw$ roughly takes the form 
+ \[\Kw~\sim~ \sum_{\substack{ \gamma_1,\gamma_2}} \sum_{e\in \gamma_1\cap \gamma_2} \frac{\prod_{k=1}^2 \wt(\gamma_k)}{W_{e}^2},\]
+where the sum is over collections $(\gamma_1,\gamma_2)$ of two paths in the computation graph of $\mN$ and edges $e$ in the computational graph of $\mN$ that lie on both (see Lemma \ref{L:paths-raw} for the precise statement).  When computing the mean, $\e[\Kw]$, by the mean zero assumption of the weights $W_e$ (see \eqref{E:mu-def}), the only contribution is when every edge in the computational graph of $\mN$ is traversed by an even number of paths. Since there are exactly two paths, the only contribution is when the two paths are identical, dramatically simplifying the problem. This gives rise to the simple formula for $\e[\Kw]$ (see \eqref{E:K-1st-moment}). The expression 
+ \[\Kw^2~\sim~ \sum_{\substack{ \gamma_1,\gamma_2,\gamma_3,\gamma_4}} \sum_{\substack{e_1\in \gamma_1\cap \gamma_2\\e_2\in \gamma_3\cap \gamma_4}} \frac{\prod_{k=1}^4 \wt(\gamma_k)}{W_{e_1}^2W_{e_2}^2},\]
+for $\Kw^2$ is more complex. It involves sums over four paths in the computational graph of $\mN$ as in the second statement of Lemma \ref{L:paths-raw}. Again recalling that the moments of the weights have mean $0$, the only collections of paths that contribute to  $\e[\Kw^2]$ are those in which every edge in the computational graph of $\mN$ is covered an even number of times:
+\begin{equation}\label{E:Kw2-rough}
+\e[\Kw^2]~=\sum_{\substack{ \gamma_1,\gamma_2,\gamma_3,\gamma_4\\\mathrm{even}}} \sum_{\substack{e_1\in \gamma_1\cap \gamma_2\\e_2\in \gamma_3\cap \gamma_4}} \E{\frac{\prod_{k=1}^4 \wt(\gamma_k)}{W_{e_1}^2W_{e_2}^2}}
+\end{equation}
+However, there are now several ways the four paths can interact to give such a configuration. It is the combinatorics of these interactions, together with the stipulation that the marked edges $e_1,e_2$ belong to particular pairs of paths, which complicates the analysis of $\e[\Kw^2].$ We estimate this expectation in several steps:
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.8\textwidth]{NN_No_Loop.pdf}
+\caption{Cartoon of the four paths $\gamma_1,\gamma_2,\gamma_3,\gamma_4$ between layers $\ell_1$ and $\ell_2$ in the case where there is no interaction. Paths stay with there original partners $\gamma_1$ with $\gamma_2$ and $\gamma_3$ with $\gamma_4$ at all intermediate layers.\label{fig:no-interaction}} 
+\end{figure}
+
+%The only other possibility is that the pairs of paths form a loop in between layers $\ell_1$ and $\ell_2$. Figure 2 shows a cartoon of what the interaction with one loop looks like. In general, there can be any odd number of loops where the paths switch partners: the only requirements is that they start and end together with their original partners. Theorem \ref{T:NTK} is the result of enumerating the contribution from all these possibilities. 
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.8\textwidth]{NN_One_Loop.pdf}
+\caption{Cartoon of the four paths $\gamma_1,\gamma_2,\gamma_3,\gamma_4$ between layers $\ell_1$ and $\ell_2$ in the case where there is exactly one ``loop'' interaction between the marked layers. Paths swap away from their original partners exactly once at some intermediate layer after $\ell_1$, and then swap back to their original partners before $\ell_2$.\label{fig:loop} } 
+\end{figure}
+
+\begin{enumerate}
+    \item Obtain an exact formula for the expectation in \eqref{E:Kw2-rough}:
+    \[\E{\frac{\prod_{k=1}^4 \wt(\gamma_k)}{W_{e_1}^2W_{e_2}^2}}~=~F(\Gamma, e_1,e_2),\]
+    where $F(\Gamma,e_1,e_2)$ is the product over the layers $\ell=1,\ldots, d$ in $\mN$ of the ``cost'' of the interactions of $\gamma_1,\ldots,\gamma_4$ between layers $\ell-1$ and $\ell.$ The precise formula is in Lemma \ref{L:2k-paths-avg}.
+    \item Observe that the dependence of $F(\Gamma, e_1,e_2)$ on $e_1,e_2$ is only up to a multiplicative constant: 
+    \[F(\Gamma,e_1,e_2)~\simeq~ F_*(\Gamma).\]
+    The precise relation is \eqref{E:F-star-def}. This shows that, up to universal constants, 
+    \[\e[\Kw^2]~\simeq ~ \sum_{\substack{ \gamma_1,\gamma_2,\gamma_3,\gamma_4\\\mathrm{even}}}F_*(\Gamma) \#\left\{\ell_1,\ell_2\in [d]~\big|~\substack{\gamma_1,\gamma_2\mathrm{~togethe~at~layer~}\ell_1\\\gamma_3,\gamma_4\mathrm{~togethe~at~layer~}\ell_2} \right\}.\]
+    This is captured precisely by the terms $I_j,II_j$ defined in \eqref{E:I-def},\eqref{E:II-def}.
+    \item Notice that $F_*(\Gamma)$ depends only on the un-ordered multiset of edges $E=E^\Gamma\in \Sigma_{even}^4$ determined by $\Gamma$ (see \eqref{E:Sigma-def}). We therefore change variables in the sum from the previous step to find
+    \[\e[\Kw^2]~\simeq ~ \sum_{E\in \Sigma_{even}^4}F_*(E) \mathrm{Jacobian}(E, e_1,e_2),\]
+    where $\mathrm{Jacobian}(E, e_1,e_2)$ counts how many collections of four paths $\Gamma \in \Gamma_{even}^4$ that have the same $E^\Gamma$ also have paths $\gamma_1,\gamma_2$ pass through $e_1$ and paths $\gamma_3,\gamma_4$ pass through $e_2.$ Lemma \ref{L:Jac-1} gives a precise expression for this Jacobian. It turns outs, as explained just below Lemma \ref{L:Jac-1}, that
+    \[\mathrm{Jacobian}(E, e_1,e_2)~\simeq~6^{\#\mathrm{loops}(E)},\]
+    where a loop in $E$ occurs when the four paths interact. More precisely, a loop occurs whenever all four paths pass through the same neuron in some layer (see Figures \ref{fig:no-interaction} and \ref{fig:loop}). 
+    \item Change variables from unordered multisets of edges $E\in \Sigma_{even}^4$ in which every edge is covered an even number of times to pairs of paths $V\in \Gamma^2$. The Jacobian turns out to be $2^{-\#\mathrm{loops}(E)}$ (Lemma \ref{L:2paths}), giving
+    \[\e[\Kw^2]~\simeq ~ \sum_{V\in \Gamma^2} F_*(V)3^{\#\mathrm{loops}(V)}.\]
+    \item Just like $F_*(V),$ the term $3^{\#\mathrm{loops}(V)}$ is again a product over layers $\ell$ in the computational graph of $\mN$ of the ``cost'' of interactions between our four paths. Aggregating these two terms into a single functional $\widehat{F}_*(E)$ and factoring out the $1/n_{\ell}$ terms in $F_*(V)$ we find that:
+    \[\e[\Kw^2]~\simeq ~ \frac{1}{n_0^2}\mE{\widehat{F}_*(V)},\]
+    where the $1/n_\ell$ terms cause the sum to become \textit{an average} over collections $V$ of two independent paths in the computational graph of $\mN,$ with each path sampling neurons uniformly at random in every layer. The precise result, including the dependence on the input $x,$ is in \eqref{E:K2-est}.
+    \item Finally, we use Proposition \ref{P:elementary} to obtain for this expectation estimates above and below that match up multiplicative constants. 
+\end{enumerate}
+
+%In particular, the indicator that $\{ e \in \gamma\}$ from equation \ref{E:deriv} gives rise to two marked edges $e_1 \in \gamma_1 \cap \gamma_2$ and $e_2 \in \gamma_3 \cap \gamma_4$ which are summed over. Since there are exactly four paths under consideration, and all edges must be covered by an even number of paths, these marked edges force that at \emph{both} the layers $\ell_1 = \ell(e_1)$ and $\ell_2 = \ell(e_2)$ the paths must be with same partners: $\gamma_1(\ell_i) = \gamma_2(\ell_i)$ \emph{and} $\gamma_3(\ell_i) = \gamma_4(\ell_i)$ for $i \in \{1,2\}$. From here, one can enumerate the possibilities for what can happen between layers $\ell_1$ and $\ell_2$. The simplest case is that there is no interaction between the paths: see Figure 1.
+
+
+
+%The computation of  $\e[\Dww]$ has a similar flavor. Because the biases are all initialised to zero, the derivative with respect can be written as a sum over paths but this time with one path starting at an intermediate layer somewhere in the middle of the computational graph, and the beginning of this path always playing the role of a marked edge. This computation is carried out in Lemma \ref{L:K-bias-moments}
+
+
+\section{Proof of Proposition \ref{P:w-moments}}\label{S:w-moments-pf}
+We begin with the well-known formula for the output of a ReLU net $\mN$ with biases set to $0$ and a linear final layer with one neuron:
+\begin{equation}\label{E:sum-over-paths}
+\mN(x)~=~\sum_{a=1}^{n_0}x_a \sum_{\gamma\in \Gamma_{a}^1}\wt(\gamma).
+\end{equation}
+
+The weight of a path $\wt(\gamma)$ was defined in \eqref{E:path-weight-def} and includes both the product of the weights along $\gamma$ and the condition that every neuron in $\gamma$ is open at $x$. As explained in \S \ref{S:notation}, the inner sum in \eqref{E:sum-over-paths} is over paths $\gamma$ in the computational graph of $\mN$ that start at neuron $a$ in the input layer and end at the output neuron and the random variables $\widehat{W}_\gamma^{(i)}$ are the normalized weights on the edge of $\gamma$ between layer $i-1$ and layer $i$ (see \eqref{E:W-gamma-def}). Differentiating this formula gives sum-over-path expressions for the derivatives of $\mN$ with respect to both $x$ and its trainable parameters. For the NTK and its first SGD update, the result is the following: 
+\begin{lemma}[weight contribution to $K_{\mN}$ and $\Delta K_{\mN}$ as a sum-over-paths]\label{L:paths-raw}
+With probability $1,$
+  \[\Kw~=~\sum_{a\in [n_0]^2}\prod_{k=1}^2x_{a_k} \sum_{\substack{\Gamma\in \Gamma_a^2\\\Gamma = \lr{\gamma_1,\gamma_2}}} \sum_{e\in \gamma_1\cap \gamma_2} \frac{\prod_{k=1}^2 \wt(\gamma_k)}{W_{e}^2},\]
+  where the sum is over collections $\Gamma$ of two paths in the computation graph of $\mN$ and edges $e$ that lie on both paths. Similarly, almost surely, 
+  \[\Kw^2~=~\sum_{a\in [n_0]^4}\prod_{k=1}^4x_{a_k} \sum_{\substack{\Gamma\in \Gamma_a^4(\vec{n})\\\Gamma = \lr{\gamma_1,\ldots, \gamma_4}}} \sum_{\substack{e_1\in \gamma_1\cap \gamma_2\\ e_2\in \gamma_3,\gamma_4}} \frac{\prod_{k=1}^4\wt(\gamma_k)}{W_{e_1}^2W_{e_2}^2},\]
+and
+  \[\Dww~=~\sum_{a\in [n_0]^4}\prod_{k=1}^4x_{a_k} \sum_{\substack{\Gamma\in \Gamma_a^4(\vec{n})\\\Gamma = \lr{\gamma_1,\ldots,\gamma_4}}} \sum_{\substack{e_1\in \gamma_1\cap \gamma_2\\ e_2\in \gamma_2,\gamma_3\\ e_1\neq e_2}} \frac{\prod_{k=1}^4\wt(\gamma_k)}{W_{e_1}^2W_{e_2}^2}\]
+plus a term that has mean $0.$ 
+\end{lemma}
+The notation $[n_0]^k,\, \Gamma_a^k,e\in \gamma,$ etc is defined in \S \ref{S:notation}. We prove Lemma \ref{L:paths-raw} in \S \ref{S:paths-raw-pf} below. Let us emphasize that the expressions for $\Kw^2$ and $\Dww$ are almost identical. The main  difference is that in the expression for $\Dww$, the second path $\gamma_2$ must contain both $e_1$ and $e_2$ while $\gamma_4$ has no restrictions. Hence, while for $\Kw^2$ the contribution from a collection of four paths $\Gamma=\lr{\gamma_1,\gamma_2,\gamma_3,\gamma_4}$ is the same as from the collection $\Gamma'=\lr{\gamma_2,\gamma_1, \gamma_4, \gamma_3},$ for $\Dww$ the contributions are different. This seemingly small discrepancy, as we shall see, causes the normalized expectation $\E{\Dww}/\E{\Kw}$ to converge to zero when $d<\infty$ is fixed and $n_i\gives \infty$ (see the $1/n_\ell$ factors in the statement of Theorem \ref{T:deriv}). In contrast, in the same regime, the normalized second moment $\E{\Kw^2}/\E{\Kw}^2$ remains bounded away from zero as in the statement of Theorem \ref{T:NTK}. Both statements are consistent with prior results in the literature \cite{dyer2018asymptotics,jacot2018neural}. Taking expectations in Lemma \ref{L:paths-raw} yields the following result.  
+\begin{lemma}[Expectation of $\Kw,\Kw^2,\Dww$ as sums over $2,4$ paths]\label{L:2k-paths-avg}
+We have,
+\begin{equation}\label{E:first-moment-2paths}
+\E{\Kw}~=~\sum_{a\in [n_0]_{even}^2}^{n_0}\prod_{k=1}^2x_{a_k} \sum_{\substack{\Gamma_a\in \Gamma_{even}^2\\\Gamma=\lr{\gamma_1,\gamma_2}}} \sum_{\substack{e\in \gamma_1\cap \gamma_2}}H(\Gamma, e)
+\end{equation}
+where
+\[H(\Gamma,e)~=~{\bf 1}_{\set{\gamma_1=\gamma_2}}\prod_{i=1}^d\frac{1}{n_{i-1}}\]
+Similarly, 
+\begin{equation}\label{E:second-moment-4paths}
+\E{\Kw^2}~=~\sum_{a\in [n_0]_{even}^4}\prod_{k=1}^4 x_{a_k}\sum_{\substack{\Gamma\in \Gamma_{a, even}^4\\\Gamma=\lr{\gamma_1,\ldots, \gamma_4}}} \sum_{\substack{e_1\in \gamma_1\cap \gamma_2\\e_2\in \gamma_3\cap \gamma_4}}F(\Gamma, e_1,e_2),
+\end{equation}
+where
+\[F(\Gamma,e_1,e_2)~=~\frac{1}{2}\prod_{i=1}^d\frac{2^{2-\abs{\Gamma(i)}}}{n_{i-1}^2} \prod_{i\neq \ell(e_1),\ell(e_2)}\mu_4^{{\bf 1}_{\set{\abs{\Gamma(i-1)}=\abs{\Gamma(i)}=1}}}.\]
+Finally, 
+\begin{equation}\label{E:SGD-4paths}
+\E{\Dww}~=~\sum_{a\in [n_0]_{even}^4}\prod_{k=1}^4x_{a_k}\sum_{\substack{\Gamma\in \Gamma_{a, even}^4\\\Gamma=\lr{\gamma_1,\ldots, \gamma_4}}} \sum_{\substack{e_1\in \gamma_1\cap \gamma_2\\e_2\in \gamma_2, \gamma_3\\ e_1\neq e_2}}F(\Gamma, e_1,e_2).
+\end{equation}
+\end{lemma}
+\noindent Lemma \ref{L:2k-paths-avg} is proved in \S \ref{S:2k-path-avg-pf}. The expression \eqref{E:first-moment-2paths} is simple to evaluate due to the delta function in $H(\Gamma,e).$ We obtain:
+\begin{align}
+  \E{\Kw} ~&=~\sum_{a=1}^{n_0}x_a^2\sum_{\gamma\in \Gamma^1(\vec{n})} \sum_{e\in \gamma} \prod_{i=1}^d\frac{1}{n_{i-1}}=~d\prod_{i=1}^d\frac{1}{n_{i-1}}\prod_{i=1}^dn_i\norm{x}_2^2=~\frac{d}{n_0}\norm{x}_2^2,\label{E:K-1st-moment}
+\end{align}
+where in the second-to-last equality we used that the number of paths in the comutational graph of $\mN$ from a given neuron in the input to the output neuron equals $\prod_{i=1,\ldots,d} n_i$ and in the last equality we used that $n_d=1.$ This proves the first equality in Theorem \ref{T:NTK}.
+
+It therefore remains to evaluate \eqref{E:second-moment-4paths} and \eqref{E:SGD-4paths}. Since they are so similar, we will continue to discuss them in parallel. To start, notice that the expression $F(\Gamma, e_1,e_2)$ appearing in \eqref{E:second-moment-4paths} and \eqref{E:SGD-4paths} satisfies
+\[\frac{1}{2\mu_4^2}F_*(\Gamma)~\leq ~ F(\Gamma,e_1,e_2)~\leq ~\frac{1}{2}F_*(\Gamma),\]
+where
+\begin{align}\label{E:F-star-def}
+  F_*(\Gamma)~:=~\prod_{i=1}^d \frac{2^{2-\abs{\Gamma(i)}}}{n_{i-1}^2}\mu_4^{{\bf 1}_{\set{\abs{\Gamma(i-1)}=\abs{\Gamma(i)}=1}}}.
+\end{align}
+For the remainder of the proof we will write
+\[f~\simeq~g\quad \Longleftrightarrow \quad \exists \text{ constants }C,c>0\text{ depending only on }\mu\text{ s.t. }\quad cg~\leq ~f~\leq~Cg.\]
+Thus, in particular, 
+\[F(\Gamma,e_1,e_2)~\simeq~ F_*(\Gamma).\]
+The advantage of $F_*(\Gamma)$ is that it does not depend on $e_1,e_2.$ Observe that for every $a=(\alpha_1,\alpha_2,\alpha_3,\alpha_4)\in [n_0]_{even}^4$, we have that either $\alpha_1=\alpha_2$, $\alpha_1=\alpha_3$, or $\alpha_1=\alpha_4$. Thus, by symmetry, the sum over $\Gamma_{even}^4(\vec{n})$ in \eqref{E:second-moment-4paths} and \eqref{E:SGD-4paths} takes only four distinct values, represented by the following possibilities:
+\[a_j\in [n_0]_{even}^4~:=~
+ \begin{cases}
+   (1,1,1,1),&\quad j=1\\
+   (1,2,1,2),&\quad j=2\\
+   (1,1,2,2),&\quad j=3\\
+   (1,2,2,1),&\quad j=4
+ \end{cases},\]
+keeping track of which paths $\gamma_1,\ldots, \gamma_4$ begin at the same neuron in the input layer to $\mN.$ Hence, since
+\[\sum_{\substack{a=(a_1,\ldots, a_4)\in [n_0]_{even}^4\\ a_1=a_2,\, a_3=a_4,\, a_1\neq a_3}}\prod_{k=1}^4x_{a_k}~=~\norm{x}_2^4-\norm{x}_4^4 \]
+we find
+\begin{equation}\label{E:K-I}
+\E{\Kw^2}~\simeq~\norm{x}_4^4 I_{1}+(\norm{x}_2^4-\norm{x}_4^4)(I_{2}+I_{3}+I_{4}),
+\end{equation}
+and similarly, 
+\begin{equation}\label{E:Delta-K-I}
+\E{ \Dww}~\simeq~\norm{x}_4^4 II_{1}+(\norm{x}_2^4-\norm{x}_4^4)(II_{2}+II_{3}+II_{4}),
+\end{equation}
+where
+\begin{align}
+\label{E:I-def}  I_{j}~&=~\sum_{\substack{\Gamma\in \Gamma_{a_j, even}^4\lr{\vec{n}}\\\Gamma=\lr{\gamma_1,\ldots, \gamma_4}}} F_*(\Gamma) \#\left\{\text{edges }e_1,e_2~|~e_1\in \gamma_1\cap \gamma_2,\,e_2\in \gamma_3\cap \gamma_4\right\}\\
+\label{E:II-def}  II_{j}~&=~\sum_{\substack{\Gamma\in \Gamma_{a_j, even}^4\lr{\vec{n}}\\\Gamma=\lr{\gamma_1,\ldots, \gamma_4}}} F_*(\Gamma) \#\left\{\text{edges }e_1,e_2~|~e_1\in \gamma_1\cap \gamma_2,\,e_2\in \gamma_2, \gamma_3,\, e_1\neq e_2\right\}.
+\end{align}
+To evaluate $I_{j},\, II_{j}$ let us write
+\begin{equation}\label{E:T-def}
+T_{i}^{\alpha,\beta}(\Gamma)~:=~{\bf 1}_{\left\{\substack{\gamma_\alpha(i-1)=\gamma_\beta(i-1)\\\gamma_\alpha(i)=\gamma_\beta(i)}\right\}},\qquad \Gamma = \lr{\gamma_1,\ldots, \gamma_4},\qquad \alpha,\beta=1,\ldots,4
+\end{equation}
+for the indicator function of the event that paths $\gamma_\alpha,\gamma_\beta$ pass through the same edge between layers $i-1,i$ in the computational graph of $\mN$. Observe that
+\[\#\left\{\text{edges }e_1,e_2~|~e_1\in \gamma_1\cap \gamma_2,\,e_2\in \gamma_3\cap \gamma_4\right\}~=~\sum_{i_1,i_2=1}^d T_{i_1}^{1,2}T_{i_2}^{3,4}\]
+and
+\[\#\left\{\text{edges }e_1,e_2~|~e_1\in \gamma_1\cap \gamma_2,\,e_2\in \gamma_2, \gamma_3,\,e_1\neq e_2\right\}~=~\sum_{\substack{i_1,i_2=1\\ i_1\neq i_2}}^d T_{i_1}^{1,2}T_{i_2}^{2,3}.\]
+Thus, we have
+\[I_{j}~=~\sum_{i_1,i_2=1}^d I_{j,i_1,i_2},\qquad II_{j}~=~\sum_{\substack{i_1,i_2=1\\i_1\neq i_2}}^d II_{j,i_1,i_2},\]
+where
+\begin{align*}
+  I_{j,i_1,i_2}~&=~\sum_{\substack{\Gamma\in \Gamma_{a_j, even}^4\lr{\vec{n}}\\\Gamma=\lr{\gamma_1,\ldots, \gamma_4}}} F_*(\Gamma) T_{i_1}^{1,2}T_{i_2}^{3,4},\qquad  II_{j,i_1,i_2}~=~\sum_{\substack{\Gamma\in \Gamma_{a_j, even}^4\lr{\vec{n}}\\\Gamma=\lr{\gamma_1,\ldots, \gamma_4}}} F_*(\Gamma) T_{i_1}^{1,2}T_{i_2}^{2,3}.
+\end{align*}
+To simplify $I_{j,i_1,i_2}$ and $II_{j,i_1,i_2}$ observe that $F_*(\Gamma)$ depends only on $\Gamma$ only via  the unordered edge multi-set (i.e. only which edges are covered matters; not their labelling)
+\[E^\Gamma=\lr{E^\Gamma(1),\ldots, E^\Gamma(d)}\in \Sigma_{even}^4\lr{\vec{n}}\]
+defined in Definition \ref{D:unordered_multisets}. Hence, we find that for $j=1,2,3,4,\,i_1,i_2=1,\ldots, d,$ 
+\begin{align}
+\label{E:I-star-2}I_{j,i_1,i_2}~& =~\sum_{\substack{E\in \Sigma_{a_j, even}^4(\vec{n})}} F_*(E)\#\left\{\Gamma\in \Gamma_{a_j, even}^4(\vec{n})~\big|~\substack{E^\Gamma=E,\,\,\Gamma(0)=a_j,t=1,2\\\gamma_1(i_t-1)=\gamma_2(i_t-1),\, \gamma_1(i_t)=\gamma_2(i_t)}\right\}\\
+\label{E:II-star-2}II_{j,i_1,i_2}~& =~\sum_{\substack{E\in \Sigma_{a_j, even}^4(\vec{n})}} F_*(E)\#\left\{\Gamma\in \Gamma_{a_j, even}^4(\vec{n})~\bigg|~\substack{E^\Gamma=E,\,\Gamma(0)=a_j\\\gamma_1(i_1-1)=\gamma_2(i_1-1),\, \gamma_1(i_1)=\gamma_2(i_1)\\\gamma_2(i_2-1)=\gamma_3(i_2-1),\,\gamma_2(i_2)=\gamma_3(i_2)}\right\}
+\end{align}
+The counts in $I_{j,*,i_1,i_2}$ and $II_{j,*,i_1,i_2}$ have a convenient representation in terms of   
+\begin{align}\label{E:C-def-E}
+  C(E,i_1,i_2)~&:=~{\bf 1}_{\left\{\exists ~\ell=\min(i_1,i_2),\ldots, \max(i_1,i_2-1)\text{ s.t. } \abs{R(E(\ell))}=1\right\}}\\
+  \widehat{C}(E,i_1,i_2)~&:=~{\bf 1}_{\left\{\exists ~\ell=0,\ldots, \min(i_1,i_2)-1\text{ s.t. } \abs{R(E(\ell))}=1\right\}}.\label{E:C-hat-def-E}
+\end{align}
+Informally, the event $\widehat{C}(E,i_1,i_2)$ indicates the presence of a ``collision'' of the four paths in $\Gamma$ before the earlier of the layers $i_1,i_2$, while $C(E,i_1,i_2)$ gives a ``collision'' between layers $i_1,i_2$; see Section \ref{S:idea} for the intuition behind calling these collisions. We also write
+\begin{align}\label{E:A-def-2-E}
+\notag A(E,i_1,i_2)~:&=~  {\bf 1}_{\left\{\substack{\abs{L(E(i_1))}=\abs{R(E(i_1))}=1 \\\abs{L(E(i_2))}=\abs{R(E(i_2))}=1}\right\}}~+~\frac{1}{6}{\bf 1}_{\left\{\substack{\abs{L(E(i_1))}=\abs{R(E(i_1))}=1,\, \abs{R(E(i_2))}=2\text{ or }\\\abs{L(E(i_2))}=\abs{R(E(i_2))}=1,\, \abs{R(E(i_1))}=2}\right\}}\\
+~&+~\frac{1}{6}{\bf 1}_{\left\{\substack{\abs{R(E(i_1))}=\abs{R(E(i_2))}=2\\ \not\exists\,  \min(i_1,i_2)\leq \ell<\max(i_1,i_2)\\ \text{s.t. } \abs{R(E(\ell))}=1} \right\}}~+~\frac{1}{36}{\bf 1}_{\left\{\substack{E(i_1),E(i_2)\in U\\ \exists\, \min(i_1,i_2)\leq \ell<\max(i_1,i_2)\\ \text{s.t. } \abs{R(E(\ell))}=1} \right\}}.
+\end{align}
+Finally, for $E\in \Sigma_{a, even}^4(\vec{n})$, we will define 
+\begin{equation}\label{E:loop-def}
+\#\text{loops}(E)~=~\#\set{i\in [d]~|~\abs{L(E(i))}=1,\, \abs{R(E(i))}=2}.
+\end{equation}
+That is, a loop is created at layer $i$ if the four edges in $E$ all begin at occupy the same vertex in layer $i-1$ but occupy two different vertices in layer $i.$ We have the following Lemma. 
+\begin{lemma}[Evaluation of Counting Terms in \eqref{E:I-star-2} and \eqref{E:II-star-2}] \label{L:Jac-1}
+Suppose $E \in \Sigma_{a_j, even}^4$ for some $j=1,2,3,4.$ For each $i_1,i_2\in \set{1,\ldots, d},$ 
+\[\#\left\{\Gamma=\lr{\gamma_1,\ldots, \gamma_4}\in \Gamma_{a_j, even}^4~\big|~\substack{E^\Gamma=E,\,\Gamma(0)=a_j,t=1,2\\\gamma_1(i_t-1)=\gamma_2(i_t-1),\,\gamma_1(i_t)=\gamma_2(i_t)}\right\}\]
+equals 
+\begin{equation}\label{E:E-Jac-1}
+6^{\#\text{loops}(E)}A(E,i_1,i_2)~\cdot~
+\begin{cases}
+  1,&\quad j=1,2\\
+  \widehat{C}(E,i_1,i_2),&\quad j=3,4
+\end{cases}.
+\end{equation}
+Similarly, 
+\[\#\left\{\Gamma\in \Gamma_{a_j, even}^4~\big|~\substack{E^\Gamma=E,\,\Gamma(0)=a_j,\,t=1,2\\\gamma_1(i_1-1)=\gamma_2(i_1-1),\, \gamma_1(i_1)=\gamma_2(i_1)\\\gamma_2(i_2-1)=\gamma_3(i_2-1),\,\gamma_2(i_2)=\gamma_3(i_2)}\right\}\]
+equals
+\begin{equation}\label{E:E-Jac-2}
+6^{\#\text{loops}(E)}A(E,i_1,i_2)C(E,i_1,i_2)~\cdot~
+\begin{cases}
+  1,&\quad j=1,2\\
+  \widehat{C}(E,i_1,i_2),&\quad j=3,4
+\end{cases}.
+\end{equation}
+\end{lemma}
+\noindent We prove Lemma \ref{L:Jac-1} in \S \ref{S:Jac-1-pf} below. Assuming it for now, observe that 
+\[\frac{1}{36}~\leq~ A(E,i_1,i_2)~\leq 1\]
+and that the conditions $L(E(1))=a_j$ are the same for $j=2,3,4$ since the equality it is in the sense of unordered multi-sets. Thus, we find that $\E{\Kw^2}$ is bounded above/below by a constant times
+\begin{equation}\label{E:K-bounds}
+\norm{x}_4^4\sum_{i_1,i_2=1}^d \sum_{\substack{E\in \Sigma_{a_1, even}^4}} F_*(E) + (\norm{x}_2^4-\norm{x}_4^4)\sum_{\substack{E\in \Sigma_{a_2,even}^4}} F_*(E)(1+2\widehat{C}(E,i_1,i_2)).
+\end{equation}
+Similarly, $\E{\Dww}$ is bounded above/below by a constant times
+\begin{align}
+\label{E:deltaK-bounds}&\sum_{\substack{i_1,i_2=1\\i_1\neq i_2}}^d \left[\norm{x}_4^4\sum_{\substack{E\in \Sigma_{a_1,even}^4}} F_*(E)6^{\#\text{loops}(E)}C(E,i_1,i_2) \right.\\
+\notag &\quad\left.+ (\norm{x}_2^4-\norm{x}_4^4)\sum_{\substack{E\in \Sigma_{a_2,even}^4}} F_*(E)6^{\#\text{loops}(E)}C(E,i_1,i_2)(1+2\widehat{C}(E,i_2,i_2))\right].
+\end{align}
+Observe that every unordered multi-set four edge multiset $E\in \Sigma_{even}^4$ can be obtained by starting from some $V\in \Gamma^2$, considering its unordered edge multi-set $E^V$ and doubling all its  edges. This map from $\Gamma^2$ to $\Sigma_{even}^4$ is surjective but not injective. The sizes of the fibers is computed by the following Lemma.
+\begin{lemma}\label{L:2paths}
+Fix  $E\in \Sigma_{even}^4$. The number of $V\in \Gamma_Z^2$ so that $E=2\cdot E^V$ is $2^{\#\text{loops}(V)+{\bf 1}_{\set{\abs{V(0)}=2}}},$ where as in \eqref{E:loop-def}, 
+\[\#\text{loops}(V)~=~\#\set{i\in [d]~|~ \abs{V(i-1)}=1,\abs{V(i)}=2}.\]
+\end{lemma}
+Lemma \ref{L:2paths} is proved in \S \ref{S:2path-pf}. Using it and that $0\leq \widehat{C}(E,i_1,i_2)\leq 1$, the relation \eqref{E:K-bounds} shows that $\E{\Kw^2}$ is bounded above/below by a constant times
+\begin{equation}\label{E:K-bounds-2}
+d^2\sum_{\substack{V\in \Gamma^2}} F_*(V) 3^{\#\text{loops}(V)}\lr{\norm{x}_4^4 {\bf 1}_{\set{\abs{V(0)}=1}}+ (\norm{x}_2^4-\norm{x}_4^4) {\bf 1}_{\set{\abs{V(0)}=2}}}.
+\end{equation}
+Similarly, $\E{\Dww}$ is bounded above/below by a constant times
+\begin{equation}\label{E:D-bounds-2}
+\sum_{\substack{i_1,i_2=1\\ i_1\neq i_2}}^d\sum_{\substack{V\in \Gamma^2}} F_*(V) 3^{\#\text{loops}(V)}C(V,i_1,i_2)\lr{\norm{x}_4^4 {\bf 1}_{\set{\abs{V(0)}=1}}+ (\norm{x}_2^4-\norm{x}_4^4) {\bf 1}_{\set{\abs{V(0)}=2}}},
+\end{equation}
+where, in analogy to \eqref{E:C-def-E}, we have
+\[C(V,i_1,i_2)~:=~{\bf 1}_{\set{\exists \ell=i_1,\ldots, i_2-1\text{ s.t. } \abs{V(\ell)}=1}}.\]
+Let us introduce 
+\begin{align*}
+  \widehat{F}_*(V)~&:=~ F_*(V)\cdot 3^{\#\text{loops}(V)}\prod_{i=0}^d n_{i}^2\\
+~&=~ 2^{\#\set{i\in [d]~|~\abs{V(i)}=1}}3^{\#\text{loops}(V)}  \mu_4^{\#\set{i\in [d]~|~\abs{V(i-1)}=\abs{V(i)}=1}}.
+\end{align*}
+Since the number of $V$ in $\Gamma^2(\vec{n})$ with specified $V(0)$ equals $\prod_{i=1}^d n_i^2,$ we find that so that for each $x\neq 0,$ we have 
+\begin{equation}\label{E:K2-est}
+\frac{\E{\Kw^2}}{\norm{x}_2^4}~\simeq~\frac{d^2}{n_0^2}\mathcal E_x\left[\widehat{F}_*(V)\right],
+\end{equation}
+and similarly, 
+\[\frac{\E{\Dww}}{\norm{x}_2^4}~\simeq~\frac{1}{n_0^2}\sum_{\substack{i_1,i_2=1\\ i_1\neq i_2}}^d\mathcal E_x\left[\widehat{F}_*(V)C(V,i_1,i_2)\right].\]
+Here, $\mathcal E_x$ is the expectation with respect to the probability measure on $V=(v_1,v_2)\in\Gamma^2$ obtained by taking $v_1,v_2$ independent, each drawn from the products of the measure $\lr{x_1^2/\norm{x}_2^2,\ldots, x_{n_0}^2/\norm{x}_2^2}$ on $[n_0]$ and the uniform measure on $[n_i],\, i=1,\ldots, d.$
+
+We are now in a position to complete the proof of Theorems \ref{T:NTK} and \ref{T:deriv}. To do this, we will evaluate the expectations $\mathcal E_x$ above to leading order in $\sum_i 1/n_i$ with the help of the following elementary result which is proven as Lemma 18 in \cite{hanin2018products}. 
+\begin{proposition}\label{P:elementary}
+\label{lem:classic_probability}Let $A_{0},A_{1},\ldots,A_{d}$ be independent
+events with probabilities $p_{0},\ldots,p_{d}$ and $B_0,\ldots, B_d$ be independent events with probabilities $q_0,\ldots,q_d$ such that
+\[A_j\cap B_j=\emptyset,\qquad \forall j=0,\ldots,d.\]
+Denote by $X_{i}$ the indicator that the event $A_{i}$ happens, $X_{i}:={\bf 1}_{\left\{ A_{i}\right\}} $, and by $Y_i$ the indicator that $B_i$ happens, $Y_i={\bf 1}_{\{B_i\}}$. Further, fix for every $i\in 1,\ldots,d$ some $\alpha_i \geq 1,K_i\geq 1$ as well as $\gamma_i>0$. Define
+%\[Z_d:=\al_*^{X_0}K^{Y_0}\al^{\sum_{i=1}^{d}X_{i}}\ga^{\sum_{i=1}^{d}X_{i-1}X_{i}}K^{\sum_{i=1}^dY_i}\]
+\[Z~=~ \prod_{i=1}^d \alpha_i^{X_i}\gamma_i^{X_{i-1}X_i}K_i^{Y_i}.\]
+Then, if $\gamma_i\geq1$ for every $i$, we have:
+\begin{align}
+\mathbb  E\left[Z\right]~\leq~\prod_{i=1}^d\left(1+p_i(\alpha_i-1)+q_i(K_i-1)+p_ip_{i-1}\alpha_i\alpha_{i-1}\gamma_{i-1}(\gamma_{i}-1)\right)\label{eq:ineq_1},
+\end{align}
+where by convention $\alpha_0=\gamma_0=1.$ In contrast, if $\gamma_i\leq 1$ for every $i$, we have:
+\begin{equation}
+\mathbb E[Z]~\geq~  \prod_{i=1}^d\left(1+p_i(\alpha_i-1)+p_ip_{i-1}\alpha_{i-1} \alpha_i(\gamma_i-1)\right)\label{eq:ineq_2}
+\end{equation}
+\end{proposition}
+
+\noindent We first apply Proposition \ref{P:elementary} to the estimates above for $\E{\Kw^2}$. To do this, recall that 
+\[3^{\#\text{loops}(V)}~=~\prod_{i=1}^d 3^{{\bf 1}_{\set{\abs{V(i-1)}=1,\, \abs{V(i)}=2}}}.\]
+Since $\abs{V(d)}=1$, we may also write
+\[3^{\#\text{loops}(V)}~=~\frac{1}{3}\prod_{i=1}^d 3^{{\bf 1}_{\set{\abs{V(i-1)}=2,\, \abs{V(i)}=1}}}~=~\frac{1}{3}\prod_{i=1}^d \lr{\frac{1}{3}}^{{\bf 1}_{\set{\abs{V(i-1)}=\abs{V(i)}=1}}}3^{{\bf 1}_{\set{\abs{V(i)}=1}}}.\]
+Putting this together with \eqref{E:K2-est} and noting that
+\[\prod_{i=1}^d 2^{2-\abs{V(i)}}=\prod_{i=1}^d 2^{{\bf 1}_{\set{\abs{V(i)}=1}}},\]
+we find that 
+\[\E{\Kw^2} / \norm{x}_2^4~\simeq ~\frac{1}{n_0^2}\mathcal E_x\left[\prod_{i=1}^d \lr{\frac{\mu_4}{3}}^{{\bf 1}_{\set{\abs{V(i-1)}=\abs{V(i)}=1}}}6^{{\bf 1}_{\set{\abs{V(i)}=1}}}\right].\]
+Since the contribution for each layer in the product is bounded above and below by constants, we have that $\E{\Kw^2} / \norm{x}_2^4$ is bounded below by a constant times
+\begin{equation}\label{E:K2-LB}
+\frac{d^2}{n_0^2}\mathcal E_x\left[\prod_{i=2}^{d-1} \lr{1\land \frac{\mu_4}{3}}^{{\bf 1}_{\set{\abs{V(i-1)}=\abs{V(i)}=1}}}6^{{\bf 1}_{\set{\abs{V(i)}=1}}}\right]
+\end{equation}
+and above by a constant times
+\begin{equation}\label{E:K2-UB}
+\frac{d^2}{n_0^2}\mathcal E_x\left[\prod_{i=2}^{d-1} \lr{1\lor \frac{\mu_4}{3}}^{{\bf 1}_{\set{\abs{V(i-1)}=\abs{V(i)}=1}}}6^{{\bf 1}_{\set{\abs{V(i)}=1}}}\right].
+\end{equation}
+Here, note that the initial condition given by $x$ and the terminal condition that all paths end at one neuron in the final layer are irrelevant. The expression \eqref{E:K2-LB} is there precisely $\E{Z_{d-1}/n_0^2}$ from Proposition \ref{P:elementary} where $X_i$ is the event that $\abs{V(i)}=1,$ $Y_i=\emptyset,$ $\alpha_i=6,$ $\gamma_i =1\land \frac{\mu_4}{3}\leq 1$, and $K_i=1$. Thus, since for $i=1,\ldots, d-1,$ the probability of $X_i$ is $1/n_i + O(1/n_i^2)$, we find that 
+\[\E{\Kw^2} / \norm{x}_2^4~\geq~\frac{d^2}{n_0^2}\prod_{i=2}^{d-1}\lr{1+\frac{5}{n_i}+O\lr{\frac{1}{n_i^2}+\frac{1}{n_{i-1}^2}}}\geq \frac{d^2}{n_0^2}\exp\lr{5\sum_{i=2}^{d-1} \frac{1}{n_i} + O\lr{\sum_{i=2}^{d-1}\frac{1}{n_i^2}}},\]
+where in the last inequality we used that $1+x\geq e^{x-x^2/2}$ for $x\geq 0.$ Since $e^{-1/n_1+1/n_d}\simeq 1,$ we conclude
+\[\E{\Kw^2} / \norm{x}_2^4~\geq~\frac{d^2}{n_0^2}\exp\lr{5\beta}\lr{1 + O\lr{\beta^{-1}\sum_{i=1}^{d}\frac{1}{n_i^2}}},\qquad \beta = \sum_{i=1}^{d} \frac{1}{n_i}.\]
+When combined with \eqref{E:K-1st-moment} this gives the lower bound in Proposition \ref{P:w-moments}. The matching upper bound is obtained from \eqref{E:K2-UB} in the same way using the opposite inequality from Proposition \ref{P:elementary}.\\
+
+ To complete the proof of Proposition \ref{P:w-moments}, we prove the analogous bounds for $\E{\Dww}$ in a similar fashion. Namely, we fix $1\leq i_1<i_2\leq d$ and write
+\[C(V,i_1,i_2)~=~\sum_{\ell=i_1}^{i_2-1} {\bf 1}_{A_\ell},\qquad A_\ell~:=~\left\{\substack{\abs{V(i)}=2,\, i=i_1,\ldots, \ell-1\\ \text{and }\abs{V(\ell)}=1}\right\}.\]
+The set $A_{\ell}$ is the event that the first collision between layers $i_1,i_2$ occurs at layer $\ell.$ We then have
+\[\mathcal E_x\left[\widehat{F}_{\ast}(V)C(V,i_1,i_2)\right]~=~\sum_{\ell=i_1}^{i_2-1}\mathcal E_x\left[\widehat{F}_{\ast}(V) {\bf 1}_{ \{A_\ell\}}\right],\]
+%where $\mathcal E_x^{\alpha\gives \beta}$ is the expectation over pairs of paths from layer $\alpha$ to a single fixed neuron in layer $\beta.$ Since
+On the event $A_\ell$, notice that $\widehat{F}_{\ast}(V)$ only depends on the layers $1\leq i \leq i_1$ and layers $\ell < i \leq d$ because the event $A_\ell$ fixes what happens in layers $i_1 < i \leq \ell$. Mimicking the estimates \eqref{E:K2-LB}, \eqref{E:K2-UB} and the application of Proposition \ref{P:elementary} and using independence, we get that:
+\[\mathcal E_x\left[\widehat{F}_{\ast}(V) 1 \{A_\ell\}\right] ~\simeq~ \exp\lr{\sum_{\substack {i=1 \\ i \notin [i_1,\ell) }}^{d} \frac{1}{n_i}} \mathcal E_x\lr{ {\bf 1}_{\{ A_\ell\}}}\]
+Finally, we compute:
+\[\mathcal E_x\lr{ {\bf 1}_{\set{ A_\ell}}}~=~\P\lr{A_\ell}~=~ ~=~\frac{1}{n_\ell}\prod_{i=i_1}^{\ell-1}\lr{1-\frac{1}{n_i}}~\simeq~\frac{1}{n_\ell}\exp\lr{-\sum_{i=i_1}^{\ell-1}\frac{1}{n_i}},\]
+Combining this we  obtain that  $\E{\Dww} / \norm{x}_2^4$ is bounded above and below by constants times
+\[\frac{1}{n_0^2}\left[\sum_{\substack{i_1,i_2=1\\i_i<i_2}}^d \sum_{\ell=i_1}^{i_2-1} \frac{1}{n_\ell} e^{-5/n_\ell -6\sum_{i=i_1}^{\ell-1}\frac{1}{n_i}}\right]\exp\lr{5\sum_{i=1}^d\frac{1}{n_i}}\lr{1+O\lr{\sum_{i=1}^d \frac{1}{n_i^2}}}.\]
+This completes the proof of Proposition \ref{P:w-moments}, modulo the proofs of Lemmas \ref{L:paths-raw}-\ref{L:2paths}, which we supply below. \hfill $\square$
+
+\subsection{Proof of Lemma \ref{L:paths-raw}}\label{S:paths-raw-pf} 
+Fix an input $x\in \R^{n_0}$ to $\mN$. We will continue to write as in \eqref{E:N-def} $y^{(i)}$ for the vector of pre-activations as layer $i$ corresponding to $x.$ We need the following simple Lemma. 
+\begin{lemma}\label{L:non-deg}
+  With probability $1,$ either there exists $i$ so that $y^{(i)}=0$ or, for every $i\in [d],j\in [n_i]$ we have $y_j^{(i)}\neq 0.$
+\end{lemma}
+\begin{proof}
+  The argument is similar to Lemma 8 in  \cite{hanin2019deep}. Namely, fix $i\in [d],j\in[n_i].$ If $y^{(\ell)}\neq 0$ for every $\ell$, then there exists at least one path $\gamma$ in the computational graph of the map $x\mapsto y_j^{(i)}$ so that,  $y_\gamma^{(\ell)}>0$ for each $\ell = 1,\ldots, i-1.$ For event that $y_j^{(i)}=0$ is therefore contained in the union over all \textit{non-empty} subsets $\Gamma$ of the collection of all paths in the computational graph of $x\mapsto y_j^{(i)}$ of the event that 
+\[\sum_{\gamma \in \Gamma} \prod_{\ell=1}^i \widehat{W}_{\gamma}^{(\ell)}=0.\]
+For each fixed $\Gamma$ this event defines a co-dimension $1$ set in the space of all the weights. Hence, since the joint distribution of the weights has a density with respect to Lebesgue measure (see just before \eqref{E:mu-def}), the union of this (finite number) of events has measure $0$. This shows that on the even that $y^{(\ell)}\neq 0$ for every $\ell$, $y_j^{(i)}\neq 0$ with probability $1.$ Taking the union over $i,j$ completes the proof. 
+\end{proof}
+Lemma \ref{L:non-deg} shows that for our fixed $x$, with probability $1,$ the derivative of each $\xi_j^{(i)}$ in \eqref{E:sum-over-paths} vanishes. Hence, almost surely, for any edge $e$ in the computational graph of $\mN:$
+\begin{equation}\label{E:sum-over-paths-deriv}
+\frac{\partial \mN}{\partial W_{e}^{(j)}}(x)~=~\sum_{a=1}^{n_0} x_a \sum_{\substack{\gamma\in \Gamma_a^1\\e\in \gamma}} \frac{\wt(\gamma)}{W_e}.
+\end{equation}
+This proves the formulas for $K_{\mN}, K_{\mN}^2.$ To derive the result for $\Delta K_{\mN},$ we write
+\[\Delta K_{\mN}~=~ -\lambda \sum_{\text{edges }e} \lr{\frac{\partial }{\partial W_e} K_{\mN}} \frac{\partial \mathcal L}{\partial W_e },\]
+where the loss $\mathcal L$ on a single batch containing only $x$ is $\frac{1}{2}\lr{\mN(x)-\mN_*(x)}^2.$ We therefore find 
+\[\Delta K_{\mN}~=~ -2\leb \sum_{\text{edges }e_1,e_2} \frac{\partial \mN}{\partial W_{e_1}}\frac{\partial^2 \mN}{\partial W_{e_1}\partial W_{e_2}}\frac{\partial \mN}{\partial W_{e_2}}\lr{\mN(x)-\mN_*(x)}.\]
+Using \eqref{E:sum-over-paths-deriv} and again applying Lemma \ref{L:non-deg}, we find that with probability $1$
+\[\frac{\partial^2 \mN}{\partial W_{e_1} \partial W_{e_2} }~=~  \sum_{a=1}^{n_0} x_a \sum_{\substack{\gamma\in \Gamma_a^1\\ e_1,e_2\in \gamma,\, e_1\neq e_2}} \frac{\wt(\gamma_1)\wt(\gamma_2)}{W_{e_1}W_{e_2}}.\]
+Thus, almost surely
+\begin{align*}
+  -\frac{1}{2\leb}\Delta K_{\mN}~=&~  \sum_{a\in [n_0]^4}\prod_{k=1}^4 x_{a_k} \sum_{\substack{\Gamma_a \in \Gamma^4(\vec{n})}} \sum_{\substack{e_1\in \gamma_1,\gamma_2\\ e_2\in \gamma_2,\gamma_3\\e_1\neq e_2}} \frac{\prod_{k=1}^4 \wt(\gamma_k)}{W_{e_1}^2W_{e_2}^2}\\
+  &- \mN_*(x)\sum_{a\in [n_0]^3}\prod_{k=1}^3 x_{a_k} \sum_{\substack{\Gamma \in \Gamma_a^3(\vec{n})}} \sum_{\substack{e_1\in \gamma_1,\gamma_2\\ e_2\in \gamma_2,\gamma_3\\ e_1\neq e_2}} \frac{\prod_{k=1}^4 \wt(\gamma_k)}{W_{e_1}^2W_{e_2}^2}.
+\end{align*}
+To complete the proof of Lemma \ref{L:paths-raw} it therefore remains to check that this last term has mean $0.$ To do this, recall that the output layer of $\mN$ is assumed to be linear and that the distribution of each weight is symmetric around $0$ (and hence has vanishing odd moments). Thus, the expectation over the weights in layer $d$ has either $1$ or $3$ weights in it and so vanishes. \hfill $\square$
+
+
+
+\subsection{Proof of Lemma \ref{L:2k-paths-avg}}\label{S:2k-path-avg-pf}
+Lemma \ref{L:2k-paths-avg} is almost a corollary of of Theorem 3 in \cite{hanin2018neural} and Proposition 2 in \cite{hanin2018products}. The difference is that, in \cite{hanin2018neural,hanin2018products}, the biases in $\mN$ were assumed to have a non-degenerate distribution, whereas here we've set them to zero. The non-degeneracy assumption is not really necessary, so we repeat here the proof from \cite{hanin2018neural} with the necessary modifications.
+
+If $x=0,$ then $\mathcal N(x)=0$ for any configuration of weights since the network biases all vanish. Will therefore suppose that $x\neq 0.$ Let us first show \eqref{E:first-moment-2paths}. We have from Lemma \ref{L:paths-raw} that
+\begin{equation}\label{E:e-val}
+\E{K_{\mN}(x)}~=~\sum_{a\in [n_0]^2}x_{a_1}x_{a_2} \sum_{\substack{\Gamma\in \Gamma_{a, even}^2}} \sum_{e\in \gamma_1\cap \gamma_2} \E{\frac{\prod_{k=1}^2 \wt(\gamma_k)}{W_{e}^2}}.
+\end{equation}
+To compute the inner expectation, write $\mF_{j}$ for the sigma algebra generated by the weight in layers up to and including $j$. Let us also define the events:
+\[S_j:=\set{x^{(j)}\neq 0},\]
+where we recall from \eqref{E:N-def} that $x^{(j)}$ are the post-activations in layer $j.$ Supposing first that $e$ is not in layer $d$, the expectation becomes
+\[\E{\frac{\prod_{i=1}^{d-1} \widehat{W}_{\gamma_1}^{(i)}\widehat{W}_{\gamma_2}^{(i)}{\bf 1}_{\set{y_{\gamma_1}^{(i)}>0}}{\bf 1}_{\set{y_{\gamma_2}^{(i)}>0}}}{W_{e}^2}\E{\widehat{W}_{\gamma_1}^{(d)}\widehat{W}_{\gamma_2}^{(d)}~\bigg|~\mathcal F_{d-1}}}.\]
+We have
+\[\E{\widehat{W}_{\gamma_1}^{(d)}\widehat{W}_{\gamma_2}^{(d)}~\bigg|~\mathcal F_{d-1}}~=~\frac{1}{n_{d-1}}{\bf 1}_{\left\{\substack{\gamma_1(d-1)=\gamma_2(d-1)\\\gamma_1(d)=\gamma_2(d)}\right\}}\]
+Thus, the expectation in \eqref{E:e-val} becomes $\frac{1}{n_{d-1}}{\bf 1}_{\left\{\substack{\gamma_1(d-1)=\gamma_2(d-1)\\\gamma_1(d)=\gamma_2(d)}\right\}}$ times
+\[ \E{\frac{\prod_{k=1}^2\prod_{i=1}^{d-2} \widehat{W}_{\gamma_k}^{(i)}{\bf 1}_{\set{y_{\gamma_k}^{(i)}>0}}}{W_{e}^2}\E{\prod_{k=1}^2\widehat{W}_{\gamma_k}^{(d-1)}{\bf 1}_{\set{y_{\gamma_k}^{(d-1)}>0}}~\bigg|~\mathcal F_{d-2}}}.\]
+Note that given $\mathcal F_{d-2},$ the pre-activations $y_j^{(d-1)}$ of different neurons in layer $d-1$ are independent. Hence, 
+\[
+\E{\prod_{k=1}^2\widehat{W}_{\gamma_k}^{(d-1)}{\bf 1}_{\set{y_{\gamma_k}^{(d-1)}>0}}~\bigg|~\mathcal F_{d-2}}~=~\begin{cases}
+\prod_{k=1}^2  \E{\widehat{W}_{\gamma_k}^{(d-1)}{\bf 1}_{\set{y_{\gamma_k}^{(d-1)}>0}}~\bigg|~\mathcal F_{d-2}}, &~ \gamma_1(d-1)\neq \gamma_2(d-1)\\
+\E{{\bf 1}_{\set{y_{\gamma_1}^{(d-1)}>0}}\prod_{k=1}^2\widehat{W}_{\gamma_k}^{(d-1)}~\bigg|~\mathcal F_{d-2}},&~ \gamma_1(d-1)=\gamma_2(d-1)
+\end{cases}.\]
+Recall that by assumption, the weight matrix $\widehat{W}^{(d-1)}$ in layer $d-1$ is equal in distribution to $-\widehat{W}^{(d-1)}.$ This replacement leaves the product $\prod_{k=1}^2\widehat{W}_{\gamma_k}^{(d-1)}$ unchanged but changes ${\bf 1}_{\set{y_{\gamma_1}^{(d-1)}>0}}$ to ${\bf 1}_{\set{y_{\gamma_1}^{(d-1)}\leq 0}}$. On the event $S_{d-1}$ (which occurs whenever $y_{\gamma_k}^{(d-2)}>0$) we have that $y_{\gamma_1}^{(d-1)}\neq 0$ with probability $1$ since we assumed that the distribution of each weight has a density relative to Lebesgue measure. Hence, symmetrizing over $\pm\widehat{W}^{(d)}$, we find that
+\[\E{\prod_{k=1}^2\widehat{W}_{\gamma_k}^{(d-1)}{\bf 1}_{\set{y_{\gamma_k}^{(d-1)}>0}}~\bigg|~\mathcal F_{d-2}}~=~ \frac{1}{n_{d-2}}{\bf 1}_{\left\{\substack{\gamma_1(d-1)=\gamma_2(d-1)\\ \gamma_1(d-2)=\gamma_2(d-2)}\right\}}.\]
+Similarly, if $e$ is in layer $i,$ then we automatically find that $\gamma_1(i-1)=\gamma_2(i-1)$ and $ \gamma_1(i)=\gamma_2(i)$, giving an expectation of $1/n_{i-1}{\bf 1}_{\left\{\substack{\gamma_1(i)=\gamma_2(i)\\ \gamma_1(i-1)=\gamma_2(i-1)}\right\}}$. Proceeding in this way yields
+\begin{align*}
+\E{K_{\mN}(x)}~&=~\sum_{a\in [n_0]^2}x_{a_1}x_{a_2} \prod_{i=1}^d\frac{1}{n_{i-1}}\sum_{\substack{\Gamma\in \Gamma_{a, even}^2(\vec{n}}}\sum_{e\in \gamma_1\cap \gamma_2} \delta_{\gamma_1=\gamma_2}\\
+&=~\sum_{a\in [n_0]^2}x_{a_1}x_{a_2} \sum_{\substack{\Gamma\in \Gamma_{a, even}^2(\vec{n})}} \delta_{\gamma_1=\gamma_2} \prod_{i=1}^d\frac{1}{n_{i-1}},
+\end{align*}
+which is precisely \eqref{E:first-moment-2paths}. The proofs of \eqref{E:second-moment-4paths} and \eqref{E:SGD-4paths} are similar. We have
+\[\E{K_{\mN}(x)^2}~=~\sum_{a\in [n_0]^4}^{n_0}\prod_{k=1}^4x_{a_k} \sum_{\substack{\Gamma\in \Gamma_a^4}} \sum_{\substack{e_1\in \gamma_1,\gamma_2\\ e_2\in \gamma_3,\gamma_4}} \E{\frac{ \prod_{k=1}^4\wt(\gamma_k)}{W_{e_1}^2W_{e_2}^2}}.\]
+As before let us first assume that edges $e_1,e_2$ are not in layer $d$. Then, 
+\[\E{\prod_{k=1}^4 \wt(\gamma_k)}~=~\E{ \prod_{k=1}^4\prod_{i=1}^{d-1}\widehat{W}_{\gamma_k}^{(i)}{\bf 1}_{\set{y_{\gamma_k}^{(i)}>0}}\E{\prod_{k=1}^4\widehat{W}_{\gamma_k}^{(d)}~\bigg|~\mathcal F_{d-1}}}.\]
+The the inner expectation is
+\[{\bf 1}_{\left\{\substack{\text{each weight appears an}\\\text{even number of times}}\right\}}\cdot \frac{1}{n_{d-1}^2} \mu_4^{{\bf 1}_{\set{\abs{\Gamma(d-1)}=\abs{\Gamma(d)}=1}}}.\]
+In contrast, if $d=\ell(e_1)$ or $d=\ell(e_2)$, then the inner expectation is
+\[
+{\bf 1}_{\left\{\substack{\text{each weight appears an}\\\text{even number of times}}\right\}}\frac{1}{n_{d-1}^2}.
+\]
+Again symmetrizing with respect to $\pm\widehat{W}^{(d)}$ and using that the pre-activation of different neurons are independent given the activations in the previous layer we find that, on the event $\set{y_{\gamma_k}^{(d-2)}>0}$, 
+\[\E{\prod_{k=1}^4\widehat{W}_{\gamma_k}^{(d-1)}{\bf 1}_{\set{y_{\gamma_k}^{(d-1)}>0}}~\bigg|~\mathcal F_{d-2}}~=~{\bf 1}_{\left\{\substack{\text{each weight appears an}\\\text{even number of times}}\right\}} \frac{2^{2-\abs{\Gamma(d-1)}}}{n_{d-1}^2} \mu_4^{{\bf 1}_{L}},\]
+where $L$ is the event that $\abs{\Gamma(d-1)}=\abs{\Gamma(d)}=1$ and $e_1,e_2$ are not in layer $d-1$. Proceeding in this way one layer at a time completes the proofs of \eqref{E:second-moment-4paths} and \eqref{E:SGD-4paths}. \hfill $\square$
+
+\subsection{Proof of Lemma \ref{L:Jac-1}}\label{S:Jac-1-pf}
+Fix $j=1,\ldots, 4$, edges $e_1,e_2$ with $\ell(e_1)\leq \ell(e_2)$ in the computational graph of $\mN$ and $E\in \Sigma_{a_j, even}^4$. The key idea is to decompose $E$ into loops. To do this, define 
+\[i_0 =-1,\qquad i_k(E)~:=~\min\set{i>i_{i-1}~|~\abs{L(E(i))}=1,\, \abs{R(E(i))}=2},\, k~\geq~ 1,\ldots, \#\text{loops}(E).\]
+For each $i=1,\ldots, d$ there exists unique $k=1,\ldots, \#\text{loops}(E)$ so that
+\[i_{k-1}(E)~\leq~i~<~i_k(E).\]
+We will say that two layers $i,j=1,\ldots, d$ belong to the same loop of $E$ if exists $k=1,\ldots, \#\text{loops}(E)$ so that
+\[i_{k-1}(E)~\leq~i,j~<~i_k(E).\]
+
+
+%We will refer to the loop of $E$ containing $i$ as the the set of layers $i_{k-1}(E),\ldots, i_k(E)-1$. Moreover, that we will say  that belong to the same loop. 
+
+We proceed layer by layer to count the number of $\Gamma\in \Gamma_{a_j, even}^4$ satisfying $\Gamma(0)=a_j$ and $E^\Gamma=E.$ To do this, suppose we are given $\Gamma(i-1)\in [n_{i-1}]^4$ and we have $L(E(i))=2$. Then $\Gamma(i-1)$ is some permutation of $(\alpha_1,\alpha_1, \alpha_2,\alpha_2)$ with $\alpha_1\neq \alpha_2.$ Moreover, for $j=1,2$ there is a unique edge (with multiplicity $2$) in $E(i)$ whose left endpoint is $\alpha_j.$ Therefore, $\Gamma(i-1)$ determines $\Gamma(i)$ when $L(E(i))=2.$ In contrast, suppose $L(E(i))=1.$ If $R(E(i))=1,$ then $E(i)$ consists of a single edge with multiplicity $4,$ which again determines $\Gamma(i-1),\Gamma(i)$. In short, $\Gamma(i)$ determines $\Gamma(j)$ for all $j$ belonging to the same loop of $E$ as $i.$ Therefore, the initial condition $\Gamma(0)=a_j$ determines $\Gamma(i)$ for all $i\leq i_1$ and the conditions $e_1\in \gamma_1,e_2\in \gamma_2$ determine $\Gamma$ in the loops of $E$ containing the layers of $e_1,e_2.$ 
+
+Finally, suppose $L(E(i))=1$ and $R(E(i))=2$ (i.e. $i=i_k(E)$ for some $k=1,\ldots,d$) and that $e_1,e_2$ are not contained in the same loop of $E$ layer $i$. Then all $\binom{4}{2}=6$ choices of $\Gamma(i)$  satisfy $\Gamma(i)=R(E(i))$, accounting for the factor of $6^{\#\text{loops}(E)}$. The concludes the proof in the case $j=1.$ the only difference in the cases $j=2,3,4$ is that if $\gamma_1(0)\neq \gamma_2(0)$ (and hence $\gamma_3(0)\neq \gamma_4(0)$), then since $\ell(e_1)\leq \ell(e_2)$ in order to satisfy $e_1\in \gamma_1,\gamma_2$ we must have that $i_1(E)<\ell(e_1).$ \hfill $\square$ 
+
+
+ 
+
+\subsection{Proof of Lemma \ref{L:2paths}}\label{S:2path-pf} The proof of Lemma \ref{L:2paths} is essentially identical to the proof of Lemma \ref{L:Jac-1}. In fact it is slightly simpler since there are no distinguished edges $e_1,e_2$ to consider. We omit the details. \hfill $\square$
+
+\section{Proof of Proposition \ref{P:b-moments}}\label{S:b-moments-pf}
+In this section, we seek to estimate $\E{\Kb},\E{\Kb^2},\E{\Dbb}$. The approach is essentially identical to but somewhat simpler than our proof of Proposition \ref{P:w-moments} in \S \ref{S:w-moments-pf}. We will therefore focus here on explaining the salient differences. Our starting point is the following analog of Lemma \ref{L:paths-raw}, which gives a sum-over-paths expression for the bias contribution $\Kb$ to the neural tangent kernel. To state it, let us define, for any collection $Z=\lr{z_1,\ldots,z_k}\in Z^k$ of $k$ neurons in $\mN$
+\[{\bf 1}_{\set{y_Z>0}} ~:=~\prod_{j=1}^k{\bf 1}_{\set{y_{z_j}>0}},\]
+to be the event that the pre-activations of the neurons $z_k$ are positive.
+\begin{lemma}[$\Kb$ as a sum over paths]\label{L:bias-paths-raw}
+With probability $1$, 
+  \begin{equation}\label{E:bias-paths}
+\Kb~=~\sum_{Z\in Z^1}  ~{\bf 1}_{\set{Z>0}}\sum_{\Gamma\in \Gamma_{(Z,Z)}^2} \prod_{k=1}^2\wt(\gamma_k),
+\end{equation}
+where $Z^1, \, \Gamma_{(Z,Z)}^2,\, \wt(\gamma)$ are defined in \S \ref{S:notation}. Further, almost surely,
+  \begin{equation}\label{E:delta-b-paths}
+\Dbb~=~0.%\sum_{\substack{Z=(z_1,\ldots, z_4)\in Z^4}}{\bf 1}_{\set{y_Z>0}}\sum_{\substack{\Gamma =\lr{\gamma_1,\ldots, \gamma_4}\in \Gamma_Z^4\\ z_3\in \gamma_2}}\prod_{k=1}^4 \wt(\gamma_k).
+\end{equation}
+%plus a term that has mean $0.$ 
+\end{lemma}
+The proof of this result is a small modification of the proof of Lemma \ref{L:paths-raw} and hence is omitted. Taking expectations, we therefore obtain the following analog to Lemma \ref{L:2k-paths-avg}.
+\begin{lemma}[Expectation of $\Kb, \Kb^2$ as a sum over paths]\label{L:K-bias-moments}
+  We have
+  \begin{equation}\label{E:first-moment-bias}
+\E{\Kb}~=~\frac{1}{2}\sum_{\substack{Z\in Z^1}}  \sum_{\substack{\Gamma\in \Gamma_{(Z,Z), even}^2\\ \Gamma = \lr{\gamma_1,\gamma_2}}} H(\Gamma),\qquad H(\Gamma)~=~{\bf 1}_{\set{\gamma_1=\gamma_2}} \prod_{i=\ell(Z)+1}^d\frac{1}{n_{i-1}}.
+\end{equation}
+Moreover, 
+\[\E{\Kb^2}~=~\frac{1}{2}\sum_{\substack{Z=(z_1,z_2)\in Z^2\\\ell(z_1)\leq \ell(z_2)}}  \sum_{\Gamma\in \Gamma_{(Z,Z), even}^{4}} \widehat{H}(\Gamma),\]
+where for $\Gamma=(\gamma_1,\ldots, \gamma_4)\in  \Gamma_{(Z,Z),even}^{4}$ we have
+\begin{equation}\label{E:H-def}
+\widehat{H}(\Gamma)=\prod_{i'=\ell(z_1)+1}^{ \ell(z_2)} {\bf 1}_{\left\{\substack{\gamma_1(i')=\gamma_2(i')\\\gamma_1(i'-1)=\gamma_2(i'-1)}\right\}} \frac{1}{n_{i'-1}} \prod_{i=\ell(z_2)+1}^{d} \frac{2^{\abs{\Gamma(i)}-2}}{n_{i-1}^2} \mu_4^{{\bf 1}_{\set{\abs{\Gamma(i)}=\abs{\Gamma(i-1)}}}}.
+\end{equation}
+\end{lemma}
+\noindent The proof is identical to the argument used in \S \ref{S:2k-path-avg-pf} to establish Lemma \ref{L:2k-paths-avg}, so we omit the details. The relation \eqref{E:first-moment-bias} is easy to simplify:
+\[\E{\Kb}~=~\frac{1}{2}\sum_{Z\in Z^1}  \sum_{\gamma\in \Gamma_{Z}}\prod_{i=\ell(Z)+1}^d\frac{1}{n_{i-1}} = \frac{1}{2}\sum_{z\in Z^1}  \frac{1}{n_{\ell(z)}}~=~\frac{d}{2},\]
+where we used that the number paths from a neuron in layer $\ell$ to the output of $\mN$ equals $\prod_{i=\ell+1}^d n_i$. This proves the first statement in Proposition \ref{P:b-moments}. Next, let us explain how to simplify $\E{\Kb^2}.$ The key computation is the following
+\begin{lemma}\label{L:bias-bias-avg}
+Fix two neurons $z_1,z_2$ with $\ell(z_1)\leq \ell(z_2)$ and write $Z=(z_1,z_1,z_2,z_2).$ Then, 
+\begin{equation}\label{E:H-hat-def}
+\sum_{\Gamma\in \Gamma_{Z,even}^{4}} \widehat{H}(\Gamma)~\simeq~\frac{1}{n_{\ell(z_1)}n_{\ell(z_2)}}\exp\lr{5\sum_{i=\ell(z_2)+1}^d\frac{1}{n_i}}\lr{1+O\lr{\sum_{i=\ell(z_2)+1}^d \frac{1}{n_i^2}}}. 
+\end{equation}
+\end{lemma}
+\begin{proof}
+The proof of Lemma \ref{L:bias-bias-avg} is a simplified version of the computation of $\E{\Kw^2}$ (starting around \eqref{E:F-star-def} and ending at the end of the proof of Proposition \ref{P:w-moments}). Specifically, note that for $\Gamma=\lr{\gamma_1,\ldots, \gamma_4}\in \Gamma_{Z,even}^{4}$ with $\ell(z_1)\leq \ell(z_2),$ the delta functions ${\bf 1}_{\left\{\substack{\gamma_1(i')=\gamma_2(i')}\right\}}{\bf 1}_{\left\{\substack{\gamma_1(i'-1)=\gamma_2(i'-1)}\right\}}$ in the definition \eqref{E:H-def} of $\widehat{H}(\Gamma)$ ensures that $\gamma_1,\gamma_2$ go through the same neuron in layer $\ell(z_2)$. To condition on the index of this neuron, we recall that we denote by $z(j,\beta)$ neuron number $\beta$ in layer $j.$  We have
+\begin{align}
+\notag \sum_{\Gamma\in \Gamma_{Z,even}^{4}}  \widehat{H}(\Gamma)~&=~\sum_{\beta=1}^{n_{\ell(z_2)}}\sum_{\substack{\gamma_1,\gamma_2:z_1\gives z(\ell(z_2),\beta)}} \prod_{i'=\ell(z_1)+1}^{\ell(z_2)} {\bf 1}_{\left\{\substack{\gamma_1(i')=\gamma_2(i')\\ \gamma_1(i'-1)=\gamma_2(i'-1)}\right\}} \frac{1}{n_{i'-1}}  \sum_{\Gamma\in \Gamma_{Z',even}^{4}} H(\Gamma)\\
+&=~\frac{1}{n_{\ell(z_1)-1}} \sum_{\beta=1}^{n_{\ell(z_2)}}\sum_{\Gamma\in \Gamma_{Z',even}^{4}}H(\Gamma),\label{E:bias-cond}
+\end{align}
+where $Z'=(z(\ell(z_2), \beta), z(\ell(z_2), \beta), z_2, z_2)$ and
+\[H(\Gamma)~=~\prod_{i=\ell(z_2)+1}^{d} \frac{2^{\abs{\Gamma(i)}-2}}{n_{i-1}^2} \mu_4^{{\bf 1}_{\set{\abs{\Gamma(i)}=\abs{\Gamma(i-1)}}}}.\]
+Since the inner sum in \eqref{E:bias-cond} is independent of $\beta$ by symmetry, we find
+\begin{align}
+\sum_{\Gamma\in \Gamma_{Z,even}^{4}}  \widehat{H}(\Gamma)~&=~\frac{n_{\ell(z_2)}}{n_{\ell(z_1)-1}} \sum_{\Gamma\in \Gamma_{Z'',even}^{4}}H(\Gamma),\label{E:bias-cond2}
+\end{align}
+where $Z''=(1,1, z_2, z_2)$. The inner sum in \eqref{E:bias-cond2} is now precisely one of the terms $I_j$ from \eqref{E:I-def} without counting terms involving edges $e_1,e_2$, except that the paths start at neuron $1$ in layer $\ell(z_2)$. The changes of variables from $\Gamma\in \Gamma_{even}^4$ to $E\in \Sigma_{even}^4$ to $V\in \Gamma^2$ that we used to estimate the $I_j$'s are  no far simpler. In particular, Lemma \ref{L:Jac-1} still holds but without any of the $A(E,i_1,i_2),$ $C(E,i_1,i_2), \widehat{C}(E,i_1,i_2)$ terms. Thus, we find that 
+\[\sum_{\Gamma\in \Gamma_{Z''}^{4,even}} H(\Gamma)~\simeq~\sum_{E\in \Sigma_{Z''}^{4,even}} H(E)6^{\#\text{loops}(E)}~\simeq~\sum_{V\in \Gamma_{Z'''}^{2}} H(V)3^{\#\text{loops}(V)},\]
+where for the second estimate we applied Lemma \ref{L:2paths} and have written $Z''' = (1,z_2)$. Thus, as in the derivation of \eqref{E:K2-est}, we find that 
+\[\sum_{\Gamma\in \Gamma_{Z''}^{4,even}} H(\Gamma)~\simeq~\frac{1}{n_{\ell(z_2)}^2} \mathcal E\left[H_*(V)\right],\]
+where
+\[H_*(V)~=~2^{\#\set{i\in [d]~|~\abs{V(i)}=1}}3^{\#\text{loops}(V)}\mu_4^{\#\set{i\in [d]~|~\abs{V(i-1)}=\abs{V(i)}=1}}\]
+and $\mathcal E$ is the expectation over pairs of paths starting from neurons $1, z_2$ in layer $\ell(z_2)$ to the output of the network for which neurons in subsequent layers are chosen independently and uniformly among all neurons in that layer. This is precisely the expectation we evaluated in the end of the proof for Proposition \ref{P:w-moments}. Thus, applying Proposition \ref{P:elementary} exactly as in that case, we find that
+\[\sum_{\Gamma\in \Gamma_{Z}^{4,even}} F(\Gamma)~\simeq~ \frac{1}{n_{\ell(z_2)}^2}\exp\lr{5\sum_{i=\ell(z_2)+1}^d \frac{1}{n_i}+O\lr{\sum_{i=\ell(z_2)+1}^d\frac{1}{n_i^2}}}.\]
+Putting this together with \eqref{E:bias-cond} completes the proof of Lemma \ref{L:bias-bias-avg}. 
+\end{proof}
+\noindent Lemma \ref{L:bias-bias-avg} combined with Lemma \ref{L:K-bias-moments} yields 
+\[\E{\Kb^2}~\simeq~\sum_{\substack{i,j=1\\i\leq j}}^d \exp\lr{5\sum_{i=j+1}^d \frac{1}{n_i}}\lr{1+O\lr{\sum_{i=1}^d\frac{1}{n_i^2}}},\]
+as claimed in the statement Proposition \ref{P:b-moments}. \hfill $\square$
+
+%\cs\cs\cs\cs It therefore remains to estimate $\E{\Dbb}.$\cs\cs\cs
+
+\section{Proof of Proposition \ref{P:wb-moments}}\label{S:wb-moments-pf}
+\noindent We begin by computing $\E{\Kb\Kw}$. We will use a hybrid of the procedures for computing $\E{\Kb^2}$ and $\E{\Kw^2}.$ Recall from Lemmas \ref{L:paths-raw} and \ref{L:bias-paths-raw} that
+\[\Kb~=~\sum_{Z\in Z^1} {\bf 1}_{\set{y_Z>0}} \sum_{\Gamma\in \Gamma_{(Z,Z)}^2} \prod_{k=1}^2 \wt(\gamma_k),\qquad \Kw~=~\sum_{a\in [n_0]^2}\prod_{k=1}^2x_{a_k} \sum_{\substack{\Gamma\in \Gamma_a^2\\\Gamma = \lr{\gamma_1,\gamma_2}}}\sum_{e\in\gamma_1,\gamma_2} \frac{\prod_{k=1}^2 \wt(\gamma_k)}{W_e^2}.\]
+Therefore, the expectation of the product $\E{\Kb\Kw}$ has the following form 
+\[\sum_{a\in [n_0]^2}\prod_{k=1}^2 x_{a_k} \sum_{Z\in Z^1} \sum_{\Gamma\in \Gamma_{(Z,Z,a)}}^4\sum_{e\in \gamma_3,\gamma_4} \E{{\bf 1}_{\set{y_Z>0}} \frac{\prod_{k=1}^4 \wt(\gamma_k)}{W_e^2}}.\]
+Here, for a neuron $Z$ and $a=(a_1,a_2)\in [n_0]^2$ we've denoted by $\Gamma_{(Z,Z,a)}^4$ the set of four tuples $(\gamma_1,\ldots, \gamma_4)$ of paths in the computational graph of $\mN$ where $\gamma_1,\gamma_2$ start from $Z$ and $\gamma_3,\gamma_4$ start at neurons $a_1,a_2$ respectively. The analog of Lemmas \ref{L:2k-paths-avg} and \ref{L:K-bias-moments} (with essentially the same proof), gives that the expectation in the previous line equals
+\[\frac{\norm{x}^2}{2}\prod_{i=1}^{\ell(Z)} {\bf 1}_{\set{\gamma_3(i)=\gamma_4(i)}}\frac{1}{n_{i-1}}\prod_{i=\ell(Z)+1}^{d}\frac{2^{2-\abs{\Gamma(i)}}}{n_{i-1}^2} \mu_4^{{\bf 1}_{\set{\abs{\Gamma(i-1)}=\abs{\Gamma(i)}=1,\,\, i\neq \ell(e)}}},\]
+which, up to a multiplicative constant equals
+\begin{equation}\label{E:G-def}
+G_Z(\Gamma)~:=~\norm{x}^2\prod_{i=1}^{\ell(Z)} {\bf 1}_{\set{\gamma_3(i)=\gamma_4(i)}}\frac{1}{n_{i-1}}\prod_{i=\ell(Z)+1}^{d}\frac{2^{2-\abs{\Gamma(i)}}}{n_{i-1}^2} \mu_4^{{\bf 1}_{\set{\abs{\Gamma(i-1)}=\abs{\Gamma(i)}=1}}},
+\end{equation}
+which is independent of $e.$ Thus, we find
+\[\E{\Kb\Kw}~\simeq~\norm{x}^2\sum_{i=1}^d\sum_{Z\in Z^1} \sum_{\Gamma\in \Gamma_{(Z,Z,1,1),{even}}^4}G_Z(\Gamma)T_{3,4}^{i}(\Gamma),\]
+where if $\Gamma=\lr{\gamma_1,\ldots, \gamma_4}$ we recall that $T_{3,4}^i(\Gamma)$ is the indicator function of the event that paths $\gamma_3,\gamma_4$ pass through the same edge in the computational graph of $\mN$ at layer $i$ (see \eqref{E:T-def}).
+
+As before, note that the delta functions ${\bf 1}_{\set{\gamma_3(i)=\gamma_4(i)}}$ ensure that $\gamma_3,\gamma_4$ pass through the same neuron in layer $\ell(Z).$ Thus, we may condition on the common neuron through which $\gamma_3,\gamma_4$ must pass at layer $\ell(Z)$ to obtain that $\E{\Kb\Kw}$ is bounded above and below by a constant times
+\begin{align*}
+\norm{x}^2\sum_{i=1}^d\sum_{Z\in Z^1} \sum_{\substack{\Gamma\in \Gamma_{(Z,Z,1,1),{even}}^4}} G_Z(\Gamma)T_{3,4}^i(\Gamma)
+ ~&=~ \frac{\norm{x}^2}{n_0}\sum_{i=1}^d\sum_{Z\in Z^1} \sum_{\beta=1}^{n_{\ell(Z)}} \sum_{\substack{\Gamma\in \Gamma_{Z',{even}}^4}} \widehat{G}_{Z}(\Gamma)T_{3,4}^i(\Gamma),
+\end{align*}
+where $Z'=(Z,Z,z(\ell(Z),\beta),z(\ell(Z),\beta))$ and we have set
+\[ \widehat{G}_{Z}(\Gamma)~=~\prod_{i=\ell(Z)+1}^{d}\frac{2^{2-\abs{\Gamma(i)}}}{n_{i-1}^2} \mu_4^{{\bf 1}_{\set{\abs{\Gamma(i-1)}=\abs{\Gamma(i)}=1}}}.\]
+Notice that $T_{3,4}^i=1$ if $i\leq \ell(Z).$ Moreover, for $i\geq \ell(Z)+1,$ the same argument as in the proof of Lemma \ref{L:Jac-1} shows that the number of $\Gamma\in \Gamma_{Z',even}^4$ for which $\gamma_3,\gamma_4$ pass through the same edge at layer $i$ and correspond to the same unordered multiset of edges $E$ equals
+\[6^{\#\text{loops}(E)-{\bf 1}_{\set{\abs{R(E(i))}\cdot\abs{L(E(i))}\neq1}}}~\simeq~6^{\#\text{loops}(E)}.\]
+As in the proof of Proposition \ref{P:w-moments}, observe that $\widehat{G}_{Z}(\Gamma)T_{3,4}^i(\Gamma)$ depends only on the unordered multiset of edges $E^\Gamma$ in $\Gamma$. 
+Thus, we find that 
+\[\E{\Kb\Kw}~\simeq~\frac{d\norm{x}^2}{n_0}\sum_{Z\in Z^1} n_{\ell(Z)}\sum_{E\in \Sigma_{Z',{even}}^4}G_Z(E) 6^{\#\text{loops}(E)}.\]
+Applying Proposition \ref{P:elementary} as in the end of the proof of Propositions \ref{P:w-moments} and \ref{P:b-moments} we conclude
+\[\sum_{E\in \Sigma_{Z',{even}}^4}G_Z(E) 6^{\#\text{loops}(E)}~=~\frac{1}{n_{\ell(Z)}^2}\exp\lr{5\sum_{i=\ell(Z)+1}^d \frac{1}{n_i}}\lr{1+O\lr{\sum_{i=1}^d \frac{1}{n_i^2}}}.\]
+Hence, 
+\[\E{\Kb\Kw}~\simeq~\frac{d\norm{x}^2}{n_0} \left[\sum_{j=1}^d \exp\lr{-5 \sum_{i=1}^j \frac{1}{n_i}}\right] \exp\lr{5\sum_{i=1}^d\frac{1}{n_i}}\lr{1+O\lr{\sum_{i=1}^d\frac{1}{n_i^2}}}.\]
+To complete the proof of Proposition \ref{P:wb-moments} it remains to evaluate $\E{\Dwb}.$ To do this, we note that, as in the proof of Lemma \ref{L:paths-raw}, we have
+\[\Dwb~=~\sum_{\substack{a\in [n_0]^2\\ a=(a_1,a_2)}}\prod_{k=1}^2x_{a_k} \sum_{Z\in Z^1}{\bf 1}_{\set{y_Z>0}}\sum_{\Gamma\in \Gamma_{(Z,Z,a_1,a_2)}^4}\sum_{e\in \gamma_2,\gamma_3} \frac{\prod_{k=1}^4 \wt(\gamma_k)}{\widehat{W}_e^2}\]
+plus a term that has mean $0.$ Therefore, as in Lemma \ref{L:2k-paths-avg}, we find
+\[\E{\Dwb}~\simeq ~\frac{\norm{x}_2^2}{n_0}\sum_{Z\in Z^1}\sum_{\Gamma\in \Gamma_{(Z,Z,1,1), even}^4} P(\Gamma) \#\set{\text{edges } e \text{ belonging to both } \gamma_2,\gamma_3},\]
+where
+\[P(\Gamma)~=~\prod_{i=1}^{\ell(Z)}\frac{1}{n_{i-1}}{\bf 1}_{\left\{\substack{\gamma_3(i-1)=\gamma_4(i-1)\\\gamma_3(i)=\gamma_4(i)}\right\}}\prod_{i=\ell(Z)+1}^d \frac{2^{2-\abs{\Gamma(i)}}}{n_{i-1}^2} \mu_4^{{\bf 1}_{\set{\abs{\Gamma(i-1)}=\abs{\Gamma(i)}=1}}}.\]
+Thus, we have
+\[\E{\Dwb}~\simeq ~\frac{\norm{x}_2^2}{n_0}\sum_{i=1}^d\sum_{Z\in Z^1}\sum_{E\in \Sigma_{Z', even}^4} P(E) T_{2,3}^i(E)\#\left\{\Gamma\in \Gamma_{Z', even}^4 \big| \substack{E^\Gamma = E\,\, \gamma_2(i)=\gamma_3(i)\\\gamma_2(i-1)=\gamma_3(i-1)}\right\} ,\]
+where $T_{2,3}^i(E)$ is as in \eqref{E:T-def}, the sum is over unordered edge multisets $E$ (see \eqref{E:Sigma-def}), and we've set
+\[Z'=(Z,Z,z(0,1),z(0,1)).\]
+As in Lemma \ref{L:Jac-1}, the counting term satisfies
+\[\#\left\{\Gamma\in \Gamma_{Z', even}^4 \big| \substack{E^\Gamma = E\,\, \gamma_2(i)=\gamma_3(i)\\\gamma_2(i-1)=\gamma_3(i-1)}\right\}~\simeq~ {\bf 1}_{\set{\ell(Z)<i}}C(E,\ell(Z),i)6^{\#\text{loops}(E)},\]
+where $C(E, i,j)$ was defined in \eqref{E:C-def-E} and is the event that there exists a collision between layers $i,j$ (i.e. there exists $\ell=i,\ldots, j-1$ so that $\abs{R(E(\ell))}=1$). Proceeding now as in the derivation of $\E{\Dww}$ at the end of the proof of Proposition \ref{P:w-moments}, we find
+\[\E{\Dwb}~\simeq~  \frac{\norm{x}_2^2}{n_0}\exp\lr{5\sum_{i=1}^d \frac{1}{n_i}}\left[\sum_{\substack{i,j=1\\j<i}}^d e^{-5\sum_{\alpha=1}^j \frac{1}{n_\alpha}}\sum_{\ell=j}^{i-1} \frac{1}{n_\ell} e^{-6\sum_{\alpha=j+1}^{\ell-1}\frac{1}{n_\alpha}}\right]\lr{1+O\lr{\sum_{i=1}^d \frac{1}{n_i^2}}}.\]
+This completes the proof of Proposition \ref{P:wb-moments}.\hfill $\square$
+
+\bibliographystyle{plain}
+\bibliography{DL_bibliography}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
+
+
+
+\section{Overall Scaling}
+We get
+\[\E{K_{\mN}^2}~=~\left[\frac{d^2}{n_0^2}\norm{x}_2^4+\frac{d}{n_0} \norm{x}_2^2\left[\sum_{j=1}^d \exp\lr{-5 \sum_{i=1}^j \frac{1}{n_i}}\right] + \sum_{\substack{j_1,j_2=1\\ j_1\leq j_2}}^d \exp\lr{-5\sum_{i=1}^{j_2}\frac{1}{n_i}}\right]\exp\lr{5\beta}.\]
+When $n_i=n,$ we obtain, up to $1/n$ corrections
+\[\E{K_{\mN}^2}~=~\left[\frac{d^2}{n_0^2}\norm{x}_2^4+\frac{d}{n_0}n\lr{1-\exp(-5d/n)} \norm{x}_2^2+ n^2\lr{1-\exp(-5d/n)-\frac{d}{n}\exp(-5d/n)}\right]\exp(5\beta).\]
+Thus, when $d/n$ is small, we have
+\[\E{K_{\mN}^2}~\simeq~\lr{\frac{d^2}{n_0^2}\norm{x}_2^4+\frac{d^2}{n_0}\norm{x}_2^2+d^2}\exp(5\beta).\]
+Thus, in this regime
+\[\frac{\E{K_{\mN}^2}}{\E{K_{\mN}}^2}~\simeq~\exp(5\beta).\]
+When $d/n$ is not small, we find
+\[\E{K_{\mN}^2}~\simeq~\lr{\frac{d^2}{n_0^2}\norm{x}_2^4+\frac{dn}{n_0}+n^2}\exp(5\beta).\]
+Thus, we again find
+\[\E{K_{\mN}^2}~\simeq~\exp(5\beta).\]
+
+
+\subsection{Proof of Lemma \ref{L:K-bias-moments}}\label{S:K-bias-moments-pf} Let us first derive the expression for $\E{\Kb}.$ We have from Lemma \ref{L:bias-paths-raw} that
+\[\Kb~=~\sum_{Z\in Z^1}{\bf 1}_{\set{y_Z>0}} \sum_{\Gamma\in \Gamma_{(Z,Z)}^2} \prod_{k=1}^2 \wt(\gamma_k).\]
+Let us therefore fix $Z\in Z^1$. We therefore have
+\[\prod_{k=1}^2 \wt(\gamma_k)~=~{\bf 1}_{\set{y_{z_1}>0}}\lr{\prod_{i=\ell(z_1)+1}^{\ell(z_2)}\widehat{W}_{{\gamma_1}}^{(i)}{\bf 1}_{\set{y_{\gamma_1}^{(i)}>0}}}\lr{ \prod_{k=1}^2 \widehat{W}_{\gamma_k}^{(d)}\prod_{i=\ell(z_2)+1}^{d-1} \widehat{W}_{{\gamma_k}}^{(i)}{\bf 1}_{\set{y_{\gamma_k}^{(i)}>0}}}.\]
+As in in the proof of  Lemma \ref{L:2k-paths-avg}, let us write $\mF_{j}$ for the sigma algebra generated by the weights of $\mN$ is layers up to $j.$ The expectation of the expression above is then 
+\[\E{\prod_{k=1}^2 \wt(\gamma_k)}~=~\E{{\bf 1}_{\set{y_{z_1}>0}}\prod_{i=\ell(z_1)+1}^{\ell(z_2)}\widehat{W}_{{\gamma_1}}^{(i)}{\bf 1}_{\set{y_{\gamma_1}^{(i)}>0}} \E{\prod_{k=1}^2 \widehat{W}_{{\gamma_k}}^{(d)}\prod_{i=\ell(z_2)+1}^{d-1} \widehat{W}_{{\gamma_k}}^{(i)}{\bf 1}_{\set{y_{\gamma_k}^{(i)}>0}}\big|\mF_{\ell(z_2)-1}}}.\]
+The conditional expectation is identical to the one appearing in the expression for $\E{\Kw}$ from Lemma \ref{L:2k-paths-avg}, giving that 
+\[\E{\prod_{k=1}^2 \wt(\gamma_k)}~=~\E{{\bf 1}_{\set{y_{z_1}>0}}\prod_{i=\ell(z_1)+1}^{\ell(z_2)}\widehat{W}_{{\gamma_1}}^{(i)}{\bf 1}_{\set{y_{\gamma_1}^{(i)}>0}} } \prod_{i=\ell(z_2)+1}^d {\bf 1}_{\set{\gamma_1(i-1)=\gamma_2(i-1)}}\frac{1}{n_{i-1}}.\]
+This completes the proof if $\ell(z_1)=\ell(z_2)$. Otherwise,we have
+\[\E{{\bf 1}_{\set{y_{z_1}>0}}\prod_{i=\ell(z_1)+1}^{\ell(z_2)}\widehat{W}_{{\gamma_1}}^{(i)}{\bf 1}_{\set{y_{\gamma_1}^{(i)}>0}} }~=~\E{{\bf 1}_{\set{y_{z_1}>0}}\prod_{i=\ell(z_1)+1}^{\ell(z_2)-1}\widehat{W}_{{\gamma_1}}^{(i)}{\bf 1}_{\set{y_{\gamma_1}^{(i)}>0}}\E{\widehat{W}_{{\gamma_1}}^{(i)}{\bf 1}_{\set{y_{\gamma_1}^{(i)}>0}}~\big|~\mF_{\ell(z_1)-1}}}.\]
+To evaluate the inner conditional expectation, we recall that $-\widehat{W}$ is equal in distribution to $\widehat{W}$ and that the distribution of each weight has a density relative to Lebesgue measure. This implies that for any non-zero vector $x$, we have $\P(\widehat{W}^{(i)}x =0)=0.$ Thus symmetrizing over $\pm \widehat{W}$, we find
+\begin{align*}
+    \E{\widehat{W}_{{\gamma_1}}^{(i)}{\bf 1}_{\set{y_{\gamma_1}^{(i)}>0}}~\big|~\mF_{\ell(z_1)-1}}~&=~\frac{1}{2}\E{\widehat{W}_{{\gamma_1}}^{(i)}\left[{\bf 1}_{\set{y_{\gamma_1}^{(i)}>0}}-{\bf 1}_{\set{y_{\gamma_1}^{(i)}<0}}\right]~\big|~\mF_{\ell(z_1)-1}}\\
+    &=~\frac{1}{2}{\bf 1}_{\set{y^{(\ell(z_2)-1)}=0}}\E{\widehat{W}_{{\gamma_1}}^{(i)}~\big|~\mF_{\ell(z_1)-1}}\\
+    &~=0,
+\end{align*}
+completing the proof of the expression for $\E{\Kb}.$ Since the expression for $\E{\Kb^2}$ is obtained in the same way by repeating the argument for $\E{\Kw^2}$ from Lemma \ref{L:2k-paths-avg} and using the same symmetrization trick, we omit the details and conclude the proof of Lemma \ref{L:bias-bias-avg}.\hfill $\square$
+
