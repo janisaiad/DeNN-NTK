@@ -4,6 +4,7 @@ from typing import List, Dict, Any, Optional, Callable, Union, Tuple, Literal
 import sympy as sp
 
 MAX_HIERARCHY_DEPTH = 10
+MAX_LAYERS = 100 # not well optimized yet but it works
 
 class FormalExpression:
     """This class represents a formal expression in our NTK hierarchy system"""
@@ -16,12 +17,16 @@ class FormalExpression:
         self.W = sp.MatrixSymbol('W', self.m, self.m)  # weights
         self.a = sp.MatrixSymbol('a', self.m, 1)       # last layer
         # input symbols x_i
+        
+        self.x_symbols = {}
         for i in range(MAX_HIERARCHY_DEPTH):
-            self.x_i = sp.Symbol(f'x_{i}') 
+            for layer in range(MAX_LAYERS+1): # +1 because of the last layer
+                self.x_symbols[str(i)+'_'+str(layer)] = sp.Symbol(f'x_{i}^{layer}') 
             
-        # sigma derivatives - sigma_prime_r represents the (r+1)th derivative
+        # sigma and its derivatives - sigma_prime_r represents the (r+1)th derivative
+        self.sigma_prime_symbols = {}
         for r in range(MAX_HIERARCHY_DEPTH):
-            setattr(self, f'sigma_prime_{r}', sp.Function(f'σ^({r})'))
+            self.sigma_prime_symbols[str(r)] = sp.Function(f'σ^({r})')
 
 @dataclass
 class Term: # each term is a function of the entries
@@ -46,11 +51,15 @@ class Term: # each term is a function of the entries
             The symbolic expression after applying the replacements
         """
         expr = self.expr
-        x_beta = sp.MatrixSymbol('x_beta', self.expr.m, 1)
+        x_beta = {} # we extract the dictionary for the last layer
         
+        # not well optimized yet but it works
+        for layer in range(MAX_LAYERS+1): # if H = 2, then layer = 0, 1, 2 which is coherent, the last is the last layer
+            x_beta[str(layer)] = sp.MatrixSymbol(f'x_beta^{layer}', self.expr.m, 1)
+            
         replacements = {
             'a_t': {
-                expr.a: x_beta**expr.H
+                expr.a: x_beta[str(expr.H-1)] # not the final value !
             },
             'W_forward': {
                 expr.W/sp.sqrt(expr.m): (
