@@ -14,7 +14,10 @@ class FormalExpression:
         self.m = sp.Symbol('m')  # width
         self.H = sp.Symbol('H')  # depth
         
-        self.W = sp.MatrixSymbol('W', self.m, self.m)  # weights
+        self.W_symbols = {}
+        for layer in range(MAX_LAYERS+1):
+            self.W_symbols[str(layer)] = sp.MatrixSymbol('W', self.m, self.m)  # weights
+        
         self.a = sp.MatrixSymbol('a', self.m, 1)       # last layer
         # input symbols x_i
         
@@ -26,24 +29,28 @@ class FormalExpression:
         # sigma and its derivatives - sigma_prime_r represents the (r+1)th derivative
         self.sigma_prime_symbols = {}
         for r in range(MAX_HIERARCHY_DEPTH):
-            self.sigma_prime_symbols[str(r)] = sp.Function(f'σ^({r})')
+            for layer in range(MAX_LAYERS+1):
+                self.sigma_prime_symbols[str(r)+'_'+str(layer)] = sp.Function(f'σ_{layer}^({r})')
 
 
 
 @dataclass
 class Term: # each term is a function of the entries
-    def __init__(self, entry_vectors: jnp.ndarray):
+    def __init__(self, entry_vectors: jnp.ndarray, H: int):
         self.entry_vectors = entry_vectors # (dim_input, n_entries) in column format
         self.expr = FormalExpression()
-        self.symbolic_term = self._initialize_symbolic_term()
         self.index_hierarchy = jnp.shape(self.entry_vectors)[1]
-
+        self.H = H
+        self.symbolic_term = self._initialize_symbolic_term()
+        
     def _initialize_symbolic_term(self) -> sp.Expr:
         """Initialize the symbolic term"""
         expr = self.expr
-        # base term K^(2)
-        term = (expr.a.T * expr.W / sp.sqrt(expr.m)) * expr.sigma_prime_0(expr.x_0)
+        # base term for f(x, theta)
+        term = expr.a.T*expr.x_symbols[str(0)+'_'+str(self.H)]
         return term
+
+
 
     def replace_rules(self, rules: Dict[str, Any]) -> sp.Expr:
         """Applies replacement rules according to the formal rewriting system
@@ -58,59 +65,69 @@ class Term: # each term is a function of the entries
         # not well optimized yet but it works
         for layer in range(MAX_LAYERS+1): # if H = 2, then layer = 0, 1, 2 which is coherent, the last is the last layer
             x_beta[str(layer)] = sp.MatrixSymbol(f'x_beta^{layer}', self.expr.m, 1)
-            
         replacements = {
             'a_t': {
-                expr.a: x_beta[str(expr.H-1)] # not the final value !
+                expr.a: x_beta[str(self.H-1)] # not the final value !
             },
             'W_forward': {
-                expr.W/sp.sqrt(expr.m): (
-                    sp.diag(expr.sigma_prime_0(x_beta)) * 
-                    (expr.W.T/sp.sqrt(expr.m)) * 
-                    expr.sigma_prime_0(x_beta) * 
-                    (expr.a/sp.sqrt(expr.m))
-                ) * (sp.ones(1, expr.m)/sp.sqrt(expr.m)) * x_beta.T
+                expr.W_symbols[str(layer)]/sp.sqrt(expr.m): (
+                    sp.diag(
+                        expr.sigma_prime_symbols[str(0)+'_'+str(layer)](x_beta[str(layer)]) * 
+                        (expr.W_symbols[str(layer+1)].T/sp.sqrt(expr.m)) * 
+                        expr.sigma_prime_symbols[str(0)+'_'+str(layer+1)](x_beta[str(layer+1)]) * 
+                        (expr.a/sp.sqrt(expr.m))
+                    ) * (sp.ones(1, expr.m)/sp.sqrt(expr.m)) * x_beta[str(layer)].T
+                    for layer in range(1, self.H)
+                )
             },
             'W_backward': {
-                expr.W.T/sp.sqrt(expr.m): (
-                    x_beta/sp.sqrt(expr.m) * 
+                expr.W_symbols[str(layer)].T/sp.sqrt(expr.m): (
+                    x_beta[str(layer-1)]/sp.sqrt(expr.m) * 
                     (expr.a.T/sp.sqrt(expr.m)) * 
-                    expr.sigma_prime_0(x_beta)
+                    expr.sigma_prime_symbols[str(0)+'_'+str(layer)](x_beta[str(layer)])
+                    for layer in range(1, self.H+1)
                 )
             },
             'x_layer': {
-                expr.x: sum(
+                expr.x_symbols[str(i)+'_'+str(layer)]: sum(
                     sp.diag(
-                        expr.sigma_prime_i(expr.x) * 
-                        (expr.W/sp.sqrt(expr.m)) * 
-                        expr.sigma_prime_1(x_beta) * 
-                        (expr.W.T/sp.sqrt(expr.m)) * 
-                        expr.sigma_prime_1(x_beta) * 
+                        expr.sigma_prime_symbols[str(0)+'_'+str(layer)](expr.x_symbols[str(i)+'_'+str(layer)]) * 
+                        (expr.W_symbols[str(layer+1)]/sp.sqrt(expr.m)) * 
+                        expr.sigma_prime_symbols[str(0)+'_'+str(k)](expr.x_symbols[str(i)+'_'+str(k)]) * 
+                        expr.sigma_prime_symbols[str(0)+'_'+str(k)](x_beta[str(k)]) * 
+                        (expr.W_symbols[str(k+1)].T/sp.sqrt(expr.m)) * 
+                        expr.sigma_prime_symbols[str(0)+'_'+str(self.H)](x_beta[str(self.H)]) * 
                         (expr.a/sp.sqrt(expr.m))
                     ) * (sp.ones(1, expr.m)/sp.sqrt(expr.m)) * 
-                    (expr.x.T * x_beta)
-                    for k in range(1, expr.H)
+                    (expr.x_symbols[str(i)+'_'+str(k-1)].T * x_beta[str(k-1)])
+                    for k in range(1, self.H)
+                    for i in range(self.index_hierarchy)
+                    for layer in range(1, self.H)
                 )
             },
             'sigma_prime_i': {
-                expr.sigma_prime_0(expr.x): (
-                    expr.sigma_prime_1(expr.x) * 
-                    sp.diag(expr.sigma_prime_0(x_beta) * 
-                    (expr.W.T/sp.sqrt(expr.m)) * 
-                    expr.sigma_prime_0(x_beta) * 
-                    (expr.a/sp.sqrt(expr.m))) * 
-                    (expr.x.T * x_beta) +
+                expr.sigma_prime_symbols[str(r)+'_'+str(layer)](expr.x_symbols[str(i)+'_'+str(layer)]): (
+                    expr.sigma_prime_symbols[str(r+1)+'_'+str(layer)](expr.x_symbols[str(i)+'_'+str(layer)]) * 
+                    sp.diag(
+                        expr.sigma_prime_symbols[str(0)+'_'+str(layer)](x_beta[str(layer)]) * 
+                        (expr.W_symbols[str(layer+1)].T/sp.sqrt(expr.m)) * 
+                        expr.sigma_prime_symbols[str(0)+'_'+str(layer+1)](x_beta[str(layer+1)]) * 
+                        (expr.a/sp.sqrt(expr.m))
+                    ) * (expr.x_symbols[str(i)+'_'+str(layer-1)].T * x_beta[str(layer-1)]) +
                     sum(
-                        expr.sigma_prime_1(expr.x) * 
-                        sp.diag((expr.W/sp.sqrt(expr.m)) * 
-                        expr.sigma_prime_0(expr.x) * 
-                        (expr.W/sp.sqrt(expr.m)) * 
-                        expr.sigma_prime_0(x_beta) * 
-                        (expr.W.T/sp.sqrt(expr.m)) * 
-                        expr.sigma_prime_0(x_beta) * 
-                        (expr.a/sp.sqrt(expr.m))) * 
-                        (expr.x.T * x_beta)
-                        for k in range(1, expr.H-1)
+                        expr.sigma_prime_symbols[str(r+1)+'_'+str(layer)](expr.x_symbols[str(i)+'_'+str(layer)]) * 
+                        sp.diag(
+                            (expr.W_symbols[str(layer)]/sp.sqrt(expr.m)) * 
+                            expr.sigma_prime_symbols[str(0)+'_'+str(k)](expr.x_symbols[str(i)+'_'+str(k)]) * 
+                            expr.sigma_prime_symbols[str(0)+'_'+str(k)](x_beta[str(k)]) * 
+                            (expr.W_symbols[str(k+1)].T/sp.sqrt(expr.m)) * 
+                            expr.sigma_prime_symbols[str(0)+'_'+str(self.H)](x_beta[str(self.H)]) * 
+                            (expr.a/sp.sqrt(expr.m))
+                        ) * (expr.x_symbols[str(i)+'_'+str(k-1)].T * x_beta[str(k-1)])
+                        for k in range(1, layer)
+                        for i in range(self.index_hierarchy)
+                        for r in range(MAX_HIERARCHY_DEPTH-1)
+                        for layer in range(1, self.H)
                     )
                 )
             }
@@ -128,7 +145,7 @@ class Term: # each term is a function of the entries
     def evolve(self,x_beta: jnp.ndarray) -> 'Term':
         """we evolve the term with the formal system evolution law"""
         entry_vectors_new = jnp.concatenate([self.entry_vectors, x_beta], axis=1) # we concat the entry vectors and the x_beta
-        new_term = Term(entry_vectors_new)
+        new_term = Term(entry_vectors_new, self.H)
         
         beta_idx = self.index_hierarchy # new index for x_beta, because of the 1 shifting of the index
         for alpha_idx in range(beta_idx):
@@ -150,7 +167,7 @@ class Term: # each term is a function of the entries
 
 
 class Kernel:
-    def __init__(self, n_entries: int, dim_input: int, entry_vectors: jnp.ndarray):
+    def __init__(self, n_entries: int, dim_input: int, entry_vectors: jnp.ndarray, H: int):
         """The Kernel class is a container for the finite width corrections kernels
             The number of layer can be changed, and this is the most interesting part
             Same for the width"""        
@@ -172,7 +189,7 @@ class Kernel:
         self.entry_vectors = entry_vectors # (dim_input, n_entries) in column format
         self.terms = [] # list of terms in the kernel
         self.dataset = None # dataset over the sphere, R^d, the Torus.
-        
+        self.H = H
         self.NN = None # the NN stored, as a jax.nn.Dense object
         self.weights = None # the weights of the NN, as a jax.numpy array
         self.feature_maps = None # the feature maps of the NN, as a jax.numpy array
