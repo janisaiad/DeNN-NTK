@@ -1,6 +1,18 @@
 import pytest
 
 
-## replace with your project folder name
-from deeperorwider.utils import *
-from deeperorwider.models import Model1, Model2
+
+def test_import():
+    """Test that the import works"""
+    
+    import finitewidth
+    assert finitewidth is not None 
+    
+
+
+if __name__ == "__main__":
+    test_import()
+    
+    
+    
+    

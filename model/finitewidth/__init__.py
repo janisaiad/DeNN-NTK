@@ -1,3 +1,3 @@
-from .finitewidth import Kernel
+from .finitewidth import Kernel, FormalExpression
 
-__all__ = ["Kernel"]
+__all__ = ["Kernel", "FormalExpression"]

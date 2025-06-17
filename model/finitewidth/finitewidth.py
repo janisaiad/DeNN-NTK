@@ -28,6 +28,8 @@ class FormalExpression:
         for r in range(MAX_HIERARCHY_DEPTH):
             self.sigma_prime_symbols[str(r)] = sp.Function(f'σ^({r})')
 
+
+
 @dataclass
 class Term: # each term is a function of the entries
     def __init__(self, entry_vectors: jnp.ndarray):
@@ -140,6 +142,12 @@ class Term: # each term is a function of the entries
         # Convert symbolic expression to numerical function
         # Implementation depends on specific requirements
         pass
+
+
+
+
+
+
 
 class Kernel:
     def __init__(self, n_entries: int, dim_input: int, entry_vectors: jnp.ndarray):
