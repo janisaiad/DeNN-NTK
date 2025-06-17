@@ -5,6 +5,8 @@ description = "Deeper or wider NN NTK analysis for PDE solving and operator lear
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "flax>=0.10.4",
+    "jax>=0.4.34",
     "neural-tangents>=0.6.5",
     "pytest>=8.3.5",
 ]
@@ -17,8 +19,8 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-package-dir = {} # you can write inside the brackets something like "Model1" = "models/model1/", "Model2" = "models/model2/"
-packages = [] # same, smth like ["Model1", "Model2"]
+package-dir = {"finitewidth"="model/finitewidth"} # you can write inside the brackets something like "Model1" = "models/model1/", "Model2" = "models/model2/"
+packages = ["finitewidth"] # same, smth like ["Model1", "Model2"]
 
 
 
