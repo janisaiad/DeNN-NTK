@@ -8,7 +8,7 @@ from typing import List, Dict, Any
 
 class Kernel3Empirical:
     """
-    Computes finite width kernels K_2 (NTK) and K_3 for a fully-connected neural network.
+    Computes finite width kernel and K_3 for a fully-connected neural network.
     """
     def __init__(self, weights: List[jnp.ndarray], 
                  sigma_derivatives: Dict[int, List[jnp.ndarray]],
