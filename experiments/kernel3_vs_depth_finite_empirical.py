@@ -40,14 +40,14 @@ def generate_data(key, n_samples, n_features):
 def init_network(key, L, d_in, m):
     
     """Initialize network weights."""
-    # the std for weights is 1/sqrt(m) by default but we want sqrt(2/m)
+    # the Xavier init operates so we init the weights without scaling sqrt(2/m) as std
     keys = jax.random.split(key, L + 1)
     weights = []
-    weights.append(jax.random.normal(keys[0], (m, d_in)) * jnp.sqrt(2/d_in))
+    weights.append(jax.random.normal(keys[0], (m, d_in)) )
     
     for i in range(1, L):
-        weights.append(jax.random.normal(keys[i], (m, m)) * jnp.sqrt(2/m))
-    weights.append(jax.random.normal(keys[L], (m,)) * jnp.sqrt(2/m))
+        weights.append(jax.random.normal(keys[i], (m, m)))
+    weights.append(jax.random.normal(keys[L], (m,)))
     return weights
 
 def compute_features_and_derivatives(weights, data):
@@ -81,9 +81,9 @@ for L in L_VALUES:
 
     # Initialization
     key = jax.random.PRNGKey(key_seed)
-    data_key, net_key = jax.random.split(key)
-    weights = init_network(net_key, L, D_IN, M)
-    data = generate_data(data_key, N, D_IN)
+    key_seed += 1  # Increment seed for next iteration
+    weights = init_network(key, L, D_IN, M)
+    data = generate_data(key_seed, N, D_IN)  # Use scalar seed directly
     
     # Forward pass to get necessary values
     feature_maps, sigma_derivatives = compute_features_and_derivatives(weights, data)
@@ -116,9 +116,9 @@ for L in L_VALUES:
     std_eigenvalues_per_L.append(np.std(all_slice_eigenvalues, axis=0))
 
 # Convert lists to numpy arrays
-mean_eigenvalues_per_L = np.array(mean_eigenvalues_per_L)
-std_eigenvalues_per_L = np.array(std_eigenvalues_per_L)
-inf_norms_per_L = np.array(inf_norms_per_L)
+mean_eigenvalues_per_L = M*np.array(mean_eigenvalues_per_L)
+std_eigenvalues_per_L = M*np.array(std_eigenvalues_per_L)
+inf_norms_per_L = M*np.array(inf_norms_per_L)
 
 # %%
 # --- Plotting ---
@@ -157,6 +157,7 @@ print(f"K3 slice eigenvalues plot saved to {PATH_TO_PLOTS}/k3_slice_eigenvalues_
 
 # %%
 # --- Save Data ---
+## I recall that the data are normalized by multiplying by M
 output_data = {
     'l_values': L_VALUES,
     'm_value': M,
