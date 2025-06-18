@@ -8,6 +8,8 @@ def test_import():
     import finitewidth
     assert finitewidth is not None 
     
+    import infinitewidth
+    assert infinitewidth is not None
 
 
 if __name__ == "__main__":

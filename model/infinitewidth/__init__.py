@@ -1,3 +1,3 @@
-from .infinitewidth import infinitewidth
+from .infinitewidth import InfiniteWidth
 
-__all__ = ["infinitewidth"]
+__all__ = ["InfiniteWidth"]

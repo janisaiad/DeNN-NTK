@@ -1,7 +1,7 @@
 import numpy as np
 
 class InfiniteWidth:
-    def __init__(self, n_layers: int, n_outputs: int, a: float = 1.0, b: float = 1.0):
+    def __init__(self, n_layers: int, n_outputs: int, a: float = 1.0, b: float = 1):
         """
         Initialise le modèle de largeur infinie.
 
@@ -24,26 +24,17 @@ class InfiniteWidth:
         self.sigma = (self.a**2 + self.b**2)**-0.5
 
     def _varrho(self, rho: np.ndarray) -> np.ndarray:
-        """Calcule la carte cosinus."""
+        """cosine map"""
         rho = np.clip(rho, -1.0, 1.0)
         return rho + self.delta_phi * (2 / np.pi) * (np.sqrt(1 - rho**2) - rho * np.arccos(rho))
 
     def _varrho_prime(self, rho: np.ndarray) -> np.ndarray:
-        """Calcule la dérivée de la carte cosinus."""
+        """derivative of the cosine map"""
         rho = np.clip(rho, -1.0, 1.0)
         return 1 - self.delta_phi * (2 / np.pi) * np.arccos(rho)
 
     def _kernel_entry(self, x1: np.ndarray, x2: np.ndarray) -> float:
-        """
-        Calcule une seule entrée K(x1, x2) de la matrice NTK.
-
-        Args:
-            x1 (np.ndarray): Premier vecteur d'entrée.
-            x2 (np.ndarray): Second vecteur d'entrée.
-
-        Returns:
-            float: La valeur de l'entrée du noyau.
-        """
+        """one entry of the NTK matrix"""
         norm_x1 = np.linalg.norm(x1)
         norm_x2 = np.linalg.norm(x2)
         
@@ -55,14 +46,14 @@ class InfiniteWidth:
         
         rhos = [rho1]
         for _ in range(1, self.l):
-            rhos.append(self._varrho(rhos[-1]))
+            rhos.append(self._varrho(rhos[-1])) # because we do it recursively
             
         rho_primes = [self._varrho_prime(rho) for rho in rhos]
 
         k_sum = 0
         for k in range(1, self.l + 1):
-            # rho_k est rhos[k-1]
-            # Produit de rho_primes de k'=k à l-1, qui sont les indices k-1 à l-2 de rho_primes
+            # rho_k is rhos[k-1]
+            # product of rho_primes from k'=k to l-1, which are the indices k-1 to l-2 of rho_primes
             prod = np.prod(rho_primes[k-1:self.l-1])
             term = rhos[k-1] * prod
             k_sum += term
@@ -71,13 +62,13 @@ class InfiniteWidth:
 
     def kernel_matrix(self, X: np.ndarray) -> np.ndarray:
         """
-        Calcule la matrice NTK pour un ensemble de données donné.
+        compute the NTK matrix for a given set of data
 
         Args:
-            X (np.ndarray): Matrice de données de forme (n_samples, n_features).
+            X (np.ndarray): data matrix of shape (n_samples, n_features).
 
         Returns:
-            np.ndarray: La matrice NTK de forme (n_samples, n_samples).
+            np.ndarray: the NTK matrix of shape (n_samples, n_samples).
         """
         n_samples = X.shape[0]
         K = np.zeros((n_samples, n_samples))
@@ -87,19 +78,6 @@ class InfiniteWidth:
                 K[i, j] = self._kernel_entry(X[i], X[j])
                 K[j, i] = K[i, j]
         
-        # Le papier définit K comme [1/n * K(xi, xj)].
-        # Je retourne K(xi,xj) ici. La normalisation peut être faite à l'extérieur.
+        # the paper defines K as [1/n * K(xi, xj)].
+        # I return K(xi,xj) here. The normalization can be done outside.
         return K
-
-    def fit(self):
-        """Non applicable pour le NTK à largeur infinie car le noyau est fixe."""
-        pass
-
-    def predict(self):
-        """La prédiction se ferait en utilisant la régression par noyau, en dehors de cette classe."""
-        pass
-
-    def evaluate(self):
-        """L'évaluation se ferait en utilisant la régression par noyau, en dehors de cette classe."""
-        pass
-

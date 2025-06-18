@@ -16,6 +16,8 @@ L_VALUES = jnp.linspace(10, 100, 20).astype(int)
 RANDOM_SEED = 42
 N_experiments = 10  # For eigenvalue mean computation
 
+
+PATH_TO_PLOTS = "/home/janis/STG3A/deeperorwider/experiments/plots"
 # %%
 def generate_data(key, n_samples, n_features):
     """Generates random data and normalizes it."""
@@ -60,8 +62,8 @@ for L in L_VALUES:
     mean_eigenvalues = jnp.mean(jnp.stack(eigenvalues_experiments), axis=0)
     eigenvalues_per_L.append(mean_eigenvalues)
 
-if not os.path.exists('plots'):
-    os.makedirs('plots')
+if not os.path.exists(PATH_TO_PLOTS):
+    os.makedirs(PATH_TO_PLOTS)
 
 # Plot eigenvalue histograms
 n_L = len(L_VALUES)
@@ -75,8 +77,8 @@ for i, L in enumerate(L_VALUES):
     ax.set_yscale('log') # for relu
 axes[0].set_ylabel("Density")
 plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-plt.savefig("plots/ntk_empirical_eigenvalue_histograms.png")
-print("Saved eigenvalue histograms to plots/ntk_empirical_eigenvalue_histograms.png")
+plt.savefig(PATH_TO_PLOTS + "/ntk_empirical_eigenvalue_histograms_finite.png")
+print("Saved eigenvalue histograms to " + PATH_TO_PLOTS + "/ntk_empirical_eigenvalue_histograms_finite.png")
 
 # Plot k-th eigenvalue vs L
 eigenvalues_per_L = np.array(eigenvalues_per_L)
@@ -96,8 +98,8 @@ plt.xticks(L_VALUES)
 plt.grid(True, which="both", ls="--")
 plt.legend()
 plt.show()
-# plt.savefig("plots/kth_eigenvalue_vs_L_empirical.png")
-print("Saved k-th eigenvalue plot to plots/kth_eigenvalue_vs_L_empirical.png")
+# plt.savefig(PATH_TO_PLOTS + "/kth_eigenvalue_vs_L_empirical_finite.png")
+print("Saved k-th eigenvalue plot to " + PATH_TO_PLOTS + "/kth_eigenvalue_vs_L_empirical_finite.png")
 
 # %%
 

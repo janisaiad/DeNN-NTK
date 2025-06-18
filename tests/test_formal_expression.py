@@ -12,17 +12,25 @@ def test_formal_expression_init():
     assert isinstance(expr.m, sp.Symbol)
     assert str(expr.m) == 'm'
     
-    # Test matrix symbols
-    assert isinstance(expr.W, sp.MatrixSymbol)
-    assert expr.W.shape == (expr.m, expr.m)
+    # Test matrix symbols for each layer
+    for layer in range(101):  # MAX_LAYERS + 1 = 101
+        assert isinstance(expr.W_symbols[str(layer)], sp.MatrixSymbol)
+        assert expr.W_symbols[str(layer)].shape == (expr.m, expr.m)
+        assert str(expr.W_symbols[str(layer)]) == 'W'
     
-    # Test x symbol
-    assert isinstance(expr.x_symbols['0_0'], sp.Symbol)
-    assert str(expr.x_symbols['0_0']) == 'x_0^0'
+    # Test x symbols for each hierarchy level and layer
+    for i in range(10):  # MAX_HIERARCHY_DEPTH = 10
+        for layer in range(101):
+            key = f"{i}_{layer}"
+            assert isinstance(expr.x_symbols[key], sp.Symbol)
+            assert str(expr.x_symbols[key]) == f'x_{i}^{layer}'
     
-    # Test sigma prime symbol
-    assert isinstance(expr.sigma_prime_symbols['0'], sp.FunctionClass)
-    assert str(expr.sigma_prime_symbols['0']) == 'σ^(0)'
+    # Test sigma prime symbols for each hierarchy level and layer
+    for r in range(10):  # MAX_HIERARCHY_DEPTH = 10
+        for layer in range(101):
+            key = f"{r}_{layer}"
+            assert isinstance(expr.sigma_prime_symbols[key], sp.FunctionClass)
+            assert str(expr.sigma_prime_symbols[key]) == f'σ_{layer}^({r})'
 
 
 if __name__ == "__main__":
