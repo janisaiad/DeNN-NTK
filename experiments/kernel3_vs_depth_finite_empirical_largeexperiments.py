@@ -69,7 +69,7 @@ for i1, N in enumerate(N_VALUES):
     for i2, D_IN in enumerate(D_IN_VALUES):
         for i3, M in enumerate(M_VALUES):
             for i4, L in enumerate(L_VALUES):
-                complexity = 2*i1 + i2 + i3 + i4  # we compute complexity score, penalize a lot N
+                complexity = 2*i1 + 0.5*i2 + 0.5*i3 + i4  # we compute complexity score, penalize a lot N
                 experiments.append((complexity, N, D_IN, M, L))
 
 experiments.sort(key=lambda x: x[0])  # we sort by complexity score (1st coordinate)

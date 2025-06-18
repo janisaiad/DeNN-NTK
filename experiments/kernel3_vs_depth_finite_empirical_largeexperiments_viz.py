@@ -27,6 +27,8 @@ import matplotlib.pyplot as plt
 import os
 import seaborn as sns
 from scipy.stats import linregress
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
 
 # %%
 PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data/large"
@@ -60,8 +62,9 @@ def analyze_parameter_scaling(data, param_name, plot_size=(20, 15)):  # we incre
     # Plot 1: Infinity Norm vs Parameter (Linear Scale)
     ax = axes[0,0]
     for key, values in groups.items():
-        x = [v[0] for v in values]
-        y = [v[1] for v in values]
+        sorted_values = sorted(values, key=lambda x: x[0])  # we sort by parameter value
+        x = [v[0] for v in sorted_values]
+        y = [v[1] for v in sorted_values]
         ax.scatter(x, y, label=str(key), s=100)  # we use scatter plot with larger markers
     ax.set_xlabel(param_name)
     ax.set_ylabel('Infinity Norm')
@@ -71,13 +74,15 @@ def analyze_parameter_scaling(data, param_name, plot_size=(20, 15)):  # we incre
     # Plot 2: Infinity Norm vs Parameter (Log Scale)
     ax = axes[0,1]
     for key, values in groups.items():
-        x = [v[0] for v in values]
-        y = [v[1] for v in values]
+        sorted_values = sorted(values, key=lambda x: x[0])  # we sort by parameter value
+        x = [v[0] for v in sorted_values]
+        y = [v[1] for v in sorted_values]
         ax.scatter(x, y, label=str(key), s=100)  # we use scatter plot with larger markers
         
         if len(x) > 1:  # we fit power law if enough points
             slope, intercept, r_value, p_value, std_err = linregress(np.log(x), np.log(y))
-            ax.plot(x, np.exp(intercept) * np.array(x)**slope, '--',
+            x_line = np.array(sorted(x))  # we use sorted x values for line
+            ax.plot(x_line, np.exp(intercept) * x_line**slope, '--',
                     label=f'slope={slope:.2f}')
     ax.set_xlabel(param_name)
     ax.set_ylabel('Infinity Norm')
@@ -89,8 +94,9 @@ def analyze_parameter_scaling(data, param_name, plot_size=(20, 15)):  # we incre
     # Plot 3: Largest Eigenvalue vs Parameter (Linear Scale)
     ax = axes[1,0]
     for key, values in groups.items():
-        x = [v[0] for v in values]
-        y = [v[2] for v in values]
+        sorted_values = sorted(values, key=lambda x: x[0])  # we sort by parameter value
+        x = [v[0] for v in sorted_values]
+        y = [v[2] for v in sorted_values]
         ax.scatter(x, y, label=str(key), s=100)  # we use scatter plot with larger markers
     ax.set_xlabel(param_name)
     ax.set_ylabel('Largest Eigenvalue')
@@ -100,13 +106,15 @@ def analyze_parameter_scaling(data, param_name, plot_size=(20, 15)):  # we incre
     # Plot 4: Largest Eigenvalue vs Parameter (Log Scale)
     ax = axes[1,1]
     for key, values in groups.items():
-        x = [v[0] for v in values]
-        y = [v[2] for v in values]
+        sorted_values = sorted(values, key=lambda x: x[0])  # we sort by parameter value
+        x = [v[0] for v in sorted_values]
+        y = [v[2] for v in sorted_values]
         ax.scatter(x, y, label=str(key), s=100)  # we use scatter plot with larger markers
         
         if len(x) > 1:  # we fit power law if enough points
             slope, intercept, r_value, p_value, std_err = linregress(np.log(x), np.log(y))
-            ax.plot(x, np.exp(intercept) * np.array(x)**slope, '--',
+            x_line = np.array(sorted(x))  # we use sorted x values for line
+            ax.plot(x_line, np.exp(intercept) * x_line**slope, '--',
                     label=f'slope={slope:.2f}')
     ax.set_xlabel(param_name)
     ax.set_ylabel('Largest Eigenvalue')
@@ -141,3 +149,39 @@ analyze_parameter_scaling(data, 'D_IN')
 # Analyze sample size scaling
 print("Analyzing sample size (N) scaling relationships...")
 analyze_parameter_scaling(data, 'N')
+
+# %% [markdown]
+# ## Multivariate Regression Analysis
+
+# %%
+# Prepare data for multivariate regression
+X = np.array([[d['N'], d['D_IN'], d['M'], d['L']] for d in data])  # we extract features
+y_inf = np.array([d['inf_norm'] for d in data])  # we extract infinity norm
+y_eig = np.array([np.max(np.abs(d['mean_eigenvalues'])) for d in data])  # we extract max eigenvalue
+
+# Log transform all variables
+X_log = np.log(X)
+y_inf_log = np.log(y_inf)
+y_eig_log = np.log(y_eig)
+
+# Standardize features
+scaler = StandardScaler()
+X_log_scaled = scaler.fit_transform(X_log)
+
+# Fit multivariate regression for infinity norm
+reg_inf = LinearRegression().fit(X_log_scaled, y_inf_log)
+reg_eig = LinearRegression().fit(X_log_scaled, y_eig_log)
+
+# Print results
+print("\nMultivariate Regression Results:")
+print("\nInfinity Norm Scaling:")
+print(f"R² score: {reg_inf.score(X_log_scaled, y_inf_log):.3f}")
+print("Coefficients (log-log scale):")
+for name, coef in zip(['N', 'D_IN', 'M', 'L'], reg_inf.coef_):
+    print(f"{name}: {coef:.3f}")
+
+print("\nLargest Eigenvalue Scaling:")
+print(f"R² score: {reg_eig.score(X_log_scaled, y_eig_log):.3f}")
+print("Coefficients (log-log scale):")
+for name, coef in zip(['N', 'D_IN', 'M', 'L'], reg_eig.coef_):
+    print(f"{name}: {coef:.3f}")
