@@ -258,6 +258,65 @@ The exponential factors $e^{-t\lambda_i}$ demonstrate that corrections become mo
 
 \newpage
 
+\section{Other proof}
+
+In the framework of the Neural Tangent Hierarchy (NTH), the kernel $K^{(3)}$ arises as the operator governing the time evolution of the Neural Tangent Kernel $K^{(2)}$. The dynamics of $K^{(2)}$ under gradient flow are given by:
+\begin{equation}
+\frac{d}{dt} K^{(2)}_t(x_\alpha, x_\beta) = -\frac{1}{n} \sum_{\gamma=1}^n K^{(3)}_t(x_\alpha, x_\beta, x_\gamma) (f_t(x_\gamma) - y_\gamma)
+\end{equation}
+where $K^{(3)}_t(x_\alpha, x_\beta, x_\gamma)$ is defined as the contraction of the gradient of $K^{(2)}_t(x_\alpha, x_\beta)$ with respect to the network parameters $\theta$ with the gradient of the network output $f_t(x_\gamma)$:
+\begin{equation}
+K^{(3)}_t(x_\alpha, x_\beta, x_\gamma) := \langle \nabla_\theta K^{(2)}_t(x_\alpha, x_\beta), \nabla_\theta f_t(x_\gamma) \rangle.
+\end{equation}
+
+Let's derive the explicit formula for $K^{(3)}_t$. We start from the expression for $K^{(2)}_t(x_\alpha, x_\beta)$:
+\begin{equation}
+K^{(2)}_t(x_\alpha, x_\beta) = \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle
+\end{equation}
+where we use the notation:
+\begin{itemize}
+    \item $x^{(p)}_\mu = \frac{1}{\sqrt{m}}\sigma(W^{(p)} x^{(p-1)}_\mu)$ for $p \ge 1$, and $x^{(0)}_\mu = x_\mu$.
+    \item $G^{(\ell)}_\mu = \frac{1}{\sqrt{m}}\sigma'_\ell(x_\mu) (W^{(\ell+1)})^T \cdots \frac{1}{\sqrt{m}}\sigma'_H(x_\mu) a_t$, with $\sigma'_\ell(x_\mu) = \text{diag}(\sigma'(W^{(\ell)}x^{(\ell-1)}_\mu))$.
+\end{itemize}
+
+Let $\delta_\gamma(\cdot) := \langle \nabla_\theta (\cdot), \nabla_\theta f_t(x_\gamma) \rangle$ denote the directional derivative along $\nabla_\theta f_t(x_\gamma)$. Then $K^{(3)}_{\alpha\beta\gamma} = \delta_\gamma(K^{(2)}_{\alpha\beta})$. Applying the product rule, we get:
+\begin{align}
+K^{(3)}_{\alpha\beta\gamma} = \delta_\gamma \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \sum_{\ell=1}^{H} \delta_\gamma \left( \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \right)
+\end{align}
+Each term expands further, following $\delta_\gamma \langle A, B \rangle = \langle \delta_\gamma A, B \rangle + \langle A, \delta_\gamma B \rangle$. This results in a sum over all components of $K^{(2)}_{\alpha\beta}$, where each component is acted upon by $\delta_\gamma$. The core of the derivation lies in computing $\delta_\gamma$ for the building blocks $x^{(p)}_\mu$ and $G^{(p)}_\mu$.
+
+The recursive formula for the derivative of the activations is:
+\begin{equation}
+\delta_\gamma x^{(p)}_\mu = \frac{1}{\sqrt{m}} \sigma'_{p}(x_\mu) \left( W^{(p)} (\delta_\gamma x^{(p-1)}_\mu) + \langle x^{(p-1)}_\gamma, x^{(p-1)}_\mu \rangle G^{(p)}_\gamma \right)
+\end{equation}
+with the base case $\delta_\gamma x^{(0)}_\mu = \delta_\gamma x_\mu = 0$.
+
+The derivative of the backpropagated vectors $G^{(\ell)}_\mu$ is given by a sum of terms, where $\delta_\gamma$ acts on one factor at a time:
+\begin{align}
+\delta_\gamma G^{(\ell)}_\mu = \sum_{p=\ell}^{H} & \left( \frac{1}{\sqrt{m}}\sigma'_\ell(x_\mu) \cdots \delta_\gamma(\frac{1}{\sqrt{m}}(W^{(p+1)})^T) \cdots \sigma'_H(x_\mu) a_t \right) \\
++ \sum_{p=\ell}^{H} & \left( \frac{1}{\sqrt{m}}\sigma'_\ell(x_\mu) \cdots \delta_\gamma(\sigma'_{p}(x_\mu)) \cdots \sigma'_H(x_\mu) a_t \right) \\
++ & \left( \frac{1}{\sqrt{m}}\sigma'_\ell(x_\mu) \cdots \sigma'_H(x_\mu) (\delta_\gamma a_t) \right)
+\end{align}
+where
+\begin{itemize}
+    \item $\delta_\gamma a_t = x^{(H)}_\gamma$
+    \item The term $\delta_\gamma((W^{(p+1)})^T)$ corresponds to a rank-1 update which, when contracted in context, yields terms involving $G^{(p+1)}_\gamma$ and inner products of activations.
+    \item $\delta_\gamma(\sigma'_{p}(x_\mu)) = \sigma''_{p}(x_\mu) \text{diag}(\delta_\gamma(W^{(p)}x^{(p-1)}_\mu/\sqrt{m}))$. This term vanishes for ReLU activation functions as $\sigma''=0$ almost everywhere.
+\end{itemize}
+
+Combining these rules gives the complete formula for $K^{(3)}_t(x_\alpha, x_\beta, x_\gamma)$. It is a sum of many terms, each corresponding to differentiating one part of $K^{(2)}_t(x_\alpha, x_\beta)$. For clarity, we write it as a sum of contributions:
+\begin{equation}
+K^{(3)}_{\alpha\beta\gamma} = K^{(3, \text{out})}_{\alpha\beta\gamma} + \sum_{\ell=1}^H \left( K^{(3, G)}_{\alpha\beta\gamma, \ell} + K^{(3, x)}_{\alpha\beta\gamma, \ell} \right)
+\end{equation}
+where
+\begin{align}
+K^{(3, \text{out})}_{\alpha\beta\gamma} &= \langle \delta_\gamma x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \langle x^{(H)}_\alpha, \delta_\gamma x^{(H)}_\beta \rangle \\
+K^{(3, G)}_{\alpha\beta\gamma, \ell} &= \left( \langle \delta_\gamma G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle + \langle G^{(\ell)}_\alpha, \delta_\gamma G^{(\ell)}_\beta \rangle \right) \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \\
+K^{(3, x)}_{\alpha\beta\gamma, \ell} &= \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \left( \langle \delta_\gamma x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle + \langle x^{(\ell-1)}_\alpha, \delta_\gamma x^{(\ell-1)}_\beta \rangle \right)
+\end{align}
+The terms $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(p)}_\mu$ are expanded using the recursive rules above, yielding a full, albeit lengthy, expression. This hierarchical structure is characteristic of the NTH framework.
+
+\newpage
 \section{Spectral Analysis and Applications}
 
 Having established the mathematical foundation for first-order corrections, we now turn to their spectral properties and practical implications.

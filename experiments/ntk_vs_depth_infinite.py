@@ -52,11 +52,13 @@ fig, axes = plt.subplots(1, n_L, figsize=(5 * n_L, 4), sharey=True)
 fig.suptitle(f'Histogram of the mean eigenvalues of the NTK with the infinite width model')
 for i, L in enumerate(L_VALUES):
     ax = axes[i]
-    ax.hist(eigenvalues_per_L[i], bins=100, density=True)
+    eigenvalues = eigenvalues_per_L[i].copy()  # Make a copy to avoid modifying original
+    eigenvalues = eigenvalues[eigenvalues != np.max(eigenvalues)]  # Remove max eigenvalue
+    ax.hist(eigenvalues, bins=100, density=True)  # Plot histogram without max eigenvalue to avoid scale issues
     ax.set_title(f"Profondeur L = {L}")
     ax.set_xlabel("Valeur propre")
-    #ax.set_yscale('log')
-    ax.set_xscale('log')
+    ax.set_yscale('log')
+    #ax.set_xscale('log')
 axes[0].set_ylabel("Densité")
 plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 plt.savefig(PATH_TO_PLOTS + "/ntk_infinite_eigenvalue_histograms.png")
