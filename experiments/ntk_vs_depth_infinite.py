@@ -9,6 +9,7 @@ D_IN = 20  # input dim
 L_VALUES = np.linspace(2, 200, 10).astype(int)
 RANDOM_SEED = 42
 PATH_TO_PLOTS = "/home/janis/STG3A/deeperorwider/experiments/plots"
+PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data"
 
 # %%
 def generate_data(key, n_samples, n_features):
@@ -104,5 +105,12 @@ plt.savefig(PATH_TO_PLOTS + "/largest_eigenvalue_vs_L_infinite.png")
 print("Graphique de la k-ième valeur propre enregistré dans " + PATH_TO_PLOTS + "/largest_eigenvalue_vs_L_infinite.png")
 
 
-# we store as a npy file the eigenvalue 
+
+# we store the compute config as a title also
+# we store as a npy file the eigenvalue matrix
+np.save(PATH_TO_DATA + f"/eigenvalues_infinite_L={L_VALUES}_N={N}_D={D_IN}.npy", eigenvalues_per_L)
+print("Eigenvalues matrix saved in " + PATH_TO_DATA + f"/eigenvalues_infinite_L={L_VALUES}_N={N}_D={D_IN}.npy")
+
+# %%
+
 
