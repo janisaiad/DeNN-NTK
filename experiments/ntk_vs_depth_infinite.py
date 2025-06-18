@@ -52,9 +52,11 @@ fig, axes = plt.subplots(1, n_L, figsize=(5 * n_L, 4), sharey=True)
 fig.suptitle(f'Histogram of the mean eigenvalues of the NTK with the infinite width model')
 for i, L in enumerate(L_VALUES):
     ax = axes[i]
-    eigenvalues = eigenvalues_per_L[i].copy()  # Make a copy to avoid modifying original
-    eigenvalues = eigenvalues[eigenvalues != np.max(eigenvalues)]  # Remove max eigenvalue
-    ax.hist(eigenvalues, bins=100, density=True)  # Plot histogram without max eigenvalue to avoid scale issues
+    
+    # BE CAREFUL : we remove the largest eigenvalue to avoid the scale issues
+    eigenvalues = eigenvalues_per_L[i].copy()  
+    eigenvalues = eigenvalues[eigenvalues != np.max(eigenvalues)]
+    ax.hist(eigenvalues, bins=100, density=True)  # histogram without max eigenvalue to avoid scale issues
     ax.set_title(f"Profondeur L = {L}")
     ax.set_xlabel("Valeur propre")
     ax.set_yscale('log')
@@ -101,4 +103,6 @@ plt.legend()
 plt.savefig(PATH_TO_PLOTS + "/largest_eigenvalue_vs_L_infinite.png")
 print("Graphique de la k-ième valeur propre enregistré dans " + PATH_TO_PLOTS + "/largest_eigenvalue_vs_L_infinite.png")
 
+
+# we store as a npy file the eigenvalue 
 
