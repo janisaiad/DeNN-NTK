@@ -4,14 +4,14 @@ import jax.numpy as jnp
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-from model.finitewidth.kernel3_empirical import Kernel3Empirical
+from finitewidth.kernel3_empirical import Kernel3Empirical
 
 # %%
 # --- Configuration ---
 N = 8  # Number of data points (smaller due to computational cost)
 D_IN = 20  # Input dimension
-M = 256  # Network width
-L_VALUES = np.arange(2, 7)  # Network depths
+M = 100  # Network width
+L_VALUES = np.arange(2, 5)  # Network depths
 RANDOM_SEED = 42
 PATH_TO_PLOTS = "/home/janis/STG3A/deeperorwider/experiments/plots"
 PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data"
@@ -38,17 +38,20 @@ def generate_data(key, n_samples, n_features):
     return data / norm
 
 def init_network(key, L, d_in, m):
+    
     """Initialize network weights."""
+    # the std for weights is 1/sqrt(m) by default but we want sqrt(2/m)
     keys = jax.random.split(key, L + 1)
     weights = []
-    weights.append(jax.random.normal(keys[0], (m, d_in)))
+    weights.append(jax.random.normal(keys[0], (m, d_in)) * jnp.sqrt(2/d_in))
+    
     for i in range(1, L):
-        weights.append(jax.random.normal(keys[i], (m, m)))
-    weights.append(jax.random.normal(keys[L], (m,)))
+        weights.append(jax.random.normal(keys[i], (m, m)) * jnp.sqrt(2/m))
+    weights.append(jax.random.normal(keys[L], (m,)) * jnp.sqrt(2/m))
     return weights
 
 def compute_features_and_derivatives(weights, data):
-    """Perform a forward pass to get all feature maps and sigma derivatives."""
+    """we perform a forward pass to get all feature maps and sigma derivatives."""
     H = len(weights) - 1
     m = weights[0].shape[0]
 

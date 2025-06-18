@@ -316,45 +316,44 @@ K^{(3, x)}_{\alpha\beta\gamma, \ell} &= \langle G^{(\ell)}_\alpha, G^{(\ell)}_\b
 \end{align}
 The terms $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(p)}_\mu$ are expanded using the recursive rules above, yielding a full, albeit lengthy, expression. This hierarchical structure is characteristic of the NTH framework.
 
-\newpage
-\section{Spectral Analysis and Applications}
 
-Having established the mathematical foundation for first-order corrections, we now turn to their spectral properties and practical implications.
+\section{Extended Formula for $K^{(3)}$}
 
-\begin{theorem}[Spectral decomposition of the NTK]\label{thm:spectral}
-For a finite-width network $N$, the smallest eigenvalue of the NTK admits the following decomposition:
-\[ \lambda_{\min}(K_\theta) \geq al + \frac{b}{N} + o(\frac{1}{N}) \]
-where:
+To obtain a complete expression for $K^{(3)}_{\alpha\beta\gamma}$, we expand the terms $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$ using their recursive definitions. We assume a ReLU activation function, so $\sigma''=0$ almost everywhere.
+
+\subsection{Development of Recursive Terms}
+
+The term $\delta_\gamma x^{(p)}_\mu$, which represents the variation of activation $x^{(p)}_\mu$ along the gradient of output $f_t(x_\gamma)$, can be expanded as a sum over previous layers:
+\begin{equation}
+\delta_\gamma x^{(p)}_\mu = \sum_{j=1}^{p} \left( \prod_{k=j+1}^{p} \frac{\sigma'_{k}(x_\mu) W^{(k)}}{\sqrt{m}} \right) \frac{\sigma'_{j}(x_\mu)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\mu \rangle G^{(j)}_\gamma
+\end{equation}
+where the product $\prod_{k=j+1}^{p}$ is an ordered product of Jacobian matrices.
+
+Similarly, the term $\delta_\gamma G^{(\ell)}_\mu$, the variation of the backpropagated gradient vector, decomposes into a sum over subsequent layers:
+\begin{align}
+\delta_\gamma G^{(\ell)}_\mu = & \sum_{p=\ell}^{H-1} \left( \prod_{k=\ell}^{p} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\mu)}{\sqrt{m}} \right) \frac{1}{m} G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\mu \rangle \\
+& + \left( \prod_{k=\ell}^{H-1} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\mu)}{\sqrt{m}} \right) \frac{x^{(H)}_\gamma}{\sqrt{m}}
+\end{align}
+The first term captures the effect of varying weights $W^{(\ell+1)}, \dots, W^{(H)}$, and the second term that of varying the output vector $a_t$.
+
+\subsection{Complete Expression}
+
+Substituting these expressions into equations (18), (19) and (20) yields the complete formula for $K^{(3)}_{\alpha\beta\gamma}$. It is a sum of $2H^2 + 2H$ terms.
+\begin{align}
+K^{(3)}_{\alpha\beta\gamma} = & \sum_{j=1}^{H} \left( \langle \mathcal{J}^{(H \to j)}_{\alpha} \mathcal{T}^{(j)}_{\gamma\alpha}, x^{(H)}_\beta \rangle + \langle x^{(H)}_\alpha, \mathcal{J}^{(H \to j)}_{\beta} \mathcal{T}^{(j)}_{\gamma\beta} \rangle \right) \nonumber \\
+& + \sum_{\ell=1}^{H} \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \sum_{p=\ell}^{H-1} \left( \langle \mathcal{B}^{(\ell \to p)}_{\alpha} \mathcal{U}^{(p)}_{\gamma\alpha}, G^{(\ell)}_\beta \rangle + \langle G^{(\ell)}_\alpha, \mathcal{B}^{(\ell \to p)}_{\beta} \mathcal{U}^{(p)}_{\gamma\beta} \rangle \right) \nonumber \\
+& + \sum_{\ell=1}^{H} \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \left( \langle \mathcal{B}^{(\ell \to H-1)}_{\alpha} \frac{x^{(H)}_\gamma}{\sqrt{m}}, G^{(\ell)}_\beta \rangle + \langle G^{(\ell)}_\alpha, \mathcal{B}^{(\ell \to H-1)}_{\beta} \frac{x^{(H)}_\gamma}{\sqrt{m}} \rangle \right) \nonumber \\
+& + \sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \sum_{j=1}^{\ell-1} \left( \langle \mathcal{J}^{(\ell-1 \to j)}_{\alpha} \mathcal{T}^{(j)}_{\gamma\alpha}, x^{(\ell-1)}_\beta \rangle + \langle x^{(\ell-1)}_\alpha, \mathcal{J}^{(\ell-1 \to j)}_{\beta} \mathcal{T}^{(j)}_{\gamma\beta} \rangle \right)
+\end{align}
+where we have defined for readability:
 \begin{itemize}
-\item $al$ is the asymptotic term corresponding to the infinite-width NTK ($N \to \infty$)
-\item $\frac{b}{N}$ is the first-order correction arising from terms $O_3$ and $O_4$
-\item $o(\frac{1}{N})$ represents negligible higher-order terms
+    \item Forward propagators (Jacobian): $\mathcal{J}^{(p \to j)}_{\mu} = \prod_{k=j+1}^{p} \frac{\sigma'_{k}(x_\mu) W^{(k)}}{\sqrt{m}}$
+    \item Forward source terms: $\mathcal{T}^{(j)}_{\gamma\mu} = \frac{\sigma'_{j}(x_\mu)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\mu \rangle G^{(j)}_\gamma$
+    \item Backward propagators: $\mathcal{B}^{(\ell \to p)}_{\mu} = \prod_{k=\ell}^{p} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\mu)}{\sqrt{m}}$
+    \item Backward source terms: $\mathcal{U}^{(p)}_{\gamma\mu} = \frac{1}{m} G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\mu \rangle$
 \end{itemize}
-\end{theorem}
+This formula, while complex, represents the complete hierarchical structure of the first-order correction to the NTK dynamics.
 
-\begin{proof}
-This decomposition follows from the analysis of corrections $O_3$ and $O_4$:
-
-The term $al$ comes from the infinite-width NTK formula. It grows linearly with the network depth $l$ because each layer contributes additively to the minimal eigenvalue.
-
-The corrections $O_3$ and $O_4$ are of order $\frac{1}{N}$ because they arise from finite fluctuations in the network width. More precisely:
-\[ \Vert O_3 \Vert = \mathcal{O}(\frac{1}{N}) \quad \text{and} \quad \Vert O_4 \Vert = \mathcal{O}(\frac{1}{N}) \]
-
-The sum of these corrections gives the term $\frac{b}{N}$, where $b$ is a constant that depends on the network architecture and the ReLU activation.
-
-This decomposition is fundamental because it shows that:
-\begin{enumerate}
-\item The asymptotic behavior of the NTK ($al$) dominates for wide networks
-\item The $\frac{1}{N}$ corrections become significant for networks of moderate width
-\item The positivity of $\lambda_{\min}(K_\theta)$ is guaranteed for sufficiently large $N$
-\end{enumerate}
-
-This positivity guarantee is crucial as it ensures the convergence of gradient descent learning in the finite-width regime.
-\end{proof}
-
-\subsection{Implications for Network Training}
-
-\Cref{thm:spectral} has important implications for understanding when gradient descent converges in finite-width networks. The decomposition shows that as long as $N$ is sufficiently large relative to the depth $l$, the NTK remains positive definite, ensuring convergence to a global minimum.
 
 \newpage
 
