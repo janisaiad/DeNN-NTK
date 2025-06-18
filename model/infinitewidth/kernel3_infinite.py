@@ -3,13 +3,13 @@ import numpy as np
 class Kernel3Infinite:
     def __init__(self, n_layers: int, n_outputs: int, a: float = 1.0, b: float = 1):
         """
-        Initialise le modèle de largeur infinie.
+        we initialize the infinite width model.
 
         Args:
-            n_layers (int): Nombre de couches, l.
-            n_outputs (int): Dimension de la sortie, m_l.
-            a (float): Paramètre 'a' de la fonction d'activation (a,b)-ReLU.
-            b (float): Paramètre 'b' de la fonction d'activation (a,b)-ReLU.
+            n_layers (int): number of layers, l.
+            n_outputs (int): output dimension, m_l.
+            a (float): parameter 'a' of the (a,b)-ReLU activation function.
+            b (float): parameter 'b' of the (a,b)-ReLU activation function.
         """
         self.l = n_layers
         self.ml = n_outputs
