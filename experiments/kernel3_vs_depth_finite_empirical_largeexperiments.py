@@ -69,15 +69,15 @@ for i1, N in enumerate(N_VALUES):
     for i2, D_IN in enumerate(D_IN_VALUES):
         for i3, M in enumerate(M_VALUES):
             for i4, L in enumerate(L_VALUES):
-                complexity = i1 + i2 + i3 + i4  # we compute complexity score
+                complexity = 2*i1 + i2 + i3 + i4  # we compute complexity score, penalize a lot N
                 experiments.append((complexity, N, D_IN, M, L))
 
-experiments.sort()  # we sort by complexity score
+experiments.sort(key=lambda x: x[0])  # we sort by complexity score (1st coordinate)
 
 for complexity, N, D_IN, M, L in experiments:
     # if the npy file exists, we skip the computation
     filename = f"k3_analysis_N{N}_D{D_IN}_M{M}_L{L}.npy"
-    if not(os.path.exists(os.path.join(PATH_TO_DATA, filename))):
+    if not(os.path.isfile(os.path.join(PATH_TO_DATA, filename))): # we check if the file exists
             
         start_time = time.time()  # we start timing
         
