@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-from infinitewidth import InfiniteWidth
+from infinitewidth import InfiniteWidth # type: ignore
 
 # %%
 N = 100  # number of data points
 D_IN = 20  # input dim
-L_VALUES = np.linspace(2, 64, 10).astype(int)
+L_VALUES = np.linspace(2, 200, 10).astype(int)
 RANDOM_SEED = 42
 PATH_TO_PLOTS = "/home/janis/STG3A/deeperorwider/experiments/plots"
 
@@ -86,16 +86,11 @@ plt.savefig(PATH_TO_PLOTS + "/kth_eigenvalue_vs_L_infinite.png")
 print("Graphique de la k-ième valeur propre enregistré dans " + PATH_TO_PLOTS + "/kth_eigenvalue_vs_L_infinite.png")
 
 
-
+# %%
 plt.figure(figsize=(10, 6))
 plt.title(f"Eigenvalues of the NTK with the infinite width model as a function of the depth of the network")
-
-
-
 # plot the largest eigenvalue
 plt.plot(L_VALUES, eigenvalues_per_L[:, -1], 'o-', label=f'λ_max')
-
-
 plt.xlabel("Nombre de couches (L)")
 plt.ylabel("Valeur propre moyenne")
 plt.xticks(L_VALUES)
