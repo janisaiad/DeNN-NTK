@@ -66,6 +66,9 @@ class Kernel3Infinite:
             
         return norm_x1 * norm_x2 * k_sum
 
+
+
+
     def _kernel_3_entry(self, x1: np.ndarray, x2: np.ndarray, x3: np.ndarray) -> float:
         """
         computes one entry of the k3 kernel matrix.
