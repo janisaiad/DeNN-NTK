@@ -67,62 +67,69 @@ class Kernel3Infinite:
         return norm_x1 * norm_x2 * k_sum
 
     def _kernel_3_entry(self, x1: np.ndarray, x2: np.ndarray, x3: np.ndarray) -> float:
-        """Calcule une entrée de la matrice du noyau K3."""
-        norm_x1 = np.linalg.norm(x1)
-        norm_x2 = np.linalg.norm(x2)
-        norm_x3 = np.linalg.norm(x3)
-
-        if norm_x1 == 0 or norm_x2 == 0 or norm_x3 == 0:
-            return 0.0
-
-        rho12 = np.clip(np.dot(x1, x2) / (norm_x1 * norm_x2), -1.0, 1.0)
-        rho13 = np.clip(np.dot(x1, x3) / (norm_x1 * norm_x3), -1.0, 1.0)
-        rho23 = np.clip(np.dot(x2, x3) / (norm_x2 * norm_x3), -1.0, 1.0)
-
-        rhos12, rhos13, rhos23 = [rho12], [rho13], [rho23]
-        for _ in range(1, self.l):
-            rhos12.append(self._varrho(rhos12[-1]))
-            rhos13.append(self._varrho(rhos13[-1]))
-            rhos23.append(self._varrho(rhos23[-1]))
-
-        # Dérivées premières
-        rho_primes12 = [self._varrho_prime(rho) for rho in rhos12]
-        rho_primes13 = [self._varrho_prime(rho) for rho in rhos13]
-        rho_primes23 = [self._varrho_prime(rho) for rho in rhos23]
-
-        # Dérivées secondes
-        rho_double_primes12 = [self._varrho_double_prime(rho) for rho in rhos12]
+        """
+        computes one entry of the k3 kernel matrix.
+        this follows the recursive structure from the neural tangent hierarchy.
+        """
+        # norms of inputs
+        c1 = np.dot(x1, x1)
+        c2 = np.dot(x2, x2)
+        c3 = np.dot(x3, x3)
         
-        k3_sum = 0
-        for k in range(1, self.l + 1):
-            prod_primes_12 = np.prod(rho_primes12[k-1:self.l-1])
-            prod_primes_13 = np.prod(rho_primes13[k-1:self.l-1])
-            prod_primes_23 = np.prod(rho_primes23[k-1:self.l-1])
+        # initial covariances (layer 0)
+        c12 = np.dot(x1, x2)
+        c13 = np.dot(x1, x3)
+        c23 = np.dot(x2, x3)
 
-            # Terme de base de K3, dérivé de K2
-            # La formule exacte est complexe, ceci est une approximation structurelle
-            # basée sur la différentiation de la formule K2
+        # initial kernels (layer 0 is just input, so kernel is 0)
+        k12, k13, k23, k33 = 0.0, 0.0, 0.0, 0.0
+        k3_123 = 0.0
+        
+        # iterate through layers
+        for _ in range(self.l):
+            # cosines from previous layer's covariances
+            rho12 = c12 / np.sqrt(c1 * c2)
+            rho13 = c13 / np.sqrt(c1 * c3)
+            rho23 = c23 / np.sqrt(c2 * c3)
             
-            # Contribution de la différentiation de rhos[k-1]
-            term1 = rho_primes12[k-1] * rhos13[k-1] * prod_primes_12 * prod_primes_13
+            # map derivatives
+            dp12 = self._varrho_prime(rho12)
+            dp13 = self._varrho_prime(rho13)
+            dp23 = self._varrho_prime(rho23)
+            d2p12 = self._varrho_double_prime(rho12)
             
-            # Contribution de la différentiation de prod(rho_primes)
-            sum_over_j = 0
-            for j in range(k - 1, self.l - 1):
-                # d/d_theta(rho_primes[j])
-                term_j = rho_double_primes12[j] * rho_primes13[j]
-                
-                prod_without_j = np.prod([p for idx, p in enumerate(rho_primes12[k-1:self.l-1]) if idx != j-(k-1)])
-                sum_over_j += term_j * prod_without_j
+            # update k3
+            # this is a direct implementation of the recursive formula for k3
+            # derived from differentiating the k2 recursion
             
-            term2 = rhos12[k-1] * rhos23[k-1] * sum_over_j * prod_primes_23
+            # derivative of c12 w.r.t theta, contracted with grad f(x3)
+            dc12_d3 = 0.5 * (k13 * dp13 / c1 * c12 + k23 * dp23 / c2 * c12 - k33 * dp13 * dp23 / c3 * c12 + k3_123)
             
-            k3_sum += term1 + term2
+            # update k3_123 for the next layer
+            k3_123 = k3_123 * dp12 * dp13 * dp23 + \
+                     k12 * d2p12 * dc12_d3 + \
+                     c12 * (d2p12 * dp13 * dp23) * k3_123
 
-        # La symétrie complète devrait être assurée en permutant x1, x2, x3
-        # Pour simplifier, nous ne montrons que la différentiation par rapport aux paramètres
-        # qui affectent le chemin x1-x2 et contracté avec le gradient de f(x3)
-        return norm_x1 * norm_x2 * norm_x3 * k3_sum
+            # update covariances for next layer
+            c1_new = c1 * self._varrho(1.0)
+            c2_new = c2 * self._varrho(1.0)
+            c3_new = c3 * self._varrho(1.0)
+            c12_new = np.sqrt(c1 * c2) * self._varrho(rho12)
+            c13_new = np.sqrt(c1 * c3) * self._varrho(rho13)
+            c23_new = np.sqrt(c2 * c3) * self._varrho(rho23)
+            
+            c1, c2, c3 = c1_new, c2_new, c3_new
+            c12, c13, c23 = c12_new, c13_new, c23_new
+            
+            # update k2 for next layer
+            k12_new = k12 * dp12 + c12
+            k13_new = k13 * dp13 + c13
+            k23_new = k23 * dp23 + c23
+            k33_new = k33 * 1.0 + c3 # dp for rho=1 is 1
+            
+            k12, k13, k23, k33 = k12_new, k13_new, k23_new, k33_new
+
+        return k3_123
 
     def kernel_matrix(self, X: np.ndarray) -> np.ndarray:
         """

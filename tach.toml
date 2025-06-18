@@ -1,0 +1,35 @@
+interfaces = []
+exclude = [
+    "**/*__pycache__",
+    "**/*egg-info",
+    "**/docs",
+    "**/tests",
+    "**/venv",
+]
+source_roots = [
+    ".",
+]
+
+[[modules ]]
+path = "model.finitewidth"
+depends_on = ["model.finitewidth.finitewidth", "model.finitewidth.kernel3_empirical"]
+
+[[modules ]]
+path = "model.infinitewidth"
+depends_on = ["model.infinitewidth.infinitewidth", "model.infinitewidth.kernel3_infinite"]
+
+[[modules ]]
+path = "model.infinitewidth.infinitewidth"
+depends_on = []
+
+[[modules ]]
+path = "model.finitewidth.finitewidth"
+depends_on = []
+
+[[modules ]]
+path = "model.infinitewidth.kernel3_infinite"
+depends_on = []
+
+[[modules ]]
+path = "model.finitewidth.kernel3_empirical"
+depends_on = []

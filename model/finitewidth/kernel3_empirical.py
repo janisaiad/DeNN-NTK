@@ -6,7 +6,7 @@ from typing import List, Dict, Any
 ## we will use a special parabola arch to compute the kernel to maximize the concentration I guess
 
 
-class FiniteWidthKernel:
+class Kernel3Empirical:
     """
     Computes finite width kernels K_2 (NTK) and K_3 for a fully-connected neural network.
     """
