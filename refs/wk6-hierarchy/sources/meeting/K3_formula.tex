@@ -181,6 +181,29 @@ where we have defined for readability:
 \end{itemize}
 This formula, while complex, represents the complete hierarchical structure of the first-order correction to the NTK dynamics.
 
+\section{Fully Expanded Non-Recursive Formula for $K^{(3)}$}
+
+Here, we present the complete, non-recursive expression for $K^{(3)}_{\alpha\beta\gamma}$. This formula is obtained by substituting the expanded expressions for the directional derivatives $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$ into the decomposed formula for $K^{(3)}$. This makes the dependency on the network parameters (weights $W^{(k)}$ and output vectors $a_t$) and activations at each layer fully explicit. We continue to assume a ReLU activation function, which sets second derivatives of $\sigma$ to zero almost everywhere.
+
+The final expression is a sum of four main components, corresponding to the differentiation of the output layer activations, the backward vectors, and the hidden layer activations:
+
+\begin{align}
+K^{(3)}_{\alpha\beta\gamma} = & \nonumber \\
+% K^(3,out) term
+& \sum_{j=1}^{H} \Biggl( \left\langle \left( \prod_{k=j+1}^{H} \frac{\sigma'_{k}(x_\alpha) W^{(k)}}{\sqrt{m}} \right) \frac{\sigma'_{j}(x_\alpha)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\alpha \rangle G^{(j)}_\gamma, x^{(H)}_\beta \right\rangle \nonumber \\
+& \quad + \left\langle x^{(H)}_\alpha, \left( \prod_{k=j+1}^{H} \frac{\sigma'_{k}(x_\beta) W^{(k)}}{\sqrt{m}} \right) \frac{\sigma'_{j}(x_\beta)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\beta \rangle G^{(j)}_\gamma \right\rangle \Biggr) \nonumber \\
+% K^(3,G) term
+& + \sum_{\ell=1}^{H} \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \Biggl[ \nonumber \\
+& \quad \sum_{p=\ell}^{H-1} \Biggl( \left\langle \left( \prod_{k=\ell}^{p} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\alpha)}{\sqrt{m}} \right) \frac{G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\alpha \rangle}{m}, G^{(\ell)}_\beta \right\rangle \nonumber \\
+& \qquad + \left\langle G^{(\ell)}_\alpha, \left( \prod_{k=\ell}^{p} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\beta)}{\sqrt{m}} \right) \frac{G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\beta \rangle}{m} \right\rangle \Biggr) \nonumber \\
+& \quad + \left\langle \left( \prod_{k=\ell}^{H-1} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\alpha)}{\sqrt{m}} \right) \frac{x^{(H)}_\gamma}{\sqrt{m}}, G^{(\ell)}_\beta \right\rangle \nonumber \\
+& \quad + \left\langle G^{(\ell)}_\alpha, \left( \prod_{k=\ell}^{H-1} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\beta)}{\sqrt{m}} \right) \frac{x^{(H)}_\gamma}{\sqrt{m}} \right\rangle \Biggr] \nonumber \\
+% K^(3,x) term
+& + \sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \sum_{j=1}^{\ell-1} \Biggl( \left\langle \left( \prod_{k=j+1}^{\ell-1} \frac{\sigma'_{k}(x_\alpha) W^{(k)}}{\sqrt{m}} \right) \frac{\sigma'_{j}(x_\alpha)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\alpha \rangle G^{(j)}_\gamma, x^{(\ell-1)}_\beta \right\rangle \nonumber \\
+& \quad + \left\langle x^{(\ell-1)}_\alpha, \left( \prod_{k=j+1}^{\ell-1} \frac{\sigma'_{k}(x_\beta) W^{(k)}}{\sqrt{m}} \right) \frac{\sigma'_{j}(x_\beta)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\beta \rangle G^{(j)}_\gamma \right\rangle \Biggr)
+\end{align}
+In this expression, the products $\prod$ represent ordered matrix products. The empty product $\prod_{k=p+1}^p$ is defined as the identity matrix. This detailed formula lays bare the intricate dependencies of the NTK dynamics on the network's architecture and parameters at finite width.
+
 
 \newpage
 
