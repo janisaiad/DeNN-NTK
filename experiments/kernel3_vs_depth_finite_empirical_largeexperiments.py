@@ -12,7 +12,7 @@ M_VALUES = [10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800,900,1000,
 L_VALUES = np.arange(2, 20, 2)  # we test network depths
 RANDOM_SEED = 42
 
-PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data/largespherical"
+PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data/large"
 os.makedirs(PATH_TO_DATA, exist_ok=True)
 
 # --- Activation Function ---
