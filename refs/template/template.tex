@@ -1,0 +1,186 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{bm}
+\usepackage{enumerate}
+\usepackage{tikz}
+\usepackage{subcaption}
+
+\usetheme{Antibes}
+\usecolortheme{default}
+
+\title{Presentation Title}
+\subtitle{Subtitle Here}
+\author{Author Name}
+\institute{Institute Name}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+\tableofcontents
+\end{frame}
+
+% Single image slide template
+\begin{frame}{Single Image Example}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{image1}
+\caption{Caption for single image}
+\end{figure}
+\end{frame}
+
+% Two images side by side template
+\begin{frame}{Two Images Example}
+\begin{figure}[h]
+\centering
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{image1}
+\caption{First image}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{image2}
+\caption{Second image}
+\end{subfigure}
+\end{figure}
+\end{frame}
+
+% Three images template
+\begin{frame}{Three Images Example}
+\begin{figure}[h]
+\centering
+\begin{subfigure}{0.3\textwidth}
+\includegraphics[width=\textwidth]{image1}
+\caption{First image}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.3\textwidth}
+\includegraphics[width=\textwidth]{image2}
+\caption{Second image}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.3\textwidth}
+\includegraphics[width=\textwidth]{image3}
+\caption{Third image}
+\end{subfigure}
+\end{figure}
+\end{frame}
+
+% Four images template
+\begin{frame}{Four Images Example}
+\begin{figure}[h]
+\centering
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{image1}
+\caption{First image}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{image2}
+\caption{Second image}
+\end{subfigure}
+\vspace{0.5cm}
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{image3}
+\caption{Third image}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{image4}
+\caption{Fourth image}
+\end{subfigure}
+\end{figure}
+\end{frame}
+
+% Two images with text template
+\begin{frame}{Two Images with Text}
+\begin{columns}
+\column{0.5\textwidth}
+\begin{figure}
+\includegraphics[width=\textwidth]{image1}
+\caption{First image}
+\end{figure}
+\column{0.5\textwidth}
+\textbf{Key points:}
+\begin{itemize}
+\item Point 1
+\item Point 2
+\item Point 3
+\end{itemize}
+\end{columns}
+\end{frame}
+
+% Theorem template
+\begin{frame}{Theorem Example}
+\begin{theorem}[Main Theorem]
+Statement of the main theorem goes here.
+\end{theorem}
+
+\begin{proof}
+\textbf{Proof outline:}
+\begin{itemize}
+\item Step 1
+\item Step 2
+\item Step 3
+\end{itemize}
+\end{proof}
+\end{frame}
+
+% Lemma template
+\begin{frame}{Lemma Example}
+\begin{lemma}[Supporting Lemma]
+Statement of the lemma goes here.
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+\textbf{Key ideas of the proof:}
+\begin{itemize}
+\item Idea 1
+\item Idea 2
+\end{itemize}
+\end{proof}
+\end{frame}
+
+% Remarks and findings template
+\begin{frame}{Key Remarks and Findings}
+\begin{itemize}
+\item \textbf{Remark 1}
+    \begin{itemize}
+    \item Supporting detail
+    \item Additional information
+    \end{itemize}
+\item \textbf{Finding 1}
+    \begin{itemize}
+    \item Evidence
+    \item Implications
+    \end{itemize}
+\item \textbf{Observation 1}
+    \begin{itemize}
+    \item Context
+    \item Significance
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusion}
+\textbf{Summary:}
+\begin{itemize}
+\item Summary point 1
+\item Summary point 2
+\item Future directions
+\end{itemize}
+\end{frame}
+
+\end{document}

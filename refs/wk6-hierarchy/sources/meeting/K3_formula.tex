@@ -208,6 +208,37 @@ In this expression, the products $\prod$ represent ordered matrix products. The 
 \newpage
 
 
+\section{Recursive Formula for $K^{(3)}$ as a Function of Depth $H$}
+
+To analyze the influence of network depth, it is useful to establish a recursive relation for $K^{(3)}$. Let $K^{(3, H)}_{\alpha\beta\gamma}$ denote the kernel for a network with $H$ layers. The goal is to express $K^{(3, H+1)}_{\alpha\beta\gamma}$ in terms of quantities computed for a network with $H$ layers.
+
+The starting point is the decomposition of $K^{(2, H+1)}_{\alpha\beta}$, the NTK for a network with $H+1$ layers:
+\begin{equation}
+K^{(2, H+1)}_{\alpha\beta} = \underbrace{\left( \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \sum_{\ell=1}^{H} \langle G'^{(\ell)}_\alpha, G'^{(\ell)}_\beta \rangle \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \right)}_{K^{(2,H)}_{\alpha\beta} \text{ with } a'_t} + T_{H+1} + C_{H+1}
+\end{equation}
+where:
+\begin{itemize}
+    \item $x^{(H+1)}_\mu = \frac{1}{\sqrt{m}}\sigma(W^{(H+1)} x^{(H)}_\mu)$.
+    \item $a'_t = \frac{1}{\sqrt{m}} (W^{(H+1)})^T \sigma'_{H+1} a_t$ is an "effective output vector" that replaces $a_t$ in the computations of $G^{(\ell)}$ for $\ell \le H$.
+    \item $T_{H+1} = \langle G^{(H+1)}_\alpha, G^{(H+1)}_\beta \rangle \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle$ is the term from the new layer $H+1$.
+    \item $C_{H+1} = \langle x^{(H+1)}_\alpha, x^{(H+1)}_\beta \rangle - \langle a'_t, a'_t \rangle \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle$ is a correction term.
+\end{itemize}
+The vectors $G'^{(\ell)}$ are the backpropagated gradients in a network with $H$ layers but with $a'_t$ as output weights, while $G^{(H+1)}$ is the gradient for layer $H+1$.
+
+Applying the directional derivative operator $\delta_\gamma(\cdot) = \langle \nabla_\theta (\cdot), \nabla_\theta f_t(x_\gamma) \rangle$, we obtain the recursion for $K^{(3)}$:
+\begin{equation}
+K^{(3, H+1)}_{\alpha\beta\gamma} = \delta_\gamma \left(K^{(2,H)}_{\alpha\beta, a'_t} \right) + \delta_\gamma(T_{H+1}) + \delta_\gamma(C_{H+1})
+\end{equation}
+The term $\delta_\gamma \left(K^{(2,H)}_{\alpha\beta, a'_t} \right)$ is analogous to $K^{(3,H)}_{\alpha\beta\gamma}$, but with additional dependencies through $a'_t$. The other terms expand as follows:
+\begin{align}
+\delta_\gamma(T_{H+1}) &= \langle \delta_\gamma G^{(H+1)}_\alpha, G^{(H+1)}_\beta \rangle \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \dots \\
+\delta_\gamma(C_{H+1}) &= \langle \delta_\gamma x^{(H+1)}_\alpha, x^{(H+1)}_\beta \rangle - \langle \delta_\gamma a'_t, a'_t \rangle \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \dots
+\end{align}
+This decomposition allows us to separate the effect of adding a layer by isolating terms specific to the new layer $(T_{H+1}, C_{H+1})$ and the modification of previous layer terms through $a'_t$.
+
+\newpage
+
+
 \bibliographystyle{plain}
 \bibliography{references}
 

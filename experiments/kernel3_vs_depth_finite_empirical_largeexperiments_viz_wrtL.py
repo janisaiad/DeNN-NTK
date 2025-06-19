@@ -117,3 +117,8 @@ print("Analyzing input dimension (D) scaling for each configuration...")
 plot_config_scaling(data, 'D_IN', ['N', 'L', 'M'])
 
 # %%
+# Plot scaling with respect to N for each (D,L,M) configuration
+print("Analyzing number of samples (N) scaling for each configuration...")
+plot_config_scaling(data, 'N', ['D_IN', 'L', 'M'])
+
+# %%
