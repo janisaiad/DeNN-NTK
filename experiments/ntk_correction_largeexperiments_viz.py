@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 import os
 import seaborn as sns
 from scipy.stats import linregress
+from sklearn.linear_model import LinearRegression
 
 # %%
 PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data/large_ntk_corrections"
@@ -127,62 +128,97 @@ N_slopes = plot_config_scaling(data, 'N', ['D_IN', 'L', 'M'])
 # Plot all points vs L in a single plot
 print("Plotting all points vs L...")
 plt.figure(figsize=(10, 6))
-L_values = [d['L'] for d in data]
-spectral_radii = [d['mean_spectral_radius'] for d in data]
-plt.scatter(L_values, spectral_radii, alpha=0.5)
+
+# Create a unique color for each configuration
+configs = [(d['N'], d['D_IN'], d['M']) for d in data]
+unique_configs = list(set(configs))
+colors = plt.cm.rainbow(np.linspace(0, 1, len(unique_configs)))
+config_to_color = dict(zip(unique_configs, colors))
+
+for config in unique_configs:
+    mask = [(d['N'], d['D_IN'], d['M']) == config for d in data]
+    L_values_config = [d['L'] for d, m in zip(data, mask) if m]
+    spectral_radii_config = [d['mean_spectral_radius'] for d, m in zip(data, mask) if m]
+    plt.scatter(L_values_config, spectral_radii_config, 
+               color=config_to_color[config], alpha=0.5,
+               label=f'N={config[0]}, D={config[1]}, M={config[2]}')
+
 plt.xlabel('L')
 plt.ylabel('Spectral Radius')
 plt.xscale('log')
 plt.yscale('log')
 plt.grid(True)
 plt.title('All Spectral Radii vs Network Depth (L)')
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
 plt.show()
 
 # %%
-# Plot all points vs D_IN in a single plot
+# Plot all points vs D_IN in a single plot with same coloring scheme
 print("Plotting all points vs D_IN...")
 plt.figure(figsize=(10, 6))
-D_values = [d['D_IN'] for d in data]
-spectral_radii = [d['mean_spectral_radius'] for d in data]
-plt.scatter(D_values, spectral_radii, alpha=0.5)
+
+for config in unique_configs:
+    mask = [(d['N'], d['D_IN'], d['M']) == config for d in data]
+    D_values_config = [d['D_IN'] for d, m in zip(data, mask) if m]
+    spectral_radii_config = [d['mean_spectral_radius'] for d, m in zip(data, mask) if m]
+    plt.scatter(D_values_config, spectral_radii_config, 
+               color=config_to_color[config], alpha=0.5,
+               label=f'N={config[0]}, D={config[1]}, M={config[2]}')
+
 plt.xlabel('D_IN')
 plt.ylabel('Spectral Radius')
 plt.xscale('log')
 plt.yscale('log')
 plt.grid(True)
 plt.title('All Spectral Radii vs Input Dimension (D_IN)')
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
 plt.show()
 
 # %%
-# Plot all points vs N in a single plot
+# Plot all points vs N in a single plot with same coloring scheme
 print("Plotting all points vs N...")
 plt.figure(figsize=(10, 6))
-N_values = [d['N'] for d in data]
-spectral_radii = [d['mean_spectral_radius'] for d in data]
-plt.scatter(N_values, spectral_radii, alpha=0.5)
+
+for config in unique_configs:
+    mask = [(d['N'], d['D_IN'], d['M']) == config for d in data]
+    N_values_config = [d['N'] for d, m in zip(data, mask) if m]
+    spectral_radii_config = [d['mean_spectral_radius'] for d, m in zip(data, mask) if m]
+    plt.scatter(N_values_config, spectral_radii_config, 
+               color=config_to_color[config], alpha=0.5,
+               label=f'N={config[0]}, D={config[1]}, M={config[2]}')
+
 plt.xlabel('N')
 plt.ylabel('Spectral Radius')
 plt.xscale('log')
 plt.yscale('log')
 plt.grid(True)
 plt.title('All Spectral Radii vs Number of Samples (N)')
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
 plt.show()
 
-# Print all slopes
-print("\nAll calculated slopes:")
-print("\nL slopes:")
-for config, slope, r2, points in L_slopes:
-    config_str = f"N={config[0]}, D_IN={config[1]}, M={config[2]}"
-    print(f"{config_str} | slope={slope:.3f}, R^2={r2:.3f}, points={points}")
+# %%
+# Perform multivariate linear regression in log space
+print("\nMultivariate Linear Regression Analysis in Log Space:")
+X = np.array([[np.log(d['L']), np.log(d['D_IN']), np.log(d['N']), np.log(d['M'])] for d in data])
+y = np.array([np.log(d['mean_spectral_radius']) for d in data])
 
-print("\nD_IN slopes:")
-for config, slope, r2, points in D_slopes:
-    config_str = f"N={config[0]}, L={config[1]}, M={config[2]}"
-    print(f"{config_str} | slope={slope:.3f}, R^2={r2:.3f}, points={points}")
+reg = LinearRegression().fit(X, y)
 
-print("\nN slopes:")
-for config, slope, r2, points in N_slopes:
-    config_str = f"D_IN={config[0]}, L={config[1]}, M={config[2]}"
-    print(f"{config_str} | slope={slope:.3f}, R^2={r2:.3f}, points={points}")
+print("\nRegression coefficients:")
+print(f"L coefficient: {reg.coef_[0]:.3f}")
+print(f"D_IN coefficient: {reg.coef_[1]:.3f}")
+print(f"N coefficient: {reg.coef_[2]:.3f}")
+print(f"M coefficient: {reg.coef_[3]:.3f}")
+print(f"Intercept: {reg.intercept_:.3f}")
+print(f"R² score: {reg.score(X, y):.3f}")
+
+# The model is: log(spectral_radius) = a*log(L) + b*log(D_IN) + c*log(N) + d*log(M) + intercept
+# Therefore: spectral_radius ∝ L^a * D_IN^b * N^c * M^d
+
+print("\nThis means the spectral radius scales approximately as:")
+print(f"spectral_radius ∝ L^{reg.coef_[0]:.3f} * D_IN^{reg.coef_[1]:.3f} * N^{reg.coef_[2]:.3f} * M^{reg.coef_[3]:.3f}")
 
 # %%

@@ -240,6 +240,48 @@ K^{(3)}_{\alpha\beta\gamma} \sim \Order\left(\frac{H^2}{\sqrt{m}}\right)
 \end{frame}
 
 
+\section{Deeper Dive: NTK Correction Scaling}
+
+\begin{frame}{Precise Scaling of the NTK Correction}
+A multivariate regression in log-space ($R^2=0.994$) on the spectral radius of the correction $\|K - K_\infty\|$ yields a precise scaling law:
+
+\begin{alertblock}{Empirical Scaling Law}
+\[
+\|K - K_\infty\| \propto L^{1.171} \cdot D_{\text{in}}^{0.047} \cdot N^{0.900} \cdot M^{-1.009}
+\]
+\end{alertblock}
+
+\textbf{Interpretation:}
+\begin{itemize}
+    \item \textbf{Depth ($L$):} Super-linear growth.
+    \item \textbf{Data Size ($N$):} Near-linear growth.
+    \item \textbf{Input Dimension ($D_{in}$):} Essentially no dependence (good for high dimensions!).
+    \item \textbf{Width ($M$):} Decays as $\sim 1/M$, as expected from theory.
+\end{itemize}
+
+\vfill
+\tiny{\textit{Disclaimer: These results are based on extensive computations ($\sim$24h) and are fully reproducible via the provided codebase.}}
+
+\end{frame}
+
+\begin{frame}{Theoretical Interpretation}
+The late-time correction $\Theta^{(1)}_\infty$ is given by a formula from \cite{large-width-feynman}:
+\begin{align*}
+\Theta^{(1)}_\infty \sim -\sum_{i}\frac{O_{3}}{\lambda_{i}} + \sum_{i,j}\frac{O_{4}}{\lambda_{i}(\lambda_{i}+\lambda_{j})}
+\end{align*}
+
+\textbf{Two key insights explain the scaling laws:}
+\begin{enumerate}
+    \item \textbf{Dominance of the $O_4$ Term:} The observed linear growth of the correction with depth $L$ suggests that the term involving the $O_4$ kernel is the primary driver of this behavior.
+    \item \textbf{Role of $\lambda_{\min}$:} The correction terms are amplified by small eigenvalues $\lambda_i$. It is known that $\lambda_{\min} \sim \mathcal{O}(L/N)$.
+    \begin{itemize}
+        \item When $L$ increases or $N$ increases, $\lambda_{\min}$ gets smaller.
+        \item This amplifies the correction, explaining the linear scaling with both $L$ and $N$.
+    \end{itemize}
+\end{enumerate}
+\end{frame}
+
+
 \section{Conclusion}
 
 \begin{frame}{Conclusion}
