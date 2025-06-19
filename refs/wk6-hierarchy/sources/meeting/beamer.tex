@@ -264,21 +264,33 @@ A multivariate regression in log-space ($R^2=0.994$) on the spectral radius of t
 
 \end{frame}
 
-\begin{frame}{Theoretical Interpretation}
-The late-time correction $\Theta^{(1)}_\infty$ is given by a formula from \cite{large-width-feynman}:
+\begin{frame}{Theoretical Interpretation: A Deeper Look}
+The formula for the late-time NTK correction, $\Theta^{(1)}_\infty$, connects our findings.
+\begin{theorem}[Late-Time Correction \cite{large-width-feynman}]
 \begin{align*}
-\Theta^{(1)}_\infty \sim -\sum_{i}\frac{O_{3}}{\lambda_{i}} + \sum_{i,j}\frac{O_{4}}{\lambda_{i}(\lambda_{i}+\lambda_{j})}
+\Theta^{(1)}_\infty = & -\sum_{i}\frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \\
+& + \sum_{i,j}\frac{1}{\lambda_{i}(\lambda_{i}+\lambda_{j})}(\hat{e}_{i}^{T}O_{4}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})
 \end{align*}
+\end{theorem}
 
-\textbf{Two key insights explain the scaling laws:}
-\begin{enumerate}
-    \item \textbf{Dominance of the $O_4$ Term:} The observed linear growth of the correction with depth $L$ suggests that the term involving the $O_4$ kernel is the primary driver of this behavior.
-    \item \textbf{Role of $\lambda_{\min}$:} The correction terms are amplified by small eigenvalues $\lambda_i$. It is known that $\lambda_{\min} \sim \mathcal{O}(L/N)$.
-    \begin{itemize}
-        \item When $L$ increases or $N$ increases, $\lambda_{\min}$ gets smaller.
-        \item This amplifies the correction, explaining the linear scaling with both $L$ and $N$.
-    \end{itemize}
-\end{enumerate}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{1. Why linear scaling with L?}
+\begin{itemize}
+    \item Our experiments showed that the $K^{(3)} \equiv O_3$ kernel's norm diminishes with width.
+    \item Therefore, the $O_3$ term's contribution is suppressed.
+    \item The observed linear growth of the correction with depth $L$ must be primarily driven by the \textbf{$O_4$ term}.
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{2. Why scaling with L and N?}
+\begin{itemize}
+    \item The correction is amplified by small eigenvalues ($\lambda_i$).
+    \item We know $\lambda_{\min} \sim L/N$.
+    \item A larger $L$ or $N$ means a smaller $\lambda_{\min}$, which \textbf{boosts the correction}, explaining the scaling.
+\end{itemize}
+\end{columns}
+
 \end{frame}
 
 

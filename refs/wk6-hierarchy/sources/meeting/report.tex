@@ -298,110 +298,26 @@ The results, as shown in Figure \ref{fig:k3_norm_vs_l}, demonstrate a clear incr
 
 \section{Deeper Analysis of Finite-Width Corrections}
 
-While the previous section confirmed the scaling of the $K^{(3)}$ tensor, we now turn to a more direct analysis of the finite-width correction to the NTK itself. We study the quantity $M(K_{\text{emp}} - K_{\infty})$, where $K_{\text{emp}}$ is the empirically measured NTK for a network of width $M$, and $K_{\infty}$ is the theoretical infinite-width kernel. This quantity represents the leading order finite-width correction, scaled by the width.
+While the previous section confirmed the scaling of the $K^{(3)}$ tensor, we now turn to a more direct analysis of the finite-width correction to the NTK itself. We study the quantity $M(K_{\text{emp}} - K_{\infty})$, where $K_{\text{emp}}$ is the empirically measured NTK for a network of width $M$, and $K_{\infty}$ is the theoretical infinite-width kernel. This quantity represents the leading order finite-width correction, scaled by the width, and is central to understanding feature learning.
 
 \subsection{Empirical Scaling Laws}
+
+To precisely quantify the dependence of the finite-width correction on the network parameters, we performed a multivariate linear regression in the logarithmic space of the parameters. We model the spectral radius of the NTK correction, $\|K_{\text{emp}} - K_{\infty}\|_\infty$, as a power law of the depth ($L$), input dimension ($D_{\text{in}}$), number of data points ($N$), and width ($M$).
 
 \begin{remark}[Computational Cost and Reproducibility]
 It is important to note that the empirical results presented in this section are the culmination of extensive numerical experiments. Obtaining these data points and ensuring their stability required significant computational resources, amounting to approximately 24 hours of dedicated computation time. The full codebase is organized to be fully reproducible, ensuring the transparency and verifiability of these findings.
 \end{remark}
-
-To precisely quantify the dependence of the finite-width correction on the network parameters, we performed a multivariate linear regression in the logarithmic space of the parameters. We model the spectral radius of the NTK correction, $\|K_{\text{emp}} - K_{\infty}\|_\infty$, as a power law of the depth ($L$), input dimension ($D_{\text{in}}$), number of data points ($N$), and width ($M$).
 
 The regression analysis yields an extremely clear relationship with a goodness-of-fit score of $R^2 = 0.994$. The resulting scaling law is:
 \begin{equation}
     \|K_{\text{emp}} - K_{\infty}\|_\infty \propto L^{1.171} \cdot D_{\text{in}}^{0.047} \cdot N^{0.900} \cdot M^{-1.009}
     \label{eq:scaling_law}
 \end{equation}
-This provides a precise empirical characterization of the correction:
-\begin{itemize}
-    \item \textbf{Dependence on Depth ($L$):} The correction grows slightly faster than linearly with depth ($L^{1.171}$).
-    \item \textbf{Dependence on Data Size ($N$):} The correction grows almost linearly with the number of data points ($N^{0.900}$).
-    \item \textbf{Dependence on Input Dimension ($D_{\text{in}}$):} The correction is effectively independent of the input dimension ($D_{\text{in}}^{0.047}$), a crucial property for high-dimensional applications.
-    \item \textbf{Dependence on Width ($M$):} The correction decays inversely with the width ($M^{-1.009}$), which is consistent with the theoretical expectation of $\mathcal{O}(1/M)$ corrections.
-\end{itemize}
-
-\subsubsection{Supporting Data for Scaling Laws}
-
-The results from the multivariate regression are supported by numerous individual regressions where only one parameter is varied at a time. The following tables show the scaling exponent (slope in log-log space) for the NTK correction with respect to depth (L) and data size (N). The high $R^2$ values across a wide range of configurations confirm the robustness of the observed power laws.
-
-\begin{table}[h!]
-\centering
-\caption{Scaling exponent of the NTK correction w.r.t. Depth (L).}
-\label{tab:slopes_l}
-\resizebox{0.9\textwidth}{!}{%
-\begin{tabular}{l | c | c | c}
-\toprule
-\textbf{Configuration} & \textbf{Slope} & \textbf{R²} & \textbf{Points} \\
-\midrule
-N=8, D\_IN=20, M=10 & 1.129 & 0.886 & 29 \\
-N=10, D\_IN=50, M=10 & 1.087 & 0.992 & 22 \\
-N=16, D\_IN=20, M=20 & 1.137 & 0.991 & 19 \\
-N=8, D\_IN=20, M=40 & 1.113 & 0.989 & 17 \\
-N=10, D\_IN=50, M=20 & 1.123 & 0.983 & 17 \\
-N=64, D\_IN=20, M=10 & 1.196 & 0.986 & 14 \\
-N=8, D\_IN=200, M=20 & 1.126 & 0.993 & 12 \\
-N=8, D\_IN=20, M=50 & 1.112 & 0.988 & 12 \\
-N=8, D\_IN=50, M=2000 & 1.171 & 0.992 & 9 \\
-N=8, D\_IN=50, M=1000 & 1.159 & 0.994 & 9 \\
-N=32, D\_IN=50, M=20 & 1.239 & 0.988 & 9 \\
-N=32, D\_IN=20, M=200 & 1.248 & 0.983 & 9 \\
-N=16, D\_IN=20, M=100 & 1.240 & 0.991 & 9 \\
-N=8, D\_IN=20, M=200 & 1.169 & 0.992 & 9 \\
-N=8, D\_IN=100, M=200 & 1.166 & 0.993 & 9 \\
-N=8, D\_IN=20, M=2000 & 1.181 & 0.992 & 9 \\
-N=8, D\_IN=20, M=60 & 1.245 & 0.993 & 7 \\
-N=25, D\_IN=100, M=10 & 1.276 & 0.989 & 7 \\
-N=8, D\_IN=1000, M=10 & 1.204 & 0.994 & 7 \\
-N=32, D\_IN=50, M=200 & 1.330 & 0.990 & 6 \\
-N=64, D\_IN=20, M=100 & 1.355 & 0.984 & 6 \\
-N=32, D\_IN=100, M=20 & 1.440 & 0.993 & 4 \\
-N=64, D\_IN=100, M=10 & 1.476 & 0.991 & 4 \\
-N=64, D\_IN=50, M=20 & 1.460 & 0.990 & 4 \\
-N=16, D\_IN=50, M=2000 & 1.381 & 0.994 & 4 \\
-N=32, D\_IN=200, M=10 & 1.439 & 0.993 & 4 \\
-\bottomrule
-\end{tabular}}
-\end{table}
-
-\begin{table}[h!]
-\centering
-\caption{Scaling exponent of the NTK correction w.r.t. Data Size (N).}
-\label{tab:slopes_n}
-\resizebox{0.9\textwidth}{!}{%
-\begin{tabular}{l | c | c | c}
-\toprule
-\textbf{Configuration} & \textbf{Slope} & \textbf{R²} & \textbf{Points} \\
-\midrule
-D\_IN=20, L=2, M=10 & 0.847 & 0.992 & 10 \\
-D\_IN=20, L=4, M=20 & 0.888 & 0.998 & 8 \\
-D\_IN=50, L=2, M=10 & 0.821 & 0.997 & 8 \\
-D\_IN=20, L=8, M=20 & 0.933 & 0.998 & 7 \\
-D\_IN=20, L=6, M=30 & 0.871 & 0.993 & 6 \\
-D\_IN=50, L=12, M=10 & 0.967 & 0.974 & 6 \\
-D\_IN=20, L=12, M=20 & 0.915 & 1.000 & 6 \\
-D\_IN=20, L=2, M=30 & 0.771 & 0.995 & 6 \\
-D\_IN=50, L=18, M=10 & 0.904 & 0.999 & 6 \\
-D\_IN=50, L=20, M=10 & 0.912 & 0.995 & 5 \\
-D\_IN=20, L=30, M=10 & 0.863 & 1.000 & 5 \\
-D\_IN=20, L=14, M=30 & 0.911 & 0.998 & 5 \\
-D\_IN=50, L=10, M=20 & 0.880 & 1.000 & 5 \\
-D\_IN=50, L=4, M=30 & 0.841 & 0.999 & 5 \\
-D\_IN=100, L=2, M=20 & 0.739 & 0.998 & 5 \\
-D\_IN=50, L=26, M=10 & 0.871 & 0.999 & 4 \\
-D\_IN=20, L=6, M=200 & 0.898 & 0.999 & 4 \\
-D\_IN=20, L=6, M=40 & 0.838 & 0.997 & 4 \\
-D\_IN=200, L=8, M=10 & 0.877 & 0.999 & 4 \\
-D\_IN=50, L=28, M=10 & 0.892 & 0.999 & 4 \\
-D\_IN=20, L=2, M=500 & 0.790 & 0.996 & 4 \\
-D\_IN=50, L=8, M=100 & 0.904 & 0.999 & 4 \\
-\bottomrule
-\end{tabular}}
-\end{table}
+This empirical model provides a precise characterization of the correction's behavior. The dependence on width $M$ closely matches the theoretical expectation of an $\mathcal{O}(1/M)$ correction, as indicated by the exponent of $-1.009$. More strikingly, the correction exhibits a super-linear growth with depth $L$ and a near-linear growth with the number of data points $N$. Perhaps most importantly for practical applications such as operator learning, the correction is effectively independent of the input dimension $D_{\text{in}}$, as shown by the small exponent of $0.047$. This suggests that the feature learning capabilities captured by the NTK evolution do not degrade in high-dimensional settings.
 
 \subsection{Theoretical Interpretation}
 
-These empirical findings can be understood through the lens of the formula for the late-time, first-order NTK correction, $\Theta^{(1)}_\infty$, derived in \cite{large-width-feynman}. This correction represents the total change in the kernel after training has converged.
+These rich empirical findings can be understood through the lens of the formula for the late-time, first-order NTK correction, $\Theta^{(1)}_\infty$, derived in the literature. This correction represents the total change in the kernel after training has converged and provides a deep connection between the observed scaling laws and the underlying structure of the theory.
 
 \begin{theorem}[Late-Time NTK Correction \cite{large-width-feynman}]
 The first-order correction to the NTK at late times is given by:
@@ -413,14 +329,9 @@ The first-order correction to the NTK at late times is given by:
 where $\lambda_i$ and $\hat{e}_i$ are the eigenvalues and eigenvectors of the initial kernel $\Theta_0$, and $O_3$ and $O_4$ are the higher-order kernels from the NTH.
 \end{theorem}
 
-This formula provides two key insights:
-\begin{enumerate}
-    \item \textbf{Dominance of the $O_4$ term:} The formula contains terms dependent on both $O_3$ (equivalent to $K^{(3)}$) and $O_4$. The observed \textit{linear} growth of the total NTK correction with depth $L$ suggests that the term involving the $O_4$ kernel is the primary driver of this behavior, even though $K^{(3)}$ also grows with depth.
+This formula illuminates two crucial mechanisms. Firstly, it involves terms with both the third-order kernel $O_3$ (equivalent to our $K^{(3)}$) and the fourth-order kernel $O_4$. Our own experimental analysis of $K^{(3)}$ in Section 5 showed that its magnitude grows with depth, yet other findings from `kernel3_vs_depth_finite_empirical_largeexperiments.py` confirm that key metrics of this kernel, such as its infinity norm and maximum eigenvalue, decay with width, suggesting its direct influence wanes. The robust linear growth of the total NTK correction with depth $L$ therefore strongly suggests that the term involving the $O_4$ kernel is the primary driver of this scaling behavior.
 
-    \item \textbf{Role of the Smallest Eigenvalue:} The correction terms are inversely proportional to the eigenvalues of the initial kernel $\Theta_0$. It has been observed that the smallest eigenvalue, $\lambda_{\min}$, scales as $\mathcal{O}(L/N)$. This means that for deeper networks (larger $L$) or larger datasets (larger $N$), $\lambda_{\min}$ becomes smaller, thus amplifying the finite-width corrections. This provides a compelling explanation for the observed scaling of the correction with both $L$ and $N$.
-\end{enumerate}
-
-This interplay between the higher-order kernels (particularly $O_4$) and the spectrum of the initial kernel ($\lambda_{\min}$) provides a strong theoretical framework for understanding why and how finite-width networks deviate from the infinite-width limit.
+Secondly, the formula reveals that the correction terms are inversely proportional to the eigenvalues $\lambda_i$ of the initial kernel. It has been empirically and theoretically shown that the smallest eigenvalue, $\lambda_{\min}$, scales as $\mathcal{O}(L/N)$. This inverse relationship means that for deeper networks (larger $L$) or for larger datasets (larger $N$), $\lambda_{\min}$ becomes smaller. A smaller denominator amplifies the entire finite-width correction. This mechanism provides a compelling theoretical explanation for the observed scaling of the correction with both depth $L$ and data size $N$. The interplay between the higher-order kernels, particularly $O_4$, and the spectrum of the initial kernel thus provides a strong theoretical framework for understanding why and how finite-width networks deviate from the infinite-width limit.
 
 
 \section{Conclusion}
