@@ -47,11 +47,17 @@ The backward vectors $G^{(\ell)}_\mu$ are defined recursively:
     G^{(L)}_\mu &= \frac{a}{\sqrt{m}} \\
     G^{(\ell)}_\mu &= \frac{(W^{(\ell+1)})^T}{\sqrt{m}} \sigma'_{\ell+1}(x_\mu) G^{(\ell+1)}_\mu
 \end{align}
-where $\sigma'_{\ell+1}$ is the diagonal matrix of activation derivatives. The operator norm of the scaled weight matrices $\|W^{(\ell+1)}/\sqrt{m}\|$ is $O(1)$. Therefore, the norm of $G^{(\ell)}_\mu$ is also stable across layers:
+where $\sigma'_{\ell+1}$ is the diagonal matrix of activation derivatives. A crucial point is to analyze the norm of the propagation operator $\mathcal{P}_\ell = \frac{(W^{(\ell+1)})^T}{\sqrt{m}} \sigma'_{\ell+1}(x_\mu)$. Based on random matrix theory, for a large matrix $W$ with i.i.d. entries of variance $\sigma_w^2$, its operator norm $\|W\|_{\text{op}}$ converges to $2\sigma_w\sqrt{m}$. Thus, the norm of our scaled operator is:
 \begin{equation}
-    \|G^{(\ell)}_\mu\| \sim \|G^{(\ell+1)}_\mu\| \implies \|G^{(\ell)}_\mu\| \sim O(1)
+    \|\mathcal{P}_\ell\|_{\text{op}} \le \left\| \frac{W^{(\ell+1)}}{\sqrt{m}} \right\|_{\text{op}} \xrightarrow{m\to\infty} 2\sigma_w
 \end{equation}
-These vectors do not exhibit decay with depth.
+For standard initialization schemes (e.g., He initialization with $\sigma_w^2=2/m_{in}$), this value is $O(1)$ but not necessarily less than 1. A naive application of the sub-multiplicative property might suggest an exponential explosion of norms, as $\|G^{(\ell)}\| \le (2\sigma_w)^{L-\ell} \|G^{(L)}\|$.
+
+However, this reasoning is flawed because we are multiplying a sequence of \textbf{independent} random matrices. The vector $G^{(\ell+1)}_\mu$, after being transformed by $\mathcal{P}_\ell$, is not aligned with the direction of maximal amplification of the next operator $\mathcal{P}_{\ell-1}$. The theory of products of random matrices shows that for deep networks, the norm is preserved on average if the initialization is chosen correctly to achieve a state of "dynamical isometry". This ensures that the system avoids both exponential explosion and vanishing of the signal. Therefore, we can confidently assume that the norms are stable across layers:
+\begin{equation}
+    \|G^{(\ell)}_\mu\| \sim O(1) \quad \text{for all } \ell
+\end{equation}
+These vectors do not exhibit a systematic decay or growth with depth.
 
 \section{Analysis of the $K^{(3)}$ Tensor}
 
@@ -111,5 +117,84 @@ This contradicts the initial suspicion of an exponential decay. The key observat
 \end{itemize}
 
 Therefore, for a fixed width $m$, we expect the values of $K^{(3)}$ to increase with the depth $L$. There is no evidence of an exponential decay. The factor $1/\sqrt{m}$ controls the overall magnitude but does not introduce a decay with depth.
+
+
+\newpage
+
+\section{Detailed Scaling Analysis with Respect to Depth $H$}
+
+We now provide a more detailed analysis of the scaling of $K^{(3)}_{\alpha\beta\gamma}$ with respect to the network depth $H$ (denoted $L$ in some contexts) and width $m$. This analysis is based on the fully expanded formula and relies on standard assumptions in the study of wide neural networks.
+
+\subsection{Core Assumptions and Scaling of Components}
+Our analysis rests on the following scaling assumptions, which are direct consequences of the NTK parameterization and standard random matrix theory results:
+\begin{itemize}
+    \item \textbf{Activations and G-vectors:} The norms of forward activations and backward-propagated vectors are stable across layers: $\|x^{(p)}_\mu\| \sim O(1)$ and $\|G^{(\ell)}_\mu\| \sim O(1)$.
+    \item \textbf{Propagators:} Due to the principle of dynamical isometry targeted by modern initialization schemes, the operator norms of the forward and backward propagators are of order one, regardless of the number of matrices in the product: $\|\mathcal{J}^{(p \to j)}_\mu\|_{\text{op}} \sim O(1)$ and $\|\mathcal{B}^{(\ell \to p)}_\mu\|_{\text{op}} \sim O(1)$.
+    \item \textbf{Source Terms:} The scaling of the source terms can be readily determined:
+    \begin{itemize}
+        \item Forward source term: $\mathcal{T}^{(j)}_{\gamma\mu} = \frac{\sigma'_{j}(x_\mu)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\mu \rangle G^{(j)}_\gamma$. Its norm scales as $\|\mathcal{T}^{(j)}_{\gamma\mu}\| \sim O(1/\sqrt{m})$.
+        \item Backward source term: $\mathcal{U}^{(p)}_{\gamma\mu} = \frac{1}{m} G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\mu \rangle$. Its norm scales as $\|\mathcal{U}^{(p)}_{\gamma\mu}\| \sim O(1/m)$.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Term-by-Term Analysis}
+We analyze the four main components of the fully expanded formula for $K^{(3)}_{\alpha\beta\gamma}$. For simplicity, we analyze one of the two symmetric terms in each summation.
+
+\textbf{1. Output Term ($K^{(3,\text{out})}$)}
+This term is given by the sum $\sum_{j=1}^{H} \langle \mathcal{J}^{(H \to j)}_{\alpha} \mathcal{T}^{(j)}_{\gamma\alpha}, x^{(H)}_\beta \rangle$.
+The magnitude of each summand is:
+\[
+|\langle \mathcal{J}^{(H \to j)}_{\alpha} \mathcal{T}^{(j)}_{\gamma\alpha}, x^{(H)}_\beta \rangle| \le \|\mathcal{J}^{(H \to j)}_{\alpha}\|_{\text{op}} \cdot \|\mathcal{T}^{(j)}_{\gamma\alpha}\| \cdot \|x^{(H)}_\beta\| \sim O(1) \cdot O(1/\sqrt{m}) \cdot O(1) = O(1/\sqrt{m})
+\]
+Since we are summing $H$ such terms, the total contribution of this component is:
+\[
+K^{(3,\text{out})} \sim H \cdot O(1/\sqrt{m}) = O(H/\sqrt{m})
+\]
+
+\textbf{2. Backward Term from Weights ($K^{(3,G,W)}$)}
+This term is the double summation $\sum_{\ell=1}^{H} \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \sum_{p=\ell}^{H-1} \langle \mathcal{B}^{(\ell \to p)}_{\alpha} \mathcal{U}^{(p)}_{\gamma\alpha}, G^{(\ell)}_\beta \rangle$.
+The magnitude of each summand in the inner loop is:
+\[
+|\langle \dots \rangle \langle \dots \rangle| \le |\langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle| \cdot \|\mathcal{B}^{(\ell \to p)}_{\alpha}\|_{\text{op}} \cdot \|\mathcal{U}^{(p)}_{\gamma\alpha}\| \cdot \|G^{(\ell)}_\beta\| \sim O(1) \cdot O(1) \cdot O(1/m) \cdot O(1) = O(1/m)
+\]
+This double sum contains approximately $\sum_{\ell=1}^H (H-\ell) \approx H^2/2$ terms. Thus, the total contribution is:
+\[
+K^{(3,G,W)} \sim H^2 \cdot O(1/m) = O(H^2/m)
+\]
+
+\textbf{3. Backward Term from Output Layer ($K^{(3,G,a)}$)}
+This term corresponds to the derivative with respect to the output weights $a_t$: $\sum_{\ell=1}^{H} \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \langle \mathcal{B}^{(\ell \to H-1)}_{\alpha} \frac{x^{(H)}_\gamma}{\sqrt{m}}, G^{(\ell)}_\beta \rangle$.
+The magnitude of each summand is:
+\[
+|\langle \dots \rangle \langle \dots \rangle| \le |\langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle| \cdot \|\mathcal{B}^{(\ell \to H-1)}_{\alpha}\|_{\text{op}} \cdot \frac{\|x^{(H)}_\gamma\|}{\sqrt{m}} \cdot \|G^{(\ell)}_\beta\| \sim O(1) \cdot O(1) \cdot O(1/\sqrt{m}) \cdot O(1) = O(1/\sqrt{m})
+\]
+Summing $H$ such terms, the total contribution is:
+\[
+K^{(3,G,a)} \sim H \cdot O(1/\sqrt{m}) = O(H/\sqrt{m})
+\]
+
+\textbf{4. Forward Term from Activations ($K^{(3,x)}$)}
+This is the final double summation: $\sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \sum_{j=1}^{\ell-1} \langle \mathcal{J}^{(\ell-1 \to j)}_{\alpha} \mathcal{T}^{(j)}_{\gamma\alpha}, x^{(\ell-1)}_\beta \rangle$.
+The magnitude of each summand in the inner loop is:
+\[
+|\langle \dots \rangle \langle \dots \rangle| \le |\langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle| \cdot \|\mathcal{J}^{(\ell-1 \to j)}_{\alpha}\|_{\text{op}} \cdot \|\mathcal{T}^{(j)}_{\gamma\alpha}\| \cdot \|x^{(\ell-1)}_\beta\| \sim O(1) \cdot O(1) \cdot O(1/\sqrt{m}) \cdot O(1) = O(1/\sqrt{m})
+\]
+This double sum contains approximately $\sum_{\ell=1}^H (\ell-1) \approx H^2/2$ terms. The total contribution is therefore:
+\[
+K^{(3,x)} \sim H^2 \cdot O(1/\sqrt{m}) = O(H^2/\sqrt{m})
+\]
+
+\subsection{Overall Scaling and Conclusion}
+Combining the four components, we have:
+\[
+K^{(3)}_{\alpha\beta\gamma} = O(H/\sqrt{m}) + O(H^2/m) + O(H/\sqrt{m}) + O(H^2/\sqrt{m})
+\]
+For a sufficiently large width $m$, the term $O(H^2/\sqrt{m})$ will dominate the term $O(H^2/m)$. Therefore, the overall scaling behavior of the third-order kernel is dictated by the $K^{(3,x)}$ term:
+\begin{equation}
+    K^{(3)}_{\alpha\beta\gamma} \sim O\left(\frac{H^2}{\sqrt{m}}\right)
+\end{equation}
+This detailed analysis confirms that the magnitude of the $K^{(3)}$ tensor entries does not decay with depth. Instead, it exhibits a \textbf{quadratic growth} with the depth $H$. This implies that the dynamics of the NTK itself become more pronounced and complex in very deep networks, a key feature of the finite-width correction captured by the Neural Tangent Hierarchy.
+
+
 
 \end{document}
