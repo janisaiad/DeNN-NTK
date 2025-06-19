@@ -71,7 +71,7 @@ def analyze_parameter_scaling(data, param_name, plot_size=(20, 15)):  # we incre
     ax.set_title(f'K3 Infinity Norm vs {param_name} (Linear)')
     ax.grid(True)
     
-    # Plot 2: Infinity Norm vs Parameter (Log Scale)
+    # Plot 2: Infinity Norm vs Parameter (Semi-Log Scale)
     ax = axes[0,1]
     for key, values in groups.items():
         sorted_values = sorted(values, key=lambda x: x[0])  # we sort by parameter value
@@ -79,16 +79,15 @@ def analyze_parameter_scaling(data, param_name, plot_size=(20, 15)):  # we incre
         y = [v[1] for v in sorted_values]
         ax.scatter(x, y, label=str(key), s=100)  # we use scatter plot with larger markers
         
-        if len(x) > 1:  # we fit power law if enough points
-            slope, intercept, r_value, p_value, std_err = linregress(np.log(x), np.log(y))
+        if len(x) > 1:  # we fit exponential if enough points
+            slope, intercept, r_value, p_value, std_err = linregress(x, np.log(y))
             x_line = np.array(sorted(x))  # we use sorted x values for line
-            ax.plot(x_line, np.exp(intercept) * x_line**slope, '--',
+            ax.plot(x_line, np.exp(intercept + slope * x_line), '--',
                     label=f'slope={slope:.2f}')
     ax.set_xlabel(param_name)
     ax.set_ylabel('Infinity Norm')
     ax.set_yscale('log')
-    ax.set_xscale('log')
-    ax.set_title(f'K3 Infinity Norm vs {param_name} (Log)')
+    ax.set_title(f'K3 Infinity Norm vs {param_name} (Semi-Log)')
     ax.grid(True)
     
     # Plot 3: Largest Eigenvalue vs Parameter (Linear Scale)
@@ -103,7 +102,7 @@ def analyze_parameter_scaling(data, param_name, plot_size=(20, 15)):  # we incre
     ax.set_title(f'K3 Largest Eigenvalue vs {param_name} (Linear)')
     ax.grid(True)
     
-    # Plot 4: Largest Eigenvalue vs Parameter (Log Scale)
+    # Plot 4: Largest Eigenvalue vs Parameter (Semi-Log Scale)
     ax = axes[1,1]
     for key, values in groups.items():
         sorted_values = sorted(values, key=lambda x: x[0])  # we sort by parameter value
@@ -111,16 +110,15 @@ def analyze_parameter_scaling(data, param_name, plot_size=(20, 15)):  # we incre
         y = [v[2] for v in sorted_values]
         ax.scatter(x, y, label=str(key), s=100)  # we use scatter plot with larger markers
         
-        if len(x) > 1:  # we fit power law if enough points
-            slope, intercept, r_value, p_value, std_err = linregress(np.log(x), np.log(y))
+        if len(x) > 1:  # we fit exponential if enough points
+            slope, intercept, r_value, p_value, std_err = linregress(x, np.log(y))
             x_line = np.array(sorted(x))  # we use sorted x values for line
-            ax.plot(x_line, np.exp(intercept) * x_line**slope, '--',
+            ax.plot(x_line, np.exp(intercept + slope * x_line), '--',
                     label=f'slope={slope:.2f}')
     ax.set_xlabel(param_name)
     ax.set_ylabel('Largest Eigenvalue')
     ax.set_yscale('log')
-    ax.set_xscale('log')
-    ax.set_title(f'K3 Largest Eigenvalue vs {param_name} (Log)')
+    ax.set_title(f'K3 Largest Eigenvalue vs {param_name} (Semi-Log)')
     ax.grid(True)
     
     # Add legend outside plots
