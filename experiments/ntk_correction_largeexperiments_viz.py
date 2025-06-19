@@ -47,6 +47,7 @@ def plot_config_scaling(data, vary_param, fixed_params):
     
     # Group data by fixed parameter combinations
     groups = {}
+    slopes = []
     slopes_file = f"slopes_{vary_param}.txt"
     with open(slopes_file, 'w') as f:
         f.write(f"Slopes for {vary_param} scaling:\n")
@@ -60,63 +61,67 @@ def plot_config_scaling(data, vary_param, fixed_params):
         groups[key].append((d[vary_param], d['mean_spectral_radius'], d['std_spectral_radius']))
 
     # Filter and sort groups by number of points
-    filtered_groups = {k:v for k,v in groups.items() if len(v) > 4}
+    filtered_groups = {k:v for k,v in groups.items() if len(v) > 3}
     sorted_groups = sorted(filtered_groups.items(), key=lambda x: len(x[1]), reverse=True)
 
     if not sorted_groups:
-        print(f"No configurations found with more than 4 points for {vary_param}")
+        print(f"No configurations found with more than 3 points for {vary_param}")
         return
 
     # Create figure with subplots for each configuration
     n_configs = len(filtered_groups)
-    fig, axes = plt.subplots(n_configs, 1, figsize=(10, 4*n_configs))
-    if n_configs == 1:
-        axes = [axes]
+    if n_configs > 0:
+        fig, axes = plt.subplots(n_configs, 1, figsize=(10, 4*n_configs))
+        if n_configs == 1:
+            axes = [axes]
     
-    for idx, (config, values) in enumerate(sorted_groups[::5]):
-        ax = axes[idx]
-        sorted_values = sorted(values, key=lambda x: x[0])
-        x = np.array([v[0] for v in sorted_values])
-        y = np.array([v[1] for v in sorted_values])
-        yerr = [v[2] for v in sorted_values]
-        
-        ax.errorbar(x, y, yerr=yerr, fmt='o', capsize=5, markersize=8)
-        slope, intercept, r_value, p_value, std_err = linregress(np.log(x), np.log(y))
-        x_line = np.array(sorted(x))
-        ax.plot(x_line, np.exp(intercept) * x_line**slope, '--',
-                label=f'slope={slope:.2f}')
-        
-        # Save slope info to file
-        config_str = ", ".join([f"{p}={v}" for p,v in zip(fixed_params, config)])
-        with open(slopes_file, 'a') as f:
-            f.write(f"{config_str} | {slope:.3f} | {r_value**2:.3f} | {len(x)}\n")
-        
-        config_str = ", ".join([f"{p}={v}" for p,v in zip(fixed_params, config)])
-        ax.set_title(f'Spectral Radius vs {vary_param}\n{config_str}')
-        ax.set_xlabel(vary_param)
-        ax.set_ylabel('Spectral Radius')
-        ax.set_xscale('log')
-        ax.set_yscale('log')
-        ax.grid(True)
-        ax.legend()
+        for idx, (config, values) in enumerate(sorted_groups[::5]):
+            ax = axes[idx]
+            sorted_values = sorted(values, key=lambda x: x[0])
+            x = np.array([v[0] for v in sorted_values])
+            y = np.array([v[1] for v in sorted_values])
+            yerr = [v[2] for v in sorted_values]
+            
+            ax.errorbar(x, y, yerr=yerr, fmt='o', capsize=5, markersize=8)
+            slope, intercept, r_value, p_value, std_err = linregress(np.log(x), np.log(y))
+            slopes.append((config, slope, r_value**2, len(x)))
+            x_line = np.array(sorted(x))
+            ax.plot(x_line, np.exp(intercept) * x_line**slope, '--',
+                    label=f'slope={slope:.2f}')
+            
+            # Save slope info to file
+            config_str = ", ".join([f"{p}={v}" for p,v in zip(fixed_params, config)])
+            with open(slopes_file, 'a') as f:
+                f.write(f"{config_str} | {slope:.3f} | {r_value**2:.3f} | {len(x)}\n")
+            
+            config_str = ", ".join([f"{p}={v}" for p,v in zip(fixed_params, config)])
+            ax.set_title(f'Spectral Radius vs {vary_param}\n{config_str}')
+            ax.set_xlabel(vary_param)
+            ax.set_ylabel('Spectral Radius')
+            ax.set_xscale('log')
+            ax.set_yscale('log')
+            ax.grid(True)
+            ax.legend()
 
-    plt.tight_layout()
-    plt.show()
+        plt.tight_layout()
+        plt.show()
+
+    return slopes
 
 # %%
 # Plot scaling with respect to L for each (N,D,M) configuration
 print("Analyzing depth (L) scaling for each configuration...")
-plot_config_scaling(data, 'L', ['N', 'D_IN', 'M'])
+L_slopes = plot_config_scaling(data, 'L', ['N', 'D_IN', 'M'])
 
 # %%
 # Plot scaling with respect to D for each (N,L,M) configuration  
 print("Analyzing input dimension (D) scaling for each configuration...")
-plot_config_scaling(data, 'D_IN', ['N', 'L', 'M'])
+D_slopes = plot_config_scaling(data, 'D_IN', ['N', 'L', 'M'])
 
 # %%
 # Plot scaling with respect to N for each (D,L,M) configuration
 print("Analyzing number of samples (N) scaling for each configuration...")  
-plot_config_scaling(data, 'N', ['D_IN', 'L', 'M'])
+N_slopes = plot_config_scaling(data, 'N', ['D_IN', 'L', 'M'])
 
 # %%
 # Plot all points vs L in a single plot
@@ -162,5 +167,22 @@ plt.yscale('log')
 plt.grid(True)
 plt.title('All Spectral Radii vs Number of Samples (N)')
 plt.show()
+
+# Print all slopes
+print("\nAll calculated slopes:")
+print("\nL slopes:")
+for config, slope, r2, points in L_slopes:
+    config_str = f"N={config[0]}, D_IN={config[1]}, M={config[2]}"
+    print(f"{config_str} | slope={slope:.3f}, R^2={r2:.3f}, points={points}")
+
+print("\nD_IN slopes:")
+for config, slope, r2, points in D_slopes:
+    config_str = f"N={config[0]}, L={config[1]}, M={config[2]}"
+    print(f"{config_str} | slope={slope:.3f}, R^2={r2:.3f}, points={points}")
+
+print("\nN slopes:")
+for config, slope, r2, points in N_slopes:
+    config_str = f"D_IN={config[0]}, L={config[1]}, M={config[2]}"
+    print(f"{config_str} | slope={slope:.3f}, R^2={r2:.3f}, points={points}")
 
 # %%
