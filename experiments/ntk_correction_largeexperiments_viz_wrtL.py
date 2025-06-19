@@ -37,70 +37,105 @@ for f in files:
 # %% [markdown]
 # ## Scaling Analysis by Configuration
 # %%
-def plot_config_scaling(data, fixed_params):
-    # Get unique values for each fixed parameter
-    unique_values = {p: sorted(list(set(d[p] for d in data))) for p in fixed_params}
+def plot_config_scaling(data):
+    # Create figure with 3 vertically stacked subplots for L, D_IN and N scaling
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(8, 18))
     
-    # Group data by fixed parameter combinations
-    groups = {}
+    # Plot L scaling
+    L_groups = {}
+    L_slopes = []
     for d in data:
-        key = tuple(d[p] for p in fixed_params)
-        if key not in groups:
-            groups[key] = []
-        groups[key].append((d['L'], d['mean_spectral_radius'], d['std_spectral_radius']))
-
-    # Sort groups by number of points
-    sorted_groups = sorted(groups.items(), key=lambda x: len(x[1]), reverse=True)
-
-    # Create figure with subplots for each configuration
-    n_configs = len(groups)
-    fig, axes = plt.subplots(n_configs + 1, 1, figsize=(10, 4*(n_configs + 1)))
+        key = (d['N'], d['D_IN'], d['M'])
+        if key not in L_groups:
+            L_groups[key] = []
+        L_groups[key].append((d['L'], d['mean_spectral_radius']))
     
-    # Plot individual configurations
-    for idx, (config, values) in enumerate(sorted_groups[::5]):
-        ax = axes[idx]
-        sorted_values = sorted(values, key=lambda x: x[0])
-        x = [v[0] for v in sorted_values]
-        y = [v[1] for v in sorted_values]
-        yerr = [v[2] for v in sorted_values]
+    # Calculate and store L slopes
+    for config, values in L_groups.items():
+        if len(values) > 4:
+            x = np.array([v[0] for v in sorted(values)])
+            y = np.array([v[1] for v in sorted(values)])
+            slope, _, r_value, _, _ = linregress(np.log(x), np.log(y))
+            L_slopes.append((config, slope, r_value**2, len(x)))
+    
+    # Plot D_IN scaling
+    D_groups = {}
+    for d in data:
+        key = (d['N'], d['L'], d['M'])
+        if key not in D_groups:
+            D_groups[key] = []
+        D_groups[key].append((d['D_IN'], d['mean_spectral_radius']))
         
-        ax.errorbar(x, y, yerr=yerr, fmt='o', capsize=5, markersize=8)
-        if len(x) > 1:
-            slope, intercept, r_value, p_value, std_err = linregress(np.log(x), np.log(y))
-            x_line = np.array(sorted(x))
-            ax.plot(x_line, np.exp(intercept) * x_line**slope, '--',
-                    label=f'slope={slope:.2f}')
-        
-        config_str = ", ".join([f"{p}={v}" for p,v in zip(fixed_params, config)])
-        ax.set_title(f'Spectral Radius vs L\n{config_str}')
-        ax.set_xlabel('L')
-        ax.set_ylabel('Spectral Radius')
-        ax.set_yscale('log')
-        ax.grid(True)
-        ax.legend()
+    # Plot N scaling
+    N_groups = {}
+    N_slopes = []
+    for d in data:
+        key = (d['L'], d['D_IN'], d['M'])
+        if key not in N_groups:
+            N_groups[key] = []
+        N_groups[key].append((d['N'], d['mean_spectral_radius']))
 
-    # Plot all points together in the last subplot
-    ax = axes[-1]
-    all_L = []
-    all_radius = []
-    all_std = []
-    for group_values in groups.values():
-        for L, radius, std in group_values:
-            all_L.append(L)
-            all_radius.append(radius)
-            all_std.append(std)
+    # Calculate and store N slopes
+    for config, values in N_groups.items():
+        if len(values) > 4:
+            x = np.array([v[0] for v in sorted(values)])
+            y = np.array([v[1] for v in sorted(values)])
+            slope, _, r_value, _, _ = linregress(np.log(x), np.log(y))
+            N_slopes.append((config, slope, r_value**2, len(x)))
+
+    # Plot L scaling
+    for config, values in L_groups.items():
+        if len(values) > 4:
+            x = [v[0] for v in sorted(values)]
+            y = [v[1] for v in sorted(values)]
+            ax1.loglog(x, y, 'o', alpha=0.3, markersize=4)
             
-    ax.errorbar(all_L, all_radius, yerr=all_std, fmt='o', alpha=0.3, capsize=2, markersize=4)
-    ax.set_title('All Configurations: Spectral Radius vs L')
-    ax.set_xlabel('L')
-    ax.set_ylabel('Spectral Radius')
-    ax.set_yscale('log')
-    ax.grid(True)
+    ax1.set_title('Spectral Radius vs L (all configs)')
+    ax1.set_xlabel('L')
+    ax1.set_ylabel('Spectral Radius')
+    ax1.grid(True)
+
+    # Plot D_IN scaling
+    for config, values in D_groups.items():
+        if len(values) > 4:
+            x = [v[0] for v in sorted(values)]
+            y = [v[1] for v in sorted(values)]
+            ax2.loglog(x, y, 'o', alpha=0.3, markersize=4)
+            
+    ax2.set_title('Spectral Radius vs D_IN (all configs)')
+    ax2.set_xlabel('D_IN')
+    ax2.set_ylabel('Spectral Radius')
+    ax2.grid(True)
+
+    # Plot N scaling
+    for config, values in N_groups.items():
+        if len(values) > 4:
+            x = [v[0] for v in sorted(values)]
+            y = [v[1] for v in sorted(values)]
+            ax3.loglog(x, y, 'o', alpha=0.3, markersize=4)
+            
+    ax3.set_title('Spectral Radius vs N (all configs)')
+    ax3.set_xlabel('N')
+    ax3.set_ylabel('Spectral Radius')
+    ax3.grid(True)
 
     plt.tight_layout()
     plt.show()
 
+    # Print slope tables
+    print("\nL Scaling Slopes:")
+    print("Config (N, D_IN, M) | Slope | R^2 | Points")
+    print("-" * 50)
+    for config, slope, r2, points in sorted(L_slopes, key=lambda x: abs(x[1]), reverse=True):
+        print(f"N={config[0]}, D={config[1]}, M={config[2]} | {slope:.3f} | {r2:.3f} | {points}")
+
+    print("\nN Scaling Slopes:")
+    print("Config (L, D_IN, M) | Slope | R^2 | Points")
+    print("-" * 50)
+    for config, slope, r2, points in sorted(N_slopes, key=lambda x: abs(x[1]), reverse=True):
+        print(f"L={config[0]}, D={config[1]}, M={config[2]} | {slope:.3f} | {r2:.3f} | {points}")
+
 # %%
-# Plot scaling with respect to L for each (N,D,M) configuration
-print("Analyzing depth (L) scaling for each configuration...")
-plot_config_scaling(data, ['N', 'D_IN', 'M'])
+# Plot scaling with respect to L, D_IN and N
+print("Analyzing scaling laws...")
+plot_config_scaling(data)
