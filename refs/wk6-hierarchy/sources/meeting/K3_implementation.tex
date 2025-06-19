@@ -1,0 +1,115 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{cleveref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    citecolor=red,
+}
+
+\title{\textbf{Analysis of $K^{(3)}$ Dependence on Network Depth $L$}}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+This document analyzes the behavior of the entries of the $K^{(3)}$ tensor as a function of the network depth, denoted by $L$ (or $H$ in the code), for a fixed network width $m$. The analysis is based on the formulas from the Neural Tangent Hierarchy (NTH) framework. We aim to understand if the tensor entries decay as the depth increases, and specifically, if this decay is exponential.
+
+\section{Scaling of Core Components in the NTK Formalism}
+
+We consider a Multi-Layer Perceptron (MLP) of depth $L$ and uniform width $m$. The weights $W^{(\ell)}$ for $\ell=1, \dots, L$ are $m \times m$ matrices, and the output weights $a$ are in $\mathbb{R}^m$. We use the NTK scaling, where weights are initialized i.i.d. from a distribution with variance $c_W^2/m$ (e.g., $\mathcal{N}(0, c_W^2/m)$). The output layer is scaled by $1/\sqrt{m}$.
+
+The forward activations $x^{(p)}_\mu$ and backward propagated vectors $G^{(\ell)}_\mu$ are the building blocks of the NTK.
+The activations are defined as $x^{(p)}_\mu = \frac{1}{\sqrt{m}}\sigma(W^{(p)} x^{(p-1)}_\mu)$. With proper initialization ($c_W^2=2$ for ReLU), the norm of the activations is stable across layers:
+\begin{equation}
+    \mathbb{E}[\|x^{(p)}_\mu\|^2] \approx \|x^{(p-1)}_\mu\|^2
+\end{equation}
+Thus, we assume $\|x^{(p)}_\mu\| \sim O(1)$ for all layers $p$.
+
+The backward vectors $G^{(\ell)}_\mu$ are defined recursively:
+\begin{align}
+    G^{(L)}_\mu &= \frac{a}{\sqrt{m}} \\
+    G^{(\ell)}_\mu &= \frac{(W^{(\ell+1)})^T}{\sqrt{m}} \sigma'_{\ell+1}(x_\mu) G^{(\ell+1)}_\mu
+\end{align}
+where $\sigma'_{\ell+1}$ is the diagonal matrix of activation derivatives. The operator norm of the scaled weight matrices $\|W^{(\ell+1)}/\sqrt{m}\|$ is $O(1)$. Therefore, the norm of $G^{(\ell)}_\mu$ is also stable across layers:
+\begin{equation}
+    \|G^{(\ell)}_\mu\| \sim \|G^{(\ell+1)}_\mu\| \implies \|G^{(\ell)}_\mu\| \sim O(1)
+\end{equation}
+These vectors do not exhibit decay with depth.
+
+\section{Analysis of the $K^{(3)}$ Tensor}
+
+The $K^{(3)}$ tensor is constructed from the directional derivatives of $x^{(p)}_\mu$ and $G^{(\ell)}_\mu$, denoted $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$.
+
+\subsection{Forward Derivative Term $\delta_\gamma x^{(p)}_\mu$}
+
+The recursive formula for $\delta_\gamma x^{(p)}_\mu$ is:
+\begin{equation}
+    \delta_\gamma x^{(p)}_\mu = \frac{1}{\sqrt{m}} \sigma'_{p}(x_\mu) \left( W^{(p)} (\delta_\gamma x^{(p-1)}_\mu) + \langle x^{(p-1)}_\gamma, x^{(p-1)}_\mu \rangle G^{(p)}_\gamma \right)
+\end{equation}
+with $\delta_\gamma x^{(0)}_\mu = 0$. Analyzing the norm:
+\begin{equation}
+    \|\delta_\gamma x^{(p)}_\mu\| \le \frac{1}{\sqrt{m}} \|\sigma'_{p}\| \left( \|W^{(p)}\| \|\delta_\gamma x^{(p-1)}_\mu\| + |\langle \dots \rangle| \|G^{(p)}_\gamma\| \right)
+\end{equation}
+Using $\|W^{(p)}\| \sim O(\sqrt{m})$ and that other norms are $O(1)$, we get:
+\begin{equation}
+    \|\delta_\gamma x^{(p)}_\mu\| \lesssim \|\delta_\gamma x^{(p-1)}_\mu\| + O(1/\sqrt{m})
+\end{equation}
+Starting from $\|\delta_\gamma x^{(0)}_\mu\| = 0$, we find $\|\delta_\gamma x^{(p)}_\mu\| \sim O(p/\sqrt{m})$. This indicates a linear growth with layer index $p$, scaled by $1/\sqrt{m}$.
+
+\subsection{Backward Derivative Term $\delta_\gamma G^{(\ell)}_\mu$}
+
+The term $\delta_\gamma G^{(\ell)}_\mu$ has a more complex structure, involving a sum over subsequent layers $p$ from $\ell$ to $L$. A representative term in this sum is (ignoring propagators for simplicity):
+\begin{equation}
+    \text{term}_p \sim \frac{1}{m} G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\mu \rangle
+\end{equation}
+This term has a factor of $1/m$. The propagation of this term back to layer $\ell$ involves products of matrices of the form $(W^{(k)})^T/\sqrt{m}$, which have $O(1)$ norm. Therefore, each term in the sum for $\delta_\gamma G^{(\ell)}_\mu$ is of order $O(1/m)$. Since there are $L-\ell$ such terms, we get:
+\begin{equation}
+    \|\delta_\gamma G^{(\ell)}_\mu\| \sim O\left(\frac{L-\ell}{m}\right)
+\end{equation}
+This term shows a linear dependency on the number of subsequent layers and is scaled by $1/m$.
+
+\subsection{Overall Scaling of $K^{(3)}$}
+
+The full expression for $K^{(3)}_{\alpha\beta\gamma}$ is a sum of terms involving scalar products of the quantities analyzed above. For example:
+\begin{equation}
+K^{(3)}_{\alpha\beta\gamma} = \langle \delta_\gamma x^{(L)}_\alpha, x^{(L)}_\beta \rangle + \langle x^{(L)}_\alpha, \delta_\gamma x^{(L)}_\beta \rangle + \dots
+\end{equation}
+The dominant term comes from the forward derivative part:
+\begin{equation}
+    \langle \delta_\gamma x^{(L)}_\alpha, x^{(L)}_\beta \rangle \sim O(L/\sqrt{m})
+\end{equation}
+The other terms involving $\delta_\gamma G$ are smaller, of order $O(L/m)$. Thus, for large $m$:
+\begin{equation}
+    K^{(3)}_{\alpha\beta\gamma} \sim O(L/\sqrt{m})
+\end{equation}
+
+\section{Conclusion on Depth Dependence}
+
+Our analysis shows that the magnitude of the entries of the $K^{(3)}$ tensor does \textbf{not} decay with depth $L$. Instead, it appears to grow linearly with $L$. The scaling factor is $1/\sqrt{m}$.
+
+This contradicts the initial suspicion of an exponential decay. The key observations are:
+\begin{itemize}
+    \item The fundamental vectors $x^{(p)}$ and $G^{(\ell)}$ have norms that are stable across layers and do not decay.
+    \item The derivative terms $\delta_\gamma x^{(p)}$ and $\delta_\gamma G^{(\ell)}$ introduce factors of $1/\sqrt{m}$ and $1/m$ respectively, but their recursive/summative nature leads to a linear growth with the number of layers involved ($p$ or $L-\ell$).
+\end{itemize}
+
+Therefore, for a fixed width $m$, we expect the values of $K^{(3)}$ to increase with the depth $L$. There is no evidence of an exponential decay. The factor $1/\sqrt{m}$ controls the overall magnitude but does not introduce a decay with depth.
+
+\end{document}
