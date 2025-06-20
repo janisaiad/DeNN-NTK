@@ -9,7 +9,7 @@ from finitewidth.kernel3_empirical import Kernel3Empirical
 N_VALUES = [8, 16, 32, 64, 128, 256]  # we use different numbers of data points
 D_IN_VALUES = [20, 50, 100, 200, 500, 1000, 2000, 5000]  # we test different input dimensions  
 M_VALUES = [10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800,900,1000,2000,3000,4000,5000]  # we vary network widths
-L_VALUES = np.arange(2, 20, 2)  # we test network depths
+L_VALUES = np.arange(2, 40, 2)  # we test network depths
 RANDOM_SEED = 42
 
 PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data/large"
@@ -69,7 +69,7 @@ for i1, N in enumerate(N_VALUES):
     for i2, D_IN in enumerate(D_IN_VALUES):
         for i3, M in enumerate(M_VALUES):
             for i4, L in enumerate(L_VALUES):
-                complexity = 2*i1 + 0.5*i2 + 0.5*i3 + i4  # we compute complexity score, penalize a lot N
+                complexity = 2*i1 + i2 + i3 + 0.2*i4  # we compute complexity score, penalize a lot N
                 experiments.append((complexity, N, D_IN, M, L))
 
 experiments.sort(key=lambda x: x[0])  # we sort by complexity score (1st coordinate)
@@ -78,61 +78,63 @@ for complexity, N, D_IN, M, L in experiments:
     # if the npy file exists, we skip the computation
     filename = f"k3_analysis_N{N}_D{D_IN}_M{M}_L{L}.npy"
     if not(os.path.isfile(os.path.join(PATH_TO_DATA, filename))): # we check if the file exists
+        try:         
+            start_time = time.time()  # we start timing
             
-        start_time = time.time()  # we start timing
-        
-        print(f"\nComputing for N={N}, D_IN={D_IN}, M={M}, L={L}...")
-        
-        key = jax.random.PRNGKey(key_seed)
-        key_seed += 1
-        weights = init_network(key, L, D_IN, M)  # we initialize network
-        data = generate_data(key_seed, N, D_IN)  # we generate input data
-        
-        feature_maps, sigma_derivatives = compute_features_and_derivatives(weights, data)  # we do forward pass
+            print(f"\nComputing for N={N}, D_IN={D_IN}, M={M}, L={L}...")
+            
+            key = jax.random.PRNGKey(key_seed)
+            key_seed += 1
+            weights = init_network(key, L, D_IN, M)  # we initialize network
+            data = generate_data(key_seed, N, D_IN)  # we generate input data
+            
+            feature_maps, sigma_derivatives = compute_features_and_derivatives(weights, data)  # we do forward pass
 
-        k3_computer = Kernel3Empirical(weights, sigma_derivatives, feature_maps)  # we setup k3 computer
-        k3_tensor = np.zeros((N, N, N))  # we initialize tensor
-        
-        for i in range(N):
-            for j in range(i, N):
-                for k in range(j, N):
-                    val = k3_computer.kernel3(i, j, k)  # we compute tensor entry
-                    k3_tensor[i, j, k] = k3_tensor[i, k, j] = k3_tensor[j, i, k] = \
-                    k3_tensor[j, k, i] = k3_tensor[k, i, j] = k3_tensor[k, j, i] = val  # we fill symmetric entries
+            k3_computer = Kernel3Empirical(weights, sigma_derivatives, feature_maps)  # we setup k3 computer
+            k3_tensor = np.zeros((N, N, N))  # we initialize tensor
+            
+            for i in range(N):
+                for j in range(i, N):
+                    for k in range(j, N):
+                        val = k3_computer.kernel3(i, j, k)  # we compute tensor entry
+                        k3_tensor[i, j, k] = k3_tensor[i, k, j] = k3_tensor[j, i, k] = \
+                        k3_tensor[j, k, i] = k3_tensor[k, i, j] = k3_tensor[k, j, i] = val  # we fill symmetric entries
 
-        inf_norm = M * np.max(np.abs(k3_tensor))  # we compute infinity norm
-        
-        all_slice_eigenvalues = []
-        for k in range(N):
-            slice_matrix = k3_tensor[:, :, k]  # we get matrix slice
-            eigenvalues = np.linalg.eigvalsh(slice_matrix)  # we compute eigenvalues
-            all_slice_eigenvalues.append(eigenvalues)
-        
-        all_slice_eigenvalues = M * np.array(all_slice_eigenvalues)  # we scale eigenvalues
-        mean_eigenvalues = np.mean(all_slice_eigenvalues, axis=0)  # we compute mean
-        std_eigenvalues = np.std(all_slice_eigenvalues, axis=0)  # we compute std
+            inf_norm = M * np.max(np.abs(k3_tensor))  # we compute infinity norm
+            
+            all_slice_eigenvalues = []
+            for k in range(N):
+                slice_matrix = k3_tensor[:, :, k]  # we get matrix slice
+                eigenvalues = np.linalg.eigvalsh(slice_matrix)  # we compute eigenvalues
+                all_slice_eigenvalues.append(eigenvalues)
+            
+            all_slice_eigenvalues = M * np.array(all_slice_eigenvalues)  # we scale eigenvalues
+            mean_eigenvalues = np.mean(all_slice_eigenvalues, axis=0)  # we compute mean
+            std_eigenvalues = np.std(all_slice_eigenvalues, axis=0)  # we compute std
 
-        output_data = {
-            'N': N,
-            'D_IN': D_IN,
-            'M': M,
-            'L': L,
-            'inf_norm': inf_norm,
-            'mean_eigenvalues': mean_eigenvalues,
-            'std_eigenvalues': std_eigenvalues,
-            'RANDOM_SEED': RANDOM_SEED
-        }
-        
-        filename = f"k3_analysis_N{N}_D{D_IN}_M{M}_L{L}.npy"
-        np.save(os.path.join(PATH_TO_DATA, filename), output_data)  # we save results
-        
-        end_time = time.time()  # we end timing
-        compute_time = end_time - start_time
-        
-        print(f"Computation time: {compute_time:.2f} seconds")
-        print(f"Data saved to {PATH_TO_DATA}/{filename}")
+            output_data = {
+                'N': N,
+                'D_IN': D_IN,
+                'M': M,
+                'L': L,
+                'inf_norm': inf_norm,
+                'mean_eigenvalues': mean_eigenvalues,
+                'std_eigenvalues': std_eigenvalues,
+                'RANDOM_SEED': RANDOM_SEED
+            }
+            
+            filename = f"k3_analysis_N{N}_D{D_IN}_M{M}_L{L}.npy"
+            np.save(os.path.join(PATH_TO_DATA, filename), output_data)  # we save results
+            
+            end_time = time.time()  # we end timing
+            compute_time = end_time - start_time
+            
+            print(f"Computation time: {compute_time:.2f} seconds")
+            print(f"Data saved to {PATH_TO_DATA}/{filename}")
 
-        
+        except Exception as e:
+            print(f"Error for N={N}, D_IN={D_IN}, M={M}, L={L}: {e}")
+            continue
     else:
         print(f"Skipping {filename} because it already exists")
         
