@@ -8,7 +8,7 @@ from finitewidth.kernel3_empirical import Kernel3Empirical
 # --- Configuration ---
 N_VALUES = [8, 16, 32, 64, 128, 256]  # we use different numbers of data points
 D_IN_VALUES = [20, 50, 100, 200, 500, 1000, 2000, 5000]  # we test different input dimensions  
-M_VALUES = [10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800,900,1000,2000,3000,4000,5000]  # we vary network widths
+M_VALUES = [10,20,30,40,50,60,70,80,90,100,200,300,400,] # 500,600,700,800,900,1000,2000,3000,4000,5000]  # we vary network widths
 L_VALUES = np.arange(2, 40, 2)  # we test network depths
 RANDOM_SEED = 42
 
