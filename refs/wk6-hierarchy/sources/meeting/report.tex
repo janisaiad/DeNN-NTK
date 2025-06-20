@@ -113,6 +113,23 @@ With this definition, the dynamics of the network output become:
 \end{equation}
 In the infinite-width limit ($m \to \infty$), $K^{(2)}_t$ converges to a fixed kernel $K^{(2)}_\infty$ and does not change during training.
 
+\subsubsection{Spectral Properties of the Infinite-Width NTK}
+The spectrum of the infinite-width kernel $\Ktwo_\infty$ exhibits a distinct structure that is crucial for understanding training dynamics. It typically contains one large, isolated eigenvalue that remains relatively constant with network depth (Figure \ref{fig:largest_eigenvalue}), while the remaining eigenvalues form a "bulk". These bulk eigenvalues, including the smallest one $\lambda_{\min}$, scale linearly with depth $L$ and inversely with data size $N$, following a trend of $\Order(L/N)$. Our experiments confirm this, revealing a scaling of approximately $0.75 L/N$ (Figure \ref{fig:k_eigenvalue}). As we will see, this property is fundamental, as the inverse of these small eigenvalues amplifies the finite-width corrections in deep networks.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{largest_eigenvalue_vs_L_infinite.png}
+    \caption{The largest eigenvalue of the infinite-width NTK remains approximately constant with depth $L$.}
+    \label{fig:largest_eigenvalue}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{kth_eigenvalue_vs_L_infinite.png}
+    \caption{The $k$-th smallest eigenvalues of the infinite-width NTK scale linearly with depth $L$.}
+    \label{fig:k_eigenvalue}
+\end{figure}
+
 \subsection{The Hierarchy of Kernels}
 At finite width, $K^{(2)}_t$ evolves. The Neural Tangent Hierarchy extends the dynamics by considering the time derivative of the kernels themselves. The evolution of $K^{(2)}_t$ is given by:
 \begin{equation}
@@ -313,7 +330,7 @@ The regression analysis yields an extremely clear relationship with a goodness-o
     \|K_{\text{emp}} - K_{\infty}\|_\infty \propto L^{1.171} \cdot D_{\text{in}}^{0.047} \cdot N^{0.900} \cdot M^{-1.009}
     \label{eq:scaling_law}
 \end{equation}
-This empirical model provides a precise characterization of the correction's behavior. The dependence on width $M$ closely matches the theoretical expectation of an $\mathcal{O}(1/M)$ correction, as indicated by the exponent of $-1.009$. More strikingly, the correction exhibits a super-linear growth with depth $L$ and a near-linear growth with the number of data points $N$. Perhaps most importantly for practical applications such as operator learning, the correction is effectively independent of the input dimension $D_{\text{in}}$, as shown by the small exponent of $0.047$. This suggests that the feature learning capabilities captured by the NTK evolution do not degrade in high-dimensional settings.
+This empirical model, derived from a comprehensive multivariate regression, provides a precise characterization of the correction's behavior. Extensive further experiments, analyzing the scaling with respect to each parameter individually, have confirmed these findings across a wide range of configurations. We consistently observe that the correction's magnitude grows slightly faster than linearly with the network's depth ($L^{1.171}$) and almost linearly with the number of data points ($N^{0.900}$). The correction also reliably decays almost perfectly as the inverse of the width ($M^{-1.009}$), which is strongly consistent with the theoretical expectation of an $\mathcal{O}(1/M)$ scaling for finite-width effects. Most importantly, the dependence on the input dimension $D_{\text{in}}$ remains bounded and remarkably small. This is a crucial property for our setup, as it suggests that the feature-learning capabilities captured by the NTK's evolution do not degrade in high-dimensional spaces, making this approach highly promising for applications such as PDE solving in high dimensions.
 
 \subsection{Theoretical Interpretation}
 
@@ -329,10 +346,16 @@ The first-order correction to the NTK at late times is given by:
 where $\lambda_i$ and $\hat{e}_i$ are the eigenvalues and eigenvectors of the initial kernel $\Theta_0$, and $O_3$ and $O_4$ are the higher-order kernels from the NTH.
 \end{theorem}
 
-This formula illuminates two crucial mechanisms. Firstly, it involves terms with both the third-order kernel $O_3$ (equivalent to our $K^{(3)}$) and the fourth-order kernel $O_4$. Our own experimental analysis of $K^{(3)}$ in Section 5 showed that its magnitude grows with depth, yet other findings from `kernel3_vs_depth_finite_empirical_largeexperiments.py` confirm that key metrics of this kernel, such as its infinity norm and maximum eigenvalue, decay with width, suggesting its direct influence wanes. While the precise scaling of the $O_3$ term within the full correction formula remains an open question that is the subject of ongoing experiments, the robust linear growth of the total NTK correction with depth $L$ strongly suggests that the term involving the $O_4$ kernel is the primary driver of this scaling behavior.
+This formula illuminates two crucial mechanisms that explain our empirical findings. First, we consider the influence of the higher-order kernels, $O_3$ (which is equivalent to our $K^{(3)}$) and $O_4$. Although our analysis has shown that the norm of $K^{(3)}$ itself grows with depth, the robust linear growth of the total NTK correction with depth $L$ strongly suggests that the term involving the $O_4$ kernel is the primary driver of this scaling behavior.
 
-Secondly, the formula reveals that the correction terms are inversely proportional to the eigenvalues $\lambda_i$ of the initial kernel. It has been empirically and theoretically shown that the smallest eigenvalue, $\lambda_{\min}$, scales as $\mathcal{O}(L/N)$. This inverse relationship means that for deeper networks (larger $L$) or for larger datasets (larger $N$), $\lambda_{\min}$ becomes smaller. A smaller denominator amplifies the entire finite-width correction. This mechanism provides a compelling theoretical explanation for the observed scaling of the correction with both depth $L$ and data size $N$. The interplay between the higher-order kernels, particularly $O_4$, and the spectrum of the initial kernel thus provides a strong theoretical framework for understanding why and how finite-width networks deviate from the infinite-width limit.
+Second, the formula reveals the critical role of the initial kernel's spectrum. The correction terms are inversely proportional to the eigenvalues $\lambda_i$ of the initial kernel $\Theta_0$. We established that the smallest eigenvalues scale as $\mathcal{O}(L/N)$. This inverse relationship provides a compelling theoretical explanation for the observed scaling of the correction: for deeper networks (larger $L$) or for larger datasets (larger $N$), the smallest eigenvalues become smaller. A smaller denominator in Equation \ref{eq:theta_correction} naturally amplifies the entire finite-width correction, explaining why it scales so clearly with both depth $L$ and data size $N$.
 
+\section{Future Work}
+This research opens up several promising avenues for future investigation. A primary goal is to further clarify the Neural Tangent Hierarchy dynamics by computing the scaling of its hierarchical coefficients, particularly $\lambda_H$, and empirically verifying its predicted linear scaling with depth. Building on this, since the $O_4$ kernel appears to be a critical component of the NTK correction, a detailed study of its properties, including its eigendecomposition, is necessary. Should a full implementation not be available in existing literature, developing one will be essential to fully analyze its structure and contribution to feature learning.
+
+Beyond the specific kernels, the emergence of particular geometric patterns in the NTK spectrum, such as the observed "parabola shape," also warrants deeper investigation. Understanding the origin of these shapes could reveal new insights into the inductive biases of deep networks. To test the generality of our findings, the numerical framework should also be extended to data with inherent geometric structure, for instance, data defined on the torus or the sphere. This would require leveraging techniques like Kronecker decomposition and spherical harmonics to analyze how the NTK evolution depends on the data manifold and input dimension.
+
+Finally, to bridge the gap between theory and practice, this analysis must be expanded to include more complex and modern architectures. Investigating the NTK hierarchy in different settings, such as for narrow networks or for networks with skip connections like ResNets and varying initialization schemes, will be a crucial next step.
 
 \section{Conclusion}
 
