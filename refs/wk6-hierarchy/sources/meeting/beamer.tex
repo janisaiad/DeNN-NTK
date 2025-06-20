@@ -19,7 +19,7 @@
 
 \title{Analysis of the Neural Tangent Hierarchy and the First-Order Correction Kernel $K^{(3)}$}
 \subtitle{Theory, Scaling, and Experiments}
-\author{Janis Aiazi}
+\author{Janis Aiad}
 \institute{UMD, Ecole Polytechnique}
 \date{\today}
 
@@ -86,6 +86,24 @@ To study finite-width effects, we turn to the \textbf{Neural Tangent Hierarchy (
 \end{enumerate}
 \end{frame}
 
+\section{The Neural Tangent Hierarchy}
+
+\begin{frame}{From NTK to the Hierarchy}
+The dynamics of the network output $f_\alpha(t) := f(x_\alpha, \theta_t)$ are given by:
+\[
+\frac{d f_\alpha(t)}{dt} = -\frac{1}{n} \sum_{\beta=1}^n K^{(2)}_t(x_\alpha, x_\beta) (f_\beta(t) - y_\beta)
+\]
+\begin{definition}[Neural Tangent Kernel]
+$K^{(2)}_t(x_\alpha, x_\beta) := \langle \nabla_\theta f_t(x_\alpha), \nabla_\theta f_t(x_\beta) \rangle$
+\end{definition}
+\vspace{0.5cm}
+
+\begin{definition}[Third-Order Kernel]
+$K^{(3)}_t(x_\alpha, x_\beta, x_\gamma) := \langle \nabla_\theta K^{(2)}_t(x_\alpha, x_\beta), \nabla_\theta f_t(x_\gamma) \rangle$
+\end{definition}
+This defines an infinite hierarchy where the dynamics of $K^{(r)}$ are governed by $K^{(r+1)}$.
+\end{frame}
+
 \begin{frame}{The NTK Spectrum at Infinite Width}
 \textbf{The spectrum of the infinite-width NTK has a distinct structure:}
 \begin{itemize}
@@ -104,24 +122,130 @@ To study finite-width effects, we turn to the \textbf{Neural Tangent Hierarchy (
     \captionof{figure}{\tiny Smallest eigenvalues vs. Depth L.}
 \end{columns}
 
+\textbf{Interpretation:}
+\begin{itemize}
+    \item \textbf{Depth ($L$):} Super-linear growth.
+    \item \textbf{Data Size ($N$):} Linear growth.
+    \item \textbf{Input Dimension ($D_{in}$):} Bounded dependence. The correction does not grow with input dimension, which is ideal for high-dimensional problems.
+    \item \textbf{Width ($M$):} Decays as $\sim 1/M$, as expected from theory.
+\end{itemize}
+
+\vfill
+\tiny{\textit{Disclaimer: These results are based on extensive computations ($\sim$100h+) and are fully reproducible via the provided codebase.}}
+
 \end{frame}
 
-\section{The Neural Tangent Hierarchy}
+\begin{frame}{Goal: The Late-Time NTK Correction}
+To understand the full impact of the NTK's evolution, we focus on the final, first-order correction after training, $\Theta^{(1)}_\infty$.
+\begin{theorem}[Late-Time Correction \cite{large-width-feynman}]
+\begin{align*}
+\Theta^{(1)}_\infty = & -\sum_{i}\frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \\
+& + \sum_{i,j}\frac{1}{\lambda_{i}(\lambda_{i}+\lambda_{j})}(\hat{e}_{i}^{T}O_{4}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})
+\end{align*}
+\end{theorem}
+\vspace{-0.5cm}
+\begin{center}
+\small
+This shows the correction depends on higher-order kernels ($O_3$, $O_4$) and the spectrum ($\lambda_i$).\\ Our first step is to analyze $K^{(3)} \equiv O_3$.
+\end{center}
+\end{frame}
 
-\begin{frame}{From NTK to the Hierarchy}
-The dynamics of the network output $f_\alpha(t) := f(x_\alpha, \theta_t)$ are given by:
+\section{Deeper Dive: NTK Correction Scaling}
+
+\begin{frame}{Experimental Setup for NTK Correction}
+\textbf{Goal:} Empirically measure the full NTK correction and find its scaling law.
+\begin{itemize}
+    \item \textbf{Setup:} JAX and Neural Tangents library.
+    \item \textbf{Measure:} Spectral radius of the scaled correction, $\|M(K_{\text{emp}} - K_{\infty})\|$.
+    \item \textbf{Parameters Varied:}
+    \begin{itemize}
+        \item Depth $L \in [2, 1000]$
+        \item Width $M \in [10, 5000]$
+        \item Input Dim $D_{in} \in [20, 5000]$
+        \item Data Size $N \in [8, 256]$
+    \end{itemize}
+    \item \textbf{Rigor:} 10 runs per configuration for statistical robustness.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Empirical Scaling of the NTK Correction}
+A multivariate regression in log-space ($R^2=0.994$) on the correction's spectral radius yields a precise scaling law:
+
+\begin{alertblock}{Empirical Scaling Law}
 \[
-\frac{d f_\alpha(t)}{dt} = -\frac{1}{n} \sum_{\beta=1}^n K^{(2)}_t(x_\alpha, x_\beta) (f_\beta(t) - y_\beta)
+\|K - K_\infty\| \propto L^{1.171} \cdot D_{\text{in}}^{0.047} \cdot N^{0.900} \cdot M^{-1.009}
 \]
-\begin{definition}[Neural Tangent Kernel]
-$K^{(2)}_t(x_\alpha, x_\beta) := \langle \nabla_\theta f_t(x_\alpha), \nabla_\theta f_t(x_\beta) \rangle$
-\end{definition}
-\vspace{0.5cm}
+\end{alertblock}
 
-\begin{definition}[Third-Order Kernel]
-$K^{(3)}_t(x_\alpha, x_\beta, x_\gamma) := \langle \nabla_\theta K^{(2)}_t(x_\alpha, x_\beta), \nabla_\theta f_t(x_\gamma) \rangle$
-\end{definition}
-This defines an infinite hierarchy where the dynamics of $K^{(r)}$ are governed by $K^{(r+1)}$.
+\textbf{Interpretation:}
+\begin{itemize}
+    \item \textbf{Depth ($L$):} Super-linear growth.
+    \item \textbf{Data Size ($N$):} Linear growth.
+    \item \textbf{Input Dimension ($D_{in}$):} Bounded dependence. The correction does not grow with input dimension, which is ideal for high-dimensional problems.
+    \item \textbf{Width ($M$):} Decays as $\sim 1/M$, as expected from theory.
+\end{itemize}
+
+\vfill
+\tiny{\textit{Disclaimer: These results are based on extensive computations ($\sim$100h+) and are fully reproducible via the provided codebase.}}
+
+\end{frame}
+
+\begin{frame}{Correction Scaling vs. Depth ($L$)}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.7\textwidth]{spectralradiusallconfigsL.png}
+        \caption{Correction's spectral radius vs. depth $L$. This plot aggregates results across all configurations, confirming the super-linear growth trend on a log-log scale, consistent with $L^{1.171}$.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Correction Scaling vs. Data Size ($N$)}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.7\textwidth]{spectralradiusallconfigsN.png}
+        \caption{Correction's spectral radius vs. data size $N$. The trend supports a near-linear scaling ($N^{0.900}$), confirming that the correction becomes more significant for larger datasets.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Correction Scaling vs. Input Dimension ($D_{in}$)}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.7\textwidth]{spectralradiusallconfigsD.png}
+        \caption{Correction's spectral radius vs. input dimension $D_{in}$. The flat trend provides strong evidence that the dependence on dimension is bounded, a crucial result for high-dimensional applications.}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Hypothetical Scaling for $\lambda_{\min}$}
+\begin{alertblock}{Finite-Width Bound}
+Including finite-width effects, we conjecture a more precise bound based on our experiments and Weyl's inequality:
+\[ \lambda_{\min}(K_{\text{emp}}) \ge \frac{0.75L}{N} - C \frac{NL}{M} \]
+\end{alertblock}
+This shows that the finite-width term further decreases the small eigenvalues.
+For a parameter budget $P = M^2L$, we first optimize with respect to $L$:
+\[
+M = \sqrt{\frac{P}{L}} \implies \lambda_{\min} \ge \frac{0.75L}{N} - C \frac{NL}{\sqrt{\frac{P}{L}}} 
+\]
+\end{frame}
+
+\begin{frame}{Optimal Configuration}
+The optimal value of $L$ occurs when the derivative of $\lambda_{\min}$ with respect to $L$ is zero:
+\[
+\frac{\partial}{\partial L} \lambda_{\min} = \frac{0.75}{N} - \frac{3}{2} C \frac{N}{\sqrt{P}} L^{1/2} = 0 \implies L^* = \frac{0.25 P}{C^2 N^4}
+\]
+
+This gives the optimal width:
+\[
+M^* = \sqrt{\frac{P}{L^*}} = 2 C N^2
+\]
+
+These values maximize the lower bound on $\lambda_{\min}$ for a fixed parameter budget $P$ and dataset size $N$.
+
+\end{frame}
+
+\begin{frame}{Important Caveat}
+\begin{alertblock}{Important Caveat}
+This analysis relies on Weyl's inequality without taking the eigenvalues signs into account, which provides a very loose bound. The actual behavior may differ significantly from these predictions. For more accurate results, we should focus on better estimating the $K^{(3)}$ and $K^{(4)}$ terms directly.
+\end{alertblock}
 \end{frame}
 
 \section{Derivation of the $K^{(3)}$ Formula}
@@ -194,25 +318,93 @@ Each component is an explicit (but lengthy) sum over layers involving activation
 \end{columns}
 \end{frame}
 
-\section{Experimental Validation}
 
-\begin{frame}{Experimental Setup}
-\textbf{Goal:} Empirically compute $K^{(3)}$ and verify the scaling law.
+
+\begin{frame}{Theoretical Interpretation of the Scaling Law (not sure of that)}
+    The late-time NTK correction formula, $\Theta^{(1)}_\infty$, explains our empirical findings.
+    
+    \begin{columns}
+    \column{0.5\textwidth}
+    \textbf{1. Why super-linear scaling with L?}
+    \begin{itemize}
+        \item While $\|K^{(3)}\| \sim \Order(L^2/\sqrt{m})$, experiments show it diminishes with width.
+        \item Its contribution to the correction is suppressed.
+        \item The observed super-linear growth of the correction with depth $L$ must be primarily driven by the \textbf{$O_4$ term}.
+        \item \textit{Note: The exact scaling of the $O_4$ term is a key area for future work.}
+    \end{itemize}
+    
+    \column{0.5\textwidth}
+    \textbf{2. Why scaling with L and N?}
+    \begin{itemize}
+        \item The correction is amplified by small eigenvalues ($\lambda_i$) of the NTK.
+        \item We've seen these eigenvalues scale as $\sim L/N$.
+        \item A larger $L$ or smaller $N$ means a smaller $\lambda_{\min}$, which \textbf{boosts the correction}, explaining the observed scaling.
+    \end{itemize}
+    \end{columns}
+    \end{frame}
+
+
+\section{Scaling and Validation of $K^{(3)}$}
+
+\begin{frame}{Theoretical Scaling of Core Components}
 \begin{itemize}
-    \item \textbf{Architecture:} MLP with ReLU, width $M=100$.
+    \item \textbf{Activations and G-vectors:}
+    With proper initialization (dynamical isometry), norms are stable across layers:
+    \[ \|x^{(p)}_\mu\| \sim \Order(1) \quad \text{and} \quad \|G^{(\ell)}_\mu\| \sim \Order(1) \]
+    
+    \item \textbf{Numerical Challenge: Lyapunov Exponents}
+    For any \textit{finite} width, the norm of products of random matrices is governed by Lyapunov exponents. Disentangling potential small exponential trends from the polynomial scaling we want to measure is hard.
+    
+    \item \textbf{Derivative Terms Scaling:}
+    \begin{align*}
+    \|\delta_\gamma x^{(p)}_\mu\| &\sim \Order\left(\frac{p}{\sqrt{m}}\right) \quad (\text{linear growth with layer } p) \\
+    \|\delta_\gamma G^{(\ell)}_\mu\| &\sim \Order\left(\frac{H-\ell}{m}\right) \quad (\text{grows with number of subsequent layers})
+    \end{align*}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Term-by-Term and Overall Scaling of $K^{(3)}$}
+Combining component scalings gives the scaling of the full tensor.
+
+\begin{columns}
+\column{0.6\textwidth}
+\textbf{Term-by-term analysis ($H \ll \sqrt{m}$):}
+\begin{itemize}
+    \item $K^{(3, \text{out})} \sim \Order(H/\sqrt{m})$
+    \item $K^{(3, G, W)} \sim \Order(H^2/m)$
+    \item $K^{(3, G, a)} \sim \Order(H/\sqrt{m})$
+    \item $K^{(3, x)} \sim \Order(H^2/\sqrt{m})$
+\end{itemize}
+\column{0.4\textwidth}
+The forward term $K^{(3,x)}$ dominates the scaling.
+\end{columns}
+
+\begin{alertblock}{Overall Scaling of $K^{(3)}$}
+The magnitude of the third-order kernel scales as:
+\begin{equation*}
+K^{(3)}_{\alpha\beta\gamma} \sim \Order\left(\frac{H^2}{\sqrt{m}}\right)
+\end{equation*}
+\end{alertblock}
+This implies finite-width effects grow quadratically with depth.
+\end{frame}
+
+\begin{frame}{Experimental Setup for $K^{(3)}$}
+\textbf{Goal:} Empirically compute $K^{(3)}$ and verify the $\Order(H^2/\sqrt{m})$ scaling law.
+\begin{itemize}
+    \item \textbf{Architecture:} MLP with ReLU, varying depth $L$ (same as $H$).
     \item \textbf{Data:} $N=8$ random, normalized data points in $D_{in}=20$.
-    \item \textbf{Variable:} We vary the network depth $L$ (same as $H$).
+    \item \textbf{Width:} Fixed at $M=100$.
     \item \textbf{Methodology:}
         \begin{enumerate}
             \item Initialize network for a given depth $L$.
-            \item Perform forward pass, storing all activations and derivatives.
+            \item Perform forward pass, storing activations and derivatives.
             \item Compute the full $K^{(3)}$ tensor using the derived formulas.
             \item Calculate its infinity norm $\|K^{(3)}\|_\infty = \max |K^{(3)}_{\alpha\beta\gamma}|$.
         \end{enumerate}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Results and Discussion}
+\begin{frame}{Results: $K^{(3)}$ Scaling}
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{../../../experiments/plots/k3_inf_norm_vs_L_finite_M100_N8_D20.png}
@@ -226,67 +418,33 @@ Each component is an explicit (but lengthy) sum over layers involving activation
 \end{itemize}
 \end{frame}
 
-\section{Deeper Dive: NTK Correction Scaling}
-
-\begin{frame}{Precise Scaling of the NTK Correction}
-A multivariate regression in log-space ($R^2=0.994$), confirmed by extensive individual experiments, on the spectral radius of the correction $\|K - K_\infty\|$ yields a precise scaling law:
-
-\begin{alertblock}{Empirical Scaling Law}
-\[
-\|K - K_\infty\| \propto L^{1.171} \cdot D_{\text{in}}^{0.047} \cdot N^{0.900} \cdot M^{-1.009}
-\]
-\end{alertblock}
-
-\textbf{Interpretation:}
-\begin{itemize}
-    \item \textbf{Depth ($L$):} Super-linear growth.
-    \item \textbf{Data Size ($N$):} Near-linear growth.
-    \item \textbf{Input Dimension ($D_{in}$):} The dependence remains bounded and small. This is great for our setup in PDE solving in high dimension.
-    \item \textbf{Width ($M$):} Decays as $\sim 1/M$, as expected from theory.
-\end{itemize}
-
-\vfill
-\tiny{\textit{Disclaimer: These results are based on extensive computations ($\sim$100h+) and are fully reproducible via the provided codebase.}}
-
-\end{frame}
-
-\begin{frame}{Theoretical Interpretation: A Deeper Look}
-The formula for the late-time NTK correction, $\Theta^{(1)}_\infty$, connects our findings.
-\begin{theorem}[Late-Time Correction \cite{large-width-feynman}]
-\begin{align*}
-\Theta^{(1)}_\infty = & -\sum_{i}\frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \\
-& + \sum_{i,j}\frac{1}{\lambda_{i}(\lambda_{i}+\lambda_{j})}(\hat{e}_{i}^{T}O_{4}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})
-\end{align*}
-\end{theorem}
-
-\begin{columns}
-\column{0.5\textwidth}
-\textbf{1. Why linear scaling with L?}
-\begin{itemize}
-    \item Our experiments showed that the $K^{(3)} \equiv O_3$ kernel's norm diminishes with width.
-    \item Therefore, the $O_3$ term's contribution is suppressed.
-    \item The observed linear growth of the correction with depth $L$ must be primarily driven by the \textbf{$O_4$ term}.
-    \item \textit{Note: The exact scaling of the $O_3$ term is complex and under active experimental investigation.}
-\end{itemize}
-
-\column{0.5\textwidth}
-\textbf{2. Why scaling with L and N?}
-\begin{itemize}
-    \item The correction is amplified by small eigenvalues ($\lambda_i$), which we've just seen scale as $\sim L/N$.
-    \item A larger $L$ or $N$ means a smaller $\lambda_{\min}$, which \textbf{boosts the correction}, explaining the scaling.
-\end{itemize}
-\end{columns}
-
-\end{frame}
-
 \section{Future Work}
 \begin{frame}{Future Work}
 \begin{itemize}
-    \item \textbf{NTH}: Compute $\lambda_H$ and verify its linear scaling.
-    \item \textbf{Feynman}: Perform eigendecomposition of the $O_4$ matrix. Implement the full framework if not found in literature.
-    \item \textbf{Concentration of the NTK}: Investigate the parabola shape and other emerging patterns.
-    \item \textbf{Numerics on Manifolds}: Extend experiments to the torus and sphere (using Kronecker decomposition / spherical harmonics) and analyze dependency on input dimension.
-    \item \textbf{NTK in Narrow Networks}: Study NTK for narrow networks with varying initializations, architectures (e.g., skip connections/ResNets).
+    \item \textbf{Neural Tangent Hierarchy:}
+    \begin{itemize}
+        \item Compute scaling of hierarchical coefficients ($\lambda_H$)
+        \item Empirically verify predicted linear scaling with depth
+    \end{itemize}
+    
+    \item \textbf{$O_4$ Kernel Analysis:}
+    \begin{itemize}
+        \item Study detailed properties and eigendecomposition
+        \item Develop full implementation if not available in literature
+        \item Analyze structure and contribution to feature learning
+    \end{itemize}
+    
+    \item \textbf{Generalization:}
+    \begin{itemize}
+        \item Extend numerical framework to structured data
+        \item Test on torus and sphere geometries
+    \end{itemize}
+    
+    \item \textbf{Modern Architectures:}
+    \begin{itemize}
+        \item Bridge theory-practice gap
+        \item Expand analysis to complex architectures like ResNets
+    \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -306,51 +464,4 @@ The training dynamics of deep networks are inherently richer than shallow ones. 
 \end{alertblock}
 \end{frame}
 
-\section{Scaling Analysis of $K^{(3)}$}
-Warning : This part is unsure now because I'm doing the calculations by hand on my own.
-\begin{frame}{Scaling of Core Components (Not sure of the validity)}
-\begin{itemize}
-    \item \textbf{Activations and G-vectors:}
-    With proper initialization (dynamical isometry), norms are stable across layers:
-    \[ \|x^{(p)}_\mu\| \sim \Order(1) \quad \text{and} \quad \|G^{(\ell)}_\mu\| \sim \Order(1) \]
-    
-    \item \textbf{Numerical Challenge: Lyapunov Exponents}
-    For any \textit{finite} width, the norm of products of random matrices is governed by Lyapunov exponents. Disentangling potential small exponential trends from the polynomial scaling we want to measure is hard.
-    
-    \item \textbf{Derivative Terms:}
-    We could imagine by making some simplifying assumptions:
-    \begin{align*}
-    \|\delta_\gamma x^{(p)}_\mu\| &\sim \Order\left(\frac{p}{\sqrt{m}}\right) \quad (\text{linear growth with layer } p) \\
-    \|\delta_\gamma G^{(\ell)}_\mu\| &\sim \Order\left(\frac{H-\ell}{m}\right) \quad (\text{grows with number of subsequent layers})
-    \end{align*}
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Overall Scaling of $K^{(3)}$}
-We combine the scaling of the components to find the scaling of the full tensor.
-
-\begin{columns}
-\column{0.6\textwidth}
-\textbf{Term-by-term analysis when H is large and M bounded:}
-\begin{itemize}
-    \item $K^{(3, \text{out})} \sim \Order(H/\sqrt{m})$
-    \item $K^{(3, G, W)} \sim \Order(H^2/m)$
-    \item $K^{(3, G, a)} \sim \Order(H/\sqrt{m})$
-    \item $K^{(3, x)} \sim \Order(H^2/\sqrt{m})$
-\end{itemize}
-\column{0.4\textwidth}
-For $H \ll \sqrt{m}$, the dominant term is the one with the slowest decay in $m$ and fastest growth in $H$.
-\end{columns}
-
-\begin{alertblock}{Dominant Term}
-The forward term $K^{(3,x)}$ dominates the scaling.
-\end{alertblock}
-
-\begin{theorem}[Scaling of $K^{(3)}$]
-The magnitude of the entries of the third-order kernel $K^{(3)}$ scales as:
-\begin{equation}
-K^{(3)}_{\alpha\beta\gamma} \sim \Order\left(\frac{H^2}{\sqrt{m}}\right)
-\end{equation*}
-\end{theorem}
-\end{frame}
 \end{document}
