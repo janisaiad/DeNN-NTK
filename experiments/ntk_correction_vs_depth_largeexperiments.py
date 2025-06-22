@@ -41,58 +41,61 @@ for complexity, N, D_IN, M, L in experiments:
     filename = f"ntk_correction_N{N}_D{D_IN}_M{M}_L{L}.npy"
     
     if not os.path.isfile(os.path.join(PATH_TO_DATA, filename)):
-        print(f"\nComputing for N={N}, D_IN={D_IN}, M={M}, L={L}...")
-        
-        spectral_radii = []
-        for exp in range(N_EXPERIMENTS):
-            key = jax.random.PRNGKey(key_seed)
-            key_seed += 1
+        try:
+            print(f"\nComputing for N={N}, D_IN={D_IN}, M={M}, L={L}...")
             
-            # we split the key for data generation and model initialization
-            data_key, model_key = random.split(key)
-            
-            data = generate_data(data_key, N, D_IN)
-            
-            layers = []
-            layers.append(stax.Dense(M, W_std=jnp.sqrt(2), b_std=0.0, parameterization='ntk'))
-            layers.append(stax.Relu())
-            
-            for _ in range(L - 1):
+            spectral_radii = []
+            for exp in range(N_EXPERIMENTS):
+                key = jax.random.PRNGKey(key_seed)
+                key_seed += 1
+                
+                # we split the key for data generation and model initialization
+                data_key, model_key = random.split(key)
+                
+                data = generate_data(data_key, N, D_IN)
+                
+                layers = []
                 layers.append(stax.Dense(M, W_std=jnp.sqrt(2), b_std=0.0, parameterization='ntk'))
                 layers.append(stax.Relu())
                 
-            layers.append(stax.Dense(1, W_std=jnp.sqrt(2), b_std=0.0, parameterization='ntk'))
+                for _ in range(L - 1):
+                    layers.append(stax.Dense(M, W_std=jnp.sqrt(2), b_std=0.0, parameterization='ntk'))
+                    layers.append(stax.Relu())
+                    
+                layers.append(stax.Dense(1, W_std=jnp.sqrt(2), b_std=0.0, parameterization='ntk'))
+                
+                init_fn, apply_fn, _ = stax.serial(*layers)
+                params = init_fn(model_key, data.shape)[1]
+                ntk_fn = nt.empirical_ntk_fn(apply_fn)
+                K = ntk_fn(data, None, params)  # compute empirical NTK
+                
+                inf_model = InfiniteWidth(n_layers=L, n_outputs=1)
+                K_prime = inf_model.kernel_matrix(data)  # compute infinite-width NTK
+                
+                correction = M * (K - K_prime)  # compute finite-width correction term
+                eigenvalues = np.linalg.eigvalsh(correction)
+                spectral_radius = np.max(np.abs(eigenvalues))  # get spectral radius of correction
+                spectral_radii.append(spectral_radius)
+                
+            mean_radius = np.mean(spectral_radii)
+            std_radius = np.std(spectral_radii)
             
-            init_fn, apply_fn, _ = stax.serial(*layers)
-            params = init_fn(model_key, data.shape)[1]
-            ntk_fn = nt.empirical_ntk_fn(apply_fn)
-            K = ntk_fn(data, None, params)  # compute empirical NTK
+            output_data = {
+                'N': N,
+                'D_IN': D_IN, 
+                'M': M,
+                'L': L,
+                'mean_spectral_radius': mean_radius,
+                'std_spectral_radius': std_radius,
+                'RANDOM_SEED': RANDOM_SEED
+            }
             
-            inf_model = InfiniteWidth(n_layers=L, n_outputs=1)
-            K_prime = inf_model.kernel_matrix(data)  # compute infinite-width NTK
-            
-            correction = M * (K - K_prime)  # compute finite-width correction term
-            eigenvalues = np.linalg.eigvalsh(correction)
-            spectral_radius = np.max(np.abs(eigenvalues))  # get spectral radius of correction
-            spectral_radii.append(spectral_radius)
-            
-        mean_radius = np.mean(spectral_radii)
-        std_radius = np.std(spectral_radii)
-        
-        output_data = {
-            'N': N,
-            'D_IN': D_IN, 
-            'M': M,
-            'L': L,
-            'mean_spectral_radius': mean_radius,
-            'std_spectral_radius': std_radius,
-            'RANDOM_SEED': RANDOM_SEED
-        }
-        
-        np.save(os.path.join(PATH_TO_DATA, filename), output_data)
-        print(f"Data saved to {PATH_TO_DATA}/{filename}")
-        print(f"Mean spectral radius: {mean_radius:.4f} ± {std_radius:.4f}")
-        
+            np.save(os.path.join(PATH_TO_DATA, filename), output_data)
+            print(f"Data saved to {PATH_TO_DATA}/{filename}")
+            print(f"Mean spectral radius: {mean_radius:.4f} ± {std_radius:.4f}")
+        except Exception as e:
+            print(f"Error for N={N}, D_IN={D_IN}, M={M}, L={L}: {e}")
+            continue
     else:
         print(f"Skipping {filename} because it already exists")
 
