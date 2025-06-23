@@ -61,7 +61,8 @@ def plot_config_scaling(data, vary_param, fixed_params):
         if key not in groups:
             groups[key] = []
         max_eigenvalue = np.max(np.abs(d['mean_eigenvalues']))
-        groups[key].append((d[vary_param], d['inf_norm'], max_eigenvalue))
+        max_eigenvalue_std = d['std_eigenvalues'][np.argmax(np.abs(d['mean_eigenvalues']))]
+        groups[key].append((d[vary_param], d['inf_norm'], max_eigenvalue, max_eigenvalue_std))
 
     filtered_groups = {k:v for k,v in groups.items() if len(v) > 3} # i keep only groups with >3 points
     sorted_groups = sorted(filtered_groups.items(), key=lambda x: len(x[1]), reverse=True)
@@ -70,48 +71,46 @@ def plot_config_scaling(data, vary_param, fixed_params):
         print(f"No configurations found with more than 3 points for {vary_param}")
         return
 
-    # i create separate figures for each plot
+    # i create figures with subplots side by side
     for idx, (config, values) in enumerate(sorted_groups[::5]):
-        # Infinity Norm Plot
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 4))
         
         sorted_values = sorted(values, key=lambda x: x[0])
         x = np.array([v[0] for v in sorted_values])
         y_inf = np.array([v[1] for v in sorted_values])
+        y_eig = np.array([v[2] for v in sorted_values])
+        y_eig_std = np.array([v[3] for v in sorted_values])
         
-        ax.scatter(x, y_inf, marker='o', s=80)
+        # Infinity Norm Plot
+        ax1.scatter(x, y_inf, marker='o', s=80)
         slope_inf, intercept_inf, r_value_inf, _, _ = linregress(np.log(x), np.log(y_inf))
         x_line = np.array(sorted(x))
-        ax.plot(x_line, np.exp(intercept_inf) * x_line**slope_inf, '--',
+        ax1.plot(x_line, np.exp(intercept_inf) * x_line**slope_inf, '--',
                 label=f'slope={slope_inf:.2f}')
         
         config_str = ", ".join([f"{p}={v}" for p,v in zip(fixed_params, config)])
-        ax.set_title(f'K3 Infinity Norm vs {vary_param}\n{config_str}')
-        ax.set_xlabel(vary_param)
-        ax.set_ylabel('Infinity Norm')
-        ax.set_xscale('log')
-        ax.set_yscale('log')
-        ax.grid(True)
-        ax.legend()
-        plt.tight_layout()
-        plt.show()
+        ax1.set_title(f'K3 Infinity Norm vs {vary_param}\n{config_str}')
+        ax1.set_xlabel(vary_param)
+        ax1.set_ylabel('Infinity Norm')
+        ax1.set_xscale('log')
+        ax1.set_yscale('log')
+        ax1.grid(True)
+        ax1.legend()
 
-        # Max Eigenvalue Plot  
-        fig, ax = plt.subplots(figsize=(10, 6))
-        y_eig = np.array([v[2] for v in sorted_values])
-        
-        ax.scatter(x, y_eig, marker='o', s=80)
+        # Max Eigenvalue Plot with Error Bars
+        ax2.errorbar(x, y_eig, yerr=y_eig_std, fmt='o', markersize=8, capsize=5)
         slope_eig, intercept_eig, r_value_eig, _, _ = linregress(np.log(x), np.log(y_eig))
-        ax.plot(x_line, np.exp(intercept_eig) * x_line**slope_eig, '--',
+        ax2.plot(x_line, np.exp(intercept_eig) * x_line**slope_eig, '--',
                 label=f'slope={slope_eig:.2f}')
         
-        ax.set_title(f'K3 Max Eigenvalue vs {vary_param}\n{config_str}')
-        ax.set_xlabel(vary_param)
-        ax.set_ylabel('Max Eigenvalue')
-        ax.set_xscale('log')
-        ax.set_yscale('log')
-        ax.grid(True)
-        ax.legend()
+        ax2.set_title(f'K3 Max Eigenvalue vs {vary_param}\n{config_str}')
+        ax2.set_xlabel(vary_param)
+        ax2.set_ylabel('Max Eigenvalue')
+        ax2.set_xscale('log')
+        ax2.set_yscale('log')
+        ax2.grid(True)
+        ax2.legend()
+        
         plt.tight_layout()
         plt.show()
 
