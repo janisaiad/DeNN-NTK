@@ -3,13 +3,13 @@ import numpy as np
 class InfiniteWidth:
     def __init__(self, n_layers: int, n_outputs: int, a: float = 1.0, b: float = 1):
         """
-        Initialise le modèle de largeur infinie.
+        Initialize the infinite width model.
 
         Args:
-            n_layers (int): Nombre de couches, l.
-            n_outputs (int): Dimension de la sortie, m_l.
-            a (float): Paramètre 'a' de la fonction d'activation (a,b)-ReLU.
-            b (float): Paramètre 'b' de la fonction d'activation (a,b)-ReLU.
+            n_layers (int): Number of layers, l.
+            n_outputs (int): Output dimension, m_l.
+            a (float): Parameter 'a' of the (a,b)-ReLU activation function.
+            b (float): Parameter 'b' of the (a,b)-ReLU activation function.
         """
         self.l = n_layers
         self.ml = n_outputs
@@ -17,10 +17,10 @@ class InfiniteWidth:
         self.b = b
         
         if self.a**2 + self.b**2 == 0:
-            raise ValueError("a^2 + b^2 ne peut pas être nul.")
+            raise ValueError("a^2 + b^2 cannot be zero.")
             
         self.delta_phi = self.b**2 / (self.a**2 + self.b**2)
-        # sigma est défini par l'initialisation EOC (Edge Of Chaos)
+        # sigma is defined by EOC (Edge Of Chaos) initialization
         self.sigma = (self.a**2 + self.b**2)**-0.5
 
     def _varrho(self, rho: np.ndarray) -> np.ndarray:

@@ -17,10 +17,10 @@ class Kernel3Infinite:
         self.b = b
         
         if self.a**2 + self.b**2 == 0:
-            raise ValueError("a^2 + b^2 ne peut pas être nul.")
+            raise ValueError("a^2 + b^2 cannot be zero.")
             
         self.delta_phi = self.b**2 / (self.a**2 + self.b**2)
-        # sigma est défini par l'initialisation EOC (Edge Of Chaos)
+        # sigma is defined by EOC (Edge Of Chaos) initialization
         self.sigma = (self.a**2 + self.b**2)**-0.5
 
     def _varrho(self, rho: np.ndarray) -> np.ndarray:

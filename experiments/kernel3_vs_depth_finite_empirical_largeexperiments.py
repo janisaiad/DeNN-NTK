@@ -6,12 +6,12 @@ import time
 from finitewidth.kernel3_empirical import Kernel3Empirical
 
 # --- Configuration ---
-N_VALUES = [8, 16, 32, 64, 128, 256]  # we use different numbers of data points
+N_VALUES =[8, 10,16, 25, 32,40,50 ,64,80,100,110, 128,150,180,200,230,256]  # we use different numbers of data points
 D_IN_VALUES = [20, 50, 100, 200, 500, 1000, 2000, 5000]  # we test different input dimensions  
 M_VALUES = [10,20,30,40,50,60,70,80,90,100,200,300,400,] # 500,600,700,800,900,1000,2000,3000,4000,5000]  # we vary network widths
 L_VALUES = np.arange(2, 40, 2)  # we test network depths
 RANDOM_SEED = 42
-
+N_experiments = 10
 PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data/large"
 os.makedirs(PATH_TO_DATA, exist_ok=True)
 
@@ -69,7 +69,7 @@ for i1, N in enumerate(N_VALUES):
     for i2, D_IN in enumerate(D_IN_VALUES):
         for i3, M in enumerate(M_VALUES):
             for i4, L in enumerate(L_VALUES):
-                complexity = 2*i1 + i2 + i3 + 0.2*i4  # we compute complexity score, penalize a lot N
+                complexity = 0.2*i1 + i2 + i3 + i4  # we compute complexity score, penalize a lot N
                 experiments.append((complexity, N, D_IN, M, L))
 
 experiments.sort(key=lambda x: x[0])  # we sort by complexity score (1st coordinate)
