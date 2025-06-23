@@ -120,6 +120,8 @@ def plot_config_scaling(data, vary_param, fixed_params):
     return slopes
 
 # %%
+# WARNING :  I recall we normalize by M in the code, but not in the plots. so it should be bounder for M
+# %%
 print("Analyzing depth (L) scaling for each configuration...") # analyze L scaling
 L_slopes = plot_config_scaling(data, 'L', ['N', 'D_IN', 'M'])
 
