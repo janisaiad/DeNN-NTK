@@ -16,3 +16,7 @@ def test_tensorflow_gpu():
     """
     [GpuDevice(id=0, platform='cuda', process_index=0, visible_device_list=['0'], memory_limit=None), GpuDevice(id=1, platform='cuda', process_index=0, visible_device_list=['1'], memory_limit=None)]
     """
+
+if __name__ == "__main__":
+    test_import_tensorflow()
+    test_tensorflow_gpu()
