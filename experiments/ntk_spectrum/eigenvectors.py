@@ -1,13 +1,13 @@
-# %%
+from infinitewidth import NtkInfiniteWidth
 import jax
 import jax.numpy as jnp
-import numpy as np
 from jax import random
-import matplotlib.pyplot as plt
+
 import os
-import neural_tangents as nt
-from neural_tangents import stax
-from infinitewidth import NtkInfiniteWidth 
+
+
+# we will see the eigenvectors distribution of the NTK matrix
+# I guess there is like a uniform distribution of the eigenvectors in the S^(N-2), which is the sphere section orthogonal to the max eigenvalue
 
 N_VALUES = [8, 10,16, 25, 32,40,50 ,64,80,100,110, 128,150,180,200,230,256]  # we use different numbers of data points
 D_IN_VALUES = [20, 50, 100, 200, 500, 1000, 2000, 5000]  # we test different input dimensions  
@@ -29,7 +29,7 @@ for i1, N in enumerate(N_VALUES):
     for i2, D_IN in enumerate(D_IN_VALUES):
         for i3, M in enumerate(M_VALUES):
             for i4, L in enumerate(L_VALUES):
-                complexity = i1 + i2 + i3 + 0.2*i4  # score to order experiments by computational complexity
+                complexity = i1 + i2 + i3 + i4  # score to order experiments by computational complexity
                 experiments.append((complexity, N, D_IN, M, L))
 
 experiments.sort(key=lambda x: x[0])
@@ -44,52 +44,36 @@ for complexity, N, D_IN, M, L in experiments:
         try:
             print(f"\nComputing for N={N}, D_IN={D_IN}, M={M}, L={L}...")
             
-            spectral_radii = []
+            all_eigenvalues = []
+            all_eigenvectors = []
             for exp in range(N_EXPERIMENTS):
                 key = jax.random.PRNGKey(key_seed)
                 key_seed += 1
                 
-                # we split the key for data generation and model initialization
-                data_key, model_key = random.split(key)
+                data_key, model_key = random.split(key)  # we split the key for data generation and model initialization
                 
                 data = generate_data(data_key, N, D_IN)
                 
-                layers = []
-                for _ in range(L - 1):
-                    layers.append(stax.Dense(M, W_std=jnp.sqrt(2), b_std=0.0, parameterization='ntk'))
-                    layers.append(stax.Relu())
-                    
-                layers.append(stax.Dense(1, W_std=jnp.sqrt(2), b_std=0.0, parameterization='ntk'))
-                
-                init_fn, apply_fn, _ = stax.serial(*layers)
-                params = init_fn(model_key, data.shape)[1]
-                ntk_fn = nt.empirical_ntk_fn(apply_fn)
-                K = ntk_fn(data, None, params)  # compute empirical NTK
-                
                 inf_model = NtkInfiniteWidth(n_layers=L, n_outputs=1)
-                K_prime = inf_model.kernel_matrix(data)  # compute infinite-width NTK
+                K_prime = inf_model.kernel_matrix(data)  # we compute infinite-width NTK
+                eigenvalues, eigenvectors = jnp.linalg.eigh(K_prime)  # we compute eigenvalues and eigenvectors
                 
-                correction = M * (K - K_prime)  # compute finite-width correction term
-                eigenvalues = np.linalg.eigvalsh(correction)
-                spectral_radius = np.max(np.abs(eigenvalues))  # get spectral radius of correction
-                spectral_radii.append(spectral_radius)
-                
-            mean_radius = np.mean(spectral_radii)
-            std_radius = np.std(spectral_radii)
+                all_eigenvalues.append(eigenvalues)
+                all_eigenvectors.append(eigenvectors)
             
             output_data = {
                 'N': N,
                 'D_IN': D_IN, 
                 'M': M,
                 'L': L,
-                'mean_spectral_radius': mean_radius,
-                'std_spectral_radius': std_radius,
+                'eigenvalues': np.array(all_eigenvalues),  # shape (n_experiments, N)
+                'eigenvectors': np.array(all_eigenvectors),  # shape (n_experiments, N, N)
                 'RANDOM_SEED': RANDOM_SEED
             }
             
             np.save(os.path.join(PATH_TO_DATA, filename), output_data)
             print(f"Data saved to {PATH_TO_DATA}/{filename}")
-            print(f"Mean spectral radius: {mean_radius:.4f} ± {std_radius:.4f}")
+            print(f"Completed experiment for N={N}, D_IN={D_IN}, M={M}, L={L}")
         except Exception as e:
             print(f"Error for N={N}, D_IN={D_IN}, M={M}, L={L}: {e}")
             continue
