@@ -13,8 +13,12 @@ D_IN = 20  # Input dimension
 M = 100  # Network width
 L_VALUES = np.arange(2, 5)  # Network depths
 RANDOM_SEED = 42
-PATH_TO_PLOTS = "/home/janis/STG3A/deeperorwider/experiments/plots"
-PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data"
+
+import dotenv
+dotenv.load_dotenv()
+PROJECT_ROOT = os.getenv("PROJECT_ROOT")
+PATH_TO_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots")
+PATH_TO_DATA = os.path.join(PROJECT_ROOT, "experiments", "data")
 
 # Ensure paths exist
 os.makedirs(PATH_TO_PLOTS, exist_ok=True)

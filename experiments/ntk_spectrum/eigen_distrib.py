@@ -5,7 +5,10 @@ from scipy import stats
 import matplotlib.pyplot as plt
 from tqdm import tqdm  # we use tqdm for progress bars
 
-PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data/eigen"
+import dotenv
+dotenv.load_dotenv()
+PROJECT_ROOT = os.getenv("PROJECT_ROOT")
+PATH_TO_DATA = os.path.join(PROJECT_ROOT, "experiments", "data", "eigen")
 
 def load_experiment_data(N, D_IN, M, L):
     """we load eigenvalues and eigenvectors data for a specific configuration"""

@@ -25,7 +25,10 @@ import seaborn as sns
 from scipy.stats import linregress
 
 # %%
-PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data/large_ntk_corrections"
+import dotenv
+dotenv.load_dotenv()
+PROJECT_ROOT = os.getenv("PROJECT_ROOT")
+PATH_TO_DATA = os.path.join(PROJECT_ROOT, "experiments", "data", "large_ntk_corrections")
 files = os.listdir(PATH_TO_DATA)
 data = []
 

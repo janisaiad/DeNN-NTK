@@ -31,7 +31,12 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
 # %%
-PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data/large"
+
+import dotenv
+dotenv.load_dotenv()
+PROJECT_ROOT = os.getenv("PROJECT_ROOT")
+PATH_TO_DATA = os.path.join(PROJECT_ROOT, "experiments", "data", "large")
+
 files = os.listdir(PATH_TO_DATA)
 data = []
 

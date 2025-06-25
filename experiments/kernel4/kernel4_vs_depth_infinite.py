@@ -9,8 +9,12 @@ N = 10  # number of data points
 D_IN = 20  # input dim
 L_VALUES = np.linspace(2, 20, 18).astype(int)
 RANDOM_SEED = 42
-PATH_TO_PLOTS = "/home/janis/STG3A/deeperorwider/experiments/plots"
-PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data"
+
+import dotenv
+dotenv.load_dotenv()
+PROJECT_ROOT = os.getenv("PROJECT_ROOT")
+PATH_TO_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots")
+PATH_TO_DATA = os.path.join(PROJECT_ROOT, "experiments", "data")
 
 # ensure paths exist
 if not os.path.exists(PATH_TO_PLOTS):

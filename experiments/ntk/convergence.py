@@ -19,7 +19,12 @@ N_EXPERIMENTS = 10  # number of experiments per configuration
 RANDOM_SEED = 42
 
 # %%
-PATH_TO_DATA = "experiments/data/ntk_convergence"
+
+import dotenv
+dotenv.load_dotenv()
+PROJECT_ROOT = os.getenv("PROJECT_ROOT")
+PATH_TO_DATA = os.path.join(PROJECT_ROOT, "experiments", "data", "ntk_convergence")
+
 os.makedirs(PATH_TO_DATA, exist_ok=True)
 
 # %%
