@@ -2,7 +2,7 @@ import jax
 import jax.numpy as jnp
 from typing import List, Dict, Any
 
-class Kernel3Empirical:
+class Kernel3Mean:
     """
     Computes finite width K3 kernel following the neural tangent hierarchy formula.
     """

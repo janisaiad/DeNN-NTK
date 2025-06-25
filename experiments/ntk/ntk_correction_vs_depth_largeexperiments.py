@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import os
 import neural_tangents as nt
 from neural_tangents import stax
-from infinitewidth.infinitewidth import NtkInfiniteWidth
+from infinitewidth import NtkInfiniteWidth
 
 N_VALUES = [8, 10,16, 25, 32,40,50 ,64,80,100,110, 128,150,180,200,230,256]  # we use different numbers of data points
 D_IN_VALUES = [20, 50, 100, 200, 500, 1000, 2000, 5000]  # we test different input dimensions  
@@ -69,7 +69,7 @@ for complexity, N, D_IN, M, L in experiments:
                 ntk_fn = nt.empirical_ntk_fn(apply_fn)
                 K = ntk_fn(data, None, params)  # compute empirical NTK
                 
-                inf_model = InfiniteWidth(n_layers=L, n_outputs=1)
+                inf_model = NtkInfiniteWidth(n_layers=L, n_outputs=1)
                 K_prime = inf_model.kernel_matrix(data)  # compute infinite-width NTK
                 
                 correction = M * (K - K_prime)  # compute finite-width correction term

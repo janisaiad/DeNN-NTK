@@ -5,11 +5,14 @@ import pytest
 def test_import():
     """Test that the import works"""
     
-    import finitewidth
+    import finitewidth 
     assert finitewidth is not None 
     
     import infinitewidth
     assert infinitewidth is not None
+    
+    import deeperorwider
+    assert deeperorwider is not None
 
 
 if __name__ == "__main__":
