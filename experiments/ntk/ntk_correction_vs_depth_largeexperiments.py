@@ -55,7 +55,7 @@ for complexity, N, D_IN, M, L in experiments:
                 data = generate_data(data_key, N, D_IN)
                 
                 layers = []
-                layers.append(stax.Dense(M, W_std=jnp.sqrt(2), b_std=0.0, parameterization='ntk'))
+                layers.append(stax.Dense(M, W_std=jnp.sqrt(2), b_std=0.0, parameterization='standard'))
                 layers.append(stax.Relu())
                 
                 for _ in range(L - 1):

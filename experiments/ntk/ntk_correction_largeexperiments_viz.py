@@ -113,6 +113,10 @@ print("Analyzing number of samples (N) scaling for each configuration...") # ana
 N_slopes = plot_config_scaling(data, 'N', ['D_IN', 'L', 'M'])
 
 # %%
+print("Analyzing width (M) scaling for each configuration...") # analyze M scaling
+M_slopes = plot_config_scaling(data, 'M', ['N', 'D_IN', 'L'])
+
+# %%
 print("Plotting all points vs L...") # plot L scaling overview
 plt.figure(figsize=(10, 6))
 
@@ -179,6 +183,28 @@ plt.xscale('log')
 plt.yscale('log')
 plt.grid(True)
 plt.title('All Spectral Radii vs Number of Samples (N)')
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
+plt.show()
+
+# %%
+print("Plotting all points vs M...") # plot M scaling overview
+plt.figure(figsize=(10, 6))
+
+for config in unique_configs:
+    mask = [(d['N'], d['D_IN'], d['M']) == config for d in data]
+    M_values_config = [d['M'] for d, m in zip(data, mask) if m]
+    spectral_radii_config = [d['mean_spectral_radius'] for d, m in zip(data, mask) if m]
+    plt.scatter(M_values_config, spectral_radii_config, 
+               color=config_to_color[config], alpha=0.5,
+               label=f'N={config[0]}, D={config[1]}, M={config[2]}')
+
+plt.xlabel('M')
+plt.ylabel('Spectral Radius')
+plt.xscale('log')
+plt.yscale('log')
+plt.grid(True)
+plt.title('All Spectral Radii vs Network Width (M)')
 plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
 plt.show()
