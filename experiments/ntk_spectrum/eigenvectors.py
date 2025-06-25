@@ -1,10 +1,16 @@
 from infinitewidth import NtkInfiniteWidth
-import jax
+try:
+    import os
+    os.environ['JAX_PLATFORM_NAME'] = 'gpu'  # we force GPU usage globally
+
+    import jax
+    jax.config.update('jax_platform_name', 'gpu')  # we configure JAX for GPU
+except:
+    print("No GPU found, using CPU")
+    pass
 import jax.numpy as jnp
 from jax import random
-
-import os
-
+import numpy as np  # we add numpy import
 
 # we will see the eigenvectors distribution of the NTK matrix
 # I guess there is like a uniform distribution of the eigenvectors in the S^(N-2), which is the sphere section orthogonal to the max eigenvalue
@@ -16,7 +22,7 @@ L_VALUES = [2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,
 N_EXPERIMENTS = 10  # number of experiments per configuration
 RANDOM_SEED = 42
 
-PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data/large_ntk_corrections"
+PATH_TO_DATA = "/home/janis/STG3A/deeperorwider/experiments/data/eigen"
 os.makedirs(PATH_TO_DATA, exist_ok=True)
 
 def generate_data(key, n_samples, n_features):
@@ -37,10 +43,11 @@ experiments.sort(key=lambda x: x[0])
 key_seed = RANDOM_SEED
 print("Starting analysis of NTK correction term...")
 
-for complexity, N, D_IN, M, L in experiments:
-    filename = f"ntk_correction_N{N}_D{D_IN}_M{M}_L{L}.npy"
+for complexity, N, D_IN, M, L in experiments[:1]:
+    filename_eigenvalues = f"ntk_eigenvalues_N{N}_D{D_IN}_M{M}_L{L}.npy"
+    filename_eigenvectors = f"ntk_eigenvectors_N{N}_D{D_IN}_M{M}_L{L}.npy"
     
-    if not os.path.isfile(os.path.join(PATH_TO_DATA, filename)):
+    if not (os.path.isfile(os.path.join(PATH_TO_DATA, filename_eigenvalues))) or not (os.path.isfile(os.path.join(PATH_TO_DATA, filename_eigenvectors))):
         try:
             print(f"\nComputing for N={N}, D_IN={D_IN}, M={M}, L={L}...")
             
@@ -61,23 +68,33 @@ for complexity, N, D_IN, M, L in experiments:
                 all_eigenvalues.append(eigenvalues)
                 all_eigenvectors.append(eigenvectors)
             
-            output_data = {
+            output_data_eigenvalues = {
                 'N': N,
                 'D_IN': D_IN, 
                 'M': M,
                 'L': L,
-                'eigenvalues': np.array(all_eigenvalues),  # shape (n_experiments, N)
-                'eigenvectors': np.array(all_eigenvectors),  # shape (n_experiments, N, N)
+                'eigenvalues': jnp.array(all_eigenvalues),  # shape (n_experiments, N)
                 'RANDOM_SEED': RANDOM_SEED
             }
             
-            np.save(os.path.join(PATH_TO_DATA, filename), output_data)
-            print(f"Data saved to {PATH_TO_DATA}/{filename}")
+            output_data_eigenvectors = {
+                'N': N,
+                'D_IN': D_IN, 
+                'M': M,
+                'L': L,
+                'eigenvectors': jnp.array(all_eigenvectors),  # shape (n_experiments, N, N)
+                'RANDOM_SEED': RANDOM_SEED
+            }
+            
+            np.save(os.path.join(PATH_TO_DATA, filename_eigenvalues), output_data_eigenvalues)  # we use numpy save
+            np.save(os.path.join(PATH_TO_DATA, filename_eigenvectors), output_data_eigenvectors)  # we use numpy save
+            print(f"Data saved to {PATH_TO_DATA}/{filename_eigenvalues} and {PATH_TO_DATA}/{filename_eigenvectors}")
             print(f"Completed experiment for N={N}, D_IN={D_IN}, M={M}, L={L}")
         except Exception as e:
+            print(e)
             print(f"Error for N={N}, D_IN={D_IN}, M={M}, L={L}: {e}")
             continue
     else:
-        print(f"Skipping {filename} because it already exists")
+        print(f"Skipping {filename_eigenvalues} and {filename_eigenvectors} because they already exist")
 
 # %%
