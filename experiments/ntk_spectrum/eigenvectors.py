@@ -11,13 +11,14 @@ except:
 import jax.numpy as jnp
 from jax import random
 import numpy as np  # we add numpy import
+import time  # we add time import for measuring computation time
 
 # we will see the eigenvectors distribution of the NTK matrix
 # I guess there is like a uniform distribution of the eigenvectors in the S^(N-2), which is the sphere section orthogonal to the max eigenvalue
 
-N_VALUES = [8, 10,16, 25, 32,40,50 ,64,80,100,110, 128,150,180,200,230,256]  # we use different numbers of data points
-D_IN_VALUES = [20, 50, 100, 200, 500, 1000, 2000, 5000]  # we test different input dimensions  
-M_VALUES = [10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800,900,1000,2000,3000,4000,5000]  # we vary network widths
+N_VALUES = [8, 10,16, 25, 32,40,50 ,64,80,100,110, 128,150,180,200,230,256,300,400,500,600,700,800,900,1000,2000,3000,4000,5000]  # we use different numbers of data points
+D_IN_VALUES = [20, 50, 100, 200, 500, 1000]  # we test different input dimensions  
+M_VALUES = [10,20,50,100,200,500,1000,2000,5000]  # we vary network widths
 L_VALUES = [2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300,310,320,330,340,350,360,370,380,390,400,410,420,430,440,450,460,470,480,490,500,510,520,530,540,550,560,570,580,590,600,610,620,630,640,650,660,670,680,690,700,710,720,730,740,750,760,770,780,790,800,810,820,830,840,850,860,870,880,890,900,910,920,930,940,950,960,970,980,990,1000]  # we test network depths in log space
 N_EXPERIMENTS = 100  # number of experiments per configuration
 RANDOM_SEED = 42
@@ -48,11 +49,14 @@ experiments.sort(key=lambda x: x[0])
 key_seed = RANDOM_SEED
 print("Starting analysis of NTK correction term...")
 
-for complexity, N, D_IN, M, L in experiments[:1]:
-    filename_eigenvalues = f"ntk_eigenvalues_N{N}_D{D_IN}_M{M}_L{L}.npy"
-    filename_eigenvectors = f"ntk_eigenvectors_N{N}_D{D_IN}_M{M}_L{L}.npy"
+
+force_recompute = True
+
+for complexity, N, D_IN, M, L in experiments:
+    filename_eigenvalues = f"values/ntk_eigenvalues_N{N}_D{D_IN}_M{M}_L{L}.npy"
+    filename_eigenvectors = f"vectors/ntk_eigenvectors_N{N}_D{D_IN}_M{M}_L{L}.npy"
     
-    if not (os.path.isfile(os.path.join(PATH_TO_DATA, filename_eigenvalues))) or not (os.path.isfile(os.path.join(PATH_TO_DATA, filename_eigenvectors))):
+    if force_recompute or (not (os.path.isfile(os.path.join(PATH_TO_DATA, filename_eigenvalues))) or not (os.path.isfile(os.path.join(PATH_TO_DATA, filename_eigenvectors)))):
         try:
             print(f"\nComputing for N={N}, D_IN={D_IN}, M={M}, L={L}...")
             
@@ -74,6 +78,7 @@ for complexity, N, D_IN, M, L in experiments[:1]:
                 all_eigenvectors.append(eigenvectors)
             
             output_data_eigenvalues = {
+                'N_EXPERIMENTS': N_EXPERIMENTS,
                 'N': N,
                 'D_IN': D_IN, 
                 'M': M,
@@ -83,6 +88,7 @@ for complexity, N, D_IN, M, L in experiments[:1]:
             }
             
             output_data_eigenvectors = {
+                'N_EXPERIMENTS': N_EXPERIMENTS,
                 'N': N,
                 'D_IN': D_IN, 
                 'M': M,
