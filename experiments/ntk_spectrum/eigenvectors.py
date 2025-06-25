@@ -49,7 +49,7 @@ experiments.sort(key=lambda x: x[0])
 key_seed = RANDOM_SEED
 print("Starting analysis of NTK correction term...")
 
-
+start_time_total = time.time()  # we track total computation time
 force_recompute = True
 
 for complexity, N, D_IN, M, L in experiments:
@@ -59,10 +59,13 @@ for complexity, N, D_IN, M, L in experiments:
     if force_recompute or (not (os.path.isfile(os.path.join(PATH_TO_DATA, filename_eigenvalues))) or not (os.path.isfile(os.path.join(PATH_TO_DATA, filename_eigenvectors)))):
         try:
             print(f"\nComputing for N={N}, D_IN={D_IN}, M={M}, L={L}...")
-            
+            start_time_config = time.time()  # we track time for each configuration
+            small_exp_time = time.time()
             all_eigenvalues = []
             all_eigenvectors = []
             for exp in range(N_EXPERIMENTS):
+                  # we track time for each experiment
+                
                 key = jax.random.PRNGKey(key_seed)
                 key_seed += 1
                 
@@ -76,6 +79,13 @@ for complexity, N, D_IN, M, L in experiments:
                 
                 all_eigenvalues.append(eigenvalues)
                 all_eigenvectors.append(eigenvectors)
+                if exp % 10 == 9:
+                    time_now = time.time()
+                    print(f"Experiment {exp+1}/{N_EXPERIMENTS} completed in {time_now - small_exp_time:.2f} seconds")
+                    small_exp_time = time.time()
+            end_time_exp = time.time()
+            exp_time = end_time_exp - start_time_config
+            print(f"Experiment {exp+1}/{N_EXPERIMENTS} completed in {exp_time:.2f} seconds")
             
             output_data_eigenvalues = {
                 'N_EXPERIMENTS': N_EXPERIMENTS,
@@ -99,13 +109,18 @@ for complexity, N, D_IN, M, L in experiments:
             
             np.save(os.path.join(PATH_TO_DATA, filename_eigenvalues), output_data_eigenvalues)  # we use numpy save
             np.save(os.path.join(PATH_TO_DATA, filename_eigenvectors), output_data_eigenvectors)  # we use numpy save
+            
+            config_time = time.time() - start_time_config  # we calculate configuration time
             print(f"Data saved to {PATH_TO_DATA}/{filename_eigenvalues} and {PATH_TO_DATA}/{filename_eigenvectors}")
-            print(f"Completed experiment for N={N}, D_IN={D_IN}, M={M}, L={L}")
+            print(f"Completed experiment for N={N}, D_IN={D_IN}, M={M}, L={L} in {config_time:.2f} seconds")
         except Exception as e:
             print(e)
             print(f"Error for N={N}, D_IN={D_IN}, M={M}, L={L}: {e}")
             continue
     else:
         print(f"Skipping {filename_eigenvalues} and {filename_eigenvectors} because they already exist")
+
+total_time = time.time() - start_time_total  # we calculate total computation time
+print(f"\nTotal computation time: {total_time:.2f} seconds")
 
 # %%

@@ -1,5 +1,15 @@
 import jax.numpy as jnp
 
+try:
+    import os
+    os.environ['JAX_PLATFORM_NAME'] = 'gpu'  # we force GPU usage globally
+
+    import jax
+    jax.config.update('jax_platform_name', 'gpu')  # we configure JAX for GPU
+except:
+    print("No GPU found, using CPU")
+    pass
+
 class NtkInfiniteWidth:
     def __init__(self, n_layers: int, n_outputs: int, a: float = 1.0, b: float = 1):
         """
