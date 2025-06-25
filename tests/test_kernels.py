@@ -4,7 +4,7 @@ import pytest
 from model.infinitewidth.infinitewidth import InfiniteWidth
 from model.infinitewidth.kernel4_infinite import Kernel3Infinite
 from model.finitewidth.kernel3_empirical import Kernel3Empirical
-from model.finitewidth.finitewidth import Kernel
+from model.finitewidth.finitewidth_formal import Kernel
 
 def test_infinite_width_initialization():
     """Test initialization of InfiniteWidth class"""

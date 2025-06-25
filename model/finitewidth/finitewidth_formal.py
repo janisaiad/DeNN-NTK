@@ -194,7 +194,7 @@ class Term: # each term is a function of the entries
 
 
 
-class Kernel:
+class FormalKernel:
     def __init__(self, n_entries: int, dim_input: int, entry_vectors: jnp.ndarray, H: int):
         """The Kernel class is a container for the finite width corrections kernels
             The number of layer can be changed, and this is the most interesting part

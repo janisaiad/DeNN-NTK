@@ -1,6 +1,6 @@
 import numpy as np
 
-class InfiniteWidth:
+class NtkInfiniteWidth:
     def __init__(self, n_layers: int, n_outputs: int, a: float = 1.0, b: float = 1):
         """
         Initialize the infinite width model.

@@ -1,12 +1,12 @@
 import pytest
 import numpy as np
-from infinitewidth import InfiniteWidth
+from infinitewidth import NtkInfiniteWidth
 
 
 def test_import():
     """Test if the InfiniteWidth class can be imported"""
-    from infinitewidth import InfiniteWidth
-    assert InfiniteWidth is not None
+    from infinitewidth import NtkInfiniteWidth
+    assert NtkInfiniteWidth is not None
 
 def test_infinite_width_init():
     """Test initialization of InfiniteWidth class"""
@@ -15,7 +15,7 @@ def test_infinite_width_init():
     a = 1.0
     b = 1.0
     
-    model = InfiniteWidth(n_layers, n_outputs, a, b)
+    model = NtkInfiniteWidth(n_layers, n_outputs, a, b)
     
     assert model.l == n_layers
     assert model.ml == n_outputs
@@ -26,14 +26,14 @@ def test_infinite_width_init():
 
 def test_varrho():
     """Test the cosine map function"""
-    model = InfiniteWidth(3, 1)
+    model = NtkInfiniteWidth(3, 1)
     rho = np.array([0.5])
     result = model._varrho(rho)
     assert isinstance(result, np.ndarray)
     
 def test_kernel_matrix():
     """Test kernel matrix computation"""
-    model = InfiniteWidth(3, 1)
+    model = NtkInfiniteWidth(3, 1)
     X = np.array([[1.0, 0.0], [0.0, 1.0]])
     K = model.kernel_matrix(X)
     assert K.shape == (2, 2)
@@ -42,7 +42,7 @@ def test_kernel_matrix():
 def test_invalid_parameters():
     """Test initialization with invalid parameters"""
     with pytest.raises(ValueError):
-        InfiniteWidth(3, 1, a=0.0, b=0.0)
+        NtkInfiniteWidth(3, 1, a=0.0, b=0.0)
 
 if __name__ == "__main__":
     pytest.main([__file__])

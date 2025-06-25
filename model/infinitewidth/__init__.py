@@ -1,3 +1,3 @@
-from .infinitewidth import InfiniteWidth
-from .kernel4_infinite import Kernel3Infinite
-__all__ = ["InfiniteWidth"]
+from .infinitewidth import NtkInfiniteWidth
+from .kernel4_infinite import Kernel4Infinite
+__all__ = ["NtkInfiniteWidth"]
