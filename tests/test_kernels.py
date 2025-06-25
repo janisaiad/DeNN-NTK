@@ -2,7 +2,7 @@ import numpy as np
 import jax.numpy as jnp
 import pytest
 from model.infinitewidth.infinitewidth import InfiniteWidth
-from model.infinitewidth.kernel3_infinite import Kernel3Infinite
+from model.infinitewidth.kernel4_infinite import Kernel3Infinite
 from model.finitewidth.kernel3_empirical import Kernel3Empirical
 from model.finitewidth.finitewidth import Kernel
 
