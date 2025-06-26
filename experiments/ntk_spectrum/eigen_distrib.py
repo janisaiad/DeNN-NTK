@@ -232,6 +232,15 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
             }
             
             print(f"Config N{N}_D{D_IN}_M{M}_L{L} - Last eigenvector barycenter mean: {last_eig_mean_components:.6f}, std: {last_eig_std_components:.6f}, exp_var: {last_eig_experiment_variance:.6f}")
+            
+            # we print the complete barycenter vector explicitly
+            print(f"LAST EIGENVECTOR BARYCENTER for N{N}_D{D_IN}_M{M}_L{L}:")
+            print(f"Vector dimension: {len(last_eigenvector_barycenter)}")
+            print("Complete vector components:")
+            for i, component in enumerate(last_eigenvector_barycenter):
+                print(f"  [{i:3d}]: {component:+.8f}")
+            print(f"Vector L2 norm: {np.linalg.norm(last_eigenvector_barycenter):.8f}")
+            print("-" * 60)
     
     # we save test results as JSON
     test_filename = f'test_results_N{N}_D{D_IN}_M{M}_L{L}.json'
