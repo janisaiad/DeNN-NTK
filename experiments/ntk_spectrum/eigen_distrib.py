@@ -475,6 +475,9 @@ for file in tqdm(files, desc="Processing experiment files"):
         eigenvalue_results = plot_eigenvalue_distribution(eigenvalues_data['eigenvalues'], N, D_IN, M, L)
         eigenvector_results = analyze_eigenvector_distribution(eigenvectors_data['eigenvectors'], N, D_IN, M, L)
         
+        # we test the constant vector hypothesis
+        constant_hypothesis_results = test_constant_vector_hypothesis(eigenvectors_data['eigenvectors'], N, D_IN, M, L)
+        
         # we combine results
         combined_results = {**eigenvector_results, **eigenvalue_results}
         all_results.append(combined_results)
@@ -615,3 +618,132 @@ print(f"- Vector plots: {PATH_TO_PLOTS_VECTORS}")
 print(f"- Value plots: {PATH_TO_PLOTS_VALUES}")
 print(f"- Test results: {PATH_TO_TESTS}")
 print(f"- Last eigenvector summary: See JSON metadata section")
+
+# %%
+def test_constant_vector_hypothesis(eigenvectors, N, D_IN, M, L):
+    """we test if last eigenvector is quasi-constant and others are orthogonal to it"""
+    n_experiments, n_vectors, dimension = eigenvectors.shape
+    
+    # we create the theoretical constant vector (normalized)
+    constant_vector = np.ones(dimension) / np.sqrt(dimension)
+    
+    test_results = {
+        'config': {'N': N, 'D_IN': D_IN, 'M': M, 'L': L},
+        'constant_vector_tests': [],
+        'orthogonality_tests': [],
+        'last_eigenvector_analysis': {}
+    }
+    
+    print(f"\nTesting constant vector hypothesis for N{N}_D{D_IN}_M{M}_L{L}:")
+    print("=" * 60)
+    
+    # we test each eigenvector order
+    for k in tqdm(range(n_vectors), desc=f"Testing constant hypothesis for N{N}_D{D_IN}_M{M}_L{L}", leave=False):
+        vectors_k = eigenvectors[:, k, :]  # we get all experiments for eigenvector k
+        
+        # we compute barycenter for this eigenvector order
+        barycenter_k = np.mean(vectors_k, axis=0)
+        
+        # we test if barycenter is close to constant vector
+        dot_with_constant = np.abs(np.dot(barycenter_k, constant_vector))
+        
+        # we compute variance of components (low = more constant-like)
+        component_variance = np.var(barycenter_k)
+        component_range = np.max(barycenter_k) - np.min(barycenter_k)
+        
+        # we test orthogonality of individual vectors to constant vector
+        orthogonality_scores = []
+        for exp in range(n_experiments):
+            orth_score = np.abs(np.dot(vectors_k[exp], constant_vector))
+            orthogonality_scores.append(orth_score)
+        
+        avg_orthogonality = np.mean(orthogonality_scores)
+        std_orthogonality = np.std(orthogonality_scores)
+        
+        test_results['constant_vector_tests'].append({
+            'eigenvector_order': k + 1,
+            'dot_with_constant': float(dot_with_constant),
+            'component_variance': float(component_variance),
+            'component_range': float(component_range),
+            'is_constant_like': bool(dot_with_constant > 0.9 and component_variance < 0.01),
+            'barycenter': barycenter_k.tolist()
+        })
+        
+        test_results['orthogonality_tests'].append({
+            'eigenvector_order': k + 1,
+            'avg_orthogonality_score': float(avg_orthogonality),
+            'std_orthogonality_score': float(std_orthogonality),
+            'is_orthogonal_to_constant': bool(avg_orthogonality < 0.1)
+        })
+        
+        print(f"Eigenvector {k+1:2d}: dot_with_constant={dot_with_constant:.6f}, "
+              f"comp_var={component_variance:.6f}, avg_orth={avg_orthogonality:.6f}")
+    
+    # we analyze the last eigenvector specifically
+    last_k = n_vectors - 1
+    last_vectors = eigenvectors[:, last_k, :]
+    last_barycenter = np.mean(last_vectors, axis=0)
+    
+    # we test if last eigenvector is the constant direction
+    last_dot_constant = np.abs(np.dot(last_barycenter, constant_vector))
+    last_is_constant = last_dot_constant > 0.9 and np.var(last_barycenter) < 0.01
+    
+    test_results['last_eigenvector_analysis'] = {
+        'is_constant_direction': bool(last_is_constant),
+        'dot_with_constant': float(last_dot_constant),
+        'component_variance': float(np.var(last_barycenter)),
+        'normalized_barycenter': (last_barycenter / np.linalg.norm(last_barycenter)).tolist(),
+        'theoretical_constant': constant_vector.tolist()
+    }
+    
+    # we test uniformity of other eigenvectors on orthogonal space
+    print(f"\nAnalyzing distribution on orthogonal space:")
+    print("-" * 40)
+    
+    if last_is_constant:
+        print("✅ Last eigenvector is quasi-constant! Testing orthogonal space uniformity...")
+        
+        # we project all other eigenvectors onto space orthogonal to constant vector
+        orthogonal_uniformity = []
+        
+        for k in range(n_vectors - 1):  # we exclude last eigenvector
+            vectors_k = eigenvectors[:, k, :]
+            
+            # we project onto orthogonal space (remove constant component)
+            projected_vectors = []
+            for exp in range(n_experiments):
+                vec = vectors_k[exp]
+                # we remove component in constant direction
+                constant_component = np.dot(vec, constant_vector) * constant_vector
+                orthogonal_vec = vec - constant_component
+                # we renormalize
+                if np.linalg.norm(orthogonal_vec) > 1e-10:
+                    orthogonal_vec = orthogonal_vec / np.linalg.norm(orthogonal_vec)
+                projected_vectors.append(orthogonal_vec)
+            
+            projected_vectors = np.array(projected_vectors)
+            
+            # we test uniformity of projected vectors
+            if len(projected_vectors) > 1:
+                pca_results = compute_pca_uniformity(projected_vectors)
+                orthogonal_uniformity.append({
+                    'eigenvector_order': k + 1,
+                    'orthogonal_uniformity_score': pca_results['uniformity_score'],
+                    'orthogonal_effective_rank': pca_results['effective_rank']
+                })
+                
+                print(f"Eigenvector {k+1:2d} (orthogonal): uniformity={pca_results['uniformity_score']:.6f}, "
+                      f"eff_rank={pca_results['effective_rank']:.2f}")
+        
+        test_results['orthogonal_space_analysis'] = orthogonal_uniformity
+    else:
+        print("❌ Last eigenvector is NOT quasi-constant")
+        test_results['orthogonal_space_analysis'] = []
+    
+    # we save results
+    test_filename = f'constant_hypothesis_N{N}_D{D_IN}_M{M}_L{L}.json'
+    with open(os.path.join(PATH_TO_TESTS, test_filename), 'w') as f:
+        json.dump(test_results, f, indent=2)
+    
+    print("=" * 60)
+    return test_results
