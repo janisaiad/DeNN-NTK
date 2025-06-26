@@ -40,8 +40,6 @@ for L in L_VALUES:
         data = generate_data(data_key, N, D_IN)
         
         layers = []
-        layers.append(stax.Dense(M, W_std=jnp.sqrt(2), b_std=0.0, parameterization='ntk'))
-        layers.append(stax.Relu())
         
         for _ in range(L - 1):
             layers.append(stax.Dense(M, W_std=jnp.sqrt(2), b_std=0.0, parameterization='ntk'))
