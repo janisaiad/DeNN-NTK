@@ -21,7 +21,7 @@
 import os
 import numpy as np
 import jax.numpy as jnp
-from scipy import stats
+
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import csv  # we use csv instead of pandas
@@ -136,7 +136,7 @@ def compute_pca_uniformity(vectors):
     
     # we compute cumulative sum of explained variance
     explained_variance = (singular_values ** 2) / np.sum(singular_values ** 2)
-    cumulative_variance = np.cumsum(explained_variance)
+    cumulative_variance = np.concatenate([[0], np.cumsum(explained_variance)])  # we start with 0
     
     # we compute uniformity metrics
     # 1. Entropy of normalized singular values (high = uniform, low = concentrated)
@@ -163,24 +163,7 @@ def compute_pca_uniformity(vectors):
         'uniformity_score': float(normalized_entropy)  # we use normalized entropy as main uniformity measure
     }
 
-# %%
-def test_uniformity_ks(vectors, n_projections=1000):
-    """we perform Kolmogorov-Smirnov test for uniformity"""
-    random_directions = np.random.randn(n_projections, vectors.shape[1])
-    random_directions /= np.linalg.norm(random_directions, axis=1)[:, np.newaxis]
-    
-    projections = np.dot(vectors, random_directions.T)
-    
-    ks_stats = []
-    p_values = []
-    
-    # we use tqdm to track KS tests
-    for proj in tqdm(projections.T, desc="Computing KS tests", leave=False):
-        ks_stat, p_value = stats.kstest(proj, 'uniform', args=(-1, 2))
-        ks_stats.append(float(ks_stat))  # we convert to float for JSON serialization
-        p_values.append(float(p_value))  # we convert to float for JSON serialization
-        
-    return np.mean(ks_stats), np.mean(p_values)
+
 
 # %%
 def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
@@ -203,13 +186,10 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
         vectors_k = eigenvectors[:, :, k]
         
         pca_results = compute_pca_uniformity(vectors_k)
-        ks_stat, p_value = test_uniformity_ks(vectors_k)
         
         test_results['eigenvector_tests'].append({
             'index': k,
-            'pca_uniformity': pca_results,
-            'ks_stat': ks_stat,
-            'ks_pvalue': p_value
+            'pca_uniformity': pca_results
         })
         
         # we analyze last eigenvector specifically
@@ -255,8 +235,7 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
     eigenvector_indices = [t['index'] + 1 for t in test_results['eigenvector_tests']]  # we start from 1
     uniformity_scores = [t['pca_uniformity']['uniformity_score'] for t in test_results['eigenvector_tests']]
     effective_ranks = [t['pca_uniformity']['effective_rank'] for t in test_results['eigenvector_tests']]
-    ks_stats = [t['ks_stat'] for t in test_results['eigenvector_tests']]
-    ks_pvalues = [t['ks_pvalue'] for t in test_results['eigenvector_tests']]
+    participation_ratios = [t['pca_uniformity']['participation_ratio'] for t in test_results['eigenvector_tests']]
     
     # we plot PCA uniformity score vs eigenvector order
     plt.subplot(2, 2, 1)
@@ -274,14 +253,12 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
     plt.ylabel('Effective Rank')
     plt.grid(True)
     
-    # we plot KS p-values vs eigenvector order
+    # we plot participation ratio vs eigenvector order
     plt.subplot(2, 2, 3)
-    plt.plot(eigenvector_indices, ks_pvalues, 'o-', color='green', linewidth=2, markersize=6)
-    plt.title(f'KS p-values vs Eigenvector Order\nConfig N{N}_D{D_IN}_M{M}_L{L}')
+    plt.plot(eigenvector_indices, participation_ratios, 'o-', color='green', linewidth=2, markersize=6)
+    plt.title(f'Participation Ratio vs Eigenvector Order\nConfig N{N}_D{D_IN}_M{M}_L{L}')
     plt.xlabel('Eigenvector Order')
-    plt.ylabel('KS p-value')
-    plt.axhline(y=0.05, color='red', linestyle='--', alpha=0.7, label='p=0.05 threshold')  # we add significance threshold
-    plt.legend()
+    plt.ylabel('Participation Ratio')
     plt.grid(True)
     
     # we plot last eigenvector analysis
@@ -315,12 +292,12 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
     plt.subplot(2, 1, 1)
     for k in range(n_vectors):
         cumulative_variance = test_results['eigenvector_tests'][k]['pca_uniformity']['cumulative_variance']
-        x_vals = range(1, len(cumulative_variance) + 1)
+        x_vals = range(0, len(cumulative_variance))  # we start from 0
         plt.plot(x_vals, cumulative_variance, 'o-', linewidth=2, markersize=4, 
                 label=f'Eigenvector {k+1}', alpha=0.8)
     
     plt.title(f'Cumulative SVD Values by Eigenvector Order\nConfig N{N}_D{D_IN}_M{M}_L{L}')
-    plt.xlabel('SVD Component Index')
+    plt.xlabel('SVD Component Index (0=start)')
     plt.ylabel('Cumulative Explained Variance')
     plt.grid(True, alpha=0.3)
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
@@ -330,7 +307,7 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
     max_components = max(len(test_results['eigenvector_tests'][k]['pca_uniformity']['cumulative_variance']) 
                         for k in range(n_vectors))
     uniform_line = np.linspace(0, 1, max_components)
-    x_uniform = range(1, max_components + 1)
+    x_uniform = range(0, max_components)  # we start from 0
     plt.plot(x_uniform, uniform_line, '--', color='black', alpha=0.5, 
              linewidth=2, label='Perfect Uniform (reference)')
     
@@ -340,17 +317,17 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
     
     for k in range(n_vectors):
         cumulative_variance = test_results['eigenvector_tests'][k]['pca_uniformity']['cumulative_variance']
-        x_vals = range(1, len(cumulative_variance) + 1)
+        x_vals = range(0, len(cumulative_variance))  # we start from 0
         
-        # we compute difference from uniform distribution
-        uniform_ref = np.linspace(1/len(cumulative_variance), 1, len(cumulative_variance))
+        # we compute difference from uniform distribution (now starting from 0)
+        uniform_ref = np.linspace(0, 1, len(cumulative_variance))
         difference = np.array(cumulative_variance) - uniform_ref
         
         plt.plot(x_vals, difference, 'o-', linewidth=2, markersize=4,
                 color=colors[k], label=f'Eigenvector {k+1}', alpha=0.8)
     
     plt.title(f'Deviation from Uniform Distribution\nConfig N{N}_D{D_IN}_M{M}_L{L}')
-    plt.xlabel('SVD Component Index')
+    plt.xlabel('SVD Component Index (0=start)')
     plt.ylabel('Deviation from Uniform (positive = more concentrated)')
     plt.grid(True, alpha=0.3)
     plt.axhline(y=0, color='black', linestyle='-', alpha=0.5, linewidth=1)
@@ -363,8 +340,7 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
     return {
         'avg_uniformity_score': np.mean([t['pca_uniformity']['uniformity_score'] for t in test_results['eigenvector_tests']]),
         'avg_effective_rank': np.mean([t['pca_uniformity']['effective_rank'] for t in test_results['eigenvector_tests']]),
-        'avg_ks_stat': np.mean([t['ks_stat'] for t in test_results['eigenvector_tests']]),
-        'avg_ks_pvalue': np.mean([t['ks_pvalue'] for t in test_results['eigenvector_tests']]),
+        'avg_participation_ratio': np.mean([t['pca_uniformity']['participation_ratio'] for t in test_results['eigenvector_tests']]),
         'last_eig_barycenter_mean': test_results['last_eigenvector_analysis']['barycenter_mean_component'],
         'last_eig_barycenter_std': test_results['last_eigenvector_analysis']['barycenter_std_component'],
         'last_eig_experiment_variance': test_results['last_eigenvector_analysis']['experiment_variance'],
@@ -397,23 +373,23 @@ def create_improved_eigenvector_plots(all_results):
     plt.grid(True)
     plt.legend()
     
-    # we plot KS statistics trends  
+    # we plot effective rank trends  
     plt.subplot(3, 2, 2)
-    ks_stat_values = [r['avg_ks_stat'] for r in all_results]
-    plt.plot(range(n_configs), ks_stat_values, 'o-', label='Average KS Statistic', color='orange')
-    plt.title('KS Statistics Across Configurations')
+    effective_rank_values = [r['avg_effective_rank'] for r in all_results]
+    plt.plot(range(n_configs), effective_rank_values, 'o-', label='Average Effective Rank', color='orange')
+    plt.title('Effective Rank Across Configurations')
     plt.xlabel('Configuration Index')
-    plt.ylabel('KS Statistic')
+    plt.ylabel('Effective Rank')
     plt.grid(True)
     plt.legend()
     
-    # we plot KS p-values trends
+    # we plot participation ratio trends
     plt.subplot(3, 2, 3)
-    ks_pval_values = [r['avg_ks_pvalue'] for r in all_results]
-    plt.plot(range(n_configs), ks_pval_values, 'o-', label='Average KS p-value', color='green')
-    plt.title('KS p-values Across Configurations')
+    participation_values = [r['avg_participation_ratio'] for r in all_results]
+    plt.plot(range(n_configs), participation_values, 'o-', label='Average Participation Ratio', color='green')
+    plt.title('Participation Ratio Across Configurations')
     plt.xlabel('Configuration Index')
-    plt.ylabel('KS p-value')
+    plt.ylabel('Participation Ratio')
     plt.grid(True)
     plt.legend()
     
@@ -747,3 +723,176 @@ def test_constant_vector_hypothesis(eigenvectors, N, D_IN, M, L):
     
     print("=" * 60)
     return test_results
+
+def plot_single_config_analysis(test_results, data, vectors_by_order, output_dir):
+    """we plot the results of the analysis for a single configuration in a 2x2 grid"""
+    N = test_results['N']
+    D_IN = test_results['D_IN']
+    M = test_results['M']
+    L = test_results['L']
+
+    # we extract data for plotting
+    eigenvector_indices = [t['index'] + 1 for t in test_results['eigenvector_tests']]  # we start from 1
+    uniformity_scores = [t['pca_uniformity']['uniformity_score'] for t in test_results['eigenvector_tests']]
+    effective_ranks = [t['pca_uniformity']['effective_rank'] for t in test_results['eigenvector_tests']]
+    participation_ratios = [t['pca_uniformity']['participation_ratio'] for t in test_results['eigenvector_tests']]
+
+    plt.figure(figsize=(18, 16))
+    plt.suptitle(f'Eigenvector Distribution Analysis for Config N{N}_D{D_IN}_M{M}_L{L}', fontsize=20)
+
+    # we plot PCA/SVD metrics vs eigenvector order
+    ax1 = plt.subplot(2, 2, 1)
+    ax1.set_title('PCA/SVD Metrics vs Eigenvector Order')
+    ax1.set_xlabel('Eigenvector Order')
+    
+    color = 'tab:blue'
+    ax1.set_ylabel('Rank / Ratio', color=color)
+    ax1.plot(eigenvector_indices, effective_ranks, 'o-', color='orange', label='Effective Rank')
+    ax1.plot(eigenvector_indices, participation_ratios, 's-', color='green', label='Participation Ratio')
+    ax1.tick_params(axis='y', labelcolor=color)
+    ax1.grid(True)
+
+    ax1b = ax1.twinx()
+    color = 'tab:red'
+    ax1b.set_ylabel('Uniformity Score', color=color)
+    ax1b.plot(eigenvector_indices, uniformity_scores, 'd--', color='red', label='Uniformity Score')
+    ax1b.tick_params(axis='y', labelcolor=color)
+    
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax1b.get_legend_handles_labels()
+    ax1.legend(lines + lines2, labels + labels2, loc='best')
+
+    # we plot 2D PCA of first eigenvectors
+    ax2 = plt.subplot(2, 2, 2)
+    vectors_k0 = np.array(vectors_by_order[0])
+    centered_k0 = vectors_k0 - np.mean(vectors_k0, axis=0)
+    u, s, vh = np.linalg.svd(centered_k0, full_matrices=False)
+    projection_k0 = u[:, :2] * s[:2]
+    ax2.scatter(projection_k0[:, 0], projection_k0[:, 1], alpha=0.6, s=50)
+    ax2.set_title('2D PCA of First Eigenvectors (k=1)')
+    ax2.set_xlabel('Principal Component 1')
+    ax2.set_ylabel('Principal Component 2')
+    ax2.grid(True)
+    ax2.axis('equal')
+    
+    # we plot last eigenvector barycenter components
+    ax3 = plt.subplot(2, 2, 3)
+    barycenter_components = test_results['last_eigenvector_analysis']['barycenter_vector']
+    d = len(barycenter_components)
+    ax3.bar(range(1, d + 1), barycenter_components, label='Barycenter Components', color='purple')
+    
+    constant_val = 1 / np.sqrt(d)
+    ax3.axhline(y=constant_val, color='r', linestyle='--', label=f'Constant value (1/√d) ≈ {constant_val:.3f}')
+    
+    ax3.set_title(f'Last Eigenvector Barycenter (dim={d})')
+    ax3.set_xlabel('Component Index')
+    ax3.set_ylabel('Component Value')
+    ax3.legend()
+    ax3.grid(axis='y')
+
+    # we plot 2D PCA of last eigenvectors
+    ax4 = plt.subplot(2, 2, 4)
+    last_k_index = max(vectors_by_order.keys())
+    vectors_last = np.array(vectors_by_order[last_k_index])
+    centered_last = vectors_last - np.mean(vectors_last, axis=0)
+    u_last, s_last, vh_last = np.linalg.svd(centered_last, full_matrices=False)
+    projection_last = u_last[:, :2] * s_last[:2]
+    
+    ax4.scatter(projection_last[:, 0], projection_last[:, 1], alpha=0.6, s=50, color='crimson')
+    ax4.set_title(f'2D PCA of Last Eigenvectors (k={last_k_index + 1})')
+    ax4.set_xlabel('Principal Component 1')
+    ax4.set_ylabel('Principal Component 2')
+    ax4.grid(True)
+    ax4.axis('equal')
+
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plot_filename = os.path.join(output_dir, f'config_N{N}_D{D_IN}_M{M}_L{L}_analysis.png')
+    plt.savefig(plot_filename, dpi=150)
+    plt.close()
+
+def plot_cumulative_svd_analysis(test_results, output_dir, N, D_IN, M, L):
+    """we plot the cumulative SVD analysis for a single configuration"""
+    # ... existing code ...
+
+def plot_marchenko_pastur_fit(data, test_results, output_dir):
+    """
+    we fit the eigenvalue distribution (excluding the last one) with the Marchenko-Pastur law
+    and plot the result.
+    """
+    N = test_results['N']
+    M = test_results['M']
+    L = test_results['L']
+    D_IN = test_results['D_IN']
+    
+    # we use eigenvalues from the first experiment as representative
+    eigenvalues = np.array(data[0]['eigenvalues'])
+    
+    # we handle the case N > M, where there are N-M zero eigenvalues
+    if N > M:
+        # we filter out zero eigenvalues for MP fit
+        eigs_to_consider = eigenvalues[eigenvalues > 1e-9]
+        if len(eigs_to_consider) < 2:
+            print(f"Warning: Not enough positive eigenvalues for MP fit for config N{N}_M{M}.")
+            return
+        eigs_bulk = eigs_to_consider[:-1]
+        last_eig = eigs_to_consider[-1]
+        gamma = M / N
+    else: # N <= M
+        eigs_bulk = eigenvalues[:-1]
+        last_eig = eigenvalues[-1]
+        gamma = N / M
+
+    if len(eigs_bulk) == 0:
+        print(f"Warning: Eigenvalue bulk is empty for config N{N}_M{M}.")
+        return
+
+    # we fit the Marchenko-Pastur distribution by scaling it to the empirical bulk
+    lambda_max_emp = np.max(eigs_bulk)
+    # the scaling factor 'c' corresponds to the variance of the matrix elements in the standard MP law
+    c = lambda_max_emp / (1 + np.sqrt(gamma))**2 if (1 + np.sqrt(gamma))**2 > 0 else 0
+    
+    lambda_plus = c * (1 + np.sqrt(gamma))**2
+    lambda_minus = c * (1 - np.sqrt(gamma))**2
+    
+    # we define the Marchenko-Pastur PDF
+    def marchenko_pastur_pdf(x, l_plus, l_minus, gamma, c):
+        if c == 0 or gamma == 0: return np.zeros_like(x)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            # we ensure we are within the support [l_minus, l_plus]
+            pdf = np.sqrt(np.maximum(0, l_plus - x) * np.maximum(0, x - l_minus)) / (2 * np.pi * gamma * x * c)
+        pdf[np.isnan(pdf)] = 0
+        return pdf
+
+    plt.figure(figsize=(12, 8))
+    plt.suptitle(f'Marchenko-Pastur Fit for Eigenvalue Spectrum\nConfig N{N}_D{D_IN}_M{M}_L{L}', fontsize=16)
+    
+    # we plot the empirical histogram
+    plt.hist(eigs_bulk, bins=50, density=True, label='Empirical Eigenvalue Distribution (bulk)', alpha=0.7)
+    
+    # we plot the theoretical MP distribution
+    x = np.linspace(lambda_minus, lambda_plus, 400)
+    pdf = marchenko_pastur_pdf(x, lambda_plus, lambda_minus, gamma, c)
+    plt.plot(x, pdf, 'r-', linewidth=2, label=f'Marchenko-Pastur Fit (γ={gamma:.2f})')
+    
+    # we indicate the position of the last eigenvalue
+    plt.axvline(x=last_eig, color='g', linestyle='--', linewidth=2, label=f'Last Eigenvalue = {last_eig:.3f}')
+    
+    # we check the case where M is close to N
+    if abs(N - M) / N <= 0.1: # if N and M are within 10% of each other
+        plt.text(0.6, 0.8, 'N ≈ M: Last eigenvalue is\nexpected near the bulk edge', 
+                 transform=plt.gca().transAxes, fontsize=12,
+                 verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+
+    plt.xlabel('Eigenvalue')
+    plt.ylabel('Density')
+    plt.title(f'Bulk Support: [{lambda_minus:.3f}, {lambda_plus:.3f}]')
+    plt.legend()
+    plt.grid(True)
+    
+    plot_filename = os.path.join(output_dir, f'config_N{N}_D{D_IN}_M{M}_L{L}_mp_fit.png')
+    plt.savefig(plot_filename, dpi=150)
+    plt.close()
+
+def plot_trend_analysis(all_results, output_dir):
+    """we plot trends across all configurations"""
+    # ... existing code ...
