@@ -307,6 +307,59 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
     plt.savefig(os.path.join(PATH_TO_PLOTS_VECTORS, f'eigenvector_analysis_N{N}_D{D_IN}_M{M}_L{L}.png'))
     plt.close()
     
+    # we create a separate plot for cumulative SVD values for each eigenvector order
+    print(f"Creating cumulative SVD plots for N{N}_D{D_IN}_M{M}_L{L}...")
+    plt.figure(figsize=(15, 10))
+    
+    # we plot cumulative variance for each eigenvector order
+    plt.subplot(2, 1, 1)
+    for k in range(n_vectors):
+        cumulative_variance = test_results['eigenvector_tests'][k]['pca_uniformity']['cumulative_variance']
+        x_vals = range(1, len(cumulative_variance) + 1)
+        plt.plot(x_vals, cumulative_variance, 'o-', linewidth=2, markersize=4, 
+                label=f'Eigenvector {k+1}', alpha=0.8)
+    
+    plt.title(f'Cumulative SVD Values by Eigenvector Order\nConfig N{N}_D{D_IN}_M{M}_L{L}')
+    plt.xlabel('SVD Component Index')
+    plt.ylabel('Cumulative Explained Variance')
+    plt.grid(True, alpha=0.3)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.ylim(0, 1)
+    
+    # we add reference lines for uniformity
+    max_components = max(len(test_results['eigenvector_tests'][k]['pca_uniformity']['cumulative_variance']) 
+                        for k in range(n_vectors))
+    uniform_line = np.linspace(0, 1, max_components)
+    x_uniform = range(1, max_components + 1)
+    plt.plot(x_uniform, uniform_line, '--', color='black', alpha=0.5, 
+             linewidth=2, label='Perfect Uniform (reference)')
+    
+    # we create a focused plot showing differences more clearly
+    plt.subplot(2, 1, 2)
+    colors = plt.cm.viridis(np.linspace(0, 1, n_vectors))
+    
+    for k in range(n_vectors):
+        cumulative_variance = test_results['eigenvector_tests'][k]['pca_uniformity']['cumulative_variance']
+        x_vals = range(1, len(cumulative_variance) + 1)
+        
+        # we compute difference from uniform distribution
+        uniform_ref = np.linspace(1/len(cumulative_variance), 1, len(cumulative_variance))
+        difference = np.array(cumulative_variance) - uniform_ref
+        
+        plt.plot(x_vals, difference, 'o-', linewidth=2, markersize=4,
+                color=colors[k], label=f'Eigenvector {k+1}', alpha=0.8)
+    
+    plt.title(f'Deviation from Uniform Distribution\nConfig N{N}_D{D_IN}_M{M}_L{L}')
+    plt.xlabel('SVD Component Index')
+    plt.ylabel('Deviation from Uniform (positive = more concentrated)')
+    plt.grid(True, alpha=0.3)
+    plt.axhline(y=0, color='black', linestyle='-', alpha=0.5, linewidth=1)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(PATH_TO_PLOTS_VECTORS, f'cumulative_svd_N{N}_D{D_IN}_M{M}_L{L}.png'))
+    plt.close()
+    
     return {
         'avg_uniformity_score': np.mean([t['pca_uniformity']['uniformity_score'] for t in test_results['eigenvector_tests']]),
         'avg_effective_rank': np.mean([t['pca_uniformity']['effective_rank'] for t in test_results['eigenvector_tests']]),
