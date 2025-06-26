@@ -6,8 +6,12 @@ try:
     import jax
     jax.config.update('jax_platform_name', 'gpu')  # we configure JAX for GPU
 except:
+    import os
+    import jax
     print("No GPU found, using CPU")
     pass
+    
+
 import jax.numpy as jnp
 from jax import random
 import numpy as np  # we add numpy import
