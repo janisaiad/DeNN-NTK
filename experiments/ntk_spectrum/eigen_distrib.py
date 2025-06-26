@@ -121,23 +121,47 @@ def plot_eigenvalue_distribution(eigenvalues, N, D_IN, M, L):
     }
 
 # %%
-def compute_max_discrepancy(vectors):
-    """we compute maximum discrepancy as uniformity measure on sphere"""
-    n_vectors = vectors.shape[0]
-    max_discrepancy = 0
+def compute_pca_uniformity(vectors):
+    """we use PCA/SVD to test uniformity - uniform distribution should have equal singular values"""
+    n_vectors, dimension = vectors.shape
     
-    # we use tqdm to track pairwise comparisons
-    total_comparisons = n_vectors * (n_vectors - 1) // 2
-    pbar = tqdm(total=total_comparisons, desc="Computing max discrepancy", leave=False)
+    # we center the vectors (subtract mean)
+    centered_vectors = vectors - np.mean(vectors, axis=0)
     
-    for i in range(n_vectors):
-        for j in range(i+1, n_vectors):
-            dist = jnp.abs(jnp.dot(vectors[i], vectors[j]))
-            max_discrepancy = max(max_discrepancy, dist)
-            pbar.update(1)
+    # we compute SVD of the centered matrix
+    U, singular_values, Vt = np.linalg.svd(centered_vectors, full_matrices=False)
     
-    pbar.close()
-    return float(max_discrepancy)  # we convert to float for JSON serialization
+    # we normalize singular values by the largest one
+    normalized_svd = singular_values / singular_values[0] if singular_values[0] > 0 else singular_values
+    
+    # we compute cumulative sum of explained variance
+    explained_variance = (singular_values ** 2) / np.sum(singular_values ** 2)
+    cumulative_variance = np.cumsum(explained_variance)
+    
+    # we compute uniformity metrics
+    # 1. Entropy of normalized singular values (high = uniform, low = concentrated)
+    eps = 1e-10  # we avoid log(0)
+    svd_entropy = -np.sum(explained_variance * np.log(explained_variance + eps))
+    max_entropy = np.log(len(singular_values))  # we get maximum possible entropy
+    normalized_entropy = svd_entropy / max_entropy if max_entropy > 0 else 0
+    
+    # 2. Effective rank (number of significant singular values)
+    effective_rank = np.exp(svd_entropy)
+    
+    # 3. Participation ratio (inverse of sum of squared normalized singular values)
+    participation_ratio = 1.0 / np.sum(explained_variance ** 2)
+    
+    return {
+        'singular_values': singular_values.tolist(),
+        'normalized_svd': normalized_svd.tolist(),
+        'explained_variance': explained_variance.tolist(),
+        'cumulative_variance': cumulative_variance.tolist(),
+        'svd_entropy': float(svd_entropy),
+        'normalized_entropy': float(normalized_entropy),
+        'effective_rank': float(effective_rank),
+        'participation_ratio': float(participation_ratio),
+        'uniformity_score': float(normalized_entropy)  # we use normalized entropy as main uniformity measure
+    }
 
 # %%
 def test_uniformity_ks(vectors, n_projections=1000):
@@ -178,12 +202,12 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
     for k in tqdm(range(n_vectors), desc=f"Analyzing eigenvectors for N{N}_D{D_IN}_M{M}_L{L}"):
         vectors_k = eigenvectors[:, :, k]
         
-        max_disc = compute_max_discrepancy(vectors_k)
+        pca_results = compute_pca_uniformity(vectors_k)
         ks_stat, p_value = test_uniformity_ks(vectors_k)
         
         test_results['eigenvector_tests'].append({
             'index': k,
-            'max_discrepancy': max_disc,
+            'pca_uniformity': pca_results,
             'ks_stat': ks_stat,
             'ks_pvalue': p_value
         })
@@ -220,24 +244,25 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
     
     # we extract data for plotting
     eigenvector_indices = [t['index'] + 1 for t in test_results['eigenvector_tests']]  # we start from 1
-    max_discrepancies = [t['max_discrepancy'] for t in test_results['eigenvector_tests']]
+    uniformity_scores = [t['pca_uniformity']['uniformity_score'] for t in test_results['eigenvector_tests']]
+    effective_ranks = [t['pca_uniformity']['effective_rank'] for t in test_results['eigenvector_tests']]
     ks_stats = [t['ks_stat'] for t in test_results['eigenvector_tests']]
     ks_pvalues = [t['ks_pvalue'] for t in test_results['eigenvector_tests']]
     
-    # we plot max discrepancy vs eigenvector order
+    # we plot PCA uniformity score vs eigenvector order
     plt.subplot(2, 2, 1)
-    plt.plot(eigenvector_indices, max_discrepancies, 'o-', linewidth=2, markersize=6)
-    plt.title(f'Maximum Discrepancy vs Eigenvector Order\nConfig N{N}_D{D_IN}_M{M}_L{L}')
+    plt.plot(eigenvector_indices, uniformity_scores, 'o-', linewidth=2, markersize=6)
+    plt.title(f'PCA Uniformity Score vs Eigenvector Order\nConfig N{N}_D{D_IN}_M{M}_L{L}')
     plt.xlabel('Eigenvector Order')
-    plt.ylabel('Max Discrepancy')
+    plt.ylabel('Uniformity Score (0=clustered, 1=uniform)')
     plt.grid(True)
     
-    # we plot KS statistic vs eigenvector order
+    # we plot effective rank vs eigenvector order
     plt.subplot(2, 2, 2)
-    plt.plot(eigenvector_indices, ks_stats, 'o-', color='orange', linewidth=2, markersize=6)
-    plt.title(f'KS Statistics vs Eigenvector Order\nConfig N{N}_D{D_IN}_M{M}_L{L}')
+    plt.plot(eigenvector_indices, effective_ranks, 'o-', color='orange', linewidth=2, markersize=6)
+    plt.title(f'Effective Rank vs Eigenvector Order\nConfig N{N}_D{D_IN}_M{M}_L{L}')
     plt.xlabel('Eigenvector Order')
-    plt.ylabel('KS Statistic')
+    plt.ylabel('Effective Rank')
     plt.grid(True)
     
     # we plot KS p-values vs eigenvector order
@@ -274,7 +299,8 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
     plt.close()
     
     return {
-        'avg_max_discrepancy': np.mean([t['max_discrepancy'] for t in test_results['eigenvector_tests']]),
+        'avg_uniformity_score': np.mean([t['pca_uniformity']['uniformity_score'] for t in test_results['eigenvector_tests']]),
+        'avg_effective_rank': np.mean([t['pca_uniformity']['effective_rank'] for t in test_results['eigenvector_tests']]),
         'avg_ks_stat': np.mean([t['ks_stat'] for t in test_results['eigenvector_tests']]),
         'avg_ks_pvalue': np.mean([t['ks_pvalue'] for t in test_results['eigenvector_tests']]),
         'last_eig_barycenter_mean': test_results['last_eigenvector_analysis']['barycenter_mean_component'],
@@ -299,13 +325,13 @@ def create_improved_eigenvector_plots(all_results):
     # we create plots closeing variation across all configurations
     plt.figure(figsize=(20, 15))
     
-    # we plot max discrepancy trends
+    # we plot PCA uniformity trends
     plt.subplot(3, 2, 1)
-    max_disc_values = [r['avg_max_discrepancy'] for r in all_results]
-    plt.plot(range(n_configs), max_disc_values, 'o-', label='Average Max Discrepancy')
-    plt.title('Maximum Discrepancy Across Configurations')
+    uniformity_values = [r['avg_uniformity_score'] for r in all_results]
+    plt.plot(range(n_configs), uniformity_values, 'o-', label='Average Uniformity Score')
+    plt.title('PCA Uniformity Score Across Configurations')
     plt.xlabel('Configuration Index')
-    plt.ylabel('Max Discrepancy')
+    plt.ylabel('Uniformity Score (0=clustered, 1=uniform)')
     plt.grid(True)
     plt.legend()
     
@@ -492,7 +518,7 @@ with open(os.path.join(PATH_TO_STATS, 'all_results.json'), 'w') as f:
 
 # we plot trends with respect to each parameter using native Python grouping
 params = ['L', 'N', 'M', 'D_IN']
-metrics = ['avg_max_discrepancy', 'avg_ks_stat', 'avg_ks_pvalue', 'last_eig_barycenter_mean', 'last_eig_barycenter_std']  # we add new metrics
+metrics = ['avg_uniformity_score', 'avg_effective_rank', 'avg_ks_stat', 'avg_ks_pvalue', 'last_eig_barycenter_mean', 'last_eig_barycenter_std']  # we use PCA metrics
 
 print("Creating parameter trend plots...")
 for param in tqdm(params, desc="Creating parameter trend plots"):
