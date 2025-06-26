@@ -74,10 +74,10 @@ def plot_eigenvalue_distribution(eigenvalues, N, D_IN, M, L):
     # we create figure with histograms and mean plot
     plt.figure(figsize=(15, 2*n_eigenvalues + 5))
     
-    # we plot histograms for each eigenvalue
-    for k in range(n_eigenvalues):
+    # we plot histograms for each eigenvalue with progress tracking
+    for k in tqdm(range(n_eigenvalues), desc=f"Plotting eigenvalue distributions for N{N}_D{D_IN}_M{M}_L{L}", leave=False):
         plt.subplot(n_eigenvalues + 1, 2, 2*k + 1)
-        plt.hist(eigenvalues[:, k], bins=50, density=True)
+        plt.hist(eigenvalues[:, k], bins='auto', density=True)
         plt.title(f'Eigenvalue {k+1} Distribution')
         plt.xlabel('Value')
         plt.ylabel('Density')
@@ -110,7 +110,7 @@ def plot_eigenvalue_distribution(eigenvalues, N, D_IN, M, L):
     
     plt.tight_layout()
     plt.savefig(os.path.join(PATH_TO_PLOTS_VALUES, f'eigenvalue_dist_N{N}_D{D_IN}_M{M}_L{L}.png'))
-    plt.show()
+    plt.close()
     
     # we return the computed means for storage
     return {
@@ -126,11 +126,17 @@ def compute_max_discrepancy(vectors):
     n_vectors = vectors.shape[0]
     max_discrepancy = 0
     
+    # we use tqdm to track pairwise comparisons
+    total_comparisons = n_vectors * (n_vectors - 1) // 2
+    pbar = tqdm(total=total_comparisons, desc="Computing max discrepancy", leave=False)
+    
     for i in range(n_vectors):
         for j in range(i+1, n_vectors):
             dist = jnp.abs(jnp.dot(vectors[i], vectors[j]))
             max_discrepancy = max(max_discrepancy, dist)
-            
+            pbar.update(1)
+    
+    pbar.close()
     return float(max_discrepancy)  # we convert to float for JSON serialization
 
 # %%
@@ -143,7 +149,9 @@ def test_uniformity_ks(vectors, n_projections=1000):
     
     ks_stats = []
     p_values = []
-    for proj in projections.T:
+    
+    # we use tqdm to track KS tests
+    for proj in tqdm(projections.T, desc="Computing KS tests", leave=False):
         ks_stat, p_value = stats.kstest(proj, 'uniform', args=(-1, 2))
         ks_stats.append(float(ks_stat))  # we convert to float for JSON serialization
         p_values.append(float(p_value))  # we convert to float for JSON serialization
@@ -166,7 +174,8 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
         'last_eigenvector_analysis': {}  # we add analysis for last eigenvector
     }
     
-    for k in tqdm(range(n_vectors)):
+    # we use tqdm with more descriptive description
+    for k in tqdm(range(n_vectors), desc=f"Analyzing eigenvectors for N{N}_D{D_IN}_M{M}_L{L}"):
         vectors_k = eigenvectors[:, :, k]
         
         max_disc = compute_max_discrepancy(vectors_k)
@@ -181,23 +190,31 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
         
         # we analyze last eigenvector specifically
         if k == n_vectors - 1:
-            last_eigenvector = vectors_k[-1]  # we take last experiment's last eigenvector
-            last_eig_mean = float(np.mean(last_eigenvector))
-            last_eig_std = float(np.std(last_eigenvector))
+            # vectors_k has shape (n_experiments, dimension) for the last eigenvector
+            # we compute the barycenter (mean vector) across all experiments
+            last_eigenvector_barycenter = np.mean(vectors_k, axis=0)  # we compute barycenter across experiments
+            last_eig_mean_components = float(np.mean(last_eigenvector_barycenter))  # we get mean of components
+            last_eig_std_components = float(np.std(last_eigenvector_barycenter))  # we get std of components
+            
+            # we also compute variance across experiments (how similar are the last eigenvectors)
+            last_eig_experiment_variance = float(np.mean(np.var(vectors_k, axis=1)))  # we get variance across experiments
             
             test_results['last_eigenvector_analysis'] = {
-                'mean': last_eig_mean,
-                'std': last_eig_std,
-                'is_constant_threshold': last_eig_std < 1e-10  # we check if nearly constant
+                'barycenter_mean_component': last_eig_mean_components,
+                'barycenter_std_component': last_eig_std_components,
+                'experiment_variance': last_eig_experiment_variance,
+                'barycenter_vector': last_eigenvector_barycenter.tolist(),  # we store the actual barycenter
+                'is_constant_threshold': last_eig_std_components < 1e-10  # we check if barycenter is nearly constant
             }
             
-            print(f"Config N{N}_D{D_IN}_M{M}_L{L} - Last eigenvector mean: {last_eig_mean:.6f}, std: {last_eig_std:.6f}")
+            print(f"Config N{N}_D{D_IN}_M{M}_L{L} - Last eigenvector barycenter mean: {last_eig_mean_components:.6f}, std: {last_eig_std_components:.6f}, exp_var: {last_eig_experiment_variance:.6f}")
     
     # we save test results as JSON
     test_filename = f'test_results_N{N}_D{D_IN}_M{M}_L{L}.json'
     with open(os.path.join(PATH_TO_TESTS, test_filename), 'w') as f:
         json.dump(test_results, f, indent=2)
     
+    print(f"Creating eigenvector plots for N{N}_D{D_IN}_M{M}_L{L}...")
     # we create plots with eigenvector order on x-axis
     plt.figure(figsize=(15, 12))
     
@@ -236,27 +253,33 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
     # we plot last eigenvector analysis
     plt.subplot(2, 2, 4)
     last_eig_info = test_results['last_eigenvector_analysis']
-    bars = plt.bar(['Mean', 'Std'], [last_eig_info['mean'], last_eig_info['std']], 
-                   color=['red', 'purple'], alpha=0.7)
+    bars = plt.bar(['Barycenter\nMean', 'Barycenter\nStd', 'Experiment\nVariance'], 
+                   [last_eig_info['barycenter_mean_component'], 
+                    last_eig_info['barycenter_std_component'],
+                    last_eig_info['experiment_variance']], 
+                   color=['red', 'purple', 'orange'], alpha=0.7)
     plt.title(f'Last Eigenvector Statistics\nConfig N{N}_D{D_IN}_M{M}_L{L}')
     plt.ylabel('Value')
     plt.grid(True, axis='y')
     
     # we add value labels on bars
-    for bar, value in zip(bars, [last_eig_info['mean'], last_eig_info['std']]):
+    for bar, value in zip(bars, [last_eig_info['barycenter_mean_component'], 
+                                 last_eig_info['barycenter_std_component'],
+                                 last_eig_info['experiment_variance']]):
         plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01, 
-                f'{value:.6f}', ha='center', va='bottom')
+                f'{value:.6f}', ha='center', va='bottom', fontsize=8)
     
     plt.tight_layout()
     plt.savefig(os.path.join(PATH_TO_PLOTS_VECTORS, f'eigenvector_analysis_N{N}_D{D_IN}_M{M}_L{L}.png'))
-    plt.show()
+    plt.close()
     
     return {
         'avg_max_discrepancy': np.mean([t['max_discrepancy'] for t in test_results['eigenvector_tests']]),
         'avg_ks_stat': np.mean([t['ks_stat'] for t in test_results['eigenvector_tests']]),
         'avg_ks_pvalue': np.mean([t['ks_pvalue'] for t in test_results['eigenvector_tests']]),
-        'last_eig_mean': test_results['last_eigenvector_analysis']['mean'],
-        'last_eig_std': test_results['last_eigenvector_analysis']['std'],
+        'last_eig_barycenter_mean': test_results['last_eigenvector_analysis']['barycenter_mean_component'],
+        'last_eig_barycenter_std': test_results['last_eigenvector_analysis']['barycenter_std_component'],
+        'last_eig_experiment_variance': test_results['last_eigenvector_analysis']['experiment_variance'],
         'last_eig_is_constant': test_results['last_eigenvector_analysis']['is_constant_threshold'],
         'N': N,
         'D_IN': D_IN,
@@ -266,13 +289,14 @@ def analyze_eigenvector_distribution(eigenvectors, N, D_IN, M, L):
 
 # %%
 def create_improved_eigenvector_plots(all_results):
-    """we create improved plots showing trends across configurations"""
+    """we create improved plots closeing trends across configurations"""
     if not all_results:
         return
         
     n_configs = len(all_results)
     
-    # we create plots showing variation across all configurations
+    print("Creating improved eigenvector plots across all configurations...")
+    # we create plots closeing variation across all configurations
     plt.figure(figsize=(20, 15))
     
     # we plot max discrepancy trends
@@ -305,21 +329,21 @@ def create_improved_eigenvector_plots(all_results):
     plt.grid(True)
     plt.legend()
     
-    # we plot last eigenvector mean
+    # we plot last eigenvector barycenter mean
     plt.subplot(3, 2, 4)
-    last_eig_means = [r['last_eig_mean'] for r in all_results]
-    plt.plot(range(n_configs), last_eig_means, 'o-', label='Last Eigenvector Mean', color='red')
-    plt.title('Last Eigenvector Mean Across Configurations')
+    last_eig_means = [r['last_eig_barycenter_mean'] for r in all_results]
+    plt.plot(range(n_configs), last_eig_means, 'o-', label='Last Eigenvector Barycenter Mean', color='red')
+    plt.title('Last Eigenvector Barycenter Mean Across Configurations')
     plt.xlabel('Configuration Index')
     plt.ylabel('Mean Value')
     plt.grid(True)
     plt.legend()
     
-    # we plot last eigenvector std
+    # we plot last eigenvector barycenter std
     plt.subplot(3, 2, 5)
-    last_eig_stds = [r['last_eig_std'] for r in all_results]
-    plt.plot(range(n_configs), last_eig_stds, 'o-', label='Last Eigenvector Std', color='purple')
-    plt.title('Last Eigenvector Standard Deviation Across Configurations')
+    last_eig_stds = [r['last_eig_barycenter_std'] for r in all_results]
+    plt.plot(range(n_configs), last_eig_stds, 'o-', label='Last Eigenvector Barycenter Std', color='purple')
+    plt.title('Last Eigenvector Barycenter Std Across Configurations')
     plt.xlabel('Configuration Index')
     plt.ylabel('Standard Deviation')
     plt.grid(True)
@@ -337,7 +361,8 @@ def create_improved_eigenvector_plots(all_results):
     
     plt.tight_layout()
     plt.savefig(os.path.join(PATH_TO_PLOTS_VECTORS, 'improved_eigenvector_analysis.png'))
-    plt.show()
+    plt.close()
+    print("Improved eigenvector plots completed!")
 
 # %%
 # we process all files in the data directory
@@ -345,9 +370,12 @@ all_results = []
 eigenvalue_means_storage = []  # we store eigenvalue means separately
 files = [f for f in os.listdir(os.path.join(PATH_TO_DATA, "vectors")) if f.startswith('ntk_eigenvectors_')]
 
+# we sort files by N
+files = sorted(files, key=lambda x: get_config_from_filename(x)[0])
+
 print("Processing all experiment files...")
 print("=" * 50)
-for file in tqdm(files):
+for file in tqdm(files, desc="Processing experiment files"):
     try:
         # we extract configuration from filename
         N, D_IN, M, L = get_config_from_filename(file)
@@ -370,20 +398,52 @@ for file in tqdm(files):
 print("=" * 50)
 print("LAST EIGENVECTOR ANALYSIS SUMMARY:")
 print("=" * 50)
-for result in all_results:
+for result in tqdm(all_results, desc="Printing last eigenvector summary", leave=False):
     config_str = f"N{result['N']}_D{result['D_IN']}_M{result['M']}_L{result['L']}"
     constant_str = "CONSTANT" if result['last_eig_is_constant'] else "VARIABLE"
-    print(f"{config_str}: mean={result['last_eig_mean']:.6f}, std={result['last_eig_std']:.6f} [{constant_str}]")
+    print(f"{config_str}: barycenter_mean={result['last_eig_barycenter_mean']:.6f}, barycenter_std={result['last_eig_barycenter_std']:.6f}, exp_var={result['last_eig_experiment_variance']:.6f} [{constant_str}]")
+
+print("\n" + "=" * 50)
+print("LAST EIGENVECTOR BARYCENTER (COMPLETE VECTORS):")
+print("=" * 50)
+for result in tqdm(all_results, desc="Printing last eigenvector barycenters", leave=False):
+    config_str = f"N{result['N']}_D{result['D_IN']}_M{result['M']}_L{result['L']}"
+    print(f"\n{config_str}:")
+    
+    # we load the corresponding test results to get the barycenter vector
+    test_filename = f'test_results_N{result["N"]}_D{result["D_IN"]}_M{result["M"]}_L{result["L"]}.json'
+    try:
+        with open(os.path.join(PATH_TO_TESTS, test_filename), 'r') as f:
+            test_data = json.load(f)
+            barycenter_vector = test_data['last_eigenvector_analysis']['barycenter_vector']
+            
+        print(f"  Barycenter vector (dimension {len(barycenter_vector)}):")
+        # we print vector components in a readable format
+        for i, component in enumerate(barycenter_vector):
+            print(f"    [{i:2d}]: {component:+.6f}")
+            
+        # we add some statistics
+        print(f"  Statistics:")
+        print(f"    Mean of components: {np.mean(barycenter_vector):.6f}")
+        print(f"    Std of components:  {np.std(barycenter_vector):.6f}")
+        print(f"    Min component:      {np.min(barycenter_vector):+.6f}")
+        print(f"    Max component:      {np.max(barycenter_vector):+.6f}")
+        print(f"    L2 norm:           {np.linalg.norm(barycenter_vector):.6f}")
+            
+    except FileNotFoundError:
+        print(f"  Error: Test results file not found for {config_str}")
+    except Exception as e:
+        print(f"  Error loading barycenter for {config_str}: {e}")
 
 print("\n" + "=" * 50)
 print("EIGENVALUE MEANS SUMMARY:")
 print("=" * 50)
-for eig_result in eigenvalue_means_storage:
+for eig_result in tqdm(eigenvalue_means_storage, desc="Printing eigenvalue summary", leave=False):
     config = eig_result['config']
     config_str = f"N{config['N']}_D{config['D_IN']}_M{config['M']}_L{config['L']}"
     n_eigenvals = len(eig_result['mean_eigenvalues'])
     print(f"{config_str}: {n_eigenvals} eigenvalues (excluding last)")
-    for i, mean_val in enumerate(eig_result['mean_eigenvalues'][:5]):  # we show first 5
+    for i, mean_val in enumerate(eig_result['mean_eigenvalues'][:5]):  # we close first 5
         print(f"  Eigenvalue {i+1}: {mean_val:.6f}")
     if n_eigenvals > 5:
         print(f"  ... and {n_eigenvals-5} more")
@@ -391,15 +451,18 @@ for eig_result in eigenvalue_means_storage:
 # we create improved plots
 create_improved_eigenvector_plots(all_results)
 
+print("Saving results to files...")
 # we save results to CSV using native Python
 if all_results:
     fieldnames = all_results[0].keys()
     with open(os.path.join(PATH_TO_STATS, 'all_results.csv'), 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(all_results)
+        for result in tqdm(all_results, desc="Writing CSV results", leave=False):
+            writer.writerow(result)
 
 # we save eigenvalue means separately
+print("Saving eigenvalue means...")
 with open(os.path.join(PATH_TO_STATS, 'eigenvalue_means.json'), 'w') as f:
     json.dump(eigenvalue_means_storage, f, indent=2)
 
@@ -411,8 +474,9 @@ results_json = {
         'last_eigenvector_summary': {
             'constant_count': sum(1 for r in all_results if r['last_eig_is_constant']),
             'variable_count': sum(1 for r in all_results if not r['last_eig_is_constant']),
-            'mean_of_means': np.mean([r['last_eig_mean'] for r in all_results]),
-            'mean_of_stds': np.mean([r['last_eig_std'] for r in all_results])
+            'mean_of_barycenter_means': np.mean([r['last_eig_barycenter_mean'] for r in all_results]),
+            'mean_of_barycenter_stds': np.mean([r['last_eig_barycenter_std'] for r in all_results]),
+            'mean_of_experiment_variances': np.mean([r['last_eig_experiment_variance'] for r in all_results])
         },
         'eigenvalue_analysis': {
             'total_configs_analyzed': len(eigenvalue_means_storage),
@@ -422,16 +486,18 @@ results_json = {
     'results': all_results,
     'eigenvalue_means': eigenvalue_means_storage
 }
+print("Saving main results JSON...")
 with open(os.path.join(PATH_TO_STATS, 'all_results.json'), 'w') as f:
     json.dump(results_json, f, indent=2)
 
 # we plot trends with respect to each parameter using native Python grouping
 params = ['L', 'N', 'M', 'D_IN']
-metrics = ['avg_max_discrepancy', 'avg_ks_stat', 'avg_ks_pvalue', 'last_eig_mean', 'last_eig_std']  # we add new metrics
+metrics = ['avg_max_discrepancy', 'avg_ks_stat', 'avg_ks_pvalue', 'last_eig_barycenter_mean', 'last_eig_barycenter_std']  # we add new metrics
 
-for param in params:
+print("Creating parameter trend plots...")
+for param in tqdm(params, desc="Creating parameter trend plots"):
     plt.figure(figsize=(20, 8))
-    for i, metric in enumerate(metrics, 1):
+    for i, metric in enumerate(tqdm(metrics, desc=f"Plotting {param} trends", leave=False), 1):
         plt.subplot(2, 3, i)
         
         # we group by parameter manually and compute mean
@@ -453,7 +519,7 @@ for param in params:
     
     plt.tight_layout()
     plt.savefig(os.path.join(PATH_TO_PLOTS_VECTORS, f'trends_wrt_{param}.png'))
-    plt.show()
+    plt.close()
 
 print("\nAnalysis complete. Results saved to:")
 print(f"- Statistics (CSV & JSON): {PATH_TO_STATS}")
