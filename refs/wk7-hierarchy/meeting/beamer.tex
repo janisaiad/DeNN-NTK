@@ -89,6 +89,20 @@ The analysis hinges on the empirical spectral structure of the NTK matrix $\Thet
 We use this split to analyze the sums in $T_3$ and $T_4$.
 \end{frame}
 
+
+\begin{frame}{The NTK Spectrum: Plots}
+   
+\begin{columns}[T] % Aligns top of columns
+    \column{0.6\textwidth}
+        \includegraphics[width=\textwidth]{largest_eigenvalue_vs_L_infinite.png}
+        \captionof{figure}{\tiny Largest eigenvalue vs. Depth L.}
+    
+    \column{0.6\textwidth}
+        \includegraphics[width=\textwidth]{kth_eigenvalue_vs_L_infinite.png}
+        \captionof{figure}{\tiny Smallest eigenvalues vs. Depth L.}
+    \end{columns}
+\end{frame}
+
 \section{Scaling Analysis of Correction Terms}
 
 \begin{frame}{Analysis of the $O_3$ Term}
@@ -99,12 +113,12 @@ T_3 = -\frac{1}{\lambda_{1}}(O_{3}\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}
 \vspace{0.5cm}
 Substituting the eigenvalue scalings:
 \[
-T_3 \approx -\frac{1}{C_1 L}(\dots)_{\text{const}} - \sum_{i=2}^N\frac{N}{C_2 L}(O_{3}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})
+T_3 \approx -\frac{1}{C_1 L}(O_{3}\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \sum_{i=2}^N\frac{N}{C_2 L}(O_{3}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})
 \]
 \vspace{0.5cm}
 Factoring out terms from the sum reveals the dependency on $N$:
 \[
-T_3 \approx -\frac{1}{C_1 L}(\dots)_{\text{const}} - \frac{N(N-1)}{C_2 L} \left( \frac{1}{N-1} \sum_{i=2}^N (\dots)_{\text{bulk}} \right)
+T_3 \approx -\frac{1}{C_1 L}(O_{3}\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \frac{N(N-1)}{C_2 L} \left( \frac{1}{N-1} \sum_{i=2}^N (O_{3}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \right)
 \]
 \begin{alertblock}{Scaling of $T_3$}
 The bulk term dominates, leading to a scaling of:
@@ -130,10 +144,10 @@ Approximating $\lambda_i \approx \lambda_{\text{bulk}} \sim L/N$, the denominato
 
 \begin{frame}{Analysis of the $O_4$ Term}
 \[
-T_4^{\text{bulk}} \approx \frac{1}{2(C_2 L/N)^2} \sum_{i,j=2}^N \left( \dots \right)
+T_4^{\text{bulk}} \approx \frac{1}{2(C_2 L/N)^2} \sum_{i,j=2}^N (\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})
 \]
 The sum has $(N-1)^2$ terms.
-\begin{alertblock}{Scaling of $T_4$}
+\begin{alertblock}{Naive scaling of $T_4$ if O4 is independent of N,L}
 The overall scaling is the product of the pre-factor and the number of terms:
 \[ T_4 \sim \Order\left(\frac{N^4}{L^2}\right) \]
 \end{alertblock}
@@ -153,18 +167,18 @@ The overall scaling is the product of the pre-factor and the number of terms:
 \column{0.5\textwidth}
 \textbf{Empirical Observation}
 \begin{itemize}
-    \item $\|K - K_\infty\| \sim \Order(N)$
+    \item $\|K - K_\infty\| \sim \Order(NL)$
 \end{itemize}
 \end{columns}
 \vspace{1cm}
 \textbf{The Missing Piece:}
 This implies that the averaged tensor components must themselves scale with $N$.
 \[
-\mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\dots)] \quad \text{must have a strong decay with } N.
+\mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})] \quad \text{must have a strong decay with } N.
 \]
 For $T_4$ to be consistent with experiments, we would need:
 \[
-\mathbb{E}[(\dots)_{O_4}] \sim \Order(1/N^3) \implies T_4 \sim \Order\left(\frac{N^4}{L^2} \cdot \frac{1}{N^3}\right) = \Order\left(\frac{N}{L^2}\right)
+\mathbb{E}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})] \sim \Order(L^3/N^3) \implies T_4 \sim \Order\left(\frac{N^4}{L^2} \cdot \frac{L^3}{N^3}\right) = \Order\left(\frac{N L}{L^2}\right)
 \]
 \end{frame}
 
