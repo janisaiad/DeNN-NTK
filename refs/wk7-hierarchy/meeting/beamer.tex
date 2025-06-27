@@ -64,12 +64,14 @@ Our goal is to understand the scaling of the first-order, late-time correction t
 \end{align*}
 \end{theorem}
 \vfill
-\begin{center}
-    To understand the overall scaling, we must analyze the scaling of its components, $T_3$ and $T_4$.
-\end{center}
+
 \end{frame}
 
 \begin{frame}{The NTK Spectrum: A Dichotomy}
+    \begin{center}
+        To understand the overall scaling, we must analyze the scaling of its components, $T_3$ and $T_4$.
+    \end{center}
+
 The analysis hinges on the empirical spectral structure of the NTK matrix $\Theta_0$:
 \begin{itemize}
     \item \textbf{A single, isolated eigenvalue $\lambda_1$}:
@@ -124,6 +126,9 @@ T_4^{\text{bulk}} = \sum_{i,j=2}^N \frac{(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delt
 \]
 \vspace{0.5cm}
 Approximating $\lambda_i \approx \lambda_{\text{bulk}} \sim L/N$, the denominator scales as $(L/N)^2$.
+\end{frame}
+
+\begin{frame}{Analysis of the $O_4$ Term}
 \[
 T_4^{\text{bulk}} \approx \frac{1}{2(C_2 L/N)^2} \sum_{i,j=2}^N \left( \dots \right)
 \]
@@ -176,6 +181,14 @@ We formalize this using Random Matrix Theory.
     \]
     The spikes $v_i$ encode learnable features.
 \end{itemize}
+\end{frame}
+
+%placeholder for image of NTK spectrum
+\begin{frame}{The NTK Spectrum}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{ntk_spectrum.png}
+\end{figure}
 \end{frame}
 
 \begin{frame}{The BBP Phase Transition and Feature Learning}
