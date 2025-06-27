@@ -446,8 +446,108 @@ The results, as shown in Figure \ref{fig:k3_norm_vs_l}, demonstrate a clear incr
 
 To understand the practical impact of the $K^{(3)}$ correction, we analyze how its magnitude scales with the network depth $H$ and width $m$. This analysis reveals how the importance of the NTK's evolution changes with the network architecture.
 
+\subsection{Implementation Note: The Perils of Parameterization}
+
+A brief note on implementation is warranted, as a subtle issue encountered during the early phases of our experiments led to a significant debugging effort. Initial computations of the finite-width NTK correction yielded results that were inconsistent with theoretical predictions, particularly concerning the scaling with width $M$. After extensive investigation, the source of the error was traced to the parameterization of the `stax.Dense` layer within the `neural-tangents` library.
+
+The default setting, `parameterization='ntk'`, is designed to make the kernel independent of width, which is ideal for studying the infinite-width limit but masks the very finite-width effects we sought to measure. The correct approach for our empirical, finite-width models required switching to `parameterization='standard'`. This change, while minor in code, was conceptually critical and resolved the discrepancies. This experience serves as a cautionary tale on the importance of ensuring that the abstractions provided by high-level libraries are precisely aligned with the theoretical regime under investigation.
 
 
+\section{wk7: A Random Matrix Perspective on the NTK Correction}
+
+In this section, we adopt a Random Matrix Theory (RMT) perspective to develop a deeper understanding of the NTK's spectral properties and their connection to feature learning. We begin by recasting our previous analysis within this more formal framework and then introduce the core concepts from RMT that explain the transition from a "lazy" kernel method to active feature learning.
+
+Our analysis starts with the late-time correction formula (Equation \ref{eq:theta_correction}), which connects the change in the kernel to its initial spectral properties:
+\begin{align*}
+\Theta^{(1)}_\infty(\vec{x}) = & -\sum_{i=1}^N \frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \\
+& + \sum_{i,j=1}^N\frac{1}{\lambda_{i}(\lambda_{i}+\lambda_{j})}(\hat{e}_{i}^{T}O_{4}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})
+\end{align*}
+
+\subsection{Empirical Spectral Structure and the Constant Mode}
+Our experiments, detailed in `eigen_distrib.py`, consistently reveal a specific spectral structure for the NTK matrix $\Theta_0$. The spectrum is dichotomous:
+\begin{itemize}
+    \item A single, large eigenvalue $\lambda_1$ that is isolated from the rest. Our analysis confirms that its associated eigenvector, $\hat{e}_1$, is consistently aligned with the constant vector: $\hat{e}_1 \approx \frac{1}{\sqrt{N}}(1, 1, \dots, 1)^T$. This mode captures the function's average value over the dataset.
+    \item A "bulk" of $N-1$ smaller eigenvalues, $\{\lambda_i\}_{i=2}^N$, which are clustered together. We hypothesize that this part of the spectrum can be modeled using RMT.
+\end{itemize}
+This observation justifies separating the sums in $\Theta^{(1)}_\infty$ into the contribution from the constant mode ($i=1$) and the contribution from the bulk ($i,j \ge 2$), as developed in the previous version of this analysis. The key insight is that the bulk's behavior is not arbitrary but follows statistical laws.
+
+\subsection{Scaling Analysis of Correction Terms}
+We split the sum in the $T_3$ term into the contribution from the top eigenvector and the bulk:
+\[ T_3 = -\frac{1}{\lambda_{1}}(O_{3}(\vec{x};0)\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \sum_{i=2}^N\frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \]
+Using the eigenvalue scaling laws ($\lambda_1 \approx C_1 L$, $\lambda_{i>1} \approx C_2 L/N$), we get:
+\[ T_3 \approx -\frac{1}{C_1 L}(O_{3}\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \sum_{i=2}^N\frac{N}{C_2 L}(O_{3}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \]
+Factoring the sum term reveals an average over the bulk eigenvectors:
+\[ T_3 \approx -\frac{1}{C_1 L}(O_{3}\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \frac{N(N-1)}{C_2 L} \left( \frac{1}{N-1} \sum_{i=2}^N (O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \right) \]
+Under our random matrix hypothesis, the sum can be interpreted as an expectation, and the second term dominates, scaling as $\mathcal{O}(N^2/L)$.
+
+A similar analysis for the $T_4$ term yields a dominant bulk contribution:
+\[ T_4^{\text{bulk}} = \sum_{i,j=2}^N \frac{(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})}{\lambda_i(\lambda_i+\lambda_j)} \]
+Approximating all bulk eigenvalues as $\lambda_{\text{bulk}} \approx C_2 L/N$, the pre-factor scales as $\mathcal{O}((N/L)^2)$. With $(N-1)^2$ terms in the sum, we find the overall scaling:
+\[ T_4^{\text{bulk}} \approx \frac{(N-1)^2}{2(C_2 L/N)^2} \mathbb{E}_{\hat{e}_i, \hat{e}_j} \left[ (\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j}) \right] \]
+The scaling law for this term is therefore $\mathcal{O}(N^2 \cdot (N/L)^2) = \mathcal{O}(N^4/L^2)$.
+
+\subsection{Discussion and Experimental Validation}
+The preceding analysis critically relies on the hypothesis that the bulk eigenvectors behave randomly. To test this hypothesis and validate our approach, numerous numerical experiments were conducted. The methodology and implementation are detailed in the scripts `experiments/ntk_spectrum/eigenvectors.py` (data generation) and `experiments/ntk_spectrum/eigen_distrib.py` (analysis). These experiments confirm the postulated spectral structure and the random nature of the eigenvectors associated with the bulk.
+
+\begin{figure}[h!]
+    \centering
+    % Placeholder for image
+    \caption{Characterization of the largest eigenvalue, showing its isolation from the rest of the spectrum.}
+    \label{fig:wk7_eig1}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    % Placeholder for image
+    \caption{Uniformity test for the bulk eigenvectors, confirming their quasi-random nature.}
+    \label{fig:wk7_uniformity}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    % Placeholder for image
+    \caption{Empirical spectral distribution of the NTK, illustrating the clear separation between the dominant eigenvalue and the bulk.}
+    \label{fig:wk7_spectrum_dist}
+\end{figure}
+
+The empirical scaling law for the correction (Equation \ref{eq:scaling_law}) is nearly linear in $N$ ($\sim N^{0.902}$). However, our raw scaling analysis suggests stronger dependencies, with $T_3 \sim \mathcal{O}(N^2/L)$ and $T_4 \sim \mathcal{O}(N^4/L^2)$. This discrepancy implies that the magnitude of the tensors $O_3$ and $O_4$ (or at least their projections onto random eigenvectors) must themselves depend on $N$.
+
+We therefore need to find a scaling law for $O_4$ as a function of $N$. The discussion focuses on the impact such a law would have. For instance, if the quadratic term in $O_4$ averaged over random eigenvectors behaved as $\mathcal{O}(1/N^3)$, then the $T_4$ contribution would scale as $\mathcal{O}(N^4/L^2 \cdot 1/N^3) = \mathcal{O}(N/L^2)$. Such a dependency, combined with a more refined analysis of the $T_3$ term, could explain the quasi-linear scaling in $N$ observed experimentally. Determining the precise scaling law of $O_4$ with $N$ is therefore a crucial goal for future work to fully validate this theoretical model.
+
+\subsection{Focus: An RMT Framework for the NTK}
+We now formalize the analysis of the NTK using RMT to understand the transition from feature learning to the lazy interpolation dictated by a random structure. This is a dialogue between the signal (the data) and the noise (the random initialization).
+
+\subsubsection{The NTK as a Spiked Covariance Matrix}
+The starting point is to view the NTK matrix, $\Theta = \frac{1}{m}JJ^T \in \R^{n \times n}$ (where $J$ is the Jacobian), not as a deterministic kernel matrix, but as a sample covariance matrix. The entries of $J$ are complex functions of the network's weights, which are random variables at initialization.
+
+The fundamental insight from RMT is that, without structure in the data (e.g., for isotropic input data $X$), the eigenvalue spectrum of $\Theta$ should converge to a universal distribution: the \textbf{Marchenko-Pastur (MP) law}. This continuous distribution, the "bulk," represents the intrinsic structure of the kernel due to the architecture and random initialization. It is the background noise, the structural prior of the network before it has "seen" any interesting structure in the data.
+
+The relevant model is not a purely random covariance matrix, but a "spiked" deformation model. We postulate that:
+\[
+\Theta \approx \Theta_{\text{MP}} + \sum_{i} \sigma_i v_i v_i^T
+\]
+Here, $\Theta_{\text{MP}}$ represents the part of the spectrum following the MP law (the bulk), and the terms $v_i$ are eigenvectors that encode low-rank structures in the data (e.g., class separation), with associated signal strengths $\sigma_i$.
+
+\subsubsection{The BBP Phase Transition and Feature Learning}
+This is the most crucial point. RMT predicts a sharp phase transition (known as the Baik-Ben Arous-Péché - BBP transition) for the emergence of these spikes. An eigenvalue associated with a data structure will only "pop out" of the MP bulk if its signal strength $\sigma_i$ exceeds a critical threshold. If it is below the threshold, the eigenvalue remains "drowned" in the bulk, and its corresponding eigenvector is essentially a random vector without exploitable information. The network is blind to this feature.
+
+\textbf{Deep Insight: Feature learning is a BBP phase transition.}
+\begin{itemize}
+    \item \textbf{Lazy Regime:} If the network width is very large, or if the data structure is too weak, no eigenvalue emerges from the bulk. The NTK behaves like a purely random matrix, and its spectrum is fully described by the Marchenko-Pastur law. Learning proceeds by simple interpolation via the random modes of the kernel. The network does not change its internal representation; it is "lazy."
+    \item \textbf{Feature Learning Regime:} When an eigenvalue $\lambda_i$ exceeds the BBP threshold and becomes an "outlier," its eigenvector $v_i$ aligns with the corresponding data structure. The network has isolated a relevant signal. The learning dynamics will then preferentially amplify the function's components along this direction $v_i$. The network actively modifies its representation to capture this feature.
+\end{itemize}
+Analyzing the NTK with RMT is therefore a search for these outliers. Their number and magnitude inform us about the "effective dimension" of the features that the network can learn.
+
+\subsection{The Influence of Depth L on the BBP Threshold}
+The primary effect of increasing depth $L$ is to push the BBP threshold to higher values, i.e., $L \uparrow \implies \text{Threshold}_{\text{BBP}} \uparrow$. This can be understood intuitively:
+\begin{enumerate}
+    \item \textbf{Addition of Variances:} Each layer adds its own "amount" of random structure. From the perspective of free probability, the spectrum of the full NTK is the free convolution of the spectra of the individual layer kernels.
+    \item \textbf{Spectrum Spreading:} This increased variance results in a bulk spectrum $\mu_{\text{Deep}}$ that is wider than that of any individual layer. The free convolution of several MP distributions produces a more spread-out distribution.
+    \item \textbf{Edge Shift:} The spreading of the bulk mechanically pushes its upper edge, $\lambda_{\max}^{\text{bulk}}$, to the right.
+\end{enumerate}
+This has a profound consequence for learning in deep networks: the deeper a network, the stronger a signal from the data must be to emerge from the increased structural noise. A signal that a shallow network might learn could be drowned in the bulk of a deeper network. This suggests the existence of a "sweet spot" for depth. Mechanisms like residual connections (ResNets) can be interpreted, from this RMT viewpoint, as ways to control how the spectra of layers are combined, potentially avoiding an "explosion" of the BBP threshold.
+
+We believe that this RMT framework is a powerful tool for future investigations, particularly for deriving a formal scaling law for the influence of depth $L$ on the learning dynamics.
 
 
 \section{Future Work}
