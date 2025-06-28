@@ -84,6 +84,58 @@ This paper presents a comprehensive mathematical analysis of the Neural Tangent 
 
 \newpage
 
+\section{Framework and Notations}
+
+In this section, we introduce the mathematical framework and notations used throughout this document, building upon the definitions established in the work on the Neural Tangent Hierarchy (NTH) \cite{dyer2019asymptoticswidenetworksfeynman}.
+
+\subsection{Neural Network Architecture}
+
+We consider a fully-connected feedforward neural network with $H$ hidden layers of width $m$.
+\begin{itemize}
+    \item The network input is a vector $x \in \mathbb{R}^d$.
+    \item The output of layer $\ell$ is denoted by $x^{(\ell)}$. For $\ell \in \{1, \dots, H\}$, it is computed recursively as:
+    \begin{equation}
+        x^{(\ell)} = \frac{1}{\sqrt{m}}\sigma(W^{(\ell)}x^{(\ell-1)})
+    \end{equation}
+    where $x^{(0)} = x$ is the input, $W^{(\ell)}$ is the weight matrix of layer $\ell$, and $\sigma$ is a non-linear activation function applied component-wise.
+    \item The final output of the network is a linear combination of the last hidden layer's output:
+    \begin{equation}
+        f(x, \theta) = a^T x^{(H)}
+    \end{equation}
+    where $a \in \mathbb{R}^m$ is the weight vector of the output layer.
+    \item The set of all trainable parameters of the network is denoted $\theta = (\text{vec}(W^{(1)}), \dots, \text{vec}(W^{(H)}), a)$.
+    \item The derivative of the activation function for layer $\ell$ is represented by a diagonal matrix $\sigma'_\ell(x) = \text{diag}(\sigma'(W^{(\ell)}x^{(\ell-1)}))$.
+\end{itemize}
+
+\subsection{The Neural Tangent Kernel (NTK)}
+
+The network is trained via gradient descent on the quadratic loss: $L(\theta) = \frac{1}{2n}\sum_{\alpha=1}^n (f(x_\alpha, \theta) - y_\alpha)^2$. The dynamics of the network function $f(x, \theta_t)$ during continuous-time training (gradient flow) are governed by the Neural Tangent Kernel (NTK), denoted $K^{(2)}_t$.
+\begin{equation}
+\frac{d}{dt} f(x, \theta_t) = -\frac{1}{n}\sum_{\beta=1}^n K^{(2)}_t(x, x_\beta) (f(x_\beta, \theta_t) - y_\beta)
+\end{equation}
+The NTK is defined as the inner product of the gradients of the output function with respect to the network parameters:
+\begin{equation}
+K^{(2)}_t(x_\alpha, x_\beta) := \langle \nabla_\theta f(x_\alpha, \theta_t), \nabla_\theta f(x_\beta, \theta_t) \rangle
+\end{equation}
+It can be decomposed as a sum over the network layers:
+\begin{equation}
+K^{(2)}_t(x_\alpha, x_\beta) = \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle
+\end{equation}
+where the vector $G^{(\ell)}_\mu$ represents the backpropagated gradient up to layer $\ell$:
+\begin{equation}
+G^{(\ell)}_\mu = \frac{1}{\sqrt{m}}\sigma'_\ell(x_\mu) (W^{(\ell+1)})^T \cdots \frac{1}{\sqrt{m}}\sigma'_H(x_\mu) a_t
+\end{equation}
+
+\subsection{The Neural Tangent Hierarchy (NTH)}
+For finite-width networks ($m < \infty$), the NTK $K^{(2)}_t$ is not constant but evolves during training. Its dynamics are dictated by the higher-order kernel $K^{(3)}_t$. This gives rise to an infinite sequence of coupled ordinary differential equations, known as the Neural Tangent Hierarchy (NTH):
+\begin{equation}
+\frac{d}{dt} K^{(r)}_t(x_{\alpha_1}, \dots, x_{\alpha_r}) = -\frac{1}{n} \sum_{\gamma=1}^n K^{(r+1)}_t(x_{\alpha_1}, \dots, x_{\alpha_r}, x_\gamma) (f_t(x_\gamma) - y_\gamma)
+\end{equation}
+valid for all $r \ge 2$. The higher-order kernel $K^{(r+1)}$ is defined recursively as the derivative of $K^{(r)}$ with respect to the parameters, contracted with the gradient of the network output:
+\begin{equation}
+K^{(r+1)}_t(x_1, \dots, x_{r+1}) := \langle \nabla_\theta K^{(r)}_t(x_1, \dots, x_r), \nabla_\theta f_t(x_{r+1}) \rangle
+\end{equation}
+This hierarchy captures the complete training dynamics beyond the infinite-width approximation where only $K^{(2)}$ is considered and is constant. The purpose of this document is to derive and analyze the explicit form of $K^{(3)}$, which represents the first correction to the NTK dynamics.
 
 \section{Other proof}
 
