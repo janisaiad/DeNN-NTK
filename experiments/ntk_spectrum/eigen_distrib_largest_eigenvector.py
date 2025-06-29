@@ -68,8 +68,6 @@ def plot_largest_eigenvector_scalar_product_distribution(eigenvectors, N, D_IN, 
     """
     # we assume the largest eigenvector is at index 0
     # eigenvectors shape: (n_experiments, n_vectors, dimension)
-    for i in range(eigenvectors.shape[0]):
-        eigenvectors[i,:,:] = eigenvectors[i,:,:].T
     
     try:
         largest_eigenvectors = eigenvectors[:, -1, :] # shape (n_experiments, dimension)
@@ -266,12 +264,12 @@ if __name__ == "__main__":
             
             # we plot the largest eigenvector scalar product distribution
             plot_largest_eigenvector_scalar_product_distribution(
-                eigenvectors_data['eigenvectors'], N, D_IN, M, L, PATH_TO_PLOTS
+                eigenvectors_data['eigenvectors'].transpose(0, 2, 1), N, D_IN, M, L, PATH_TO_PLOTS
             )
             
             # we plot the largest eigenvector coordinate distributions
             plot_largest_eigenvector_coordinate_distributions(
-                eigenvectors_data['eigenvectors'], N, D_IN, M, L, PATH_TO_PLOTS
+                eigenvectors_data['eigenvectors'].transpose(0, 2, 1), N, D_IN, M, L, PATH_TO_PLOTS
             )
             
         except Exception as e:

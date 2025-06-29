@@ -618,22 +618,22 @@ if __name__ == "__main__":
             
             # we analyze coordinate distributions for all eigenvectors
             analyze_all_eigenvectors_coordinates(
-                eigenvectors_data['eigenvectors'], N, D_IN, M, L, PATH_TO_PLOTS
+                eigenvectors_data['eigenvectors'].transpose(0, 2, 1), N, D_IN, M, L, PATH_TO_PLOTS
             )
             
             # we compute and visualize the Gram matrix
             gram_stats = compute_and_plot_gram_matrix(
-                eigenvectors_data['eigenvectors'], N, D_IN, M, L, PATH_TO_PLOTS
+                eigenvectors_data['eigenvectors'].transpose(0, 2, 1), N, D_IN, M, L, PATH_TO_PLOTS
             )
             
             # we analyze the last coordinate property
             analyze_last_coordinate_property(
-                eigenvectors_data['eigenvectors'], N, D_IN, M, L, PATH_TO_PLOTS
+                eigenvectors_data['eigenvectors'].transpose(0, 2, 1), N, D_IN, M, L, PATH_TO_PLOTS
             )
             
             # we analyze the Gram matrix inverse
             analyze_gram_matrix_inverse(
-                eigenvectors_data['eigenvectors'], N, D_IN, M, L, PATH_TO_PLOTS
+                eigenvectors_data['eigenvectors'].transpose(0, 2, 1), N, D_IN, M, L, PATH_TO_PLOTS
             )
             
         except Exception as e:
