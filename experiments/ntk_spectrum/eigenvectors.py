@@ -81,6 +81,7 @@ for complexity, N, D_IN, M, L in experiments:
                 K_prime = inf_model.kernel_matrix(data)  # we compute infinite-width NTK
                 eigenvalues, eigenvectors = jnp.linalg.eigh(K_prime)  # we compute eigenvalues and eigenvectors
                 
+                # the largest eigenvalue is the last one
                 all_eigenvalues.append(eigenvalues)
                 all_eigenvectors.append(eigenvectors)
                 if exp % 10 == 9:
@@ -110,7 +111,7 @@ for complexity, N, D_IN, M, L in experiments:
                 'eigenvectors': jnp.array(all_eigenvectors),  # shape (n_experiments, N, N)
                 'RANDOM_SEED': RANDOM_SEED
             }
-            
+            # in this data, the largest eigenvector is the last one, we can access them with all_eigenvectors[:, -1, :]
             np.save(os.path.join(PATH_TO_DATA, filename_eigenvalues), output_data_eigenvalues)  # we use numpy save
             np.save(os.path.join(PATH_TO_DATA, filename_eigenvectors), output_data_eigenvectors)  # we use numpy save
             
