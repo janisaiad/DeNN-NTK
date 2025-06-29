@@ -69,39 +69,31 @@ def get_ordinal_suffix(n):
         suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')
     return f"{n}{suffix}"
 
-def compute_entropy_in_eigenvector_basis(eigenvectors, eigenvector_order, N, D_IN, M, L, output_dir):
+def compute_entropy_in_eigenvector_basis_vectorized(eigenvectors, eigenvector_order, N, D_IN, M, L, output_dir):
     """
     We compute the entropy of the distribution for each coordinate of a specific eigenvector order,
-    but using the eigenvectors of the first experiment as the basis.
+    but using the eigenvectors of the first experiment as the basis. VECTORIZED VERSION.
     """
     n_experiments, n_vectors, dimension = eigenvectors.shape
     
     # we use the first experiment's eigenvectors as the basis
-    first_experiment_basis = eigenvectors[0, :, :] # shape (n_vectors, dimension)
+    first_experiment_basis = jnp.array(eigenvectors[0, :, :]) # shape (n_vectors, dimension)
     
     try: # we get the eigenvectors for the specific order from all other experiments
-        selected_eigenvectors = eigenvectors[1:, eigenvector_order, :] # shape (n_experiments-1, dimension)
+        selected_eigenvectors = jnp.array(eigenvectors[1:, eigenvector_order, :]) # shape (n_experiments-1, dimension)
     except IndexError:
         print(f"Warning: Could not extract eigenvector {eigenvector_order+1} for config N{N}_D{D_IN}_M{M}_L{L}.")
         return None
 
     n_remaining_experiments, dimension = selected_eigenvectors.shape
+    n_basis_vectors = min(n_vectors, dimension-1) # we use N-1 vectors as basis
     
-    # we project each eigenvector onto the basis formed by first experiment's eigenvectors
-    coordinates_in_basis = []
-    for exp_idx in range(n_remaining_experiments):
-        eigenvector = selected_eigenvectors[exp_idx, :] # current eigenvector
-        
-        # we compute scalar products with each basis vector
-        coords = []
-        for basis_idx in range(min(n_vectors, dimension-1)): # we use N-1 vectors as mentioned
-            basis_vector = first_experiment_basis[basis_idx, :]
-            scalar_product = np.dot(eigenvector, basis_vector)
-            coords.append(scalar_product)
-        
-        coordinates_in_basis.append(coords)
-    
-    coordinates_in_basis = np.array(coordinates_in_basis) # shape (n_remaining_experiments, n_basis_vectors)
+    # VECTORIZED: we compute all scalar products in one matrix multiplication
+    # selected_eigenvectors: (n_remaining_experiments, dimension)
+    # first_experiment_basis[:n_basis_vectors, :]: (n_basis_vectors, dimension)  
+    # Result: (n_remaining_experiments, n_basis_vectors)
+    coordinates_in_basis = selected_eigenvectors @ first_experiment_basis[:n_basis_vectors, :].T
+    coordinates_in_basis = np.array(coordinates_in_basis) # we convert back to numpy for histogram computation
     
     # we compute entropy for each coordinate in the new basis
     coordinate_entropies = []
@@ -122,9 +114,10 @@ def compute_entropy_in_eigenvector_basis(eigenvectors, eigenvector_order, N, D_I
     
     return coordinate_entropies
 
-def plot_coordinate_distributions_in_basis(eigenvectors, N, D_IN, M, L, output_dir):
+def plot_coordinate_distributions_in_basis_vectorized(eigenvectors, N, D_IN, M, L, output_dir):
     """
     We plot the distributions of coordinates in the eigenvector basis for all eigenvector orders.
+    VECTORIZED VERSION.
     """
     n_experiments, n_vectors, dimension = eigenvectors.shape
     
@@ -133,38 +126,36 @@ def plot_coordinate_distributions_in_basis(eigenvectors, N, D_IN, M, L, output_d
         return None
     
     # we use the first experiment's eigenvectors as the basis
-    first_experiment_basis = eigenvectors[0, :, :] # shape (n_vectors, dimension)
+    first_experiment_basis = jnp.array(eigenvectors[0, :, :]) # shape (n_vectors, dimension)
     n_basis_vectors = min(n_vectors, dimension-1) # we use N-1 vectors as basis
+    basis_vectors = first_experiment_basis[:n_basis_vectors, :] # shape (n_basis_vectors, dimension)
     
-    print(f"Plotting coordinate distributions in eigenvector basis - N{N}_D{D_IN}_M{M}_L{L}")
+    print(f"Plotting coordinate distributions in eigenvector basis (VECTORIZED) - N{N}_D{D_IN}_M{M}_L{L}")
     
-    # we compute coordinates for all eigenvectors in the basis
+    # VECTORIZED: we compute coordinates for ALL eigenvectors at once
+    remaining_eigenvectors = jnp.array(eigenvectors[1:, :, :]) # shape (n_experiments-1, n_vectors, dimension)
+    
+    # we reshape for batch matrix multiplication: (n_experiments-1 * n_vectors, dimension)
+    reshaped_eigenvectors = remaining_eigenvectors.reshape(-1, dimension)
+    
+    # VECTORIZED: single matrix multiplication for ALL projections
+    # reshaped_eigenvectors: (n_experiments-1 * n_vectors, dimension)
+    # basis_vectors.T: (dimension, n_basis_vectors)
+    # Result: (n_experiments-1 * n_vectors, n_basis_vectors)
+    all_coordinates_flat = reshaped_eigenvectors @ basis_vectors.T
+    
+    # we reshape back to (n_experiments-1, n_vectors, n_basis_vectors)
+    all_coordinates_3d = all_coordinates_flat.reshape(n_experiments-1, n_vectors, n_basis_vectors)
+    all_coordinates_3d = np.array(all_coordinates_3d) # we convert back to numpy
+    
+    # we separate by eigenvector order
     all_coordinates = []
     eigenvector_labels = []
     
-    for k in range(n_vectors): # for each eigenvector order
-        try:
-            selected_eigenvectors = eigenvectors[1:, k, :] # shape (n_experiments-1, dimension)
-            n_remaining_experiments = selected_eigenvectors.shape[0]
-            
-            # we project each eigenvector onto the basis
-            coordinates_in_basis = []
-            for exp_idx in range(n_remaining_experiments):
-                eigenvector = selected_eigenvectors[exp_idx, :]
-                coords = []
-                for basis_idx in range(n_basis_vectors):
-                    basis_vector = first_experiment_basis[basis_idx, :]
-                    scalar_product = np.dot(eigenvector, basis_vector)
-                    coords.append(scalar_product)
-                coordinates_in_basis.append(coords)
-            
-            coordinates_in_basis = np.array(coordinates_in_basis) # shape (n_remaining_experiments, n_basis_vectors)
-            all_coordinates.append(coordinates_in_basis)
-            eigenvector_labels.append(f'{get_ordinal_suffix(k+1)} eigenvector')
-            
-        except IndexError:
-            print(f"Warning: Could not extract eigenvector {k+1}")
-            continue
+    for k in range(n_vectors):
+        coordinates_in_basis = all_coordinates_3d[:, k, :] # shape (n_experiments-1, n_basis_vectors)
+        all_coordinates.append(coordinates_in_basis)
+        eigenvector_labels.append(f'{get_ordinal_suffix(k+1)} eigenvector')
     
     if not all_coordinates:
         print("No valid coordinates computed")
@@ -331,14 +322,14 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, output_dir
     print(f"Using first experiment as basis, analyzing {n_experiments-1} remaining experiments")
     
     # First, plot the coordinate distributions
-    coord_results = plot_coordinate_distributions_in_basis(eigenvectors, N, D_IN, M, L, output_dir)
+    coord_results = plot_coordinate_distributions_in_basis_vectorized(eigenvectors, N, D_IN, M, L, output_dir)
     
     # we compute entropy for each eigenvector order
     all_entropies = []
     n_basis_vectors = min(n_vectors, dimension-1) # we use N-1 vectors as basis
     
     for k in range(n_vectors):
-        entropies = compute_entropy_in_eigenvector_basis(eigenvectors, k, N, D_IN, M, L, output_dir)
+        entropies = compute_entropy_in_eigenvector_basis_vectorized(eigenvectors, k, N, D_IN, M, L, output_dir)
         if entropies is not None:
             all_entropies.append(entropies)
     
