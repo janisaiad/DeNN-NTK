@@ -117,7 +117,7 @@ def compute_entropy_in_eigenvector_basis(eigenvectors, eigenvector_order, N, D_I
         probabilities = hist * bin_width
         probabilities = probabilities[probabilities > 0] # we remove zero probabilities
         
-        entropy = -np.sum(probabilities * np.log2(probabilities))
+        entropy = -np.sum(probabilities * np.log(probabilities))
         coordinate_entropies.append(entropy)
     
     return coordinate_entropies
