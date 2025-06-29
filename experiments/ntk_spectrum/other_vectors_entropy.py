@@ -122,6 +122,201 @@ def compute_entropy_in_eigenvector_basis(eigenvectors, eigenvector_order, N, D_I
     
     return coordinate_entropies
 
+def plot_coordinate_distributions_in_basis(eigenvectors, N, D_IN, M, L, output_dir):
+    """
+    We plot the distributions of coordinates in the eigenvector basis for all eigenvector orders.
+    """
+    n_experiments, n_vectors, dimension = eigenvectors.shape
+    
+    if n_experiments < 2:
+        print(f"Warning: Need at least 2 experiments for basis analysis, got {n_experiments}")
+        return None
+    
+    # we use the first experiment's eigenvectors as the basis
+    first_experiment_basis = eigenvectors[0, :, :] # shape (n_vectors, dimension)
+    n_basis_vectors = min(n_vectors, dimension-1) # we use N-1 vectors as basis
+    
+    print(f"Plotting coordinate distributions in eigenvector basis - N{N}_D{D_IN}_M{M}_L{L}")
+    
+    # we compute coordinates for all eigenvectors in the basis
+    all_coordinates = []
+    eigenvector_labels = []
+    
+    for k in range(n_vectors): # for each eigenvector order
+        try:
+            selected_eigenvectors = eigenvectors[1:, k, :] # shape (n_experiments-1, dimension)
+            n_remaining_experiments = selected_eigenvectors.shape[0]
+            
+            # we project each eigenvector onto the basis
+            coordinates_in_basis = []
+            for exp_idx in range(n_remaining_experiments):
+                eigenvector = selected_eigenvectors[exp_idx, :]
+                coords = []
+                for basis_idx in range(n_basis_vectors):
+                    basis_vector = first_experiment_basis[basis_idx, :]
+                    scalar_product = np.dot(eigenvector, basis_vector)
+                    coords.append(scalar_product)
+                coordinates_in_basis.append(coords)
+            
+            coordinates_in_basis = np.array(coordinates_in_basis) # shape (n_remaining_experiments, n_basis_vectors)
+            all_coordinates.append(coordinates_in_basis)
+            eigenvector_labels.append(f'{get_ordinal_suffix(k+1)} eigenvector')
+            
+        except IndexError:
+            print(f"Warning: Could not extract eigenvector {k+1}")
+            continue
+    
+    if not all_coordinates:
+        print("No valid coordinates computed")
+        return None
+    
+    # we create comprehensive visualizations
+    n_eigenvectors = len(all_coordinates)
+    
+    # we create a large figure with multiple subplots
+    fig = plt.figure(figsize=(20, 12))
+    gs = fig.add_gridspec(3, 4, hspace=0.3, wspace=0.3)
+    
+    # Plot 1: Distribution of coordinates for first few eigenvectors
+    ax1 = fig.add_subplot(gs[0, :2])
+    colors = plt.cm.tab10(np.linspace(0, 1, min(n_eigenvectors, 5)))
+    
+    for i in range(min(n_eigenvectors, 5)):
+        coords = all_coordinates[i].flatten()
+        ax1.hist(coords, bins=30, alpha=0.6, label=eigenvector_labels[i], 
+                color=colors[i], density=True)
+    
+    ax1.set_xlabel('Coordinate Value')
+    ax1.set_ylabel('Density')
+    ax1.set_title('Distribution of All Coordinates\n(First 5 Eigenvectors)')
+    ax1.legend()
+    ax1.grid(True, alpha=0.3)
+    
+    # Plot 2: Statistics summary (mean, std, range)
+    ax2 = fig.add_subplot(gs[0, 2:])
+    stats_data = []
+    for i, coords_matrix in enumerate(all_coordinates):
+        coords_flat = coords_matrix.flatten()
+        stats = {
+            'mean': np.mean(coords_flat),
+            'std': np.std(coords_flat),
+            'min': np.min(coords_flat),
+            'max': np.max(coords_flat),
+            'range': np.max(coords_flat) - np.min(coords_flat)
+        }
+        stats_data.append(stats)
+    
+    means = [s['mean'] for s in stats_data]
+    stds = [s['std'] for s in stats_data]
+    ranges = [s['range'] for s in stats_data]
+    
+    x_pos = np.arange(len(means))
+    ax2.errorbar(x_pos, means, yerr=stds, fmt='o-', capsize=5, 
+                label='Mean ± Std', linewidth=2, markersize=6)
+    ax2.fill_between(x_pos, [s['min'] for s in stats_data], 
+                    [s['max'] for s in stats_data], alpha=0.2, label='Range')
+    ax2.set_xlabel('Eigenvector Order')
+    ax2.set_ylabel('Coordinate Value')
+    ax2.set_title('Statistics of Coordinate Distributions')
+    ax2.set_xticks(x_pos)
+    ax2.set_xticklabels([f'{i+1}' for i in range(len(means))])
+    ax2.legend()
+    ax2.grid(True, alpha=0.3)
+    
+    # Plot 3: Heatmap of coordinates for all basis vectors
+    ax3 = fig.add_subplot(gs[1, :2])
+    
+    # we create a matrix with mean coordinates for each eigenvector and basis vector
+    coord_matrix = np.zeros((n_eigenvectors, n_basis_vectors))
+    for i, coords_matrix in enumerate(all_coordinates):
+        coord_matrix[i, :] = np.mean(coords_matrix, axis=0)
+    
+    im = ax3.imshow(coord_matrix, aspect='auto', cmap='RdBu_r')
+    plt.colorbar(im, ax=ax3, label='Mean Coordinate Value')
+    ax3.set_xlabel('Basis Vector Index')
+    ax3.set_ylabel('Eigenvector Order')
+    ax3.set_title('Mean Coordinates in Eigenvector Basis')
+    ax3.set_xticks(range(n_basis_vectors))
+    ax3.set_xticklabels([f'{i+1}' for i in range(n_basis_vectors)])
+    ax3.set_yticks(range(n_eigenvectors))
+    ax3.set_yticklabels([f'{i+1}' for i in range(n_eigenvectors)])
+    
+    # Plot 4: Standard deviation heatmap
+    ax4 = fig.add_subplot(gs[1, 2:])
+    
+    std_matrix = np.zeros((n_eigenvectors, n_basis_vectors))
+    for i, coords_matrix in enumerate(all_coordinates):
+        std_matrix[i, :] = np.std(coords_matrix, axis=0)
+    
+    im2 = ax4.imshow(std_matrix, aspect='auto', cmap='viridis')
+    plt.colorbar(im2, ax=ax4, label='Standard Deviation')
+    ax4.set_xlabel('Basis Vector Index')
+    ax4.set_ylabel('Eigenvector Order')
+    ax4.set_title('Standard Deviation of Coordinates')
+    ax4.set_xticks(range(n_basis_vectors))
+    ax4.set_xticklabels([f'{i+1}' for i in range(n_basis_vectors)])
+    ax4.set_yticks(range(n_eigenvectors))
+    ax4.set_yticklabels([f'{i+1}' for i in range(n_eigenvectors)])
+    
+    # Plot 5: Box plots for first few basis vectors
+    ax5 = fig.add_subplot(gs[2, :2])
+    
+    box_data = []
+    box_labels = []
+    for basis_idx in range(min(n_basis_vectors, 8)): # we show first 8 basis vectors
+        coords_for_basis = []
+        for coords_matrix in all_coordinates:
+            coords_for_basis.extend(coords_matrix[:, basis_idx])
+        box_data.append(coords_for_basis)
+        box_labels.append(f'Basis {basis_idx+1}')
+    
+    ax5.boxplot(box_data, labels=box_labels)
+    ax5.set_xlabel('Basis Vector')
+    ax5.set_ylabel('Coordinate Value')
+    ax5.set_title('Distribution per Basis Vector\n(All Eigenvectors Combined)')
+    ax5.grid(True, alpha=0.3)
+    
+    # Plot 6: Q-Q plot to test normality
+    ax6 = fig.add_subplot(gs[2, 2:])
+    
+    from scipy import stats
+    
+    # we test normality for the first eigenvector's coordinates
+    if len(all_coordinates) > 0:
+        test_coords = all_coordinates[0].flatten()
+        stats.probplot(test_coords, dist="norm", plot=ax6)
+        ax6.set_title(f'Q-Q Plot (Normal Distribution)\n{eigenvector_labels[0]} Coordinates')
+        ax6.grid(True, alpha=0.3)
+    
+    plt.suptitle(f'Coordinate Distributions in Eigenvector Basis\nConfig N{N}_D{D_IN}_M{M}_L{L}', 
+                fontsize=16, y=0.98)
+    
+    # Save plot
+    coord_dist_filename = os.path.join(output_dir, f'coordinate_distributions_N{N}_D{D_IN}_M{M}_L{L}.png')
+    plt.savefig(coord_dist_filename, dpi=120, bbox_inches='tight')
+    plt.show()
+    plt.close()
+    
+    # Print detailed statistics
+    print(f"\nCoordinate Distribution Statistics:")
+    print(f"  Number of basis vectors: {n_basis_vectors}")
+    print(f"  Number of experiments used: {n_experiments-1}")
+    
+    for i, (coords_matrix, label) in enumerate(zip(all_coordinates, eigenvector_labels)):
+        coords_flat = coords_matrix.flatten()
+        print(f"\n  {label}:")
+        print(f"    Mean: {np.mean(coords_flat):.6f} ± {np.std(coords_flat):.6f}")
+        print(f"    Range: [{np.min(coords_flat):.6f}, {np.max(coords_flat):.6f}]")
+        print(f"    Median: {np.median(coords_flat):.6f}")
+        print(f"    Skewness: {stats.skew(coords_flat):.6f}")
+        print(f"    Kurtosis: {stats.kurtosis(coords_flat):.6f}")
+    
+    return {
+        'coordinates': all_coordinates,
+        'statistics': stats_data,
+        'n_basis_vectors': n_basis_vectors
+    }
+
 def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, output_dir):
     """
     Analyze entropy distributions using the first experiment's eigenvectors as basis.
@@ -134,6 +329,9 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, output_dir
     
     print(f"Computing entropy in eigenvector basis - N{N}_D{D_IN}_M{M}_L{L}")
     print(f"Using first experiment as basis, analyzing {n_experiments-1} remaining experiments")
+    
+    # First, plot the coordinate distributions
+    coord_results = plot_coordinate_distributions_in_basis(eigenvectors, N, D_IN, M, L, output_dir)
     
     # we compute entropy for each eigenvector order
     all_entropies = []
@@ -165,12 +363,12 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, output_dir
                 fmt='o-', capsize=5, linewidth=2, markersize=6)
     plt.title(f'Mean Entropy in Eigenvector Basis\nConfig N{N}_D{D_IN}_M{M}_L{L}')
     plt.xlabel('Eigenvector Order')
-    plt.ylabel('Mean Entropy (bits)')
+    plt.ylabel('Mean Entropy (nats)')
     plt.grid(True)
     
     plt.subplot(2, 2, 2)
     plt.imshow(all_entropies.T, aspect='auto', cmap='viridis')
-    plt.colorbar(label='Entropy (bits)')
+    plt.colorbar(label='Entropy (nats)')
     plt.title('Entropy Heatmap (Eigenvector Basis)')
     plt.xlabel('Eigenvector Order')
     plt.ylabel('Basis Vector Index')
@@ -182,7 +380,7 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, output_dir
     plt.axvline(np.mean(all_entropy_values), color='red', linestyle='--', 
                 label=f'Mean: {np.mean(all_entropy_values):.3f}')
     plt.title('Distribution of All Entropies')
-    plt.xlabel('Entropy (bits)')
+    plt.xlabel('Entropy (nats)')
     plt.ylabel('Density')
     plt.legend()
     plt.grid(True)
@@ -196,7 +394,7 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, output_dir
                 fmt='s-', capsize=5, linewidth=2, markersize=6, color='orange')
     plt.title('Mean Entropy per Basis Vector')
     plt.xlabel('Basis Vector Index')
-    plt.ylabel('Mean Entropy (bits)')
+    plt.ylabel('Mean Entropy (nats)')
     plt.grid(True)
     
     plt.tight_layout()
@@ -209,9 +407,9 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, output_dir
     
     # Print statistics
     print(f"\nEntropy Statistics in Eigenvector Basis:")
-    print(f"  Overall mean entropy: {np.mean(all_entropy_values):.4f} ± {np.std(all_entropy_values):.4f} bits")
-    print(f"  Max entropy: {np.max(all_entropy_values):.4f} bits")
-    print(f"  Min entropy: {np.min(all_entropy_values):.4f} bits")
+    print(f"  Overall mean entropy: {np.mean(all_entropy_values):.4f} ± {np.std(all_entropy_values):.4f} nats")
+    print(f"  Max entropy: {np.max(all_entropy_values):.4f} nats")
+    print(f"  Min entropy: {np.min(all_entropy_values):.4f} nats")
     print(f"  Number of basis vectors used: {n_basis_vectors}")
     
     # Find most and least random eigenvectors
@@ -219,17 +417,17 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, output_dir
     least_random_idx = np.argmin(mean_entropies)
     
     print(f"\nMost random eigenvector: {get_ordinal_suffix(most_random_idx + 1)}")
-    print(f"  Mean entropy: {mean_entropies[most_random_idx]:.4f} ± {std_entropies[most_random_idx]:.4f} bits")
+    print(f"  Mean entropy: {mean_entropies[most_random_idx]:.4f} ± {std_entropies[most_random_idx]:.4f} nats")
     
     print(f"\nLeast random eigenvector: {get_ordinal_suffix(least_random_idx + 1)}")
-    print(f"  Mean entropy: {mean_entropies[least_random_idx]:.4f} ± {std_entropies[least_random_idx]:.4f} bits")
+    print(f"  Mean entropy: {mean_entropies[least_random_idx]:.4f} ± {std_entropies[least_random_idx]:.4f} nats")
     
     # we test uniformity hypothesis
-    theoretical_uniform_entropy = np.log2(n_experiments-1) # we approximate for uniform distribution
+    theoretical_uniform_entropy = np.log(n_experiments-1) # we use natural log for uniform distribution
     print(f"\nUniformity Analysis:")
-    print(f"  Theoretical uniform entropy (approx): {theoretical_uniform_entropy:.4f} bits")
-    print(f"  Observed mean entropy: {np.mean(all_entropy_values):.4f} bits")
-    print(f"  Difference: {np.mean(all_entropy_values) - theoretical_uniform_entropy:.4f} bits")
+    print(f"  Theoretical uniform entropy (approx): {theoretical_uniform_entropy:.4f} nats")
+    print(f"  Observed mean entropy: {np.mean(all_entropy_values):.4f} nats")
+    print(f"  Difference: {np.mean(all_entropy_values) - theoretical_uniform_entropy:.4f} nats")
     
     return {
         'mean_entropies': mean_entropies,
@@ -238,7 +436,8 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, output_dir
         'most_random_idx': most_random_idx,
         'least_random_idx': least_random_idx,
         'n_basis_vectors': n_basis_vectors,
-        'theoretical_uniform_entropy': theoretical_uniform_entropy
+        'theoretical_uniform_entropy': theoretical_uniform_entropy,
+        'coordinate_results': coord_results
     }
 
 
