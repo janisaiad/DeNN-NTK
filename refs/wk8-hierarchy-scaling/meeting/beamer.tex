@@ -1,0 +1,232 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{bm}
+\usepackage{enumerate}
+\usepackage{tikz}
+\usepackage{subcaption}
+\usepackage{lmodern} % For better font rendering
+
+\usetheme{Antibes}
+\usecolortheme{default}
+
+\title{A Random Matrix Perspective on the NTK Correction}
+\subtitle{Scaling Analysis of $\Theta^{(1)}_\infty$}
+\author{Janis Aiad}
+\institute{UMD, Ecole Polytechnique}
+\date{\today}
+
+% Math commands from report
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\I}{\mathbf{I}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\evmin}[1]{\lambda_{\min}\left(#1\right)}
+\newcommand{\evmax}[1]{\lambda_{\max}\left(#1\right)}
+\newcommand{\svmin}[1]{\sigma_{\min}\left(#1\right)}
+\newcommand{\tr}{\text{tr}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\g}{\mathbf{g}}
+\newcommand{\y}{\mathbf{y}}
+\newcommand{\f}{\mathbf{f}}
+\newcommand{\Ktwo}{K^{(2)}}
+\newcommand{\Kthree}{K^{(3)}}
+\newcommand{\Order}{\mathcal{O}}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+\tableofcontents
+\end{frame}
+
+\section{Goal: Scaling of the NTK Correction}
+
+\begin{frame}{The Late-Time NTK Correction}
+Our goal is to understand the scaling of the first-order, late-time correction to the NTK, denoted $\Theta^{(1)}_\infty$.
+\begin{theorem}[Late-Time Correction \cite{large-width-feynman}]
+\begin{align*}
+\Theta^{(1)}_\infty(\vec{x}) = & \underbrace{-\sum_{i=1}^N \frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})}_{T_3} \\
+& + \underbrace{\sum_{i,j=1}^N\frac{1}{\lambda_{i}(\lambda_{i}+\lambda_{j})}(\hat{e}_{i}^{T}O_{4}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})}_{T_4}
+\end{align*}
+\end{theorem}
+\vfill
+
+\end{frame}
+
+\begin{frame}{The NTK Spectrum: A Dichotomy}
+    \begin{center}
+        To understand the overall scaling, we must analyze the scaling of its components, $T_3$ and $T_4$.
+    \end{center}
+
+The analysis hinges on the empirical spectral structure of the NTK matrix $\Theta_0$:
+\begin{itemize}
+    \item \textbf{A single, isolated eigenvalue $\lambda_1$}:
+    \begin{itemize}
+        \item Associated eigenvector $\hat{e}_1 \approx \frac{1}{\sqrt{N}}(1, \dots, 1)^T$ (the constant mode).
+        \item Scales as $\lambda_1 \sim \Order(L)$.
+    \end{itemize}
+    \item \textbf{A "bulk" of $N-1$ eigenvalues $\{\lambda_i\}_{i=2}^N$}:
+    \begin{itemize}
+        \item Associated eigenvectors $\{\hat{e}_i\}_{i=2}^N$ behave as random vectors.
+        \item Scale as $\lambda_i \sim \Order(L/N)$.
+    \end{itemize}
+\end{itemize}
+\vspace{1cm}
+We use this split to analyze the sums in $T_3$ and $T_4$.
+\end{frame}
+
+
+\begin{frame}{The NTK Spectrum: Plots}
+   
+\begin{columns}[T] % Aligns top of columns
+    \column{0.6\textwidth}
+        \includegraphics[width=\textwidth]{largest_eigenvalue_vs_L_infinite.png}
+        \captionof{figure}{\tiny Largest eigenvalue vs. Depth L.}
+    
+    \column{0.6\textwidth}
+        \includegraphics[width=\textwidth]{kth_eigenvalue_vs_L_infinite.png}
+        \captionof{figure}{\tiny Smallest eigenvalues vs. Depth L.}
+    \end{columns}
+\end{frame}
+
+\section{Scaling Analysis of Correction Terms}
+
+\begin{frame}{Analysis of the $O_3$ Term}
+We decompose the sum for $T_3$ into the constant mode and the bulk:
+\[
+T_3 = -\frac{1}{\lambda_{1}}(O_{3}\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \sum_{i=2}^N\frac{1}{\lambda_{i}}(O_{3}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})
+\]
+\vspace{0.5cm}
+Substituting the eigenvalue scalings:
+\[
+T_3 \approx -\frac{1}{C_1 L}(O_{3}\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \sum_{i=2}^N\frac{N}{C_2 L}(O_{3}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})
+\]
+\vspace{0.5cm}
+Factoring out terms from the sum reveals the dependency on $N$:
+\[
+T_3 \approx -\frac{1}{C_1 L}(O_{3}\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \frac{N(N-1)}{C_2 L} \left( \frac{1}{N-1} \sum_{i=2}^N (O_{3}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \right)
+\]
+\begin{alertblock}{Scaling of $T_3$}
+The bulk term dominates, leading to a scaling of:
+\[ T_3 \sim \Order\left(\frac{N^2}{L}\right) \]
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Analysis of the $O_4$ Term}
+The double sum for $T_4$ is decomposed into three parts:
+\begin{enumerate}
+    \item Top-Top interaction ($i=1, j=1$)
+    \item Top-Bulk interaction ($i=1, j>1$ or $i>1, j=1$)
+    \item \textbf{Bulk-Bulk interaction ($i,j > 1$) (Dominant)}
+\end{enumerate}
+\vspace{0.5cm}
+The dominant term is:
+\[
+T_4^{\text{bulk}} = \sum_{i,j=2}^N \frac{(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})}{\lambda_i(\lambda_i+\lambda_j)}
+\]
+\vspace{0.5cm}
+Approximating $\lambda_i \approx \lambda_{\text{bulk}} \sim L/N$, the denominator scales as $(L/N)^2$.
+\end{frame}
+
+\begin{frame}{Analysis of the $O_4$ Term}
+\[
+T_4^{\text{bulk}} \approx \frac{1}{2(C_2 L/N)^2} \sum_{i,j=2}^N (\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})
+\]
+The sum has $(N-1)^2$ terms.
+\begin{alertblock}{Naive scaling of $T_4$ if O4 is independent of N,L}
+The overall scaling is the product of the pre-factor and the number of terms:
+\[ T_4 \sim \Order\left(\frac{N^4}{L^2}\right) \]
+\end{alertblock}
+\end{frame}
+
+\section{Reconciling Theory and Experiment}
+
+\begin{frame}{Theoretical vs. Empirical Scaling}
+\textbf{The Puzzle:} Our analysis gives raw scalings that grow rapidly with $N$, while experiments show a much milder, near-linear dependence.
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Theoretical Prediction}
+\begin{itemize}
+    \item $T_3 \sim \Order(N^2/L)$
+    \item $T_4 \sim \Order(N^4/L^2)$
+\end{itemize}
+\column{0.5\textwidth}
+\textbf{Empirical Observation}
+\begin{itemize}
+    \item $\|K - K_\infty\| \sim \Order(NL)$
+\end{itemize}
+\end{columns}
+\vspace{1cm}
+\textbf{The Missing Piece:}
+This implies that the averaged tensor components must themselves scale with $N$.
+\[
+\mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})] \quad \text{must have a strong decay with } N.
+\]
+For $T_4$ to be consistent with experiments, we would need:
+\[
+\mathbb{E}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})] \sim \Order(L^3/N^3) \implies T_4 \sim \Order\left(\frac{N^4}{L^2} \cdot \frac{L^3}{N^3}\right) = \Order\left(\frac{N L}{L^2}\right)
+\]
+\end{frame}
+
+\section{Deeper Dive: RMT Framework}
+
+\begin{frame}{The NTK as a Spiked Random Matrix}
+We formalize this using Random Matrix Theory.
+\begin{itemize}
+    \item The NTK, $\Theta$, is viewed as a sample covariance matrix.
+    \item Without data structure, its spectrum follows the \textbf{Marchenko-Pastur (MP) law}. This is the "structural noise" of the network.
+    \item With data structure, the NTK becomes a \textbf{spiked model}:
+    \[
+    \Theta \approx \underbrace{\Theta_{\text{MP}}}_{\text{Bulk}} + \underbrace{\sum_{i} \sigma_i v_i v_i^T}_{\text{Spikes}}
+    \]
+    The spikes $v_i$ encode learnable features.
+\end{itemize}
+\end{frame}
+
+%placeholder for image of NTK spectrum
+\begin{frame}{The NTK Spectrum}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{ntk_spectrum.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}{The BBP Phase Transition and Feature Learning}
+\textbf{The Core Idea:} Feature learning is a phase transition.
+\begin{itemize}
+    \item A feature (a spike) only emerges from the bulk if its signal strength $\sigma_i$ exceeds a critical threshold.
+    \item This is the \textbf{Baik-Ben Arous-Péché (BBP) phase transition}.
+    \item \textbf{Lazy Regime:} No signal is strong enough. No spikes emerge. The network only interpolates using the random modes of the kernel.
+    \item \textbf{Feature Learning Regime:} At least one signal is strong enough. A spike emerges, its eigenvector aligns with the data structure, and the network actively learns this feature.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The Effect of Depth L on Learning}
+How does depth $L$ affect this transition?
+\begin{itemize}
+    \item Increasing $L$ increases the "structural noise" of the network.
+    \item In RMT terms, the spectrum of the deep kernel is the free convolution of the layer kernels' spectra.
+    \item This \textbf{widens the MP bulk}, pushing its edge $\lambda_{\max}^{\text{bulk}}$ to higher values.
+\end{itemize}
+\begin{alertblock}{The Consequence of Depth}
+\[ L \uparrow \quad \implies \quad \text{BBP Threshold} \uparrow \]
+A deeper network requires a \textbf{stronger signal} from the data to trigger the BBP transition and learn a feature.
+\end{alertblock}
+This suggests a "sweet spot" for depth, balancing expressivity against the rising threshold for feature learning.
+\end{frame}
+
+\end{document}
