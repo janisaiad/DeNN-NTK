@@ -155,4 +155,7 @@ ecrire la variable aleatoire du NTK en faisant la somme de chemin à la physicie
 
 
 
+script of what said : 
+
+
 
