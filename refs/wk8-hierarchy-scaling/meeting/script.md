@@ -131,17 +131,28 @@ donc dans les nouveaux aspects mathémtiques à introduire pour analyser ça on 
 ce qu'il faut faire :
 traiter les correlations eigenvectors
 verifier le MP pour les scalings inter valeurs propres
+
 verifier les scalings dans o3 o4, puis verifier les scalings internes
 implementer o4 en 
 montrer une gueule de hessienne en comparaison avec le NTK
 
 faire les liens terjek variance seleznova
+release le code en mode n'importe qui peut telecharger et run, une fois les optimization faites
+
+faire des diapos comme la soutenance, rapport comme la soutenance (car on est à la moitié, enfin commencer pour la semaine pro avancer, voir au feeling
+si lex experiences disent uqelque chose et sinon dire que la semaine prochaine je faerfais aca)
 
 
 en deuxieme instance : 
 
-en fait otutes les experimentations on peut les lancer sur le tore
+tester le NTK en dsrn
+en fait otutes les experimentations on peut les lancer sur le tore et sur espace gaussien
 il faudrait aussi traiter shiijun et rank mmfn ffnn, et aussi pour haizhao en exposant fractionnaire l'approximation
 traiter aussi la dimensionnalité pour le sobolev training
 traiter les experiences des autres codes pour voir ce qu'ils donnent, et traiter le code en jax aussi
 surtout le narrow en creatif sur une vm
+ecrire la variable aleatoire du NTK en faisant la somme de chemin à la physicienne (ising ?)
+
+
+
+

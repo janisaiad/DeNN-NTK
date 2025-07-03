@@ -2,6 +2,9 @@ import jax
 import jax.numpy as jnp
 from typing import List, Dict, Any
 
+
+# to implement, we will use jax and hessian to compute this I guess
+
 class Kernel4Empirical:
     """
     Computes finite width K3 kernel following the neural tangent hierarchy formula.
