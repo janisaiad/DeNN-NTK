@@ -1,198 +1,147 @@
-"CONCISE"
+en fait pour repondre a la question on a plusieurs chemisn
 
+deja on peut regarder la correction finie de ntk, en fiat c'est ce qui permet de calculer des quantités liées au ntk sans devoir le calculer explicitement
+c'est juste ecrire les sommes matricielles d'une maniere qui nous arrange en faisant apparaitre les representations en 1/M
+au fond c'est ça que ça veut dire , et avec ça on peut deja etudier comment le ntk scale avec L m N et d
 
+ca nous donne l'etude de o3 et O4 mais ils apparaissent sous une ceratine forme
+en fait on a des formules pour eux qui sont tres longues et qui sont ponderees par le spectre du ntk mais du ntk infinite width
+qui est tres facile a calculer
+de la on peut etudier directment les noyaux et essayer de trouver les scalings associes, combines aux sacling des valeurs propres
+ et on a des insights en fonction de L
+ car on a une somme d'une certaine quantité de kernel (qu'on pourrait d'ailleurs etudier separement)
+ àopur les etudier separement ça peut etre pratique pour o3 mais ps pour o4,
+ car il y en a trop
+ en fait pour o4 on peut calculer en fonction de la hessienne du ntk, et le ntk est implémenté de maniere autograd, 
+ donc on peut le faire avec un autograd pour fair eplein de calculs, la procedure est la suivante, 
+ et ainsi ca permet de voir les caling des valeurs,
+ mais encore mieux on peut faire quelque chose, c'est que le spectre peut de maniere statistique
+ avoir certaine particularités notamment les eigenvectors ont une ceratine distribution, cela vient de l'aspect rmt,
+ la distribution peut etre predie par certains trucs rmt mais c'est assez dur car il n'y a pas de gaussianité, il faudrait pour cela non pas etudier le spectre mais 
+ vraiment les eigenvector, et pour cela regarder sous quel groupe de symetrie (representation theory) le K3 est invariant 
+ pour recuperer des invariants de symetries dans la distribution des eigenvectors qui la caractériseraient (par exemple la norme pour GUE)
 
+ ça c'est pour l'aspect preuve, mais les eigenvectors ont aussi une structure de dependance non evidente dans o4 qui est
+ à expliciter (JOBBBBBBBBB)
+ une fois cela fait on peut obtenir des vraies insights sur comment le noyau agit, parce qu'en plus o4 est très proche à un ordre de grandeur en plus
+ de sa version infinite width, donc on peut faire des estimations pour un M assez grand mais pas trop (et qui limitera les calculs)
 
+ on peut aussi se mettre à calculer leur moyenne si de maniere statistique ça passe, et qu'on a une indépendance (pas sure) entre eigenvector ntk et les termes
+ internes de o4 (ce qui est le ca en fait car les eigenvectors infinite width ne dependant pas !!) donc on peut les sorties
+ bref le calcul de la moyenne mathamtique peut etre assez facilité sous la conjecture qqqch
 
+cette correction permet en fait surtout d'appliquer l'ingéalité de weul, qui est sharp dans le pire cas ou les eigenvectors sont paralleles entre les 2 matricees
+pour la smallest eigenvalue
 
+et l'interpretation a en faire est que sortir du regime ntk a un cout qui peut etre compensé par la la profondeur ou baisser la quantité de données
+(augmenter ou baisser la profondeur c'est ça la question majeure) et baisser la quantité de données, 
 
+ça c'est l'aspect correction. en fait c'est vraiment depenendant des corrrelations enter eigenvectors et de comment les calculs se font avec la moyenne
+d'ailleurs l'influence de K4 est importante car c'est l'influence hessienne du NTK, c'est opur ça qu'elle compte le plus 
+alors que l'influence linéaire du ntk est plus faible
 
+attention il faut faire attention à la differentiabilité pour relu, car c'est un aspect important, meme s'il y a un aspect mesure nulle qui rend la chose facile
+pour une parametrisation qui rend la chose avantageuse (par exemple mu p ou NTK) avec des poids très petit mais qui bougent beaucoup 
+on peut aussi voir cet aspect mesure nulle dans le NTK narrow
 
 
 
 
 
+pour les autres pistes qui permettent de repondre à cette question, et de pourquoi elle est importante, il ya au ssi l'aspect hessien,
+en fait le NTK et la hessienne ont un spectre très proche, au moins pour certaines eigenvalues (les D premieres), ça tient avec une conjecture, ou beaucoup
+de calculs anciens, et c'est pourquoi en fait les 2 points de vues sont les memes, 
 
-"LONG"
+ça tient aussi car le NTK c'est la matrice de gauss newton, et que les termes non diagonaux sont assez proches des termes diagonaux (seleznova)
 
-Okay, so for today's presentation, It'll be short, I'm going to walk you through the work I've been doing. First, a quick personal update: I've had to spend a lot of time this week sorting out administrative issues with the embassy and the French consulate, which has been very long and has ended Wednesday.
-So I got my visa appointment for the 8th July. That's great. okay ;; However, It also gave me the chance to think more deeply about the theoretical side, specifically from the perspective of the NTK's spectral properties and Random Matrix Theory.
+d'ailleurs seleznova dit quelque chose d'interessant, c'est que la variance du NTK explose,avec le ratio
+et c'est un resultat que l'on doit retrouver quand on regarde la finite width, la variance quelque part doit exploser si on n'est pas à l'eoc
 
----
+ces aspects diagonaux et non diagonaux apparaissent quand on etudier les random kernel matrices (el karoui)
+meme a l'eoc on a une dispersion qui eclate pour des reseaux vraiment rectangle
 
-### The Presentation Script
+le truc c'est que meme pour un aspect optimisation de taille c'est pas optimla, et pour un aspect concentration c'est vraiment sous optimal
+comme le papier de terjek le dit, on peut avoir une concentration du NTK vraiment bien selon la forme du reseau
 
-**(Slide 1: Title)**
 
-Alright, so today I'm presenting my latest results on understanding the finite-width NTK correction, framed through another perspective, under the lens of Random Matrix Theory.
+on peut meme s'amuser à voir que vaut le lambda dans ce cas de réseau parabole, car la somme va converger donc on ne se retrouve plus avec L/M mais une constante
+autre qui tend vers O quand m augmente je crois
 
-**(Slide 2: Outline)**
 
-Here's the plan. We'll start with the main goal, Which is to get the scaling laws for the NTK correction. 
+dans cet aspect parabolique il y a aussi un aspect quel layer je fais croitre à l'infini car apparement on peut seulement se contenter d'une layer qui diverge
+pour pouvoir appliquer la theorie du NTK
 
-**(Slide 3: The Late-Time NTK Correction)**
+en tout cas si on se place dans un cadre parabolique on peut bien etudier la theorie du ntk, et au moins ses perturbations finies
+(on peut essayer de faire des experiences sur ces reseaux paraboliques)
+(d'ailleurs le ntk de seleznova se calcule super facilement, je vais reprendr eleur implementation)
+d'ailleurs donner un sens de largeur moyenne ne marche pas car la somme est dominée par le dernier terme
 
-The main object we are trying to understand is this: $\Theta^{(1)}_\infty$, the leading-order correction to the NTK at the end of training. It tells us how much the kernel has changed from its initial state. The formula from the literature splits it into two main components, which I've labeled $T_3$ and $T_4$. $T_3$ depends on the third-order kernel $O_3$, and $T_4$ on the fourth-order kernel $O_4$. To understand the whole correction, we have to understand how these two big pieces scale with network and data parameters, like depth $L$ and dataset size $N$.
+en fait le prix à payer en terme de neurone devient quadratique en alpha mais le coeff lambda est en 1/alpha
+donc il y a un compromis à voir pour trouver le meilleur alpha quand on a un certain nombre de donneés, (parce qu'avec le budget ça passe)
+alors qu'avec une croissance linéaire ça diverge et donc c foutu, le carré est important car il minimise VRAIMENT la variance
+(voir dans la preuve pourquoi c'est vraiment le cas)
 
-**(Slide 4: The NTK Spectrum: A Dichotomy)**
-What I've done the last week was mainly about getting numerical scaling laws for this Theta infinite
-and I got something a bit super linear in L and linear in N.
-So there have been a path, trying to go through O3 and O4, but this is hard, like very hard to be confident
-on the code and the behaviour because very small kernel entries multiplying together (with random normal matrices) can lead to some numerical instabilities. especially I can't rely on other libraries like neural tangents for that, I need to hardcode it in jax numpy, and if I want it to run fast and optimize it with JAX autograd. So it's hard and should not be the leading path from right now.
-That's why i've read the formula with another perspective before tackling the hardest part.
+au moins on peut s'assurer que l'on peut rester dans le cadre NTK et calculer des moyennes AVEC DU SENS, car sinon ça n'en a pas !!
+puisque la dispersion et le post training va trop bouger et ça ne fonctionnera plus
+à mettre en perspective avec le papier NTH, parce qu'avec une architecture changeante ça change les plans, on peut toujours
+essayer de calculer une déviation mais là ce sera pas en 1/M masi en 1/Q avec Q la moyenne geometrique des m_l (je crois, selon les papiers de physique theorique), scaling moyen
 
-The key to analyzing these sums is understanding the spectral structure of the initial NTK that is in the formula. Because empirically, and this is confirmed in my experiments, we see a clear dichotomy. There's one very large, isolated eigenvalue, $\lambda_1$. Its eigenvector corresponds to the constant mode—it essentially captures the average bias of the function. This eigenvalue scales linearly with depth, so $\lambda_1 \sim \mathcal{O}(L)$.
+mais le scaling moyen lui est un peu complexe car la somme des log nous donne un nlog(n) donc scaling en 1/m*L² moyen je crois (a investiguer)
 
-The other $N-1$ eigenvalues are all clustered together in what we call a "bulk." They are much smaller and all scale similarly, like $\mathcal{O}(L/N)$. Our working hypothesis is that their corresponding eigenvectors behave like random vectors, uniformly distributed on the sphere. This split is the foundation of the whole analysis.
 
-No one has ever talked about this RMT analysis, or only in 1 paper in the perspective of neural compression, but not for finite width corrections because it's very recent.
-So to be sure of this hypothesis without references, I went through extensive experiments of the NTK eigenstuff, that is currently running on my pc and I'm analyzing this since yesterday, because i've the intuition that the eigenvectors are a bit uniformly distributed (as the case for random gaussian symmetric matrices)
-if your data is uniformly distributed ( and i guess, but i'm not sure, the reasoning can be because of rotation invariance in the dot product kernels and arccosine kernel, we can formalize that and i'm doing that today and tomorrow)
 
+le  but de toute cette discussion c'est d'etre vraiment rigoureux sur quel theoreme on peut appliquer dans quel cadre, pour avoir des estimations
+probabilistes qui sont bien (variance diminuée), avec une bonne confiance en les corrections finies, la theorie du NTK est bien car elle a de gros liens
+avec la hessienne, et que la hessienne c'est pas forcement un truc pratique des que notre reseau devient complexe (block hessian pour transformers,
+d'aillleurs montrer une gueule de hessienne de NN)
 
+l'avantage c'est surtout qu'à l'initialisation et APRES le training on a des garanties, c'est ça qui est interessant avec le NTK (et qui ne l'est pas quand
+on etudie des optimizationo bounds sous l'angle SGD etc .. car là on peut se faire avoir par le optimization landscape ou les minima globaux sont locaux)
+(d'ailleurs c'est la grand question du deep learning, les minima locaux sont globaux ?) peut etre sous l'angle morse theory
 
-**(Slide 5: Scaling Analysis of the $O_3$ Term)**
+peut etre que ducoup sous cette hypothese c'est pas le NTK qu'il faut voir
 
-So, it's clear that we can apply this split to the $T_3$ term. We separate the sum into the contribution from the constant mode ($i=1$) and the contribution from the bulk ($i \ge 2$). When we plug in the scaling for the eigenvalues, we see the bulk term has a pre-factor of $N/L$. Since there are $N-1$ terms in that sum, the whole expression is dominated by the bulk part and scales like $\mathcal{O}(N^2/L)$. This is a very fast growth in $N$.
+c'est pour ça que recentrer la discussion du NTK sur l'applicabilité, les hypothèses et le cadre high dimensionnal, high compute, high size est bien (sinon
+ça devient trop difficile )
 
-**(Slide 6: Scaling Analysis of the $O_4$ Term)**
+à noter aussi les constantes de variance du ntk de terjek
 
-We do the exact same thing for the $T_4$ term. It's a double sum, so there are a few more interactions, but the dominant part is the bulk-bulk interaction, where both indices $i$ and $j$ are greater than 1. Here, the denominator contains a product of two eigenvalues, so it scales like $(L/N)^2$. The sum itself contains roughly $N^2$ terms. Multiplying the number of terms by the pre-factor gives us an overall scaling of $\mathcal{O}(N^4/L^2)$. This is an even more explosive growth with the dataset size $N$.
+en fait la perspective du NTK quand m est grand et avec o3 o4 c'est de répondre pendant le training
+de sorte à pouvoir obtenir une optimization bound en fonction de L et M
 
-**(Slide 7: Reconciling Theory and Experiment)**
+il y a aussi un aspect important, ce n'est pas la depth qui change la structure profonde du spectre, elle l'élargi de manière linéaire
+mais le spectre garde sa forme, on ne pourra jamais contrer le conditionnement ça c'est sur c'est écrit dans les équations
 
-This leads us to a major puzzle. This raw theoretical analysis suggests the correction should blow up with dataset size, scaling like $N^2$ or even $N^4$. But my extensive experiments show a much more controlled, almost linear scaling, closer to $\mathcal{O}(N)$.
+d'ailleurs le 1er vecteur propre est celui des normes, donc c'est celui qui dit qu'en cas d'homogénéité, c'est d'abord la norme qui compte
+(puisqu'elle est propagée) et donc d'abord on apprend quel scaling il faut pour chaque vecteur (en fonction de sa norme donc)
+car c'est la "scaling appropriée de premier instance qui permettra ensutie de bien approximer la fonction f (impossible d'apprendre un relu à l'approximer
+sans d'abord apprendre la norme), ça c'est ce que le NTK nous dit c'est qu'agumenter la profondeur ça marche, et qui scale bien en fonction de L
+donc le pouvoir séparateur des normes (je suis pas sur de ca) augmente avec L, mais l'autre pouvoir aussi (faire
+un dessin du pouvoir separateur des normes sur une sphere, et pourquoi ça augmente, parce qu'on rajoute des chemins ?)
 
-So, what's the missing piece? The only way to reconcile these two is if the tensors $O_3$ and $O_4$, when projected onto these random bulk eigenvectors, have an average magnitude that decays with $N$. For the $T_4$ term, which is the most aggressive, to align with experiments, its expected value would need to decay very quickly, something like $\mathcal{O}(1/N^3)$. This is a new, crucial hypothesis that i'm working on this current days. The reasoning is the same for T3
 
-And I think this is where the real work begins. It's not enough to just do what physicists often do: make a log-log plot, see a straight line, and declare a scaling law. The goal is to *interpret* that law in the context of computer science and the big questions we have today, like the ones raised by scaling law researches from OpenAI. I'm currently going through the OPENAI paper to be sure of the methodology to use
-to derive confident results.
 
+et après cela fait c'est la partie autre du spectre qui importe et c'est celle là qui nous intéressent, on veut apprendre les patterns
+et là le ntk ne le décrit pas bien en fait, car le spectre ne s'approche vraiment pas du spectre qu'il nous faut, avec une separation
+(à verifier avec MP, refaire calculs) des eigenvalue quasi identiques
 
+donc dans les nouveaux aspects mathémtiques à introduire pour analyser ça on a le narrow ntk, que l'on pourrait développer dans un aspect purement creatif
 
 
+ce qu'il faut faire :
+traiter les correlations eigenvectors
+verifier le MP pour les scalings inter valeurs propres
+verifier les scalings dans o3 o4, puis verifier les scalings internes
+implementer o4 en 
+montrer une gueule de hessienne en comparaison avec le NTK
 
+faire les liens terjek variance seleznova
 
 
+en deuxieme instance : 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-**(Slide 8: Deeper Dive: RMT Framework)**
-
-To formalize this whole discussion about random eigenvectors and spectral distributions, we can use the language of Random Matrix Theory. And I want to emphasize how novel this angle is. Most theoretical work on wide networks uses tools from high-dimensional probability and statistics, but very few people have applied the specific, powerful machinery of RMT to analyze the NTK's *eigenvectors* and *spectral edge dynamics*. There are very few direct references, which meant I had to do a lot of foundational reading to connect the dots between established RMT and our specific problem.
-
-The idea is to view the NTK not as a fixed, deterministic kernel, but as a sample covariance matrix. If the data has no structure, RMT predicts that its eigenvalue spectrum will follow a universal distribution—the Marchenko-Pastur law. This is the "bulk," the baseline structural noise of the network. But when there is structure in the data, it can create "spikes," or outliers in the spectrum. These spikes *are* the learnable features.
-
-
-
-**(Slide 9: The BBP Phase Transition and Feature Learning)**
-
-This brings us to the core idea: feature learning *is* a phase transition. A feature, a spike, will only emerge from the random bulk if its signal strength is high enough to cross a critical threshold. This is known as the BBP phase transition. If no data signal is strong enough, the network stays in the "lazy regime." It simply interpolates the data using its pre-existing random structure. But if a signal is strong enough to cross the threshold, the network enters the "feature learning regime." It has identified a meaningful structure, and its representations will actively change to learn it.
-
-**(Slide 10: The Effect of Depth L on Learning)**
-
-So finally, what is the role of depth in this picture? Each layer in a deep network adds its own randomness. From an RMT perspective, the spectrum of the total NTK is the "free convolution" of the spectra of the individual layer kernels. This operation has the effect of widening the Marchenko-Pastur bulk. A wider bulk means its edge moves to the right, which means the BBP threshold gets higher.
-
-And this is the profound consequence of depth: a deeper network requires a *stronger signal* from the data to learn a feature. A feature that a shallow network could easily pick up might be completely drowned out by the structural noise of a much deeper network. This suggests there is a "sweet spot" for depth, which could explain why architectures need things like skip-connections to manage this effect.
-
-This RMT framework also provides a powerful lens through which to view other very recent theoretical approaches. For example, some work analyzes the NTK spectrum by studying it as a fixed point of composing kernels based on inverse cosine distances. That view explains *that* information is transformed layer by layer, while our RMT approach explains *how* this composition impacts the actual learnability of features by modulating the BBP threshold. It allows us to start asking much more precise questions: which layers contribute most to the final signal, and which just add noise that makes learning harder?
-
-Okay so now I'm gonna show my theoretical and empirical results when investigating the NTK for finite width
-I recall that the NTK regime where the optimization process is well described by the NTK requires
-that we have a width that is polynomial in your dataset size,
-but in practice we want deeper neural network, and to disentangle the ffect of depth with the 
-effect of width
-
-in fact, the NTK is not the only kernel that describe well the optimization dynamics, there are whole 
-family of kernel that is indexed by the natural numebr, that we call the NTH 
-and that allows you to compute theoretically and numerically what will be the true optimization path 
-your training will have wrt your dataset and network
-
-the way to construct them is by taking the dot product of the former kernel of the gradients wrt parameters of your network
-with the former kernel, you can see the definition of the third order kernel now
-
-for the NTK, wrt depth, we know theoretically (see the references) that the spectrum is linear in the depth
-you can see some experiments i've done this week that confirm it. in fact the spectrum using the infinite width
-ntk has 1 big eigenvalue and the others have the same magnitude as the minimum eigenvalue (bulk)
-and scales linearly
-
-
-for the other kernels, in fact, you can describe the NTK finite width correction with this late time correction
-globally you can approximate your finite width ntk by adding this kernel that involes the O3 and O4 in the hierarchy
-so from now we can do 2 things, we can just try to get scaling laws for the 1/M correction (where M in the depth)
-or we can compute O3, by hand, numerically, and see what's happening
-
-i've done both, the second is very much much more difficult and i'll explain why later,
-now we will focus on just analyzing the NTK correction 1/M asymptotic expansion 
-
-
-so experimentally I use Jax and the neural tangents library, I evaluate Kemp with neural tangents, and Kinf with
-a formula i've presented 2 weeks ago with the cosine kernel, I use this setup, it was very very long to
-run all of this, and I've many things to disentangle again in the computations but i've got some results
-
-what I got is something like that, that the correction scales linearly (or super linearly) with N (dataset size) and L
-and that remains bounded (which is a bit logical) wrt the input dimension
-
-you can see a plot i've made, it took me 24h to run this, and you can see a superlinear growth with the upside
-of the plot
-
-you can see the same with D_in, and N
-
-
-Now just to show you why I do that, because ith weyl inequality (that is very not tight) we can do something like that
-to try to get a optimum bound for the smallest eigenvalue wrt depth, width and your parameter budget P
-the calculations are not that interesting because i need to be confident with the linear or super linear growth
-but in fact you can have something like that, you can be ensured to maintain a good spectrum if your width scale as your dataset size
-
-overall the achievement now is great, because I can optimize a bit my experiments and get better results for the next week, i'm 
-happy and confident with that, i've made a great code that runs well even a bit slow, but it is fully reproducible
-
-but this is not very tight, and can ccontradict a bit what we do empirically when training deep neural nets, and that's why the best is to understand those kernels K3 and K4
-
-
-by hand it's very hard to get a good formula, it tooks me several days to be sure of what i'm writing but you can
-get a whole formula i've written it in the report for K3, and for K4 this formula take like 2 pages i've not written it now
-
-
-from now i'm not a lot confident on what I'm saying but i'll try to make you understand the goal
-we want to get scaling laws and trends for a big formula and we can try to infer it by analyzing its terms
-that are backprop terms, derivatives, weigth matrices and forward prop terms
-we can try to do some scaling analysis for those terms, and we can find something that scales between linearly and quadratically
-for O3,, for O4 we can do the same, but for O4 there are a scaling of 1/lambda² with eigenvalues of the NTK, 1/lambda for O3
-and we can guess that the O4 contribution has the same magnitude as O3
-
-
-so this between linear or quadratic scaling which is also what I found for the correction term, so I think that 
-what I tried to guess from analyzing my formula can give some insights, but it is not totally
-rigorous because if we want so we need to compute lyapunov exponents for random gaussian matrices, we know it has
-a log(M) trend but it's a huge work.
-
-
-I've done abit of some experimental setups, that I'll run today, but from right now
-it's computationnaly expansive but there are a lot of rewards because no one has ever done that
-
-
-just to conclude, i'll compute the scaling of the O1 formula by hand with a mroe tight analysis for the correction
-i'll investigate the O4 kernel, run extensive experiments for O3, optimize my implementation and publish it
-because i've seen it nowhere
-and i'll do what i've done with the NTK corrections in other setups (torus with what I said the last week) to get results
-that can be applied with the DSRN framework
-
-and also try to understand if we get the same when there are resnets or skip connections (because we have some better results)
-from that point of view
-
-I'll also try to do the same but for some very narrow network, to compare it with the deep narrow network theory, 
-
-this gave me a lot of time to have experiments running in the background to really nail down the scaling laws I've been observing. 
+en fait otutes les experimentations on peut les lancer sur le tore
+il faudrait aussi traiter shiijun et rank mmfn ffnn, et aussi pour haizhao en exposant fractionnaire l'approximation
+traiter aussi la dimensionnalité pour le sobolev training
+traiter les experiences des autres codes pour voir ce qu'ils donnent, et traiter le code en jax aussi
+surtout le narrow en creatif sur une vm
