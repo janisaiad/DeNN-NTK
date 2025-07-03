@@ -287,7 +287,7 @@ def plot_coordinate_distributions_in_basis_vectorized(eigenvectors, N, D_IN, M, 
     # Save plot
     coord_dist_filename = os.path.join(output_dir, f'coordinate_distributions_N{N}_D{D_IN}_M{M}_L{L}.png')
     plt.savefig(coord_dist_filename, dpi=120, bbox_inches='tight')
-    plt.show()
+    # plt.show()
     plt.close()
     
     # Print detailed statistics
@@ -393,7 +393,7 @@ def analyze_coordinate_correlations(all_coordinates, eigenvector_labels, N, D_IN
         # i save the plot
         correlation_plot_filename = os.path.join(output_dir, f'coordinate_correlations_{label.replace(" ", "_")}_N{N}_D{D_IN}_M{M}_L{L}.png')
         plt.savefig(correlation_plot_filename, dpi=120, bbox_inches='tight')
-        plt.show()
+        # plt.show()
         plt.close()
         
         print(f"  Correlation analysis for {label}:")
@@ -497,7 +497,7 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, 
     # Save plot
     entropy_filename = os.path.join(plot_dir, f'entropy_eigenvector_basis_N{N}_D{D_IN}_M{M}_L{L}.png')
     plt.savefig(entropy_filename, dpi=120, bbox_inches='tight')
-    plt.show()
+    # plt.show()
     plt.close()
     
     # Print statistics
