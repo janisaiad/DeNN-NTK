@@ -35,14 +35,19 @@ def get_config_from_filename(filename):
     return N, D, M, L
 
 def load_experiment_data(N, D_IN, M, L):
-    """we load eigenvalues and eigenvectors data for a specific configuration"""
-    filename_eigenvalues = f"values/ntk_eigenvalues_N{N}_D{D_IN}_M{M}_L{L}.npy"
+    """we load eigenvectors data for a specific configuration"""
     filename_eigenvectors = f"vectors/ntk_eigenvectors_N{N}_D{D_IN}_M{M}_L{L}.npy"
+    path = os.path.join(PATH_TO_DATA, filename_eigenvectors)
+    if not os.path.exists(path):
+        return None
     
-    eigenvalues_data = np.load(os.path.join(PATH_TO_DATA, filename_eigenvalues), allow_pickle=True).item()
-    eigenvectors_data = np.load(os.path.join(PATH_TO_DATA, filename_eigenvectors), allow_pickle=True).item()
+    loaded_data = np.load(path, allow_pickle=True).item()
     
-    return eigenvalues_data, eigenvectors_data
+    # we handle the case where the data is stored inside a tuple, e.g., ({'key':...},)
+    if isinstance(loaded_data, tuple) and len(loaded_data) > 0:
+        return loaded_data[0]
+        
+    return loaded_data
 
 def plot_eigenvalue_distribution(eigenvalues, N, D_IN, M, L):
     """we plot histogram of eigenvalues distribution for each k and mean eigenvalues vs order"""

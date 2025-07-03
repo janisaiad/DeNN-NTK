@@ -599,7 +599,7 @@ eigenvalue_means_storage = []  # we store eigenvalue means separately
 files = [f for f in os.listdir(os.path.join(PATH_TO_DATA, "vectors")) if f.startswith('ntk_eigenvectors_')]
 
 # we sort files by N
-files = sorted(files, key=lambda x: get_config_from_filename(x)[0])
+files = sorted(files, key=lambda x: get_config_from_filename(x)[0],reverse=True)
 
 print("Processing all experiment files...")
 print("=" * 50)
