@@ -158,10 +158,10 @@ def analyze_eigenvalue_spacing(eigenvalues, N, D_IN, M, L, output_dir):
         ratios = spacings[1:] / spacings[:-1]
         all_spacing_ratios.extend(ratios)
 
-        # we perform unfolding by dividing by the mean spacing
+        # we perform unfolding by multiplying by n, assuming mean spacing is of order 1/n
         mean_spacing = np.mean(spacings)
         if mean_spacing > 1e-9:
-            unfolded_spacings = spacings / mean_spacing
+            unfolded_spacings = spacings * N
             all_unfolded_spacings.extend(unfolded_spacings)
 
     if not all_spacing_ratios:
@@ -182,19 +182,10 @@ def analyze_eigenvalue_spacing(eigenvalues, N, D_IN, M, L, output_dir):
     
     # i define theoretical distributions for the ratio r
     r = np.linspace(0, 10, 400)
-    # for poissonian spectra (uncorrelated eigenvalues)
-    p_poisson = 1 / (1 + r)**2
     # for goe (real-symmetric matrices from wigner-dyson)
     p_goe = (27 / 8) * (r + r**2) / (1 + r + r**2)**2.5
-    # for gue (complex hermitian matrices)
-    p_gue = (81 * np.sqrt(3) / (4 * np.pi)) * (r + r**2)**2 / (1 + r + r**2)**4
-    # for gse (quaternion self-dual matrices)
-    p_gse = (729 * np.sqrt(3) / (4 * np.pi)) * (r + r**2)**4 / (1 + r + r**2)**7
 
-    plt.plot(r, p_poisson, 'g--', linewidth=2, label=f'Poisson (Uncorrelated)')
     plt.plot(r, p_goe, 'r-', linewidth=2, label=f'GOE (Wigner-Dyson)')
-    plt.plot(r, p_gue, 'b-.', linewidth=2, label=f'GUE')
-    plt.plot(r, p_gse, 'm:', linewidth=2, label=f'GSE')
     
     plt.title(f'Consecutive Spacing Ratio Distribution\nConfig N{N}_D{D_IN}_M{M}_L{L}')
     plt.xlabel('Ratio of Consecutive Spacings (r)')
@@ -203,18 +194,12 @@ def analyze_eigenvalue_spacing(eigenvalues, N, D_IN, M, L, output_dir):
     plt.grid(True, alpha=0.5)
     
     # i add a text box with statistics
-    mean_min_r_poisson = np.log(2)  # theoretical value for poisson
     mean_min_r_goe = 0.535  # theoretical value for goe
-    mean_min_r_gue = 0.5996 # theoretical value for gue
-    mean_min_r_gse = 0.676 # theoretical value for gse
     
     stats_text = (
         f"Empirical <min(r, 1/r)> = {mean_min_r:.4f}\n\n"
         f"Theoretical <min(r, 1/r)>:\n"
-        f"  Poisson: {mean_min_r_poisson:.4f}\n"
-        f"  GOE: {mean_min_r_goe:.4f}\n"
-        f"  GUE: {mean_min_r_gue:.4f}\n"
-        f"  GSE: {mean_min_r_gse:.4f}"
+        f"  GOE: {mean_min_r_goe:.4f}"
     )
     plt.text(0.95, 0.95, stats_text, transform=plt.gca().transAxes, fontsize=12,
              verticalalignment='top', horizontalalignment='right',
