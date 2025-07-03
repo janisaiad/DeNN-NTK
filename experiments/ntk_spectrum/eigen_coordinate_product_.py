@@ -28,6 +28,8 @@ import csv  # we use csv instead of pandas
 from collections import defaultdict  # we use defaultdict for grouping
 import json  # we add json for storing test results
 import seaborn as sns  # we use seaborn for enhanced heatmap visualizations
+from scipy import stats
+from sklearn.metrics import mutual_info_score
 
 # %%
 import dotenv
@@ -38,12 +40,16 @@ PATH_TO_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots", "eigen", "ent
 PATH_TO_CORR_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots", "eigen", "correlations")
 PATH_TO_INTER_CORR_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots", "eigen", "inter_correlations")
 PATH_TO_PRODUCT_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots", "eigen", "coordinate_products")
+PATH_TO_PRODUCT_INDEPENDENCE_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots", "eigen", "product_independence")
+PATH_TO_METRICS = os.path.join(PROJECT_ROOT, "experiments", "data", "metrics")
 
 # we create necessary directories
 os.makedirs(PATH_TO_PLOTS, exist_ok=True)
 os.makedirs(PATH_TO_CORR_PLOTS, exist_ok=True)
 os.makedirs(PATH_TO_INTER_CORR_PLOTS, exist_ok=True)
 os.makedirs(PATH_TO_PRODUCT_PLOTS, exist_ok=True)
+os.makedirs(PATH_TO_PRODUCT_INDEPENDENCE_PLOTS, exist_ok=True)
+os.makedirs(PATH_TO_METRICS, exist_ok=True)
 
 # %%
 def get_config_from_filename(filename):
@@ -275,8 +281,6 @@ def plot_coordinate_distributions_in_basis_vectorized(eigenvectors, N, D_IN, M, 
     
     # Plot 6: Q-Q plot to test normality
     ax6 = fig.add_subplot(gs[2, 2:])
-    
-    from scipy import stats
     
     # we test normality for the first eigenvector's coordinates
     if len(all_coordinates) > 0:
@@ -541,13 +545,24 @@ def analyze_eigenvector_coordinate_products(all_coordinates, eigenvector_labels,
         products_flat = coordinate_products.flatten()
         
         # plotting the distribution
-        plt.figure(figsize=(10, 6))
-        plt.hist(products_flat, bins=50, density=True, alpha=0.7)
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.hist(products_flat, bins=50, density=True, alpha=0.7, label='Product Distribution')
         
         mean_prod = np.mean(products_flat)
         std_prod = np.std(products_flat)
+        skew_prod = stats.skew(products_flat)
+        kurt_prod = stats.kurtosis(products_flat)
         
-        plt.axvline(mean_prod, color='r', linestyle='--', label=f'Mean: {mean_prod:.4f}')
+        ax.axvline(mean_prod, color='r', linestyle='--', label=f'Mean: {mean_prod:.4f}')
+        
+        # i add a text box with statistics
+        stats_text = (f"Mean: {mean_prod:.4f}\n"
+                      f"Std Dev: {std_prod:.4f}\n"
+                      f"Skewness: {skew_prod:.4f}\n"
+                      f"Kurtosis: {kurt_prod:.4f}")
+        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+        ax.text(0.05, 0.95, stats_text, transform=ax.transAxes, fontsize=10,
+                verticalalignment='top', bbox=props)
         
         plt.title(f'Distribution of Coordinate Products\n{label_i} vs {label_j} (Config N{N}_D{D_IN}_M{M}_L{L})')
         plt.xlabel('Coordinate Product Value')
@@ -560,15 +575,106 @@ def analyze_eigenvector_coordinate_products(all_coordinates, eigenvector_labels,
         plt.savefig(plot_filename, dpi=120, bbox_inches='tight')
         plt.close()
         
-        from scipy import stats
         print(f"\nCoordinate Product Analysis for pair ({label_i}, {label_j}):")
         print(f"  Mean: {mean_prod:.6f} ± {std_prod:.6f}")
         print(f"  Range: [{np.min(products_flat):.6f}, {np.max(products_flat):.6f}]")
         print(f"  Median: {np.median(products_flat):.6f}")
-        print(f"  Skewness: {stats.skew(products_flat):.6f}")
-        print(f"  Kurtosis: {stats.kurtosis(products_flat):.6f}")
+        print(f"  Skewness: {skew_prod:.6f}")
+        print(f"  Kurtosis: {kurt_prod:.6f}")
 
-def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, corr_plot_dir, inter_corr_plot_dir, product_plot_dir):
+def analyze_product_independence(all_coordinates, eigenvector_labels, N, D_IN, M, L, output_dir):
+    """
+    i analyze the independence between coordinate products of different eigenvector pairs.
+    """
+    print(f"\nAnalyzing independence of coordinate products for N{N}_D{D_IN}_M{M}_L{L}...")
+    n_eigenvectors = len(all_coordinates)
+
+    if n_eigenvectors < 4:
+        print("Skipping product independence analysis: requires at least 4 eigenvectors.")
+        return
+
+    # i select pairs of pairs of eigenvectors for analysis
+    pairs_of_pairs = [
+        ((0, 1), (2, 3)),
+        ((0, 2), (1, 3))
+    ]
+
+    all_metrics = []
+    for (pair1, pair2) in pairs_of_pairs:
+        idx1, idx2 = pair1
+        idx3, idx4 = pair2
+
+        label1, label2 = eigenvector_labels[idx1], eigenvector_labels[idx2]
+        label3, label4 = eigenvector_labels[idx3], eigenvector_labels[idx4]
+
+        coords1, coords2 = all_coordinates[idx1], all_coordinates[idx2]
+        coords3, coords4 = all_coordinates[idx3], all_coordinates[idx4]
+
+        if any(c.shape[1] == 0 for c in [coords1, coords2, coords3, coords4]):
+            continue
+
+        products1 = (coords1 * coords2).flatten()
+        products2 = (coords3 * coords4).flatten()
+
+        # 1. i compute independence metrics
+        pearson_corr, _ = stats.pearsonr(products1, products2)
+        spearman_corr, _ = stats.spearmanr(products1, products2)
+
+        # i compute mutual information from binned data
+        bins = int(np.sqrt(len(products1) / 5))
+        if bins < 10: bins = 10
+        
+        joint_hist, _, _ = np.histogram2d(products1, products2, bins=bins)
+        joint_prob = joint_hist / np.sum(joint_hist)
+        p_x = np.sum(joint_prob, axis=1)
+        p_y = np.sum(joint_prob, axis=0)
+        p_x_p_y = p_x[:, np.newaxis] * p_y[np.newaxis, :]
+        
+        non_zero_indices = (joint_prob > 0) & (p_x_p_y > 0)
+        mutual_info = np.sum(
+            joint_prob[non_zero_indices] * np.log(joint_prob[non_zero_indices] / p_x_p_y[non_zero_indices])
+        )
+
+        # 2. i create scatter plot
+        plt.figure(figsize=(10, 8))
+        plt.scatter(products1, products2, alpha=0.1)
+        
+        plt.title(f'Independence of Coordinate Products\nPair ({idx1+1},{idx2+1}) vs Pair ({idx3+1},{idx4+1}) - Config N{N}_D{D_IN}_M{M}_L{L}')
+        plt.xlabel(f'Product of Coords for e-vecs {idx1+1} & {idx2+1}')
+        plt.ylabel(f'Product of Coords for e-vecs {idx3+1} & {idx4+1}')
+        plt.grid(True, alpha=0.3)
+
+        # i add metrics to the plot
+        stats_text = (f"Pearson r: {pearson_corr:.4f}\n"
+                      f"Spearman ρ: {spearman_corr:.4f}\n"
+                      f"Mutual Info: {mutual_info:.4f} nats")
+        props = dict(boxstyle='round', facecolor='wheat', alpha=0.7)
+        ax = plt.gca()
+        ax.text(0.05, 0.95, stats_text, transform=ax.transAxes, fontsize=12,
+                verticalalignment='top', bbox=props)
+
+        # i save plot
+        plot_filename = os.path.join(output_dir, f'product_independence_{idx1+1}-{idx2+1}_vs_{idx3+1}-{idx4+1}_N{N}_D{D_IN}_M{M}_L{L}.png')
+        plt.savefig(plot_filename, dpi=120, bbox_inches='tight')
+        plt.close()
+
+        # i store metrics
+        metrics_data = {
+            'pair1': {'indices': (idx1, idx2), 'labels': (f'e-vec {idx1+1}', f'e-vec {idx2+1}')},
+            'pair2': {'indices': (idx3, idx4), 'labels': (f'e-vec {idx3+1}', f'e-vec {idx4+1}')},
+            'pearson_correlation': pearson_corr,
+            'spearman_correlation': spearman_corr,
+            'mutual_information_nats': mutual_info
+        }
+        all_metrics.append(metrics_data)
+
+    # i save all metrics for this config
+    metrics_filename = os.path.join(PATH_TO_METRICS, f'product_independence_metrics_N{N}_D{D_IN}_M{M}_L{L}.json')
+    with open(metrics_filename, 'w') as f:
+        json.dump(all_metrics, f, indent=4)
+    print(f"Saved product independence metrics to {metrics_filename}")
+
+def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, corr_plot_dir, inter_corr_plot_dir, product_plot_dir, product_independence_plot_dir):
     """
     Analyze entropy distributions using the first experiment's eigenvectors as basis.
     """
@@ -610,6 +716,14 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, 
         coord_results['eigenvector_labels'],
         N, D_IN, M, L,
         product_plot_dir
+    )
+    
+    # i analyze independence of products
+    analyze_product_independence(
+        coord_results['coordinates'],
+        coord_results['eigenvector_labels'],
+        N, D_IN, M, L,
+        product_independence_plot_dir
     )
     
     # we compute entropy for each eigenvector order
@@ -742,7 +856,7 @@ if __name__ == "__main__":
             
             # we analyze entropy in eigenvector basis
             analyze_entropy_in_eigenvector_basis(
-                eigenvectors_data['eigenvectors'].transpose(0, 2, 1), N, D_IN, M, L, PATH_TO_PLOTS, PATH_TO_CORR_PLOTS, PATH_TO_INTER_CORR_PLOTS, PATH_TO_PRODUCT_PLOTS
+                eigenvectors_data['eigenvectors'].transpose(0, 2, 1), N, D_IN, M, L, PATH_TO_PLOTS, PATH_TO_CORR_PLOTS, PATH_TO_INTER_CORR_PLOTS, PATH_TO_PRODUCT_PLOTS, PATH_TO_PRODUCT_INDEPENDENCE_PLOTS
             )
             
             print("\n" + "="*50 + "\n")
