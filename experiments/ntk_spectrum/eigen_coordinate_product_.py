@@ -29,6 +29,7 @@ from collections import defaultdict  # we use defaultdict for grouping
 import json  # we add json for storing test results
 import seaborn as sns  # we use seaborn for enhanced heatmap visualizations
 from scipy import stats
+from scipy.optimize import minimize_scalar
 from sklearn.metrics import mutual_info_score
 
 # %%
@@ -609,21 +610,26 @@ def analyze_product_independence(all_coordinates, eigenvector_labels, N, D_IN, M
         print("Skipping product independence analysis: requires at least 4 eigenvectors.")
         return
 
+    from itertools import combinations
+    
     # i select pairs of pairs of eigenvectors for analysis
-    pairs_of_pairs = [
-        ((0, 1), (2, 3)),
-        ((0, 2), (1, 3))
-    ]
-
+    # i generate detailed plots for these specific pairs
+    detailed_plot_pairs = [((0, 1), (2, 3)), ((0, 2), (1, 3))]
+    
     all_metrics = []
-    all_normalized_products = [] # i store all normalized products for summary plot
+    all_normalized_products = [] 
+    all_pearson = []
+    all_spearman = []
+    all_mi = []
 
-    for (pair1, pair2) in pairs_of_pairs:
+    # i find all combinations of pairs with 4 unique eigenvectors
+    all_eigenvector_pairs = list(combinations(range(n_eigenvectors), 2))
+    pairs_to_process = [pop for pop in combinations(all_eigenvector_pairs, 2) if len(set(pop[0]) | set(pop[1])) == 4]
+
+    print(f"Analyzing {len(pairs_to_process)} pairs of products...")
+    for (pair1, pair2) in tqdm(pairs_to_process, desc="Analyzing product pairs"):
         idx1, idx2 = pair1
         idx3, idx4 = pair2
-
-        label1, label2 = eigenvector_labels[idx1], eigenvector_labels[idx2]
-        label3, label4 = eigenvector_labels[idx3], eigenvector_labels[idx4]
 
         coords1, coords2 = all_coordinates[idx1], all_coordinates[idx2]
         coords3, coords4 = all_coordinates[idx3], all_coordinates[idx4]
@@ -639,7 +645,6 @@ def analyze_product_independence(all_coordinates, eigenvector_labels, N, D_IN, M
         std2 = np.std(products2)
         
         if std1 == 0 or std2 == 0:
-            print(f"Skipping pair ({idx1+1},{idx2+1}) vs ({idx3+1},{idx4+1}) due to zero std dev.")
             continue
             
         products1_norm = products1 / std1
@@ -654,7 +659,7 @@ def analyze_product_independence(all_coordinates, eigenvector_labels, N, D_IN, M
         bins = int(np.sqrt(len(products1_norm) / 5))
         if bins < 10: bins = 10
         
-        joint_hist, _, _ = np.histogram2d(products1_norm, products2_norm, bins=bins)
+        joint_hist, bin_edges = np.histogram2d(products1_norm, products2_norm, bins=bins)
         joint_prob = joint_hist / np.sum(joint_hist)
         p_x = np.sum(joint_prob, axis=1)
         p_y = np.sum(joint_prob, axis=0)
@@ -665,30 +670,11 @@ def analyze_product_independence(all_coordinates, eigenvector_labels, N, D_IN, M
             joint_prob[non_zero_indices] * np.log(joint_prob[non_zero_indices] / p_x_p_y[non_zero_indices])
         )
 
-        # 2. i create scatter plot
-        plt.figure(figsize=(10, 8))
-        plt.scatter(products1_norm, products2_norm, alpha=0.1)
-        
-        plt.title(f'Normalized Independence of Coordinate Products\nPair ({idx1+1},{idx2+1}) vs Pair ({idx3+1},{idx4+1}) - Config N{N}_D{D_IN}_M{M}_L{L}')
-        plt.xlabel(f'Normalized Product of Coords for e-vecs {idx1+1} & {idx2+1} (std units)')
-        plt.ylabel(f'Normalized Product of Coords for e-vecs {idx3+1} & {idx4+1} (std units)')
-        plt.grid(True, alpha=0.3)
+        all_pearson.append(pearson_corr)
+        all_spearman.append(spearman_corr)
+        all_mi.append(mutual_info)
 
-        # i add metrics to the plot
-        stats_text = (f"Pearson r: {pearson_corr:.4f}\n"
-                      f"Spearman ρ: {spearman_corr:.4f}\n"
-                      f"Mutual Info: {mutual_info:.4f} nats")
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.7)
-        ax = plt.gca()
-        ax.text(0.05, 0.95, stats_text, transform=ax.transAxes, fontsize=12,
-                verticalalignment='top', bbox=props)
-
-        # i save plot
-        plot_filename = os.path.join(output_dir, f'product_independence_norm_{idx1+1}-{idx2+1}_vs_{idx3+1}-{idx4+1}_N{N}_D{D_IN}_M{M}_L{L}.png')
-        plt.savefig(plot_filename, dpi=120, bbox_inches='tight')
-        plt.close()
-
-        # i store metrics
+        # i store metrics for later saving
         metrics_data = {
             'pair1': {'indices': (idx1, idx2), 'labels': (f'e-vec {idx1+1}', f'e-vec {idx2+1}')},
             'pair2': {'indices': (idx3, idx4), 'labels': (f'e-vec {idx3+1}', f'e-vec {idx4+1}')},
@@ -698,11 +684,130 @@ def analyze_product_independence(all_coordinates, eigenvector_labels, N, D_IN, M
         }
         all_metrics.append(metrics_data)
 
+        # 2. i create scatter plot for selected pairs
+        if (pair1, pair2) in detailed_plot_pairs:
+            plt.figure(figsize=(10, 8))
+            plt.scatter(products1_norm, products2_norm, alpha=0.1)
+            
+            plt.title(f'Normalized Independence of Coordinate Products\nPair ({idx1+1},{idx2+1}) vs Pair ({idx3+1},{idx4+1}) - Config N{N}_D{D_IN}_M{M}_L{L}')
+            plt.xlabel(f'Normalized Product of Coords for e-vecs {idx1+1} & {idx2+1} (std units)')
+            plt.ylabel(f'Normalized Product of Coords for e-vecs {idx3+1} & {idx4+1} (std units)')
+            plt.grid(True, alpha=0.3)
+
+            # i add metrics to the plot
+            stats_text = (f"Pearson r: {pearson_corr:.4f}\n"
+                          f"Spearman ρ: {spearman_corr:.4f}\n"
+                          f"Mutual Info: {mutual_info:.4f} nats")
+            props = dict(boxstyle='round', facecolor='wheat', alpha=0.7)
+            ax = plt.gca()
+            ax.text(0.05, 0.95, stats_text, transform=ax.transAxes, fontsize=12,
+                    verticalalignment='top', bbox=props)
+
+            # i save plot
+            plot_filename = os.path.join(output_dir, f'product_independence_norm_{idx1+1}-{idx2+1}_vs_{idx3+1}-{idx4+1}_N{N}_D{D_IN}_M{M}_L{L}.png')
+            plt.savefig(plot_filename, dpi=120, bbox_inches='tight')
+            plt.close()
+    
     # i save all metrics for this config
     metrics_filename = os.path.join(PATH_TO_METRICS, f'product_independence_metrics_N{N}_D{D_IN}_M{M}_L{L}.json')
     with open(metrics_filename, 'w') as f:
-        json.dump(all_metrics, f, indent=4)
-    print(f"Saved product independence metrics to {metrics_filename}")
+        json.dump(all_metrics, f, indent=2)
+    print(f"Saved {len(all_metrics)} product independence metrics to {metrics_filename}")
+
+    # i plot the distribution of all computed metrics
+    if all_pearson:
+        fig, axes = plt.subplots(1, 3, figsize=(24, 7))
+        fig.suptitle(f'Distribution of Independence Metrics for Config N{N}_D{D_IN}_M{M}_L{L}', fontsize=16)
+
+        # i plot pearson distribution
+        axes[0].hist(all_pearson, bins=40, density=True, label='Empirical')
+        axes[0].set_title("Distribution of Pearson's r")
+        axes[0].set_xlabel("Pearson Correlation Coefficient")
+        axes[0].set_ylabel("Density")
+        
+        # i define the custom potential function with a scaling parameter 'a'
+        def custom_potential(z, a=1.0):
+            z_abs = np.abs(z)
+            scaled_z = a * z_abs
+            
+            # the potential is defined for scaled_z in [0, 1)
+            mask = scaled_z < 1.0
+            potential = np.full_like(z, np.nan, dtype=float)
+            
+            z_safe = scaled_z[mask]
+            z_safe = np.where(z_safe == 0, 1e-12, z_safe) # avoid log(0)
+
+            # user's formula
+            potential[mask] = -2 * ((1 - z_safe) * np.log(z_safe) - 2 * z_safe + 2)
+            return potential
+
+        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+        # i define objective function to find best 'a' by comparing shapes (via RMSE of L2-normalized vectors)
+        def objective_for_fit(a, x, y):
+            y_theory = custom_potential(x, a)
+            valid_mask = ~np.isnan(y_theory)
+            x, y, y_theory = x[valid_mask], y[valid_mask], y_theory[valid_mask]
+            
+            if len(x) < 2: return np.inf
+
+            # i normalize both to unit L2 norm to compare shape
+            y_norm = y / np.linalg.norm(y)
+            y_theory_norm = y_theory / np.linalg.norm(y_theory)
+            
+            return np.sqrt(np.mean((y_norm - y_theory_norm)**2))
+        
+        # i find the best 'a'
+        result = minimize_scalar(objective_for_fit, args=(bin_centers, hist), bounds=(0.1, 5.0), method='bounded')
+        best_a = result.x
+        
+        # i plot the theoretical curve with the best-fit 'a'
+        z_fine = np.linspace(-1, 1, 500)
+        potential_fine = custom_potential(z_fine, best_a)
+        
+        # i calculate scaling factor C to match histogram peak for visualization
+        peak_y_hist = np.max(hist)
+        # i find potential value at the bin center closest to the peak
+        potential_at_bins = custom_potential(bin_centers, best_a)
+        valid_bins_mask = ~np.isnan(potential_at_bins)
+        
+        potential_at_peak = potential_at_bins[valid_bins_mask][np.argmax(hist[valid_bins_mask])]
+        scaling_factor = peak_y_hist / potential_at_peak
+        
+        y_fit_scaled = scaling_factor * potential_fine
+        valid_plot_mask = ~np.isnan(y_fit_scaled)
+
+        axes[0].plot(z_fine[valid_plot_mask], y_fit_scaled[valid_plot_mask], 'r-', linewidth=2, label=f'Fit (a={best_a:.2f})')
+        
+        # i calculate the final RMSE for the scaled curve as a goodness-of-fit metric
+        y_pred_scaled = scaling_factor * custom_potential(bin_centers, best_a)
+        valid_rmse_mask = ~np.isnan(y_pred_scaled)
+        rmse = np.sqrt(np.mean((hist[valid_rmse_mask] - y_pred_scaled[valid_rmse_mask])**2))
+
+        # i add metrics to the plot
+        stats_text = f"Fit Param a: {best_a:.2f}\nRMSE: {rmse:.4f}"
+        props = dict(boxstyle='round', facecolor='lightblue', alpha=0.5)
+        axes[0].text(0.05, 0.95, stats_text, transform=axes[0].transAxes, fontsize=10,
+                verticalalignment='top', bbox=props)
+        axes[0].legend()
+        axes[0].grid(True, alpha=0.4)
+
+        # i plot spearman distribution
+        axes[1].hist(all_spearman, bins=40, density=True)
+        axes[1].set_title("Distribution of Spearman's ρ")
+        axes[1].set_xlabel("Spearman Correlation Coefficient")
+        axes[1].grid(True, alpha=0.4)
+
+        # i plot mutual information distribution
+        axes[2].hist(all_mi, bins=40, density=True)
+        axes[2].set_title("Distribution of Mutual Information")
+        axes[2].set_xlabel("Mutual Information (nats)")
+        axes[2].grid(True, alpha=0.4)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        dist_plot_filename = os.path.join(output_dir, f'product_independence_metrics_dist_N{N}_D{D_IN}_M{M}_L{L}.png')
+        plt.savefig(dist_plot_filename, dpi=120, bbox_inches='tight')
+        plt.close()
 
     # i create the summary plot with all normalized products superimposed
     if all_normalized_products:
