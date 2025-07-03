@@ -36,10 +36,12 @@ PROJECT_ROOT = os.getenv("PROJECT_ROOT")
 PATH_TO_DATA = os.path.join(PROJECT_ROOT, "experiments", "data", "eigen")
 PATH_TO_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots", "eigen", "entropy")
 PATH_TO_CORR_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots", "eigen", "correlations")
+PATH_TO_INTER_CORR_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots", "eigen", "inter_correlations")
 
 # we create necessary directories
 os.makedirs(PATH_TO_PLOTS, exist_ok=True)
 os.makedirs(PATH_TO_CORR_PLOTS, exist_ok=True)
+os.makedirs(PATH_TO_INTER_CORR_PLOTS, exist_ok=True)
 
 # %%
 def get_config_from_filename(filename):
@@ -401,7 +403,96 @@ def analyze_coordinate_correlations(all_coordinates, eigenvector_labels, N, D_IN
         print(f"    Max correlation: {np.max(off_diagonal_corrs):.4f}")
         print(f"    Min correlation: {np.min(off_diagonal_corrs):.4f}")
 
-def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, corr_plot_dir):
+def analyze_inter_eigenvector_correlations(all_coordinates, eigenvector_labels, N, D_IN, M, L, output_dir):
+    """
+    i analyze and plot the correlations between coordinates of *different* eigenvector orders.
+    this creates a summary heatmap for all pairs and detailed plots for selected pairs.
+    """
+    print(f"\nAnalyzing INTER-eigenvector correlations for N{N}_D{D_IN}_M{M}_L{L}...")
+    
+    n_eigenvectors = len(all_coordinates)
+    if n_eigenvectors < 2:
+        print("Skipping inter-eigenvector analysis: requires at least 2 eigenvectors.")
+        return
+
+    # 1. i create a summary matrix of correlations for all pairs
+    inter_corr_summary = np.zeros((n_eigenvectors, n_eigenvectors))
+    
+    from itertools import combinations
+    
+    for (idx1, idx2) in tqdm(list(combinations(range(n_eigenvectors), 2)), desc="Computing inter-eigenvector correlations"):
+        coords1 = all_coordinates[idx1]
+        coords2 = all_coordinates[idx2]
+        
+        if coords1.shape[1] == 0 or coords2.shape[1] == 0:
+            continue
+            
+        combined_coords = np.hstack([coords1, coords2])
+        corr_matrix = np.corrcoef(combined_coords, rowvar=False)
+        
+        n_basis_vectors = coords1.shape[1]
+        inter_corr_block = corr_matrix[:n_basis_vectors, n_basis_vectors:]
+        
+        mean_abs_corr = np.mean(np.abs(inter_corr_block))
+        inter_corr_summary[idx1, idx2] = mean_abs_corr
+        inter_corr_summary[idx2, idx1] = mean_abs_corr
+
+    # i plot the summary heatmap
+    plt.figure(figsize=(14, 12))
+    sns.heatmap(inter_corr_summary, annot=True, fmt=".2f", cmap="viridis",
+                xticklabels=[str(i+1) for i in range(n_eigenvectors)],
+                yticklabels=[str(i+1) for i in range(n_eigenvectors)])
+    plt.title(f'Mean Absolute Inter-Eigenvector Coordinate Correlation\nConfig N{N}_D{D_IN}_M{M}_L{L}')
+    plt.xlabel('Eigenvector Order')
+    plt.ylabel('Eigenvector Order')
+    
+    summary_filename = os.path.join(output_dir, f'inter_corr_summary_N{N}_D{D_IN}_M{M}_L{L}.png')
+    plt.savefig(summary_filename, dpi=120, bbox_inches='tight')
+    plt.close()
+
+    # 2. i create detailed plots for a few selected pairs
+    selected_pairs = [(0, 1)]
+    if n_eigenvectors > 2:
+        selected_pairs.append((0, n_eigenvectors // 2))
+    if n_eigenvectors > 1:
+        selected_pairs.append((0, n_eigenvectors - 1))
+    selected_pairs = sorted(list(set(selected_pairs)))
+
+    for (idx1, idx2) in selected_pairs:
+        label1, label2 = eigenvector_labels[idx1], eigenvector_labels[idx2]
+        coords1, coords2 = all_coordinates[idx1], all_coordinates[idx2]
+        n_basis_vectors = coords1.shape[1]
+
+        combined_coords = np.hstack([coords1, coords2])
+        corr_matrix = np.corrcoef(combined_coords, rowvar=False)
+        inter_corr_block = corr_matrix[:n_basis_vectors, n_basis_vectors:]
+        
+        fig, axes = plt.subplots(1, 2, figsize=(22, 9))
+        fig.suptitle(f'Inter-Eigenvector Correlation: {label1} vs {label2}\nConfig N{N}_D{D_IN}_M{M}_L{L}', fontsize=16)
+
+        # i plot the full correlation heatmap
+        ax1 = axes[0]
+        sns.heatmap(corr_matrix, ax=ax1, cmap='RdBu_r', vmin=-1, vmax=1, annot=False)
+        ax1.axvline(x=n_basis_vectors, color='black', linestyle='--')
+        ax1.axhline(y=n_basis_vectors, color='black', linestyle='--')
+        ax1.set_title('Full Correlation Matrix')
+        ax1.set_xlabel(f'Coordinates ({label1} | {label2})')
+        ax1.set_ylabel(f'Coordinates ({label1} | {label2})')
+
+        # i plot the distribution of inter-correlation coefficients
+        ax2 = axes[1]
+        ax2.hist(inter_corr_block.flatten(), bins=30, density=True, alpha=0.7)
+        ax2.set_title('Distribution of Inter-Correlation Coefficients')
+        ax2.set_xlabel('Correlation Coefficient')
+        ax2.set_ylabel('Density')
+        ax2.grid(True, alpha=0.5)
+
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        detailed_plot_filename = os.path.join(output_dir, f'inter_corr_detail_{label1.replace(" ", "_")}_vs_{label2.replace(" ", "_")}.png')
+        plt.savefig(detailed_plot_filename, dpi=120, bbox_inches='tight')
+        plt.close()
+
+def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, corr_plot_dir, inter_corr_plot_dir):
     """
     Analyze entropy distributions using the first experiment's eigenvectors as basis.
     """
@@ -426,6 +517,14 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, 
         coord_results['eigenvector_labels'],
         N, D_IN, M, L,
         corr_plot_dir
+    )
+
+    # i perform inter-eigenvector correlation analysis
+    analyze_inter_eigenvector_correlations(
+        coord_results['coordinates'],
+        coord_results['eigenvector_labels'],
+        N, D_IN, M, L,
+        inter_corr_plot_dir
     )
     
     # we compute entropy for each eigenvector order
@@ -558,7 +657,7 @@ if __name__ == "__main__":
             
             # we analyze entropy in eigenvector basis
             analyze_entropy_in_eigenvector_basis(
-                eigenvectors_data['eigenvectors'].transpose(0, 2, 1), N, D_IN, M, L, PATH_TO_PLOTS, PATH_TO_CORR_PLOTS
+                eigenvectors_data['eigenvectors'].transpose(0, 2, 1), N, D_IN, M, L, PATH_TO_PLOTS, PATH_TO_CORR_PLOTS, PATH_TO_INTER_CORR_PLOTS
             )
             
             print("\n" + "="*50 + "\n")
