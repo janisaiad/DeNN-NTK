@@ -1,0 +1,1100 @@
+# ---
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.17.2
+#   kernelspec:
+#     display_name: .venv
+#     language: python
+#     name: python3
+# ---
+
+# %% [markdown]
+# # Analysis of NTK Eigenvalue and Eigenvector Distributions
+#
+# We analyze the distributions of eigenvalues and eigenvectors of the NTK matrix.
+
+# %%
+import os
+import numpy as np
+import jax.numpy as jnp
+
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+import csv  # we use csv instead of pandas
+from collections import defaultdict  # we use defaultdict for grouping
+import json  # we add json for storing test results
+import seaborn as sns  # we use seaborn for enhanced heatmap visualizations
+from scipy import stats
+from scipy.optimize import minimize_scalar
+from sklearn.metrics import mutual_info_score
+
+# %%
+import dotenv
+dotenv.load_dotenv()
+PROJECT_ROOT = os.getenv("PROJECT_ROOT")
+PATH_TO_DATA = os.path.join(PROJECT_ROOT, "experiments", "data", "eigen")
+PATH_TO_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots", "eigen", "entropy")
+PATH_TO_CORR_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots", "eigen", "correlations")
+PATH_TO_INTER_CORR_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots", "eigen", "inter_correlations")
+PATH_TO_PRODUCT_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots", "eigen", "coordinate_products")
+PATH_TO_PRODUCT_INDEPENDENCE_PLOTS = os.path.join(PROJECT_ROOT, "experiments", "plots", "eigen", "product_independence")
+PATH_TO_METRICS = os.path.join(PROJECT_ROOT, "experiments", "data", "metrics")
+
+# we create necessary directories
+os.makedirs(PATH_TO_PLOTS, exist_ok=True)
+os.makedirs(PATH_TO_CORR_PLOTS, exist_ok=True)
+os.makedirs(PATH_TO_INTER_CORR_PLOTS, exist_ok=True)
+os.makedirs(PATH_TO_PRODUCT_PLOTS, exist_ok=True)
+os.makedirs(PATH_TO_PRODUCT_INDEPENDENCE_PLOTS, exist_ok=True)
+os.makedirs(PATH_TO_METRICS, exist_ok=True)
+
+# %%
+def get_config_from_filename(filename):
+    """we extract configuration parameters from filename"""
+    parts = filename.replace(".npy", "").split("_")
+    N = int(parts[-4][1:])
+    D = int(parts[-3][1:])
+    M = int(parts[-2][1:])
+    L = int(parts[-1][1:])
+    return N, D, M, L
+
+def load_experiment_data(N, D_IN, M, L):
+    """we load eigenvalues and eigenvectors data for a specific configuration"""
+    filename_eigenvalues = f"values/ntk_eigenvalues_N{N}_D{D_IN}_M{M}_L{L}.npy"
+    filename_eigenvectors = f"vectors/ntk_eigenvectors_N{N}_D{D_IN}_M{M}_L{L}.npy"
+    
+    eigenvalues_data = np.load(os.path.join(PATH_TO_DATA, filename_eigenvalues), allow_pickle=True).item()
+    eigenvectors_data = np.load(os.path.join(PATH_TO_DATA, filename_eigenvectors), allow_pickle=True).item()
+    
+    return eigenvalues_data, eigenvectors_data
+
+# %%
+
+def get_ordinal_suffix(n):
+    """we get the ordinal suffix for a number (1st, 2nd, 3rd, 4th, etc.)"""
+    if 10 <= n % 100 <= 20:
+        suffix = 'th'
+    else:
+        suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')
+    return f"{n}{suffix}"
+
+def compute_entropy_in_eigenvector_basis_vectorized(eigenvectors, eigenvector_order, N, D_IN, M, L, output_dir):
+    """
+    We compute the entropy of the distribution for each coordinate of a specific eigenvector order,
+    but using the eigenvectors of the first experiment as the basis. VECTORIZED VERSION.
+    """
+    n_experiments, n_vectors, dimension = eigenvectors.shape
+    
+    # we use the first experiment's eigenvectors as the basis
+    first_experiment_basis = jnp.array(eigenvectors[0, :, :]) # shape (n_vectors, dimension)
+    
+    try: # we get the eigenvectors for the specific order from all other experiments
+        selected_eigenvectors = jnp.array(eigenvectors[1:, eigenvector_order, :]) # shape (n_experiments-1, dimension)
+    except IndexError:
+        print(f"Warning: Could not extract eigenvector {eigenvector_order+1} for config N{N}_D{D_IN}_M{M}_L{L}.")
+        return None
+
+    n_remaining_experiments, dimension = selected_eigenvectors.shape
+    n_basis_vectors = min(n_vectors, dimension-1) # we use N-1 vectors as basis
+    
+    # VECTORIZED: we compute all scalar products in one matrix multiplication
+    # selected_eigenvectors: (n_remaining_experiments, dimension)
+    # first_experiment_basis[:n_basis_vectors, :]: (n_basis_vectors, dimension)  
+    # Result: (n_remaining_experiments, n_basis_vectors)
+    coordinates_in_basis = selected_eigenvectors @ first_experiment_basis[:n_basis_vectors, :].T
+    coordinates_in_basis = np.array(coordinates_in_basis) # we convert back to numpy for histogram computation
+    
+    # we compute entropy for each coordinate in the new basis
+    coordinate_entropies = []
+    n_basis_coords = coordinates_in_basis.shape[1]
+    
+    for i in range(n_basis_coords): # we compute entropy coordinate-wise in new basis
+        coordinate_values = coordinates_in_basis[:, i]
+        
+        hist, bin_edges = np.histogram(coordinate_values, bins='auto', density=True)
+        bin_width = bin_edges[1] - bin_edges[0]
+        
+        # we normalize
+        probabilities = hist * bin_width
+        probabilities = probabilities[probabilities > 0] # we remove zero probabilities
+        
+        entropy = -np.sum(probabilities * np.log(probabilities))
+        coordinate_entropies.append(entropy)
+    
+    return coordinate_entropies
+
+def plot_coordinate_distributions_in_basis_vectorized(eigenvectors, N, D_IN, M, L, output_dir):
+    """
+    We plot the distributions of coordinates in the eigenvector basis for all eigenvector orders.
+    VECTORIZED VERSION.
+    """
+    n_experiments, n_vectors, dimension = eigenvectors.shape
+    
+    if n_experiments < 2:
+        print(f"Warning: Need at least 2 experiments for basis analysis, got {n_experiments}")
+        return None
+    
+    # we use the first experiment's eigenvectors as the basis
+    first_experiment_basis = jnp.array(eigenvectors[0, :, :]) # shape (n_vectors, dimension)
+    n_basis_vectors = min(n_vectors, dimension-1) # we use N-1 vectors as basis
+    basis_vectors = first_experiment_basis[:n_basis_vectors, :] # shape (n_basis_vectors, dimension)
+    
+    print(f"Plotting coordinate distributions in eigenvector basis (VECTORIZED) - N{N}_D{D_IN}_M{M}_L{L}")
+    
+    # VECTORIZED: we compute coordinates for ALL eigenvectors at once
+    remaining_eigenvectors = jnp.array(eigenvectors[1:, :, :]) # shape (n_experiments-1, n_vectors, dimension)
+    
+    # we reshape for batch matrix multiplication: (n_experiments-1 * n_vectors, dimension)
+    reshaped_eigenvectors = remaining_eigenvectors.reshape(-1, dimension)
+    
+    # VECTORIZED: single matrix multiplication for ALL projections
+    # reshaped_eigenvectors: (n_experiments-1 * n_vectors, dimension)
+    # basis_vectors.T: (dimension, n_basis_vectors)
+    # Result: (n_experiments-1 * n_vectors, n_basis_vectors)
+    all_coordinates_flat = reshaped_eigenvectors @ basis_vectors.T
+    
+    # we reshape back to (n_experiments-1, n_vectors, n_basis_vectors)
+    all_coordinates_3d = all_coordinates_flat.reshape(n_experiments-1, n_vectors, n_basis_vectors)
+    all_coordinates_3d = np.array(all_coordinates_3d) # we convert back to numpy
+    
+    # we separate by eigenvector order
+    all_coordinates = []
+    eigenvector_labels = []
+    
+    for k in range(n_vectors):
+        coordinates_in_basis = all_coordinates_3d[:, k, :] # shape (n_experiments-1, n_basis_vectors)
+        all_coordinates.append(coordinates_in_basis)
+        eigenvector_labels.append(f'{get_ordinal_suffix(k+1)} eigenvector')
+    
+    if not all_coordinates:
+        print("No valid coordinates computed")
+        return None
+    
+    # we create comprehensive visualizations
+    n_eigenvectors = len(all_coordinates)
+    
+    # we create a large figure with multiple subplots
+    fig = plt.figure(figsize=(20, 12))
+    gs = fig.add_gridspec(3, 4, hspace=0.3, wspace=0.3)
+    
+    # Plot 1: Distribution of coordinates for first few eigenvectors
+    ax1 = fig.add_subplot(gs[0, :2])
+    colors = plt.cm.tab10(np.linspace(0, 1, min(n_eigenvectors, 5)))
+    
+    for i in range(min(n_eigenvectors, 5)):
+        coords = all_coordinates[i].flatten()
+        ax1.hist(coords, bins=30, alpha=0.6, label=eigenvector_labels[i], 
+                color=colors[i], density=True)
+    
+    ax1.set_xlabel('Coordinate Value')
+    ax1.set_ylabel('Density')
+    ax1.set_title('Distribution of All Coordinates\n(First 5 Eigenvectors)')
+    ax1.legend()
+    ax1.grid(True, alpha=0.3)
+    
+    # Plot 2: Statistics summary (mean, std, range)
+    ax2 = fig.add_subplot(gs[0, 2:])
+    stats_data = []
+    for i, coords_matrix in enumerate(all_coordinates):
+        coords_flat = coords_matrix.flatten()
+        stat_dict = {
+            'mean': np.mean(coords_flat),
+            'std': np.std(coords_flat),
+            'min': np.min(coords_flat),
+            'max': np.max(coords_flat),
+            'range': np.max(coords_flat) - np.min(coords_flat)
+        }
+        stats_data.append(stat_dict)
+    
+    means = [s['mean'] for s in stats_data]
+    stds = [s['std'] for s in stats_data]
+    ranges = [s['range'] for s in stats_data]
+    
+    x_pos = np.arange(len(means))
+    ax2.errorbar(x_pos, means, yerr=stds, fmt='o-', capsize=5, 
+                label='Mean ± Std', linewidth=2, markersize=6)
+    ax2.fill_between(x_pos, [s['min'] for s in stats_data], 
+                    [s['max'] for s in stats_data], alpha=0.2, label='Range')
+    ax2.set_xlabel('Eigenvector Order')
+    ax2.set_ylabel('Coordinate Value')
+    ax2.set_title('Statistics of Coordinate Distributions')
+    ax2.set_xticks(x_pos)
+    ax2.set_xticklabels([f'{i+1}' for i in range(len(means))])
+    ax2.legend()
+    ax2.grid(True, alpha=0.3)
+    
+    # Plot 3: Heatmap of coordinates for all basis vectors
+    ax3 = fig.add_subplot(gs[1, :2])
+    
+    # we create a matrix with mean coordinates for each eigenvector and basis vector
+    coord_matrix = np.zeros((n_eigenvectors, n_basis_vectors))
+    for i, coords_matrix in enumerate(all_coordinates):
+        coord_matrix[i, :] = np.mean(coords_matrix, axis=0)
+    
+    im = ax3.imshow(coord_matrix, aspect='auto', cmap='RdBu_r')
+    plt.colorbar(im, ax=ax3, label='Mean Coordinate Value')
+    ax3.set_xlabel('Basis Vector Index')
+    ax3.set_ylabel('Eigenvector Order')
+    ax3.set_title('Mean Coordinates in Eigenvector Basis')
+    ax3.set_xticks(range(n_basis_vectors))
+    ax3.set_xticklabels([f'{i+1}' for i in range(n_basis_vectors)])
+    ax3.set_yticks(range(n_eigenvectors))
+    ax3.set_yticklabels([f'{i+1}' for i in range(n_eigenvectors)])
+    
+    # Plot 4: Standard deviation heatmap
+    ax4 = fig.add_subplot(gs[1, 2:])
+    
+    std_matrix = np.zeros((n_eigenvectors, n_basis_vectors))
+    for i, coords_matrix in enumerate(all_coordinates):
+        std_matrix[i, :] = np.std(coords_matrix, axis=0)
+    
+    im2 = ax4.imshow(std_matrix, aspect='auto', cmap='viridis')
+    plt.colorbar(im2, ax=ax4, label='Standard Deviation')
+    ax4.set_xlabel('Basis Vector Index')
+    ax4.set_ylabel('Eigenvector Order')
+    ax4.set_title('Standard Deviation of Coordinates')
+    ax4.set_xticks(range(n_basis_vectors))
+    ax4.set_xticklabels([f'{i+1}' for i in range(n_basis_vectors)])
+    ax4.set_yticks(range(n_eigenvectors))
+    ax4.set_yticklabels([f'{i+1}' for i in range(n_eigenvectors)])
+    
+    # Plot 5: Box plots for first few basis vectors
+    ax5 = fig.add_subplot(gs[2, :2])
+    
+    box_data = []
+    box_labels = []
+    for basis_idx in range(min(n_basis_vectors, 8)): # we show first 8 basis vectors
+        coords_for_basis = []
+        for coords_matrix in all_coordinates:
+            coords_for_basis.extend(coords_matrix[:, basis_idx])
+        box_data.append(coords_for_basis)
+        box_labels.append(f'Basis {basis_idx+1}')
+    
+    ax5.boxplot(box_data, labels=box_labels)
+    ax5.set_xlabel('Basis Vector')
+    ax5.set_ylabel('Coordinate Value')
+    ax5.set_title('Distribution per Basis Vector\n(All Eigenvectors Combined)')
+    ax5.grid(True, alpha=0.3)
+    
+    # Plot 6: Q-Q plot to test normality
+    ax6 = fig.add_subplot(gs[2, 2:])
+    
+    # we test normality for the first eigenvector's coordinates
+    if len(all_coordinates) > 0:
+        test_coords = all_coordinates[0].flatten()
+        stats.probplot(test_coords, dist="norm", plot=ax6)
+        ax6.set_title(f'Q-Q Plot (Normal Distribution)\n{eigenvector_labels[0]} Coordinates')
+        ax6.grid(True, alpha=0.3)
+    
+    plt.suptitle(f'Coordinate Distributions in Eigenvector Basis\nConfig N{N}_D{D_IN}_M{M}_L{L}', 
+                fontsize=16, y=0.98)
+    
+    # Save plot
+    coord_dist_filename = os.path.join(output_dir, f'coordinate_distributions_N{N}_D{D_IN}_M{M}_L{L}.png')
+    plt.savefig(coord_dist_filename, dpi=120, bbox_inches='tight')
+    # plt.show()
+    plt.close()
+    
+    # Print detailed statistics
+    print(f"\nCoordinate Distribution Statistics:")
+    print(f"  Number of basis vectors: {n_basis_vectors}")
+    print(f"  Number of experiments used: {n_experiments-1}")
+    
+    for i, (coords_matrix, label) in enumerate(zip(all_coordinates, eigenvector_labels)):
+        coords_flat = coords_matrix.flatten()
+        print(f"\n  {label}:")
+        print(f"    Mean: {np.mean(coords_flat):.6f} ± {np.std(coords_flat):.6f}")
+        print(f"    Range: [{np.min(coords_flat):.6f}, {np.max(coords_flat):.6f}]")
+        print(f"    Median: {np.median(coords_flat):.6f}")
+        print(f"    Skewness: {stats.skew(coords_flat):.6f}")
+        print(f"    Kurtosis: {stats.kurtosis(coords_flat):.6f}")
+    
+    return {
+        'coordinates': all_coordinates,
+        'statistics': stats_data,
+        'n_basis_vectors': n_basis_vectors,
+        'eigenvector_labels': eigenvector_labels
+    }
+
+def analyze_coordinate_correlations(all_coordinates, eigenvector_labels, N, D_IN, M, L, output_dir):
+    """
+    i analyze and plot the correlations between coordinates in the eigenvector basis.
+    this includes covariance/correlation matrices and copula plots.
+    """
+    print(f"\nAnalyzing coordinate correlations for N{N}_D{D_IN}_M{M}_L{L}...")
+    
+    n_eigenvectors = len(all_coordinates)
+    if n_eigenvectors == 0:
+        print("No coordinates to analyze.")
+        return
+
+    # i select a few eigenvector orders for detailed analysis to avoid too many plots
+    selected_eigenvector_indices = [0, 1, 2, n_eigenvectors // 2, n_eigenvectors - 1]
+    selected_eigenvector_indices = sorted(list(set(selected_eigenvector_indices)))
+
+    for k in selected_eigenvector_indices:
+        coords_matrix = all_coordinates[k]
+        label = eigenvector_labels[k]
+        n_experiments_m1, n_basis_vectors = coords_matrix.shape
+
+        if n_basis_vectors < 2:
+            print(f"Skipping correlation analysis for {label}: only {n_basis_vectors} basis vector.")
+            continue
+
+        # 1. i compute and plot the correlation matrix
+        corr_matrix = np.corrcoef(coords_matrix, rowvar=False)
+        
+        fig, axes = plt.subplots(2, 2, figsize=(16, 14))
+        fig.suptitle(f'Coordinate Correlation Analysis for {label}\nConfig N{N}_D{D_IN}_M{M}_L{L}', fontsize=16)
+
+        # i create a heatmap of correlation matrix
+        ax1 = axes[0, 0]
+        sns.heatmap(corr_matrix, ax=ax1, cmap='RdBu_r', vmin=-1, vmax=1, annot=False)
+        ax1.set_title('Correlation Matrix of Coordinates')
+        ax1.set_xlabel('Basis Vector Index')
+        ax1.set_ylabel('Basis Vector Index')
+
+        # 2. i create copula plots for a few pairs of coordinates
+        from scipy.stats import rankdata
+        
+        coord_pairs_to_plot = [(0, 1), (0, 2), (1, 2)]
+        
+        # i create a scatter plot of original coordinates
+        ax2 = axes[0, 1]
+        for i, (c1_idx, c2_idx) in enumerate(coord_pairs_to_plot):
+            if c1_idx < n_basis_vectors and c2_idx < n_basis_vectors:
+                ax2.scatter(coords_matrix[:, c1_idx], coords_matrix[:, c2_idx], alpha=0.5, label=f'Coords {c1_idx+1} vs {c2_idx+1}')
+        ax2.set_title('Scatter Plot of Coordinate Pairs')
+        ax2.set_xlabel('Coordinate Value')
+        ax2.set_ylabel('Coordinate Value')
+        ax2.legend()
+        ax2.grid(True, alpha=0.3)
+
+        # i create an empirical copula plot
+        ax3 = axes[1, 0]
+        uniform_coords = np.apply_along_axis(lambda x: rankdata(x) / (len(x) + 1), 0, coords_matrix)
+        
+        for i, (c1_idx, c2_idx) in enumerate(coord_pairs_to_plot):
+             if c1_idx < n_basis_vectors and c2_idx < n_basis_vectors:
+                ax3.scatter(uniform_coords[:, c1_idx], uniform_coords[:, c2_idx], alpha=0.5, label=f'Coords {c1_idx+1} vs {c2_idx+1}')
+        ax3.set_title('Empirical Copula Plot')
+        ax3.set_xlabel('U-space of Coordinate')
+        ax3.set_ylabel('U-space of Coordinate')
+        ax3.set_aspect('equal', 'box')
+        ax3.legend()
+        ax3.grid(True, alpha=0.3)
+
+        # 3. i create a distribution of off-diagonal correlation coefficients
+        ax4 = axes[1, 1]
+        off_diagonal_corrs = corr_matrix[np.triu_indices_from(corr_matrix, k=1)]
+        ax4.hist(off_diagonal_corrs, bins=20, density=True)
+        ax4.set_title('Distribution of Correlation Coefficients')
+        ax4.set_xlabel('Correlation Coefficient')
+        ax4.set_ylabel('Density')
+        ax4.grid(True, alpha=0.3)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        
+        # i save the plot
+        correlation_plot_filename = os.path.join(output_dir, f'coordinate_correlations_{label.replace(" ", "_")}_N{N}_D{D_IN}_M{M}_L{L}.png')
+        plt.savefig(correlation_plot_filename, dpi=120, bbox_inches='tight')
+        # plt.show()
+        plt.close()
+        
+        print(f"  Correlation analysis for {label}:")
+        print(f"    Mean off-diagonal correlation: {np.mean(np.abs(off_diagonal_corrs)):.4f}")
+        print(f"    Max correlation: {np.max(off_diagonal_corrs):.4f}")
+        print(f"    Min correlation: {np.min(off_diagonal_corrs):.4f}")
+
+def analyze_inter_eigenvector_correlations(all_coordinates, eigenvector_labels, N, D_IN, M, L, output_dir):
+    """
+    i analyze and plot the correlations between coordinates of *different* eigenvector orders.
+    this creates a summary heatmap for all pairs and detailed plots for selected pairs.
+    """
+    print(f"\nAnalyzing INTER-eigenvector correlations for N{N}_D{D_IN}_M{M}_L{L}...")
+    
+    n_eigenvectors = len(all_coordinates)
+    if n_eigenvectors < 2:
+        print("Skipping inter-eigenvector analysis: requires at least 2 eigenvectors.")
+        return
+
+    # 1. i create a summary matrix of correlations for all pairs
+    inter_corr_summary = np.zeros((n_eigenvectors, n_eigenvectors))
+    
+    from itertools import combinations
+    
+    for (idx1, idx2) in tqdm(list(combinations(range(n_eigenvectors), 2)), desc="Computing inter-eigenvector correlations"):
+        coords1 = all_coordinates[idx1]
+        coords2 = all_coordinates[idx2]
+        
+        if coords1.shape[1] == 0 or coords2.shape[1] == 0:
+            continue
+            
+        combined_coords = np.hstack([coords1, coords2])
+        corr_matrix = np.corrcoef(combined_coords, rowvar=False)
+        
+        n_basis_vectors = coords1.shape[1]
+        inter_corr_block = corr_matrix[:n_basis_vectors, n_basis_vectors:]
+        
+        mean_abs_corr = np.mean(np.abs(inter_corr_block))
+        inter_corr_summary[idx1, idx2] = mean_abs_corr
+        inter_corr_summary[idx2, idx1] = mean_abs_corr
+
+    # i plot the summary heatmap
+    plt.figure(figsize=(14, 12))
+    sns.heatmap(inter_corr_summary, annot=True, fmt=".2f", cmap="viridis",
+                xticklabels=[str(i+1) for i in range(n_eigenvectors)],
+                yticklabels=[str(i+1) for i in range(n_eigenvectors)])
+    plt.title(f'Mean Absolute Inter-Eigenvector Coordinate Correlation\nConfig N{N}_D{D_IN}_M{M}_L{L}')
+    plt.xlabel('Eigenvector Order')
+    plt.ylabel('Eigenvector Order')
+    
+    summary_filename = os.path.join(output_dir, f'inter_corr_summary_N{N}_D{D_IN}_M{M}_L{L}.png')
+    plt.savefig(summary_filename, dpi=120, bbox_inches='tight')
+    plt.close()
+
+    # 2. i create detailed plots for a few selected pairs
+    selected_pairs = [(0, 1)]
+    if n_eigenvectors > 2:
+        selected_pairs.append((0, n_eigenvectors // 2))
+    if n_eigenvectors > 1:
+        selected_pairs.append((0, n_eigenvectors - 1))
+    selected_pairs = sorted(list(set(selected_pairs)))
+
+    for (idx1, idx2) in selected_pairs:
+        label1, label2 = eigenvector_labels[idx1], eigenvector_labels[idx2]
+        coords1, coords2 = all_coordinates[idx1], all_coordinates[idx2]
+        n_basis_vectors = coords1.shape[1]
+
+        combined_coords = np.hstack([coords1, coords2])
+        corr_matrix = np.corrcoef(combined_coords, rowvar=False)
+        inter_corr_block = corr_matrix[:n_basis_vectors, n_basis_vectors:]
+        
+        fig, axes = plt.subplots(1, 2, figsize=(22, 9))
+        fig.suptitle(f'Inter-Eigenvector Correlation: {label1} vs {label2}\nConfig N{N}_D{D_IN}_M{M}_L{L}', fontsize=16)
+
+        # i plot the full correlation heatmap
+        ax1 = axes[0]
+        sns.heatmap(corr_matrix, ax=ax1, cmap='RdBu_r', vmin=-1, vmax=1, annot=False)
+        ax1.axvline(x=n_basis_vectors, color='black', linestyle='--')
+        ax1.axhline(y=n_basis_vectors, color='black', linestyle='--')
+        ax1.set_title('Full Correlation Matrix')
+        ax1.set_xlabel(f'Coordinates ({label1} | {label2})')
+        ax1.set_ylabel(f'Coordinates ({label1} | {label2})')
+
+        # i plot the distribution of inter-correlation coefficients
+        ax2 = axes[1]
+        ax2.hist(inter_corr_block.flatten(), bins=30, density=True, alpha=0.7)
+        ax2.set_title('Distribution of Inter-Correlation Coefficients')
+        ax2.set_xlabel('Correlation Coefficient')
+        ax2.set_ylabel('Density')
+        ax2.grid(True, alpha=0.5)
+
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        detailed_plot_filename = os.path.join(output_dir, f'inter_corr_detail_{label1.replace(" ", "_")}_vs_{label2.replace(" ", "_")}.png')
+        plt.savefig(detailed_plot_filename, dpi=120, bbox_inches='tight')
+        plt.close()
+
+def analyze_eigenvector_coordinate_products(all_coordinates, eigenvector_labels, N, D_IN, M, L, output_dir):
+    """
+    i analyze and plot the distribution of the element-wise product of coordinates 
+    for pairs of eigenvectors. the distribution is taken over all experiments and all basis vectors.
+    """
+    print(f"\nAnalyzing eigenvector coordinate products for N{N}_D{D_IN}_M{M}_L{L}...")
+    
+    n_eigenvectors = len(all_coordinates)
+    if n_eigenvectors < 2:
+        print("Skipping coordinate product analysis: requires at least 2 eigenvectors.")
+        return
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    # i select a few eigenvector pairs for detailed analysis to avoid too many plots
+    selected_eigenvector_pairs = []
+    if n_eigenvectors > 1:
+        selected_eigenvector_pairs.append((0, 1))
+    if n_eigenvectors > 2:
+        selected_eigenvector_pairs.append((0, 2))
+        selected_eigenvector_pairs.append((1, 2))
+    if n_eigenvectors > 3:
+        selected_eigenvector_pairs.append((0, n_eigenvectors - 1))
+    
+    selected_eigenvector_pairs = sorted(list(set(selected_eigenvector_pairs)))
+
+    product_stats = []
+    for i, j in selected_eigenvector_pairs:
+        if i >= n_eigenvectors or j >= n_eigenvectors:
+            continue
+
+        coords_i = all_coordinates[i]
+        coords_j = all_coordinates[j]
+        
+        label_i = eigenvector_labels[i]
+        label_j = eigenvector_labels[j]
+
+        if coords_i.shape[1] == 0 or coords_j.shape[1] == 0:
+            print(f"Skipping product analysis for pair ({label_i}, {label_j}): no coordinates.")
+            continue
+            
+        # element-wise product of coordinates
+        # coords_i and coords_j have shape (n_experiments-1, n_basis_vectors)
+        coordinate_products = coords_i * coords_j
+        
+        products_flat = coordinate_products.flatten()
+        
+        mean_prod = np.mean(products_flat)
+        std_prod = np.std(products_flat)
+        skew_prod = stats.skew(products_flat)
+        kurt_prod = stats.kurtosis(products_flat)
+        
+        print(f"\nCoordinate Product Analysis for pair ({label_i}, {label_j}):")
+        print(f"  Mean: {mean_prod:.6f} ± {std_prod:.6f}")
+        print(f"  Range: [{np.min(products_flat):.6f}, {np.max(products_flat):.6f}]")
+        print(f"  Median: {np.median(products_flat):.6f}")
+        print(f"  Skewness: {skew_prod:.6f}")
+        print(f"  Kurtosis: {kurt_prod:.6f}")
+        
+        # we plot the distribution and Q-Q plots
+        fig, axes = plt.subplots(1, 3, figsize=(24, 7))
+        
+        # i plot the histogram
+        axes[0].hist(products_flat, bins=50, density=True, alpha=0.7)
+        axes[0].set_title(f'Distribution of Products\n{label_i} vs {label_j}')
+        axes[0].set_xlabel('Coordinate Product Value')
+        axes[0].set_ylabel('Density')
+        axes[0].grid(True, alpha=0.5)
+
+        # i add a text box with statistics
+        stats_text = (f"Mean: {mean_prod:.4f}\n"
+                      f"Std Dev: {std_prod:.4f}\n"
+                      f"Skewness: {skew_prod:.4f}\n"
+                      f"Kurtosis: {kurt_prod:.4f}")
+        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+        axes[0].text(0.05, 0.95, stats_text, transform=axes[0].transAxes, fontsize=10,
+                     verticalalignment='top', bbox=props)
+
+        # i plot the Q-Q plot vs Laplace
+        stats.probplot(products_flat, dist=stats.laplace, plot=axes[1])
+        axes[1].set_title('Q-Q Plot vs. Laplace Distribution')
+        axes[1].grid(True, alpha=0.5)
+
+        # i plot the Q-Q plot vs Cauchy
+        stats.probplot(products_flat, dist=stats.cauchy, plot=axes[2])
+        axes[2].set_title('Q-Q Plot vs. Cauchy Distribution')
+        axes[2].grid(True, alpha=0.5)
+        
+        fig.suptitle(f'Product Distribution Analysis for Config N{N}_D{D_IN}_M{M}_L{L}', fontsize=16)
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        
+        # saving the plot
+        plot_filename = os.path.join(output_dir, f'coord_product_dist_{i+1}_vs_{j+1}_N{N}_D{D_IN}_M{M}_L{L}.png')
+        plt.savefig(plot_filename, dpi=120, bbox_inches='tight')
+        plt.close()
+
+        product_stats.append({'pair': (i, j), 'std': std_prod, 'N': N})
+
+    return product_stats
+
+def analyze_product_independence(all_coordinates, eigenvector_labels, N, D_IN, M, L, output_dir):
+    """
+    i analyze the independence between coordinate products of different eigenvector pairs.
+    """
+    print(f"\nAnalyzing independence of coordinate products for N{N}_D{D_IN}_M{M}_L{L}...")
+    n_eigenvectors = len(all_coordinates)
+
+    if n_eigenvectors < 4:
+        print("Skipping product independence analysis: requires at least 4 eigenvectors.")
+        return
+
+    from itertools import combinations
+    
+    # i select pairs of pairs of eigenvectors for analysis
+    # i generate detailed plots for these specific pairs
+    detailed_plot_pairs = [((0, 1), (2, 3)), ((0, 2), (1, 3))]
+    
+    all_metrics = []
+    all_normalized_products = [] 
+    all_pearson = []
+    all_spearman = []
+    all_mi = []
+
+    # i find all combinations of pairs with 4 unique eigenvectors
+    all_eigenvector_pairs = list(combinations(range(n_eigenvectors), 2))
+    pairs_to_process = [pop for pop in combinations(all_eigenvector_pairs, 2) if len(set(pop[0]) | set(pop[1])) == 4]
+
+    print(f"Analyzing {len(pairs_to_process)} pairs of products...")
+    for (pair1, pair2) in tqdm(pairs_to_process, desc="Analyzing product pairs"):
+        idx1, idx2 = pair1
+        idx3, idx4 = pair2
+
+        coords1, coords2 = all_coordinates[idx1], all_coordinates[idx2]
+        coords3, coords4 = all_coordinates[idx3], all_coordinates[idx4]
+
+        if any(c.shape[1] == 0 for c in [coords1, coords2, coords3, coords4]):
+            continue
+
+        products1 = (coords1 * coords2).flatten()
+        products2 = (coords3 * coords4).flatten()
+
+        # i normalize products by their standard deviation
+        std1 = np.std(products1)
+        std2 = np.std(products2)
+        
+        if std1 == 0 or std2 == 0:
+            continue
+            
+        products1_norm = products1 / std1
+        products2_norm = products2 / std2
+        all_normalized_products.append((products1_norm, products2_norm))
+
+        # 1. i compute independence metrics
+        pearson_corr, _ = stats.pearsonr(products1_norm, products2_norm)
+        spearman_corr, _ = stats.spearmanr(products1_norm, products2_norm)
+
+        # i compute mutual information from binned data
+        bins = int(np.sqrt(len(products1_norm) / 5))
+        if bins < 10: bins = 10
+        
+        joint_hist, bin_edges = np.histogram2d(products1_norm, products2_norm, bins=bins)
+        joint_prob = joint_hist / np.sum(joint_hist)
+        p_x = np.sum(joint_prob, axis=1)
+        p_y = np.sum(joint_prob, axis=0)
+        p_x_p_y = p_x[:, np.newaxis] * p_y[np.newaxis, :]
+        
+        non_zero_indices = (joint_prob > 0) & (p_x_p_y > 0)
+        mutual_info = np.sum(
+            joint_prob[non_zero_indices] * np.log(joint_prob[non_zero_indices] / p_x_p_y[non_zero_indices])
+        )
+
+        all_pearson.append(pearson_corr)
+        all_spearman.append(spearman_corr)
+        all_mi.append(mutual_info)
+
+        # i store metrics for later saving
+        metrics_data = {
+            'pair1': {'indices': (idx1, idx2), 'labels': (f'e-vec {idx1+1}', f'e-vec {idx2+1}')},
+            'pair2': {'indices': (idx3, idx4), 'labels': (f'e-vec {idx3+1}', f'e-vec {idx4+1}')},
+            'pearson_correlation': pearson_corr,
+            'spearman_correlation': spearman_corr,
+            'mutual_information_nats': mutual_info
+        }
+        all_metrics.append(metrics_data)
+
+        # 2. i create scatter plot for selected pairs
+        if (pair1, pair2) in detailed_plot_pairs:
+            plt.figure(figsize=(10, 8))
+            plt.scatter(products1_norm, products2_norm, alpha=0.1)
+            
+            plt.title(f'Normalized Independence of Coordinate Products\nPair ({idx1+1},{idx2+1}) vs Pair ({idx3+1},{idx4+1}) - Config N{N}_D{D_IN}_M{M}_L{L}')
+            plt.xlabel(f'Normalized Product of Coords for e-vecs {idx1+1} & {idx2+1} (std units)')
+            plt.ylabel(f'Normalized Product of Coords for e-vecs {idx3+1} & {idx4+1} (std units)')
+            plt.grid(True, alpha=0.3)
+
+            # i add metrics to the plot
+            stats_text = (f"Pearson r: {pearson_corr:.4f}\n"
+                          f"Spearman ρ: {spearman_corr:.4f}\n"
+                          f"Mutual Info: {mutual_info:.4f} nats")
+            props = dict(boxstyle='round', facecolor='wheat', alpha=0.7)
+            ax = plt.gca()
+            ax.text(0.05, 0.95, stats_text, transform=ax.transAxes, fontsize=12,
+                    verticalalignment='top', bbox=props)
+
+            # i save plot
+            plot_filename = os.path.join(output_dir, f'product_independence_norm_{idx1+1}-{idx2+1}_vs_{idx3+1}-{idx4+1}_N{N}_D{D_IN}_M{M}_L{L}.png')
+            plt.savefig(plot_filename, dpi=120, bbox_inches='tight')
+            plt.close()
+    
+    # i save all metrics for this config
+    metrics_filename = os.path.join(PATH_TO_METRICS, f'product_independence_metrics_N{N}_D{D_IN}_M{M}_L{L}.json')
+    with open(metrics_filename, 'w') as f:
+        json.dump(all_metrics, f, indent=2)
+    print(f"Saved {len(all_metrics)} product independence metrics to {metrics_filename}")
+
+    # i plot the distribution of all computed metrics
+    if all_pearson:
+        fig, axes = plt.subplots(1, 3, figsize=(24, 7))
+        fig.suptitle(f'Distribution of Independence Metrics for Config N{N}_D{D_IN}_M{M}_L{L}', fontsize=16)
+
+        # i plot pearson distribution
+        axes[0].hist(all_pearson, bins=40, density=True, label='Empirical')
+        axes[0].set_title("Distribution of Pearson's r")
+        axes[0].set_xlabel("Pearson Correlation Coefficient")
+        axes[0].set_ylabel("Density")
+        
+        # i define the custom potential function with a scaling parameter 'a'
+        def custom_potential(z, a=1.0):
+            z_abs = np.abs(z)
+            scaled_z = a * z_abs
+            
+            # the potential is defined for scaled_z in [0, 1)
+            mask = scaled_z < 1.0
+            potential = np.full_like(z, np.nan, dtype=float)
+            
+            z_safe = scaled_z[mask]
+            z_safe = np.where(z_safe == 0, 1e-12, z_safe) # avoid log(0)
+
+            # user's formula
+            potential[mask] = -2 * ((1 - z_safe) * np.log(z_safe) - 2 * z_safe + 2)
+            return potential
+
+        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+        # i define objective function to find best 'a' by comparing shapes (via RMSE of L2-normalized vectors)
+        def objective_for_fit(a, x, y):
+            y_theory = custom_potential(x, a)
+            valid_mask = ~np.isnan(y_theory)
+            x, y, y_theory = x[valid_mask], y[valid_mask], y_theory[valid_mask]
+            
+            if len(x) < 2: return np.inf
+
+            # i normalize both to unit L2 norm to compare shape
+            y_norm = y / np.linalg.norm(y)
+            y_theory_norm = y_theory / np.linalg.norm(y_theory)
+            
+            return np.sqrt(np.mean((y_norm - y_theory_norm)**2))
+        
+        # i find the best 'a'
+        result = minimize_scalar(objective_for_fit, args=(bin_centers, hist), bounds=(0.1, 5.0), method='bounded')
+        best_a = result.x
+        
+        # i plot the theoretical curve with the best-fit 'a'
+        z_fine = np.linspace(-1, 1, 500)
+        potential_fine = custom_potential(z_fine, best_a)
+        
+        # i calculate scaling factor C to match histogram peak for visualization
+        peak_y_hist = np.max(hist)
+        # i find potential value at the bin center closest to the peak
+        potential_at_bins = custom_potential(bin_centers, best_a)
+        valid_bins_mask = ~np.isnan(potential_at_bins)
+        
+        potential_at_peak = potential_at_bins[valid_bins_mask][np.argmax(hist[valid_bins_mask])]
+        scaling_factor = peak_y_hist / potential_at_peak
+        
+        y_fit_scaled = scaling_factor * potential_fine
+        valid_plot_mask = ~np.isnan(y_fit_scaled)
+
+        axes[0].plot(z_fine[valid_plot_mask], y_fit_scaled[valid_plot_mask], 'r-', linewidth=2, label=f'Fit (a={best_a:.2f})')
+        
+        # i calculate the final RMSE for the scaled curve as a goodness-of-fit metric
+        y_pred_scaled = scaling_factor * custom_potential(bin_centers, best_a)
+        valid_rmse_mask = ~np.isnan(y_pred_scaled)
+        rmse = np.sqrt(np.mean((hist[valid_rmse_mask] - y_pred_scaled[valid_rmse_mask])**2))
+
+        # i add metrics to the plot
+        stats_text = f"Fit Param a: {best_a:.2f}\nRMSE: {rmse:.4f}"
+        props = dict(boxstyle='round', facecolor='lightblue', alpha=0.5)
+        axes[0].text(0.05, 0.95, stats_text, transform=axes[0].transAxes, fontsize=10,
+                verticalalignment='top', bbox=props)
+        axes[0].legend()
+        axes[0].grid(True, alpha=0.4)
+
+        # i plot spearman distribution
+        axes[1].hist(all_spearman, bins=40, density=True)
+        axes[1].set_title("Distribution of Spearman's ρ")
+        axes[1].set_xlabel("Spearman Correlation Coefficient")
+        axes[1].grid(True, alpha=0.4)
+
+        # i plot mutual information distribution
+        axes[2].hist(all_mi, bins=40, density=True)
+        axes[2].set_title("Distribution of Mutual Information")
+        axes[2].set_xlabel("Mutual Information (nats)")
+        axes[2].grid(True, alpha=0.4)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        dist_plot_filename = os.path.join(output_dir, f'product_independence_metrics_dist_N{N}_D{D_IN}_M{M}_L{L}.png')
+        plt.savefig(dist_plot_filename, dpi=120, bbox_inches='tight')
+        plt.close()
+
+    # i create the summary plot with all normalized products superimposed
+    if all_normalized_products:
+        plt.figure(figsize=(12, 12))
+        for prods1_n, prods2_n in all_normalized_products:
+            plt.scatter(prods1_n, prods2_n, alpha=0.05)
+
+        plt.title(f'Superimposed Normalized Product Pairs\nConfig N{N}_D{D_IN}_M{M}_L{L}')
+        plt.xlabel('Normalized Coordinate Product (std units)')
+        plt.ylabel('Normalized Coordinate Product (std units)')
+        plt.grid(True, alpha=0.4)
+        plt.axhline(0, color='black', linewidth=0.5)
+        plt.axvline(0, color='black', linewidth=0.5)
+        plt.axis('equal')
+        
+        summary_plot_filename = os.path.join(output_dir, f'product_independence_summary_N{N}_D{D_IN}_M{M}_L{L}.png')
+        plt.savefig(summary_plot_filename, dpi=120, bbox_inches='tight')
+        plt.close()
+
+        print(f"Saved superimposed product independence plot to {summary_plot_filename}")
+
+def plot_std_scaling_with_N(all_product_stats, output_dir):
+    """
+    i plot the scaling of the standard deviation of coordinate products with N.
+    """
+    print("\nPlotting scaling of product coordinate std dev with N...")
+
+    # i aggregate stats by N
+    stats_by_N = defaultdict(lambda: {'stds': []})
+    for stat in all_product_stats:
+        # i only consider the first pair of eigenvectors for this plot
+        if stat['pair'] == (0, 1):
+            stats_by_N[stat['N']]['stds'].append(stat['std'])
+
+    if not stats_by_N:
+        print("No stats available to plot std scaling.")
+        return
+
+    # i compute mean and std of stds for each N
+    N_values = sorted(stats_by_N.keys())
+    mean_stds = [np.mean(stats_by_N[N]['stds']) for N in N_values]
+    std_of_stds = [np.std(stats_by_N[N]['stds']) for N in N_values]
+
+    # i filter out N values with no data
+    valid_indices = [i for i, std in enumerate(mean_stds) if not np.isnan(std)]
+    if len(valid_indices) < 2:
+        print("Not enough data points to plot scaling.")
+        return
+        
+    N_values = np.array(N_values)[valid_indices]
+    mean_stds = np.array(mean_stds)[valid_indices]
+    std_of_stds = np.array(std_of_stds)[valid_indices]
+
+    # i perform log-log regression
+    log_N = np.log10(N_values)
+    log_std = np.log10(mean_stds)
+    slope, intercept, r_value, _, _ = stats.linregress(log_N, log_std)
+    
+    # i create the plot
+    plt.figure(figsize=(12, 8))
+    plt.errorbar(N_values, mean_stds, yerr=std_of_stds, fmt='o', capsize=5, label='Mean Std Dev of Products (Pair 1,2)')
+    
+    # i plot the fitted line
+    fit_line = 10**(intercept) * (N_values**slope)
+    plt.plot(N_values, fit_line, 'r-', label=f'Fit: slope={slope:.2f} (R²={r_value**2:.2f})')
+    
+    # i plot the theoretical 1/sqrt(N) line for comparison
+    # i normalize it to pass through the first point
+    theoretical_line = (mean_stds[0] * np.sqrt(N_values[0])) / np.sqrt(N_values)
+    plt.plot(N_values, theoretical_line, 'g--', label='Theoretical slope=-0.5')
+    
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('N (Number of Data Points)')
+    plt.ylabel('Std Dev of Coordinate Products')
+    plt.title('Scaling of Product Std Dev with N')
+    plt.legend()
+    plt.grid(True, which="both", ls="--")
+    
+    # i save plot
+    plot_filename = os.path.join(output_dir, 'std_scaling_vs_N.png')
+    plt.savefig(plot_filename, dpi=120, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Saved std dev scaling plot to {plot_filename}")
+
+def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, corr_plot_dir, inter_corr_plot_dir, product_plot_dir, product_independence_plot_dir):
+    """
+    Analyze entropy distributions using the first experiment's eigenvectors as basis.
+    """
+    n_experiments, n_vectors, dimension = eigenvectors.shape
+    
+    if n_experiments < 2:
+        print(f"Warning: Need at least 2 experiments for basis analysis, got {n_experiments}")
+        return None
+    
+    print(f"Computing entropy in eigenvector basis - N{N}_D{D_IN}_M{M}_L{L}")
+    print(f"Using first experiment as basis, analyzing {n_experiments-1} remaining experiments")
+    
+    # First, plot the coordinate distributions
+    coord_results = plot_coordinate_distributions_in_basis_vectorized(eigenvectors, N, D_IN, M, L, plot_dir)
+    
+    if coord_results is None:
+        return None
+
+    # i perform correlation analysis on the coordinates
+    '''
+    analyze_coordinate_correlations(
+        coord_results['coordinates'],
+        coord_results['eigenvector_labels'],
+        N, D_IN, M, L,
+        corr_plot_dir
+    )
+    '''
+    # i perform inter-eigenvector correlation analysis
+    analyze_inter_eigenvector_correlations(
+        coord_results['coordinates'],
+        coord_results['eigenvector_labels'],
+        N, D_IN, M, L,
+        inter_corr_plot_dir
+    )
+    
+    # i analyze coordinate products
+    product_stats = analyze_eigenvector_coordinate_products(
+        coord_results['coordinates'],
+        coord_results['eigenvector_labels'],
+        N, D_IN, M, L,
+        product_plot_dir
+    )
+    
+    # i analyze independence of products
+    analyze_product_independence(
+        coord_results['coordinates'],
+        coord_results['eigenvector_labels'],
+        N, D_IN, M, L,
+        product_independence_plot_dir
+    )
+    
+    # we compute entropy for each eigenvector order
+    all_entropies = []
+    n_basis_vectors = min(n_vectors, dimension-1) # we use N-1 vectors as basis
+    
+    for k in range(n_vectors):
+        entropies = compute_entropy_in_eigenvector_basis_vectorized(eigenvectors, k, N, D_IN, M, L, plot_dir)
+        if entropies is not None:
+            all_entropies.append(entropies)
+    
+    if not all_entropies:
+        print("No valid entropy computations")
+        return None
+        
+    all_entropies = np.array(all_entropies) # shape (n_vectors, n_basis_vectors)
+    
+    # viz creation
+    plt.figure(figsize=(14, 10))
+    
+    # we plot entropy for each eigenvector order
+    eigenvector_indices = list(range(1, len(all_entropies) + 1))
+    basis_indices = list(range(1, n_basis_vectors + 1))
+    
+    plt.subplot(2, 2, 1)
+    mean_entropies = np.mean(all_entropies, axis=1)
+    std_entropies = np.std(all_entropies, axis=1)
+    
+    plt.errorbar(eigenvector_indices, mean_entropies, yerr=std_entropies,
+                fmt='o-', capsize=5, linewidth=2, markersize=6)
+    plt.title(f'Mean Entropy in Eigenvector Basis\nConfig N{N}_D{D_IN}_M{M}_L{L}')
+    plt.xlabel('Eigenvector Order')
+    plt.ylabel('Mean Entropy (nats)')
+    plt.grid(True)
+    
+    plt.subplot(2, 2, 2)
+    plt.imshow(all_entropies.T, aspect='auto', cmap='viridis')
+    plt.colorbar(label='Entropy (nats)')
+    plt.title('Entropy Heatmap (Eigenvector Basis)')
+    plt.xlabel('Eigenvector Order')
+    plt.ylabel('Basis Vector Index')
+    
+    # we plot distribution of all entropies
+    plt.subplot(2, 2, 3)
+    all_entropy_values = all_entropies.flatten()
+    plt.hist(all_entropy_values, bins=30, alpha=0.7, density=True)
+    plt.axvline(np.mean(all_entropy_values), color='red', linestyle='--', 
+                label=f'Mean: {np.mean(all_entropy_values):.3f}')
+    plt.title('Distribution of All Entropies')
+    plt.xlabel('Entropy (nats)')
+    plt.ylabel('Density')
+    plt.legend()
+    plt.grid(True)
+    
+    # we plot entropy vs basis vector index
+    plt.subplot(2, 2, 4)
+    mean_entropies_per_basis = np.mean(all_entropies, axis=0)
+    std_entropies_per_basis = np.std(all_entropies, axis=0)
+    
+    plt.errorbar(basis_indices, mean_entropies_per_basis, yerr=std_entropies_per_basis,
+                fmt='s-', capsize=5, linewidth=2, markersize=6, color='orange')
+    plt.title('Mean Entropy per Basis Vector')
+    plt.xlabel('Basis Vector Index')
+    plt.ylabel('Mean Entropy (nats)')
+    plt.grid(True)
+    
+    plt.tight_layout()
+    
+    # Save plot
+    entropy_filename = os.path.join(plot_dir, f'entropy_eigenvector_basis_N{N}_D{D_IN}_M{M}_L{L}.png')
+    plt.savefig(entropy_filename, dpi=120, bbox_inches='tight')
+    # plt.show()
+    plt.close()
+    
+    # Print statistics
+    print(f"\nEntropy Statistics in Eigenvector Basis:")
+    print(f"  Overall mean entropy: {np.mean(all_entropy_values):.4f} ± {np.std(all_entropy_values):.4f} nats")
+    print(f"  Max entropy: {np.max(all_entropy_values):.4f} nats")
+    print(f"  Min entropy: {np.min(all_entropy_values):.4f} nats")
+    print(f"  Number of basis vectors used: {n_basis_vectors}")
+    
+    # Find most and least random eigenvectors
+    most_random_idx = np.argmax(mean_entropies)
+    least_random_idx = np.argmin(mean_entropies)
+    
+    print(f"\nMost random eigenvector: {get_ordinal_suffix(most_random_idx + 1)}")
+    print(f"  Mean entropy: {mean_entropies[most_random_idx]:.4f} ± {std_entropies[most_random_idx]:.4f} nats")
+    
+    print(f"\nLeast random eigenvector: {get_ordinal_suffix(least_random_idx + 1)}")
+    print(f"  Mean entropy: {mean_entropies[least_random_idx]:.4f} ± {std_entropies[least_random_idx]:.4f} nats")
+    
+    # we test uniformity hypothesis
+    theoretical_uniform_entropy = np.log(n_experiments-1) # we use natural log for uniform distribution
+    print(f"\nUniformity Analysis:")
+    print(f"  Theoretical uniform entropy (approx): {theoretical_uniform_entropy:.4f} nats")
+    print(f"  Observed mean entropy: {np.mean(all_entropy_values):.4f} nats")
+    print(f"  Difference: {np.mean(all_entropy_values) - theoretical_uniform_entropy:.4f} nats")
+    
+    base_return = {
+        'mean_entropies': mean_entropies,
+        'std_entropies': std_entropies,
+        'all_entropies': all_entropies,
+        'most_random_idx': most_random_idx,
+        'least_random_idx': least_random_idx,
+        'n_basis_vectors': n_basis_vectors,
+        'theoretical_uniform_entropy': theoretical_uniform_entropy,
+        'coordinate_results': coord_results
+    }
+    if product_stats is not None:
+        base_return['product_stats'] = product_stats
+    return base_return
+
+
+# %%
+if __name__ == "__main__":
+    # we process all files in the vectors directory
+    files = [f for f in os.listdir(os.path.join(PATH_TO_DATA, "vectors")) if f.startswith('ntk_eigenvectors_')]
+    
+    # we sort files by N
+    files = sorted(files, key=lambda x: get_config_from_filename(x)[0])
+    
+    files = files  # we process all files
+    all_results = []
+    print("Processing all experiment files for eigenvector basis entropy analysis...")
+    print("=" * 80)
+    
+    for file in tqdm(files, desc="Processing experiment files"):
+        try:
+            # we extract configuration from filename
+            N, D_IN, M, L = get_config_from_filename(file)
+            
+            # we load eigenvectors data
+            _, eigenvectors_data = load_experiment_data(N, D_IN, M, L)
+            
+            # we analyze entropy in eigenvector basis
+            results = analyze_entropy_in_eigenvector_basis(
+                eigenvectors_data['eigenvectors'].transpose(0, 2, 1), N, D_IN, M, L, PATH_TO_PLOTS, PATH_TO_CORR_PLOTS, PATH_TO_INTER_CORR_PLOTS, PATH_TO_PRODUCT_PLOTS, PATH_TO_PRODUCT_INDEPENDENCE_PLOTS
+            )
+            if results:
+                all_results.append(results)
+            
+            print("\n" + "="*50 + "\n")
+            
+        except Exception as e:
+            print(f"Error processing {file}: {e}")
+    
+    # i perform summary analysis after all files are processed
+    all_product_stats = [item for result in all_results for item in result.get('product_stats', [])]
+    plot_std_scaling_with_N(all_product_stats, PATH_TO_PRODUCT_PLOTS)
+
+    print("Eigenvector basis entropy analysis complete!")
+
+# %%
+# %%

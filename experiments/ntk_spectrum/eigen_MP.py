@@ -27,6 +27,8 @@ from tqdm import tqdm
 import csv  # we use csv instead of pandas
 from collections import defaultdict  # we use defaultdict for grouping
 import json  # we add json for storing test results
+from scipy.optimize import least_squares  # we add for brody fit
+from scipy.special import gamma as gamma_func  # we add for brody distribution
 
 # %%
 import dotenv
@@ -126,12 +128,21 @@ def analyze_eigenvalue_spacing(eigenvalues, N, D_IN, M, L, output_dir):
     """
     i analyze the distribution of the ratio of consecutive eigenvalue spacings
     and compare it to theoretical distributions from random matrix theory (rmt).
+    i also fit the brody distribution to the unfolded spacings.
     """
     all_spacing_ratios = []
+    all_unfolded_spacings = []
     # i iterate over each experiment's eigenvalues
     for i in range(eigenvalues.shape[0]):
-        # i get eigenvalues, sort them, and take the bulk (excluding the largest)
+        # i get eigenvalues, sort them, and filter out near-zero values
         eigs = np.sort(eigenvalues[i, :])
+        eigs = eigs[eigs > 1e-12]  # we filter tiny eigenvalues to handle degeneracies
+
+        # we need at least 3 eigenvalues for one ratio, and one more for the bulk
+        if len(eigs) < 4:
+            continue
+        
+        # i take the bulk (excluding the largest)
         eigs_bulk = eigs[:-1]
         
         # i compute spacings between adjacent eigenvalues
@@ -147,6 +158,12 @@ def analyze_eigenvalue_spacing(eigenvalues, N, D_IN, M, L, output_dir):
         ratios = spacings[1:] / spacings[:-1]
         all_spacing_ratios.extend(ratios)
 
+        # we perform unfolding by dividing by the mean spacing
+        mean_spacing = np.mean(spacings)
+        if mean_spacing > 1e-9:
+            unfolded_spacings = spacings / mean_spacing
+            all_unfolded_spacings.extend(unfolded_spacings)
+
     if not all_spacing_ratios:
         print(f"Warning: No spacing ratios computed for config N{N}_D{D_IN}_M{M}_L{L}.")
         return
@@ -157,23 +174,29 @@ def analyze_eigenvalue_spacing(eigenvalues, N, D_IN, M, L, output_dir):
     mean_r = np.mean(all_spacing_ratios)
     mean_min_r = np.mean(np.minimum(all_spacing_ratios, 1/all_spacing_ratios))
 
-    # i create the plot
+    # i create the plot for spacing ratios
     plt.figure(figsize=(12, 8))
     
     # i plot the histogram of the empirical distribution, capped for visibility
-    plt.hist(all_spacing_ratios, bins=100, density=True, label='Empirical Ratios', range=(0, 4), color='skyblue')
+    plt.hist(all_spacing_ratios, bins=100, density=True, label='Empirical Ratios', range=(0, 10), color='skyblue')
     
     # i define theoretical distributions for the ratio r
-    r = np.linspace(0, 4, 400)
+    r = np.linspace(0, 10, 400)
     # for poissonian spectra (uncorrelated eigenvalues)
     p_poisson = 1 / (1 + r)**2
     # for goe (real-symmetric matrices from wigner-dyson)
     p_goe = (27 / 8) * (r + r**2) / (1 + r + r**2)**2.5
-    
+    # for gue (complex hermitian matrices)
+    p_gue = (81 * np.sqrt(3) / (4 * np.pi)) * (r + r**2)**2 / (1 + r + r**2)**4
+    # for gse (quaternion self-dual matrices)
+    p_gse = (729 * np.sqrt(3) / (4 * np.pi)) * (r + r**2)**4 / (1 + r + r**2)**7
+
     plt.plot(r, p_poisson, 'g--', linewidth=2, label=f'Poisson (Uncorrelated)')
     plt.plot(r, p_goe, 'r-', linewidth=2, label=f'GOE (Wigner-Dyson)')
+    plt.plot(r, p_gue, 'b-.', linewidth=2, label=f'GUE')
+    plt.plot(r, p_gse, 'm:', linewidth=2, label=f'GSE')
     
-    plt.title(f'Eigenvalue Spacing Ratio Distribution\nConfig N{N}_D{D_IN}_M{M}_L{L}')
+    plt.title(f'Consecutive Spacing Ratio Distribution\nConfig N{N}_D{D_IN}_M{M}_L{L}')
     plt.xlabel('Ratio of Consecutive Spacings (r)')
     plt.ylabel('Probability Density P(r)')
     plt.legend()
@@ -182,23 +205,80 @@ def analyze_eigenvalue_spacing(eigenvalues, N, D_IN, M, L, output_dir):
     # i add a text box with statistics
     mean_min_r_poisson = np.log(2)  # theoretical value for poisson
     mean_min_r_goe = 0.535  # theoretical value for goe
+    mean_min_r_gue = 0.5996 # theoretical value for gue
+    mean_min_r_gse = 0.676 # theoretical value for gse
     
     stats_text = (
-        f"Empirical Mean <min(r, 1/r)> = {mean_min_r:.4f}\n\n"
-        f"Theoretical Means <min(r, 1/r)>:\n"
+        f"Empirical <min(r, 1/r)> = {mean_min_r:.4f}\n\n"
+        f"Theoretical <min(r, 1/r)>:\n"
         f"  Poisson: {mean_min_r_poisson:.4f}\n"
-        f"  GOE: {mean_min_r_goe:.4f}"
+        f"  GOE: {mean_min_r_goe:.4f}\n"
+        f"  GUE: {mean_min_r_gue:.4f}\n"
+        f"  GSE: {mean_min_r_gse:.4f}"
     )
     plt.text(0.95, 0.95, stats_text, transform=plt.gca().transAxes, fontsize=12,
              verticalalignment='top', horizontalalignment='right',
              bbox=dict(boxstyle='round,pad=0.5', fc='wheat', alpha=0.5))
     
     # i save the plot
-    plot_filename = os.path.join(output_dir, f'spacing_ratio_dist_N{N}_D{D_IN}_M{M}_L{L}.png')
+    plot_filename = os.path.join(output_dir, f'consecutive_spacing_ratio_dist_N{N}_D{D_IN}_M{M}_L{L}.png')
     plt.savefig(plot_filename, dpi=120, bbox_inches='tight')
     plt.close()
 
-    print(f"Spacing ratio analysis for N{N}_D{D_IN}_M{M}_L{L} complete. Mean ratio <min(r, 1/r)> = {mean_min_r:.4f}")
+    print(f"Consecutive Spacing Ratio analysis for N{N}_D{D_IN}_M{M}_L{L} complete. Mean ratio <min(r, 1/r)> = {mean_min_r:.4f}")
+
+    # we now analyze the unfolded spacings with brody distribution
+    if all_unfolded_spacings:
+        all_unfolded_spacings = np.array(all_unfolded_spacings)
+        
+        # we define brody distribution
+        def brody_dist(s, q):
+            alpha = (gamma_func((q + 2) / (q + 1)))**(q + 1)
+            return (q + 1) * alpha * (s**q) * np.exp(-alpha * s**(q + 1))
+
+        # we define residuals for fitting
+        def residuals(q_param, s_data, hist_data):
+            # we need to compute the pdf on the bin centers
+            bin_centers = (s_data[1:] + s_data[:-1]) / 2
+            theoretical_pdf = brody_dist(bin_centers, q_param[0])
+            return theoretical_pdf - hist_data
+            
+        # we compute histogram of unfolded spacings
+        hist, bin_edges = np.histogram(all_unfolded_spacings, bins=50, range=(0, 4), density=True)
+        
+        # we fit brody parameter q
+        try:
+            # we use least squares to find the best q
+            result = least_squares(residuals, x0=[0.5], bounds=(0, 2), args=(bin_edges, hist))
+            q_fit = result.x[0]
+        except Exception as e:
+            print(f"Could not fit Brody distribution for N{N}_D{D_IN}_M{M}_L{L}. Error: {e}")
+            q_fit = -1 # we indicate fit failed
+
+        # we create the plot for brody fit
+        plt.figure(figsize=(12, 8))
+        plt.hist(all_unfolded_spacings, bins=50, density=True, label='Empirical Unfolded Spacings', range=(0, 4), color='skyblue')
+
+        s = np.linspace(0, 4, 400)
+        p_poisson_s = np.exp(-s) # p(s) for poisson
+        p_goe_s = (np.pi / 2) * s * np.exp(-np.pi * s**2 / 4) # p(s) for goe (wigner surmise)
+
+        plt.plot(s, p_poisson_s, 'g--', linewidth=2, label='Poisson (q=0)')
+        plt.plot(s, p_goe_s, 'r-', linewidth=2, label='GOE (q=1)')
+        
+        if q_fit != -1:
+            p_brody_fit = brody_dist(s, q_fit)
+            plt.plot(s, p_brody_fit, 'k--', linewidth=2, label=f'Brody Fit (q={q_fit:.3f})')
+        
+        plt.title(f'Unfolded Eigenvalue Spacing Distribution\nConfig N{N}_D{D_IN}_M{M}_L{L}')
+        plt.xlabel('Unfolded Spacing (s)')
+        plt.ylabel('Probability Density P(s)')
+        plt.legend()
+        plt.grid(True, alpha=0.5)
+
+        brody_plot_filename = os.path.join(output_dir, f'brody_fit_N{N}_D{D_IN}_M{M}_L{L}.png')
+        plt.savefig(brody_plot_filename, dpi=120, bbox_inches='tight')
+        plt.close()
 
     return {
         'mean_spacing_ratio': mean_r,
