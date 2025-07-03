@@ -142,6 +142,7 @@ release le code en mode n'importe qui peut telecharger et run, une fois les opti
 faire des diapos comme la soutenance, rapport comme la soutenance (car on est à la moitié, enfin commencer pour la semaine pro avancer, voir au feeling
 si lex experiences disent uqelque chose et sinon dire que la semaine prochaine je faerfais aca)
 
+pas oublier que les correlations qu'on calcule c pas grave à conjugaison pres (dans la base interne)
 
 en deuxieme instance : 
 

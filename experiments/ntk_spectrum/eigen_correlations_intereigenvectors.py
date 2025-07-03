@@ -104,7 +104,7 @@ def compute_entropy_in_eigenvector_basis_vectorized(eigenvectors, eigenvector_or
     n_basis_coords = coordinates_in_basis.shape[1]
     
     for i in range(n_basis_coords): # we compute entropy coordinate-wise in new basis
-        coordinate_values = coordinate_in_basis[:, i]
+        coordinate_values = coordinates_in_basis[:, i]
         
         hist, bin_edges = np.histogram(coordinate_values, bins='auto', density=True)
         bin_width = bin_edges[1] - bin_edges[0]
@@ -289,7 +289,7 @@ def plot_coordinate_distributions_in_basis_vectorized(eigenvectors, N, D_IN, M, 
     # Save plot
     coord_dist_filename = os.path.join(output_dir, f'coordinate_distributions_N{N}_D{D_IN}_M{M}_L{L}.png')
     plt.savefig(coord_dist_filename, dpi=120, bbox_inches='tight')
-    plt.show()
+    # plt.show()
     plt.close()
     
     # Print detailed statistics
@@ -395,7 +395,7 @@ def analyze_coordinate_correlations(all_coordinates, eigenvector_labels, N, D_IN
         # i save the plot
         correlation_plot_filename = os.path.join(output_dir, f'coordinate_correlations_{label.replace(" ", "_")}_N{N}_D{D_IN}_M{M}_L{L}.png')
         plt.savefig(correlation_plot_filename, dpi=120, bbox_inches='tight')
-        plt.show()
+        # plt.show()
         plt.close()
         
         print(f"  Correlation analysis for {label}:")
@@ -512,13 +512,14 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, 
         return None
 
     # i perform correlation analysis on the coordinates
+    '''
     analyze_coordinate_correlations(
         coord_results['coordinates'],
         coord_results['eigenvector_labels'],
         N, D_IN, M, L,
         corr_plot_dir
     )
-
+    '''
     # i perform inter-eigenvector correlation analysis
     analyze_inter_eigenvector_correlations(
         coord_results['coordinates'],
@@ -596,7 +597,7 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, 
     # Save plot
     entropy_filename = os.path.join(plot_dir, f'entropy_eigenvector_basis_N{N}_D{D_IN}_M{M}_L{L}.png')
     plt.savefig(entropy_filename, dpi=120, bbox_inches='tight')
-    plt.show()
+    # plt.show()
     plt.close()
     
     # Print statistics
@@ -643,7 +644,7 @@ if __name__ == "__main__":
     # we sort files by N
     files = sorted(files, key=lambda x: get_config_from_filename(x)[0])
     
-    files = files[:5]  # we process all files
+    files = files  # we process all files
     print("Processing all experiment files for eigenvector basis entropy analysis...")
     print("=" * 80)
     
