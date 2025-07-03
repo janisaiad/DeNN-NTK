@@ -544,7 +544,7 @@ if __name__ == "__main__":
     # we sort files by N
     files = sorted(files, key=lambda x: get_config_from_filename(x)[0])
     
-    files = files[:5]  # we process all files
+    files = files  # we process all files
     print("Processing all experiment files for eigenvector basis entropy analysis...")
     print("=" * 80)
     
