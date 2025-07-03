@@ -200,14 +200,14 @@ def plot_coordinate_distributions_in_basis_vectorized(eigenvectors, N, D_IN, M, 
     stats_data = []
     for i, coords_matrix in enumerate(all_coordinates):
         coords_flat = coords_matrix.flatten()
-        stats = {
+        stat_dict = {
             'mean': np.mean(coords_flat),
             'std': np.std(coords_flat),
             'min': np.min(coords_flat),
             'max': np.max(coords_flat),
             'range': np.max(coords_flat) - np.min(coords_flat)
         }
-        stats_data.append(stats)
+        stats_data.append(stat_dict)
     
     means = [s['mean'] for s in stats_data]
     stds = [s['std'] for s in stats_data]
@@ -524,6 +524,7 @@ def analyze_eigenvector_coordinate_products(all_coordinates, eigenvector_labels,
     
     selected_eigenvector_pairs = sorted(list(set(selected_eigenvector_pairs)))
 
+    product_stats = []
     for i, j in selected_eigenvector_pairs:
         if i >= n_eigenvectors or j >= n_eigenvectors:
             continue
@@ -544,36 +545,10 @@ def analyze_eigenvector_coordinate_products(all_coordinates, eigenvector_labels,
         
         products_flat = coordinate_products.flatten()
         
-        # plotting the distribution
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.hist(products_flat, bins=50, density=True, alpha=0.7, label='Product Distribution')
-        
         mean_prod = np.mean(products_flat)
         std_prod = np.std(products_flat)
         skew_prod = stats.skew(products_flat)
         kurt_prod = stats.kurtosis(products_flat)
-        
-        ax.axvline(mean_prod, color='r', linestyle='--', label=f'Mean: {mean_prod:.4f}')
-        
-        # i add a text box with statistics
-        stats_text = (f"Mean: {mean_prod:.4f}\n"
-                      f"Std Dev: {std_prod:.4f}\n"
-                      f"Skewness: {skew_prod:.4f}\n"
-                      f"Kurtosis: {kurt_prod:.4f}")
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-        ax.text(0.05, 0.95, stats_text, transform=ax.transAxes, fontsize=10,
-                verticalalignment='top', bbox=props)
-        
-        plt.title(f'Distribution of Coordinate Products\n{label_i} vs {label_j} (Config N{N}_D{D_IN}_M{M}_L{L})')
-        plt.xlabel('Coordinate Product Value')
-        plt.ylabel('Density')
-        plt.legend()
-        plt.grid(True, alpha=0.5)
-        
-        # saving the plot
-        plot_filename = os.path.join(output_dir, f'coord_product_dist_{i+1}_vs_{j+1}_N{N}_D{D_IN}_M{M}_L{L}.png')
-        plt.savefig(plot_filename, dpi=120, bbox_inches='tight')
-        plt.close()
         
         print(f"\nCoordinate Product Analysis for pair ({label_i}, {label_j}):")
         print(f"  Mean: {mean_prod:.6f} ± {std_prod:.6f}")
@@ -581,6 +556,47 @@ def analyze_eigenvector_coordinate_products(all_coordinates, eigenvector_labels,
         print(f"  Median: {np.median(products_flat):.6f}")
         print(f"  Skewness: {skew_prod:.6f}")
         print(f"  Kurtosis: {kurt_prod:.6f}")
+        
+        # we plot the distribution and Q-Q plots
+        fig, axes = plt.subplots(1, 3, figsize=(24, 7))
+        
+        # i plot the histogram
+        axes[0].hist(products_flat, bins=50, density=True, alpha=0.7)
+        axes[0].set_title(f'Distribution of Products\n{label_i} vs {label_j}')
+        axes[0].set_xlabel('Coordinate Product Value')
+        axes[0].set_ylabel('Density')
+        axes[0].grid(True, alpha=0.5)
+
+        # i add a text box with statistics
+        stats_text = (f"Mean: {mean_prod:.4f}\n"
+                      f"Std Dev: {std_prod:.4f}\n"
+                      f"Skewness: {skew_prod:.4f}\n"
+                      f"Kurtosis: {kurt_prod:.4f}")
+        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+        axes[0].text(0.05, 0.95, stats_text, transform=axes[0].transAxes, fontsize=10,
+                     verticalalignment='top', bbox=props)
+
+        # i plot the Q-Q plot vs Laplace
+        stats.probplot(products_flat, dist=stats.laplace, plot=axes[1])
+        axes[1].set_title('Q-Q Plot vs. Laplace Distribution')
+        axes[1].grid(True, alpha=0.5)
+
+        # i plot the Q-Q plot vs Cauchy
+        stats.probplot(products_flat, dist=stats.cauchy, plot=axes[2])
+        axes[2].set_title('Q-Q Plot vs. Cauchy Distribution')
+        axes[2].grid(True, alpha=0.5)
+        
+        fig.suptitle(f'Product Distribution Analysis for Config N{N}_D{D_IN}_M{M}_L{L}', fontsize=16)
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        
+        # saving the plot
+        plot_filename = os.path.join(output_dir, f'coord_product_dist_{i+1}_vs_{j+1}_N{N}_D{D_IN}_M{M}_L{L}.png')
+        plt.savefig(plot_filename, dpi=120, bbox_inches='tight')
+        plt.close()
+
+        product_stats.append({'pair': (i, j), 'std': std_prod, 'N': N})
+
+    return product_stats
 
 def analyze_product_independence(all_coordinates, eigenvector_labels, N, D_IN, M, L, output_dir):
     """
@@ -600,6 +616,8 @@ def analyze_product_independence(all_coordinates, eigenvector_labels, N, D_IN, M
     ]
 
     all_metrics = []
+    all_normalized_products = [] # i store all normalized products for summary plot
+
     for (pair1, pair2) in pairs_of_pairs:
         idx1, idx2 = pair1
         idx3, idx4 = pair2
@@ -616,15 +634,27 @@ def analyze_product_independence(all_coordinates, eigenvector_labels, N, D_IN, M
         products1 = (coords1 * coords2).flatten()
         products2 = (coords3 * coords4).flatten()
 
+        # i normalize products by their standard deviation
+        std1 = np.std(products1)
+        std2 = np.std(products2)
+        
+        if std1 == 0 or std2 == 0:
+            print(f"Skipping pair ({idx1+1},{idx2+1}) vs ({idx3+1},{idx4+1}) due to zero std dev.")
+            continue
+            
+        products1_norm = products1 / std1
+        products2_norm = products2 / std2
+        all_normalized_products.append((products1_norm, products2_norm))
+
         # 1. i compute independence metrics
-        pearson_corr, _ = stats.pearsonr(products1, products2)
-        spearman_corr, _ = stats.spearmanr(products1, products2)
+        pearson_corr, _ = stats.pearsonr(products1_norm, products2_norm)
+        spearman_corr, _ = stats.spearmanr(products1_norm, products2_norm)
 
         # i compute mutual information from binned data
-        bins = int(np.sqrt(len(products1) / 5))
+        bins = int(np.sqrt(len(products1_norm) / 5))
         if bins < 10: bins = 10
         
-        joint_hist, _, _ = np.histogram2d(products1, products2, bins=bins)
+        joint_hist, _, _ = np.histogram2d(products1_norm, products2_norm, bins=bins)
         joint_prob = joint_hist / np.sum(joint_hist)
         p_x = np.sum(joint_prob, axis=1)
         p_y = np.sum(joint_prob, axis=0)
@@ -637,11 +667,11 @@ def analyze_product_independence(all_coordinates, eigenvector_labels, N, D_IN, M
 
         # 2. i create scatter plot
         plt.figure(figsize=(10, 8))
-        plt.scatter(products1, products2, alpha=0.1)
+        plt.scatter(products1_norm, products2_norm, alpha=0.1)
         
-        plt.title(f'Independence of Coordinate Products\nPair ({idx1+1},{idx2+1}) vs Pair ({idx3+1},{idx4+1}) - Config N{N}_D{D_IN}_M{M}_L{L}')
-        plt.xlabel(f'Product of Coords for e-vecs {idx1+1} & {idx2+1}')
-        plt.ylabel(f'Product of Coords for e-vecs {idx3+1} & {idx4+1}')
+        plt.title(f'Normalized Independence of Coordinate Products\nPair ({idx1+1},{idx2+1}) vs Pair ({idx3+1},{idx4+1}) - Config N{N}_D{D_IN}_M{M}_L{L}')
+        plt.xlabel(f'Normalized Product of Coords for e-vecs {idx1+1} & {idx2+1} (std units)')
+        plt.ylabel(f'Normalized Product of Coords for e-vecs {idx3+1} & {idx4+1} (std units)')
         plt.grid(True, alpha=0.3)
 
         # i add metrics to the plot
@@ -654,7 +684,7 @@ def analyze_product_independence(all_coordinates, eigenvector_labels, N, D_IN, M
                 verticalalignment='top', bbox=props)
 
         # i save plot
-        plot_filename = os.path.join(output_dir, f'product_independence_{idx1+1}-{idx2+1}_vs_{idx3+1}-{idx4+1}_N{N}_D{D_IN}_M{M}_L{L}.png')
+        plot_filename = os.path.join(output_dir, f'product_independence_norm_{idx1+1}-{idx2+1}_vs_{idx3+1}-{idx4+1}_N{N}_D{D_IN}_M{M}_L{L}.png')
         plt.savefig(plot_filename, dpi=120, bbox_inches='tight')
         plt.close()
 
@@ -673,6 +703,91 @@ def analyze_product_independence(all_coordinates, eigenvector_labels, N, D_IN, M
     with open(metrics_filename, 'w') as f:
         json.dump(all_metrics, f, indent=4)
     print(f"Saved product independence metrics to {metrics_filename}")
+
+    # i create the summary plot with all normalized products superimposed
+    if all_normalized_products:
+        plt.figure(figsize=(12, 12))
+        for prods1_n, prods2_n in all_normalized_products:
+            plt.scatter(prods1_n, prods2_n, alpha=0.05)
+
+        plt.title(f'Superimposed Normalized Product Pairs\nConfig N{N}_D{D_IN}_M{M}_L{L}')
+        plt.xlabel('Normalized Coordinate Product (std units)')
+        plt.ylabel('Normalized Coordinate Product (std units)')
+        plt.grid(True, alpha=0.4)
+        plt.axhline(0, color='black', linewidth=0.5)
+        plt.axvline(0, color='black', linewidth=0.5)
+        plt.axis('equal')
+        
+        summary_plot_filename = os.path.join(output_dir, f'product_independence_summary_N{N}_D{D_IN}_M{M}_L{L}.png')
+        plt.savefig(summary_plot_filename, dpi=120, bbox_inches='tight')
+        plt.close()
+
+        print(f"Saved superimposed product independence plot to {summary_plot_filename}")
+
+def plot_std_scaling_with_N(all_product_stats, output_dir):
+    """
+    i plot the scaling of the standard deviation of coordinate products with N.
+    """
+    print("\nPlotting scaling of product coordinate std dev with N...")
+
+    # i aggregate stats by N
+    stats_by_N = defaultdict(lambda: {'stds': []})
+    for stat in all_product_stats:
+        # i only consider the first pair of eigenvectors for this plot
+        if stat['pair'] == (0, 1):
+            stats_by_N[stat['N']]['stds'].append(stat['std'])
+
+    if not stats_by_N:
+        print("No stats available to plot std scaling.")
+        return
+
+    # i compute mean and std of stds for each N
+    N_values = sorted(stats_by_N.keys())
+    mean_stds = [np.mean(stats_by_N[N]['stds']) for N in N_values]
+    std_of_stds = [np.std(stats_by_N[N]['stds']) for N in N_values]
+
+    # i filter out N values with no data
+    valid_indices = [i for i, std in enumerate(mean_stds) if not np.isnan(std)]
+    if len(valid_indices) < 2:
+        print("Not enough data points to plot scaling.")
+        return
+        
+    N_values = np.array(N_values)[valid_indices]
+    mean_stds = np.array(mean_stds)[valid_indices]
+    std_of_stds = np.array(std_of_stds)[valid_indices]
+
+    # i perform log-log regression
+    log_N = np.log10(N_values)
+    log_std = np.log10(mean_stds)
+    slope, intercept, r_value, _, _ = stats.linregress(log_N, log_std)
+    
+    # i create the plot
+    plt.figure(figsize=(12, 8))
+    plt.errorbar(N_values, mean_stds, yerr=std_of_stds, fmt='o', capsize=5, label='Mean Std Dev of Products (Pair 1,2)')
+    
+    # i plot the fitted line
+    fit_line = 10**(intercept) * (N_values**slope)
+    plt.plot(N_values, fit_line, 'r-', label=f'Fit: slope={slope:.2f} (R²={r_value**2:.2f})')
+    
+    # i plot the theoretical 1/sqrt(N) line for comparison
+    # i normalize it to pass through the first point
+    theoretical_line = (mean_stds[0] * np.sqrt(N_values[0])) / np.sqrt(N_values)
+    plt.plot(N_values, theoretical_line, 'g--', label='Theoretical slope=-0.5')
+    
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('N (Number of Data Points)')
+    plt.ylabel('Std Dev of Coordinate Products')
+    plt.title('Scaling of Product Std Dev with N')
+    plt.legend()
+    plt.grid(True, which="both", ls="--")
+    
+    # i save plot
+    plot_filename = os.path.join(output_dir, 'std_scaling_vs_N.png')
+    plt.savefig(plot_filename, dpi=120, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Saved std dev scaling plot to {plot_filename}")
 
 def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, corr_plot_dir, inter_corr_plot_dir, product_plot_dir, product_independence_plot_dir):
     """
@@ -711,7 +826,7 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, 
     )
     
     # i analyze coordinate products
-    analyze_eigenvector_coordinate_products(
+    product_stats = analyze_eigenvector_coordinate_products(
         coord_results['coordinates'],
         coord_results['eigenvector_labels'],
         N, D_IN, M, L,
@@ -822,7 +937,7 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, 
     print(f"  Observed mean entropy: {np.mean(all_entropy_values):.4f} nats")
     print(f"  Difference: {np.mean(all_entropy_values) - theoretical_uniform_entropy:.4f} nats")
     
-    return {
+    base_return = {
         'mean_entropies': mean_entropies,
         'std_entropies': std_entropies,
         'all_entropies': all_entropies,
@@ -832,6 +947,9 @@ def analyze_entropy_in_eigenvector_basis(eigenvectors, N, D_IN, M, L, plot_dir, 
         'theoretical_uniform_entropy': theoretical_uniform_entropy,
         'coordinate_results': coord_results
     }
+    if product_stats is not None:
+        base_return['product_stats'] = product_stats
+    return base_return
 
 
 # %%
@@ -843,6 +961,7 @@ if __name__ == "__main__":
     files = sorted(files, key=lambda x: get_config_from_filename(x)[0])
     
     files = files  # we process all files
+    all_results = []
     print("Processing all experiment files for eigenvector basis entropy analysis...")
     print("=" * 80)
     
@@ -855,15 +974,21 @@ if __name__ == "__main__":
             _, eigenvectors_data = load_experiment_data(N, D_IN, M, L)
             
             # we analyze entropy in eigenvector basis
-            analyze_entropy_in_eigenvector_basis(
+            results = analyze_entropy_in_eigenvector_basis(
                 eigenvectors_data['eigenvectors'].transpose(0, 2, 1), N, D_IN, M, L, PATH_TO_PLOTS, PATH_TO_CORR_PLOTS, PATH_TO_INTER_CORR_PLOTS, PATH_TO_PRODUCT_PLOTS, PATH_TO_PRODUCT_INDEPENDENCE_PLOTS
             )
+            if results:
+                all_results.append(results)
             
             print("\n" + "="*50 + "\n")
             
         except Exception as e:
             print(f"Error processing {file}: {e}")
     
+    # i perform summary analysis after all files are processed
+    all_product_stats = [item for result in all_results for item in result.get('product_stats', [])]
+    plot_std_scaling_with_N(all_product_stats, PATH_TO_PRODUCT_PLOTS)
+
     print("Eigenvector basis entropy analysis complete!")
 
 # %%
