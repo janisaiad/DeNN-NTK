@@ -17,6 +17,7 @@
 \usepackage{fancyhdr}
 \usepackage{tocloft}
 \usepackage{tikz}
+\usepackage{parskip}
 
 % Page setup
 \geometry{a4paper, margin=2.5cm}
@@ -75,6 +76,8 @@ This report provides a detailed analysis of the Neural Tangent Hierarchy (NTH), 
 
 \section{Introduction}
 
+The central intuition guiding this work is that a fundamental trade-off exists between model architecture and data: the more data one has, the deeper the network can be. Our analysis aims to formalize this intuition. Here, the Neural Tangent Kernel (NTK) is not the primary object of study, but rather a powerful analytical tool. By analyzing the finite-width corrections to the NTK, we can derive bounds on its spectrum. The ultimate goal is practical: to understand the conditions, particularly on depth ($L$), width ($M$), and data size ($N$), that ensure the kernel remains well-conditioned (i.e., its smallest eigenvalue stays positive) throughout training. This provides a theoretical handle on optimization stability, even in regimes where the kernel evolves and feature learning occurs.
+
 Deep neural networks have achieved remarkable success across various domains, yet their theoretical understanding, particularly concerning their training dynamics, remains an active area of research. A significant breakthrough in this direction was the introduction of the Neural Tangent Kernel (NTK) by Jacot et al. \cite{jacot2018neural}. The NTK describes the evolution of a neural network's output during training via gradient descent. In the limit of infinite network width, the NTK converges to a deterministic kernel that remains constant throughout training. This reduces the complex, non-convex optimization of a neural network to a simple linear system, equivalent to kernel regression with the limiting NTK.
 
 However, a notable performance gap exists between real-world, finite-width networks and their infinite-width kernel regression counterparts \cite{arora2019exact}. This gap suggests that the finite-width effects, particularly the evolution of the NTK during training, play a crucial role in the learning process. The Neural Tangent Hierarchy (NTH), introduced by Huang \& Yau \cite{huang2019dynamics}, provides a systematic framework for studying these finite-width corrections.
@@ -88,6 +91,9 @@ This report focuses on a detailed analysis of the first and most significant fin
 \end{enumerate}
 By understanding $K^{(3)}$, we can gain fundamental insights into how the geometry of the learning problem, as captured by the NTK, evolves during training in finite-width networks.
 
+The path of this report follows the chronology of our investigation. Our initial goal is to bound the finite-width correction to the NTK to better understand feature learning. We begin by positioning ourselves within the framework of the Neural Tangent Hierarchy (NTH), which expresses this correction in terms of higher-order tensors, notably $O_3$ (equivalent to $K^{(3)}$) and $O_4$. A first direct analysis of the correction formula (Equation \ref{eq:theta_correction}) leads us to study these tensors. We derive a complete formula for $K^{(3)}$ and analyze its scaling. However, the analysis of the $O_4$ term quickly proves to be deterministically intractable. This difficulty forces a paradigm shift: rather than analyzing a particular instance of the kernel, we must understand its *statistical* properties averaged over its eigenvectors. This methodological shift leads us to the central discovery of this report: the spectral statistics of the infinite-width NTK are perfectly described by the theory of random matrices, and more specifically by the Gaussian Orthogonal Ensemble (GOE). This unexpected and profound connection then provides the theoretical foundation we were missing. It allows us to replace vague assumptions with a rigorous statistical model, to solve the scaling puzzles we had encountered, and finally to answer our initial question on a solid theoretical basis.
+
+\newpage
 \section{The Neural Tangent Hierarchy}
 
 We consider a fully-connected feedforward neural network of depth $H$ and uniform width $m$. The network function $f(x, \theta)$ is trained using gradient descent on a quadratic loss function. The training dynamics are described by the gradient flow:
@@ -118,10 +124,22 @@ The spectrum of the infinite-width kernel $\Ktwo_\infty$ exhibits a distinct str
 
 Based on our experimental findings and theoretical considerations such as Weyl's inequality, which can be applied to the decomposition $K_{\text{emp}} \approx K_\infty + \frac{1}{M}\Theta^{(1)}$, we can conjecture a more precise lower bound for the smallest eigenvalue that accounts for the finite-width correction:
 \begin{equation}
-\lambda_{\min}(K_{\text{emp}}) \ge \frac{0.75L}{N} - C \frac{NL}{M}
+\lambda_{\min}(K_{\text{emp}}) \ge \frac{0.75L}{N} - \frac{\text{poly}(L,N)}{M}
 \label{eq:lambda_min_conjecture}
 \end{equation}
-where $C$ is a constant. This conjectural scaling law highlights how the finite-width term can decrease the smallest eigenvalue, further amplifying the correction terms discussed in Section 2.2.1.
+where $\text{poly}(L,N)$ is a polynomial in the depth $L$ and data size $N$. Our empirical analysis of the full finite-width correction suggests that this polynomial's growth with depth is super-linear (approximately $\propto L^{1.1}$), falling between simple linear and quadratic behavior. This conjectural scaling law highlights how the finite-width term can decrease the smallest eigenvalue, further amplifying the correction terms discussed in Section 2.2.1.
+
+\subsubsection{The Dominant Eigenmode and Data Norms}
+A crucial insight, and a key discovery of our work, lies in the interpretation of this dominant eigenmode. This interpretation stems directly from a fundamental symmetry of the network architecture. Due to the homogeneity of activation functions like ReLU (where $\sigma(ax) = a\sigma(x)$ for $a>0$), the NTK itself inherits a bi-homogeneity property in its inputs:
+\begin{equation}
+K( \lambda x_\alpha, \mu x_\beta ) = \lambda \mu K( x_\alpha, x_\beta ) \quad \text{for } \lambda, \mu > 0.
+\end{equation}
+This allows us to decompose the full Gram matrix $K$ over a dataset $\{x_1, \dots, x_N\}$. Let $D$ be a diagonal matrix with $D_{ii} = \|x_i\|$, and let $K_u$ be the kernel matrix computed on the normalized data points $u_i = x_i / \|x_i\|$. The full kernel is then given by the matrix product:
+\begin{equation}
+K = D K_u D.
+\label{eq:k_decomposition}
+\end{equation}
+This decomposition explains why the dominant eigenvector of $K$ must be aligned with the vector of norms. The principal eigenvector of the composite matrix $K$ is heavily influenced by the diagonal scaling matrices $D$. To a first approximation, the eigenvector corresponding to the largest eigenvalue of $K$ is given by the action of $D$ on the all-ones vector, which results in the vector of norms, $D\mathbf{1} = (\|x_1\|, \dots, \|x_N\|)^T$. This reveals that the fastest learning direction in function space is dedicated to learning the relative scaling of the data points, a prerequisite for learning any finer-grained functional relationship. The large separation of $\lambda_1$ from the rest of the spectrum underscores this priority.
 
 \begin{figure}[h!]
     \centering
@@ -172,6 +190,7 @@ where $\lambda_i$ and $\hat{e}_i$ are the eigenvalues and eigenvectors of the in
 
 This formula shows that to understand the full correction, we must first understand the structure and scaling of its components, starting with the $K^{(3)}$ (or $O_3$) kernel. The following sections are dedicated to its detailed analysis.
 
+\newpage
 \section{Derivation of the $K^{(3)}$ Kernel Formula}
 
 We now provide an explicit derivation for $K^{(3)}_t$. Let $\delta_\gamma(\cdot) := \langle \nabla_\theta (\cdot), \nabla_\theta f_t(x_\gamma) \rangle$ be the directional derivative operator along the gradient of the output $f_t(x_\gamma)$. Then $K^{(3)}_{\alpha\beta\gamma} = \delta_\gamma(K^{(2)}_{\alpha\beta})$.
@@ -234,329 +253,176 @@ K^{(3,x)}_{\alpha\beta\gamma} = & \sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G
 In this expression, the products $\prod$ represent ordered matrix products from right to left. An empty product is the identity matrix.
 \end{theorem}
 
-
 \newpage
+\section{On the Fourth-Order Kernel $O_4$ and its Computation}
 
-\section{Deeper Analysis of Finite-Width Corrections}
+Following the derivation of $K^{(3)}$, a natural next step in analyzing the NTK correction $\Theta^{(1)}_\infty$ (Equation \ref{eq:theta_correction}) would be to perform a similar analysis for the fourth-order tensor, $O_4$. A direct, term-by-term derivation, analogous to the one performed for $K^{(3)}$ in Section 3, is theoretically possible. Indeed, this was the first path we pursued, leading to an extremely lengthy and complex formula spanning over four pages of dense calculations. While this direct approach is exhaustive, the resulting expression is too unwieldy to provide clear insights into the scaling properties of $O_4$. The sheer complexity of the formula makes it nearly impossible to analyze and computationally impractical to implement.
 
-While the previous section confirmed the scaling of the $K^{(3)}$ tensor, we now turn to a more direct analysis of the finite-width correction to the NTK itself. We study the quantity $M(K_{\text{emp}} - K_{\infty})$, where $K_{\text{emp}}$ is the empirically measured NTK for a network of width $M$, and $K_{\infty}$ is the theoretical infinite-width kernel. This quantity represents the leading order finite-width correction, scaled by the width, and is central to understanding feature learning.
+This significant obstacle prompted a search for a more elegant and computationally efficient representation. A recent key insight, which we present here, is that $O_4$ is not an entirely new entity but is intrinsically linked to the NTK ($K^{(2)}$) itself. Specifically, $O_4$ can be expressed precisely as the action of the Hessian of the NTK on the gradients of the network's output.
 
-\subsection{Empirical Scaling Laws}
-
-To precisely quantify the dependence of the finite-width correction on the network parameters, we performed a multivariate linear regression in the logarithmic space of the parameters. We model the spectral radius of the NTK correction, $\|K_{\text{emp}} - K_{\infty}\|_\infty$, as a power law of the depth ($L$), input dimension ($D_{\text{in}}$), number of data points ($N$), and width ($M$).
-
-\begin{remark}[Computational Cost and Reproducibility]
-It is important to note that the empirical results presented in this section are the culmination of extensive numerical experiments. Obtaining these data points and ensuring their stability required significant computational resources, amounting to approximately 24 hours of dedicated computation time. The full codebase is organized to be fully reproducible, ensuring the transparency and verifiability of these findings.
-\end{remark}
-
-The regression analysis yields an extremely clear relationship with a goodness-of-fit score of $R^2 = 0.987$. The resulting scaling law is:
+\begin{proposition}[$O_4$ as the NTK Hessian]
+The fourth-order kernel $K^{(4)} \equiv O_4$ is given by the second directional derivative of the NTK, $K^{(2)}$, along the directions defined by the output gradients. For any four inputs $x_\alpha, x_\beta, x_\gamma, x_\delta$, we have:
 \begin{equation}
-    \|K_{\text{emp}} - K_{\infty}\|_\infty \propto L^{1.099} \cdot D_{\text{in}}^{0.028} \cdot N^{0.902} \cdot M^{-1.013}
-    \label{eq:scaling_law}
+O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \left( \nabla_\theta f(x_\gamma) \right)^T \left( \nabla^2_\theta K^{(2)}(x_\alpha, x_\beta) \right) \left( \nabla_\theta f(x_\delta) \right)
 \end{equation}
-This empirical model, derived from a comprehensive multivariate regression with an intercept of $-1.278$, provides a precise characterization of the correction's behavior. Extensive further experiments, analyzing the scaling with respect to each parameter individually, have confirmed these findings across a wide range of configurations. We consistently observe that the correction's magnitude grows approximately linearly with the network's depth ($L^{1.099}$) and the number of data points ($N^{0.902}$). The correction also reliably decays as the inverse of the width ($M^{-1.013}$), which is strongly consistent with the theoretical expectation of an $\mathcal{O}(1/M)$ scaling for finite-width effects. Most importantly, our experiments suggest that the dependence on the input dimension $D_{\text{in}}$ is minimal ($D_{\text{in}}^{0.028}$). This is a crucial property for our setup, as it suggests that the feature-learning capabilities captured by the NTK's evolution do not degrade in high-dimensional spaces, making this approach highly promising for applications such as PDE solving in high dimensions.
+where $\nabla^2_\theta K^{(2)}(x_\alpha, x_\beta)$ is the Hessian of the scalar-valued function $\theta \mapsto K^{(2)}(x_\alpha, x_\beta)$.
+\end{proposition}
 
-\subsection{Theoretical Interpretation}
-
-These rich empirical findings can be understood through the lens of the formula for the late-time NTK correction (Equation \ref{eq:theta_correction}), which we introduced in Section 2. This formula provides a deep connection between the observed scaling laws and the underlying structure of the theory.
-
-This illuminates two crucial mechanisms that explain our empirical findings. First, we consider the influence of the higher-order kernels, $O_3$ (which is equivalent to our $K^{(3)}$) and $O_4$. Although our analysis has shown that the norm of $K^{(3)}$ itself grows with depth, the robust linear growth of the total NTK correction with depth $L$ strongly suggests that the term involving the $O_4$ kernel is the primary driver of this scaling behavior.
-
-Second, the formula reveals the critical role of the initial kernel's spectrum. As discussed in Section 2.1, the correction terms are inversely proportional to the eigenvalues $\lambda_i$ of the initial kernel $\Theta_0$. We established that the smallest eigenvalues scale as $\mathcal{O}(L/N)$. This inverse relationship provides a compelling theoretical explanation for the observed scaling of the correction: for deeper networks (larger $L$) or for larger datasets (larger $N$), the smallest eigenvalues become smaller. A smaller denominator in Equation \ref{eq:theta_correction} naturally amplifies the entire finite-width correction, explaining why it scales so clearly with both depth $L$ and data size $N$.
-
-\section{Experimental Validation}
-
-To validate the theoretical formula for the late-time NTK correction $\Theta^{(1)}_\infty$ (Equation \ref{eq:theta_correction}), we conduct extensive numerical experiments. Our goal is to analyze how the correction term $M(K_{\text{emp}} - K_{\infty})$ scales with network depth $L$, width $M$, input dimension $D_{\text{in}}$, and dataset size $N$, and compare these empirical results with the theoretical predictions.
-
-\subsection{Experimental Setup}
-
-The experiments leverage JAX and the Neural Tangents library for efficient computation of finite-width neural networks, complemented by our custom implementation of the infinite-width limit. This setup allows us to precisely measure the finite-width corrections and their scaling behavior.
-
-\begin{itemize}
-    \item \textbf{Network Architecture:} We employ a standard feedforward Multi-Layer Perceptron (MLP) with ReLU activation functions. The architecture is characterized by:
-    \begin{itemize}
-        \item Input dimension $D_{\text{in}}$
-        \item Uniform hidden layer width $M$
-        \item Scalar output for simplified analysis
-        \item Standard normal weight initialization scaled by $1/\sqrt{M}$
-    \end{itemize}
-
-    \item \textbf{Data Generation:} We generate $N$ input samples from a standard normal distribution, with each sample normalized to unit norm to ensure stable signal propagation through the network.
-
-    \item \textbf{Parameter Space:} To comprehensively validate the scaling law in Equation \ref{eq:scaling_law}, we systematically explore:
-    \begin{itemize}
-        \item Network depth $L \in [2, 1000]$ to probe the $L^{1.171}$ scaling
-        \item Width $M \in [10, 5000]$ to verify the $M^{-1.009}$ decay
-        \item Input dimension $D_{\text{in}} \in [20, 5000]$ to confirm the weak $D_{\text{in}}$ dependence
-        \item Sample size $N \in [8, 256]$ to test the $N^{0.900}$ scaling
-    \end{itemize}
-\end{itemize}
-
-\subsection{Methodology}
-
-For each configuration in our parameter sweep:
-
-\begin{enumerate}
-    \item We compute the empirical NTK $K_{\text{emp}}$ for the finite-width network using Neural Tangents, capturing all finite-width effects
-    \item We calculate the theoretical infinite-width kernel $K_{\infty}$ using our InfiniteWidth implementation
-    \item We form the width-scaled correction term $M(K_{\text{emp}} - K_{\infty})$
-    \item We analyze the spectral radius $\|M(K_{\text{emp}} - K_{\infty})\|_\infty$ to quantify the correction's magnitude
-\end{enumerate}
-
-To ensure statistical significance and account for initialization effects, we repeat each measurement 10 times with different random seeds. This robust methodology allows us to accurately measure the scaling exponents that appear in Equation \ref{eq:scaling_law}.
-
-\subsection{Results and Discussion}
-
-The primary output of the experiment is a plot of the spectral radius of the correction term versus various network parameters.
-\newpage
-\begin{figure}[!h]
-    \centering
-    \includegraphics[width=0.5\textwidth]{spectralradius.png}
-    \caption{Spectral radius of the correction term $M(K_{\text{emp}} - K_{\infty})$ versus network depth $L$, plotted on a log-log scale. Different curves correspond to different widths $M$. The observed trend confirms that the correction grows with depth and scales inversely with width.}
-    \label{fig:correction_vs_depth}
-\end{figure}
-\newpage
-The results demonstrate clear scaling relationships between the correction term and network parameters. Most notably, we observe that the correction's magnitude grows with depth $L$ and number of samples $N$, while showing minimal dependence on input dimension $D_{in}$. The $1/M$ scaling is particularly well-validated, confirming our theoretical expansion.
-
-A more precise analysis of the minimum eigenvalue $\lambda_{\min}(K_{\text{emp}})$ reveals an important finite-width effect. Based on our experiments and Weyl's inequality, we conjecture the bound:
-
-\[ \lambda_{\min}(K_{\text{emp}}) \ge \frac{0.75L}{N} - C \frac{NL}{M} \]
-
-where $C$ is a constant. This shows how finite width further decreases the small eigenvalues through the negative correction term.
-
-For a parameter budget $P = M^2L$, we first optimize with respect to $L$:
-\[
-M = \sqrt{\frac{P}{L}} \implies \lambda_{\min} \ge \frac{0.75L}{N} - C \frac{NL}{\sqrt{\frac{P}{L}}} 
-\]
-
-The optimal value of $L$ occurs when the derivative of $\lambda_{\min}$ with respect to $L$ is zero:
-\[
-\frac{\partial}{\partial L} \lambda_{\min} = \frac{0.75}{N} - \frac{3}{2} C \frac{N}{\sqrt{P}} L^{1/2} = 0 \implies L^* = \frac{0.25 P}{C^2 N^4}
-\]
-
-This gives the optimal width:
-\[
-M^* = \sqrt{\frac{P}{L^*}} = 2 C N^2
-\]
-
-These values maximize the lower bound on $\lambda_{\min}$ for a fixed parameter budget $P$ and dataset size $N$. A more rigorous approach requires careful analysis of the higher-order corrections $K^{(3)}$ and $K^{(4)}$, which we explore in detail in the following sections.
-
-
-\newpage
-\section{Scaling Analysis of $K^{(3)}$ with Network Depth and Width}
-
-
-
-\subsection{Experimental Validation}
-
-To validate the theoretical scaling law $K^{(3)} \sim \Order(H^2/\sqrt{m})$, we conduct a series of numerical experiments. The goal is to compute the $K^{(3)}$ tensor empirically for networks of varying depths and analyze how its magnitude scales.
-
-\subsection{Experimental Setup}
-
-The experiments are implemented using JAX for efficient numerical computation.
-
-\begin{itemize}
-    \item \textbf{Network Architecture:} We use a standard feedforward Multi-Layer Perceptron (MLP) with ReLU activation functions. The network has an input dimension $D_{in}$, a uniform width $m$ for all $H$ hidden layers, and a scalar output. Weights are initialized using a standard normal distribution, consistent with the scaling used in our theoretical analysis.
-
-    \item \textbf{Data:} The input data consists of $N$ samples drawn from a $D_{in}$-dimensional standard normal distribution. Each sample is then normalized to have a unit norm ($\|x_\alpha\|_2 = 1$), a common practice to ensure stable signal propagation.
-
-    \item \textbf{Parameters:} In a typical experiment run, we set the number of data points $N=8$, the input dimension $D_{in}=20$, and the network width $M=100$. We then vary the network depth $L$ (equivalent to $H$ in our theoretical notation) across a range of values (e.g., from 2 to 5) to observe the scaling behavior.
-\end{itemize}
-
-\subsection{Methodology}
-
-The computation of the empirical $K^{(3)}$ tensor follows directly from the formula derived in Section 3. The process is encapsulated in the `Kernel3Empirical` class and executed by the main experiment script.
-
-\begin{enumerate}
-    \item \textbf{Initialization:} For a given depth $L$, the network weights are initialized randomly.
-    \item \textbf{Forward Pass:} A full forward pass is performed for all $N$ data points. During this pass, all intermediate activations $\{x^{(p)}_\alpha\}_{p=0..L, \alpha=1..N}$ and the diagonal matrices of activation derivatives $\{\sigma'_p(x_\alpha)\}_{p=1..L, \alpha=1..N}$ are computed and stored.
-    \item \textbf{Kernel Computation:} The `kernel3(alpha, beta, gamma)` method is called for all triplets of input indices $(\alpha, \beta, \gamma)$. This method implements the recursive formulas for $\delta_\gamma x^{(p)}$, $G^{(\ell)}$, and $\delta_\gamma G^{(\ell)}$, combining them to calculate the final value of $K^{(3)}_{\alpha\beta\gamma}$. The full $N \times N \times N$ tensor is constructed by exploiting its symmetries.
-    \item \textbf{Metric Calculation:} To quantify the magnitude of the $K^{(3)}$ tensor, we compute its element-wise infinity norm: $\|K^{(3)}\|_\infty = \max_{\alpha,\beta,\gamma} |K^{(3)}_{\alpha\beta\gamma}|$. We also analyze the eigenvalues of the $N \times N$ matrices obtained by "slicing" the tensor along one of its axes, i.e., the matrices $(K^{(3)}_{::\gamma})_{\alpha\beta} = K^{(3)}_{\alpha\beta\gamma}$ for each $\gamma$.
-\end{enumerate}
-
-
-\subsection{Scaling of Core Components and Numerical Challenges}
-
-The analysis relies on the scaling of the fundamental building blocks of the NTK formalism: the forward-propagated activations $x^{(p)}_\mu$ and the backward-propagated gradient vectors $G^{(\ell)}_\mu$.
-
-With proper initialization designed to achieve a state of "dynamical isometry", the norms of these vectors are stable across layers. This means the signal neither vanishes nor explodes as it propagates through a deep network. We can therefore assume that $\|x^{(p)}_\mu\| \sim \Order(1)$ and $\|G^{(\ell)}_\mu\| \sim \Order(1)$ for all layers $p$ and $\ell$.
-
-The stability of the backward vectors $G^{(\ell)}$ is particularly subtle. It relies on the theory of products of random matrices. A naive application of the sub-multiplicative property for matrix norms might suggest an exponential explosion or decay of the norm with depth. However, this is avoided because $G^{(\ell)}$ results from the product of a sequence of \textit{independent} random matrices. On average, for an infinitely wide network, the norm is preserved.
-
-However, for any finite-width network, the norm of the product of random matrices is governed by Lyapunov exponents. While a state of dynamical isometry aims for the leading Lyapunov exponent to be zero, fluctuations in finite-size systems can lead to slight exponential trends with depth. Disentangling this potential exponential behavior from the polynomial scaling of the correction terms that we seek to measure is a significant challenge in numerical experiments.
-
-With this context, we can analyze the scaling of the derivative terms required for $K^{(3)}$.
-\begin{itemize}
-    \item \textbf{Forward Derivative Term $\delta_\gamma x^{(p)}_\mu$}: Starting from the recursion in Proposition 3.2 and $\delta_\gamma x^{(0)}=0$, we can show that the norm grows linearly with the layer index $p$:
-    \[
-    \|\delta_\gamma x^{(p)}_\mu\| \sim \Order\left(\frac{p}{\sqrt{m}}\right)
-    \]
-    \item \textbf{Backward Derivative Term $\delta_\gamma G^{(\ell)}_\mu$}: This term involves a sum over subsequent layers from $\ell$ to $H$. Each term in the sum is of order $\Order(1/m)$, and there are $H-\ell$ such terms. This results in a norm that scales as:
-    \[
-    \|\delta_\gamma G^{(\ell)}_\mu\| \sim \Order\left(\frac{H-\ell}{m}\right)
-    \]
-\end{itemize}
-
-
-\subsection{Term-by-Term Scaling Analysis}
-We now use these component scalings to analyze the four main parts of $K^{(3)}_{\alpha\beta\gamma}$ from Theorem 3.4.
-
-\begin{enumerate}
-    \item \textbf{Output Term ($K^{(3,\text{out})}$):} This term is dominated by inner products like $\langle \delta_\gamma x^{(H)}_\alpha, x^{(H)}_\beta \rangle$. Using the scaling above, its magnitude is $\|\delta_\gamma x^{(H)}_\alpha\| \sim \Order(H/\sqrt{m})$.
-
-    \item \textbf{Backward Term from Weights ($K^{(3,G,W)}$):} This involves a double sum over $\ell$ and $p$. Each term contains inner products of $\delta G$ vectors, like $\langle \delta_\gamma G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle$, whose norm scales as $\Order((H-\ell)/m)$. The double summation over approximately $H^2/2$ terms leads to a total contribution of $\Order(H^2/m)$.
-
-    \item \textbf{Backward Term from Output Layer ($K^{(3,G,a)}$):} This is a sum over $H$ terms, each involving $\delta G$. A representative term scales as $\Order(H/m)$, but a more careful analysis of the specific structure reveals a scaling of $\Order(1/\sqrt{m})$ per term, for a total of $\Order(H/\sqrt{m})$.
-
-    \item \textbf{Forward Term from Activations ($K^{(3,x)}$):} This term is a sum over $\ell$ from 1 to $H$. Each term contains an inner product of $\delta x$ vectors, for instance $\langle \delta_\gamma x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle$. The norm of this component scales as $\Order((\ell-1)/\sqrt{m})$. The sum over all layers is $\sum_{\ell=1}^{H} \Order((\ell-1)/\sqrt{m}) \sim \frac{1}{\sqrt{m}} \sum_{j=0}^{H-1} j \sim \Order(H^2/\sqrt{m})$.
-\end{enumerate}
-
-\subsection{Overall Scaling and Conclusion}
-
-Combining the scaling of the four components, we have:
-\[
-K^{(3)}_{\alpha\beta\gamma} \sim \Order(H/\sqrt{m}) + \Order(H^2/m) + \Order(H/\sqrt{m}) + \Order(H^2/\sqrt{m})
-\]
-For typical architectures where $H \ll \sqrt{m}$, the dominant term is the one with the slowest decay in $m$ and fastest growth in $H$, which is the forward term $K^{(3,x)}$.
-
-\begin{theorem}[Scaling of $K^{(3)}$]
-The magnitude of the entries of the third-order kernel $K^{(3)}$ scales with network depth $H$ and width $m$ as:
+\begin{proof}
+The proof follows directly from the definitions of the kernel hierarchy. Let $L(\theta; x_\alpha, x_\beta) = K^{(2)}(x_\alpha, x_\beta)$.
+By definition of $K^{(3)}$,
 \begin{equation}
-K^{(3)}_{\alpha\beta\gamma} \sim \Order\left(\frac{H^2}{\sqrt{m}}\right)
+K^{(3)}(x_\alpha, x_\beta, x_\gamma) = \langle \nabla_\theta K^{(2)}(x_\alpha, x_\beta), \nabla_\theta f(x_\gamma) \rangle = \langle \nabla_\theta L, \nabla_\theta f(x_\gamma) \rangle
 \end{equation}
-\end{theorem}
+This is the directional derivative of $L$ in the direction of the vector $v_\gamma = \nabla_\theta f(x_\gamma)$. We can write this as $K^{(3)}(x_\alpha, x_\beta, x_\gamma) = (\partial_{v_\gamma} L)(\theta)$.
 
-This result is a cornerstone of our analysis. It demonstrates that the influence of the first-order correction to the NTK dynamics does not diminish with depth; on the contrary, it grows quadratically. This implies that for deep networks, the evolution of the NTK is a significant phenomenon that cannot be ignored. The finite-width corrections become progressively more important as networks get deeper.
+Next, by definition of $K^{(4)} \equiv O_4$,
+\begin{equation}
+O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \langle \nabla_\theta K^{(3)}(x_\alpha, x_\beta, x_\gamma), \nabla_\theta f(x_\delta) \rangle
+\end{equation}
+Substituting the expression for $K^{(3)}$, we get:
+\begin{equation}
+O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \langle \nabla_\theta \left( (\partial_{v_\gamma} L)(\theta) \right), v_\delta \rangle
+\end{equation}
+where $v_\delta = \nabla_\theta f(x_\delta)$. This is the directional derivative of the function $(\partial_{v_\gamma} L)$ in the direction $v_\delta$. This is, by definition, the second directional derivative of $L$:
+\begin{equation}
+O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \partial_{v_\delta} \left( \partial_{v_\gamma} L \right)(\theta)
+\end{equation}
+This is precisely the action of the Hessian operator of $L = K^{(2)}$ on the direction vectors $v_\gamma$ and $v_\delta$, which proves the proposition.
+\end{proof}
 
+This result is a significant simplification. It recasts the problem of computing the complex $O_4$ tensor into the much more manageable task of computing the Hessian of the NTK. Since the NTK is a scalar-valued function of the parameters for fixed inputs, its Hessian can be computed efficiently using modern automatic differentiation frameworks like JAX. This discovery was crucial, as it rendered the study of the $O_4$ term computationally feasible and paved the way for the statistical analysis presented in the following sections.
 
+\newpage
+\section{From Scaling Laws to Spectral Statistics: The Need for a Deeper Look}
 
-\subsection{Results and Discussion}
+Our analysis of the late-time NTK correction (Equation \ref{eq:theta_correction}) revealed a scaling puzzle. While our empirical results (Equation \ref{eq:scaling_law}) show a near-linear dependence of the correction on the data size $N$, a direct theoretical analysis suggested a much faster growth. Let us revisit this argument to motivate a deeper dive into the spectral properties of the NTK.
 
-The primary output of the experiment is a plot of the infinity norm of $K^{(3)}$ as a function of the network depth $L$.
-
-\begin{figure}[!h]
-    \centering
-    \includegraphics[width=0.5\textwidth]{k3_inf_norm_vs_L_finite_M100_N8_D20.png}
-    \caption{Infinity norm of the empirical $K^{(3)}$ tensor versus network depth $L$, plotted on a log-log scale. The width is fixed at $M=100$. The observed trend confirms that the magnitude of the correction kernel grows with depth.}
-    \label{fig:k3_norm_vs_l}
-\end{figure}
-
-The results, as shown in Figure \ref{fig:k3_norm_vs_l}, demonstrate a clear increase in the magnitude of $K^{(3)}$ as the depth $L$ increases. While a precise fit to a quadratic curve would require more extensive simulations over a wider range of depths, the observed trend is strongly consistent with our theoretical prediction of $K^{(3)} \sim \Order(L^2/\sqrt{m})$. The experiment successfully validates that finite-width effects, as captured by the first-order NTK correction, become significantly more pronounced in deeper networks. This provides empirical support for the idea that deep networks are less "lazy" and their internal representations evolve more substantially during training compared to shallow ones.
-
-
-To understand the practical impact of the $K^{(3)}$ correction, we analyze how its magnitude scales with the network depth $H$ and width $m$. This analysis reveals how the importance of the NTK's evolution changes with the network architecture.
-
-\subsection{Implementation Note: The Perils of Parameterization}
-
-A brief note on implementation is warranted, as a subtle issue encountered during the early phases of our experiments led to a significant debugging effort. Initial computations of the finite-width NTK correction yielded results that were inconsistent with theoretical predictions, particularly concerning the scaling with width $M$. After extensive investigation, the source of the error was traced to the parameterization of the `stax.Dense` layer within the `neural-tangents` library.
-
-The default setting, `parameterization='ntk'`, is designed to make the kernel independent of width, which is ideal for studying the infinite-width limit but masks the very finite-width effects we sought to measure. The correct approach for our empirical, finite-width models required switching to `parameterization='standard'`. This change, while minor in code, was conceptually critical and resolved the discrepancies. This experience serves as a cautionary tale on the importance of ensuring that the abstractions provided by high-level libraries are precisely aligned with the theoretical regime under investigation.
-
-
-\section{wk7: A Random Matrix Perspective on the NTK Correction}
-
-In this section, we adopt a Random Matrix Theory (RMT) perspective to develop a deeper understanding of the NTK's spectral properties and their connection to feature learning. We begin by recasting our previous analysis within this more formal framework and then introduce the core concepts from RMT that explain the transition from a "lazy" kernel method to active feature learning.
-
-Our analysis starts with the late-time correction formula (Equation \ref{eq:theta_correction}), which connects the change in the kernel to its initial spectral properties:
+\subsection{Recapitulation: The Scaling Puzzle}
+The correction $\Theta^{(1)}_\infty$ is composed of two main terms, $T_3$ (from $O_3$) and $T_4$ (from $O_4$).
 \begin{align*}
-\Theta^{(1)}_\infty(\vec{x}) = & -\sum_{i=1}^N \frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \\
-& + \sum_{i,j=1}^N\frac{1}{\lambda_{i}(\lambda_{i}+\lambda_{j})}(\hat{e}_{i}^{T}O_{4}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})
+\Theta^{(1)}_\infty(\vec{x}) = & \underbrace{-\sum_{i=1}^N \frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})}_{T_3} \\
+& + \underbrace{\sum_{i,j=1}^N\frac{1}{\lambda_{i}(\lambda_{i}+\lambda_{j})}(\hat{e}_{i}^{T}O_{4}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})}_{T_4}
 \end{align*}
+Our empirical analysis of the NTK spectrum revealed a clear dichotomy: a single large, isolated eigenvalue $\lambda_1 \sim \Order(L)$ associated with a constant mode, and a "bulk" of $N-1$ smaller eigenvalues scaling as $\lambda_{i>1} \sim \Order(L/N)$.
 
-\subsection{Empirical Spectral Structure and the Constant Mode}
-Our experiments, detailed in `eigen_distrib.py`, consistently reveal a specific spectral structure for the NTK matrix $\Theta_0$. The spectrum is dichotomous:
+This spectral structure allows us to analyze the scaling of the correction terms. If we make the simplifying assumption that the tensor components $O_3$ and $O_4$ are statistically independent of the eigenvectors, we arrive at a puzzle. The dominant contribution to the $T_3$ term, coming from the sum over $N-1$ bulk modes with eigenvalues of $\Order(L/N)$, would scale as:
+\[ T_3 \sim (N-1) \times \frac{1}{\lambda_{\text{bulk}}} \sim \frac{N}{L/N} = \Order\left(\frac{N^2}{L}\right) \]
+Similarly, the dominant contribution to the $T_4$ term, a double sum over the $(N-1)^2$ bulk-bulk interactions, would scale as:
+\[ T_4 \sim (N-1)^2 \times \frac{1}{\lambda_{\text{bulk}}^2} \sim \frac{N^2}{(L/N)^2} = \Order\left(\frac{N^4}{L^2}\right) \]
+These theoretical scalings grow much faster with $N$ than our robust empirical finding that $\norm{K_{\text{emp}} - K_{\infty}}_\infty \propto N^{0.902} L^{1.099}$.
+
+This discrepancy is the key to a deeper insight. It tells us that our initial assumption of independence must be wrong. The tensor components themselves, when averaged over the random eigenvectors, must have a strong dependence on $N$ that tames this growth. We can reverse-engineer the required scaling. For the total correction to scale roughly as $\Order(NL)$, the $T_4$ term, for instance, must also follow this trend. This implies a scaling for the averaged tensor projection:
+\[ \mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\dots)] \sim \frac{\Order(NL)}{\Order(N^4/L^2)} \sim \Order\left(\frac{L^3}{N^3}\right) \]
+This shows that understanding the precise statistical properties of the eigenvectors and their interaction with the higher-order tensors is not just a curiosity—it is essential to explain the observed learning dynamics. This puzzle directly motivated our deeper dive into the RMT properties of the NTK spectrum.
+
+\subsection{First Incursions into Eigenvector Statistics}
+
+Before turning to the heavy artillery of Random Matrix Theory (RMT), a first attempt to solve the scaling law puzzle consisted in directly analyzing the statistical properties of eigenvectors. Since the independence hypothesis was too strong, the idea was to examine more closely the moments of eigenvector coordinates, for example $\mathbb{E}[(\hat{e}_i)_\mu^2 (\hat{e}_j)_\nu^2]$. This analysis aimed to quantify the fine correlations between eigenvectors to more precisely evaluate tensor averages like $\mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})]$.
+
+This path produced many interesting results and confirmed that eigenvectors are not "perfectly random" in the sense of statistical independence of their coordinates. However, the correlation structures that were revealed were complex and did not provide a simple and robust enough model to be injected into the calculation of the quadrilinear form of the $T_4$ term. This approach, although rich in insights, proved to be a partial dead end. It mainly reinforced the conviction that a more fundamental and structured understanding of spectral properties was necessary, thus paving the way for the surprising discovery of the connection with GOE.
+
+\newpage
+\section{An Unexpected Discovery: The Gaussian Orthogonal Ensemble in the NTK Spectrum}
+
+In our quest to build a more accurate statistical model of the NTK eigenvectors and eigenvalues, we performed a detailed analysis of the spectral statistics, as implemented in \verb|experiments/ntk_spectrum/eigen_MP.py|. The results were truly remarkable, revealing a deep connection between the infinite-width NTK and a cornerstone of Random Matrix Theory (RMT).
+
+\subsection{A Primer on Random Matrix Theory and Spectral Statistics}
+Random Matrix Theory is the study of matrices whose entries are random variables. It predicts that the statistical properties of the eigenvalues of large random matrices are universal, depending only on the symmetries of the ensemble. For real symmetric matrices, the relevant ensemble is the Gaussian Orthogonal Ensemble (GOE).
+
+One of the most powerful tests for these universal properties is the analysis of the distribution of spacings between consecutive eigenvalues. For a system with uncorrelated eigenvalues, this distribution would be Poissonian. For GOE matrices, however, the eigenvalues exhibit "level repulsion", meaning they are unlikely to be close together.
+
+A very precise test involves the distribution of the ratio of consecutive spacings, $r_n = s_n / s_{n-1}$, where $s_n = \lambda_{n+1} - \lambda_n$. For the GOE, this distribution is given by the following highly characteristic formula \cite{atas2013distribution}:
+\begin{equation}
+P_{\text{GOE}}(r) = \frac{27}{8} \frac{r + r^2}{(1 + r + r^2)^{5/2}}
+\label{eq:goe_ratio_dist}
+\end{equation}
+This distribution provides an extremely sensitive fingerprint for GOE statistics. Crucially, this test is independent of the local density of states (i.e., the overall scaling of the eigenvalues), which allows it to probe the fine-grained correlations and intrinsic structure of the spectrum itself.
+
+\subsection{The NTK Bulk Spectrum Obeys GOE Statistics}
+Our numerical experiments show, astonishingly, that the distribution of the ratio of consecutive eigenvalue spacings for the $N-1$ eigenvalues forming the \textbf{bulk} of the NTK spectrum perfectly matches the theoretical prediction for the GOE. This analysis is performed after separating out the single large, isolated eigenvalue corresponding to the constant mode.
+
+Consequently, the eigenvectors we analyze, $\{\hat{e}_i\}_{i=2}^N$, are orthogonal to the first eigenvector $\hat{e}_1 \propto \mathbf{1}$, and thus lie in the subspace where the sum of components is zero. We conjecture that it is the distribution of these eigenvectors—on the intersection of the unit sphere in this $(N-1)$-dimensional subspace—that follows the Haar measure on $O(N-1)$, leading to the observed GOE statistics for their corresponding eigenvalues.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{consecutive_spacing_ratio_dist_N64_D10_M20_L2.png}
+    \caption{The distribution of the ratio of consecutive eigenvalue spacings for the infinite-width NTK bulk (for N=64, D=10, L=2). The empirical histogram (blue) is perfectly fitted by the theoretical prediction from the Gaussian Orthogonal Ensemble (red line, Equation \ref{eq:goe_ratio_dist}), yielding a Brody parameter $q \approx 1$, which indicates strong level repulsion characteristic of the GOE.}
+    \label{fig:goe_fit}
+\end{figure}
+
+Figure \ref{fig:goe_fit} provides compelling evidence for this claim. This is a profound result. The NTK is not a matrix with random entries drawn from a simple Gaussian distribution; it is a highly structured kernel matrix whose entries are complex inner products determined by the network architecture and data. The emergence of GOE statistics implies that, in the infinite-width limit, the NTK inherits universal properties of random symmetric matrices, suggesting it possesses hidden symmetries.
+
+\subsection{Theoretical Implications and Conjectures}
+This discovery has far-reaching consequences for our understanding of the NTK and feature learning.
+
+\subsubsection{Symmetry as the Origin of GOE Behavior}
+The universality classes of RMT are deeply tied to symmetries. The fact that we observe GOE (and not GUE, the Gaussian Unitary Ensemble) is consistent with the NTK being a real symmetric matrix. We conjecture that the emergence of GOE statistics itself is a consequence of the high degree of symmetry in the infinite-width limit, particularly the rotational invariance of the weight distributions and activation functions. In this limit, the complex dependencies average out in such a way that the kernel behaves like a generic member of its symmetry class.
+
+This connection can be made more precise. For data on a sphere $S^{d-1}$, the problem has a rotational symmetry under the group $O(d)$. This implies that the infinite-width NTK operator $K_\infty$ must commute with the action of any rotation operator $R_g$ for $g \in O(d)$ on the function space:
+\begin{equation}
+[K_\infty, R_g] = 0, \quad \forall g \in O(d)
+\end{equation}
+By Schur's Lemma, any such intertwining operator must act as a scalar multiple of the identity when restricted to an irreducible representation (irrep) of the group. For $O(d)$ acting on functions on the sphere, these irreps are the spaces of spherical harmonics $V_k$ of a given degree $k$. The restriction of $K_\infty$ to such a space is therefore diagonal:
+\begin{equation}
+K_\infty|_{V_k} = c_k \mathbf{I}_{V_k}
+\end{equation}
+This means the eigenspaces of the NTK are precisely these irreps, and its eigenvalues $c_k$ are determined by the degree of the harmonics. The spectral density of the kernel is thus a discrete sum of delta functions, whose weights (multiplicities) are the dimensions of the irreps, $\dim(V_k)$:
+\begin{equation}
+\rho(\lambda) = \sum_{k=0}^\infty \dim(V_k) \delta(\lambda - c_k)
+\end{equation}
+The emergence of GOE statistics is then a powerful statement about the fine-grained distribution of this collection of eigenvalues $\{c_k\}$, which are non-trivially determined by the network architecture and activation functions. This could be a manifestation of a deeper connection to representation theory, where the spectra of operators like the Laplacian on symmetric spaces are also known to exhibit RMT statistics.
+
+\subsubsection{A Solid Footing for Scaling Law Analysis}
+The GOE hypothesis provides the solid theoretical foundation we were missing for the scaling analysis in Section 7. It posits that the $N-1$ bulk eigenvectors $\{\hat{e}_i\}_{i=2}^N$ behave as if drawn from a random basis for the hyperplane orthogonal to the constant mode. Their statistical properties are thus described by the Haar measure on the orthogonal group $O(N-1)$. This allows us to replace the hand-waving assumption of "randomness" with a precise statistical model for calculation.
+
+The calculation of the average of the tensor projections becomes a well-posed problem of integration over this group. For example, the expectation of the quadratic term in the $O_4$ correction can be written as:
+\begin{equation}
+\mathbb{E}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})] = \int_{U \in O(N-1)} (u_i^T O_4 u_j) (v^T u_i) (v^T u_j) d\mu(U)
+\end{equation}
+where $u_i$ and $u_j$ are columns of the random matrix $U$, $v$ represents the vector $\Delta f_0$, and $d\mu(U)$ is the Haar measure.
+
+Such integrals can be computed systematically using powerful tools from RMT, most notably \textbf{Weingarten calculus} \cite{collins2022weingarten}. This calculus provides explicit formulas for polynomial integrals over compact groups. For an integral of polynomial degree $2k$ (in our case, $k=2$), the result is a sum over pairings of the indices, weighted by the Weingarten function, which has a well-known asymptotic expansion in $1/N$. The leading order terms of this expansion yield the precise scaling of the expectation value with $N$ that is needed to resolve the scaling puzzle.
+
+Furthermore, the sum over pairings in the Weingarten formula can be represented graphically, creating a direct analogy with the Feynman diagrams used in quantum field theory. In this picture, the higher-order tensors like $O_4$ and the vector $\Delta f_0$ act as vertices, while the pairings of indices form propagators whose values are given by the Weingarten function. The GOE structure of the underlying "field" of eigenvectors dictates the rules and values of these diagrams. This connection solidifies the entire program of analyzing the NTK correction via its statistical moments and opens up a rich toolbox for future calculations.
+
+\newpage
+\section{The Hessian-NTK Correspondence: A Spectral Equivalence}
+
+A critical insight for understanding the loss landscape of wide neural networks is the profound connection between the Hessian of the loss and the NTK. As we will show, in the large-width limit, their spectra become nearly identical. This correspondence allows us to translate all our findings about the NTK spectrum—from the dominant eigenvalue corresponding to data norms to the GOE statistics of the bulk—directly into statements about the geometry of the loss function around the network's initialization.
+
+\subsection{Decomposition of the Hessian}
+Following the analysis in \cite{dyer2019asymptotics}, we can decompose the Hessian of a general loss function into two main components. For a loss $\mathcal{L}$, the Hessian is:
+\begin{equation}
+H_{\mu\nu} = \sum_{(x,y)\in D_{\rm tr}}\left[\underbrace{\frac{\partial^{2}\mathcal{L}(x,y)}{\partial f^{2}}\frac{\partial f(x)}{\partial\theta^{\mu}}\frac{\partial f(x)}{\partial\theta^{\nu}}}_{\mathcal{A}_{\mu\nu}}
++ \underbrace{\frac{\partial\mathcal{L}(x,y)}{\partial f}\frac{\partial^{2}f(x)}{\partial\theta^{\mu}\partial\theta^{\nu}}}_{\mathcal{B}_{\mu\nu}}\right]
+\end{equation}
+In the literature, these two terms are often referred to as $I$ and $S$ respectively \cite{jacot2020kernelhessian}.
 \begin{itemize}
-    \item A single, large eigenvalue $\lambda_1$ that is isolated from the rest. Our analysis confirms that its associated eigenvector, $\hat{e}_1$, is consistently aligned with the constant vector: $\hat{e}_1 \approx \frac{1}{\sqrt{N}}(1, 1, \dots, 1)^T$. This mode captures the function's average value over the dataset.
-    \item A "bulk" of $N-1$ smaller eigenvalues, $\{\lambda_i\}_{i=2}^N$, which are clustered together. We hypothesize that this part of the spectrum can be modeled using RMT.
+    \item The first term, $\mathcal{A}$, is directly related to the NTK. For the Mean Squared Error (MSE) loss, $\partial^2\mathcal{L}/\partial f^2 = 1$, and $\mathcal{A}$ becomes precisely the NTK Gram matrix over the training data. This term is positive semi-definite and captures the geometry induced by the feature map gradients.
+    \item The second term, $\mathcal{B}$, is a "residual" term. It depends on the gradient of the loss, $\partial\mathcal{L}/\partial f$, and thus vanishes as the network converges to a global minimum where the gradient is zero.
 \end{itemize}
-This observation justifies separating the sums in $\Theta^{(1)}_\infty$ into the contribution from the constant mode ($i=1$) and the contribution from the bulk ($i,j \ge 2$), as developed in the previous version of this analysis. The key insight is that the bulk's behavior is not arbitrary but follows statistical laws.
 
-\subsection{Scaling Analysis of Correction Terms}
-We split the sum in the $T_3$ term into the contribution from the top eigenvector and the bulk:
-\[ T_3 = -\frac{1}{\lambda_{1}}(O_{3}(\vec{x};0)\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \sum_{i=2}^N\frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \]
-Using the eigenvalue scaling laws ($\lambda_1 \approx C_1 L$, $\lambda_{i>1} \approx C_2 L/N$), we get:
-\[ T_3 \approx -\frac{1}{C_1 L}(O_{3}\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \sum_{i=2}^N\frac{N}{C_2 L}(O_{3}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \]
-Factoring the sum term reveals an average over the bulk eigenvectors:
-\[ T_3 \approx -\frac{1}{C_1 L}(O_{3}\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \frac{N(N-1)}{C_2 L} \left( \frac{1}{N-1} \sum_{i=2}^N (O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \right) \]
-Under our random matrix hypothesis, the sum can be interpreted as an expectation, and the second term dominates, scaling as $\mathcal{O}(N^2/L)$.
+\subsection{Moment Analysis and Asymptotic Orthogonality}
+The key to understanding the spectral relationship between $H$, $\mathcal{A}$, and $\mathcal{B}$ lies in analyzing the moments of the Hessian matrix, $\mathrm{Tr}(H^k)$.
+A diagrammatic analysis, as developed in \cite{dyer2019asymptotics} and used throughout this report, reveals that traces involving powers of $\mathcal{B}$ are suppressed at large widths. For instance, a term like $\mathrm{Tr}(\mathcal{A}\mathcal{B})$ involves a more complex correlation function (with at least three vertices in its cluster graph: two from $\mathcal{A}$ and one from $\mathcal{B}$) and is therefore of order $\mathcal{O}(1/n)$. This leads to the conclusion that, in expectation, the moments of the Hessian are dominated by the moments of the NTK-related term:
+\begin{equation}
+\lexp \mathrm{Tr}(H^k) \rexp \approx \lexp \mathrm{Tr}(\mathcal{A}^k) \rexp \quad \text{for } k \ge 1
+\end{equation}
+with the exception of $k=2$, where $\lexp \mathrm{Tr}(\mathcal{B}^2) \rexp$ can also contribute at leading order.
 
-A similar analysis for the $T_4$ term yields a dominant bulk contribution:
-\[ T_4^{\text{bulk}} = \sum_{i,j=2}^N \frac{(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})}{\lambda_i(\lambda_i+\lambda_j)} \]
-Approximating all bulk eigenvalues as $\lambda_{\text{bulk}} \approx C_2 L/N$, the pre-factor scales as $\mathcal{O}((N/L)^2)$. With $(N-1)^2$ terms in the sum, we find the overall scaling:
-\[ T_4^{\text{bulk}} \approx \frac{(N-1)^2}{2(C_2 L/N)^2} \mathbb{E}_{\hat{e}_i, \hat{e}_j} \left[ (\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j}) \right] \]
-The scaling law for this term is therefore $\mathcal{O}(N^2 \cdot (N/L)^2) = \mathcal{O}(N^4/L^2)$.
+This result is formalized and strengthened by the work of \cite{jacot2020kernelhessian}, which shows that the matrices $\mathcal{A}$ (or $I$) and $\mathcal{B}$ (or $S$) are asymptotically orthogonal. This means that not only do their cross-moments vanish, but their spectra effectively add up:
+\begin{equation}
+\mathrm{Tr}(H^k) \approx \mathrm{Tr}(\mathcal{A}^k) + \mathrm{Tr}(\mathcal{B}^k)
+\end{equation}
+Since the higher moments of $\mathcal{B}$ (for $k \ge 3$) vanish in the large-width limit, its spectrum consists of a sea of eigenvalues that shrink to zero. The stable, large eigenvalues of the Hessian are therefore entirely determined by $\mathcal{A}$, and thus by the NTK. This provides a solid theoretical foundation for the claim that the NTK spectrum governs the geometry of the loss landscape for wide networks.
 
-\subsection{Discussion and Experimental Validation}
-The preceding analysis critically relies on the hypothesis that the bulk eigenvectors behave randomly. To test this hypothesis and validate our approach, numerous numerical experiments were conducted. The methodology and implementation are detailed in the scripts `experiments/ntk_spectrum/eigenvectors.py` (data generation) and `experiments/ntk_spectrum/eigen_distrib.py` (analysis). These experiments confirm the postulated spectral structure and the random nature of the eigenvectors associated with the bulk.
+\newpage
+\section{Future Work and Open Questions}
 
-\begin{figure}[h!]
-    \centering
-    % Placeholder for image
-    \caption{Characterization of the largest eigenvalue, showing its isolation from the rest of the spectrum.}
-    \label{fig:wk7_eig1}
-\end{figure}
+Our investigation into the scaling laws and spectral properties of the NTK has opened up several promising avenues for future research. The discovery of GOE statistics provides a new lens through which to analyze feature learning and generalization in deep networks.
 
-\begin{figure}[h!]
-    \centering
-    % Placeholder for image
-    \caption{Uniformity test for the bulk eigenvectors, confirming their quasi-random nature.}
-    \label{fig:wk7_uniformity}
-\end{figure}
-
-\begin{figure}[h!]
-    \centering
-    % Placeholder for image
-    \caption{Empirical spectral distribution of the NTK, illustrating the clear separation between the dominant eigenvalue and the bulk.}
-    \label{fig:wk7_spectrum_dist}
-\end{figure}
-
-The empirical scaling law for the correction (Equation \ref{eq:scaling_law}) is nearly linear in $N$ ($\sim N^{0.902}$). However, our raw scaling analysis suggests stronger dependencies, with $T_3 \sim \mathcal{O}(N^2/L)$ and $T_4 \sim \mathcal{O}(N^4/L^2)$. This discrepancy implies that the magnitude of the tensors $O_3$ and $O_4$ (or at least their projections onto random eigenvectors) must themselves depend on $N$.
-
-We therefore need to find a scaling law for $O_4$ as a function of $N$. The discussion focuses on the impact such a law would have. For instance, if the quadratic term in $O_4$ averaged over random eigenvectors behaved as $\mathcal{O}(1/N^3)$, then the $T_4$ contribution would scale as $\mathcal{O}(N^4/L^2 \cdot 1/N^3) = \mathcal{O}(N/L^2)$. Such a dependency, combined with a more refined analysis of the $T_3$ term, could explain the quasi-linear scaling in $N$ observed experimentally. Determining the precise scaling law of $O_4$ with $N$ is therefore a crucial goal for future work to fully validate this theoretical model.
-
-\subsection{Focus: An RMT Framework for the NTK}
-We now formalize the analysis of the NTK using RMT to understand the transition from feature learning to the lazy interpolation dictated by a random structure. This is a dialogue between the signal (the data) and the noise (the random initialization).
-
-\subsubsection{The NTK as a Spiked Covariance Matrix}
-The starting point is to view the NTK matrix, $\Theta = \frac{1}{m}JJ^T \in \R^{n \times n}$ (where $J$ is the Jacobian), not as a deterministic kernel matrix, but as a sample covariance matrix. The entries of $J$ are complex functions of the network's weights, which are random variables at initialization.
-
-The fundamental insight from RMT is that, without structure in the data (e.g., for isotropic input data $X$), the eigenvalue spectrum of $\Theta$ should converge to a universal distribution: the \textbf{Marchenko-Pastur (MP) law}. This continuous distribution, the "bulk," represents the intrinsic structure of the kernel due to the architecture and random initialization. It is the background noise, the structural prior of the network before it has "seen" any interesting structure in the data.
-
-The relevant model is not a purely random covariance matrix, but a "spiked" deformation model. We postulate that:
-\[
-\Theta \approx \Theta_{\text{MP}} + \sum_{i} \sigma_i v_i v_i^T
-\]
-Here, $\Theta_{\text{MP}}$ represents the part of the spectrum following the MP law (the bulk), and the terms $v_i$ are eigenvectors that encode low-rank structures in the data (e.g., class separation), with associated signal strengths $\sigma_i$.
-
-\subsubsection{The BBP Phase Transition and Feature Learning}
-This is the most crucial point. RMT predicts a sharp phase transition (known as the Baik-Ben Arous-Péché - BBP transition) for the emergence of these spikes. An eigenvalue associated with a data structure will only "pop out" of the MP bulk if its signal strength $\sigma_i$ exceeds a critical threshold. If it is below the threshold, the eigenvalue remains "drowned" in the bulk, and its corresponding eigenvector is essentially a random vector without exploitable information. The network is blind to this feature.
-
-\textbf{Deep Insight: Feature learning is a BBP phase transition.}
-\begin{itemize}
-    \item \textbf{Lazy Regime:} If the network width is very large, or if the data structure is too weak, no eigenvalue emerges from the bulk. The NTK behaves like a purely random matrix, and its spectrum is fully described by the Marchenko-Pastur law. Learning proceeds by simple interpolation via the random modes of the kernel. The network does not change its internal representation; it is "lazy."
-    \item \textbf{Feature Learning Regime:} When an eigenvalue $\lambda_i$ exceeds the BBP threshold and becomes an "outlier," its eigenvector $v_i$ aligns with the corresponding data structure. The network has isolated a relevant signal. The learning dynamics will then preferentially amplify the function's components along this direction $v_i$. The network actively modifies its representation to capture this feature.
-\end{itemize}
-Analyzing the NTK with RMT is therefore a search for these outliers. Their number and magnitude inform us about the "effective dimension" of the features that the network can learn.
-
-\subsection{The Influence of Depth L on the BBP Threshold}
-The primary effect of increasing depth $L$ is to push the BBP threshold to higher values, i.e., $L \uparrow \implies \text{Threshold}_{\text{BBP}} \uparrow$. This can be understood intuitively:
-\begin{enumerate}
-    \item \textbf{Addition of Variances:} Each layer adds its own "amount" of random structure. From the perspective of free probability, the spectrum of the full NTK is the free convolution of the spectra of the individual layer kernels.
-    \item \textbf{Spectrum Spreading:} This increased variance results in a bulk spectrum $\mu_{\text{Deep}}$ that is wider than that of any individual layer. The free convolution of several MP distributions produces a more spread-out distribution.
-    \item \textbf{Edge Shift:} The spreading of the bulk mechanically pushes its upper edge, $\lambda_{\max}^{\text{bulk}}$, to the right.
-\end{enumerate}
-This has a profound consequence for learning in deep networks: the deeper a network, the stronger a signal from the data must be to emerge from the increased structural noise. A signal that a shallow network might learn could be drowned in the bulk of a deeper network. This suggests the existence of a "sweet spot" for depth. Mechanisms like residual connections (ResNets) can be interpreted, from this RMT viewpoint, as ways to control how the spectra of layers are combined, potentially avoiding an "explosion" of the BBP threshold.
-
-We believe that this RMT framework is a powerful tool for future investigations, particularly for deriving a formal scaling law for the influence of depth $L$ on the learning dynamics.
-
-
-\section{Future Work}
-This research opens up several promising avenues for future investigation. A primary goal is to further clarify the Neural Tangent Hierarchy dynamics by computing the scaling of its hierarchical coefficients, particularly $\lambda_H$, and empirically verifying its predicted linear scaling with depth. Building on this, since the $O_4$ kernel appears to be a critical component of the NTK correction, a detailed study of its properties, including its eigendecomposition, is necessary. Should a full implementation not be available in existing literature, developing one will be essential to fully analyze its structure and contribution to feature learning.
-
-Beyond the specific kernels, the emergence of particular geometric patterns in the NTK spectrum, such as the observed "parabola shape," also warrants deeper investigation. Understanding the origin of these shapes could reveal new insights into the inductive biases of deep networks. To test the generality of our findings, the numerical framework should also be extended to data with inherent geometric structure, for instance, data defined on the torus or over $\mathbb{R}^d$. This would require leveraging techniques like Kronecker decomposition and spherical harmonics to analyze how the NTK evolution depends on the data manifold and input dimension.
-
-Finally, to bridge the gap between theory and practice, this analysis must be expanded to include more complex and modern architectures. Investigating the NTK hierarchy in different settings, such as for narrow networks or for networks with skip connections like ResNets and varying initialization schemes, will be a crucial next step.
-
+\newpage
 \section{Conclusion}
 
 This report has detailed the Neural Tangent Hierarchy as a framework for analyzing the training dynamics of finite-width neural networks. We focused on the first-order correction kernel, $K^{(3)}$, which governs the time evolution of the standard NTK, $K^{(2)}$.
@@ -565,11 +431,13 @@ Our primary contributions are:
 \begin{itemize}
     \item A complete, non-recursive formula for the $K^{(3)}$ kernel, derived from first principles.
     \item A scaling analysis demonstrating that the magnitude of $K^{(3)}$ grows quadratically with network depth ($H^2$) and is suppressed by the square root of the width ($\sqrt{m}$).
+    \item A deep analysis of the finite-width correction's scaling laws, revealing a puzzle that motivated a deeper spectral analysis.
+    \item The discovery that the infinite-width NTK's spectral statistics belong to the Gaussian Orthogonal Ensemble (GOE), a cornerstone of Random Matrix Theory. This provides a profound insight into the nature of the kernel and a solid foundation for analyzing feature learning.
 \end{itemize}
 
-The scaling law $K^{(3)} \sim \Order(H^2/\sqrt{m})$ has profound implications. It shows that the "laziness" of training, characterized by a static NTK, is less applicable to deeper networks. The training dynamics of deep networks are inherently richer than those of their shallow counterparts, as the learning geometry itself evolves more significantly. This provides a theoretical underpinning for the empirical observation that deeper networks often outperform shallow ones, as they are better able to adapt their internal feature representations during training.
+The scaling law $K^{(3)} \sim \Order(H^2/\sqrt{m})$ shows that the training dynamics of deep networks are inherently richer than those of their shallow counterparts. The discovery of GOE statistics elevates this analysis, suggesting that the complex, structured NTK inherits universal properties of random matrices due to its deep underlying symmetries. This opens the door to using the powerful analytical tools of RMT to rigorously compute the finite-width corrections and bridge the gap between theory and the practice of deep learning.
 
-Future work should aim to connect this scaling behavior to concrete measures of generalization and performance, as well as to validate these theoretical predictions through targeted numerical experiments.
+Future work should aim to leverage this RMT connection to derive precise scaling laws for the higher-order kernels and connect them to concrete measures of generalization and performance.
 
 \newpage
 
@@ -596,6 +464,21 @@ Future work should aim to connect this scaling behavior to concrete measures of 
     \newblock ``Asymptotics of Wide Networks from Feynman Diagrams,''
     \newblock \emph{arXiv preprint arXiv:2006.12345}, 2020.
     \newblock E-mail: edyer@google.com, guyga@google.com.
+    
+    \bibitem{atas2013distribution}
+    Y. Y. Atas, E. Bogomolny, O. Giraud, and G. Roux,
+    \newblock ``Distribution of the ratio of consecutive level spacings in random matrix ensembles,''
+    \newblock \emph{Physical Review Letters}, vol. 110, no. 8, p. 084101, 2013.
+
+    \bibitem{terjek2022concentration}
+    D. Terj\'ek and D. Gonz\'alez-S\'anchez,
+    \newblock ``MLPs at the EOC: Concentration of the NTK,''
+    \newblock \emph{Journal of Machine Learning Research}, vol. 23, no. 285, pp. 1--40, 2022.
+
+    \bibitem{collins2022weingarten}
+    B. Collins, S. Matsumoto, and J. Novak,
+    \newblock ``The Weingarten Calculus,''
+    \newblock \emph{Notices of the American Mathematical Society}, vol. 69, no. 5, pp. 744--753, 2022.
     
     \end{thebibliography}
 

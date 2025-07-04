@@ -7,7 +7,7 @@ au fond c'est ça que ça veut dire , et avec ça on peut deja etudier comment l
 ca nous donne l'etude de o3 et O4 mais ils apparaissent sous une ceratine forme
 en fait on a des formules pour eux qui sont tres longues et qui sont ponderees par le spectre du ntk mais du ntk infinite width
 qui est tres facile a calculer
-de la on peut etudier directment les noyaux et essayer de trouver les scalings associes, combines aux sacling des valeurs propres
+de la on peut etudier directement les noyaux et essayer de trouver les scalings associes, combines aux sacling des valeurs propres
  et on a des insights en fonction de L
  car on a une somme d'une certaine quantité de kernel (qu'on pourrait d'ailleurs etudier separement)
  àopur les etudier separement ça peut etre pratique pour o3 mais ps pour o4,
@@ -129,8 +129,8 @@ donc dans les nouveaux aspects mathémtiques à introduire pour analyser ça on 
 
 
 ce qu'il faut faire :
-traiter les correlations eigenvectors
-verifier le MP pour les scalings inter valeurs propres
+traiter les correlations eigenvectors OK
+verifier le MP pour les scalings inter valeurs propres OK
 
 verifier les scalings dans o3 o4, puis verifier les scalings internes
 implementer o4 en 
@@ -148,12 +148,12 @@ peut etre que la je vais avoir besoin de l'aide d'haizhao pour comprendre vraime
 
 en deuxieme instance : 
 
-tester le NTK en dsrn
+tester le NTK en Deep Super Relu Networks (see haizhao yang refs on google)
 en fait otutes les experimentations on peut les lancer sur le tore et sur espace gaussien
 il faudrait aussi traiter shiijun et rank mmfn ffnn, et aussi pour haizhao en exposant fractionnaire l'approximation
-traiter aussi la dimensionnalité pour le sobolev training
-traiter les experiences des autres codes pour voir ce qu'ils donnent, et traiter le code en jax aussi
-surtout le narrow en creatif sur une vm
+traiter aussi la dimensionnalité pour le sobolev training, la dependance du sectre en la dimension
+traiter les experiences des autres codes pour voir ce qu'ils donnent, et traiter le code en jax aussi pour calculer o4 avec la hessienne du NTK
+surtout le narrow ntk de ntk for deep narrow network (see ref on google)
 ecrire la variable aleatoire du NTK en faisant la somme de chemin à la physicienne (ising ?)
 
 
@@ -161,4 +161,65 @@ ecrire la variable aleatoire du NTK en faisant la somme de chemin à la physicie
 script of what said : 
 
 
+gérer l'erreur ntk standard
 
+
+RASSIFIE :
+Bonjour à tous. Aujourd'hui, je vais vous présenter l'avancement de mes recherches sur l'analyse de la correction du Neural Tangent Kernel, et comment une perspective issue de la théorie des matrices aléatoires nous permet de résoudre un puzzle fondamental sur son comportement.
+
+**Slide: Outline**
+Voici le plan. Je commencerai par présenter l'objectif, qui est de comprendre le scaling de la correction du NTK. Je vous montrerai ensuite comment une analyse directe mène à un puzzle, une contradiction entre la théorie naïve et l'expérience. La solution à ce puzzle passera par la compréhension des composants de la correction, notamment le tenseur $O_4$, puis par une plongée dans la théorie des matrices aléatoires qui nous a révélé une connexion inattendue avec le GOE. Enfin, je lierai ces résultats à des implications plus larges et je conclurai sur les prochaines étapes.
+
+**Slide: The Late-Time NTK Correction**
+L'objet central de notre étude est la correction au NTK à temps long, $\Theta^{(1)}_\infty$. Sa formule, bien que complexe, est la clé pour comprendre comment les réseaux de largeur finie apprennent des features au-delà du régime "lazy". Elle se décompose en deux termes principaux, un terme $T_3$ dépendant d'un tenseur d'ordre 3, et un terme $T_4$ dépendant d'un tenseur d'ordre 4.
+
+**Slide: The NTK Spectrum: A Dichotomy**
+Pour analyser les sommes dans $\Theta^{(1)}_\infty$, il faut d'abord comprendre le spectre du NTK initial. Empiriquement, on observe une dichotomie claire : une unique grande valeur propre $\lambda_1$ qui reste constante avec la profondeur, et un "bulk" de $N-1$ valeurs propres plus petites qui, elles, diminuent avec le nombre de données $N$.
+
+**Slide: The NTK Spectrum: Plots**
+Ces graphiques illustrent bien ce comportement. À gauche, la plus grande valeur propre reste stable quand on augmente la profondeur. À droite, les plus petites valeurs propres du bulk scalent bien linéairement avec la profondeur.
+
+**Slide: Analysis of the $O_3$ Term / $O_4$ Term**
+Une analyse directe de ces termes, en supposant que les tenseurs $O_3$ et $O_4$ sont statistiquement indépendants des vecteurs propres, nous mène à des scalings très rapides en fonction de N. Le terme $T_3$ scalerait comme $N^2$, et le terme dominant de $T_4$ scalerait même comme $N^4$.
+
+**Slide: The Scaling Puzzle**
+Et c'est là qu'est le puzzle. Notre théorie naïve prédit une croissance très rapide en $N^4$, alors que nos expériences montrent un scaling quasi linéaire, bien plus sage. Cette contradiction est au cœur du problème et nous indique que notre hypothèse de départ, l'indépendance, est fausse.
+
+**Slide: The Implication: A Missing Dependency**
+Pour que la théorie colle aux expériences, il faut que la projection des tenseurs sur les vecteurs propres, moyennée sur toutes les directions, ait elle-même une forte dépendance en $N$ qui vient "calmer" cette croissance explosive. Le calcul nous montre que cette moyenne doit décroître comme $1/N^3$ pour que le scaling final soit correct.
+
+**Slide: The Challenge of the O4 Kernel**
+Pour vérifier cela, il faut comprendre le comportement de $O_4$. Une dérivation directe de sa formule est un cauchemar calculatoire. C'est une impasse. Il faut donc une approche plus intelligente.
+
+**Slide: A Key Insight: O4 as the NTK Hessian**
+L'avancée majeure a été de réaliser que ce tenseur $O_4$ est en fait directement lié au Hessien du NTK. Il peut être exprimé comme une double dérivée directionnelle du NTK. Cette formulation est cruciale car elle rend $O_4$ calculable numériquement via des frameworks d'auto-différenciation comme JAX.
+
+**Slide: An Unexpected Discovery: The GOE Connection**
+Mais le vrai déblocage est venu d'une analyse plus profonde. En étudiant les statistiques fines du spectre du NTK, on a fait une découverte surprenante : le "bulk" du spectre obéit parfaitement aux lois de la Théorie des Matrices Aléatoires, et plus spécifiquement, à l'Ensemble Orthogonal Gaussien (GOE).
+
+**Slide: The GOE Fingerprint**
+Ce graphique en est la preuve la plus frappante. L'histogramme bleu, qui représente la distribution des ratios d'espacements entre valeurs propres consécutives de nos données, est parfaitement superposé à la courbe rouge, qui est la prédiction théorique du GOE. C'est une signature non-équivoque.
+
+**Slide: What This Means: Level Repulsion**
+La conséquence du GOE, c'est la "répulsion des niveaux". Contrairement à des valeurs propres tirées au hasard de manière indépendante, les valeurs propres d'une matrice du GOE ont tendance à s'éviter. On quantifie ça avec le ratio des espacements, $r_n$.
+
+**Slide: The GOE Test**
+Pour des valeurs propres non-corrélées, la distribution de ce ratio serait une loi de Poisson. Pour le GOE, elle suit cette formule très caractéristique, qui est exactement ce que nous observons.
+
+**Slide: Solving the Puzzle with RMT**
+Cette découverte est la pierre angulaire de notre solution. Elle nous fournit un modèle statistique rigoureux pour les vecteurs propres du NTK. On peut maintenant remplacer l'hypothèse fausse d'indépendance par un modèle précis où les vecteurs propres sont distribués aléatoirement sur le groupe orthogonal.
+
+**Slide: Weingarten Calculus: The Formal Solution**
+Avec ce modèle, le calcul de la moyenne qui nous posait problème devient une intégrale sur le groupe orthogonal. Et pour calculer ce type d'intégrale, il existe un outil mathématique puissant : le calcul de Weingarten. Il nous donne le scaling exact en $1/N$ qui résout complètement le puzzle des lois d'échelle.
+
+**Slide: The Hessian-NTK Correspondence**
+Les implications de cette découverte vont encore plus loin. On peut montrer que le Hessien de la fonction de perte se décompose en un terme NTK et un terme résiduel.
+
+**Slide: Spectral Equivalence**
+À grande largeur, la contribution de ce terme résiduel au spectre devient négligeable. Par conséquent, le spectre du Hessien devient identique à celui du NTK. Cela signifie que toutes nos découvertes sur le NTK, y compris sa nature GOE, s'appliquent directement à la géométrie du paysage de la perte exploré par l'optimiseur.
+
+**Slide: Summary**
+Pour résumer, nous sommes partis d'un puzzle sur le scaling de la correction du NTK. La clé pour le résoudre fut une découverte inattendue issue de la théorie des matrices aléatoires : le spectre du NTK obéit aux statistiques du GOE. Ce résultat unifie notre compréhension et la lie directement à la géométrie de la fonction de perte.
+
+**Slide: Future Work**
+Les prochaines étapes sont donc claires. Premièrement, passer complètement à la méthode du Hessien implémentée en JAX pour calculer efficacement les termes de la correction. Deuxièmement, comparer ces résultats avec le véritable Hessien du réseau pour valider la correspondance. Et enfin, le plus important, je vais profiter de ma semaine à Paris pour approfondir la théorie derrière cette connexion au GOE et lancer de nouvelles expériences numériques pour la sonder. Merci.

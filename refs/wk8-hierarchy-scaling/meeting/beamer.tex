@@ -89,6 +89,18 @@ The analysis hinges on the empirical spectral structure of the NTK matrix $\Thet
 We use this split to analyze the sums in $T_3$ and $T_4$.
 \end{frame}
 
+\begin{frame}{The Eigenvector of Norms: A Mathematical View}
+\textbf{The NTK's Bi-Homogeneity:} Due to ReLU activations, the NTK has a key scaling property with respect to its two entries:
+\[ K(\lambda x_i, \mu x_j) = \lambda \mu K(x_i, x_j) \]
+\vfill
+\textbf{Matrix Decomposition:} This allows us to decompose the Gram matrix $K$. Let $D$ be the diagonal matrix of norms, $D_{ii}=\|x_i\|$. Then:
+\[ K = D K_u D \]
+where $K_u$ is the kernel of the normalized data $x_i/\|x_i\|$.
+\vfill
+\begin{alertblock}{The Consequence}
+The principal eigenvector of this composite matrix $K$ is mathematically constrained to be aligned with $D\mathbf{1}$, which is precisely the vector of data norms.
+\end{alertblock}
+\end{frame}
 
 \begin{frame}{The NTK Spectrum: Plots}
    
@@ -155,9 +167,9 @@ The overall scaling is the product of the pre-factor and the number of terms:
 
 \section{Reconciling Theory and Experiment}
 
-\begin{frame}{Theoretical vs. Empirical Scaling}
+\begin{frame}{The Scaling Puzzle}
 \textbf{The Puzzle:} Our analysis gives raw scalings that grow rapidly with $N$, while experiments show a much milder, near-linear dependence.
-\begin{columns}
+\begin{columns}[T]
 \column{0.5\textwidth}
 \textbf{Theoretical Prediction}
 \begin{itemize}
@@ -167,66 +179,143 @@ The overall scaling is the product of the pre-factor and the number of terms:
 \column{0.5\textwidth}
 \textbf{Empirical Observation}
 \begin{itemize}
-    \item $\|K - K_\infty\| \sim \Order(NL)$
+    \item $\|K_{emp} - K_\infty\| \sim \Order(NL)$
 \end{itemize}
 \end{columns}
-\vspace{1cm}
+\vfill
 \textbf{The Missing Piece:}
-This implies that the averaged tensor components must themselves scale with $N$.
+This implies our "independence" assumption was wrong. The averaged tensor components must themselves have a strong scaling dependency on $N$.
+\end{frame}
+
+\begin{frame}{The Implication: A Missing Dependency}
+For the theory to match experiments, the averaged tensor projection must decay rapidly.
 \[
-\mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})] \quad \text{must have a strong decay with } N.
+\mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})]
 \]
-For $T_4$ to be consistent with experiments, we would need:
+\vfill
+For $T_4$ to be consistent, this term must scale as:
 \[
-\mathbb{E}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})] \sim \Order(L^3/N^3) \implies T_4 \sim \Order\left(\frac{N^4}{L^2} \cdot \frac{L^3}{N^3}\right) = \Order\left(\frac{N L}{L^2}\right)
+\mathbb{E}[\dots] \sim \Order\left(\frac{L^3}{N^3}\right)
 \]
+This would correctly predict $T_4 \sim \Order\left(\frac{N^4}{L^2} \cdot \frac{L^3}{N^3}\right) = \Order(NL)$.
 \end{frame}
 
-\section{Deeper Dive: RMT Framework}
+\section{The Path to a Solution}
 
-\begin{frame}{The NTK as a Spiked Random Matrix}
-We formalize this using Random Matrix Theory.
+\begin{frame}{The Challenge of the $O_4$ Kernel}
+To understand the scaling, we must understand the $O_4$ tensor.
+\vfill
+A direct, term-by-term derivation is theoretically possible but leads to an intractably complex expression, making analysis impossible.
+\vfill
+We need a smarter way to compute and analyze $O_4$.
+\end{frame}
+
+\begin{frame}{A Key Insight: $O_4$ as the NTK Hessian}
+A crucial insight simplifies the problem immensely.
+\vfill
+The $O_4$ tensor can be expressed as the Hessian of the NTK ($K^{(2)}$) itself.
+\begin{proposition}
+$O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \left( \nabla_\theta f_\gamma \right)^T \left( \nabla^2_\theta K^{(2)}_{\alpha\beta} \right) \left( \nabla_\theta f_\delta \right)$
+\end{proposition}
+\vfill
+This makes $O_4$ computationally tractable using automatic differentiation frameworks like JAX.
+\end{frame}
+
+\section{A Deeper Look: Random Matrix Theory}
+
+\begin{frame}{An Unexpected Discovery: The GOE Connection}
+A detailed analysis of the NTK's spectral statistics revealed a deep connection with Random Matrix Theory (RMT).
+\vfill
+Specifically, the distribution of spacings for the $N-1$ eigenvalues of the NTK \textbf{bulk} perfectly matches the predictions for the Gaussian Orthogonal Ensemble (GOE).
+\end{frame}
+
+\begin{frame}{The GOE Fingerprint}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{consecutive_spacing_ratio_dist_N64_D10_M20_L2.png}
+        \caption{The empirical spacing ratio distribution (blue) is perfectly predicted by the GOE theoretical curve (red), a tell-tale sign of RMT statistics.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{What This Means: Level Repulsion}
+The GOE is the universality class for large real symmetric random matrices.
+\vfill
+A key feature is "level repulsion": eigenvalues are not independent and tend to repel each other.
+\vfill
+This is tested by the distribution of the ratio of consecutive spacings, $r_n = s_n / s_{n-1}$, where $s_n = \lambda_{n+1} - \lambda_n$.
+\end{frame}
+
+\begin{frame}{The GOE Test}
+For uncorrelated eigenvalues, the distribution of $r$ would be Poissonian.
+\vfill
+For the GOE, it follows a very specific and characteristic distribution.
+\begin{equation}
+P_{\text{GOE}}(r) = \frac{27}{8} \frac{r + r^2}{(1 + r + r^2)^{5/2}}
+\end{equation}
+\vfill
+This provides an extremely sensitive fingerprint for GOE statistics.
+\end{frame}
+
+\begin{frame}{Solving the Puzzle with RMT}
+The GOE discovery provides the solid theoretical foundation we were missing.
+\vfill
+It gives us a rigorous statistical model for the $N-1$ bulk eigenvectors. Being orthogonal to the constant mode $\hat{e}_1$, they are constrained to live on the hyperplane where vector components sum to zero.
+\vfill
+We model them as being randomly distributed in this subspace, which corresponds to the Haar measure on $O(N-1)$.
+\end{frame}
+
+\begin{frame}{Weingarten Calculus: The Formal Solution}
+We can now formally compute the required tensor averages.
+\vfill
+The expectation becomes an integral over the orthogonal group:
+\begin{equation}
+\mathbb{E}[\dots] = \int_{U \in O(N-1)} (u_i^T O_4 u_j) (v^T u_i) (v^T u_j) d\mu(U)
+\end{equation}
+\vfill
+\textbf{Weingarten Calculus} is a method to compute moments of matrix variables distributed according to the Haar measure of compact groups. It provides the exact $1/N$ expansion to solve the integral, making the problem analytically and numerically tractable.
+\end{frame}
+
+\section{Broader Implications}
+
+\begin{frame}{The Hessian-NTK Correspondence}
+This RMT framework has even broader implications for the loss landscape.
+\vfill
+The Hessian of the loss can be decomposed as:
+\begin{equation}
+H_{\mu\nu} = \sum_{(x,y)}\left[\underbrace{\frac{\partial^{2}\mathcal{L}}{\partial f^{2}}\frac{\partial f}{\partial\theta^{\mu}}\frac{\partial f}{\partial\theta^{\nu}}}_{\mathcal{A}_{\mu\nu}}
++ \underbrace{\frac{\partial\mathcal{L}}{\partial f}\frac{\partial^{2}f}{\partial\theta^{\mu}\partial\theta^{\nu}}}_{\mathcal{B}_{\mu\nu}}\right]
+\end{equation}
+The first term, $\mathcal{A}$, is the NTK. The second, $\mathcal{B}$, is a residual term.
+\end{frame}
+
+\begin{frame}{Spectral Equivalence}
+At large widths, the residual term's contribution to the spectrum vanishes.
+\begin{equation}
+\mathrm{Tr}(H^k) \approx \mathrm{Tr}(\mathcal{A}^k) + \mathrm{Tr}(\mathcal{B}^k) \quad \text{and} \quad \mathrm{Tr}(\mathcal{B}^k) \to 0
+\end{equation}
+\vfill
+The spectrum of the Hessian becomes identical to the spectrum of the NTK.
+\vfill
+This means all our RMT findings for the NTK apply directly to the geometry of the loss function.
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}{Summary}
+We began with a puzzle in the scaling of the NTK correction.
+\vfill
+The solution came from an unexpected discovery: the NTK's spectrum obeys GOE statistics from Random Matrix Theory.
+\vfill
+This provides a powerful framework to analyze learning dynamics and explains the geometry of the loss landscape.
+\end{frame}
+
+\begin{frame}{Future Work}
+The next steps are clear and focused:
 \begin{itemize}
-    \item The NTK, $\Theta$, is viewed as a sample covariance matrix.
-    \item Without data structure, its spectrum follows the \textbf{Marchenko-Pastur (MP) law}. This is the "structural noise" of the network.
-    \item With data structure, the NTK becomes a \textbf{spiked model}:
-    \[
-    \Theta \approx \underbrace{\Theta_{\text{MP}}}_{\text{Bulk}} + \underbrace{\sum_{i} \sigma_i v_i v_i^T}_{\text{Spikes}}
-    \]
-    The spikes $v_i$ encode learnable features.
+    \item \textbf{Switch to the Hessian method in JAX} to efficiently compute the correction terms.
+    \item \textbf{Compare with the full NN Hessian} to validate the correspondence and the approximations made.
+    \item \textbf{Deeper theoretical investigation of the GOE connection.} I will use my week in Paris for dedicated reading and new numerical experiments on this topic.
 \end{itemize}
-\end{frame}
-
-%placeholder for image of NTK spectrum
-\begin{frame}{The NTK Spectrum}
-\begin{figure}
-    \centering
-    \includegraphics[width=0.8\textwidth]{ntk_spectrum.png}
-\end{figure}
-\end{frame}
-
-\begin{frame}{The BBP Phase Transition and Feature Learning}
-\textbf{The Core Idea:} Feature learning is a phase transition.
-\begin{itemize}
-    \item A feature (a spike) only emerges from the bulk if its signal strength $\sigma_i$ exceeds a critical threshold.
-    \item This is the \textbf{Baik-Ben Arous-Péché (BBP) phase transition}.
-    \item \textbf{Lazy Regime:} No signal is strong enough. No spikes emerge. The network only interpolates using the random modes of the kernel.
-    \item \textbf{Feature Learning Regime:} At least one signal is strong enough. A spike emerges, its eigenvector aligns with the data structure, and the network actively learns this feature.
-\end{itemize}
-\end{frame}
-
-\begin{frame}{The Effect of Depth L on Learning}
-How does depth $L$ affect this transition?
-\begin{itemize}
-    \item Increasing $L$ increases the "structural noise" of the network.
-    \item In RMT terms, the spectrum of the deep kernel is the free convolution of the layer kernels' spectra.
-    \item This \textbf{widens the MP bulk}, pushing its edge $\lambda_{\max}^{\text{bulk}}$ to higher values.
-\end{itemize}
-\begin{alertblock}{The Consequence of Depth}
-\[ L \uparrow \quad \implies \quad \text{BBP Threshold} \uparrow \]
-A deeper network requires a \textbf{stronger signal} from the data to trigger the BBP transition and learn a feature.
-\end{alertblock}
-This suggests a "sweet spot" for depth, balancing expressivity against the rising threshold for feature learning.
 \end{frame}
 
 \end{document}
