@@ -145,6 +145,19 @@ si lex experiences disent uqelque chose et sinon dire que la semaine prochaine j
 pas oublier que les correlations qu'on calcule c pas grave à conjugaison pres (dans la base interne)
 
 peut etre que la je vais avoir besoin de l'aide d'haizhao pour comprendre vraiment le truc de l'optimization bound
+verifier pour d'autres densités non uniformes
+
+
+
+
+
+
+
+
+
+
+
+
 
 en deuxieme instance : 
 
@@ -162,6 +175,23 @@ script of what said :
 
 
 gérer l'erreur ntk standard
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 RASSIFIE :
