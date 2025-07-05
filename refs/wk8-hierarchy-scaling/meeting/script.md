@@ -168,7 +168,7 @@ traiter aussi la dimensionnalité pour le sobolev training, la dependance du sec
 traiter les experiences des autres codes pour voir ce qu'ils donnent, et traiter le code en jax aussi pour calculer o4 avec la hessienne du NTK
 surtout le narrow ntk de ntk for deep narrow network (see ref on google)
 ecrire la variable aleatoire du NTK en faisant la somme de chemin à la physicienne (ising ?)
-
+euh l'aspect relu doit etre careful parce que un peu complexe la finite width comme dit par ethan dyer
 
 
 script of what said : 
@@ -178,6 +178,86 @@ gérer l'erreur ntk standard
 
 
 
+Personnel :
+
+Okay so today i'll show you some things i've discovered, the path that lead to a weird discovery related too 
+random amtrix theory for the random kernel NTK matrix in the infinite width setup,
+i'll remind you first what i've said the last week about my intuition for finite width NTK corrections
+
+
+When you have a finite width you call it M, the 1/M expansion of the NTK make you just adding
+this kernel, where x is a couple of data entry. for that you have to compute those kernels.
+previously i've computed by hand and made a proof of what K3 looks like.
+
+This week i've made a new thing I thought was impossible, I derived K4, for that you have to carefully apply chain rules
+and apply rewriting rules to K3, it led me to a formula that is about 4 pages long, you can find it in K4 derivation,
+it was so long overleaf refused to compile it so I had to carefully modify my notations so that it fits in.
+
+
+It is not the only way to compute those, in fact I've remarked something that practically no one talked about,
+you can compute K4 via the hessian, and K3 the same, via the autograd in JAX with the NTK that is implemented
+in the library neural-tangents. But I've remarked this for K4 after getting the derivation, this is fairly simple you just
+expand the gradient of K3 with its definition. I'll do that the next week because it's practically impossible to implement
+efficiently K4 otherwise 
+
+I recall you the scalings of other eigenvalues, for normalized data you have 1 big eigenvalue that correspond
+to the constant vector, i've confirmed it experimentally and if you have a data distribution, it's just
+and approximation of the 1st eigenvector of the kernel operator that is constant
+
+for the others, we call it the bulk, and you can see that it is very localized, a bit uniformly distributed in the log space
+but completely localized and far away for the 1st eigenvalue
+
+one other thing i've remarked that no one talked about is that the NTK is bi homogeneous for ReLu networks, so that
+you can factorize the norm, so that this shows the principal eigenvector in the general case. is the vector of distances, which is And that is explained since you diagonalize with orthogonal matrices, so that any network you train on a general dataset
+should before separate the distances due to homogeneity and adapt its weigth to compensate the norm, before learning
+separation features for any function. I think that's a small but valuable insight, i've seen it nowhere.
+
+
+You can see there the scaling, for the eigenvalues. What we want is a scaling law with respect to N and L of the finite width 
+correction
+
+My insight and the hypothesis I wanted to write investigate was to tackle this finite width correction theoretically to find and explain the polynomial scaling law i've seen numerically 2 weeks ago. Especially with N because with L you can
+explain it very practically (but the computations are hard) that you have between a linear and quadratic scaling wrt L
+due to the sum of a PSD matrices (or PSD kernels) that scales with L. I prefered not to investigate this first
+because you have to carefully compute some norms of products of random matrices, that lead to compute lyapunov exponents,
+and I did not want to do it first. Because the 1st thing that I know is the scaling wrt L and N of the eigenvalues
+
+This makes me able to separates the sums with different eigenvalues scalings, and explain each term independantly
+
+and there have been 1 thing, you can see some forms that are bilinear and quadrilinear in the coordinates of the eigenvectors
+of the NTK matrix in the infinite width setup. So there are some means to try to statistically investigate that.
+I say that because my intuition was that, the bulk make me think that the eigenvectors can be statistically distributed
+each with the same distribution in the intersection of the hyperplane of sum 0 and the unit sphere.
+And with that I just need to compute the mean of O3 and O4 entries wrt data distribution, and that's it
+So that i can rewrite the sum as an expectation, with 2 and 4 moments of thos eigenvectors distributions, that ponderate
+means of O3 and O4
+but i did not know this distribution. uniform or not.
+
+
+I say that because having the same mean with each term can explain the exponent in the scaling law wrt N and L then
+when I compute this mean matrix entry for O3 and O4
+
+
+So now i'll present what I found, I found that the eigenvalues of the empirical relative spacings for the eigenvalues
+is completely predicted by the Gaussian orthogonal ensemble equivalent. My methodology first was
+to find some quantities that are independant of the scaling of L and input dimension. And it was the relative spacings
+
+The theory says that for gaussian random matrices, the eigenvalues relative spacings, you substract the ordered eigenvalues
+and you compute their ratios so that it is scale independant
+
+The theory says that this distribution is completely deterministic if you make N goes to the infinity,
+and that is dicted by this non trivial curve
+
+This is a completely new thing, and I think is related to the hessian and the local statistics
+of the network, and the fact that hessians and NTK matrix have a spectrum that is very close when the width goes to infinity
+
+
+I won't go through the math of that because this work on the hessian is a bit complicated and freshly new for me
+but this is a great path, because from that I can compute explicitely some means if the orthogonal matrix
+behave as the same as a random gaussian matrix, this is I think very interesting, i've seen it nowhere about the NTK matrix
+and can be fully explaianed by the hessian behavior, like the very link between NTK and hessian is very enforced now
+
+One thing I wanted to show is that for the NTK matrix in the infinite setup
 
 
 

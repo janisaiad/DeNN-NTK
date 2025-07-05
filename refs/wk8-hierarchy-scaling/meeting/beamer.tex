@@ -67,6 +67,27 @@ Our goal is to understand the scaling of the first-order, late-time correction t
 
 \end{frame}
 
+
+\begin{frame}{The NTK Spectrum: A Dichotomy}
+    Where
+    \begin{equation}
+        K^{(3)}_t(x_\alpha, x_\beta, x_\gamma) := \langle \nabla_\theta K^{(2)}_t(x_\alpha, x_\beta), \nabla_\theta f_t(x_\gamma) \rangle
+    \end{equation}
+    \begin{equation}
+            K^{(4)}_t(x_\alpha, x_\beta, x_\gamma, x_\delta) := \langle \nabla_\theta K^{(3)}_t(x_\alpha, x_\beta, x_\gamma), \nabla_\theta f_t(x_\delta) \rangle
+    \end{equation}
+\end{frame}
+
+
+
+\begin{frame}{The Challenge of the $O_4$ Kernel}
+    To understand the scaling, we must understand the $O_4$ tensor.
+    \vfill
+    A direct, term-by-term derivation is theoretically possible but leads to an intractably complex expression, making analysis impossible.
+    \vfill
+    We need a smarter way to compute and analyze $O_4$.
+\end{frame}
+    
 \begin{frame}{The NTK Spectrum: A Dichotomy}
     \begin{center}
         To understand the overall scaling, we must analyze the scaling of its components, $T_3$ and $T_4$.
@@ -89,6 +110,13 @@ The analysis hinges on the empirical spectral structure of the NTK matrix $\Thet
 We use this split to analyze the sums in $T_3$ and $T_4$.
 \end{frame}
 
+
+\begin{frame}{The NTK Spectrum: A Dichotomy}
+    An example for 32 data points,
+    \includegraphics[width=\textwidth]{png/eigenvalue_dist_N32_D20_M10_L2.png}
+\end{frame}
+
+
 \begin{frame}{The Eigenvector of Norms: A Mathematical View}
 \textbf{The NTK's Bi-Homogeneity:} Due to ReLU activations, the NTK has a key scaling property with respect to its two entries:
 \[ K(\lambda x_i, \mu x_j) = \lambda \mu K(x_i, x_j) \]
@@ -106,11 +134,11 @@ The principal eigenvector of this composite matrix $K$ is mathematically constra
    
 \begin{columns}[T] % Aligns top of columns
     \column{0.6\textwidth}
-        \includegraphics[width=\textwidth]{largest_eigenvalue_vs_L_infinite.png}
+        \includegraphics[width=\textwidth]{png/largest_eigenvalue_vs_L_infinite.png}
         \captionof{figure}{\tiny Largest eigenvalue vs. Depth L.}
     
     \column{0.6\textwidth}
-        \includegraphics[width=\textwidth]{kth_eigenvalue_vs_L_infinite.png}
+        \includegraphics[width=\textwidth]{png/kth_eigenvalue_vs_L_infinite.png}
         \captionof{figure}{\tiny Smallest eigenvalues vs. Depth L.}
     \end{columns}
 \end{frame}
@@ -202,25 +230,6 @@ This would correctly predict $T_4 \sim \Order\left(\frac{N^4}{L^2} \cdot \frac{L
 
 \section{The Path to a Solution}
 
-\begin{frame}{The Challenge of the $O_4$ Kernel}
-To understand the scaling, we must understand the $O_4$ tensor.
-\vfill
-A direct, term-by-term derivation is theoretically possible but leads to an intractably complex expression, making analysis impossible.
-\vfill
-We need a smarter way to compute and analyze $O_4$.
-\end{frame}
-
-\begin{frame}{A Key Insight: $O_4$ as the NTK Hessian}
-A crucial insight simplifies the problem immensely.
-\vfill
-The $O_4$ tensor can be expressed as the Hessian of the NTK ($K^{(2)}$) itself.
-\begin{proposition}
-$O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \left( \nabla_\theta f_\gamma \right)^T \left( \nabla^2_\theta K^{(2)}_{\alpha\beta} \right) \left( \nabla_\theta f_\delta \right)$
-\end{proposition}
-\vfill
-This makes $O_4$ computationally tractable using automatic differentiation frameworks like JAX.
-\end{frame}
-
 \section{A Deeper Look: Random Matrix Theory}
 
 \begin{frame}{An Unexpected Discovery: The GOE Connection}
@@ -232,7 +241,7 @@ Specifically, the distribution of spacings for the $N-1$ eigenvalues of the NTK 
 \begin{frame}{The GOE Fingerprint}
     \begin{figure}
         \centering
-        \includegraphics[width=0.8\textwidth]{consecutive_spacing_ratio_dist_N64_D10_M20_L2.png}
+        \includegraphics[width=0.8\textwidth]{png/consecutive_spacing_ratio_dist_N64_D10_M20_L2.png}
         \caption{The empirical spacing ratio distribution (blue) is perfectly predicted by the GOE theoretical curve (red), a tell-tale sign of RMT statistics.}
     \end{figure}
 \end{frame}
@@ -255,6 +264,16 @@ P_{\text{GOE}}(r) = \frac{27}{8} \frac{r + r^2}{(1 + r + r^2)^{5/2}}
 \vfill
 This provides an extremely sensitive fingerprint for GOE statistics.
 \end{frame}
+
+
+\begin{frame}{The GOE Fingerprint}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{png/consecutive_spacing_ratio_dist_N64_D10_M20_L2.png}
+        \caption{The empirical spacing ratio distribution (blue) is perfectly predicted by the GOE theoretical curve (red), a tell-tale sign of RMT statistics.}
+    \end{figure}
+\end{frame}
+
 
 \begin{frame}{Solving the Puzzle with RMT}
 The GOE discovery provides the solid theoretical foundation we were missing.
