@@ -1,0 +1,70 @@
+\documentclass{beamer}
+\usetheme{Antibes}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\title{Reconstruction of Neural Tangent Kernel (NTK) Calculations for an MMNN Network}
+\author{Analysis of provided notes}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Introduction and Definitions}
+\begin{itemize}
+\item Derivation of neural tangent kernel (NTK) for an MMNN network
+\item Hypothesis: only external layer parameters are trained
+\item An MMNN block: $h(x) = A\sigma(Wx+b) + c$
+\item NTK defined by: $K_{NTK}(x, x') = \mathbb{E}_{\theta_{init}} \left[ \left\langle \nabla_{\theta} h(x), \nabla_{\theta} h(x') \right\rangle \right]$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Kernel Calculation for One Layer}
+\begin{itemize}
+\item Gaussian variables: $g_1 = w^T x + b$, $g_2 = w^T x' + b$
+\item Distribution: $w \sim \mathcal{N}(0, I)$, $b \sim \mathcal{N}(0, \sigma_b^2)$
+\item Calculation of $\mathbb{E}_{w,b} [\sigma(g_1) \sigma(g_2)]$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Simplified Case}
+For $\sigma_b=0$ and $\|x\|=\|x'\|=1$:
+\begin{equation}
+\mathbb{E}[\text{ReLU}(Z_1)\text{ReLU}(Z_2)] = \frac{1}{2\pi} (\sqrt{1-\rho^2} + (\pi - \arccos\rho)\rho)
+\end{equation}
+where $\rho = \langle x, x' \rangle$
+\end{frame}
+
+\begin{frame}{General Non-Centered Case}
+\begin{itemize}
+\item Decomposition into three terms: $I = \sigma^2 I_2 + 2\mu\sigma I_1 + \mu^2 I_0$
+\item $I_0$: Probability (bivariate CDF)
+\item $I_1$: First order moment
+\item $I_2$: Cross second order moment
+\end{itemize}
+\end{frame}
+
+\begin{frame}{NTK for Multi-Layer Networks}
+\begin{itemize}
+\item Network: $f = h_L \circ h_{L-1} \circ \dots \circ h_1$
+\item Recursive relation:
+\begin{equation}
+K^{(L)}(x,x') = K^{(L-1)}(x,x') + \left\langle \nabla_{\theta_L} h_L(f^{(L-1)}(x)), \nabla_{\theta_L} h_L(f^{(L-1)}(x')) \right\rangle
+\end{equation}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Conceptual Notes}
+\begin{itemize}
+\item Decomposition via inclusion-exclusion principle
+\item Scale interactions
+\item Data signature
+\item Homogeneity of activation function
+\end{itemize}
+\end{frame}
+
+\end{document}
