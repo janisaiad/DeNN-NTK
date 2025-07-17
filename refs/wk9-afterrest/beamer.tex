@@ -3,9 +3,10 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{amsfonts}
 
-\title{Reconstruction of Neural Tangent Kernel (NTK) Calculations for an MMNN Network}
-\author{Analysis of provided notes}
+\title{Neural Tangent Kernel Analysis of Multi-component and Multi-layer Neural Networks (MMNNs)}
+\author{Based on the provided report}
 \date{\today}
 
 \begin{document}
@@ -14,56 +15,131 @@
 \titlepage
 \end{frame}
 
-\begin{frame}{Introduction and Definitions}
+\begin{frame}{Introduction \& Goal}
 \begin{itemize}
-\item Derivation of neural tangent kernel (NTK) for an MMNN network
-\item Hypothesis: only external layer parameters are trained
-\item An MMNN block: $h(x) = A\sigma(Wx+b) + c$
-\item NTK defined by: $K_{NTK}(x, x') = \mathbb{E}_{\theta_{init}} \left[ \left\langle \nabla_{\theta} h(x), \nabla_{\theta} h(x') \right\rangle \right]$
+    \item \textbf{Objective:} To understand the local optimization landscape of MMNNs.
+    \item \textbf{Method:} Analyze the Neural Tangent Kernel (NTK) in the infinite-width limit.
+    \item \textbf{Core Hypothesis (S1):} Only the external linear layer parameters ($\tilde{\bm{A}}$) are trained. The internal parameters ($\tilde{\bm{W}}$) defining the basis functions are randomly initialized and fixed.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Kernel Calculation for One Layer}
+\begin{frame}{MMFN Architecture: Single Layer}
+A single layer is a linear combination of random basis functions:
+\begin{equation*}
+    \bmh(\bm{x}) = \bm{A} \sigma(\bm{W}\bm{x} + \bm{b}) + \bm{c}
+\end{equation*}
+\vspace{1em}
+Using an augmented representation to absorb the biases:
+\begin{equation*}
+    \bmh(\bm{x}) = \tilde{\bm{A}}
+    \begin{bmatrix}
+        \sigma(\tilde{\bm{W}}\tilde{\bm{x}}) \\
+        1
+    \end{bmatrix}
+    \quad \text{where} \quad
+    \begin{cases}
+      \tilde{\bm{x}} = [\bm{x}^{\top}, 1]^{\top} \\
+      \tilde{\bm{W}} = [\bm{W}, \bm{b}] \\
+      \tilde{\bm{A}} = [\bm{A}, \bm{c}]
+    \end{cases}
+\end{equation*}
 \begin{itemize}
-\item Gaussian variables: $g_1 = w^T x + b$, $g_2 = w^T x' + b$
-\item Distribution: $w \sim \mathcal{N}(0, I)$, $b \sim \mathcal{N}(0, \sigma_b^2)$
-\item Calculation of $\mathbb{E}_{w,b} [\sigma(g_1) \sigma(g_2)]$
+    \item Each output $\bmh[i]$ is a \textit{component}.
+    \item The fixed $\sigma(\tilde{\bm{W}}\tilde{\bm{x}})$ acts as a basis.
+    \item The trainable $\tilde{\bm{A}}$ learns the coefficients for that basis.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Simplified Case}
-For $\sigma_b=0$ and $\|x\|=\|x'\|=1$:
+\begin{frame}{Inspiration: Function Decomposition}
+\begin{itemize}
+    \item MMNNs are inspired by a "divide and conquer" strategy for complex functions.
+    \item \textbf{N-Dimensional Decomposition Theorem:} Any function on a hyperrectangle can be decomposed via the principle of inclusion-exclusion. The 1D case is the simplest version of this.
+    \begin{equation*}
+    \resizebox{\hsize}{!}{$f(\bm{x}) = \sum_{S \subseteq \{1, \dots, d\}} (-1)^{d-|S|} \sum_{\bm{j}_{\bar{S}}} \left( \mathcal{D}_S \left[ f(\cdot, \bm{x}_{\bar{S}, \bm{j}_{\bar{S}}}) \right] (\bm{x}_S) \right)$}
+    \end{equation*}
+    \item The fixed weights $\tilde{\bm{W}}$ create a basis analogous to partitioning the domain (the operators $\mathcal{D}_S$).
+    \item The trainable weights $\tilde{\bm{A}}$ learn the coefficients, analogous to approximating the simpler function pieces on the sub-domains.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Analysis Setup: Key Assumptions}
+\begin{block}{Activation Function}
+    We focus on \textbf{ReLU}, as its positive-homogeneity simplifies kernel computations.
+\end{block}
+
+\begin{block}{Initialization Strategy ($n \to \infty$)}
+\begin{itemize}
+    \item \textbf{Inner Weights $\tilde{\bm{W}}$:} Drawn from an order-one distribution. This is crucial for creating a stable partition of the input space.
+    \item \textbf{Outer Weights $\tilde{\bm{A}}$:} Scaled by $1/\sqrt{n}$. This is essential for the NTK theory, ensuring convergence to a well-behaved Gaussian Process.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Single-Layer NTK: From Sum to Expectation}
+\begin{alertblock}{Focus of this Analysis}
+The following derivation is exclusively for a \textbf{single-layer MMFN}. The multi-layer case will be discussed at the end as future work.
+\end{alertblock}
+The kernel is the sum of gradient products over trainable parameters ($\{A_j\}, c$). For a single output MMFN:
+\begin{equation*}
+    h(\bm{x}) = \frac{1}{\sqrt{n}} \sum_{j=1}^n A_j \sigma(\bm{w}_j^\top \bm{x} + b_j) + c
+\end{equation*}
+In the infinite-width limit ($n \to \infty$), the Law of Large Numbers gives:
 \begin{equation}
-\mathbb{E}[\text{ReLU}(Z_1)\text{ReLU}(Z_2)] = \frac{1}{2\pi} (\sqrt{1-\rho^2} + (\pi - \arccos\rho)\rho)
+    K_{NTK}(\bm{x}, \bm{x}') = \mathbb{E}_{\bm{w},b} \left[ \sigma(\bm{w}^\top \bm{x} + b)\sigma(\bm{w}^\top \bm{x}' + b) \right] + 1
 \end{equation}
-where $\rho = \langle x, x' \rangle$
 \end{frame}
 
-\begin{frame}{General Non-Centered Case}
+\begin{frame}{Integral Formulation \& Parameter Mapping}
+The expectation is an integral over the parameter space of $(\bm{w}, b)$.
 \begin{itemize}
-\item Decomposition into three terms: $I = \sigma^2 I_2 + 2\mu\sigma I_1 + \mu^2 I_0$
-\item $I_0$: Probability (bivariate CDF)
-\item $I_1$: First order moment
-\item $I_2$: Cross second order moment
+    \item We perform a change of variables from the high-dimensional parameter space to the 2D pre-activation space $(g_1, g_2)$.
+    \item This maps the problem to an expectation over a 2D bivariate Gaussian.
+\end{itemize}
+\begin{block}{Bivariate Gaussian Parameters}
+\begin{itemize}
+    \item \textbf{Means:} $\mu = \mu_b$
+    \item \textbf{Variances:} $\sigma_1^2 = \bm{x}^\top \Sigma_w \bm{x} + \sigma_b^2$
+    \item \textbf{Covariance:} $\text{Cov}(g_1, g_2) = \bm{x}^\top \Sigma_w \bm{x}' + \sigma_b^2$
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Comparison with Standard FCNN Kernel}
+\begin{itemize}
+    \item The NTK for a standard 1-layer FCNN often assumes centered pre-activations: $\mathbb{E}_{\bm{w}}[\sigma(\bm{w}^\top\bm{x})\sigma(\bm{w}^\top\bm{x}')]$.
+    \item \textbf{The key difference for MMFN:} The random, non-trainable bias $b$ is \textit{inside} the activation function.
+    \item This makes the pre-activations non-centered (if $\mu_b \neq 0$) and leads to a more complex, but richer, kernel calculation.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{NTK for Multi-Layer Networks}
+\begin{frame}{The Final Result: Analytical NTK}
+\begin{theorem}[NTK for a Single-Layer ReLU MMFN]
+The expectation $\mathbb{E}[\text{ReLU}(g_1)\text{ReLU}(g_2)]$ for jointly Gaussian pre-activations $(g_1, g_2)$ is:
+\begin{equation*}
+\resizebox{0.9\hsize}{!}{$\mathbb{E}[\sigma(g_1)\sigma(g_2)] = \sigma_1\sigma_2 \cdot I_{12} + \mu_1\sigma_2 \cdot I_{01} + \mu_2\sigma_1 \cdot I_{10} + \mu_1\mu_2 \cdot I_{00}$}
+\end{equation*}
+The terms $I_{ij}$ are moments of standardized bivariate normal variables $(Z_1, Z_2)$ with thresholds $a_{1,2} = -\mu_{1,2}/\sigma_{1,2}$ and correlation $\rho$.
+For the symmetric case ($a_1=a_2=a$), these terms are:
 \begin{itemize}
-\item Network: $f = h_L \circ h_{L-1} \circ \dots \circ h_1$
-\item Recursive relation:
-\begin{equation}
-K^{(L)}(x,x') = K^{(L-1)}(x,x') + \left\langle \nabla_{\theta_L} h_L(f^{(L-1)}(x)), \nabla_{\theta_L} h_L(f^{(L-1)}(x')) \right\rangle
-\end{equation}
+    \item $I_0 = \mathbb{E}[\mathbf{1}_{Z>a, Z'>a}] = L(-a, -a; \rho)$
+    \item $I_1 = \mathbb{E}[Z \cdot \mathbf{1}_{Z>a, Z'>a}] = (1+\rho)\phi(a)\Phi\left(a\sqrt{\frac{1-\rho}{1+\rho}}\right)$
+    \item $I_2 = \mathbb{E}[Z Z' \cdot \mathbf{1}_{Z>a, Z'>a}] = \rho L(-a, -a; -\rho) + \phi(a, a; \rho)$
 \end{itemize}
+
+\end{theorem}
 \end{frame}
 
-\begin{frame}{Conceptual Notes}
+\begin{frame}{Final Notes}
+\vspace{0.5em}
+where $\phi(z) = \frac{1}{\sqrt{2\pi}}e^{-z^2/2}$, $\Phi(z) = \int_{-\infty}^z \phi(t)dt$, and $L(a,b;\rho) = \int_{-\infty}^a\int_{-\infty}^b \phi(z_1,z_2;\rho)dz_1dz_2$.
+\end{frame}
+
+\begin{frame}{Future Work: The Multi-Layer Case}
 \begin{itemize}
-\item Decomposition via inclusion-exclusion principle
-\item Scale interactions
-\item Data signature
-\item Homogeneity of activation function
+    \item The analysis for a deep MMNN builds upon the single-layer kernel via a recursive formula.
+    \item The kernel at layer $L$ depends on the kernel from layer $L-1$.
+    \item The detailed computation for this recursive case, especially for ResMMNNs, is significantly more complex and is left for future work.
+    \item This single-layer derivation serves as the essential base case.
 \end{itemize}
 \end{frame}
 
