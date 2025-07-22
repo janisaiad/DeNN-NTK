@@ -1,7 +1,7 @@
-# Project Name
+# Deeper or wider ?
 
 ## Description
-A clear and concise description of what this project does and what it is for.
+We investigate wether deeper or wider is better for NNs optimization under the NTK's perspective
 
 ## Table of Contents
 - [Installation](#installation)
