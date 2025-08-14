@@ -139,6 +139,10 @@ The squared norms, `||x_1||^2` and `||y_1||^2`, together follow a **Kibble distr
 
 And the most amazing part? The orientation of the vectors, which is related to the correlation `rho_1`, is completely **independent** of their lengths, which are the norms. This statistical independence is a wonderful result that makes the whole analysis possible.
 
+This is very important because I do all of this work in order to be able to compute a mean NTK value ! and this mean NTK value
+is very tractable NOW that we have this formula because of independents variable, this was the main focus of my work and this is a great
+coincidence.
+
 **Part 6: The Conclusion - No Curse of Dimensionality**
 
 So what does this all mean, especially when we think about the rank `r` of that bottleneck layer?
@@ -149,7 +153,21 @@ I studied what happens to these Fisher and Kibble distributions when the rank `r
 
 The conclusion is this: there is no "curse of dimensionality" here. As the rank `r` of our bottleneck layer grows, the random parts of our NTK become more predictable and concentrate around their mean values. The randomness is controlled, and the signal travels through the network in a stable way.
 
+What i've described before as being the curse of dim was due to the decay of the std, that is because of the 
+scaling we need to ensure forward propagation that do not explode, normalizing by the low rank
+
+
 So, to finish this part: we now have a complete, analytical formula for the two-layer MMNN NTK. It's a random kernel, but its randomness is perfectly described by these beautiful distributions, and it behaves very well in high dimensions. This gives us a strong theoretical reason to understand why these architectures are so powerful.
+
+
+In fact the future questions to tackle is that, can we infer from this kernel function how the optimizatin and approximation behave ?
+That means analyzing the reproducing kernel hilbert space
+it appears that we can from the paper from francis bach, and that arccosine kernels taylor series at 1 and -1 gives us exactly
+what we already have for FCNN in 2 words (the RKHS for MMNN and FCNN is the same) !
+
+Another thing to discuss from this expression is that with the spectrum scaling we can understand partly the low frequency bias of FCNN
+as pr zhang already worked on, and for MMNNs, because we can calculate the gram matrix of the basis and get its scaling now. in the 
+infinite setup with low rank, with a gaussian process inside. This is very very promising
 
 
 Ok so now i'm talking about transformers
