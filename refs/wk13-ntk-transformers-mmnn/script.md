@@ -82,14 +82,50 @@ This process gives us the arccosine kernel formula, and it's also the key to sol
 
 **Part 4: The Main Part - The Two-Layer MMNN Kernel**
 
-Okay, now for the main part. We have understood one layer. Let's go deeper and add another one. The NTK formula for deep networks is recursive. The kernel for layer two, `Theta^(2)`, uses the kernel from layer one, `Theta^(1)`.
+Okay, now for the main part. We have understood one layer. Let's go deeper and add another one. First, let's be very clear about the architecture we're analyzing. It's a network with two hidden layers:
+1.  A first wide layer, just like in a standard neural network.
+2.  A narrow "bottleneck" layer with a small, fixed rank `r`.
+3.  A second wide layer.
 
-We focus on 2 layers MMNNs because we should compare with a baseline of FCNN, where there is a BIG matrix in the baseline
-that is small in MMNNs due to the low rank. We then have linear number of weights, and quadratic, wrt width, for FCNNs
+The key idea is that the width `N` of the wide layers goes to infinity, but the rank `r` of the bottleneck stays fixed and small. We focus on 2-layer MMNNs to compare them with standard 2-layer Fully-Connected Networks (FCNNs). The big difference is that FCNNs have a huge weight matrix in the middle, with a number of weights that grows quadratically with the width. In our MMNN, because of the low-rank bottleneck, the number of weights only grows linearly.
 
-But here is the crucial, very interesting difference for MMNNs. If you look closely at the recursive formula, the second-layer kernel, `Theta^(2)`, depends on `h^(1)`—the *random output* of the first hidden layer. Because our bottleneck layer has a finite rank `r`, this `h^(1)` is a random vector.
+Now, how do we compute the NTK for this? The formula for deep networks is recursive. The kernel for a layer `l`, which we call `Theta^(l)`, is built using the kernel from the previous layer, `Theta^(l-1)`. The general formula looks like this:
+
+`Theta^(l) = Theta^(l-1) * (a term with derivatives) + (the NNGP kernel for layer l) + 1`
+
+Let's apply this step-by-step.
+*   **For the first layer (`l=1`)**: We start with `Theta^(0) = 0`. So the formula simplifies to `Theta^(1) = Sigma^(1) + 1`, where `Sigma^(1)` is the standard NNGP kernel for one layer. Since the inputs `x` and `x'` are fixed, this `Theta^(1)` is a deterministic kernel. It's the arccosine kernel we talked about. No randomness here.
+
+*   **For the second layer (`l=2`)**: This is where things get really interesting. The inputs to the second hidden layer are not the original `x` and `x'` anymore. The inputs are now `h^(1)(x)` and `h^(1)(x')`, which are the *outputs* from the first bottleneck layer.
+
+And because this bottleneck layer has a finite, fixed rank `r`, these outputs `h^(1)` are **random vectors**. Their values depend on the specific random initialization of the weights in the first layer.
+
+This has a huge consequence. When we write down the formula for `Theta^(2)`, it now depends on these random vectors `h^(1)`.
 
 This means `Theta^(2)` is no longer a fixed, predictable kernel that just depends on the inputs. It is a **random field**. Its value changes depending on the specific random initialization of the network weights. This is the key feature that makes MMNNs different from standard, infinite-width networks.
+
+To make the calculations possible, we assume the biases are zero. We also need to be careful about how the signal propagates. We don't want the vector norms to explode or vanish as they pass through the layers. This is called staying at the "Edge of Chaos". To ensure this, we need to set the variance of the weights in a specific way, which introduces a normalization factor of `1/r`.
+
+After all the calculations, we arrive at the final expression for the 2-layer kernel. It's a beautiful formula that depends on two things:
+1.  `rho`: the correlation of the original inputs, `x` and `x'`.
+2.  `rho_1`: the **random** correlation between the outputs of the first layer, `h^(1)(x)` and `h^(1)(x')`.
+
+The formula clearly shows how the final kernel is a mix of different parts: one part comes from the first layer's kernel, and the other part is the NNGP kernel of the second layer, but this second part is random. It's random because it depends on `rho_1` and also on the random norms of the first layer's outputs, `||h^(1)(x)||` and `||h^(1)(x')||`.
+
+So, we have an exact formula, but it contains random variables. The next logical question is: can we understand these random variables? And the answer, as we'll see, is yes.
+
+This is the key takeaway: the NTK of a multi-layer MMNN is a random object, and we have an exact mathematical expression that captures this randomness through the correlation and norms of the intermediate layer's outputs.
+
+
+At the end, you can see that if we do a good scaling, we have this multiplication, by something between 0 and 1, and that is promising
+for getting NTK scaling law wrt depth, because we multiply some random variables and can have a geometric convergence
+
+You can see if I remove r for this part and do a good scaling also,, when adding a depth we have a geometric divergence
+with the products of ranks, as i've already shown in 1 month old experiments. This is very very promising i'm very happy of that.
+
+I can also state that the numerical values are near the same in my experiments for high ranks. near 1 with a standard deviation
+that decay fast, computing the scaling exponent exactly can be hard because the kernels have intractable forms for the 
+std with the kibble and fisher distribution.
 
 **Part 5: Understanding the Randomness - Fisher and Kibble Distributions**
 
