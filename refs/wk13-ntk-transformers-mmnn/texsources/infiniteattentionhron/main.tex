@@ -1,0 +1,1379 @@
+%
+
+\documentclass{article}
+
+%
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{booktabs} %
+
+%
+%
+%
+%
+%
+
+\newcommand{\papertitle}{Infinite attention: NNGP and NTK for deep attention networks}
+
+
+\usepackage{tabularx}
+\usepackage{multirow} 
+
+\usepackage{hyperref}
+\hypersetup{
+    unicode=false,
+    pdftoolbar=true,
+    pdfmenubar=true,
+    pdffitwindow=false,
+    pdfstartview={FitH},
+    pdftitle={\papertitle},
+    pdfauthor={Jiri Hron, Yasaman Bahri, Jascha Sohl-Dickstein, Roman Novak},
+    pdfsubject={\papertitle},
+    pdfkeywords={Infinite Neural Networks, Neural Tangent Kernel, Gaussian Processes, Attention},
+    pdfnewwindow=true,
+    colorlinks=True,
+    linkcolor=BurntOrange,
+    citecolor=RawSienna,
+    filecolor=magenta,
+    urlcolor=blue
+}
+
+\newcommand{\sref}[1]{\S\ref{#1}}
+
+%
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+%
+\usepackage[accepted]{icml2020}
+
+%
+%
+
+%
+\input{preamble0.tex}
+\input{preamble1.tex}
+
+
+%
+\definecolor{darkgreen}{rgb}{0,0.6,0}
+
+%
+%
+\icmltitlerunning{\papertitle}
+
+\begin{document}
+
+\twocolumn[
+\icmltitle{\papertitle}
+
+%
+%
+%
+%
+
+%
+%
+%
+%
+
+%
+%
+%
+\icmlsetsymbol{equal}{*}
+
+\begin{icmlauthorlist}
+\icmlauthor{Jiri Hron}{c}
+\icmlauthor{Yasaman Bahri}{g}
+\icmlauthor{Jascha Sohl-Dickstein}{g}
+\icmlauthor{Roman Novak}{g}
+\end{icmlauthorlist}
+
+\icmlaffiliation{g}{Google Brain}
+\icmlaffiliation{c}{University of Cambridge. Work done while interning at Google Brain.}
+%
+
+\icmlcorrespondingauthor{Jiri Hron}{jh2084@cam.ac.uk}
+%
+
+%
+%
+%
+\icmlkeywords{Machine Learning, ICML, nngp, ntk, gaussian process, infinite, attention, wide, neural networks}
+
+\vskip 0.3in
+]
+
+%
+
+%
+%
+%
+%
+%
+
+\printAffiliationsAndNotice{}  %
+%
+
+\begin{abstract}
+There is a growing amount of literature on the relationship between wide neural networks (NNs) and Gaussian processes (GPs), identifying an equivalence between the two for a variety of NN architectures.
+This equivalence enables, for instance, accurate approximation of the behaviour of wide Bayesian NNs without MCMC or variational approximations, or characterisation of the distribution of randomly initialised wide NNs optimised by gradient descent without ever running an optimiser.
+We provide a rigorous extension of these results to NNs involving attention layers,
+showing that unlike single-head attention, which induces non-Gaussian behaviour, multi-head attention architectures behave as GPs as the number of heads tends to infinity. 
+We further discuss the effects of positional encodings and layer normalisation, and propose modifications of the attention mechanism which lead to improved results for both finite and infinitely wide NNs.
+We evaluate attention kernels empirically, leading to a moderate improvement upon the previous state-of-the-art on CIFAR-10 for GPs without trainable kernels and advanced data preprocessing.
+Finally, we introduce new features to the Neural Tangents library \citep{novak2020neural} allowing applications of NNGP/NTK models, with and without attention, to variable-length sequences, with an example on the IMDb reviews dataset.
+\end{abstract}
+
+
+\section{Introduction}\label{sect:intro}
+
+
+One of the currently most active research directions in theoretical deep learning is the study of NN behaviour as the number of parameters in each layer goes to infinity \citep[e.g.,][]{matthews2018gaussian,lee2018deep,garriga2019deep,novak2019bayesian,li2018learning,allenzhu19convergence,du2019gd,arora2019,yang2019v2}. 
+Building upon these efforts, we study the asymptotic behaviour of NNs with attention layers \citep{bahdanu2015nmt,vaswani2017attention} and derive the corresponding neural network Gaussian proccess (NNGP) and Neural Tangent kernels \citep[NTK,][]{jacot2018ntk,lee2019wide}.
+
+Beyond their recent empirical successes \citep[e.g.,][]{radford2019language,devlin2019bert}, attention layers are also interesting from the theoretical perspective as the standard proof techniques used to establish asymptotic Gaussianity of the input-to-output mappings represented by wide NNs \citep{matthews2018gaussian,yang2019v2} cannot be applied. 
+
+To understand why, consider the following simplified attention layer model: let $\inputSymbol \in \R{\spatialDimension \times \genericDimenstion'}$ be the input with $\spatialDimension$ \emph{spatial} and $\genericDimenstion'$ \emph{embedding} dimensions (by spatial, we mean, e.g., the number of tokens in a string or pixels in an image),  
+$\WQ, \WK, \WV \in \R{\genericDimenstion' \times \genericDimenstion}$ be weight matrices, and define queries
+$\querySymbol(\inputSymbol) \coloneqq \inputSymbol \WQ$, keys $\keySymbol(\inputSymbol) \coloneqq \inputSymbol \WK$, and values $\valueSymbol(\inputSymbol) \coloneqq \inputSymbol \WV$ as usual.
+The attention layer output is then
+\begin{align}\label{eq:single_head_informal}
+    \activationSymbol(\inputSymbol)
+    \coloneqq
+    \softmax \biggl(
+        \frac{
+            \querySymbol(\inputSymbol) \keySymbol(\inputSymbol)^\top
+        }{\sqrt{\genericDimenstion}}
+    \biggr) 
+    \valueSymbol(\inputSymbol)
+    =
+    \softmax (
+        \logitSymbol(\inputSymbol)
+    )
+    \valueSymbol(\inputSymbol)
+    \, ,
+\end{align}
+where $\softmax$ is the row-wise softmax function.
+
+Now observe that 
+$\dim \logitSymbol(\inputSymbol) = \spatialDimension \times \spatialDimension$ 
+where the spatial dimension $\spatialDimension$ stays finite even as the number of parameters---here proportional to $\genericDimenstion$---goes to infinity.
+As we will show rigorously in \Cref{sect:theory}, this fact combined with the $\genericDimenstion^{-1/2}$ scaling 
+causes each column of $\activationSymbol(\inputSymbol)$ to be a linear combination of the \emph{same stochastic matrix} $\softmax(\logitSymbol(\inputSymbol))$, and thus statistically dependent even in the infinite width limit.
+
+Since the exchangeability based arguments
+\citep{matthews2018gaussian,garriga2019deep} require that certain moment statistics of $\activationSymbol(\inputSymbol)$ asymptotically behave as if its columns were independent \citep[see condition {\em b} in lemma 10,][]{matthews2018gaussian}, they do not extend to attention layers in a straightforward manner.
+Similarly, the proofs based on Gaussian conditioning \citep{novak2019bayesian,yang2019v2} require that given the input $\inputSymbol$, the conditional covariance of each column of $\activationSymbol(x)$ converges (in probability) to the same \emph{deterministic} positive semidefinite matrix \citep[see propositions 5.5 and G.4 in][]{yang2019v2} which will not be the case due to the aforementioned stochasticity of $\softmax(\logitSymbol(\inputSymbol))$.
+
+Among the many interesting contributions in \citep{yang2019v2}, the author proposes to resolve the above issue by replacing the $\genericDimenstion^{-1/2}$ scaling in \Cref{eq:single_head_informal} by $\genericDimenstion^{-1}$ which does enable application of the Gaussian conditioning type arguments.
+However, it also forces the attention layer to only perform computation similar to average pooling in the infinite width limit, and reduces the overall expressivity of attention even if suitable modifications preventing the pooling behaviour are considered (see \Cref{sect:linear_scaling_limit}).
+
+We address the above issues by modifying the exchangability based technique and provide a rigorous characterisation of the infinite width behaviour under both the $\genericDimenstion^{-1/2}$ and $\genericDimenstion^{-1}$ scalings.
+We also show that positional encodings \citep{gehring2017convolutional,vaswani2017attention} can improve empirical performance even in the infinite width limit, and propose modifications to the attention mechanism which results in further gains for both finite and infinite NNs.
+In experiments, we moderately improve upon the previous state-of-the-art result on CIFAR-10 for GP models without data augmentation and advanced preprocessing \citep[cf.][]{li2019enhanced}.
+Finally, since attention is often applied to text datasets, we release code allowing applications of NNGP/NTK models to variable-length sequences, including an example on the IMDb reviews dataset.
+
+
+\begin{figure}[tbp]
+    \begin{center}
+        \centerline{
+            \includegraphics[width=0.5\columnwidth,keepaspectratio]{fig/single_head_sample_logy}
+            \hfill
+            \includegraphics[width=0.5\columnwidth,keepaspectratio]{fig/multihead_head_sample_logy}
+        }
+        \vskip -0.2in
+        \caption{
+        \textbf{Distribution of an attention layer output for single-head} (left) \textbf{and 100-head} (right) architecture at initialisation under the $\genericDimenstion^{-1/2}$ scaling when $\genericDimenstion$ is large ($1000$).
+        Red line is the Gaussian density with sample mean and variance substituted for its parameters.
+        Unlike multi-head, the empirical distribution of single-head attention significantly deviates from Gaussian despite $\genericDimenstion \gg 0$.}
+        \label{fig:scale_mixture}
+    \end{center}
+    \vskip -0.25in
+\end{figure}
+
+
+\newlength{\tableFS}
+\setlength{\tableFS}{8.4pt}
+
+\begin{table*}[t]
+\caption{
+\textbf{Overview of the discussed kernels.}
+The $\genericDimenstion$ column refers to the $\genericDimenstion^{-1}$ and $\genericDimenstion^{-1/2}$ scaling of the $\querySymbol (\inputSymbol) \keySymbol(\inputSymbol)^\top$.
+$(\kerntilde, \ntktilde)$ denote the input and $(\kernel, \ntk)$ the output NNGP and NTK kernels.
+\textsc{NNGP} and \textsc{NTK} columns are stated as updates for full $\spatialDimension \times \spatialDimension$ covariance blocks unless the generic spatial dimension subscripts $a b$ are used.
+To fit to page width, we use superscripts to denote dependence on inputs, e.g., replacing $\kerntildef{}{}{\inputSymbol}{\inputSymbol}$ by $\kerntilde^{\inputSymbol\inputSymbol'}$.
+$\langle A, B \rangle_F = \sum_{ij} A_{ij} B_{ij}$ is the Frobenius product of matrices $A, B$, with $\| A \|_F^2 = \langle A, A \rangle$.
+$\interpKern$ denotes interpolation,
+e.g.,
+$\interpKern \circ \kerntildef{}{}{\inputSymbol}{\inputSymbol'} = \interpKernCoeff \kerntildef{}{}{\inputSymbol}{\inputSymbol'} + (1 - \interpKernCoeff) \covPosEmb{}{}$ with fixed hyperparameters $\interpKernCoeff \in [0, 1]$ and $\covPosEmb{}{}$ (a generic covariance related to initialisation of positional encodings);
+the special case $\covPosEmb{}{} = I$ is denoted by $\interpKern_{I}$.
+$\ddag$ is for optional operators (e.g., $\interpKern^\ddag \circ  \kerntilde^{\inputSymbol\inputSymbol'}$ can be replaced with $\kerntilde^{\inputSymbol\inputSymbol'}$).
+$\WQ = \WK$ initialisation assumed for all $\genericDimenstion^{-1}$, and $\softmax = \text{identity}$ for all $\genericDimenstion^{-1/2}$ kernels (see \Cref{sect:linear_scaling_limit,sect:softmax_alternatives} respectively).
+See \Cref{sect:theory,sect:beyon_vanilla_attn} for derivations, and \citep{yang2019v2} for the \textsc{LayerNorm} kernel (stated here for ease of reference).
+}
+\label{tab:kernel_overview}
+\begin{center}
+\fontsize{\tableFS}{1.2\tableFS}
+\begin{sc}
+\renewcommand{\arraystretch}{1.75}
+\begin{tabular}{lcccc}
+    \toprule
+    Kernel & $d$ &  NNGP & NTK  \\
+    \midrule
+    \multirow{2}{*}{Vanilla}    &
+    %
+    $1$
+    &
+    $
+    \softmax(
+        \kerntilde^{\inputSymbol\inputSymbol}
+        %
+    )
+    %
+        \kerntilde^{\inputSymbol\inputSymbol'}
+        %
+    %
+    \softmax(
+        \kerntilde^{\inputSymbol'\inputSymbol'}
+        %
+    )^\top
+    $ 
+    &
+    $
+    2 
+    \kernel^{\inputSymbol\inputSymbol'}
+    %
+    +
+    \softmax(
+        \kerntilde^{\inputSymbol\inputSymbol}
+        %
+        %
+    )
+    %
+        \ntktilde^{\inputSymbol\inputSymbol'}
+        %
+    %
+    \softmax(
+        \kerntilde^{\inputSymbol'\inputSymbol'}
+        %
+    )^\top
+    $ 
+    \\
+    
+    &
+    $\frac{1}{2}$
+    &
+    $
+    \kerntilde^{\inputSymbol\inputSymbol'}
+    %
+    %
+    \norm{
+        \kerntilde^{\inputSymbol\inputSymbol'}
+        %
+    }_F^2
+    $
+    & 
+    $
+    4 
+    \kernel_{ab}^{\inputSymbol\inputSymbol'}
+    %
+    +
+    \langle
+        \kerntilde^{\inputSymbol\inputSymbol'}
+        %
+        ,
+        2 
+        \kerntilde_{ab}^{\inputSymbol\inputSymbol'}
+        %
+        \ntktilde^{\inputSymbol\inputSymbol'}
+        %
+        +
+        \ntktilde_{ab}^{\inputSymbol\inputSymbol'}
+        %
+        \kerntilde^{\inputSymbol\inputSymbol'}
+        %
+    \rangle_F
+    $
+    \\
+    
+    \midrule
+    
+    \multirow{2}{*}{
+    \begin{minipage}[t]{0.2\columnwidth}%
+    Random Positional Encoding
+    \end{minipage}
+    } 
+    &
+    $1$
+    &
+    $
+    \softmax (
+        \interpKern_I \circ
+        \kerntilde^{\inputSymbol\inputSymbol}
+        %
+    )
+    [
+        \interpKern_I \circ
+        \kerntilde^{\inputSymbol\inputSymbol'}
+        %
+    ]
+    \softmax (
+        \interpKern_I \circ
+        \kerntilde^{\inputSymbol'\inputSymbol'}
+        %
+    )^\top
+    $
+    &
+    $
+    2
+    \kernel^{\inputSymbol\inputSymbol'}
+    %
+    +
+    \softmax (
+        \interpKern_I \circ
+        \kerntilde^{\inputSymbol\inputSymbol}
+        %
+    )
+    [
+        \interpKern_I \circ
+        \ntktilde^{\inputSymbol\inputSymbol'}
+        %
+    ]
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    \softmax (
+        \interpKern_I \circ
+        \kerntilde^{\inputSymbol'\inputSymbol'}
+        %
+    )^\top
+    $
+    %
+    \\ 
+    
+    &
+    $\frac{1}{2}$
+    &
+    $
+    \interpKern_I \circ
+    \kerntilde^{\inputSymbol\inputSymbol'}
+    %
+    %
+    \norm{
+        \interpKern_I \circ \kerntilde^{\inputSymbol\inputSymbol'}
+        %
+    }_F^2
+    $
+    & 
+    $
+    4 
+    \kernel_{ab}^{\inputSymbol\inputSymbol'}
+    %
+    +
+    \langle
+        \interpKern_I \circ
+        \kerntilde^{\inputSymbol\inputSymbol'}
+        %
+        ,
+        2
+        [
+            \interpKern_I \circ
+            \kerntilde_{ab}^{\inputSymbol\inputSymbol'}
+            %
+        ]
+        %
+            \interpKern_I \circ
+            \ntktilde^{\inputSymbol\inputSymbol'}
+            %
+        %
+        +
+        [
+            \interpKern_I \circ
+            \ntktilde_{ab}^{\inputSymbol\inputSymbol'}
+            %
+        ]
+        \interpKern_I \circ
+        \kerntilde^{\inputSymbol\inputSymbol'}
+        %
+    \rangle_F
+    $
+    \\
+    
+    \midrule
+    
+    \multirow{2}{*}{
+    \begin{minipage}[t]{0.2\columnwidth}%
+    Structured Positional Encoding
+    \end{minipage}
+    } 
+    &
+    $1$
+    &
+    $
+    \softmax (
+        \interpKern \circ
+        \kerntilde^{\inputSymbol\inputSymbol}
+        %
+    )
+    [
+        \interpKern^\ddag \circ
+        \kerntilde^{\inputSymbol\inputSymbol'}
+        %
+    ]
+    \softmax (
+        \interpKern \circ
+        \kerntilde^{\inputSymbol'\inputSymbol'}
+        %
+    )^\top
+    $
+    &
+    $
+    2 
+    \kernel^{\inputSymbol\inputSymbol'}
+    %
+    +
+    \softmax (
+        \interpKern \circ
+        \kerntilde^{\inputSymbol\inputSymbol}
+        %
+    )
+    [
+        \interpKern^\ddag \circ
+        \ntktilde^{\inputSymbol\inputSymbol'}
+        %
+    ]
+    \softmax (
+        \interpKern \circ
+        \kerntilde^{\inputSymbol'\inputSymbol'}
+        %
+    )^\top
+    $
+    %
+    \\
+    
+    &
+    %
+    $\frac{1}{2}$
+    %
+    &
+    %
+    $
+    \interpKern \circ
+    \kerntilde^{\inputSymbol\inputSymbol'}
+    %
+    %
+    \langle
+        \interpKern^\ddag \circ
+        \kerntilde^{\inputSymbol\inputSymbol'}
+        %
+        ,
+        \interpKern \circ \kerntilde^{\inputSymbol\inputSymbol'}
+        %
+    \rangle_F
+    $
+    %
+    &
+    %
+    $
+    \begin{aligned}
+    4 \kernel_{ab}^{\inputSymbol\inputSymbol'}
+    &+
+    \langle
+        \interpKern^\ddag \circ
+        \kerntilde^{\inputSymbol\inputSymbol'}
+        ,
+        [
+            \interpKern \circ
+            \kerntilde_{ab}^{\inputSymbol\inputSymbol'}
+        ]
+        \interpKern \circ
+        \ntktilde^{\inputSymbol\inputSymbol'}
+        +
+        [
+            \interpKern \circ
+            \ntktilde_{ab}^{\inputSymbol\inputSymbol'}
+        ]
+        \interpKern \circ
+        \kerntilde^{\inputSymbol\inputSymbol'}
+    \rangle_F
+    \\
+    &+
+    \langle
+        \interpKern \circ
+        \kerntilde^{\inputSymbol\inputSymbol'}
+        \phantom{\ddag}
+        ,
+        [
+            \interpKern \circ
+            \kerntilde_{ab}^{\inputSymbol\inputSymbol'}   
+        ]
+        \interpKern^\ddag \circ
+        \ntktilde^{\inputSymbol\inputSymbol'}
+    \rangle_F
+    \end{aligned}
+    $
+    %
+    \\
+    %
+    
+    \midrule
+    
+    Residual
+    &
+    --
+    &
+    $
+        \interpKernCoeff 
+        \kerntilde^{\inputSymbol\inputSymbol'}
+        %
+        +
+        (1 - \interpKernCoeff)
+        \covPosEmb{}{}
+        \kerntilde^{\inputSymbol\inputSymbol'}
+        %
+        \covPosEmb{}{\top}
+    $
+    &
+    $
+    2 (1 - \interpKernCoeff)
+    \kernel^{\inputSymbol\inputSymbol'}
+    %
+    +
+    \interpKernCoeff
+    \ntktilde^{\inputSymbol \inputSymbol'}
+    +
+    (1 - \interpKernCoeff) 
+    \covPosEmb{}{} 
+    \ntktilde^{\inputSymbol\inputSymbol'}
+    %
+    \covPosEmb{}{\top}
+    $
+    \\
+    
+    \midrule
+    
+    LayerNorm  &
+    --
+    &
+    $
+    %
+        \kerntilde_{ab}^{\inputSymbol\inputSymbol'}
+        %
+    %
+        %
+        [
+            \kerntilde_{aa}^{\inputSymbol\inputSymbol}
+            %
+            \kerntilde_{bb}^{\inputSymbol\inputSymbol'}
+            %
+        ]^{-1/2}
+        %
+    %
+    $
+    &
+    $
+    %
+        \ntktilde_{ab}^{\inputSymbol\inputSymbol'}
+        %
+    %
+        %
+        [
+            \ntktilde_{aa}^{\inputSymbol\inputSymbol}
+            %
+            \ntktilde_{bb}^{\inputSymbol'\inputSymbol'}
+            %
+        ]^{-1/2}
+        %
+    %
+    $
+    
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    %
+    \\
+    %
+    \bottomrule
+\end{tabular}
+\end{sc}
+\end{center}
+\vskip -0.18in
+\end{table*}
+
+
+
+
+\section{Definitions and notation}\label{sect:background}
+
+\textbf{Neural networks:}
+$\indexedActivation{\depthSymbol}{}{\inputSymbol}$ denotes the~output of $\depthSymbol$\textsuperscript{th} layer for an~input $\inputSymbol \in \indexSet \subset \R{\spatialDimension \times \inputDimension}$, and $\indexedActivity{\depthSymbol}{}{\inputSymbol} \coloneqq \nonlinearity (\indexedActivation{\depthSymbol}{}{\inputSymbol})$ the~corresponding post-nonlinearity where $\nonlinearity \colon \R{} \to \R{}$ is the~activation function applied elementwise (for convenience, we set $\indexedActivity{0}{}{\inputSymbol} = \inputSymbol$).
+We assume the~network has $\depth \in \natnum$ hidden layers, making $\indexedActivation{\depth + 1}{}{\inputSymbol}$
+the output,
+and that the input set $\indexSet$ is \emph{countable}.
+As we will be examining behaviour of sequences of increasingly wide NNs, the~variables corresponding to the~$\sequenceVariable$\textsuperscript{th} network are going to be denoted by a~subscript $\sequenceVariable$ (e.g., $\indexedActivation{\depthSymbol}{\sequenceVariable}{\inputSymbol}$ is the~output of $\depthSymbol$\textsuperscript{th} layer of the~$\sequenceVariable$\textsuperscript{th} network in the~sequence evaluated at $\inputSymbol$).
+We also use
+\begin{align*}
+    \activations{\sequenceVariable, \cdot j}{\depthSymbol} 
+    &\coloneqq 
+    \{ 
+        \indexedActivation{\depthSymbol}{\sequenceVariable, ij}{\inputSymbol} 
+        \colon 
+        \inputSymbol \in \indexSet,
+        i \in [\spatialDimension]
+    \} 
+    \\
+    \activations{\sequenceVariable}{\depthSymbol} 
+    &\coloneqq 
+    \{ 
+        \activations{\sequenceVariable, \cdot j}{\depthSymbol} 
+        \colon 
+        j \in \natnum 
+    \} 
+    \, ,
+\end{align*}
+with $[\spatialDimension] = \{1, 2, \ldots, \spatialDimension \}$.
+To reduce clutter, we omit the $\depthSymbol$ index where it is clear from the context or unimportant.
+
+\textbf{Shapes:} $\indexedActivation{\depthSymbol}{\sequenceVariable}{\inputSymbol}, \indexedActivity{\depthSymbol}{\sequenceVariable}{\inputSymbol} \in \R{\spatialDimension \times \layerDimensionN}$ with $\spatialDimension, \layerDimensionN \in \natnum$ respectively the~\emph{spatial} and \emph{embedding} dimensions.
+If there are multiple spatial dimensions, such as height and width for images, we assume these have been flattened into a single dimension.
+Finally, we will allow the row space dimension of $\W_{\sequenceVariable}^{\depthSymbol,\querySymbol}, \W_{\sequenceVariable}^{\depthSymbol,\keySymbol} \in \R{\layerDimension{\depthSymbol - 1} \times \logitDimension}$ to differ from that of $\W_{\sequenceVariable}^{\depthSymbol,\valueSymbol} \in \R{\layerDimension{\depthSymbol - 1} \times \layerDimensionN}$, leading to the modified definition 
+\begin{align}\label{eq:logit_def}
+    \logitSymbol_{\sequenceVariable}^{\depthSymbol} (\inputSymbol)
+    =
+    \frac{\querySymbol_{\sequenceVariable}^{\depthSymbol}(\inputSymbol) \keySymbol_{\sequenceVariable}^{\depthSymbol} (\inputSymbol)^\top}{\sqrt{\logitDimension}}
+\end{align}
+
+
+\textbf{Multi-head attention:} \Cref{eq:single_head_informal} describes a vanilla version of a \emph{single-head} attention layer.
+Later in this paper, we examine the \emph{multi-head} attention alternative in which the~output $\indexedActivation{\depthSymbol}{\sequenceVariable}{\inputSymbol}$ is computed as
+\begin{equation}\label{eq:attention_out}
+    \indexedActivation{
+    \depthSymbol
+    }{\sequenceVariable}{\inputSymbol}
+    =
+    \bigl[
+        \indexedActivation{
+        \depthSymbol
+        1}{\sequenceVariable}{\inputSymbol},
+        \ldots,
+        \indexedActivation{
+        \depthSymbol
+        \headDimension}{\sequenceVariable}{\inputSymbol}
+    \bigr]
+    \weightsO
+    \, ,
+\end{equation}
+i.e., by stacking the outputs of $\headDimension \in \natnum$ independently parametrised heads into a $\spatialDimension \times \headDimension \layerDimensionN$ matrix and projecting back into $\spatialDimension \times \layerDimensionN$ by $\weightsO \in \R{\headDimension \layerDimensionN \times \layerDimensionN}$.
+The embedding dimension of each head $\valueDimension$ can optionally differ from $\layerDimensionN$.
+To distinguish the weight matrices corresponding to the individual heads, we will be using a superscript $\headIndex$, e.g., 
+$\queryN (\inputSymbol) = \indexedActivity{\depthSymbol - 1}{\sequenceVariable}{\inputSymbol} \weightsQ$.
+
+
+\textbf{Weight distribution:} 
+As usual, we will assume Gaussian initialisation of the weights, i.e., 
+$\weightQ{ij} \sim \gauss (0, \queryVar / \layerDimension{\depthSymbol - 1} )$, 
+$\weightK{ij} \sim \gauss (0, \keyVar / \layerDimension{\depthSymbol - 1} )$,
+$\weightV{ij} \sim \gauss (0, \valueVar / \layerDimension{\depthSymbol - 1} )$, 
+and
+$\weightO{ij} \sim \gauss (0, \outVar / (\headDimension \layerDimension{\depthSymbol}) )$, all i.i.d.\ over the $i, j$ and $\depthSymbol, \headIndex$ indices for all $\sequenceVariable$.
+The scaling of variance by inverse of the input dimension is standard and ensures that the asymptotic variances do not diverge \citep{neal1996,lecun1998efficient,he2015delving}.
+Throughout \Cref{sect:beyon_vanilla_attn,sect:theory}, we assume all the $\sigma^2$ parameters are equal to one, and only state the results in full generality in the appendix.
+
+
+\textbf{NNGP/NTK:} 
+As discussed in the introduction, randomly initialised NNs induce a distribution over the $\activationSymbol_{\sequenceVariable}^{\depth + 1}$ mappings.
+For a variety of architectures, this distribution converges (weakly) to that of a GP as $\min_{\depthSymbol \in [\depth]} \layerDimensionN \to \infty$, both at initialisation (NNGP), and after continuous gradient descent optimisation of the randomly initialised NN
+with respect to a mean squared error loss (NTK).
+Both the NNGP and NTK distributions are typically zero mean, and we use $\kernel^{\depth + 1}$ and $\ntk^{\depth + 1}$ to denote their respective kernel functions.
+
+These kernel functions tend to have a recursive structure where each layer in the underlying NN architecture is associated with a mapping $(\kernel^{\depthSymbol - 1}, \ntk^{\depthSymbol - 1}) \mapsto (\kernel^{\depthSymbol}, \ntk^{\depthSymbol})$ transforming the NNGP and NTK kernels according to the layer's effect on the outputs in the infinite width limit.
+Since nonlinearities are typically not treated as separate layers, we use $\kerntilde^{\depthSymbol}$ and $\ntktilde^{\depthSymbol}$ to denote the intermediate transformation $(\kernel^{\depthSymbol - 1}, \ntk^{\depthSymbol - 1}) \mapsto (\kerntilde^{\depthSymbol}, \ntktilde^{\depthSymbol})$ they induce.
+
+We generally assume every layer is followed by a nonlinearity, setting $(\kerntilde^{\depthSymbol}, \ntktilde^{\depthSymbol}) = (\kernel^{\depthSymbol-1}, \ntk^{\depthSymbol-1})$ if none is used.
+In the next two sections,
+we uncover the mappings $(\kerntilde^{\depthSymbol}, \ntktilde^{\depthSymbol}) \mapsto (\kernel^{\depthSymbol}, \ntk^{\depthSymbol})$ induced by various attention architectures.
+
+
+
+\section{Attention and Gaussian process behaviour}\label{sect:theory}
+
+Throughout the rest of this paper, we restrict our focus to increasingly wide NNs including at least one attention layer.
+In particular, we consider sequences of NNs such that
+\begin{align}\label{eq:sim_limit}
+    \lim_{\sequenceVariable \to \infty} \min_{\depthSymbol \in [\depth]} \layerDimensionN = \infty
+    \, ,
+\end{align}
+and the reader should thus interpret any statements involving $\sequenceVariable \to \infty$ as implicitly assuming
+\Cref{eq:sim_limit} holds.
+
+
+Due to the space constraints, most of the technical discussion including derivation of the NTK is relegated to \Cref{sect:proofs}.
+In this section, we only focus on the key step in our proof which relies on an inductive argument adapted from \citep{matthews2018gaussian}.
+On a high level, the induction is applied from $\depthSymbol = 1$ to $\depthSymbol = \depth + 1$, and establishes that whenever 
+$\activationSymbol_{\sequenceVariable}^{\depthSymbol - 1}$ converges in distribution to 
+$\gp(0 ,\kernel^{\depthSymbol - 1})$ at initialisation, $\activationSymbol_{\sequenceVariable}^{\depthSymbol}$ also converges in distribution to $\gp(0 ,\kernel^{\depthSymbol})$ as $\sequenceVariable \to \infty$.
+Since this fact is known for dense, convolutional, and average pooling layers, and almost all nonlinearities \citep{matthews2018gaussian,lee2018deep,garriga2019deep,novak2019bayesian,yang2019v2}, it will be sufficient to show the same for attention layers.
+
+
+
+
+\subsection{Infinite width limit under the $\genericDimenstion^{-1}$ scaling}\label{sect:linear_scaling}
+
+As illustrated in \Cref{fig:scale_mixture}, use of the $\genericDimenstion^{-1/2}$ scaling within a \emph{single-head} architecture leads to a scale mixture behaviour of the attention layer outputs as the number of parameters goes to infinity.
+To obtain a Gaussian limit, \citet[appendix A]{yang2019v2} proposes to replace the definition in \Cref{eq:logit_def} by 
+$
+\logitSymbol_{\sequenceVariable} %
+(\inputSymbol) 
+= 
+(\genericDimenstion_{\sequenceVariable}^{\logitSymbol})^{-1}
+\querySymbol_{\sequenceVariable} %
+(\inputSymbol) 
+\keySymbol_{\sequenceVariable} %
+(\inputSymbol)^\top 
+$,
+i.e., the use of $\genericDimenstion^{-1}$ scaling.
+The desired result then follows:
+
+\begin{theorem}[$\genericDimenstion^{-1}$ limit \citep{yang2019v2}]\label{thm:linear_scaling_limit}
+    Under the $\genericDimenstion^{-1}$ scaling and the assumptions stated in \citep{yang2019v2}:
+    \vspace{-0.5\baselineskip}
+    \begin{enumerate}[\hspace{-0.5em}(I)]
+        \renewcommand\labelenumi{\emph{\bfseries(\theenumi)}}
+        \item 
+        For any $(\inputSymbol, \inputSymbol') \in \indexSet \times \indexSet$ and $a, b, i, j \in [\spatialDimension]$, there exist constants $(\softmaxMean_{a i}^\inputSymbol, \softmaxMean_{b j}^{\inputSymbol'}) \in \R{} \times \R{}$ such that
+        \begin{align}\label{eq:logit_determ_limit}
+            (
+                \softmax(
+                    \logitSymbol_{\sequenceVariable}%
+                    (\inputSymbol)
+                )_{ai},
+                \softmax(
+                    \logitSymbol_{\sequenceVariable}%
+                    (\inputSymbol')
+                )_{bj}
+            ) 
+            \to 
+            ( 
+                \softmaxMean_{a i}^\inputSymbol,
+                \softmaxMean_{b j}^{\inputSymbol'}
+            )
+        \end{align}
+        in probability as $\sequenceVariable \to \infty$.
+        
+        \item 
+        %
+        %
+        $\activations{\sequenceVariable}{}$ %
+        converges in distribution to $\activationSymbol%
+        \sim \gp(0, \kernel)$ with 
+        %
+        \begin{align}\label{eq:determ_kernel}
+            \kernelf{a b}{}{\inputSymbol}{\inputSymbol'}
+            &=
+            \E [
+                \indexedActivation{}{a1}{\inputSymbol}
+                \indexedActivation{}{b1}{\inputSymbol'}
+            ]
+            \\
+            &=
+            \sum_{i , j = 1}^{\spatialDimension} 
+                \kerntildef{i j}{}{\inputSymbol}{\inputSymbol'}
+                    \softmaxMean_{a i}^\inputSymbol
+                    \softmaxMean_{b j}^{\inputSymbol'}
+            \nonumber
+            \, ,
+        \end{align}
+        and $\activations{\cdot k}{}$ and $\activations{\cdot l}{}$ are independent for any $k \neq l$.
+        %
+    \end{enumerate}
+\end{theorem}
+
+An analogous result also holds for multi-head attention architectures
+which follows by the usual argument for fully connected layers as long as either the number of embedding dimensions per head or the number of heads goes to infinity.
+
+\subsection{Limitations of the $\genericDimenstion^{-1}$ scaling}\label{sect:linear_scaling_limit}
+
+While \Cref{thm:linear_scaling_limit} is a good starting point, several issues have to be resolved before using the kernel function described in \Cref{eq:determ_kernel} in practice.
+Firstly, since $\W_{\sequenceVariable}^{\querySymbol}$ and $\W_{\sequenceVariable}^{\keySymbol}$ are initialised independently, the $\genericDimenstion^{-1}$ scaled inner products of keys and queries will converge to zero (the mean), and thus for any $a, i$ and $\inputSymbol$, $\softmaxMean_{a i}^{\inputSymbol} \to (\spatialDimension)^{-1}$ in probability by the continuous mapping theorem.
+This issue was already noted by \citeauthor{yang2019v2} in appendix~A but not discussed further as the main focus of the paper lies elsewhere.
+In any case, substituting $(\spatialDimension)^{-1}$ for all the $\softmaxMean$ coefficients will make $\kernelf{a b}{}{\inputSymbol}{\inputSymbol '} = \kernelf{i j}{}{\inputSymbol}{\inputSymbol '}$ for any $a, b, i, j \in [\spatialDimension]$, and in fact all of these entries will be equivalent to output of a simple global average pooling kernel \citep[equation 17]{novak2019bayesian}.\footnote{In fact, the asymptotic distribution induced by such an attention layer followed by flatten and dense layers is the same as that induced by global average pooling followed by a dense layer.}
+
+Perhaps the simplest way to address the above issue is by drawing the initial weights such that $\W_{\sequenceVariable}^{\querySymbol} = \W_{\sequenceVariable}^{\keySymbol}$.
+This will ensure that the key and query for a particular spatial dimension will point in the same direction and thus the attention weight corresponding to itself will be large with high probability.
+The resulting formula for $\kernelf{a b}{}{\inputSymbol}{\inputSymbol'}$ is
+\begin{align}\label{eq:fixed_determ_kernel}
+    %
+    %
+    %
+    \sum_{i , j = 1}^{\spatialDimension} 
+        \kerntildef{i j}{}{\inputSymbol}{\inputSymbol'}
+        \softmax(
+            %
+            \kerntildef{a i}{}{\inputSymbol}{\inputSymbol}
+        )
+        \softmax(
+            %
+            \kerntildef{b j}{}{\inputSymbol'}{\inputSymbol'}
+        )
+    \, .
+\end{align}
+
+Since \Cref{eq:fixed_determ_kernel} resolves the issue of reduction to average pooling, a natural question is whether  swapping $\genericDimenstion^{-1/2}$ for $\genericDimenstion^{-1}$ has any undesirable consequences in the infinite width limit.
+As we will see, this question can be answered in affirmative.
+In particular, we start by a proposition inspired by \citep{cordonnier2020On} in which the authors show that an attention layer with a sufficient number of heads is at least as expressive as a standard convolutional layer, 
+and that attention layers often empirically learn to perform computation akin to convolution.
+In contrast, \Cref{prop:linear_scale_no_conv} proves that there is no initial distribution of $\W_{\sequenceVariable}^{\querySymbol}$ and $\W_{\sequenceVariable}^{\keySymbol}$ which would recover the convolutional kernel \citep{novak2019bayesian,garriga2019deep} in the infinite width limit.
+
+
+
+
+\begin{restatable}{proposition}{linearNoConv}
+\label{prop:linear_scale_no_conv}
+    There is no set of attention coefficients $\{ \softmaxMean_{a i}^{\inputSymbol} \! \in \R{} \! \colon a, i \in [\spatialDimension], \inputSymbol \in \indexSet \}$ such that for \emph{all} positive semidefinite kernels $\kerntilde$ simultaneously
+    \begin{align*}
+        \sum_{i , j = 1}^{\spatialDimension} 
+            \kerntildef{i j}{}{\inputSymbol}{\inputSymbol'}
+                \softmaxMean_{a i}^\inputSymbol
+                \softmaxMean_{b j}^{\inputSymbol'}
+        %
+        =
+        \sum_{i = 1}^{\genericDimenstion_f} 
+            \kerntildef{N_a(i) N_b(i)}{}{\inputSymbol}{\inputSymbol'}
+            \frac{1}{\genericDimenstion_f}
+        \, ,
+    \end{align*}
+    where $\genericDimenstion_f$ is the dimension of the (flattened) convolutional filter, $N_a, N_b \subset [\spatialDimension]$ are the ordered subsets of pixels which are used to compute the new values of pixels $a$ and $b$, respectively, and $N_a(i), N_b(i)$ are the $i$\textsuperscript{th} pixels in $N_a, N_b$.
+\end{restatable}
+
+
+In the next section, we will see that the convolutional kernel can be recovered under the $\genericDimenstion^{-1/2}$ scaling (\Cref{prop:sqrt_scale_conv_recover}). 
+However, we need to establish convergence scaling first.
+
+
+\begin{figure}[tbp]
+    \begin{center}
+        \centerline{
+            \includegraphics[width=0.5\columnwidth,keepaspectratio]{fig/channel_sample_dist}
+            \hfill
+            \includegraphics[width=0.5\columnwidth,keepaspectratio]{fig/channel_sample_acc}
+            }
+        \vskip -0.15in
+        \caption{
+        \textbf{Convergence} (left) \textbf{and validation accuracy} (right) \textbf{plots for an empirical NNGP kernel} estimated by Monte Carlo on a 2K/4K train/validation subset of 8x8-downsampled CIFAR-10, as the number weight samples averaged over (x-axis) and the number of parameters (y-axis) grows. Architecture: Convolution + ReLU, 2x Attention + ReLU, Flatten, Dense. For attention layers, $\logitDimension = \text{\#channels}$ but $\headDimension = \valueDimension =  \floor{\sqrt{\text{\#channels}}}$ to reduce the memory footprint. Details in \Cref{sect:convergence_appendix}.}
+        \label{fig:convergence_plots}
+    \end{center}
+    \vskip -0.25in
+\end{figure}
+
+
+\subsection{Infinite width limit under the $\genericDimenstion^{-1/2}$ scaling}\label{sect:multi_head}
+
+As discussed in \Cref{sect:intro}, single-head attention architectures can exhibit non-Gaussian asymptotic behaviour under the $\genericDimenstion^{-1/2}$ scaling.
+This is inconvenient for our purposes as many modern NN architectures combine attention with fully connected, convolutional, and other layer types, all of which have Gaussian NNGP and NTK limits \citep[e.g.,][]{novak2019bayesian,garriga2019deep,yang2019v2}.
+%
+This Gaussianity simplifies derivation of the infinite width behaviour of many architectures and allows for easy integration with existing software libraries \citep{novak2020neural}. 
+Fortunately, the output of an attention layer becomes asymptotically Gaussian when the number of heads becomes large.
+
+\begin{restatable}[$\genericDimenstion^{-1/2}$ limit]{theorem}{nngpConvergence}
+\label{thm:gp_convergence_sqrt}
+    Let 
+    $\depthSymbol \in \{ 2, \ldots , \depth + 1 \}$, and 
+    $\nonlinearity$ be such that $|\nonlinearity(\inputSymbol)| \leq c + m |\inputSymbol|$ for some $c, m \in \R{}_+$.
+    Assume $\activations{\sequenceVariable}{\depthSymbol - 1}$
+    converges in distribution to $\activationSymbol^{\depthSymbol - 1} \sim \gp(0, \kernel^{\depthSymbol-1})$, such that $\activations{\cdot j}{\depthSymbol - 1}$ and $\activations{\cdot k}{\depthSymbol - 1}$ are independent for any $j \neq k$,
+    the~variables $\{ \activations{\sequenceVariable, \cdot j}{\depthSymbol - 1} \colon j \in \natnum \}$ are exchangeable over $j$.
+    
+    Then as $ \min \, \{ \sequenceVariable, \headDimension , \logitDimension \} \to \infty \, $:
+    \vspace{-0.5\baselineskip}
+    \begin{enumerate}[\hspace{-0.5em}(I)]
+        \renewcommand\labelenumi{\emph{\bfseries(\theenumi)}}
+        \item 
+        $\logitSymbol_{\sequenceVariable}^{\depthSymbol} = \{ \logitN(x) \colon x \in \indexSet , \headIndex \in \natnum  \}$ converges in distribution to $\logitSymbol^{\depthSymbol} \sim \gp (0, \kernel^{\depthSymbol, \logitSymbol})$ with
+        \begin{align}\label{eq:logit_cov}
+            \E [\logitSymbol_{a i}^{\depthSymbol \headIndex}(\inputSymbol) \logitSymbol_{b j}^{\depthSymbol \headIndex'}(\inputSymbol')]
+            &=
+            \delta_{\headIndex = \headIndex'}
+            %
+            \kerntildef{a b}{\depthSymbol}{\inputSymbol}{\inputSymbol'} \,
+            \kerntildef{i j}{\depthSymbol}{\inputSymbol}{\inputSymbol'}
+            %
+            \, .
+        \end{align}
+        
+        \item 
+        $\activationsN$ converges in distribution to $\activationSymbol^{\depthSymbol} \sim \gp(0, \kernel^{\depthSymbol})$ with
+        \begin{align}\label{eq:sqrt_scaling_kernel}
+            &\kernelf{a b}{\depthSymbol}{\inputSymbol}{\inputSymbol'}
+            =
+            \E [
+                \activationSymbol_{a1}^{\depthSymbol}(\inputSymbol)
+                \activationSymbol_{b1}^{\depthSymbol}(\inputSymbol')
+            ]
+            \\
+            &=
+            %
+            %
+            \sum_{i , j = 1}^{\spatialDimension} 
+                \kerntildef{i j}{\depthSymbol}{\inputSymbol}{\inputSymbol'}
+                \E [\softmax(\logitSymbol^{\depthSymbol 1}(\inputSymbol))_{a i} \softmax(\logitSymbol^{\depthSymbol 1}(\inputSymbol'))_{b j}]
+            \nonumber
+            \, ,
+        \end{align}
+        and $\activations{\cdot k}{\depthSymbol}$ and $\activations{\cdot l}{\depthSymbol}$ are independent for any $k \neq l$.
+    \end{enumerate}
+\end{restatable}
+
+We can now revisit our argument from the previous section, and prove that unlike in \Cref{prop:linear_scale_no_conv}, $\genericDimenstion^{-1/2}$ scaling ensures a convolutional kernel can in principle be recovered.
+
+\begin{restatable}{proposition}{sqrtConvRecover}
+\label{prop:sqrt_scale_conv_recover}
+    Under the $\genericDimenstion^{-1/2}$ scaling, there exists a distribution over $\logitSymbol$ such that
+    for any $\inputSymbol, \inputSymbol'$ and $a, b, i, j$
+    \begin{align}
+        &\E [
+            \softmax(\logitSymbol(\inputSymbol))_{a i}
+            \softmax(\logitSymbol(\inputSymbol'))_{b j}
+        ]
+        \nonumber
+        \\
+        &=
+        \begin{cases}
+            \frac{1}{\genericDimenstion_f}\, , &  \exists k \in [\genericDimenstion] \text{ s.t.\ } i = N_a(k) \, , j = N_b(k) \, ,  \\
+            0 \, ,&  \text{ otherwise.}
+        \end{cases}
+    \end{align}
+\end{restatable}
+
+
+
+\section{Beyond the vanilla attention definition}\label{sect:beyon_vanilla_attn}
+
+Before progressing to empirical evaluation of infinitely wide attention architectures,
+two practical considerations have to be addressed: (i)~the $\genericDimenstion^{-1/2}$ scaling induced kernel in \Cref{eq:sqrt_scaling_kernel} involves an analytically intractable integral $\E [\softmax(\logitSymbol^{\depthSymbol 1}(\inputSymbol)) \softmax(\logitSymbol^{\depthSymbol 1}(\inputSymbol'))]$; (ii)~incorporation of positional encodings \citep{gehring2017convolutional,vaswani2017attention}.
+
+\subsection{Alternatives to softmax in attention networks}\label{sect:softmax_alternatives}
+
+We propose to resolve the analytical intractability of the $\E [\softmax(\logitSymbol^{\depthSymbol 1}(\inputSymbol)) \softmax(\logitSymbol^{\depthSymbol 1}(\inputSymbol'))]$ in \Cref{eq:sqrt_scaling_kernel} by substituting functions other than softmax for $\softmax$.
+In particular, we consider two alternatives:
+(i)~$\softmax(x) = \text{ReLU}(x)$, and (ii)~$\softmax(x) = x$, both applied elementwise. Besides analytical tractability of the expectation, our motivation for choosing (i) and (ii) is that ReLU removes the normalisation while still enforcing positivity of the attention weights, while the identity function allows the attention layer to learn an arbitrary linear combination of the values without constraints.
+
+To see if either is a sensible modification, we evaluated performance of \emph{finite} attention networks on CIFAR-10 for different choices of $\softmax$.
+Since softmax typically dampens the marginal variance of attention layer outputs (variance of a convex combination of random variables is upper bounded by the maximum of the individual variances), and both ReLU and identity can also significantly affect scale of the outputs, we optionally add layer normalisation as is common in attention architectures.
+We consider no normalisation (\texttt{none}),\footnote{Despite the similarity between attention with ReLU or identity for $\softmax$ and dense layers with cubic nonlinearities, which are known to be hard to train, we found that layer normalisation was not strictly necessary.
+We believe this is partly because we only used a single attention layer, and partly because the weights for keys, queries, and values are initialised independently which leads to relatively better behaved distribution of gradients at initialisation.} 
+normalisation applied after each head prior to multiplication by $\weightsO$ (\texttt{per\_head}), and normalisation applied to the output after $\weightsO$ (\texttt{at\_output}).
+
+\Cref{fig:softmax_replacements} shows the results across varying hyperparameters and random seeds, and \Cref{tab:finite_attention_best} (\Cref{sect:replacements_appendix}) reports accuracies attained under optimal hyperparameter settings.
+As you can see, both the replacement of softmax and addition of layer normalisation significantly increases the performance of the NN, with $\softmax(x) = x$ and \texttt{at\_output} normalisation being the best across variety of hyperparameter choices. 
+
+In light of the above, we will restrict our attention to the identity function alternative for $\softmax$ in the rest of the paper, and contrast its performance with the standard softmax choice where possible (finite NNs, and infinite attention NNs under the $\genericDimenstion^{-1}$ scaling---see \Cref{thm:linear_scaling_limit}).
+Similarly, we will also leverage the \texttt{at\_output} layer normalisation over the embedding dimension in our experiments.
+As shown by \citet[appendix A]{yang2019v2}, layer normalisation does not prevent Gaussianity of the infinite width limit (see \Cref{tab:kernel_overview} for the associated NNGP and NTK kernel transformations).
+
+
+
+\begin{figure}[tbp]
+    \begin{center}
+        \centerline{
+            \includegraphics[width=0.9\columnwidth,keepaspectratio]{fig/zeta_layernorm}
+        }
+        \vskip -0.15in
+        \caption{\textbf{Comparison of $\softmax$ alternatives.}
+        Architecture: 4x Convolution + ReLU, Attention, Flatten, Dense.
+        The captured variability is due to multiple random seeds, varying learning rate and network width, illustrating robustness of the reported results.
+        Softmax significantly underperforms other $\softmax$ alternatives whenever attention is followed by layer normalisation. Details in \Cref{sect:replacements_appendix}.}
+        \label{fig:softmax_replacements}
+    \end{center}
+    \vskip -0.25in
+\end{figure}
+
+
+\subsection{Positional encodings}\label{sect:positional_encodings}
+
+While substituting the identity function for $\softmax$ as suggested in \Cref{sect:softmax_alternatives} would technically allow us to move on to the experimental evaluation already, we found that positional encodings are as important in the infinite width limit as they are for the finite attention layers \citep{vaswani2017attention}.
+Since there are many possible variants of the positional encoding implementation, we focus only on the major points here and provide more detail in \Cref{sect:positional_encodings_appendix}.
+
+In finite networks, some of the most common ways to implement positional encodings is to modify the attention layer input by either \texttt{add}-ing $\indexedActivity{\depthSymbol - 1}{\sequenceVariable}{\inputSymbol} + \posEmb{\sequenceVariable}{\depthSymbol}$ or \texttt{append}-ing $[ \indexedActivity{\depthSymbol - 1}{\sequenceVariable}{\inputSymbol} \, , \posEmb{\sequenceVariable}{\depthSymbol} ]$ a matrix 
+$\posEmb{\sequenceVariable}{\depthSymbol}$ 
+which may be either fixed or a trainable parameter.
+The purpose of $\posEmb{\sequenceVariable}{\depthSymbol}$ is to provide the attention layer with information about the relationships between individual spatial dimensions (e.g., position of a particular pixel in an image, or of a token in a string).
+
+\subsubsection{Effect on the infinite width limit}
+
+If we assume $\posEmb{\sequenceVariable}{\depthSymbol}$ is trainable and each of its columns is initialised independently from $\gauss (0 , R)$,
+$\covPosEmb{}{}$ positive semidefinite,
+it can be shown that both in the \texttt{add} and \texttt{append} case, the attention layer output converges (in distribution) to a Gaussian infinite width limit (see \Cref{sect:positional_encodings_appendix}).
+The corresponding kernels can be stated in terms of an operator $\interpKern$ which interpolates any given kernel $\kernel$ with $\covPosEmb{}{}$
+\begin{align}\label{eq:kernel_interp_op}
+    \interpKern
+    \colon
+    \kernelf{}{}{\inputSymbol}{\inputSymbol'}
+    \mapsto
+    \interpKernCoeff \kernelf{}{}{\inputSymbol}{\inputSymbol'}
+    +
+    (1 - \interpKernCoeff)
+    \covPosEmb{}{}
+    \, ,
+\end{align}
+where $\interpKernCoeff \in [0, 1]$ is a hyperparameter,\footnote{If $\posEmb{\sequenceVariable}{\depthSymbol}$ is \texttt{append}-ed, $\interpKernCoeff = \lim_{\sequenceVariable \to \infty} \layerDimension{\depthSymbol - 1} / (\peDimension + \layerDimension{\depthSymbol - 1})$ with $\peDimension$ the row space dimension of $\posEmb{\sequenceVariable}{\depthSymbol}$.
+When $\posEmb{\sequenceVariable}{\depthSymbol}$ is \texttt{add}-ed, we replace $\indexedActivity{\depthSymbol - 1}{\sequenceVariable}{\inputSymbol}$ by 
+$\sqrt{\interpKernCoeff} \indexedActivity{\depthSymbol - 1}{\sequenceVariable}{\inputSymbol} + \sqrt{1 - \interpKernCoeff} \posEmb{\sequenceVariable}{\depthSymbol}$ 
+so as to prevent increase of the layer's input variance (see \Cref{sect:positional_encodings_appendix}).} yielding the following modification of the kernel induced by the $\genericDimenstion^{-1}$ scaling and $\WQ = \WK$ initialisation (\Cref{eq:fixed_determ_kernel}):
+\begin{align}\label{eq:sum_pe_lin_scale_kernel}
+    \kernelf{a b}{}{\inputSymbol}{\inputSymbol'}
+    =
+    \softmaxMean_{a}^{\inputSymbol}
+    [
+        \interpKern \circ
+        \kerntildef{}{}{\inputSymbol}{\inputSymbol'}
+    ]
+    (\softmaxMean_{b}^{\inputSymbol'})^\top
+    \, ,
+\end{align}
+where 
+$
+    \softmaxMean_{a}^{\inputSymbol}
+    \coloneqq
+    \softmax (
+        \interpKern \circ
+        \kerntildef{}{}{\inputSymbol}{\inputSymbol}
+    )_{a \cdot}
+$
+and similarly for $\softmaxMean_{b}^{\inputSymbol'}$.
+The modification of the kernel induced by the $\genericDimenstion^{-1/2}$ scaling, $\WQ, \WK$ initialised independently, and $\softmax$ replaced by the identity function (\Cref{eq:sqrt_scaling_kernel}), then leads to:
+\begin{align}\label{eq:sum_pe_sqrt_scale_kernel}
+    \kernelf{a b}{}{\inputSymbol}{\inputSymbol'}
+    =
+    \interpKern \circ
+    \kerntildef{a b}{}{\inputSymbol}{\inputSymbol'}
+    \!
+    \sum_{i, j=1}^{\spatialDimension}
+         [
+            \interpKern \circ
+            \kerntildef{i j}{}{\inputSymbol}{\inputSymbol'}
+         ]^2
+    .
+\end{align}
+
+Several comments are in order.
+Firstly, the typical choice of the initialisation covariance for $\posEmb{\sequenceVariable}{\depthSymbol}$ is $\covPosEmb{}{} = \rho I$, $\rho > 0$. This may be reasonable for the
+$
+    \softmaxMean_{a}^{\inputSymbol}
+    =
+    \softmax (
+        %
+        \interpKern \circ
+        \kerntildef{}{}{\inputSymbol}{\inputSymbol}
+    )_{a \cdot}
+$
+in \Cref{eq:sum_pe_lin_scale_kernel} when $\softmax$ is the softmax function as it increases attention to the matching input spatial dimension, but does not seem to have any ``attention-like'' interpretation in \Cref{eq:sum_pe_sqrt_scale_kernel} where the effect of applying $\interpKern$ 
+to $\kerntilde^{}$ with $\covPosEmb{ }{} = \rho I$
+is essentially analogous to that of just adding i.i.d.\ Gaussian noise to each of the attention layer inputs.
+
+Secondly, the right hand side of \Cref{eq:sum_pe_sqrt_scale_kernel} is just a scaled version of the discussed $\interpKern \circ \kerntilde$ kernel,
+with the scaling constant disappearing when the attention layer is followed by layer normalization (\Cref{tab:kernel_overview}).
+Both of these call into question whether the performance of the corresponding finite NN architectures will translate to its infinite width equivalent.
+We address some of these issues next.
+
+
+
+\subsubsection{Structured positional encodings}\label{sect:struct_pe}
+
+As mentioned, the main purpose of positional encodings is to inject structural information present in the inputs which would be otherwise ignored by the attention layer.
+A natural way to resolve the issues discussed in previous section is thus to try to incorporate similar information directly into the $\covPosEmb{}{}$ covariance matrix.
+In particular, we propose
+\begin{align}\label{eq:decay_pos_emb}
+    \covPosEmb{a b}{}
+    =
+    \rho
+    \begin{cases}
+        \exp \{ -\varphi [r_{h}(a, b)^2 + r_{v}(a, b)^2 ] \}
+        & \text{(image)} \\
+        \exp \{ -\varphi \, r_{s}(a, b)^2 \}
+        & \text{(string)}
+    \end{cases}
+    %
+    %
+    %
+    %
+\end{align}
+where $\rho, \varphi > 0$ are hyperparameters, $r_h (a, b)$ and $r_v(a, b)$ are the absolute horizontal and vertical distances between the pixels $a$ and $b$ divided by the image width and height respectively, and $r_s(a, b)$ is the absolute distance between the relative position of tokens $a$ and $b$, e.g., if $a$ is the 4\textsuperscript{th} token out of 7 in the first, and $b$ is the 2\textsuperscript{nd} token out of 9 in the second string, then $r_s(a, b) = |\frac{4}{7} - \frac{2}{9}|$.
+
+To motivate the above definition, let us briefly revisit \Cref{eq:sum_pe_lin_scale_kernel}.
+Intuitively, the $d^{-1}$ kernel
+$
+\softmaxMean_{a}^{\inputSymbol}
+[
+    \interpKern \circ
+    \kerntildef{}{}{\inputSymbol}{\inputSymbol'}
+]
+(\softmaxMean_{b}^{\inputSymbol'})^\top
+$
+is a result of multiplying the asymptotically Gaussian values $\val{}{} \sim \gp (0, \interpKern \circ \kerntilde)$ by matrices of row-wise stacked $\softmaxMean^\inputSymbol = [ \softmaxMean_1^\inputSymbol ; \ldots ; \softmaxMean_{\spatialDimension}^\inputSymbol]$ vectors, e.g.,
+$
+\indexedActivation{}{}{\inputSymbol} =   
+\softmaxMean^\inputSymbol
+\val{}{}(\inputSymbol)
+$,\footnote{By standard Gaussian identities, if $Z \sim \gauss (0, \Sigma)$, and $A$ is a deterministic matrix, then $A Z \sim \gauss (0, A \Sigma A^\top).$}
+meaning that the $\softmaxMean$
+vectors serve the role of attention weights in the infinite width limit.
+This in turn implies that the greater the similarity under $\kerntildef{a b}{}{\inputSymbol}{\inputSymbol}$ the higher the attention paid by $a$ to $b$.
+Thus, if we want to inject information about the relevance of neighbouring pixels in an image or tokens in a string, we need to increase the corresponding entries of
+$
+    \interpKern \circ
+    \kerntildef{}{}{\inputSymbol}{\inputSymbol}
+    =
+    \interpKernCoeff \kerntildef{}{}{\inputSymbol}{\inputSymbol'}
+    +
+    (1 - \interpKernCoeff)
+    \covPosEmb{}{}
+$
+which can be achieved exactly by substituting the $\covPosEmb{}{}$ from \Cref{eq:decay_pos_emb}.
+
+The above reasoning only provides the motivation for modifying the attention weights using positional encodings but not necessarily for modifying the asymptotic distribution of the values $\val{}{}$.
+Adding positional encodings only inside the $\softmax$ is not uncommon \citep[e.g.,][]{shaw2018self}, and thus we will also experiment with kernels induced by adding positional encodings
+only to the inputs of $\query{\sequenceVariable}{}$ and $\key{\sequenceVariable}{}$, leading to
+\begin{align}\label{eq:decay_lin_scale_kernel}
+    \kernelf{a b }{}{\inputSymbol}{\inputSymbol'}
+    =
+    \softmaxMean_{a}^{\inputSymbol}
+    %
+        \kerntildef{}{}{\inputSymbol}{\inputSymbol'}
+    %
+    (\softmaxMean_{b}^{\inputSymbol'})^\top
+    \, ,
+\end{align}
+under the $\genericDimenstion^{-1}$ scaling (cf.\ \Cref{eq:sum_pe_lin_scale_kernel}), and
+\begin{align*} %
+    \kernelf{a b}{}{\inputSymbol}{\inputSymbol'}
+    =
+    \interpKern \circ
+    \kerntildef{a b}{}{\inputSymbol}{\inputSymbol'}
+    \!
+    \sum_{i, j=1}^{\spatialDimension}
+        \kerntildef{i j}{}{\inputSymbol}{\inputSymbol'}
+        %
+            \interpKern \circ
+            \kerntildef{i j}{}{\inputSymbol}{\inputSymbol'}
+        %
+    \, ,
+\end{align*}
+under the $\genericDimenstion^{-1/2}$ scaling (cf.\ \Cref{eq:sum_pe_sqrt_scale_kernel}).
+
+Finally, note that the last kernel remains a scaled version of the aforementioned $\interpKern \circ \kerntilde$ kernel, albeit now with $\covPosEmb{}{}$ as in \Cref{eq:decay_pos_emb}.
+In our experience, using just $\interpKern \circ \kerntilde$ without the scaling leads to improved empirical performance, and further gains can be obtained with the related kernel
+\begin{align}\label{eq:residual_kernel}
+    \kernelf{a b }{}{\inputSymbol}{\inputSymbol'}
+    =
+    \interpKernCoeff \kerntildef{a b}{}{\inputSymbol}{\inputSymbol'}
+    +
+    (1 - \interpKernCoeff)
+    \covPosEmb{a \cdot}{}
+    \kerntildef{}{}{\inputSymbol}{\inputSymbol'}
+    \covPosEmb{b \cdot}{\top}
+    \, .
+\end{align}
+We call \Cref{eq:residual_kernel} the \emph{residual} attention kernel, as it can be obtained as a limit of architecture with a skip connection, $\indexedActivation{\depthSymbol}{\sequenceVariable}{\inputSymbol} = \sqrt{\interpKernCoeff} \indexedActivity{\depthSymbol - 1}{\sequenceVariable}{\inputSymbol} + \sqrt{1 - \interpKernCoeff} \tildeActivation{\depthSymbol}{\sequenceVariable}{\inputSymbol}$, where $\tildeActivation{\depthSymbol}{\sequenceVariable}{\inputSymbol}$ is output of an attention layer (details in \Cref{sect:residual_attention_appendix}).
+
+
+\section{Experiments}
+
+We evaluate the attention NNGP/NTK kernels on the CIFAR-10 \citep{cifar10} and IMDb reviews \citep{maas2011learning} datasets.
+While IMDb is a more typical setting for attention models (\Cref{sec:imdb}), we included CIFAR-10 experiments (\Cref{sec:cifar}) due to desire to compare with other NNGPs/NTKs on an established benchmark \citep[e.g.,][]{novak2019bayesian,du2019gd,li2019enhanced}, 
+and the recent successes of attention on vision tasks \citep[e.g.,][]{wang2017residual,wang2018non,hu2018squeeze,woo2018cbam,chen2018,ramachandran2018stand,bello2019attention}.
+Our experimental code utilises the JAX \citep{jax2018github} and Neural Tangents \citep{novak2020neural} libraries.
+
+
+\begin{figure}[tp]
+    \begin{center}
+        \centerline{
+            \includegraphics[width=\columnwidth,keepaspectratio]{fig/depth_all_logx.pdf}
+        }
+        \vskip -0.15in
+        \caption{
+        \textbf{Validation accuracy as a function of depth for various NNGP kernels} on a 2K/4K train/validation split of CIFAR-10 (no pixel downsampling).
+        Architecture: \texttt{[depth]}x Convolution + ReLU, followed by a single instance of the kernel specified in the legend (attention kernels combined with additional Flatten), and Dense.
+        See \Cref{tab:kernel_overview} for attention, and \citep{novak2019bayesian,garriga2019deep} for Convolutional, Flatten, and Global Average Pooling (GAP) kernel descriptions.
+        Results reported for best hyperparameters ($\genericDimenstion^{-1}$ scaling generally resulted in better performance for the \texttt{Struct} kernel).
+        More experimental details in \Cref{sect:depth_appendix}.
+        Notice the improved performance of attention kernels with positional embeddings and layer normalisation (i.e., \texttt{Struct}, \texttt{Residual}) over their \texttt{Vanilla} counterpart.
+        }
+        \label{fig:cifar_pe}
+    \end{center}
+    \vskip -0.25in
+\end{figure}
+
+
+
+\subsection{CIFAR-10}\label{sec:cifar}
+
+
+We have run two types of experiments on CIFAR-10: 
+(i)~smaller scale experiments focused on understanding how different hyperparameters of the attention kernel affect empirical performance;
+(ii)~a larger scale experiment comparing attention kernels to existing NNGP/NTK benchmarks.
+The smaller scale experiments were run on a randomly selected subset of six thousand observations from the \emph{training} set, with the 2K/4K train/validation split.
+This subset was used in \Cref{fig:convergence_plots,fig:cifar_pe}, and for hyperparameter tuning.
+Selected hyperparameters were then employed in the larger scale experiment with the usual 50K/10K train/test split.
+
+All kernels evaluated in this section correspond to NN architectures composed of multiple stacked convolutional layers with ReLU activations, followed by either simple flattening, global average pooling (GAP), or one of our attention kernels itself followed by flattening and, except for the \texttt{Vanilla} attention case (see \Cref{tab:kernel_overview}), also by layer normalisation;
+the output is then computed by a single dense layer placed on top.
+The choice to use only one attention layer was made to facilitate comparison with \citep{novak2019bayesian,du2019gd,li2019enhanced} where the same set-up with a stack of convolutional layers was considered.
+Adding more attention layers did not result in significant gains during hyperparameter search though.
+Exact details regarding data normalisation, hyperparameter tuning, and other experimental settings can be found in \Cref{sect:experimental_details}.
+
+
+\begin{table}[tbp]
+\caption{\textbf{CIFAR-10 test accuracies} of attention kernels and existing NNGP/NTK alternatives.
+The standard 50K/10K train/test split is used (no pixel downsampling).
+Best hyperparemeters from the 2K/4K subset experiments used for each kernel, $\genericDimenstion^{-1}$ scaling for the \texttt{Struct} kernel (see \Cref{tab:kernel_overview}). Details in \Cref{sect:full_cifar_appendix}.}
+\label{tab:full_data_results}
+\vskip 0.15in
+\begin{center}
+\begin{small}
+\begin{sc}
+\noindent
+\begin{tabularx}{\columnwidth}{X l c}
+    \toprule
+    Kernel & NNGP & NTK \\
+    \midrule
+    Flatten    &  65.54  & 66.27 \\
+    GAP \cite{li2019enhanced} & 77.85  & 77.39 \\
+    LAP \cite{li2019enhanced} & 80.36 & 79.71 \\
+    %
+    Struct & 80.55  & 79.93 \\
+    Residual & \textbf{80.72}  &  \textbf{80.10} \\
+    \bottomrule
+\end{tabularx}
+%
+\end{sc}
+\end{small}
+\end{center}
+\vskip -0.18in
+\end{table}
+
+
+
+The most important observations from the smaller scale experiments are captured in \Cref{fig:cifar_pe} which shows the validation accuracy of various NNGP models as a function of kernel choice and number of convolutional layers (\texttt{depth}) preceding the final flatten/GAP/attention plus dense block.
+Firstly, notice that except for the \texttt{Flatten} model, all other kernel choices achieve their best performance at smaller depths which is consistent with existing literature \citep{arora2019,li2019enhanced}.
+
+Secondly, observe that both the \texttt{Struct} and \texttt{Residual} attention kernels significantly outperform the \texttt{Vanilla} one, demonstrating that the use of positional embeddings and layer normalisation is helpful even in the infinite width limit as claimed in \Cref{sect:positional_encodings}.
+In contrast, we did not find significant evidence for $\softmax(x) = x$ outperforming the standard softmax choice as was the case for finite networks (see \Cref{fig:softmax_replacements}), with the best set of hyperparameters for \texttt{Struct} $\genericDimenstion^{-1}$ with softmax being only marginally better than the best results with the identity function (recall that no $\genericDimenstion^{-1/2}$ kernels use $\softmax = \text{softmax}$ due to the intractability discussed in \Cref{sect:beyon_vanilla_attn}).
+This finding provides hope that the $\genericDimenstion^{-1/2}$ kernels also do not sacrifice much in terms of performance by using identity for $\softmax$, but also points to salient differences between the qualitative effects of individual hyperparameter choices in finite and infinite attention layers.
+
+Using the insights from the smaller scale experiments, we ran the larger scale experiment on the full dataset using eight layer models and the \texttt{Struct} and \texttt{Residual} attention kernels.
+We used the positional embedding covariance matrix defined in \Cref{eq:decay_pos_emb} in both cases, and $\genericDimenstion^{-1}$ with softmax for the \texttt{Struct} kernel (further details in \Cref{sect:full_cifar_appendix}).
+The results can be found in \Cref{tab:full_data_results}.
+As you can see, attention performs significantly better than the \texttt{GAP} kernel \citep{arora2019}, and also provides a moderate improvement over the recent local average pooling (\texttt{LAP}) results \citep{li2019enhanced}.
+Since we used the validation accuracy from smaller scale experiments to determine our hyperparameters, we are comparing against the best cross-validation results from \citep{li2019enhanced} for fairness.
+
+
+\begin{table}[t]
+\caption{\textbf{IMDb sentiment classification, test accuracies} of simple NNGP/NTK models on the  25K/25K train/test split using GloVe word embeddings (\citet{pennington2014glove}; 840B.300d). \texttt{GAP-only} corresponds to a single global average pooling layer followed by a linear fully connected readout. \texttt{GAP-FCN} has 2 ReLU fully connected layers after GAP. \texttt{Struct} has an attention layer preceding GAP, followed by one (NNGP) or two (NTK) fully connected layers. Models selected on a validation set of 10K reviews. Details in \Cref{sect:imdb_full_appendix}.}
+\label{tab:imdb_full_results}
+\vskip 0.15in
+\begin{center}
+\begin{small}
+\begin{sc}
+\begin{tabularx}{\columnwidth}{X l c}
+    \toprule
+    Kernel & NNGP & NTK \\
+    \midrule
+    GAP-only &  \multicolumn{2}{c}{--\,\,\,\,\,84.98\,\,\,\,\,--} \\
+    GAP-FCN & 85.82 & 85.80 \\
+    Struct & \textbf{86.09} & \textbf{86.09} \\
+    \bottomrule
+\end{tabularx}
+\end{sc}
+\end{small}
+\end{center}
+\vskip -0.18in
+\end{table}
+
+
+\subsection{IMDb reviews}\label{sec:imdb}
+
+Although there has been interest in applying attention in vision, to date it has been predominantly recognized for performance on  language tasks. However, most of available NNGP/NTK kernel implementations  \citep{matthews2018gaussian, lee2018deep, garriga2019deep, arora2019, yang2019v2, li2019enhanced} are hard-coded for the specific experiments performed in the respective paper. Neural Tangents \citep{novak2020neural} allows for some flexibility, yet still accepts only inputs of fixed length and having exactly zero (i.e. inputs to fully connected networks) or two (images for CNNs) spatial dimensions.
+
+We release code allowing use of NNGP/NTK models (with or without attention) on inputs of variable spatial extent and arbitrary dimensionality (e.g., one spatial dimension for texts and time series, three spatial dimensions for videos).
+Our implementation seamlessly extends the Neural Tangents library, enabling research and application of NNGP and NTK models to new domains with almost no extra effort.
+
+As an example, we present the first benchmarks of simple NNGP and NTK models on the IMDb sentiment classification dataset in \Cref{tab:imdb_full_results}. We observe that \texttt{Struct} kernels outperform the \texttt{GAP-only} kernel (corresponding to linear regression on the word embeddings mean), but provides marginal benefit compared to a fully connected model on top of the pooling layer (\texttt{GAP-FCN}). We conjecture this is due to high-quality word embeddings  partially incorporating the inductive bias of the considered model. Indeed, we further demonstrate this effect by contrasting the gaps in performance between different kernel families on high- and low-quality word embeddings in \Cref{tab:imdb_small_results}.
+
+
+\begin{table}[t]
+\caption{\textbf{IMDb sentiment classification, test accuracies} on a 3.2K/1.6K train/test split. When high-quality word embeddings are used (300-dimensional GloVe trained on 840B tokens), complex models yield diminishing returns. Contrarily, simple embeddings (50-dimensional GloVe trained on 6B tokens) lead to significant gaps in model performance due to respective inductive biases ($\texttt{GAP-only} < \texttt{GAP-FCN} << \texttt{CNN-GAP} \approx \texttt{Struct}$). Models selected on a validation set of 1.6K reviews. Details in \Cref{sect:imdb_small_appendix}.}\label{tab:imdb_small_results}
+\vskip 0.15in
+\begin{sc}
+\begin{small}
+\begin{tabularx}{\columnwidth}{X X c c c}
+\toprule
+\multicolumn{2}{l}{Embeddings:}     & GloVe 840B      & GloVe 6B        \\
+\multicolumn{2}{l}{(dimension)} & (300)             & (50)               \\
+\midrule
+\multicolumn{2}{l}{GAP only}            & 83.81          & 73.00         \\
+\midrule
+\multirow{3}{*}{NNGP}      & GAP-FCN        & 83.75          & 74.44         \\
+                           & CNN-GAP        & 84.69          & 81.00         \\
+                           & Struct     & 83.56          & 80.88         \\
+\midrule
+\multirow{3}{*}{NTK}       & GAP-FCN        & 83.81          & 74.88          \\
+                           & CNN-GAP        & \textbf{84.88} & 80.31          \\
+                           & Struct     & 84.00          & \textbf{81.06}  \\
+\bottomrule
+\end{tabularx}
+\end{small}
+\end{sc}
+\vskip -0.18in
+\end{table}
+
+Naturally, our sample IMDb results are not competitive with the state-of-the-art, which achieve up to 97.4\% \citep[Table 4]{thongtan-phienthrakul-2019-sentiment}. However, we hope they will be a useful baseline for future research in infinite width sequence models, and that our codebase will substantially facilitate the process by enabling variable-length, arbitrary-dimensional input processing.
+ 
+
+
+\section{Conclusion}
+
+Unlike under the $\genericDimenstion^{-1}$ scaling of $\querySymbol(\inputSymbol) \keySymbol (\inputSymbol)^\top$ proposed in \citep{yang2019v2}, the standard $\genericDimenstion^{-1/2}$ scaling may lead to non-Gaussian asymptotic behaviour of attention layer outputs.
+Gaussianity of the limit can however be obtained by taking the number of heads to infinity.
+We explored the effect of positional encodings and replacements for the softmax function in attention layers, leading to improved performance for both finite and infinite attention architectures.
+On CIFAR-10, attention improves moderately upon the previous state-of-the-art for GPs without trainable kernels and advanced data preprocessing \citep{li2019enhanced}.
+We further released code allowing application of NNGP/NTK kernels to variable-length sequences and demonstrated its use on the IMDb reviews dataset.
+While caution is needed in extrapolation of any results, we hope that particularly \Cref{fig:softmax_replacements} and \Cref{tab:full_data_results} inspire novel NN architectures and kernel designs.
+
+\section*{Acknowledgements}
+    We thank Jaehoon Lee for frequent discussion, help with scaling up the experiments, and feedback on the manuscript. We thank Prajit Ramachandran for frequent discussion about attention architectures. We thank Greg Yang, Niki Parmar, and Ashish Vaswani, for useful discussion and feedback on the project. Finally, we thank Sam Schoenholz for insightful code reviews.
+
+\bibliography{ref}
+\bibliographystyle{icml2020}
+
+
+\input{appendix.tex}
+
+\end{document}

@@ -1,0 +1,310 @@
+\usepackage{microtype}
+\usepackage{graphicx}
+%\usepackage{subfigure}
+\usepackage{booktabs} % for professional tables
+\usepackage{hyperref}
+
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage{url}            % simple URL typesetting
+%\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+
+% additional packages
+\usepackage[british]{babel}
+\usepackage{natbib}
+\usepackage{enumerate}
+\usepackage{cancel}
+% \usepackage{xcolor}
+\usepackage{soul}
+\usepackage{multirow}
+\usepackage{mathtools}
+\usepackage{amsmath,amsthm,verbatim,amssymb,amsfonts,amscd}
+\usepackage{commath}
+\usepackage{bbm}
+\usepackage{thmtools,thm-restate}
+\usepackage{cleveref} % load last
+
+\babelhyphenation[british]{ap-pro-xi-ma-te}
+\babelhyphenation[british]{em-pi-ri-cal}
+\babelhyphenation[british]{re-lia-bi-li-ty}
+\babelhyphenation[british]{va-li-da-tion}
+\babelhyphenation[british]{me-chan-ism}
+\babelhyphenation[british]{si-mul-ta-ne-ous-ly}
+
+
+% allows equations to be split over mutliple pages
+\allowdisplaybreaks
+
+% math statements
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+
+% custom commands
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\argmax}{\arg\!\max}
+\DeclareMathOperator*{\E}{\mathbb{E}}
+\DeclareMathOperator*{\Var}{\mathbb{V}}
+\DeclareMathOperator*{\Covar}{Cov}
+\DeclareMathOperator{\Prob}{\mathbb{P}}
+\DeclareMathOperator{\diverg}{D}
+\DeclareMathOperator{\law}{Law}
+\DeclareMathOperator{\lipschitz}{Lip}
+\DeclareMathOperator{\poly}{poly}
+\DeclareMathOperator{\diam}{diam}
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\proj}{proj}
+\DeclareMathOperator{\vectorise}{vect}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\given}{\vert}
+\DeclareMathOperator{\conv}{\star}
+\DeclareMathOperator{\diag}{diag}
+% \DeclareMathOperator{\KL}{\mathrm{KL} \, }
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\DeclarePairedDelimiter{\parenth}{\lparen}{\rparen}
+\DeclarePairedDelimiter{\bracket}{\lbrack}{\rbrack}
+\DeclarePairedDelimiter{\vertbars}{\vert}{\vert}
+\DeclarePairedDelimiterX{\infdivx}[2]{(}{)}{%
+	#1 \, \delimsize\| \, #2%
+}
+\DeclarePairedDelimiterX{\commaparen}[2]{(}{)}{%
+	#1 , #2%
+}
+\DeclarePairedDelimiterX{\innerprod}[2]{\langle}{\rangle}{%
+	#1 , #2%
+}
+\DeclarePairedDelimiterX{\parenththree}[3]{\lparen}{\rparen}{
+	#1 ; #2 ; #3	
+}
+\newcommand{\niton}{\not\mathrel{\text{\reflectbox{$\in$}}}}
+\newcommand*\xbar[1]{%
+	\hbox{%
+		\vbox{%
+			\hrule height 0.5pt % The actual bar
+			\kern0.5ex%         % Distance between bar and symbol
+			\hbox{%
+				\kern-0.1em%      % Shortening on the left side
+				\ensuremath{#1}%
+				\kern-0.1em%      % Shortening on the right side
+			}%
+		}%
+	}%
+} 
+
+\newcommand{\fun}[1]{#1}
+\newcommand{\enorm}[1]{\norm{#1}_2}
+%\newcommand{\abs}{\vertbars}
+\newcommand{\KL}{\mathrm{KL} \, \infdivx}
+\newcommand{\TV}{\mathrm{TV} \commaparen}
+\newcommand{\expect}[1]{\E_{#1} \parenth}
+\newcommand{\divg}{\diverg \, \infdivx}
+%\newcommand{\inftsm}{\mathrm{d} \hspace{1pt} \parenth}
+\newcommand{\inftsm}[1]{\mathrm{d} #1}
+\newcommand{\lebesgue}{\lambda}
+\newcommand{\gradwrt}[1]{\nabla_{#1}}
+%\newcommand{\proj}{\mathrm{proj} \, \parenth}
+\newcommand{\sigmaAlg}{\sigma \, \parenth}
+%\newcommand{\borelAlg}{\mathcal{B} \, \parenth}
+\newcommand{\entropy}{\mathcal{H} \, \parenth}
+\newcommand{\order}{\mathcal{O} \, \parenth}
+\newcommand{\determ}{\vertbars}
+\newcommand{\vect}[1]{\boldsymbol{#1}}
+\newcommand{\mat}[1]{\boldsymbol{#1}}
+\newcommand{\aset}[1]{#1}
+\newcommand{\aspace}[1]{\mathcal{#1}}
+\newcommand{\rv}[1]{\expandafter\MakeUppercase\expandafter{#1}}
+\newcommand{\distr}[1]{\expandafter\MakeUppercase\expandafter{\mathrm{#1}}}
+%\newcommand{\distr}[1]{\mathrm{#1}}
+\newcommand{\dens}[1]{#1}
+\newcommand{\const}[1]{\mathrm{#1}}
+\newcommand{\complem}[1]{#1^\mathrm{C}}
+\newcommand{\transp}[1]{#1^\mathrm{T}}
+\newcommand{\inv}[1]{#1^{-1}}
+\newcommand{\pseudoinv}[1]{#1^{\dag}}
+\newcommand{\trace}[1]{\mathrm{Tr}\left( #1 \right)}
+\newcommand{\natnum}{\mathbb{N}}
+\newcommand{\hilbert}[1]{\mathcal{#1}}
+\newcommand{\dirac}{\fun{\delta}}
+\newcommand{\diracf}{\dirac \, \parenth}
+\newcommand{\kronecker}{\fun{\delta}_{\mathrm{Kr}}}
+\newcommand{\kroneckerf}{\kronecker \, \parenth}
+% \newcommand{\indicator}[1]{\mathbb{I}_{#1}}
+\newcommand{\indicator}[1]{\mathbbm{1}_{#1}}
+\newcommand{\indicatorf}[2]{\indicator{#1} ( #2 )}
+\newcommand{\identity}{\mathrm{Id}}
+\newcommand{\identityf}[1]{\identity(#1)}
+\newcommand{\e}[1]{\const{e}^{#1}}
+\newcommand{\factorial}[1]{#1!}
+
+
+% \newcommand{\kernel}{\mathcal{K}}
+\newcommand{\kernel}{\kappa}
+\newcommand{\kernhat}{\hat{\kernel}}
+\newcommand{\kerntilde}{\tilde{\kernel}}
+\newcommand{\kernelf}[2]{\kernel_{#1}^{#2} \, \commaparen}
+\newcommand{\kernhatf}[2]{\kernhat_{#1}^{#2} \, \commaparen}
+\newcommand{\kerntildef}[2]{\kerntilde_{#1}^{#2} \, \commaparen}
+\newcommand{\ntk}{\Theta}
+\newcommand{\ntktilde}{\widetilde{\ntk}}
+\newcommand{\ntkhat}{\widehat{\ntk}}
+\newcommand{\ntkf}[2]{\ntk_{#1}^{#2} \, \commaparen}
+\newcommand{\ntktildef}[2]{\ntktilde_{#1}^{#2} \, \commaparen}
+\newcommand{\ntkhatf}[2]{\ntkhat_{#1}^{#2} \, \commaparen}
+\newcommand{\interpKern}{\mathcal{I}}
+% \newcommand{\interpRand}{\interpKern^{r}}
+% \newcommand{\interpStruct}{\interpKern^{s}}
+\newcommand{\interpKernCoeff}{\alpha}
+
+\newcommand{\R}[1]{\mathbb{R}^{#1}}
+\newcommand{\Q}[1]{\mathbb{Q}^{#1}}
+\newcommand{\Lp}[1]{\mathrm{L}^{#1}}
+\newcommand{\contFns}[1]{C(#1)}
+\newcommand{\contBoundFns}[1]{C_b(#1)}
+\newcommand{\contVanishFns}[1]{C_0(#1)}
+
+\newcommand*\rfrac[2]{{}^{#1}\!/_{#2}}
+
+\newcommand{\gauss}{\mathcal{N}}
+\newcommand{\gaussDens}{\fun{\phi}}
+\newcommand{\gaussDensFn}[2]{\gaussDens_{#1, #2}}
+\newcommand{\standGaussDensFn}{\gaussDensFn{0}{1}}
+\newcommand{\mgauss}{\mathcal{MN}}
+\newcommand{\gp}{\mathcal{GP}}
+\newcommand{\categorical}{\text{Categorical}}
+\newcommand{\bernoulli}{\text{Bernoulli}}
+\newcommand{\chisq}{\chi^2}
+
+% \newcommand{\convergeDist}{\overset{\mathcal{L}}{\longrightarrow}}
+\newcommand{\convergeDist}{\rightsquigarrow}
+\newcommand{\convergeProb}{\overset{P}{\longrightarrow}}
+\newcommand{\convergeAs}{\overset{a.s.}{\longrightarrow}}
+
+% function restriction
+\newcommand\restr[2]{{% we make the whole thing an ordinary symbol
+  \left.\kern-\nulldelimiterspace % automatically resize the bar with \right
+  #1 % the function
+%   \vphantom{\big|} % pretend it's a little taller at normal size
+  \right|_{#2} % this is the delimiter
+  }}
+
+
+  
+
+\newcommand{\generalMean}{\bar{\generalSum}}
+
+\newcommand{\genericDimenstion}{d}
+\newcommand{\inputDimension}{\genericDimenstion^{0}}
+\newcommand{\outputDimension}{\genericDimenstion^{\depth + 1}}
+\newcommand{\spatialDimension}{\genericDimenstion^s}
+\newcommand{\layerDimension}[1]{\genericDimenstion_{\sequenceVariable}^{#1}}
+% \newcommand{\layerDimensionN}{\genericDimenstion_{\sequenceVariable}^{\depthSymbol}}
+\newcommand{\layerDimensionN}{\layerDimension{\depthSymbol}}
+
+
+\newcommand{\headIndex}{h}
+\newcommand{\headSymbol}{H}
+\newcommand{\headN}{\headSymbol_{\sequenceVariable}^{\depthSymbol}}
+
+\newcommand{\softmax}{\zeta}
+\newcommand{\softmaxMean}{\bar{\softmax}}
+\newcommand{\params}{\theta}
+
+\newcommand{\keySymbol}{K}
+\newcommand{\querySymbol}{Q}
+\newcommand{\valueSymbol}{V}
+\newcommand{\logitSymbol}{G}
+\newcommand{\outputSymbol}{O}
+\newcommand{\key}[2]{\keySymbol_{#1}^{#2}}
+\newcommand{\query}[2]{\querySymbol_{#1}^{#2}}
+\newcommand{\val}[2]{\valueSymbol_{#1}^{#2}}
+\newcommand{\logit}[2]{\logitSymbol_{#1}^{#2}}
+\newcommand{\keyN}{\key{\sequenceVariable}{\depthSymbol \headIndex}}
+\newcommand{\queryN}{\query{\sequenceVariable}{\depthSymbol \headIndex}}
+\newcommand{\valueN}{\val{\sequenceVariable}{\depthSymbol \headIndex}}
+\newcommand{\logitN}{\logit{\sequenceVariable}{\depthSymbol \headIndex}}
+
+\newcommand{\posEmbSymbol}{E}
+\newcommand{\posEmb}[2]{\posEmbSymbol_{#1}^{#2}}
+\newcommand{\posEmbN}{\posEmb{\sequenceVariable}{\depthSymbol \headIndex}}
+\newcommand{\covPosEmb}[2]{R_{#1}^{#2}}
+
+
+\newcommand{\weightMatSymbol}{W}
+\newcommand{\W}{\weightMatSymbol}
+\newcommand{\WQ}{\weightMatSymbol^{\querySymbol}}
+\newcommand{\WK}{\weightMatSymbol^{\keySymbol}}
+\newcommand{\WV}{\weightMatSymbol^{\valueSymbol}}
+\newcommand{\WO}{\weightMatSymbol^{\outputSymbol}}
+\newcommand{\weightQ}[1]{\weightMatSymbol_{\sequenceVariable, #1}^{\depthSymbol \headIndex, \querySymbol}}
+\newcommand{\weightK}[1]{\weightMatSymbol_{\sequenceVariable, #1}^{\depthSymbol \headIndex, \keySymbol}}
+\newcommand{\weightV}[1]{\weightMatSymbol_{\sequenceVariable, #1}^{\depthSymbol \headIndex, \valueSymbol}}
+% \newcommand{\weightO}[1]{\weightMatSymbol_{\sequenceVariable, #1}^{\depthSymbol, \outputSymbol}}
+\newcommand{\weightOGen}[2]{\weightMatSymbol_{#1}^{#2}}
+\newcommand{\weightO}[1]{\weightOGen{\sequenceVariable, #1}{\depthSymbol, \outputSymbol}}
+\newcommand{\weightsQ}{\weightMatSymbol_{\sequenceVariable}^{\depthSymbol \headIndex, \querySymbol}}
+\newcommand{\weightsK}{\weightMatSymbol_{\sequenceVariable}^{\depthSymbol \headIndex, \keySymbol}}
+\newcommand{\weightsV}{\weightMatSymbol_{\sequenceVariable}^{\depthSymbol \headIndex, \valueSymbol}}
+\newcommand{\weightsO}{\weightMatSymbol_{\sequenceVariable}^{\depthSymbol, \outputSymbol}}
+
+% \newcommand{\headDimension}{\genericDimenstion_{\sequenceVariable}^{\headSymbol^{\depthSymbol}}}
+\newcommand{\headDimension}{\genericDimenstion_{\sequenceVariable}^{\depthSymbol, \headSymbol}}
+% \newcommand{\headDimension}{\headSymbol_{\sequenceVariable}^{\depthSymbol}}
+\newcommand{\keyDimension}{\genericDimenstion_{\sequenceVariable}^{\depthSymbol, \keySymbol}}
+\newcommand{\queryDimension}{\genericDimenstion_{\sequenceVariable}^{\depthSymbol, \querySymbol}}
+\newcommand{\valueDimension}{\genericDimenstion_{\sequenceVariable}^{\depthSymbol, \valueSymbol}}
+\newcommand{\logitDimension}{\genericDimenstion_{\sequenceVariable}^{\depthSymbol, \logitSymbol}}
+\newcommand{\peDimension}{\genericDimenstion_{\sequenceVariable}^{\depthSymbol, \posEmb{}{}}}
+
+
+\newcommand{\stdSymbol}{\sigma}
+\newcommand{\keyStd}{\stdSymbol_{\keySymbol}}
+\newcommand{\queryStd}{\stdSymbol_{\querySymbol}}
+\newcommand{\valueStd}{\stdSymbol_{\valueSymbol}}
+\newcommand{\outStd}{\stdSymbol_{\outputSymbol}}
+\newcommand{\QKStd}{\stdSymbol_{\querySymbol \keySymbol}}
+\newcommand{\OVStd}{\stdSymbol_{\outputSymbol \valueSymbol}}
+\newcommand{\keyVar}{\keyStd^2}
+\newcommand{\queryVar}{\queryStd^2}
+\newcommand{\valueVar}{\valueStd^2}
+\newcommand{\outVar}{\outStd^2}
+\newcommand{\QKVar}{\QKStd^2}
+\newcommand{\OVVar}{\OVStd^2}
+
+\newcommand{\activations}[2]{\activationSymbol_{#1}^{#2}}
+\newcommand{\activationsN}{\activations{\sequenceVariable}{\depthSymbol}}
+\newcommand{\channels}[2]{\tilde{\activationSymbol}_{#1}^{#2}}
+\newcommand{\channelsN}{\channels{\sequenceVariable}{\depthSymbol}}
+\newcommand{\logits}[2]{\logitSymbol_{#1}^{#2}}
+\newcommand{\logitsN}{\logits{\sequenceVariable}{\depthSymbol}}
+
+\newcommand{\scaling}{\tau}
+\newcommand{\fIndexA}{a}
+\newcommand{\fIndexB}{b}
+\newcommand{\gIndexA}{a'}
+\newcommand{\gIndexB}{b'}
+\newcommand{\gIndexZA}{i'}
+\newcommand{\gIndexZB}{j'}
+
+\newcommand{\projectionN}{\projection_{\sequenceVariable}}
+\newcommand{\summandN}{\summand_{\sequenceVariable, \headIndex}}
+
+\newcommand{\projectionLogitSymbol}{\projection}
+\newcommand{\summandLogitSymbol}{\varphi}
+\newcommand{\projectionLogit}{\projectionLogitSymbol_{\sequenceVariable}^{\logitSymbol}}
+\newcommand{\projectionCoefficientsLogit}{\beta}
+\newcommand{\summandLogit}[1]{\summandLogitSymbol_{#1}}
+\newcommand{\summandLogitN}{\summandLogit{\sequenceVariable, j}}
+
+\newcommand{\tildeActivation}[3]{\indexedObject{\tilde{\activationSymbol}}{#1}{#2}{(#3)}}
+\newcommand{\tildeActivity}[3]{\indexedObject{\tilde{\activitySymbol}}{#1}{#2}{(#3)}}
+\newcommand{\tildeLogit}[2]{\widetilde{\logitSymbol}_{#1}^{#2}}
+\newcommand{\tildeLogitN}[3]{\tildeLogit{#1}{#2} (#3)}
+\newcommand{\uW}{\widetilde{\weightMatSymbol}}
+\newcommand{\uWQ}{\uW^{\querySymbol}}
+\newcommand{\uWK}{\uW^{\keySymbol}}
+\newcommand{\uWV}{\uW^{\valueSymbol}}
+\newcommand{\uWO}{\uW^{\outputSymbol}}

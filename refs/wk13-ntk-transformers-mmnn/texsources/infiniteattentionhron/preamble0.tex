@@ -1,0 +1,206 @@
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+
+\makeatletter
+\newcommand*\bigcdot{\mathpalette\bigcdot@{.5}}
+\newcommand*\bigcdot@[2]{\mathbin{\vcenter{\hbox{\scalebox{#2}{$\m@th#1\bullet$}}}}}
+\makeatother
+
+%text stuff
+\newcommand{\equationFullStop}{.}
+\newcommand{\equationComma}{,}
+
+%basic math
+\newcommand{\kron}{\delta}
+% \newcommand{\identity}{I}
+
+%base symbols
+\newcommand{\activationSymbol}{f}
+\newcommand{\activitySymbol}{g}
+\newcommand{\weightSymbol}{w}
+\newcommand{\biasSymbol}{b}
+
+\newcommand{\widthFunction}{h}
+%\newcommand{\sequenceIndex}{s}
+
+%\indeces
+\newcommand{\depthSymbol}{\ell}
+\newcommand{\smallestDepth}{1}
+\newcommand{\secondSmallestDepth}{2}
+\newcommand{\largestDepthIndex}{\depth}
+\newcommand{\secondLargestDepthIndex}{\depth-1}
+\newcommand{\widthSymbol}{i}
+\newcommand{\widthSymbolB}{j}
+\newcommand{\widthSymbolC}{k}
+\newcommand{\widthSymbolPair}{\widthSymbol,\widthSymbolB}
+\newcommand{\inputSymbol}{x}
+\newcommand{\inputSymbolB}{x'}
+
+%generic indexed symbols
+\newcommand{\indexedObject}[4]{{#1}^{#2}_{#3}{#4}}
+\newcommand{\indexedActivation}[3]{\indexedObject{\activationSymbol}{#1}{#2}{(#3)}}
+\newcommand{\indexedActivity}[3]{\indexedObject{\activitySymbol}{#1}{#2}{(#3)}}
+\newcommand{\indexedWeight}[2]{\indexedObject{\weightSymbol}{#1}{#2}{}} %weights don't depend on input
+\newcommand{\indexedStandardNormal}[2]{\indexedObject{\standardNormals}{#1}{#2}{}} %weights don't depend on input
+\newcommand{\indexedBias}[2]{\indexedObject{\biasSymbol}{#1}{#2}{}} %biases don't depend on input
+
+%default symbols
+\newcommand{\activation}{\indexedActivation{\depthSymbol}{\widthSymbol}{\inputSymbol}}
+\newcommand{\activity}{\indexedActivity{\depthSymbol}{\widthSymbol}{\inputSymbol}}
+\newcommand{\weight}{\indexedWeight{\depthSymbol}{\widthSymbolPair}}
+\newcommand{\bias}{\indexedBias{\depthSymbol}{\widthSymbol}}
+\newcommand{\finalFunction}{\indexedActivation{\largestDepthIndex}{}{\inputSymbol}}
+
+%vector symbols
+\newcommand{\vectorize}[1]{#1}
+\newcommand{\vectorActivation}{\indexedObject{\vectorize{\activationSymbol}}{2}{}{(\inputSymbol)}}
+\newcommand{\vectorActivationB}{\indexedObject{\vectorize{\activationSymbol}}{2}{}{(\inputSymbolB)}}
+\newcommand{\weightVector}{\vectorize{\weightSymbol}_{\weightSymbolB}}
+\newcommand{\dotIndex}{\bigcdot}
+\newcommand{\biasVectorZero}{\indexedObject{\vectorize{\biasSymbol}}{1}{}{}}
+\newcommand{\biasVectorOne}{\indexedObject{\vectorize{\biasSymbol}}{2}{}{}}
+\newcommand{\bigVector}{F}
+\newcommand{\bigVectorStandard}{\bigVector^{(\secondSmallestDepth)}}
+
+%general network symbols
+\newcommand{\nonlinearity}{\phi}
+\newcommand{\depth}{L}
+
+%distribution symbols
+\newcommand{\normal}{\mathcal{N}}
+\newcommand{\varianceSymbol}{C}
+\newcommand{\weightVariance}{\varianceSymbol_{\weightSymbol}}
+\newcommand{\weightVarianceScaled}{\hat{\varianceSymbol}_{\weightSymbol}}
+\newcommand{\weightVarianceDepth}{\weightVariance^{(\depthSymbol)}}
+\newcommand{\weightVarianceDepthScaled}{\weightVarianceScaled^{(\depthSymbol)}}
+\newcommand{\biasVariance}{\varianceSymbol_{\biasSymbol}}
+\newcommand{\biasVarianceDepth}{\biasVariance^{(\depthSymbol)}}
+\newcommand{\expectation}[2]{\mathbb{E}_{#2}{\left\lbrack #1\right\rbrack}}
+\newcommand{\integrationVariable}{\epsilon}
+\newcommand{\integrationVariableB}{\gamma}
+\newcommand{\genericCov}{K}
+\newcommand{\genericRandomVariable}{X}
+\newcommand{\frequencyVariable}{k}
+\newcommand{\dee}{d}
+\newcommand{\probabilityMeasure}{P}
+\newcommand{\genericMeasure}{\mu}
+\newcommand{\sequenceVariable}{n}
+\newcommand{\genericFunction}{h}
+
+
+
+\newcommand{\predictiveNumPoints}{10}
+\newcommand{\predictiveDimension}{4}
+
+\newcommand{\naturalNumbers}{\mathbb{N}}
+\newcommand{\couplingIndex}{n}
+
+
+\newcommand{\datapoint}{x}
+\newcommand{\datapointi}{\datapoint[i]}
+\newcommand{\datapointa}{\datapoint[a]}
+\newcommand{\datapointb}{\datapoint[b]}
+\newcommand{\datapointone}{\datapoint[1]}
+\newcommand{\datapointn}{\datapoint[n]}
+\newcommand{\indexSet}{\mathcal{X}}
+
+\newcommand{\sequenceMeasure}{\genericMeasure_{\sequenceVariable}}
+\newcommand{\limitMeasure}{\genericMeasure_{*}}
+\newcommand{\characteristicSymbol}{(C)}
+\newcommand{\counterSymbol}{(S)}
+\newcommand{\infiniteSequenceMeasure}{\genericMeasure^{\characteristicSymbol}_{\sequenceVariable}}
+\newcommand{\infiniteLimitMeasure}{\limitMeasure^{\characteristicSymbol}}
+\newcommand{\counterSequenceMeasure}{\genericMeasure^{\counterSymbol}_{\sequenceVariable}}
+\newcommand{\counterLimitMeasure}{\limitMeasure^{\counterSymbol}}
+
+\newcommand{\genericReal}{u}
+\newcommand{\envelopegradient}{m}
+\newcommand{\envelopeconstant}{c}
+
+\newcommand{\countableInfinity}{\infty}
+\newcommand{\sequenceSpace}{\realLine^{\countableIndexSet}}
+\newcommand{\genericSequence}{x}
+\newcommand{\genericSequenceB}{y}
+\newcommand{\simpleElement}{z}
+\newcommand{\sequenceMetric}{\rho}
+\newcommand{\sequenceIndex}{j}
+\newcommand{\functionSequenceVariable}{m}
+\newcommand{\function}{\psi}
+\newcommand{\sequenceFunction}{\function_{\functionSequenceVariable}}
+\newcommand{\sequenceFunctionShared}{\function_{\sequenceVariable}}
+\newcommand{\characteristicFunction}{\sequenceFunctionShared^{\characteristicSymbol}}
+\newcommand{\counterFunction}{\sequenceFunctionShared^{\counterSymbol}}
+\newcommand{\complexPlane}{\mathbb{C}}
+\newcommand{\characteristicVariable}{k}
+\newcommand{\overallLimit}{L}
+\newcommand{\boundSequenceVariable}{N}
+\newcommand{\boundFunctionSequenceVariable}{M}
+\newcommand{\boundFunctionSequenceVariableB}{\tilde{\boundFunctionSequenceVariable}}
+\newcommand{\approximationQuality}{\epsilon}
+\newcommand{\genericBoundedFunction}{\phi}
+\newcommand{\genericElement}{x}
+\newcommand{\sampleSpace}{\Omega}
+\newcommand{\sigmaAlgebra}{\mathcal{F}}
+\newcommand{\metric}{m}
+\newcommand{\metricSpace}{(\sampleSpace,\metric)}
+\newcommand{\borelSigmaAlgebra}{\mathcal{B}}
+\newcommand{\sharedMeasure}{\tilde{Q}}
+\newcommand{\sharedProbabilitySpace}{\left\lbrace \sharedSampleSpace, \sharedSigmaAlgebra, \sharedMeasure \right\rbrace}
+\newcommand{\borelSet}{A}
+\newcommand{\cdfBoundary}{c}
+\newcommand{\cdfBorelSet}{\borelSet_\cdfBoundary}
+\newcommand{\boundarySymbol}{\delta}
+\newcommand{\boundaryBorelSet}{\boundarySymbol \borelSet}
+\newcommand{\numBinomialSuccesses}{X_\numBinomialDraws}
+\newcommand{\numBinomialDraws}{n}
+\newcommand{\binomialProbability}{q}
+\newcommand{\latticeSymbol}{L}
+\newcommand{\latticeBorelSet}{\borelSet_\latticeSymbol}
+\newcommand{\latticeVariable}{d}
+\newcommand{\latticeVariableB}{e}
+\newcommand{\datapointiprime}{x^{\prime}[i]}
+
+
+\newcommand{\genericRV}{X}
+\newcommand{\genericRVB}{Y}
+\newcommand{\genericP}{P}
+\newcommand{\rowIndex}{n}
+\newcommand{\rowVariance}{\sigma^2_{\rowIndex}}
+\newcommand{\rowStd}{\sigma_{\rowIndex}}
+\newcommand{\limitStd}{\sigma_{*}}
+% \newcommand{\Var}{\text{Var}}
+\newcommand{\Cov}{\text{Cov}}
+% \newcommand{\Prob}{\text{Pr}}
+\newcommand{\limitVariance}{\sigma^2_{*}}
+\newcommand{\vectorDimension}{k}
+\newcommand{\limitSymbol}{*}
+\newcommand{\colIndex}{i}
+\newcommand{\setIndex}{j}
+\newcommand{\generalSum}{S}
+\newcommand{\littleO}{\mathrm{o}}
+\newcommand{\normalCdf}{\Phi}
+\newcommand{\testVector}{t}
+% \newcommand{\standardNormals}{\epsilon}
+\newcommand{\standardNormals}{\varepsilon}
+\newcommand{\summand}{\gamma}
+\newcommand{\summandIndeces}[1]{\summand_{\widthSymbol,\widthSymbolB}^{(\depthSymbol)}(#1)[\width]}
+\newcommand{\standardizedSum}{b}
+\newcommand{\standardizedSumIndeces}[3]{\standardizedSum_{#3}^{(#2)}(#1)[\width]}
+\newcommand{\finiteSet}{\mathcal{I}}
+\newcommand{\projection}{\mathcal{T}}
+\newcommand{\projectionIndeces}{\mathcal{L}}
+\newcommand{\projectionCoefficients}{\alpha}
+\newcommand{\atWidth}{[\sequenceVariable]}
+\newcommand{\atLimit}{[*]}
+
+\newcommand{\projectionVar}{\sigma^{2}(\depthSymbol,\projectionIndeces,\projectionCoefficients)\atWidth}
+\newcommand{\limitVar}{\sigma^{2}(\depthSymbol,\projectionIndeces,\projectionCoefficients)\atLimit}
+\newcommand{\generalizedSummandHnorm}[1]{\hat{\generalizedSummand}_{#1}^{(\depthSymbol)}(\finiteSet,\testVector)[\width]}
+\newcommand{\generalizedSummandLnorm}[1]{\tilde{\generalizedSummand}_{#1}^{(\depthSymbol)}(\finiteSet,\testVector)[\width]}
+\newcommand{\linearCoeff}{m}
+\newcommand{\constantCoeff}{c}
+\newcommand{\projectionIndex}{\alpha}
+\newcommand{\finiteSetTerms}{(\inputSymbol,\widthSymbol, \projectionIndex) \in \finiteSet}
+\newcommand{\finiteSetTermsDashed}{(\inputSymbol',\widthSymbol', \projectionIndex') \in \finiteSet}

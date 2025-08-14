@@ -21,3 +21,9 @@ monday :  Wigner conjectured that certain properties of GOE matrices hold
 
 
 wednesday : hand computations done, now focusing on transformers
+
+
+thursday : 
+there is also the 1st eigenvector issue
+faire attentino au fait que ce ne soit pas le resnet qui enlève tout l'aspect optimization landscape
+notationnal issues: beaucoup mieuxa vec mes notations 
