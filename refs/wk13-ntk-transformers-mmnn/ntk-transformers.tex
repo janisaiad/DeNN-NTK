@@ -1,0 +1,76 @@
+\documentclass[10pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[margin=1in]{geometry}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\dd}{\mathrm{d}}
+
+\title{Neural Tangent Kernel for a Single Attention Layer}
+\author{Janis Aiad (Synthesis)}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Context: NTK for Transformers}
+
+The study of infinitely wide neural networks provides powerful theoretical tools to understand the behavior of deep learning models. The Neural Tangent Kernel (NTK) characterizes the training dynamics of such networks under gradient descent. This document synthesizes the derivation of the NTK for a single attention layer, following the framework of Hron et al. (2020).
+
+We focus on the most expressive scaling regime:
+\begin{itemize}
+    \item The attention logits $\frac{QK^\top}{\sqrt{d_k}}$ are scaled by $d_k^{-1/2}$.
+    \item Asymptotic Gaussianity is recovered by taking the number of heads $H \to \infty$.
+\end{itemize}
+The NTK is defined recursively. The kernel of a layer $\ell$, denoted $\Theta^\ell$, depends on the NNGP kernel $\kappa^\ell$ of that same layer, and on the NNGP ($\tilde\kappa^{\ell-1}$) and NTK ($\tilde\Theta^{\ell-1}$) from the output of the preceding layer. The general recursive formula can be schematically written as:
+\[
+\Theta^\ell = \text{DirectContribution}(\tilde\kappa^{\ell-1}) + \text{IndirectContribution}(\tilde\kappa^{\ell-1}, \tilde\Theta^{\ell-1})
+\]
+
+\section{Simplification for the First Layer ($\ell=1$)}
+
+A crucial simplification occurs for the first layer of the network. The "preceding layer" is the input data itself.
+\begin{itemize}
+    \item \textbf{Input NNGP Kernel ($\tilde\kappa^0$):} The NNGP measures output covariance. Since the "output" of the input layer is the data itself, this kernel is simply the dot product similarity between input vectors. For two sequences $x$ and $x'$, the kernel between token $a$ of $x$ and token $b$ of $x'$ is:
+    \[ \tilde\kappa^0_{ab}(x, x') = x_a^\top x_{b'}' \]
+    \item \textbf{Input NTK ($\tilde\Theta^0$):} The NTK tracks gradients with respect to trainable parameters. The input layer has no such parameters. Therefore, its NTK is zero everywhere:
+    \[ \tilde\Theta^0_{ab}(x, x') = 0 \]
+\end{itemize}
+This observation is key: since $\tilde\Theta^0 = 0$, the \textbf{Indirect Contribution} term vanishes entirely from the recursive formula. The NTK of the first attention layer is composed solely of the \textbf{Direct Contribution} terms, which arise from the gradients with respect to that layer's own weights ($W^Q, W^K, W^V, W^O$).
+
+\section{NNGP and NTK Formulas for a Single Layer}
+
+Let's define the kernels for the first attention layer ($l=1$). For clarity, we assume identity gating ($\zeta(x)=x$) and no positional encodings.
+
+\subsection{NNGP Kernel $\kappa^1$}
+First, we need the NNGP of the attention layer itself. It depends on the input NNGP $\tilde\kappa^0$. Following the mapping for identity gating with $d^{-1/2}$ scaling:
+\[
+\kappa^1_{ab}(x,x') = \big(\tilde\kappa^0_{ab}(x,x')\big) \sum_{i,j} \big(\tilde\kappa^0_{ij}(x,x')\big)^2 = (x_a^\top x_{b'}') \sum_{i,j} (x_i^\top x_{j}')^2
+\]
+This kernel describes the covariance of the layer's output at initialization.
+
+\subsection{NTK $\Theta^1$}
+The NTK for the first layer is the sum of the direct contributions from its weights. From the proofs in Hron et al. (2020, Appendix B.2), this is:
+\[
+\Theta^1_{ab}(x,x') = \underbrace{2\kappa^1_{ab}(x,x')}_{\text{From } V, O \text{ weights}} + \underbrace{\text{Term from } Q, K \text{ weights}}_{\text{Assuming } \tau=1/2 \text{ scaling}}
+\]
+Let's expand the term from the Query and Key weights. After simplifying with $\tilde\Theta^0=0$ and substituting $\tilde\kappa^0$, we get:
+\begin{align*}
+\Theta^1_{ab}(x,x') = & \; 2\kappa^1_{ab}(x,x') \\
+& + 2 \sigma_{OV}^2 \sigma_{QK}^2 (x_a^\top x_{b}') \sum_{c_1,c_2,d_1,d_2} \frac{(x_{c_1}^\top x_{c_2}') (x_{d_1}^\top x_{d_2}')}{d_s} \mathbb{E}\bigg[ \frac{\partial \tilde{G}_{ac_1}^1(x)}{\partial G_{ad_1}^1(x)} \frac{\partial \tilde{G}_{bc_2}^1(x')}{\partial G_{bd_2}^1(x')} \bigg]
+\end{align*}
+where:
+\begin{itemize}
+    \item $\sigma_{OV}^2, \sigma_{QK}^2$ are variances from weight initializations.
+    \item The sum is over all spatial dimensions (e.g., token indices).
+    \item $G^1$ represents the pre-nonlinearity attention logits, which are Gaussian with a covariance depending on $\tilde\kappa^0$.
+    \item $\tilde G^1$ represents the post-nonlinearity attention scores. The expectation of their derivatives $\E[\frac{\partial\tilde G}{\partial G}]$ captures the geometry induced by the attention mechanism's gating/normalization function.
+\end{itemize}
+
+This final formula, while still complex, is the concrete expression for the NTK of a single attention layer, built from the ground up from the input data similarities.
+
+\end{document}

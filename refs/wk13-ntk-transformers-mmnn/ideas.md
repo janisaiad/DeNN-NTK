@@ -27,3 +27,8 @@ thursday :
 there is also the 1st eigenvector issue
 faire attentino au fait que ce ne soit pas le resnet qui enlève tout l'aspect optimization landscape
 notationnal issues: beaucoup mieuxa vec mes notations 
+explain in the ntk where every term comes from
+
+great insight, layer norm do nothing for normes vectors, especially becaue they are already normes 
+
+see if transformers also have this RMT result for wigner ratio spacings
