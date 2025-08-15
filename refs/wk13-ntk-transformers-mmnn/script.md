@@ -37,9 +37,9 @@ For the 1st part I recall you the setup for MMNNs
 
 
 Now for the 2nd part
-I'll show you all the hand calculations i went through, it was very hard and very long, b
+I'll show you all the hand calculations i went through, it was very hard and very long
 
-I'm glad to present to you my hand calculations, because since the beginning of my work over the NTK, i've written about 300 pages of hand calculations. This is a retranscription of what i've done only during 3 days, with also reading papers, implementing numerical stuff and 
+I'm glad to present to you this, because since the beginning of my work over the NTK, i've written about 300 pages of hand calculations. This is a retranscription of what i've done only during 3 days, with also reading papers, implementing numerical stuff and 
 do comparisons etc ..
 
 
