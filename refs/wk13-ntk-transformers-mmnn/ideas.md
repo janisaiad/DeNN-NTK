@@ -32,3 +32,7 @@ explain in the ntk where every term comes from
 great insight, layer norm do nothing for normes vectors, especially becaue they are already normes 
 
 see if transformers also have this RMT result for wigner ratio spacings
+
+for mx presentation : how sgd select the global minima, for MMNNs the adam optimizer (we can look into the sharpness and no nuniformity)
+the proof for theorem 3.1 is in the supplemental, we can look at something similar for the adam optimizer
+(MX will work on the sharpness and non uniformity bound for adam), present this paper next week
