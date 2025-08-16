@@ -456,6 +456,34 @@ By assembling all the terms, we obtain the final algebraic formula:
 
 
 
+\subsection{Computing ReLU Product Expectations}
+When analyzing the Neural Tangent Kernel (NTK) of a single-layer network, we need to compute expectations of the form:
+\[
+\mathbb{E}[\text{ReLU}(X_1)\text{ReLU}(X_2)]
+\]
+where $(X_1, X_2)$ follows a bivariate normal distribution with parameters $(\mu_1, \sigma_1, \mu_2, \sigma_2, \rho)$.
+
+For deterministic input vectors $x_1$ and $x_2$, we define the following quantities:
+\begin{itemize}
+\item $\sigma_1 = \|x_1\|$ (where $\|\cdot\|$ denotes Euclidean norm)
+\item $\sigma_2 = \|x_2\|$ 
+\item $\rho = \cos(x_1,x_2) = \frac{\langle x_1, x_2 \rangle}{\|x_1\| \|x_2\|}$
+\end{itemize}
+
+The network outputs follow a Gaussian process characterized by the covariance matrix:
+\[
+\Sigma = 
+\begin{pmatrix}
+\sigma_1^2 & \rho\sigma_1\sigma_2 \\
+\rho\sigma_1\sigma_2 & \sigma_2^2
+\end{pmatrix}
+\]
+\sigma_1^2 & \rho\sigma_1\sigma_2 \\
+\rho\sigma_1\sigma_2 & \sigma_2^2
+\end{pmatrix}
+\]
+
+
 
 
 \subsection{Decomposition}
@@ -479,9 +507,6 @@ $I_{11}$ is the probability $P(Z_1 > a, Z_2 > b)$. It is calculated via the cumu
 \[
 I_{11} = P(Z_1 > a, Z_2 > b) = P(Z_1 < -a, Z_2 < -b) = \Phi_2(-a, -b; \rho) = \Phi_2\left(\frac{\mu_1}{\sigma_1}, \frac{\mu_2}{\sigma_2}; \rho\right)
 \]
-
-
-
 
 
 

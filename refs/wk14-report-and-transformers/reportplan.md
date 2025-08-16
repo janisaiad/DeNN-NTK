@@ -21,6 +21,12 @@ la deuxieme approche est l'intuition du
 la preuve a la khatri rao peut etre etendue dans le settings resnet
 
 
+bien garder à l'esprit que l'on garde en vue le fait que dans les applications indusrie, ce n'est pas forcément la meilleure chose
+que de trouver la meilleure approximation (les théoremes d'approximations on s'en fout un peu)
+c'est surtout la généralisation qui intéresse et l'optimization en 1er lieu
+
+
+expliciter l'eatpe douteuse de retirer tous les termes de legendre ( sinon on suppose la polynoamialité ce qui n'est vraiment pas bon quand on stack les layers)
 finaliser sur notre intuition finale qui explique les performances pour les MMNN, transformers et resnets (discussion avec terjek aussi)
 ne pas oublier que la suite est longue, en particulier pour le RKHS et 
 
