@@ -1,0 +1,673 @@
+% il existe plusieures classes de documents
+% pour des documents plus longs, vous pouvez utiliser
+% book ou report
+\documentclass[a4paper]{article} 
+\usepackage[draft]{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{biblatex} %Imports biblatex package
+\usepackage{subfig}
+\usepackage{parskip}
+\usepackage{multirow}
+\usepackage[most]{tcolorbox}
+\usepackage{xcolor}
+\addbibresource{stg3a.bib} %Import the bibliography file
+
+% vous pouvez changer les paramètres : voici les options dispoinibles :
+% - a4paper
+% - fancysections
+% - notitlepage ou titlepage
+% - onside ou twoside selon si vous voulez l'imprimer en recto-verso ou en recto
+% - sectionmark
+% - chaptermark (pour les 
+% - pagenumber
+% - enmanquedinspiration
+% en cas de doutes, pas de doutes, la documentation est sur :
+%  https://gitlab.binets.fr/typographix/polytechnique/-/blob/master/source/polytechnique.pdf
+
+
+
+\usepackage[a4paper,  fancysections,  titlepage]{polytechnique}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{blindtext}
+\usepackage[hidelinks]{hyperref}
+
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{xcolor}
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  showstringspaces = false,
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  commentstyle=\color{brown},
+  morecomment=[l][\color{magenta}]{\#},
+  inputencoding=utf8,
+  extendedchars=true,
+  literate={à}{{\`a}}1 {ç}{{\c{c}}}1 {é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {ë}{{\"e}}1 {î}{{\^i}}1 {ï}{{\"i}}1 {ô}{{\^o}}1 {ö}{{\"o}}1 {ù}{{\`u}}1 {û}{{\^u}}1 {ü}{{\"u}}1 {ÿ}{{\"y}}1 {À}{{\`A}}1 {Ç}{{\c{C}}}1 {É}{{\'E}}1 {È}{{\`E}}1 {Ê}{{\^E}}1 {Ë}{{\"E}}1 {Î}{{\^I}}1 {Ï}{{\"I}}1 {Ô}{{\^O}}1 {Ö}{{\"O}}1 {Ù}{{\`U}}1 {Û}{{\^U}}1 {Ü}{{\"U}}1 {Ÿ}{{\"Y}}1 {\_}{\textunderscore}{1}
+}
+
+% nous avons défini deux commandes :
+\newcommand{\code}[1]{%
+    \mbox{\ttfamily%
+        \detokenize{#1}%
+    }%
+}
+
+\newcommand{\resultat}[1]{%
+    \quad \rightsquigarrow \quad #1%
+}
+
+\DeclareRobustCommand{\ReLU}{\mathrel{\text{%
+    \begin{tikzpicture}[baseline=(current bounding box.south)]
+        \draw[thick] (0,0) -- (0.25,0) -- (0.4,0.25);
+    \end{tikzpicture}}}\!\!}
+
+\newtheorem{theorem}{Théorème}[section]
+\newtheorem{lemma}[theorem]{Lemme}
+
+\newcommand{\E}{\mathbb{E}}
+\DeclareMathOperator{\Var}{Var}
+\newcommand{\indic}{\mathbb{1}}
+\newcommand{\dd}{\,d}
+
+\author{Janis AIAD}
+\date{\today}
+\title{Analyse de la dynamique d'apprentissage des réseaux de neurones profonds à travers le prisme du Noyau de Tangente Neuronale}
+\subtitle{Contributions à la compréhension des corrections à largeur finie et des régimes d'apprentissage}
+% pour changer de logo, ajoutez l'image dans un fomat PDF
+% ou image en la glissant à droite et remplacez typographix
+% par le nom de l'image, si vous ne voulez pas de logo, 
+% supprimze la ligne. 
+
+\begin{document}
+\begin{figure*}[b]
+    \includegraphics[width=0.4\linewidth]{logoaividence.jpg}
+    \label{fig:enter-label}
+\end{figure}
+
+
+\fontsize{40pt}{48pt}
+
+	\maketitle 
+	
+	\tableofcontents
+\newpage
+
+
+\addcontentsline{toc}{section}{Résumé}
+\section*{Résumé}
+Ce rapport présente les résultats d'un stage de recherche axé sur l'étude de la dynamique d'apprentissage des réseaux de neurones profonds. Nous explorons les mécanismes sous-jacents à travers le formalisme du Noyau de Tangente Neuronale (NTK), en portant une attention particulière aux corrections à largeur finie. Nos travaux s'articulent autour de la décomposition du NTK via l'entraînement de Sobolev, l'analyse de son espace à noyau reproduisant (RKHS) et l'étude des valeurs propres extrêmes. Nous présentons des bornes théoriques pour la plus petite valeur propre du NTK en nous appuyant sur des techniques de matrices aléatoires (RMT). Ces résultats sont ensuite appliqués à l'analyse de différentes architectures, notamment les réseaux de neurones à propagation avant (FCNN), les réseaux à mémoire matricielle (MMNN) et les transformeurs. Nous discutons également des implications de nos découvertes pour les applications en calcul scientifique (SciML) et proposons des pistes pour de futures recherches.
+
+\newpage
+\addcontentsline{toc}{section}{Executive summary}
+\section*{Executive summary}
+(Executive summary placeholder)
+
+\newpage
+\addcontentsline{toc}{section}{Introduction}
+\section*{Introduction}
+L'étude de la dynamique d'apprentissage dans les réseaux de neurones profonds constitue un domaine de recherche fondamental. Le régime du Noyau de Tangente Neuronale (NTK) a fourni un cadre puissant pour analyser le comportement des réseaux infiniment larges, où la dynamique d'entraînement se linéarise. Cependant, les réseaux pratiques ont une largeur finie, ce qui introduit des corrections complexes et un comportement d'apprentissage des caractéristiques (feature learning). Ce rapport vise à approfondir notre compréhension de ces phénomènes.
+
+Nous commençons par une analyse théorique du NTK, en présentant sa décomposition basée sur l'entraînement de Sobolev et en caractérisant son RKHS. Une partie centrale de nos travaux est consacrée à l'étude du spectre du NTK, où nous cherchons à borner ses plus petites valeurs propres à l'aide d'outils issus de la théorie des matrices aléatoires. Ces résultats théoriques sont ensuite mis en perspective à travers l'analyse de plusieurs architectures : FCNN, MMNN et transformeurs. Pour les FCNN, nous étudions les corrections à largeur finie et le scaling des paramètres. Pour les MMNN et les transformeurs, nous discutons des défis spécifiques liés à l'optimisation et des intuitions sur leurs performances.
+
+Enfin, nous explorons les applications de nos travaux, notamment en SciML, et discutons de l'alignement entre les hypothèses théoriques et les observations empiriques. Nous abordons également des perspectives inspirées de la physique statistique pour interpréter la convergence des modèles vers l'équilibre.
+
+
+\newpage
+\addcontentsline{toc}{section}{Notations}
+\section*{Notations}
+Les notations se veulent claires et, lorsque c'est pertinent, colorées, afin de faciliter la compréhension pour un public aussi large que possible.
+
+$\ReLU$ : La fonction d'activation ReLU (Rectified Linear Unit), définie par $\ReLU(x) = \max(0, x)$.
+\newline
+$\E[\cdot]$ : Espérance mathématique.
+\newline
+$\Var(\cdot)$ : Variance d'une variable aléatoire.
+\newline
+$\indic\{\cdot\}$ : Fonction indicatrice, valant 1 si la condition est vraie, 0 sinon.
+\newline
+$\dd x$ : Élément différentiel utilisé dans les intégrales.
+
+\newpage
+
+\section{Cadre Théorique du Noyau de Tangente Neuronale}
+
+\subsection{Entraînement de Sobolev et Décomposition du NTK}
+(Présentation des théorèmes sur la décomposition du NTK via le Sobolev training. Description du RKHS pour le noyau de Sobolev et le noyau de Laplace.)
+
+\subsection{Analyse Spectrale du NTK et Bornes sur les Valeurs Propres}
+(Discussion sur la plus grande valeur propre du NTK. Présentation des théorèmes de Terjek et du plan de preuve pour obtenir une borne sur la plus petite valeur propre en utilisant la RMT.)
+
+\section{Corrections à Largeur Finie et Régimes d'Apprentissage}
+
+\subsection{Développement Théorique pour les FCNN}
+(Présentation des théorèmes et formules pour les corrections à largeur finie dans les FCNN. Analyse des lois de scaling du reste et discussion sur les termes d'erreur, en lien avec les ensembles de matrices aléatoires QUE & GOE.)
+
+\subsection{Approches Alternatives et Concentration}
+(Explication de l'approche alternative pour les FCNN via les réseaux paraboliques de Terjek, permettant de se placer en régime de feature learning tout en conservant des propriétés du NTK. Discussion sur les bornes de concentration.)
+
+\section{Analyse d'Architectures Spécifiques}
+
+\subsection{Réseaux à Mémoire Matricielle (MMNN) et Transformeurs}
+(Description des techniques de préconditionnement du NTK pour ces architectures. Discussion sur les régimes "feature" et "kernel", et sur les défis liés à l'optimisation. Présentation d'une conjecture sur la stabilité autour des minima globaux.)
+
+\subsection{Intuitions sur les Performances}
+(Discussion finale basée sur les résultats théoriques et expérimentaux pour expliquer les performances observées pour les MMNN, les transformeurs et les ResNets.)
+
+\section{Résultats Expérimentaux et Applications}
+
+\subsection{Validation des Lois de Scaling et des Corrections}
+(Présentation des expériences numériques validant les lois de scaling pour les corrections à largeur finie dans les FCNN.)
+
+\subsection{Analyse Hessienne et Dynamique}
+(Présentation des expériences sur l'approche hessienne du NTK et l'étude des termes de type Lyapunov.)
+
+\subsection{Applications en SciML et Discussion}
+(Discussion sur l'application des résultats en Scientific Machine Learning. Vérification des hypothèses théoriques sur les grands modèles et le scaling des paramètres. Lien avec la physique statistique et la convergence vers l'équilibre thermique.)
+
+
+\newpage
+
+\section{Présentation de l'organisme d'accueil : AI-vidence}
+
+\subsection{Historique}
+
+
+(paragraphe)
+
+
+\subsection{Contexte industriel de l'entreprise}
+
+
+(paragraphe)
+
+
+
+
+\subsubsection{Macro-environnement : PESTEL}
+
+(paragraphe)
+
+\begin{center}
+    \textbf{Analyse PESTEL}
+\end{center}
+
+\begin{itemize}
+
+\item{$\bullet$  \textbf{Politique :} }
+(paragraphe)
+\item{$\bullet$  \textbf{Economie :} }
+(paragraphe)
+\item{$\bullet$  \textbf{Sociétal et Culturel :} }
+(paragraphe)
+\item{$\bullet$ \textbf{Technologique: }} 
+(paragraphe)
+\item{$\bullet$  \textbf{Environnemental :} } 
+(paragraphe)
+\item{$\bullet$  \textbf{Légal : }} 
+(paragraphe)
+(paragraphe)
+\end{itemize}
+
+\subsubsection{Dynamique concurentielle : Analyse de PORTER}
+\begin{itemize}
+\item{$\bullet$ \textbf{Risque d'entrée de nouveaux acteurs :} } 
+(paragraphe)
+\item{$\bullet$ \textbf{Pouvoir de négociation des fournisseurs :} } 
+(paragraphe)
+\item{$\bullet$ \textbf{Pouvoir de négociation des clients :} } 
+(paragraphe)
+\item{$\bullet$ R\textbf{isque de produits alternatifs :} }
+(paragraphe)
+\item{$\bullet$ \textbf{Concurrence entre les acteurs établis :} }
+(paragraphe)
+(paragraphe)
+\end{itemize}
+
+\subsubsection{Evaluation stratégique : Analyse SWOT}
+(paragraphe)
+
+\begin{center}
+\textbf{Évaluation SWOT}
+\end{center}
+
+\begin{itemize}
+\item \textbf{$\bullet$ Atouts :} 
+ \textit{Compétence en Explicabilité :} (paragraphe)
+ \textit{Conseil Scientifique Prestigieux :} (paragraphe)
+ \textit{Approche Unique :} (paragraphe)
+ \textit{Incubation au sein de Paris-Saclay :} (paragraphe)
+ \textit{Alliances Stratégiques :} (paragraphe)
+\item \textbf{$\bullet$ Lacunes :} 
+ \textit{Équipe Restreinte :} (paragraphe)
+ \textit{Dépendance aux Stagiaires :} (paragraphe)
+\item \textbf{$\bullet$ Opportunités :} 
+ \textit{Demande Accrue pour l’Explicabilité :} (paragraphe)
+ \textit{Évolution Réglementaire :} (paragraphe)
+\item \textbf{$\bullet$ Risques :} 
+ \textit{Accroissement de la Concurrence :} (paragraphe)
+ \textit{Contraintes Régionales :} (paragraphe)
+ \textit{Dépendance aux Fournisseurs et aux Ressources :} (paragraphe)
+\end{itemize}
+(paragraphe)
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{Compétence en Explicabilité Conseil scientifique prestigieux Quelles sont les plus grandes qualités de l’entreprise .jpg}
+    \caption{Analyse SWOT d'AI-VIDENCE}
+    \label{fig:enter-label}
+\end{figure}
+
+\end{itemize}
+
+
+\subsection{Analyse interne de l'entreprise}
+
+\subsubsection{Structure organisationnelle}
+
+(paragraphe)
+
+\textbf{$\bullet$ Organisation hiérarchique :} (paragraphe)
+\begin{itemize}
+    \item \textbf{David Cortés}, (paragraphe)
+    \item \textbf{Laurent}, (paragraphe)
+\end{itemize}
+(paragraphe)
+
+\textbf{$\bullet$ Conseil scientifique :} (paragraphe)
+\begin{itemize}
+    \item \textbf{Pierre Marquis}, (paragraphe)
+    \item \textbf{Arthur Charpentier}, (paragraphe)
+    
+    \item \textbf{Stéphane Clémençon}, (paragraphe)
+\end{itemize}
+(paragraphe)
+\textbf{$\bullet$ Mécanismes de Coordination selon MINTZBERG :} (paragraphe)
+(paragraphe)
+
+\subsubsection{Culture de l'entreprise}
+
+\textbf{$\bullet$ La culture d'entreprise chez AI-VIDENCE :} (paragraphe)
+\textbf{$\bullet$ Signes :} (paragraphe)
+\textbf{$\bullet$ Symboles et Rituels :} (paragraphe)
+\textbf{$\bullet$ Vision Collective :} (paragraphe)
+
+\subsubsection{Motivations, incitations et pouvoir}
+
+\textbf{$\bullet$ Motivations et incitations :}
+(paragraphe)
+— \textit{$\bullet$ Mission Porteuse de Sens :} (paragraphe) 
+— \textit{$\bullet$ Récompenses liées à la Performance :} (paragraphe) 
+— \textit{$\bullet$ Souplesse et Valorisation :} (paragraphe) 
+— \textit{$\bullet$ Cohésion par les Activités Sociales :} (paragraphe)
+(paragraphe)
+
+\textbf{$\bullet$ Répartition du pouvoir :}
+(paragraphe)
+
+\newpage
+
+\section{Déroulement du stage, missions et réalisations}
+
+\subsection{Environnement de travail et ressources à disposition}
+(paragraphe)
+
+\subsection{Déroulement des missions}
+\subsubsection{ Orientation générale des missions}
+(paragraphe)
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\linewidth]{Capture d'écran 2024-09-22 160601.png}
+    \caption{Positionnement d'AI-VIDENCE dans les avancées récentes en apprentissage machine DeepTech}
+    \label{fig:enter-label}
+\end{figure}
+
+\subsubsection{Mission 1 : Appropriation du sujet et initiation de la recherche et des partenariats}
+
+(paragraphe)
+
+\begin{itemize}
+    \item \textbf{$\bullet$ Découverte du cadre de la mission :}
+    (paragraphe)
+    \item \textbf{$\bullet$ Échanges sur les attentes et objectifs :}
+    (paragraphe)
+    \item \textbf{$\bullet$ Analyse du produit AntakIA :}
+    (paragraphe)
+    \item \textbf{$\bullet$ Examen des projets antérieurs :} 
+    (paragraphe)
+    \item \textbf{$\bullet$ Participation à des événements extérieurs :}
+    (paragraphe)
+\end{itemize}
+
+\paragraph{Synthèse :}
+(paragraphe)
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\linewidth]{Capture d’écran 2024-09-22 160656.png}
+    \caption{Positionnement de ma mission sur la causalité dans la stratégie d'AI-VIDENCE sur l'apprentissage machine}
+    \label{fig:enter-label}
+\end{figure}
+
+\subsubsection{Mission 2 :  Recherche, Implémentation et Application des modèles causaux hiérarchiques}
+\setlength{\parindent}{2em}
+
+(paragraphe)
+\begin{itemize}
+  \item \textbf{$\bullet$ Examen de l'approche du projet HierarchicalCausalModels (HCM) : }
+  (paragraphe)
+  \item \textbf{$\bullet$ Exploration de la littérature scientifique :} 
+  (paragraphe)
+  \item \textbf{$\bullet$ Mise en œuvre de la modélisation causale hiérarchique : }
+  (paragraphe)
+  \item \textbf{$\bullet$ Intégration dans CausaLink : }
+  (paragraphe)
+\end{itemize}
+
+
+\paragraph{\textbf{Synthèse :}} 
+  (paragraphe)
+
+\subsubsection{Mission 3 : Documentation et vérification des travaux}
+
+(paragraphe)
+
+\begin{itemize}
+    \item \textbf{$\bullet$ Documentation détaillée :}
+    (paragraphe)
+    \item \textbf{$\bullet$ Suivi des projets :} 
+    (paragraphe)
+    \item \textbf{$\bullet$ Tests et validation :}
+    (paragraphe)
+\end{itemize}
+
+\paragraph{\textbf{Synthèse :}} (paragraphe)
+
+
+\newpage
+\section{Apprentissage et perspectives de développement}
+(paragraphe)
+
+\subsection{Enrichissement des compétences techniques}
+(paragraphe)
+\subsection{Maîtrise de l'explicabilité en intelligence artificielle}
+(paragraphe)
+
+\subsection{Esprit d'équipe et collaboration}
+(paragraphe)
+
+\subsection{Indépendance et aptitude à la recherche}
+(paragraphe)
+
+La recherche était une part intégrante de mon quotidien. J’ai affiné ma capacité à trouver des ressources utiles — qu'il s'agisse d’articles académiques, de documentations techniques ou de bibliothèques de code open source —, à synthétiser des informations complexes rapidement et à les appliquer à des problèmes concrets. 
+
+Un des défis les plus stimulants de mon stage a été de trouver des solutions à des problématiques techniques inédites. Par exemple, lors de la mise en œuvre des modèles causaux hiérarchiques j’ai dû analyser des méthodes proches mais non inédites, les adapter aux besoins du projet et concevoir de nouvelles approches lorsque cela s’avérait nécessaire. Cette expérience m’a prouvé que la recherche, bien qu’exigeante, peut également être une source de grande satisfaction.
+
+Ces compétences en autonomie et en recherche seront des atouts précieux pour la suite de ma carrière. Elles me permettront de continuer à innover, à apprendre et à affronter de nouveaux défis dans le domaine de l'intelligence artificielle. Je suis convaincu que l’indépendance et la capacité à effectuer des recherches sont indispensables pour rester à la pointe dans ce secteur en perpétuelle évolution.
+
+\subsection{Avenir et développement}
+(paragraphe)
+
+
+\newpage
+
+
+\addcontentsline{toc}{section}{Conclusion}
+\section*{Conclusion}
+\setlength{\parindent}{2em}
+(paragraphe)
+
+
+\newpage
+
+
+\section*{Annexes}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{001504621_896x598_c.png}
+    \caption{Aperçu de l'interface \href{https://github.com/AI-vidence/antakia}{mise à disposition en source ouverte} pour l'extraction de connaissances}
+    \label{fig:enter-label}
+\end{figure}
+
+
+\newpage
+
+
+\appendix
+\section{Expériences numériques}
+L'étude des Noyaux de Tangente Neuronale (NTK) a fourni des aperçus profonds sur le comportement des réseaux de neurones profonds, en particulier dans la limite de largeur infinie où la dynamique d'entraînement peut être décrite par un noyau. Cette analyse repose sur le fait que, dans cette limite, les sorties de pré-activation de la première couche suivent un Processus Gaussien. Alors que le NTK pour les architectures standards comme les Perceptrons Multi-Couches (MLP) est bien compris, ses propriétés pour des modèles plus complexes comme les MMNN restent moins explorées.
+
+Dans ce travail, je mène une investigation empirique détaillée du NTK pour les MMNN à deux couches avec des activations ReLU. Mon objectif est de caractériser la dépendance du NTK à deux hyperparamètres critiques : le rang interne de la multiplication matricielle et un paramètre de type biais, $\beta$. Je cherche à comprendre comment ces paramètres affectent non seulement le comportement moyen du noyau mais aussi ses fluctuations statistiques.
+
+\subsection{Méthodologie Expérimentale}
+Mon installation expérimentale a été conçue pour explorer systématiquement l'espace des paramètres des MMNN et de leur NTK correspondant.
+
+\subsubsection{Architecture du Modèle et Données}
+\begin{itemize}
+    \item \textbf{Modèle:} J'utilise un MMNN à deux couches avec une fonction d'activation ReLU, $\sigma(x) = \max(0, x)$, où la première couche a une largeur de 1000. Le réseau produit une sortie scalaire unidimensionnelle.
+    \item \textbf{Données:} Mes vecteurs d'entrée sont bidimensionnels et échantillonnés uniformément sur la sphère unité. J'ai choisi cette configuration de faible dimension car le NTK est un noyau zonal, ce qui signifie qu'il ne dépend que du produit scalaire $\rho = x^T x'$ entre les entrées. Cela permet des expériences approfondies et expressives sans souffrir de la malédiction de la dimensionnalité.
+\end{itemize}
+
+\subsubsection{Configuration des Hyperparamètres}
+\begin{itemize}
+    \item \textbf{Rang Interne ($r$):} Le rang de la décomposition matricielle est un paramètre central, varié sur une échelle logarithmique (de 2 à 100). La matrice de poids de la deuxième couche est normalisée par $1/\sqrt{r}$.
+    \item \textbf{Paramètre $\beta$:} Contrairement aux analyses MLP standard où $\beta$ est souvent nul, nous explorons des valeurs non nulles pour étudier son influence non triviale sur le noyau.
+\end{itemize}
+Chaque configuration expérimentale est un tuple (dimension, nombre de points $n$, $\beta$, rang $r$).
+
+\subsubsection{Calcul du NTK et Estimation Statistique}
+J'estime le NTK en utilisant une méthode de Monte Carlo. Cette approche est une nécessité pratique. Le calcul analytique exact nécessiterait une intégration sur une mesure gaussienne de haute dimension associée aux poids de la deuxième couche (où la dimension est le rang $r$), ce qui est informatiquement intraitable.
+\begin{itemize}
+    \item J'utilise 300 points aléatoires pour l'estimation de Monte Carlo. Une attention particulière a été portée au rééchantillonnage des matrices de poids pour chaque tirage afin de garantir l'indépendance statistique.
+    \item Pour chaque configuration, je calcule 50 matrices NTK distinctes sur un jeu de données fixe. Cela me permet de réaliser une analyse statistique du noyau lui-même.
+    \item Étant donné l'échantillonnage uniforme, j'ai également employé des techniques de bootstrapping pour générer un jeu de données plus riche pour des visualisations de densité plus robustes et des estimations statistiques de quantités comme la moyenne et l'écart-type.
+\end{itemize}
+
+\subsection{Résultats et Observations}
+\subsubsection{Impact du Rang Interne sur les Statistiques du NTK}
+Mon observation la plus significative est que l'écart-type des entrées du NTK (diagonales et hors diagonales) décroît comme une loi de puissance avec le rang interne $r$. C'est une découverte puissante. Cela signifie qu'à mesure que le rang augmente, la composante aléatoire du NTK disparaît, et le noyau devient de plus en plus déterministe. Par conséquent, je peux utiliser en toute confiance le NTK moyen, $\mathbb{E}[\Theta]$, comme une représentation fiable de son comportement pour mon analyse. C'est fantastique car cela me permet de bien conditionner les intégrales, même au sein de processus gaussiens profonds.
+
+J'ai également noté que pour les rangs faibles, le spectre du NTK est enrichi de nombreuses valeurs propres positives qui sont du même ordre de grandeur que la principale.
+
+\subsubsection{Dépendance au Paramètre $\beta$}
+Le paramètre $\beta$ a un impact très clair. Pour $\beta = 0$, j'ai observé que la valeur moyenne du NTK converge vers 0 avec une pente particulière à mesure que le rang augmente. Pour $\beta > 0$, il converge vers une constante non nulle. Mes graphiques indiquent que la dépendance de cette limite à $\beta$ semble être linéaire ou quadratique. Je suis convaincu que cette limite peut être calculée théoriquement, bien que cela nécessiterait l'intégration de fonctions spéciales (comme `erf` et les CDF gaussiennes), que je prévois également de vérifier numériquement en Python.
+
+\subsubsection{Analyse Distributionnelle du NTK}
+J'ai analysé la distribution des valeurs du NTK, conditionnée par le produit scalaire $\rho$. En utilisant divers estimateurs de densité à noyau (Epanechnikov, Gaussien, etc.), j'ai fait plusieurs observations clés.
+\begin{itemize}
+    \item Les distributions présentent des queues lourdes, de type loi de puissance, en particulier aux rangs faibles. Je suis actuellement en train de vérifier formellement cela en utilisant des estimateurs de Hill.
+    \item La distribution des éléments sur la diagonale est particulièrement intéressante ; bien qu'elle tende vers une gaussienne avec le rang, elle présente également une forme pyramidale, ce qui suggère un lien potentiel avec la Théorie des Matrices Aléatoires.
+    \item Les éléments hors diagonale montrent une distribution à queue avec un mode concentré près de 1 pour les rangs inférieurs, qui converge ensuite vers une gaussienne à mesure que le rang augmente.
+    \item Malgré les queues lourdes aux rangs faibles, la distribution globale converge clairement vers une gaussienne à mesure que le rang augmente, ce qui est cohérent avec le Théorème Central Limite.
+\end{itemize}
+
+\subsubsection{NTK Moyen et Propriétés Structurelles}
+Lorsque j'ai tracé le NTK moyen en fonction du produit scalaire d'entrée $\rho$, j'ai remarqué un très faible degré de convexité. Spécifiquement, pour des rangs élevés comme $r=100$, la relation est presque linéaire avec une valeur de R-carré élevée.
+
+J'ai également comparé ce comportement à d'autres architectures. J'ai trouvé que le NTK empirique pour un MMNN à 1 couche ressemble remarquablement au NTK théorique d'un MLP à 2 couches, mais mis à l'échelle par un facteur de $1/2$. Le "gain" de l'ajout d'une deuxième couche au MMNN semble correspondre aux contributions de deux termes spécifiques dans la formule de récurrence du NTK.
+
+De plus, j'ai remarqué que la matrice NTK présente une structure composée. Pour quantifier cela, j'ai calculé sa perte L2 sur cet sous-espace spécifique, confirmant un écart structuré par rapport à une forme matricielle plus simple.
+
+\subsection{Conclusion}
+En conclusion, mon analyse empirique a révélé plusieurs propriétés distinctes du NTK pour les MMNN. Le résultat le plus critique est la décroissance rapide de la variance du NTK avec l'augmentation du rang interne. Ce phénomène de concentration implique que pour des rangs suffisamment élevés, le NTK se comporte comme un noyau déterministe qui peut être entièrement caractérisé par sa moyenne. C'est une conclusion puissante, car elle simplifie grandement l'analyse théorique de ces modèles. De plus, j'ai caractérisé l'influence significative du paramètre $\beta$ et identifié des signatures uniques dans la forme fonctionnelle du noyau qui distinguent les MMNN des architectures MLP classiques.
+
+\section{Calculs et Démonstrations Détaillés}
+
+\subsection[Calcul de l'espérance $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$]{Calcul de l'espérance $\E[\ReLU(X_1)\ReLU(X_2)]$}
+Une fois que nous calculons le NTK de MMNN pour 1 couche, il nous reste le problème du calcul de l'espérance $\E[\ReLU(X_1)\ReLU(X_2)]$ pour une paire de variables aléatoires $(X_1, X_2)$ suivant une distribution normale bivariée avec les paramètres $(\mu_1, \sigma_1, \mu_2, \sigma_2, \rho)$.
+
+Si vous avez 2 variables déterministes $X_1$ et $X_2$, la sortie de MMNN suit un processus gaussien.
+
+Soit $\sigma_1 = \|x_1\|$, où $\|\cdot\|$ dénote la norme euclidienne.
+Soit $\sigma_2 = \|x_2\|$, et
+Soit $\rho = \frac{\langle x_1, x_2 \rangle}{\|x_1\| \|x_2\|}$ la similarité cosinus entre $x_1$ et $x_2$.
+
+La matrice de covariance du processus gaussien est :
+\[
+\Sigma = \begin{pmatrix}
+\sigma_1^2 & \rho\sigma_1\sigma_2 \\
+\rho\sigma_1\sigma_2 & \sigma_2^2
+\end{pmatrix}
+\]
+
+\begin{lemma}[Décomposition]
+L'approche consiste à standardiser les variables ($Z_i = (X_i - \mu_i)/\sigma_i$) et à décomposer l'intégrale en quatre termes :
+\[
+\E[\dots] = \sigma_1\sigma_2 I_{22} + \mu_1\sigma_2 I_{12} + \mu_2\sigma_1 I_{21} + \mu_1\mu_2 I_{11}
+\]
+où les intégrales $I_{ij}$ sont définies sur le domaine $z_1 > a$ et $z_2 > b$, with $a = -\mu_1/\sigma_1$ et $b = -\mu_2/\sigma_2$.
+\begin{itemize}
+    \item $I_{11} = \int_a^\infty \int_b^\infty \phi_2(z_1, z_2; \rho) \dd z_2 \dd z_1$
+    \item $I_{21} = \int_a^\infty \int_b^\infty z_1 \phi_2(z_1, z_2; \rho) \dd z_2 \dd z_1$
+    \item $I_{12} = \int_a^\infty \int_b^\infty z_2 \phi_2(z_1, z_2; \rho) \dd z_2 \dd z_1$
+    \item $I_{22} = \int_a^\infty \int_b^\infty z_1 z_2 \phi_2(z_1, z_2; \rho) \dd z_2 \dd z_1$
+\end{itemize}
+\end{lemma}
+
+\subsubsection*{Calcul des Composantes}
+
+\begin{lemma}[Calcul de $I_{11}$ (Probabilité)]
+$I_{11}$ est la probabilité $P(Z_1 > a, Z_2 > b)$.
+\[
+I_{11} = P(Z_1 > a, Z_2 > b) = P(Z_1 < -a, Z_2 < -b) = \Phi_2(-a, -b; \rho) = \Phi_2\left(\frac{\mu_1}{\sigma_1}, \frac{\mu_2}{\sigma_2}; \rho\right)
+\]
+\end{lemma}
+\begin{proof}
+Il est calculé via la fonction de répartition (CDF) de la distribution normale bivariée standard, $\Phi_2$.
+\end{proof}
+
+\begin{lemma}[Calcul de $I_{12}$ et $I_{21}$ (Moments de premier ordre)]
+Pour $I_{12}$, nous avons :
+\[
+I_{12} = \phi_1(b)\Phi_1\left(\frac{a+\rho b}{\sqrt{1-\rho^2}}\right) + \rho\phi_1(a)\Phi_1\left(-\frac{b+\rho a}{\sqrt{1-\rho^2}}\right)
+\]
+\end{lemma}
+\begin{proof}
+Pour $I_{12}$, nous devons calculer :
+\[
+I_{12} = \int_a^\infty \int_b^\infty z_2 \phi_2(z_1, z_2; \rho) \dd z_2 \dd z_1
+\]
+Nous nous concentrons d'abord sur l'intégrale intérieure par rapport à $z_2$. La formule exacte pour la densité conditionnelle est :
+\[
+\phi_2(x,y;\rho) = \frac{1}{\sqrt{1-\rho^2}} \phi_1(y) \phi_1\left(\frac{x-\rho y}{\sqrt{1-\rho^2}}\right)
+\]
+En appliquant cette formule avec $x=z_1$ et $y=z_2$, et après un changement de variable et simplification, nous obtenons le résultat.
+\end{proof}
+
+\begin{lemma}[Calcul de $I_{22}$ (Moment croisé)]
+Le calcul de $I_{22}$ est la partie la plus complexe. Le résultat final est :
+\[
+I_{22} = \int_0^\rho I_{11} + \phi_2(a, b; \rho)
+\]
+\end{lemma}
+\begin{proof}
+La preuve de cette identité a été un point central de la discussion. La méthode la plus rigoureuse consiste à montrer l'égalité pour $\rho=0$, puis l'égalité des dérivées par rapport à $\rho$ pour les deux côtés de l'équation.
+\end{proof}
+
+\begin{theorem}[Formule Finale]
+En assemblant tous les termes, nous obtenons la formule algébrique finale :
+\[
+\E[\dots] = (\mu_1\mu_2 + \rho\sigma_1\sigma_2) I_{11} + \mu_1\sigma_2 I_{12} + \mu_2\sigma_1 I_{21} + \sigma_1\sigma_2 \phi_2(a, b; \rho)
+\]
+\end{theorem}
+
+\subsection{Tentatives infructueuses de calcul de $I_{22}$}
+Plusieurs approches pour calculer $I_{22}$ se sont avérées être des impasses.
+\subsubsection{Via l'identité sur la dérivée de $\phi_2$}
+Prouvons d'abord l'identité pour les dérivées partielles de la PDF normale 2D $\phi_2$. Pour une distribution normale bivariée avec une corrélation $\rho$ :
+\[
+\frac{\partial \phi_2}{\partial z_1} = -\frac{z_1 - \rho z_2}{1-\rho^2} \phi_2(z_1, z_2; \rho)
+\]
+\[
+\frac{\partial \phi_2}{\partial z_2} = -\frac{z_2 - \rho z_1}{1-\rho^2} \phi_2(z_1, z_2; \rho)
+\]
+En utilisant ces identités, nous pouvons écrire :
+\[
+z_1\phi_2 = -\rho z_2\phi_2 - (1-\rho^2)\frac{\partial \phi_2}{\partial z_1}
+\]
+En intégrant de $a$ à $\infty$ par rapport à $z_1$ :
+\[
+\int_a^\infty z_1\phi_2 \dd z_1 = -\rho z_2\int_a^\infty \phi_2 \dd z_1 + (1-\rho^2)\phi_2(a, z_2; \rho)
+\]
+En essayant d'utiliser cela pour $I_{22}$, nous intégrons $z_1z_2\phi_2$ sur la région $[a,\infty) \times [b,\infty)$ :
+\[
+I_{22} = \int_b^\infty z_2 \left(\int_a^\infty z_1\phi_2 \dd z_1\right) \dd z_2
+\]
+En substituant l'identité :
+\[
+I_{22} = -\rho \int_b^\infty z_2^2 \left(\int_a^\infty \phi_2 \dd z_1\right) \dd z_2 + (1-\rho^2)\int_b^\infty z_2\phi_2(a, z_2; \rho) \dd z_2
+\]
+Cette approche devient intraitable car le premier terme implique un moment d'ordre supérieur $z_2^2$ et le second terme nécessite l'évaluation d'une autre intégrale complexe.
+
+\subsection{Cas spécial : Moyennes nulles ($\mu_1=\mu_2=0$)}
+\begin{theorem}[Cas des moyennes nulles]
+Dans ce cas, la dérivation "à partir de zéro" conduit à une formule élégante.
+\[
+\E[\ReLU(X_1)\ReLU(X_2)] = \frac{\sigma_1\sigma_2}{2\pi}(\sqrt{1-\rho^2} + \rho\arccos(-\rho))
+\]
+\end{theorem}
+\begin{proof}
+Le problème se réduit au calcul de $I_{22}(0,0; \rho) = \E[\ReLU(Z_1)\ReLU(Z_2)]$. La dérivation la plus propre utilise le théorème de Price :
+\begin{enumerate}
+    \item $\frac{\partial \E[g]}{\partial \rho} = \E\left[\frac{\partial^2 g}{\partial z_1 \partial z_2}\right] = \E[\indic(z_1>0, z_2>0)] = P(Z_1>0, Z_2>0) = \frac{1}{2\pi}\arccos(-\rho)$.
+    \item La constante d'intégration est $\E[g]_{\rho=0} = \E[\ReLU(Z_1)]\E[\ReLU(Z_2)] = \left(\frac{1}{\sqrt{2\pi}}\right)^2 = \frac{1}{2\pi}$.
+    \item En intégrant $\frac{\partial \E[g]}{\partial \rho}$ de $0$ à $\rho$ et en ajoutant la constante, nous obtenons le résultat.
+\end{enumerate}
+\end{proof}
+
+\subsection{Théorème de Price et dérivations}
+\begin{theorem}[Théorème de Price]
+Supposons que $X_1$ et $X_2$ forment un vecteur gaussien avec une distribution jointe $f_{X_1,X_2}(x_1,x_2)$. Alors, pour toute fonction $g(x_1,x_2)$, nous avons :
+\[
+\E[g(X_1,X_2)] = \int_0^\rho \E\left[\frac{\partial^2 g}{\partial x_1 \partial x_2}(X_1,X_2)\right] \dd\rho + \text{Constant}
+\]
+où la constante est la valeur de l'espérance lorsque $\rho=0$.
+\end{theorem}
+
+\subsection{NTK des MMNN pour 2 couches cachées}
+\begin{theorem}[NTK pour MMNN à 2 couches]
+Pour une MMNN à 2 couches cachées, la formulation récursive du noyau NTK est donnée par :
+\begin{equation}
+    \Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \left(\sigma_A^2\dot{\Sigma}^{(\ell)}(x, x')\right) + \Sigma^{(\ell)}(x, x') +1
+\end{equation}
+\end{theorem}
+
+\subsection{Distributions de Fisher, Kibble et la "malédiction de la dimensionnalité"}
+\begin{lemma}[Distribution de Fisher]
+Fisher a dérivé la loi exacte de $r$ en 1915, représentant le cosinus entre des vecteurs gaussiens de dimension $r$ avec une corrélation $\rho$ :
+\[
+p(r|\rho, r) = \frac{(r-2)\Gamma(r-1)(1-\rho^2)^{\frac{r-1}{2}}(1-r^2)^{\frac{r-4}{2}}}{\sqrt{2\pi}\Gamma(r-\frac{1}{2})(1-\rho r)^{r-\frac{3}{2}}} \times {}_2F_1\left(\frac{1}{2}, \frac{1}{2}; r-\frac{1}{2}; \frac{1+\rho r}{2}\right)
+\]
+Où $\Gamma$ est la fonction gamma et ${}_2F_1$ est la fonction hypergéométrique.
+\end{lemma}
+
+\begin{lemma}[Distribution de Kibble]
+La loi conjointe des variables chi-carré corrélées $U=\|X\|^2$ et $V=\|Y\|^2$ suit la distribution de Kibble de 1941 :
+\[
+f(u, v) = \frac{(uv)^{\frac{r/2-1}{2}} e^{-\frac{u+v}{2(1-\rho^2)}}}{\Gamma(r/2) (2(1-\rho^2))^{r/2+1} \rho^{\frac{r/2-1}{2}}} \cdot I_{r/2-1}\left(\frac{\rho\sqrt{uv}}{1-\rho^2}\right)
+\]
+Où $I_\alpha$ est la fonction de Bessel modifiée de première espèce.
+\end{lemma}
+
+\begin{lemma}[Moments exacts et corrélation pour les variables de Kibble]
+Soit $(X_i,Y_i)_{i=1}^r$ des paires gaussiennes i.i.d. avec une moyenne nulle, des variances unitaires et une corrélation $\rho$. Définissons $U=\sum_{i=1}^r X_i^2$ et $V=\sum_{i=1}^r Y_i^2$. Alors $(U,V)$ suit la loi de chi-carré bivariée de Kibble. Nous avons :
+\[
+\E[U]=r,\quad \Var(U)=2r,\quad \Cov(U,V)=2r\,\rho^2, \quad \Corr(U,V)=\rho^2.
+\]
+\end{lemma}
+
+
+\bibliography{stg3a}
+\printbibliography
+	
+\end{document}
