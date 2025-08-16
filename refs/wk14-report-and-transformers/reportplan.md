@@ -18,11 +18,11 @@ la finalité est d'obtenir une borne pour les smallest eigenvalue, donc en obten
 avec le khatri rao et retirer les autres termes d'hermite et pourquoi ça ne peut pas fonctionner
 la deuxieme approche est l'intuition du 
 
-
+la preuve a la khatri rao peut etre etendue dans le settings resnet
 
 
 finaliser sur notre intuition finale qui explique les performances pour les MMNN, transformers et resnets (discussion avec terjek aussi)
-
+ne pas oublier que la suite est longue, en particulier pour le RKHS et 
 
 enfin partir sur l'attaque des FCNN avec la finite width correction, expliciter les théorèmes et formules trouvées ainsi que les experiences sur les scaling
 law du reste, et finaliser sur l'intuition finale, les résultats et les discussions sur l'attaque du dernier terme (QUE & GOE)
@@ -30,8 +30,11 @@ et pour les MMNN expliquer que l'aspect global de l'optimisation est beaucoup pl
 en particulier on conjecture qu'autour d'un minima global, le problème est bien stable est qu'on peut plonger dedans assez bien
 (avec des experiences numériques qui le justiifie)
 
+on va aussi rajouter un tracking le long des semaines de tout ce qui a été fait
+bien séparer le meanfield regime du kernel regime, et avec le framework TP
 
-
+faire une revue du framework TP en appendix
+opur la délocalisation, on mettra les experiences sur le scaling des vp
 faire des dernieres experiences numeriques avec l'approche hessienne du ntk, et des formules et l'approche finale de l'étude du termes à la lyapunov
 ensuite expliquer que pour la concentration bounds on utilisera celle de terjek, en particulier avec résseau parabolique, et comme quoi
 ce type de réseau permet de se placer dans une feature learning tout en maintenant une ntk-itude par un scaling de la dernière et des derniers papiers
