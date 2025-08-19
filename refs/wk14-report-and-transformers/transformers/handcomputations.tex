@@ -170,32 +170,32 @@ This confirms that the construction is correct.
 \subsection{Alternative Construction with a Global Correlation Source}
 An alternative construction was described, involving $n^2+1$ random variables. This model introduces a common source of randomness for all entries of the matrix.
 
-Let $Z_0$ be a single standard normal random variable ($Z_0 \sim \mathcal{N}(0,1)$). Let $Z'$ be an $n \times n$ matrix of i.i.d. standard normal random variables, independent of $Z_0$. Let $R$ be an $n \times n$ matrix of parameters, where $|R_{ij}| \le 1$ for all $i,j$.
+Let $Z_0$ be a single standard normal random variable ($Z_0 \sim \mathcal{N}(0,1)$). Let $Z'$ be an $n \times n$ matrix of i.i.d. standard normal random variables, independent of $Z_0$. Let $\rho$ be an $n \times n$ matrix of parameters, where $|\rho_{ij}| \le 1$ for all $i,j$.
 
 The matrix $G$ is constructed entry-wise as:
 \[
-G_{ij} = Z_0 \cdot R_{ij} + Z'_{ij} \sqrt{1 - R_{ij}^2}
+G_{ij} = Z_0 \cdot \rho_{ij} + Z'_{ij} \sqrt{1 - \rho_{ij}^2}
 \]
 This is equivalent to the matrix form:
 \[
-G = Z_0 R + Z' \circ \sqrt{J - R \circ R}
+G = Z_0 \rho + Z' \circ \sqrt{J - \rho \circ \rho}
 \]
 where $\circ$ denotes the Hadamard (element-wise) product, $J$ is the $n \times n$ matrix of all ones, and the square root is taken element-wise.
 
 \subsubsection*{Resulting Covariance}
 Let's compute the covariance structure resulting from this model. The variance of any element $G_{ij}$ is:
 \[
-\text{Var}(G_{ij}) = \mathbb{E}[(Z_0 R_{ij} + Z'_{ij} \sqrt{1-R_{ij}^2})^2] = R_{ij}^2 \mathbb{E}[Z_0^2] + (1-R_{ij}^2) \mathbb{E}[(Z'_{ij})^2] = R_{ij}^2 + (1-R_{ij}^2) = 1
+\text{Var}(G_{ij}) = \mathbb{E}[(Z_0 \rho_{ij} + Z'_{ij} \sqrt{1-\rho_{ij}^2})^2] = \rho_{ij}^2 \mathbb{E}[Z_0^2] + (1-\rho_{ij}^2) \mathbb{E}[(Z'_{ij})^2] = \rho_{ij}^2 + (1-\rho_{ij}^2) = 1
 \]
 The covariance between two different elements $G_{ik}$ and $G_{jl}$ (where $(i,k) \neq (j,l)$) is:
 \begin{align*}
-\text{Cov}(G_{ik}, G_{jl}) &= \mathbb{E}\left[(Z_0 R_{ik} + Z'_{ik} \sqrt{1-R_{ik}^2})(Z_0 R_{jl} + Z'_{jl} \sqrt{1-R_{jl}^2})\right] \\
-&= R_{ik} R_{jl} \mathbb{E}[Z_0^2] + \mathbb{E}[Z'_{ik}Z'_{jl}] \sqrt{(1-R_{ik}^2)(1-R_{jl}^2)} \\
-&= R_{ik} R_{jl}
+\text{Cov}(G_{ik}, G_{jl}) &= \mathbb{E}\left[(Z_0 \rho_{ik} + Z'_{ik} \sqrt{1-\rho_{ik}^2})(Z_0 \rho_{jl} + Z'_{jl} \sqrt{1-\rho_{jl}^2})\right] \\
+&= \rho_{ik} \rho_{jl} \mathbb{E}[Z_0^2] + \mathbb{E}[Z'_{ik}Z'_{jl}] \sqrt{(1-\rho_{ik}^2)(1-\rho_{jl}^2)} \\
+&= \rho_{ik} \rho_{jl}
 \end{align*}
 since $\mathbb{E}[Z'_{ik}Z'_{jl}] = \delta_{ij}\delta_{kl}$ which is zero for different elements.
 
-The resulting covariance structure is $\text{Cov}(G_{ik}, G_{jl}) = R_{ik} R_{jl}$. This is a rank-one structure, which is generally different from the separable Kronecker product structure $\text{Cov}(G_{ik}, G_{jl}) = \rho_{ij} \rho_{kl}$. The former depends on all four indices in a non-separable way, while the latter separates row and column correlations. Therefore, while the second construction is a valid model for a correlated matrix, it does not produce the specific Kronecker product covariance structure.
+The resulting covariance structure is $\text{Cov}(G_{ik}, G_{jl}) = \rho_{ik} \rho_{jl}$. This is a rank-one structure, which is generally different from the separable Kronecker product structure $\text{Cov}(G_{ik}, G_{jl}) = \rho_{ij} \rho_{kl}$. The former depends on all four indices in a non-separable way, while the latter separates row and column correlations. Therefore, while the second construction is a valid model for a correlated matrix, it does not produce the specific Kronecker product covariance structure.
 
 \section{Application to Transformer Models in NLP}
 
@@ -229,7 +229,7 @@ We seek to formalize the calculation of the expectation of a specific polynomial
 \subsection{Definitions}
 Let $G$ be a correlated Gaussian matrix of size $N \times P$, generated as before by the global source model:
 \[
-G_{ij} = Z_0 \cdot R_{ij} + Z'_{ij} \sqrt{1 - R_{ij}^2}
+G_{ij} = Z_0 \cdot \rho_{ij} + Z'_{ij} \sqrt{1 - \rho_{ij}^2}
 \]
 where $Z_0 \sim \mathcal{N}(0,1)$ is a scalar standard normal variable, and $Z' \in \mathbb{R}^{N \times P}$ is a matrix of i.i.d. standard normal variables, independent of $Z_0$.
 
@@ -249,7 +249,7 @@ Let $d\mu(z) = \frac{1}{\sqrt{2\pi}} e^{-z^2/2} dz$ be the standard Gaussian mea
 \end{align*}
 where the $G_{ij}$ terms inside the polynomial are functions of the integration variables $z_0$ and $\{z'_{ij}\}$:
 \[
-G_{ij}(z_0, \{z'_{kl}\}) = z_0 \cdot R_{ij} + z'_{ij} \sqrt{1 - R_{ij}^2}
+G_{ij}(z_0, \{z'_{kl}\}) = z_0 \cdot \rho_{ij} + z'_{ij} \sqrt{1 - \rho_{ij}^2}
 \]
 This expression formally represents the quantity to be calculated. It is an integral over $NP+1$ variables, where the integrand is a highly non-linear and coupled function of these variables.
 
@@ -267,10 +267,10 @@ The set $\{Z_0, Z_a, Z_b\}$ contains $2P+1$ independent Gaussian variables in to
 The entries of the relevant rows of the matrix $G$ are now constructed as follows:
 For $j = 1, \dots, P$:
 \begin{align*}
-G_{aj} &= Z_0 \cdot R_{aj} + Z_{aj} \sqrt{1 - R_{aj}^2} \\
-G_{bj} &= Z_0 \cdot R_{bj} + Z_{bj} \sqrt{1 - R_{bj}^2}
+G_{aj} &= Z_0 \cdot \rho_{aj} + Z_{aj} \sqrt{1 - \rho_{aj}^2} \\
+G_{bj} &= Z_0 \cdot \rho_{bj} + Z_{bj} \sqrt{1 - \rho_{bj}^2}
 \end{align*}
-This construction maintains the desired covariance structure where $\text{Cov}(G_{ik}, G_{jl}) = R_{ik}R_{jl}$ for $i,j \in \{a,b\}$, but it only requires integrating over the variables that actually affect the quantity of interest.
+This construction maintains the desired covariance structure where $\text{Cov}(G_{ik}, G_{jl}) = \rho_{ik}\rho_{jl}$ for $i,j \in \{a,b\}$, but it only requires integrating over the variables that actually affect the quantity of interest.
 
 \subsection{Final Integral Expression}
 The expectation $\mathbb{E}[P(S_{a, \cdot}, S_{b, \cdot})]$ can now be expressed as an integral over these $2P+1$ variables. Let $d\mu(z)$ remain the standard Gaussian measure. The final, complete, and more tractable integral is:
@@ -281,11 +281,57 @@ The expectation $\mathbb{E}[P(S_{a, \cdot}, S_{b, \cdot})]$ can now be expressed
 \end{align*}
 where the arguments of the polynomial $P$ are the softmax outputs for rows $a$ and $b$. For any given column $l \in \{1, \dots, P\}$, these are:
 \[
-S_{al} = \frac{\exp\left(\beta \left[z_0 R_{al} + z_{al} \sqrt{1-R_{al}^2}\right]\right)}{\sum_{k=1}^{P} \exp\left(\beta \left[z_0 R_{ak} + z_{ak} \sqrt{1-R_{ak}^2}\right]\right)}
+S_{al} = \frac{\exp\left(\beta \left[z_0 \rho_{al} + z_{al} \sqrt{1-\rho_{al}^2}\right]\right)}{\sum_{k=1}^{P} \exp\left(\beta \left[z_0 \rho_{ak} + z_{ak} \sqrt{1-\rho_{ak}^2}\right]\right)}
 \]
 \[
-S_{bl} = \frac{\exp\left(\beta \left[z_0 R_{bl} + z_{bl} \sqrt{1-R_{bl}^2}\right]\right)}{\sum_{k=1}^{P} \exp\left(\beta \left[z_0 R_{bk} + z_{bk} \sqrt{1-R_{bk}^2}\right]\right)}
+S_{bl} = \frac{\exp\left(\beta \left[z_0 \rho_{bl} + z_{bl} \sqrt{1-\rho_{bl}^2}\right]\right)}{\sum_{k=1}^{P} \exp\left(\beta \left[z_0 \rho_{bk} + z_{bk} \sqrt{1-\rho_{bk}^2}\right]\right)}
 \]
 This is the final, complete expression for the quantity of interest. The calculation is now framed as an integral over $2P+1$ dimensions, which, while still challenging, is a significant reduction from the initial formulation.
+
+\section{Perturbative Expansion Strategy and Physical Interpretation}
+
+The analytical intractability of the final integral calls for a perturbative approach, grounded in the physical behavior of the system. The choice of the expansion method is a strategic one, balancing analytical elegance with interpretability.
+
+\subsection{Dominant Logit Regime and Low-Temperature Expansion}
+The core assumption enabling a perturbative treatment is the existence of a \textbf{dominant logit} within each row. For a given row $a$, we assume there exists an index $k=\text{max}$ such that the logit $G_{a, \text{max}}$ is significantly larger than all other logits $G_{ak}$ for $k \neq \text{max}$.
+
+\subsubsection*{Logit Scaling and the Role of Temperature}
+In the context of Transformer models, the pre-softmax logits are intentionally scaled to have a variance of $\mathcal{O}(1)$. Consequently, for a set of $P$ such correlated Gaussian variables, results from \textbf{extreme value theory} suggest that the expected gap, $G_{a, \text{max}} - G_{ak}$, is relatively small, scaling as $\mathcal{O}(\sqrt{\log P})$.
+
+This small intrinsic gap implies that the validity of the expansion is not guaranteed by the logits alone. Instead, the expansion becomes a \textbf{low-temperature approximation}, controlled by the inverse temperature $\beta = 1/T$. By assuming a large $\beta$, we ensure that the perturbation parameter $\delta_k = \exp(-\beta(G_{a, \text{max}} - G_{ak}))$ is small, even for a modest logit gap. This regime is analogous to a \textbf{Random Energy Model (REM)} at low temperature, where the system freezes into its lowest energy state (the one corresponding to the maximum logit).
+
+\subsection{Comparison of Taylor Expansion Strategies}
+Given the assumption of a dominant logit, we can factorize the partition function $Z_a$:
+\[
+Z_a = \sum_{k=1}^{P} e^{\beta G_{ak}} = e^{\beta G_{a, \text{max}}} \left( 1 + \sum_{k \neq \text{max}} e^{\beta (G_{ak} - G_{a, \text{max}})} \right) = e^{\beta G_{a, \text{max}}} \left( 1 + \sum_{k \neq \text{max}} \delta_k \right)
+\]
+Two main strategies for the Taylor expansion emerge:
+
+\subsubsection{Direct Analytical Expansion}
+This involves rewriting the softmax output $S_{al} = e^{\beta G_{al}} / Z_a$ as $e^{\beta G_{al}} \cdot (Z_a)^{-1}$. The denominator term is expanded using the geometric series for $(1+x)^{-1}$ where $x = \sum_{k \neq \text{max}} \delta_k$:
+\[
+(Z_a)^{-1} = e^{-\beta G_{a, \text{max}}} \left( \frac{1}{1 + \sum_{k \neq \text{max}} \delta_k} \right) \approx e^{-\beta G_{a, \text{max}}} \left( 1 - \sum_{k \neq \text{max}} \delta_k + \left(\sum_{k \neq \text{max}} \delta_k\right)^2 - \dots \right)
+\]
+This approach is direct and computationally straightforward, yielding an expansion for the denominator without involving logarithms.
+
+\subsubsection{Cumulant Expansion (via Logarithm)}
+This more physically-motivated approach involves expanding the term $\exp(-\log(Z_a))$. First, we expand the logarithm:
+\begin{align*}
+\log(Z_a) &= \log\left(e^{\beta G_{a, \text{max}}}\right) + \log\left( 1 + \sum_{k \neq \text{max}} \delta_k \right) \\
+&\approx \beta G_{a, \text{max}} + \left(\sum_{k \neq \text{max}} \delta_k\right) - \frac{1}{2}\left(\sum_{k \neq \text{max}} \delta_k\right)^2 + \dots
+\end{align*}
+The softmax outputs are then $S_{al} = \exp(\beta G_{al} - \log(Z_a))$. For the dominant output ($l=\text{max}$):
+\begin{align*}
+S_{a, \text{max}} &= \exp\left(\beta G_{a, \text{max}} - \log(Z_a)\right) \\
+&\approx \exp\left( - \sum_{k \neq \text{max}} \delta_k + \frac{1}{2}\left(\sum_{k \neq \text{max}} \delta_k\right)^2 - \dots \right) \\
+&\approx 1 - \sum_{k \neq \text{max}} \delta_k + \left(\sum_{k \neq \text{max}} \delta_k\right)^2 + \dots
+\end{align*}
+For a perturbative output ($l \neq \text{max}$):
+\[
+S_{al} = \exp(\beta G_{al} - \log(Z_a)) \approx \delta_l \left(1 - \sum_{k \neq \text{max}} \delta_k + \dots \right)
+\]
+
+\subsubsection*{Strategic Choice}
+The direct analytical expansion is often faster for obtaining the first few terms of the series. However, the cumulant expansion is generally considered more powerful and systematic. It naturally organizes the perturbative corrections in a way that often has a deeper physical or statistical interpretation (related to connected diagrams in field theory, for instance). While it may appear more complex due to the nested expansions, it provides a more robust framework for higher-order calculations and connects more directly to established methods in statistical physics, such as the replica trick, which is designed to handle expectations of logarithms of partition functions. The choice between them is a trade-off between immediate computational speed and theoretical elegance and extensibility.
 
 \end{document}
