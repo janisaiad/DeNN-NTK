@@ -1,0 +1,291 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{Theoretical Analysis of Integrals with Gaussian Measure and Softmax Function}
+\author{Discussion with Gemini 2.5 Pro}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Initial Problem Statement}
+
+The discussion began with the challenge of calculating integrals of the form:
+\[
+I = \int_{-\infty}^{\infty} \frac{e^{-ax^2 + bx + c} \cdot e^{f(x)}}{\sum_{i=1}^{N} e^{g_i(x)}} dx
+\]
+where the term $e^{-ax^2+bx+c}$ represents a Gaussian measure.
+
+It was established that there is generally no simple analytical solution for this general form. Several strategies were proposed.
+
+\subsection{Simplification and Special Cases}
+\begin{itemize}
+    \item Approximation by a dominant term in the denominator.
+    \item Use of integrand symmetries.
+    \item Changes of variable to simplify the expression.
+\end{itemize}
+
+\subsection{Laplace Approximation}
+This method is suitable when the Gaussian is sharply peaked. The integral is rewritten in the form $\int e^{-F(x)} dx$ by incorporating the denominator into the exponent via a logarithm:
+\[
+\int \exp\left(-ax^2 + bx + c + h(x) - \ln\left(\sum_i e^{g_i(x)}\right)\right) dx
+\]
+The approximation is then given by:
+\[
+I \approx e^{-F(x_0)} \sqrt{\frac{2\pi}{F''(x_0)}}
+\]
+where $x_0$ is the minimum of $F(x)$.
+
+\subsection{Numerical Methods}
+\begin{itemize}
+    \item \textbf{Gauss-Hermite Quadrature:} Specifically designed for integrals of the form $\int_{-\infty}^{\infty} e^{-x^2} g(x) dx$.
+    \item \textbf{Monte Carlo Methods:} Essential for high-dimensional integrals, particularly importance sampling.
+\end{itemize}
+
+\section{Connection with Hermite Polynomials}
+
+The conversation then shifted to calculating the Hermite coefficients of a complex function $f(x)$, given that the basis of Hermite polynomials is natural for a Gaussian measure.
+The expansion is:
+\[
+f(x) = \sum_{n=0}^{\infty} c_n H_n(x)
+\]
+with the coefficients:
+\[
+c_n = \frac{1}{\sqrt{\pi} 2^n n!} \int_{-\infty}^{\infty} f(x) H_n(x) e^{-x^2} dx
+\]
+The calculation of these coefficients $c_n$ proves to be as complex as the initial integral.
+
+\subsection{Taylor Expansion Approach}
+An alternative is to expand $f(x)$ as a Taylor series:
+\[
+f(x) = \sum_{k=0}^{\infty} \frac{f^{(k)}(0)}{k!} x^k
+\]
+The integral then becomes a sum over the moments of the Gaussian:
+\[
+\int_{-\infty}^{\infty} f(x) e^{-x^2} dx = \sum_{k=0}^{\infty} \frac{f^{(k)}(0)}{k!} \int_{-\infty}^{\infty} x^k e^{-x^2} dx
+\]
+This approach transforms an integration problem into a differentiation problem.
+
+\subsection{Generating Function Approach}
+Using the generating function for Hermite polynomials, $e^{2xt-t^2} = \sum_{n=0}^{\infty} \frac{H_n(x)}{n!} t^n$, we arrive at the relation:
+\[
+\int_{-\infty}^{\infty} f(x) e^{-(x-t)^2} dx = \sqrt{\pi} \sum_{n=0}^{\infty} (2t)^n c_n
+\]
+The calculation of $c_n$ is reduced to the Taylor series expansion of the parametric integral on the left.
+
+\section{Transition to the Multivariate Case}
+
+The problem is actually multivariate. The Taylor series approach then leads to the calculation of moments of a multivariate Gaussian, governed by \textbf{Wick's (or Isserlis') theorem}. This results in a combinatorial explosion.
+
+\subsection{Feynman Diagram Formalism}
+This approach allows for the visualization and organization of the combinatorics of Wick's theorem, transforming the problem into a topological task of summing over graphs.
+
+\subsection{Generating Functional Approach}
+A functional $Z[J]$ is introduced, depending on an external source field $J$:
+\[
+Z[J] = \int f(\mathbf{x}) \exp\left(-\frac{1}{2} \mathbf{x}^T \Sigma^{-1} \mathbf{x} + \mathbf{J}^T \mathbf{x}\right) d^d x
+\]
+The moments are obtained by functional differentiation with respect to $J$.
+
+\subsection{Monte Carlo in High Dimensions}
+Importance sampling remains the most robust numerical method, with its error decreasing as $1/\sqrt{N}$ regardless of the dimension.
+\[
+I = \int f(\mathbf{x}) p(\mathbf{x}) d^d x \approx \frac{1}{N} \sum_{i=1}^{N} f(\mathbf{x}_i), \quad \mathbf{x}_i \sim p(\mathbf{x})
+\]
+
+\section{Specific Problem: Moments of the Softmax Function}
+
+The concrete problem is to calculate the moments of the output of a softmax function applied row-wise to an $N \times P$ Gaussian matrix $X$ with a correlated covariance structure. The output $S$ is given by:
+\[
+S_{ik} = \frac{e^{X_{ik}}}{Z_i}, \quad \text{where } Z_i = \sum_{l=1}^{P} e^{X_{il}}
+\]
+The objective is to calculate $\mathbb{E}[P(S_{ik})]$ over the distribution of $X$.
+
+\subsection{Feasibility of Analytical Calculation}
+An exact analytical calculation is considered \textbf{intractable}. The structure of the softmax is intrinsically linked to the logarithm of the partition function $Z_i$, because:
+\[
+S_{ik} = \frac{\partial \log(Z_i)}{\partial X_{ik}}
+\]
+Thus, $\mathbb{E}[P(S_{ik})]$ is the expectation of a polynomial of the derivatives of $\log Z_i$. The approaches are therefore necessarily controlled approximation schemes.
+
+\subsection{Approximation Strategies}
+
+\begin{description}
+    \item[Asymptotic Approach (Saddle-Point Method / Low Temperature)]
+    Introduce a parameter $\beta$ (inverse temperature): $S_{ik}(\beta) = e^{\beta X_{ik}} / \sum_l e^{\beta X_{il}}$. The limit $\beta \to \infty$ reduces the problem to extreme value statistics for correlated Gaussian variables, which serves as a starting point for a perturbative expansion.
+
+    \item[Perturbative Approach (Limited Expansion)]
+    A Taylor expansion of the integrand $(S_{ik})^k$ in the variables $X_{jl}$ around zero. This leads back to Wick's theorem, but the complexity of the derivatives of the denominator makes this approach quickly intractable.
+
+    \item[Theoretical Physics Approach (Replica Method)]
+    This is the most advanced method for this type of problem. It allows for averaging over the "disorder" (the matrix $X$) by using the identity $\mathbb{E}[\log Z] = \lim_{n \to 0} \frac{\mathbb{E}[Z^n] - 1}{n}$. One calculates $\mathbb{E}[Z^n]$ for integer $n$ by introducing $n$ copies ("replicas") of the system. The expectation over $X$ can then be performed, and the resulting system is analyzed in the limit $n \to 0$. This is the most powerful way to obtain approximate analytical results in the large matrix limit.
+\end{description}
+
+\section{Generative Model for the Correlated Gaussian Matrix}
+
+A key part of the problem involves understanding the structure of the correlated Gaussian matrix $G$. Let's formalize its generation.
+
+\subsection{Target Covariance Structure}
+Let $G$ be an $n \times n$ matrix of Gaussian random variables. The entries of $G$ are correlated. We assume a separable covariance structure. If we vectorize the matrix by stacking its columns into an $n^2 \times 1$ vector $g = \text{vec}(G)$, its covariance matrix is given by the Kronecker product of a correlation matrix $\rho$ with itself:
+\[
+\text{Cov}(g) = \mathbb{E}[g g^T] = \rho \otimes \rho
+\]
+This implies that the covariance between two elements of the matrix, $G_{ik}$ and $G_{jl}$ (element in row $i$, column $k$ and row $j$, column $l$ respectively), is given by:
+\[
+\text{Cov}(G_{ik}, G_{jl}) = \rho_{ij} \rho_{kl}
+\]
+Here, $\rho_{ij}$ models the correlation between rows $i$ and $j$, while $\rho_{kl}$ models the correlation between columns $k$ and $l$.
+
+\subsection{Standard Construction via Cholesky Decomposition}
+A standard and correct method to generate a matrix $G$ with this exact covariance structure relies on the Cholesky decomposition of the correlation matrix $\rho$.
+Let $\rho = L L^T$ be the Cholesky decomposition, where $L$ is a lower triangular matrix. Let $Z$ be an $n \times n$ matrix of independent and identically distributed (i.i.d.) standard normal random variables, i.e., $Z_{ik} \sim \mathcal{N}(0,1)$.
+
+The matrix $G$ is generated as follows:
+\[
+G = L Z L^T
+\]
+This construction uses $n^2$ random variables from the matrix $Z$.
+
+\subsubsection*{Verification of the Covariance}
+We can verify that this construction yields the desired covariance. Using the properties of the vectorization operator and the Kronecker product:
+\[
+\text{vec}(G) = \text{vec}(L Z L^T) = (L \otimes L) \text{vec}(Z)
+\]
+The covariance of the vectorized matrix is:
+\begin{align*}
+\text{Cov}(\text{vec}(G)) &= \mathbb{E}\left[ ((L \otimes L) \text{vec}(Z)) ((L \otimes L) \text{vec}(Z))^T \right] \\
+&= (L \otimes L) \, \mathbb{E}[\text{vec}(Z) \text{vec}(Z)^T] \, (L \otimes L)^T \\
+&= (L \otimes L) \, I_{n^2} \, (L^T \otimes L^T) \\
+&= (L L^T) \otimes (L L^T) \\
+&= \rho \otimes \rho
+\end{align*}
+This confirms that the construction is correct.
+
+\subsection{Alternative Construction with a Global Correlation Source}
+An alternative construction was described, involving $n^2+1$ random variables. This model introduces a common source of randomness for all entries of the matrix.
+
+Let $Z_0$ be a single standard normal random variable ($Z_0 \sim \mathcal{N}(0,1)$). Let $Z'$ be an $n \times n$ matrix of i.i.d. standard normal random variables, independent of $Z_0$. Let $R$ be an $n \times n$ matrix of parameters, where $|R_{ij}| \le 1$ for all $i,j$.
+
+The matrix $G$ is constructed entry-wise as:
+\[
+G_{ij} = Z_0 \cdot R_{ij} + Z'_{ij} \sqrt{1 - R_{ij}^2}
+\]
+This is equivalent to the matrix form:
+\[
+G = Z_0 R + Z' \circ \sqrt{J - R \circ R}
+\]
+where $\circ$ denotes the Hadamard (element-wise) product, $J$ is the $n \times n$ matrix of all ones, and the square root is taken element-wise.
+
+\subsubsection*{Resulting Covariance}
+Let's compute the covariance structure resulting from this model. The variance of any element $G_{ij}$ is:
+\[
+\text{Var}(G_{ij}) = \mathbb{E}[(Z_0 R_{ij} + Z'_{ij} \sqrt{1-R_{ij}^2})^2] = R_{ij}^2 \mathbb{E}[Z_0^2] + (1-R_{ij}^2) \mathbb{E}[(Z'_{ij})^2] = R_{ij}^2 + (1-R_{ij}^2) = 1
+\]
+The covariance between two different elements $G_{ik}$ and $G_{jl}$ (where $(i,k) \neq (j,l)$) is:
+\begin{align*}
+\text{Cov}(G_{ik}, G_{jl}) &= \mathbb{E}\left[(Z_0 R_{ik} + Z'_{ik} \sqrt{1-R_{ik}^2})(Z_0 R_{jl} + Z'_{jl} \sqrt{1-R_{jl}^2})\right] \\
+&= R_{ik} R_{jl} \mathbb{E}[Z_0^2] + \mathbb{E}[Z'_{ik}Z'_{jl}] \sqrt{(1-R_{ik}^2)(1-R_{jl}^2)} \\
+&= R_{ik} R_{jl}
+\end{align*}
+since $\mathbb{E}[Z'_{ik}Z'_{jl}] = \delta_{ij}\delta_{kl}$ which is zero for different elements.
+
+The resulting covariance structure is $\text{Cov}(G_{ik}, G_{jl}) = R_{ik} R_{jl}$. This is a rank-one structure, which is generally different from the separable Kronecker product structure $\text{Cov}(G_{ik}, G_{jl}) = \rho_{ij} \rho_{kl}$. The former depends on all four indices in a non-separable way, while the latter separates row and column correlations. Therefore, while the second construction is a valid model for a correlated matrix, it does not produce the specific Kronecker product covariance structure.
+
+\section{Application to Transformer Models in NLP}
+
+The theoretical framework developed above is directly applicable to the analysis of Transformer models in Natural Language Processing (NLP). We can model the input to a Transformer layer as a Gaussian Process, which allows us to study the propagation of uncertainty and correlations through the network.
+
+\subsection{Formalism}
+Let the input sequence of word embeddings be represented by a matrix $X \in \mathbb{R}^{N \times D}$, where $N$ is the sequence length and $D$ is the embedding dimension. We model this input as being drawn from a matrix-variate Gaussian distribution. The attention mechanism of a Transformer computes a matrix of attention scores, which is then passed through a softmax function. Let's denote the pre-softmax attention scores for a single attention head as a matrix $A \in \mathbb{R}^{N \times N}$. The entries $A_{ij}$ represent the score between query token $i$ and key token $j$. This matrix $A$ is a function of the input $X$ and is therefore also a correlated Gaussian matrix.
+
+The output of the attention head is determined by the softmax function applied column-wise to $A$:
+\[
+S_{ij} = \frac{e^{A_{ij}}}{\sum_{k=1}^{N} e^{A_{kj}}}
+\]
+The problem of analyzing the Transformer's output thus reduces to computing moments and other properties of the matrix $S$, which is precisely the problem we have been addressing.
+
+\subsection{Interpretation of the Laplace Approximation}
+In this context, the Laplace approximation (or the saddle-point method) acquires a concrete interpretation. The method provides an accurate approximation when the integrand is sharply peaked. This corresponds to a scenario where, for a given column $j$, one attention score $A_{kj}$ is significantly larger than all others.
+
+This is the case of "peak attention," where one word (or token) in the sequence strongly attends to another. For example, if two words are highly correlated (e.g., a pronoun and its antecedent), the attention score between them will be large, creating a peak in the softmax denominator. The Laplace method is therefore a powerful tool for analytically studying the behavior of attention in the presence of strong, localized correlations.
+
+\subsection{Large-Scale Analysis and Random Matrix Theory}
+For modern NLP models, the sequence length $N$ can be very large. In this large-$N$ limit, direct computation is intractable, but powerful approximations can be made by leveraging tools from Random Matrix Theory (RMT).
+
+A key insight is that the correlation matrix $\rho$ (describing correlations between token positions) is likely to be sparse. In natural language, a given word's meaning is typically determined by a small, local context, not by all other words in a long sequence. Therefore, $\rho_{ij}$ will be negligible for most pairs $(i,j)$ where $|i-j|$ is large.
+
+This sparsity is crucial. The spectral properties (i.e., the distribution of eigenvalues) of large, sparse random matrices are well-understood. Similarly, RMT provides precise results for the spectra of matrices that are low-rank perturbations of random matrices (like the rank-one structure from the alternative generative model). By assuming a sparse or low-rank structure for the correlation, we can approximate the behavior of the system and compute the desired moments in the large-$N$ limit, turning an intractable problem into a solvable one.
+
+\section{Formulation of the Target Integral}
+
+We seek to formalize the calculation of the expectation of a specific polynomial. This polynomial depends on the outputs of the softmax function for two particular rows, denoted $a$ and $b$, of the input Gaussian matrix.
+
+\subsection{Definitions}
+Let $G$ be a correlated Gaussian matrix of size $N \times P$, generated as before by the global source model:
+\[
+G_{ij} = Z_0 \cdot R_{ij} + Z'_{ij} \sqrt{1 - R_{ij}^2}
+\]
+where $Z_0 \sim \mathcal{N}(0,1)$ is a scalar standard normal variable, and $Z' \in \mathbb{R}^{N \times P}$ is a matrix of i.i.d. standard normal variables, independent of $Z_0$.
+
+The output of the system is a matrix $S \in \mathbb{R}^{N \times P}$, obtained by applying a softmax function with temperature $T$ (or inverse $\beta = 1/T$) to each row of $G$:
+\[
+S_{ik} = \frac{e^{\beta G_{ik}}}{\sum_{l=1}^{P} e^{\beta G_{il}}}
+\]
+The objective is to compute the expectation of a polynomial $P$ which takes as arguments the entries of rows $a$ and $b$ of the matrix $S$. Let us denote the set of these entries by $S_{a, \cdot} = \{S_{a1}, S_{a2}, \dots, S_{aP}\}$ and $S_{b, \cdot} = \{S_{b1}, S_{b2}, \dots, S_{bP}\}$. The expectation is taken over all underlying random variables, i.e., $Z_0$ and the set of $\{Z'_{ij}\}$.
+
+\subsection{Full Integral Expression}
+The desired expectation, $\mathbb{E}[P(S_{a, \cdot}, S_{b, \cdot})]$, is written as a multidimensional integral over the probability measure of all independent Gaussian variables.
+
+Let $d\mu(z) = \frac{1}{\sqrt{2\pi}} e^{-z^2/2} dz$ be the standard Gaussian measure. The full integral is:
+\begin{align*}
+\mathbb{E}[P(S_{a, \cdot}, S_{b, \cdot})] = & \int_{\mathbb{R}} d\mu(z_0) \left( \prod_{i=1}^{N} \prod_{j=1}^{P} \int_{\mathbb{R}} d\mu(z'_{ij}) \right) \\
+& P\left( \left\{ \frac{e^{\beta G_{al}}}{\sum_{k=1}^{P} e^{\beta G_{ak}}} \right\}_{l=1 \dots P}, \left\{ \frac{e^{\beta G_{bl}}}{\sum_{k=1}^{P} e^{\beta G_{bk}}} \right\}_{l=1 \dots P} \right)
+\end{align*}
+where the $G_{ij}$ terms inside the polynomial are functions of the integration variables $z_0$ and $\{z'_{ij}\}$:
+\[
+G_{ij}(z_0, \{z'_{kl}\}) = z_0 \cdot R_{ij} + z'_{ij} \sqrt{1 - R_{ij}^2}
+\]
+This expression formally represents the quantity to be calculated. It is an integral over $NP+1$ variables, where the integrand is a highly non-linear and coupled function of these variables.
+
+\section{Final Formulation with Reduced Variable Set}
+
+We now refine the model to explicitly use a reduced set of random variables, as the polynomial of interest, $P$, only depends on rows $a$ and $b$. This is a crucial simplification for analytical tractability.
+
+\subsection{Refined Generative Model}
+The core insight is that we only need to model the specific correlations within and between rows $a$ and $b$. We assume the entries of these two rows are generated from a smaller set of independent Gaussian sources.
+Let $Z_0 \sim \mathcal{N}(0,1)$ be a global random variable as before.
+Let $Z_a = (Z_{a1}, Z_{a2}, \dots, Z_{aP})$ be a vector of $P$ i.i.d. standard normal variables for row $a$.
+Let $Z_b = (Z_{b1}, Z_{b2}, \dots, Z_{bP})$ be a vector of $P$ i.i.d. standard normal variables for row $b$.
+The set $\{Z_0, Z_a, Z_b\}$ contains $2P+1$ independent Gaussian variables in total.
+
+The entries of the relevant rows of the matrix $G$ are now constructed as follows:
+For $j = 1, \dots, P$:
+\begin{align*}
+G_{aj} &= Z_0 \cdot R_{aj} + Z_{aj} \sqrt{1 - R_{aj}^2} \\
+G_{bj} &= Z_0 \cdot R_{bj} + Z_{bj} \sqrt{1 - R_{bj}^2}
+\end{align*}
+This construction maintains the desired covariance structure where $\text{Cov}(G_{ik}, G_{jl}) = R_{ik}R_{jl}$ for $i,j \in \{a,b\}$, but it only requires integrating over the variables that actually affect the quantity of interest.
+
+\subsection{Final Integral Expression}
+The expectation $\mathbb{E}[P(S_{a, \cdot}, S_{b, \cdot})]$ can now be expressed as an integral over these $2P+1$ variables. Let $d\mu(z)$ remain the standard Gaussian measure. The final, complete, and more tractable integral is:
+
+\begin{align*}
+\mathbb{E}[P(S_{a, \cdot}, S_{b, \cdot})] = & \int_{\mathbb{R}} d\mu(z_0) \left( \prod_{j=1}^{P} \int_{\mathbb{R}} d\mu(z_{aj}) \right) \left( \prod_{j=1}^{P} \int_{\mathbb{R}} d\mu(z_{bj}) \right) \\
+& P\left( S_{a, \cdot}(z_0, \mathbf{z}_a), S_{b, \cdot}(z_0, \mathbf{z}_b) \right)
+\end{align*}
+where the arguments of the polynomial $P$ are the softmax outputs for rows $a$ and $b$. For any given column $l \in \{1, \dots, P\}$, these are:
+\[
+S_{al} = \frac{\exp\left(\beta \left[z_0 R_{al} + z_{al} \sqrt{1-R_{al}^2}\right]\right)}{\sum_{k=1}^{P} \exp\left(\beta \left[z_0 R_{ak} + z_{ak} \sqrt{1-R_{ak}^2}\right]\right)}
+\]
+\[
+S_{bl} = \frac{\exp\left(\beta \left[z_0 R_{bl} + z_{bl} \sqrt{1-R_{bl}^2}\right]\right)}{\sum_{k=1}^{P} \exp\left(\beta \left[z_0 R_{bk} + z_{bk} \sqrt{1-R_{bk}^2}\right]\right)}
+\]
+This is the final, complete expression for the quantity of interest. The calculation is now framed as an integral over $2P+1$ dimensions, which, while still challenging, is a significant reduction from the initial formulation.
+
+\end{document}
