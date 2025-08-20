@@ -33,7 +33,9 @@ et qu'on repond d'abord pour nn regression, ensuite pour sobolev avec la decompo
 le fait est qu'en parallele on apprend aussi à fitter nos données et leurs normes, ce n'est pas la 1ere chose que l'on fait
 (car on a une matrice diagonale), c'est pas on apprend 2 noyaux orthogonaux, on apprend en fait 1 noyaux et son scaling
 
-
+expliciter aussi que l'usage de l'IA s'est restreint le plus possible lors de l'écriture de tex, et quand je me suis retrouvé bloqué et que
+mon prof n'était pas dispo pour discuter
+avec meme un historique de toutes mes requetes IA mis dans un ficheirs special
 détailler aussi tout le setup experimental et mis en oeuvre avec toutes les stats de commit et de fichiers
 décrire aussi que j'ai fait des lives, contacts etc ..
 mettre aussi l'aspect ingéniérie et le fait que l'asd et le ntk est dual, et que ça explique en partie la double descente
