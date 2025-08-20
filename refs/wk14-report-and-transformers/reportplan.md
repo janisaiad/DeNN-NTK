@@ -1,3 +1,5 @@
+revoir la base de données de rapport de l'x pour d'inspirer
+
 plan : un maximum de contributions personnelles
 on part du sobolev training, on écrit les théorèmes qui montrent la décomposition du NTK
 on décrit le RKHS pour le kernel de sobolev, puis le laplace pour le NTK en 1 theoreme rapide
