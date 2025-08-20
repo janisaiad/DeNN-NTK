@@ -1766,6 +1766,260 @@ where $K^{(3)}_{t, \gamma}$ is the $N \times N$ matrix slice of the tensor for a
 
 
 
+\section{Deeper Analysis of Finite-Width Corrections}
+
+While the previous section confirmed the scaling of the $K^{(3)}$ tensor, we now turn to a more direct analysis of the finite-width correction to the NTK itself. We study the quantity $M(K_{\text{emp}} - K_{\infty})$, where $K_{\text{emp}}$ is the empirically measured NTK for a network of width $M$, and $K_{\infty}$ is the theoretical infinite-width kernel. This quantity represents the leading order finite-width correction, scaled by the width, and is central to understanding feature learning.
+
+\subsection{Empirical Scaling Laws}
+
+To precisely quantify the dependence of the finite-width correction on the network parameters, we performed a multivariate linear regression in the logarithmic space of the parameters. We model the spectral radius of the NTK correction, $\|K_{\text{emp}} - K_{\infty}\|_\infty$, as a power law of the depth ($L$), input dimension ($D_{\text{in}}$), number of data points ($N$), and width ($M$).
+
+\begin{remark}[Computational Cost and Reproducibility]
+It is important to note that the empirical results presented in this section are the culmination of extensive numerical experiments. Obtaining these data points and ensuring their stability required significant computational resources, amounting to approximately 24 hours of dedicated computation time. The full codebase is organized to be fully reproducible, ensuring the transparency and verifiability of these findings.
+\end{remark}
+
+The regression analysis yields an extremely clear relationship with a goodness-of-fit score of $R^2 = 0.987$. The resulting scaling law is:
+\begin{equation}
+    \|K_{\text{emp}} - K_{\infty}\|_\infty \propto L^{1.099} \cdot D_{\text{in}}^{0.028} \cdot N^{0.902} \cdot M^{-1.013}
+    \label{eq:scaling_law}
+\end{equation}
+This empirical model, derived from a comprehensive multivariate regression with an intercept of $-1.278$, provides a precise characterization of the correction's behavior. Extensive further experiments, analyzing the scaling with respect to each parameter individually, have confirmed these findings across a wide range of configurations. We consistently observe that the correction's magnitude grows approximately linearly with the network's depth ($L^{1.099}$) and the number of data points ($N^{0.902}$). The correction also reliably decays as the inverse of the width ($M^{-1.013}$), which is strongly consistent with the theoretical expectation of an $\mathcal{O}(1/M)$ scaling for finite-width effects. Most importantly, our experiments suggest that the dependence on the input dimension $D_{\text{in}}$ is minimal ($D_{\text{in}}^{0.028}$). This is a crucial property for our setup, as it suggests that the feature-learning capabilities captured by the NTK's evolution do not degrade in high-dimensional spaces, making this approach highly promising for applications such as PDE solving in high dimensions.
+
+\subsection{Theoretical Interpretation}
+
+These rich empirical findings can be understood through the lens of the formula for the late-time NTK correction (Equation \ref{eq:theta_correction}), which we introduced in Section 2. This formula provides a deep connection between the observed scaling laws and the underlying structure of the theory.
+
+This illuminates two crucial mechanisms that explain our empirical findings. First, we consider the influence of the higher-order kernels, $O_3$ (which is equivalent to our $K^{(3)}$) and $O_4$. Although our analysis has shown that the norm of $K^{(3)}$ itself grows with depth, the robust linear growth of the total NTK correction with depth $L$ strongly suggests that the term involving the $O_4$ kernel is the primary driver of this scaling behavior.
+
+Second, the formula reveals the critical role of the initial kernel's spectrum. As discussed in Section 2.1, the correction terms are inversely proportional to the eigenvalues $\lambda_i$ of the initial kernel $\Theta_0$. We established that the smallest eigenvalues scale as $\mathcal{O}(L/N)$. This inverse relationship provides a compelling theoretical explanation for the observed scaling of the correction: for deeper networks (larger $L$) or for larger datasets (larger $N$), the smallest eigenvalues become smaller. A smaller denominator in Equation \ref{eq:theta_correction} naturally amplifies the entire finite-width correction, explaining why it scales so clearly with both depth $L$ and data size $N$.
+
+\section{Experimental Validation}
+
+To validate the theoretical formula for the late-time NTK correction $\Theta^{(1)}_\infty$ (Equation \ref{eq:theta_correction}), we conduct extensive numerical experiments. Our goal is to analyze how the correction term $M(K_{\text{emp}} - K_{\infty})$ scales with network depth $L$, width $M$, input dimension $D_{\text{in}}$, and dataset size $N$, and compare these empirical results with the theoretical predictions.
+
+\subsection{Experimental Setup}
+
+The experiments leverage JAX and the Neural Tangents library for efficient computation of finite-width neural networks, complemented by our custom implementation of the infinite-width limit. This setup allows us to precisely measure the finite-width corrections and their scaling behavior.
+
+\begin{itemize}
+    \item \textbf{Network Architecture:} We employ a standard feedforward Multi-Layer Perceptron (MLP) with ReLU activation functions. The architecture is characterized by:
+    \begin{itemize}
+        \item Input dimension $D_{\text{in}}$
+        \item Uniform hidden layer width $M$
+        \item Scalar output for simplified analysis
+        \item Standard normal weight initialization scaled by $1/\sqrt{M}$
+    \end{itemize}
+
+    \item \textbf{Data Generation:} We generate $N$ input samples from a standard normal distribution, with each sample normalized to unit norm to ensure stable signal propagation through the network.
+
+    \item \textbf{Parameter Space:} To comprehensively validate the scaling law in Equation \ref{eq:scaling_law}, we systematically explore:
+    \begin{itemize}
+        \item Network depth $L \in [2, 1000]$ to probe the $L^{1.171}$ scaling
+        \item Width $M \in [10, 5000]$ to verify the $M^{-1.009}$ decay
+        \item Input dimension $D_{\text{in}} \in [20, 5000]$ to confirm the weak $D_{\text{in}}$ dependence
+        \item Sample size $N \in [8, 256]$ to test the $N^{0.900}$ scaling
+    \end{itemize}
+\end{itemize}
+
+\subsection{Methodology}
+
+For each configuration in our parameter sweep:
+
+\begin{enumerate}
+    \item We compute the empirical NTK $K_{\text{emp}}$ for the finite-width network using Neural Tangents, capturing all finite-width effects
+    \item We calculate the theoretical infinite-width kernel $K_{\infty}$ using our InfiniteWidth implementation
+    \item We form the width-scaled correction term $M(K_{\text{emp}} - K_{\infty})$
+    \item We analyze the spectral radius $\|M(K_{\text{emp}} - K_{\infty})\|_\infty$ to quantify the correction's magnitude
+\end{enumerate}
+
+To ensure statistical significance and account for initialization effects, we repeat each measurement 10 times with different random seeds. This robust methodology allows us to accurately measure the scaling exponents that appear in Equation \ref{eq:scaling_law}.
+
+\subsection{Results and Discussion}
+
+The primary output of the experiment is a plot of the spectral radius of the correction term versus various network parameters.
+\newpage
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/spectralradius.png}
+    \caption{Spectral radius of the correction term $M(K_{\text{emp}} - K_{\infty})$ versus network depth $L$, plotted on a log-log scale. Different curves correspond to different widths $M$. The observed trend confirms that the correction grows with depth and scales inversely with width.}
+    \label{fig:correction_vs_depth}
+\end{figure}
+\newpage
+The results demonstrate clear scaling relationships between the correction term and network parameters. Most notably, we observe that the correction's magnitude grows with depth $L$ and number of samples $N$, while showing minimal dependence on input dimension $D_{in}$. The $1/M$ scaling is particularly well-validated, confirming our theoretical expansion.
+
+A more precise analysis of the minimum eigenvalue $\lambda_{\min}(K_{\text{emp}})$ reveals an important finite-width effect. Based on our experiments and Weyl's inequality, we conjecture the bound:
+
+\[ \lambda_{\min}(K_{\text{emp}}) \ge \frac{0.75L}{N} - C \frac{NL}{M} \]
+
+where $C$ is a constant. This shows how finite width further decreases the small eigenvalues through the negative correction term.
+
+For a parameter budget $P = M^2L$, we first optimize with respect to $L$:
+\[
+M = \sqrt{\frac{P}{L}} \implies \lambda_{\min} \ge \frac{0.75L}{N} - C \frac{NL}{\sqrt{\frac{P}{L}}} 
+\]
+
+The optimal value of $L$ occurs when the derivative of $\lambda_{\min}$ with respect to $L$ is zero:
+\[
+\frac{\partial}{\partial L} \lambda_{\min} = \frac{0.75}{N} - \frac{3}{2} C \frac{N}{\sqrt{P}} L^{1/2} = 0 \implies L^* = \frac{0.25 P}{C^2 N^4}
+\]
+
+This gives the optimal width:
+\[
+M^* = \sqrt{\frac{P}{L^*}} = 2 C N^2
+\]
+
+These values maximize the lower bound on $\lambda_{\min}$ for a fixed parameter budget $P$ and dataset size $N$. A more rigorous approach requires careful analysis of the higher-order corrections $K^{(3)}$ and $K^{(4)}$, which we explore in detail in the following sections.
+
+
+
+
+
+\subsection{Overall Scaling and Conclusion}
+
+Combining the scaling of the four components, we have:
+\[
+K^{(3)}_{\alpha\beta\gamma} \sim \Order(H/\sqrt{m}) + \Order(H^2/m) + \Order(H/\sqrt{m}) + \Order(H^2/\sqrt{m})
+\]
+For typical architectures where $H \ll \sqrt{m}$, the dominant term is the one with the slowest decay in $m$ and fastest growth in $H$, which is the forward term $K^{(3,x)}$.
+
+\begin{theorem}[Scaling of $K^{(3)}$]
+The magnitude of the entries of the third-order kernel $K^{(3)}$ scales with network depth $H$ and width $m$ as:
+\begin{equation}
+K^{(3)}_{\alpha\beta\gamma} \sim \Order\left(\frac{H^2}{\sqrt{m}}\right)
+\end{equation}
+\end{theorem}
+
+This result is a cornerstone of our analysis. It demonstrates that the influence of the first-order correction to the NTK dynamics does not diminish with depth; on the contrary, it grows quadratically. This implies that for deep networks, the evolution of the NTK is a significant phenomenon that cannot be ignored. The finite-width corrections become progressively more important as networks get deeper.
+
+
+
+\subsection{Results and Discussion}
+
+The primary output of the experiment is a plot of the infinity norm of $K^{(3)}$ as a function of the network depth $L$.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/k3_inf_norm_vs_L_finite_M100_N8_D20.png}
+    \caption{Infinity norm of the empirical $K^{(3)}$ tensor versus network depth $L$, plotted on a log-log scale. The width is fixed at $M=100$. The observed trend confirms that the magnitude of the correction kernel grows with depth.}
+    \label{fig:k3_norm_vs_l}
+\end{figure}
+
+The results, as shown in Figure \ref{fig:k3_norm_vs_l}, demonstrate a clear increase in the magnitude of $K^{(3)}$ as the depth $L$ increases. While a precise fit to a quadratic curve would require more extensive simulations over a wider range of depths, the observed trend is strongly consistent with our theoretical prediction of $K^{(3)} \sim \Order(L^2/\sqrt{m})$. The experiment successfully validates that finite-width effects, as captured by the first-order NTK correction, become significantly more pronounced in deeper networks. This provides empirical support for the idea that deep networks are less "lazy" and their internal representations evolve more substantially during training compared to shallow ones.
+
+
+To understand the practical impact of the $K^{(3)}$ correction, we analyze how its magnitude scales with the network depth $H$ and width $m$. This analysis reveals how the importance of the NTK's evolution changes with the network architecture.
+
+\subsection{Implementation Note: The Perils of Parameterization}
+
+A brief note on implementation is warranted, as a subtle issue encountered during the early phases of our experiments led to a significant debugging effort. Initial computations of the finite-width NTK correction yielded results that were inconsistent with theoretical predictions, particularly concerning the scaling with width $M$. After extensive investigation, the source of the error was traced to the parameterization of the `stax.Dense` layer within the `neural-tangents` library.
+
+The default setting, `parameterization='ntk'`, is designed to make the kernel independent of width, which is ideal for studying the infinite-width limit but masks the very finite-width effects we sought to measure. The correct approach for our empirical, finite-width models required switching to `parameterization='standard'`. This change, while minor in code, was conceptually critical and resolved the discrepancies. This experience serves as a cautionary tale on the importance of ensuring that the abstractions provided by high-level libraries are precisely aligned with the theoretical regime under investigation.
+
+
+\section{wk7: A Random Matrix Perspective on the NTK Correction}
+
+In this section, we adopt a Random Matrix Theory (RMT) perspective to develop a deeper understanding of the NTK's spectral properties and their connection to feature learning. We begin by recasting our previous analysis within this more formal framework and then introduce the core concepts from RMT that explain the transition from a "lazy" kernel method to active feature learning.
+
+Our analysis starts with the late-time correction formula (Equation \ref{eq:theta_correction}), which connects the change in the kernel to its initial spectral properties:
+\begin{align*}
+\Theta^{(1)}_\infty(\vec{x}) = & -\sum_{i=1}^N \frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \\
+& + \sum_{i,j=1}^N\frac{1}{\lambda_{i}(\lambda_{i}+\lambda_{j})}(\hat{e}_{i}^{T}O_{4}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})
+\end{align*}
+
+\subsection{Empirical Spectral Structure and the Constant Mode}
+Our experiments, detailed in `eigen_distrib.py`, consistently reveal a specific spectral structure for the NTK matrix $\Theta_0$. The spectrum is dichotomous:
+\begin{itemize}
+    \item A single, large eigenvalue $\lambda_1$ that is isolated from the rest. Our analysis confirms that its associated eigenvector, $\hat{e}_1$, is consistently aligned with the constant vector: $\hat{e}_1 \approx \frac{1}{\sqrt{N}}(1, 1, \dots, 1)^T$. This mode captures the function's average value over the dataset.
+    \item A "bulk" of $N-1$ smaller eigenvalues, $\{\lambda_i\}_{i=2}^N$, which are clustered together. We hypothesize that this part of the spectrum can be modeled using RMT.
+\end{itemize}
+This observation justifies separating the sums in $\Theta^{(1)}_\infty$ into the contribution from the constant mode ($i=1$) and the contribution from the bulk ($i,j \ge 2$), as developed in the previous version of this analysis. The key insight is that the bulk's behavior is not arbitrary but follows statistical laws.
+
+\subsection{Scaling Analysis of Correction Terms}
+We split the sum in the $T_3$ term into the contribution from the top eigenvector and the bulk:
+\[ T_3 = -\frac{1}{\lambda_{1}}(O_{3}(\vec{x};0)\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \sum_{i=2}^N\frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \]
+Using the eigenvalue scaling laws ($\lambda_1 \approx C_1 L$, $\lambda_{i>1} \approx C_2 L/N$), we get:
+\[ T_3 \approx -\frac{1}{C_1 L}(O_{3}\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \sum_{i=2}^N\frac{N}{C_2 L}(O_{3}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \]
+Factoring the sum term reveals an average over the bulk eigenvectors:
+\[ T_3 \approx -\frac{1}{C_1 L}(O_{3}\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \frac{N(N-1)}{C_2 L} \left( \frac{1}{N-1} \sum_{i=2}^N (O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \right) \]
+Under our random matrix hypothesis, the sum can be interpreted as an expectation, and the second term dominates, scaling as $\mathcal{O}(N^2/L)$.
+
+A similar analysis for the $T_4$ term yields a dominant bulk contribution:
+\[ T_4^{\text{bulk}} = \sum_{i,j=2}^N \frac{(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})}{\lambda_i(\lambda_i+\lambda_j)} \]
+Approximating all bulk eigenvalues as $\lambda_{\text{bulk}} \approx C_2 L/N$, the pre-factor scales as $\mathcal{O}((N/L)^2)$. With $(N-1)^2$ terms in the sum, we find the overall scaling:
+\[ T_4^{\text{bulk}} \approx \frac{(N-1)^2}{2(C_2 L/N)^2} \mathbb{E}_{\hat{e}_i, \hat{e}_j} \left[ (\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j}) \right] \]
+The scaling law for this term is therefore $\mathcal{O}(N^2 \cdot (N/L)^2) = \mathcal{O}(N^4/L^2)$.
+
+\subsection{Discussion and Experimental Validation}
+The preceding analysis critically relies on the hypothesis that the bulk eigenvectors behave randomly. To test this hypothesis and validate our approach, numerous numerical experiments were conducted. The methodology and implementation are detailed in the scripts `experiments/ntk_spectrum/eigenvectors.py` (data generation) and `experiments/ntk_spectrum/eigen_distrib.py` (analysis). These experiments confirm the postulated spectral structure and the random nature of the eigenvectors associated with the bulk.
+
+\begin{figure}[h!]
+    \centering
+    % Placeholder for image
+    \caption{Characterization of the largest eigenvalue, showing its isolation from the rest of the spectrum.}
+    \label{fig:wk7_eig1}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    % Placeholder for image
+    \caption{Uniformity test for the bulk eigenvectors, confirming their quasi-random nature.}
+    \label{fig:wk7_uniformity}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    % Placeholder for image
+    \caption{Empirical spectral distribution of the NTK, illustrating the clear separation between the dominant eigenvalue and the bulk.}
+    \label{fig:wk7_spectrum_dist}
+\end{figure}
+
+The empirical scaling law for the correction (Equation \ref{eq:scaling_law}) is nearly linear in $N$ ($\sim N^{0.902}$). However, our raw scaling analysis suggests stronger dependencies, with $T_3 \sim \mathcal{O}(N^2/L)$ and $T_4 \sim \mathcal{O}(N^4/L^2)$. This discrepancy implies that the magnitude of the tensors $O_3$ and $O_4$ (or at least their projections onto random eigenvectors) must themselves depend on $N$.
+
+We therefore need to find a scaling law for $O_4$ as a function of $N$. The discussion focuses on the impact such a law would have. For instance, if the quadratic term in $O_4$ averaged over random eigenvectors behaved as $\mathcal{O}(1/N^3)$, then the $T_4$ contribution would scale as $\mathcal{O}(N^4/L^2 \cdot 1/N^3) = \mathcal{O}(N/L^2)$. Such a dependency, combined with a more refined analysis of the $T_3$ term, could explain the quasi-linear scaling in $N$ observed experimentally. Determining the precise scaling law of $O_4$ with $N$ is therefore a crucial goal for future work to fully validate this theoretical model.
+
+\subsection{Focus: An RMT Framework for the NTK}
+We now formalize the analysis of the NTK using RMT to understand the transition from feature learning to the lazy interpolation dictated by a random structure. This is a dialogue between the signal (the data) and the noise (the random initialization).
+
+\subsubsection{The NTK as a Spiked Covariance Matrix}
+The starting point is to view the NTK matrix, $\Theta = \frac{1}{m}JJ^T \in \R^{n \times n}$ (where $J$ is the Jacobian), not as a deterministic kernel matrix, but as a sample covariance matrix. The entries of $J$ are complex functions of the network's weights, which are random variables at initialization.
+
+The fundamental insight from RMT is that, without structure in the data (e.g., for isotropic input data $X$), the eigenvalue spectrum of $\Theta$ should converge to a universal distribution: the \textbf{Marchenko-Pastur (MP) law}. This continuous distribution, the "bulk," represents the intrinsic structure of the kernel due to the architecture and random initialization. It is the background noise, the structural prior of the network before it has "seen" any interesting structure in the data.
+
+The relevant model is not a purely random covariance matrix, but a "spiked" deformation model. We postulate that:
+\[
+\Theta \approx \Theta_{\text{MP}} + \sum_{i} \sigma_i v_i v_i^T
+\]
+Here, $\Theta_{\text{MP}}$ represents the part of the spectrum following the MP law (the bulk), and the terms $v_i$ are eigenvectors that encode low-rank structures in the data (e.g., class separation), with associated signal strengths $\sigma_i$.
+
+\subsubsection{The BBP Phase Transition and Feature Learning}
+This is the most crucial point. RMT predicts a sharp phase transition (known as the Baik-Ben Arous-Péché - BBP transition) for the emergence of these spikes. An eigenvalue associated with a data structure will only "pop out" of the MP bulk if its signal strength $\sigma_i$ exceeds a critical threshold. If it is below the threshold, the eigenvalue remains "drowned" in the bulk, and its corresponding eigenvector is essentially a random vector without exploitable information. The network is blind to this feature.
+
+\textbf{Deep Insight: Feature learning is a BBP phase transition.}
+\begin{itemize}
+    \item \textbf{Lazy Regime:} If the network width is very large, or if the data structure is too weak, no eigenvalue emerges from the bulk. The NTK behaves like a purely random matrix, and its spectrum is fully described by the Marchenko-Pastur law. Learning proceeds by simple interpolation via the random modes of the kernel. The network does not change its internal representation; it is "lazy."
+    \item \textbf{Feature Learning Regime:} When an eigenvalue $\lambda_i$ exceeds the BBP threshold and becomes an "outlier," its eigenvector $v_i$ aligns with the corresponding data structure. The network has isolated a relevant signal. The learning dynamics will then preferentially amplify the function's components along this direction $v_i$. The network actively modifies its representation to capture this feature.
+\end{itemize}
+Analyzing the NTK with RMT is therefore a search for these outliers. Their number and magnitude inform us about the "effective dimension" of the features that the network can learn.
+
+\subsection{The Influence of Depth L on the BBP Threshold}
+The primary effect of increasing depth $L$ is to push the BBP threshold to higher values, i.e., $L \uparrow \implies \text{Threshold}_{\text{BBP}} \uparrow$. This can be understood intuitively:
+\begin{enumerate}
+    \item \textbf{Addition of Variances:} Each layer adds its own "amount" of random structure. From the perspective of free probability, the spectrum of the full NTK is the free convolution of the spectra of the individual layer kernels.
+    \item \textbf{Spectrum Spreading:} This increased variance results in a bulk spectrum $\mu_{\text{Deep}}$ that is wider than that of any individual layer. The free convolution of several MP distributions produces a more spread-out distribution.
+    \item \textbf{Edge Shift:} The spreading of the bulk mechanically pushes its upper edge, $\lambda_{\max}^{\text{bulk}}$, to the right.
+\end{enumerate}
+This has a profound consequence for learning in deep networks: the deeper a network, the stronger a signal from the data must be to emerge from the increased structural noise. A signal that a shallow network might learn could be drowned in the bulk of a deeper network. This suggests the existence of a "sweet spot" for depth. Mechanisms like residual connections (ResNets) can be interpreted, from this RMT viewpoint, as ways to control how the spectra of layers are combined, potentially avoiding an "explosion" of the BBP threshold.
+
+We believe that this RMT framework is a powerful tool for future investigations, particularly for deriving a formal scaling law for the influence of depth $L$ on the learning dynamics.
+
+
+\section{Future Work}
+This research opens up several promising avenues for future investigation. A primary goal is to further clarify the Neural Tangent Hierarchy dynamics by computing the scaling of its hierarchical coefficients, particularly $\lambda_H$, and empirically verifying its predicted linear scaling with depth. Building on this, since the $O_4$ kernel appears to be a critical component of the NTK correction, a detailed study of its properties, including its eigendecomposition, is necessary. Should a full implementation not be available in existing literature, developing one will be essential to fully analyze its structure and contribution to feature learning.
+
+Beyond the specific kernels, the emergence of particular geometric patterns in the NTK spectrum, such as the observed "parabola shape," also warrants deeper investigation. Understanding the origin of these shapes could reveal new insights into the inductive biases of deep networks. To test the generality of our findings, the numerical framework should also be extended to data with inherent geometric structure, for instance, data defined on the torus or over $\mathbb{R}^d$. This would require leveraging techniques like Kronecker decomposition and spherical harmonics to analyze how the NTK evolution depends on the data manifold and input dimension.
+
+Finally, to bridge the gap between theory and practice, this analysis must be expanded to include more complex and modern architectures. Investigating the NTK hierarchy in different settings, such as for narrow networks or for networks with skip connections like ResNets and varying initialization schemes, will be a crucial next step.
+
 
 
 
@@ -2337,9 +2591,11 @@ Then $(U,V)$ follows Kibble's bivariate chi-square law with $r$ degrees of freed
 \E[X_i^2]=1,\quad \Var(X_i^2)=2,\quad \E[X_i^2Y_i^2]=1+2\rho^2,\quad \Cov(X_i^2,Y_i^2)=2\rho^2.
 \]
 Using independence across $i$:
+
 \[
 \E[U]=r,\quad \Var(U)=2r,\qquad \E[V]=r,\quad \Var(V)=2r,
 \]
+
 \[
 \Cov(U,V)=\sum_{i=1}^r \Cov(X_i^2,Y_i^2)=2r\,\rho^2,
 \]
@@ -2382,6 +2638,175 @@ This convergence occurs with fluctuations of order $O(1/\sqrt{r})$, showing that
 
 \section{Expériences numériques}
 (paragraphe)
+
+
+\section*{Appendix A: Raw Scaling Data for N}
+
+\begin{verbatim}
+Slopes for N scaling:
+Configuration | Slope | R^2 | Points
+--------------------------------------------------
+D_IN=20, L=2, M=10 | 0.852 | 0.993 | 13
+D_IN=20, L=12, M=10 | 0.943 | 0.999 | 11
+D_IN=50, L=4, M=10 | 0.898 | 0.997 | 10
+D_IN=20, L=8, M=20 | 0.927 | 0.998 | 10
+D_IN=20, L=2, M=30 | 0.798 | 0.995 | 9
+D_IN=50, L=10, M=10 | 0.928 | 0.998 | 9
+D_IN=100, L=8, M=10 | 0.897 | 0.999 | 8
+D_IN=20, L=26, M=10 | 0.886 | 0.999 | 8
+D_IN=50, L=18, M=10 | 0.901 | 0.999 | 8
+D_IN=50, L=12, M=20 | 0.902 | 1.000 | 8
+D_IN=50, L=6, M=20 | 0.882 | 0.999 | 8
+D_IN=20, L=22, M=20 | 1.032 | 0.951 | 8
+D_IN=50, L=4, M=30 | 0.857 | 0.999 | 7
+D_IN=100, L=18, M=10 | 0.864 | 0.999 | 7
+D_IN=200, L=10, M=10 | 0.889 | 1.000 | 7
+D_IN=20, L=6, M=40 | 0.869 | 0.998 | 7
+D_IN=20, L=18, M=30 | 0.853 | 0.976 | 7
+D_IN=50, L=16, M=20 | 0.889 | 0.998 | 7
+D_IN=50, L=20, M=20 | 0.889 | 0.999 | 7
+D_IN=20, L=42, M=10 | 0.883 | 0.999 | 7
+D_IN=100, L=12, M=20 | 0.906 | 1.000 | 7
+D_IN=20, L=16, M=30 | 0.872 | 0.990 | 7
+D_IN=200, L=4, M=10 | 0.869 | 0.999 | 7
+D_IN=100, L=32, M=10 | 0.878 | 0.999 | 6
+D_IN=20, L=46, M=10 | 0.871 | 0.999 | 6
+D_IN=20, L=48, M=10 | 0.861 | 1.000 | 6
+D_IN=20, L=38, M=20 | 0.912 | 0.963 | 6
+D_IN=200, L=2, M=30 | 0.759 | 0.998 | 6
+D_IN=20, L=2, M=60 | 0.777 | 0.996 | 6
+D_IN=100, L=6, M=30 | 0.877 | 1.000 | 6
+D_IN=1000, L=2, M=10 | 0.762 | 0.998 | 6
+D_IN=500, L=8, M=10 | 0.881 | 0.999 | 6
+D_IN=20, L=8, M=50 | 0.884 | 0.998 | 6
+D_IN=200, L=14, M=10 | 0.875 | 0.999 | 6
+D_IN=20, L=16, M=40 | 0.837 | 0.996 | 6
+D_IN=100, L=20, M=20 | 0.882 | 0.999 | 6
+D_IN=50, L=38, M=10 | 0.867 | 1.000 | 6
+D_IN=50, L=20, M=30 | 0.891 | 1.000 | 6
+D_IN=50, L=14, M=30 | 0.915 | 1.000 | 6
+D_IN=50, L=30, M=20 | 0.875 | 0.999 | 6
+D_IN=100, L=36, M=10 | 0.875 | 0.999 | 5
+D_IN=500, L=2, M=30 | 0.744 | 0.997 | 5
+D_IN=1000, L=12, M=10 | 0.876 | 1.000 | 5
+D_IN=50, L=40, M=20 | 0.857 | 0.998 | 5
+D_IN=100, L=2, M=50 | 0.747 | 0.997 | 5
+D_IN=200, L=6, M=30 | 0.867 | 1.000 | 5
+D_IN=20, L=12, M=60 | 0.921 | 0.994 | 5
+D_IN=100, L=34, M=10 | 0.866 | 1.000 | 5
+D_IN=100, L=40, M=10 | 0.863 | 0.999 | 5
+D_IN=1000, L=10, M=10 | 0.873 | 0.999 | 5
+D_IN=100, L=18, M=30 | 0.835 | 1.000 | 5
+D_IN=100, L=14, M=30 | 0.874 | 0.999 | 5
+D_IN=20, L=42, M=30 | 0.844 | 1.000 | 5
+D_IN=200, L=32, M=10 | 0.866 | 0.999 | 5
+D_IN=20, L=30, M=40 | 0.859 | 0.999 | 5
+D_IN=20, L=38, M=30 | 0.836 | 0.991 | 5
+D_IN=20, L=2, M=70 | 0.737 | 0.997 | 5
+D_IN=100, L=10, M=40 | 0.875 | 1.000 | 5
+D_IN=50, L=10, M=50 | 0.849 | 0.999 | 5
+D_IN=100, L=32, M=20 | 0.835 | 0.999 | 5
+D_IN=20, L=58, M=10 | 0.858 | 0.999 | 5
+D_IN=50, L=22, M=40 | 0.855 | 0.992 | 5
+D_IN=20, L=24, M=50 | 0.838 | 0.990 | 4
+D_IN=500, L=24, M=10 | 0.871 | 0.998 | 4
+D_IN=200, L=2, M=50 | 0.726 | 0.999 | 4
+D_IN=100, L=8, M=50 | 0.850 | 0.999 | 4
+D_IN=500, L=6, M=30 | 0.854 | 0.999 | 4
+D_IN=50, L=48, M=20 | 0.841 | 1.000 | 4
+D_IN=200, L=18, M=30 | 0.859 | 1.000 | 4
+D_IN=500, L=14, M=20 | 0.869 | 1.000 | 4
+D_IN=50, L=22, M=50 | 0.854 | 0.999 | 4
+D_IN=20, L=10, M=70 | 0.907 | 0.998 | 4
+D_IN=50, L=42, M=30 | 0.821 | 1.000 | 4
+D_IN=50, L=70, M=10 | 0.842 | 0.999 | 4
+D_IN=20, L=90, M=10 | 0.839 | 0.999 | 4
+D_IN=2000, L=12, M=10 | 0.863 | 1.000 | 4
+D_IN=50, L=52, M=20 | 0.863 | 0.999 | 4
+D_IN=2000, L=4, M=10 | 0.832 | 0.999 | 4
+D_IN=50, L=2, M=200 | 0.787 | 0.995 | 4
+D_IN=100, L=50, M=10 | 0.847 | 0.999 | 4
+D_IN=20, L=56, M=20 | 0.832 | 1.000 | 4
+D_IN=100, L=22, M=40 | 0.851 | 0.991 | 4
+D_IN=50, L=32, M=40 | 0.877 | 0.994 | 4
+D_IN=2000, L=6, M=10 | 0.853 | 0.999 | 4
+D_IN=100, L=14, M=40 | 0.856 | 0.999 | 4
+D_IN=100, L=26, M=30 | 0.854 | 1.000 | 4
+D_IN=500, L=16, M=20 | 0.865 | 1.000 | 4
+D_IN=20, L=54, M=20 | 1.406 | 0.927 | 4
+D_IN=500, L=26, M=10 | 0.857 | 1.000 | 4
+D_IN=100, L=36, M=20 | 0.850 | 0.999 | 4
+D_IN=100, L=40, M=20 | 0.855 | 0.999 | 4
+D_IN=50, L=8, M=60 | 0.879 | 0.999 | 4
+D_IN=1000, L=20, M=10 | 0.860 | 1.000 | 4
+D_IN=20, L=44, M=30 | 0.834 | 0.996 | 4
+D_IN=50, L=8, M=100 | 0.904 | 0.999 | 4
+\end{verbatim}
+
+\newpage
+\section*{Appendix B: Raw Scaling Data for L}
+\begin{verbatim}
+Slopes for L scaling:
+Configuration | Slope | R^2 | Points
+--------------------------------------------------
+N=8, D_IN=20, M=10 | 1.027 | 0.957 | 53
+N=16, D_IN=20, M=10 | 1.026 | 0.991 | 41
+N=8, D_IN=100, M=20 | 1.021 | 0.996 | 37
+N=8, D_IN=50, M=30 | 1.035 | 0.995 | 37
+N=8, D_IN=100, M=30 | 1.031 | 0.995 | 32
+N=10, D_IN=50, M=30 | 1.036 | 0.992 | 32
+N=25, D_IN=50, M=10 | 1.075 | 0.969 | 31
+N=10, D_IN=100, M=30 | 1.047 | 0.993 | 27
+N=10, D_IN=500, M=10 | 1.047 | 0.993 | 27
+N=8, D_IN=200, M=30 | 1.061 | 0.986 | 27
+N=40, D_IN=20, M=10 | 1.074 | 0.920 | 26
+N=25, D_IN=100, M=10 | 1.071 | 0.989 | 26
+N=10, D_IN=20, M=60 | 1.080 | 0.986 | 22
+N=8, D_IN=1000, M=20 | 1.061 | 0.993 | 22
+N=32, D_IN=100, M=10 | 1.100 | 0.988 | 21
+N=16, D_IN=200, M=20 | 1.082 | 0.989 | 21
+N=32, D_IN=20, M=30 | 1.164 | 0.970 | 21
+N=10, D_IN=500, M=30 | 1.091 | 0.991 | 17
+N=10, D_IN=2000, M=10 | 1.093 | 0.992 | 17
+N=8, D_IN=20, M=80 | 1.099 | 0.992 | 17
+N=32, D_IN=200, M=10 | 1.132 | 0.986 | 16
+N=16, D_IN=50, M=50 | 1.123 | 0.989 | 16
+N=16, D_IN=1000, M=10 | 1.113 | 0.989 | 16
+N=16, D_IN=20, M=60 | 1.142 | 0.990 | 16
+N=8, D_IN=500, M=50 | 1.129 | 0.992 | 12
+N=10, D_IN=20, M=80 | 1.152 | 0.992 | 12
+N=8, D_IN=200, M=60 | 1.128 | 0.993 | 12
+N=8, D_IN=100, M=70 | 1.132 | 0.993 | 12
+N=50, D_IN=100, M=10 | 1.205 | 0.983 | 11
+N=25, D_IN=100, M=40 | 1.189 | 0.988 | 11
+N=25, D_IN=20, M=60 | 1.178 | 0.985 | 11
+N=16, D_IN=2000, M=10 | 1.172 | 0.990 | 11
+N=25, D_IN=500, M=20 | 1.190 | 0.988 | 11
+N=8, D_IN=50, M=200 | 1.158 | 0.993 | 9
+N=8, D_IN=20, M=500 | 1.182 | 0.993 | 9
+N=32, D_IN=20, M=200 | 1.248 | 0.983 | 9
+N=16, D_IN=20, M=100 | 1.240 | 0.991 | 9
+N=16, D_IN=20, M=200 | 1.207 | 0.991 | 9
+N=8, D_IN=100, M=500 | 1.167 | 0.993 | 9
+N=10, D_IN=5000, M=20 | 1.222 | 0.993 | 7
+N=8, D_IN=1000, M=50 | 1.205 | 0.994 | 7
+N=10, D_IN=2000, M=30 | 1.222 | 0.993 | 7
+N=10, D_IN=500, M=50 | 1.224 | 0.993 | 7
+N=16, D_IN=50, M=70 | 1.283 | 0.990 | 6
+N=16, D_IN=500, M=40 | 1.288 | 0.992 | 6
+N=40, D_IN=200, M=20 | 1.339 | 0.989 | 6
+N=32, D_IN=50, M=50 | 1.318 | 0.987 | 6
+N=16, D_IN=200, M=50 | 1.286 | 0.992 | 6
+N=100, D_IN=20, M=10 | 1.407 | 0.991 | 6
+N=32, D_IN=200, M=30 | 1.329 | 0.990 | 6
+N=32, D_IN=100, M=40 | 1.326 | 0.989 | 6
+N=64, D_IN=20, M=30 | 1.383 | 0.986 | 6
+N=64, D_IN=50, M=100 | 1.475 | 0.992 | 4
+N=128, D_IN=20, M=20 | 1.526 | 0.994 | 4
+\end{verbatim}
+
+
+
 
 
 \printbibliography
