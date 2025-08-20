@@ -35,6 +35,7 @@ le fait est qu'en parallele on apprend aussi à fitter nos données et leurs nor
 
 expliciter aussi que l'usage de l'IA s'est restreint le plus possible lors de l'écriture de tex, et quand je me suis retrouvé bloqué et que
 mon prof n'était pas dispo pour discuter
+compiler toutes les reserch directions au fil du temps, et faireun graphe de tout ce que j'ai travaillé, une sorte de graphe du début avec tous les chemins, et une chronologie
 avec meme un historique de toutes mes requetes IA mis dans un ficheirs special
 détailler aussi tout le setup experimental et mis en oeuvre avec toutes les stats de commit et de fichiers
 décrire aussi que j'ai fait des lives, contacts etc ..
