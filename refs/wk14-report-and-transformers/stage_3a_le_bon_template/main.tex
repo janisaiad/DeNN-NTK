@@ -152,34 +152,9 @@ $\tilde{\Omega}(\cdot)$ : Landau notation (big Omega tilde).
 
 \newpage
 
-\section{Theoretical Framework of the Neural Tangent Kernel}
 
-\subsection{Introduction: Eigenvalue Scaling Laws and Learning Dynamics}
-\subsubsection{The Neural Tangent Kernel}
-The Neural Tangent Kernel (NTK) has emerged as a fundamental tool for understanding the training dynamics of deep neural networks. For a neural network $f(\x; \theta)$ with parameters $\theta$, the NTK is defined as:
-$$K^{\infty}(x_i, x_j) = \left\langle \frac{\partial f(\x_i; \theta)}{\partial \theta}, \frac{\partial f(\x_j; \theta)}{\partial \theta} \right\rangle = \sum_{k} \frac{\partial f(\x_i; \theta)}{\partial \theta_k} \frac{\partial f(\x_j; \theta)}{\partial \theta_k}$$
+\section{Statement of the problem}
 
-For L2 gradient descent with learning rate $\eta$, the dynamics are given by:
-
-$$\frac{d}{dt}f_t(x) = -\eta \sum_{i=1}^n K^{\infty}(x,x_i)(f_t(x_i) - y_i)$$
-The following theorem from Jacot et al. \cite{jacot2020neuraltangentkernelconvergence} establishes the convergence of neural networks to their linearized version in the infinite width limit, along with the recursive kernel formulation:
-
-\begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018]
-Consider a neural network $f(\x;\theta)$ trained by gradient descent with infinitesimal learning rate. As the width of the hidden layers tends to infinity:
-
-1) The network converges to a Gaussian process with kernel $K^{\infty}$, with dynamics:
-$$\frac{\partial f_t(\x)}{\partial t} = -\eta \sum_{i=1}^n K^{\infty}(\x,\x_i)(f_t(\x_i) - y_i)$$
-
-2) The kernel follows the recursive formula for depth $l$:
-$$K^{(l)}(\x,\x') = \sigma_w^2 \cdot K^{(l-1)}(\x,\x') \cdot \E_{g \sim \mathcal{N}(0,\Sigma^{(l-1)})} [\phi'(g(\x))\phi'(g(\x'))]$$
-where $\Sigma^{(l)}$ is the covariance of pre-activations at layer $l$:
-$$\Sigma^{(l)}(\x,\x') = \sigma_w^2 \cdot \E_{g \sim \mathcal{N}(0,\Sigma^{(l-1)})} [\phi(g(\x))\phi(g(\x'))]$$
-with $\Sigma^{(0)}(\x,\x') = \x^\top\x'$ and $\phi$ the activation function.
-
-3) For ReLU networks, the correlation function $\dot{\Lambda}^{(l)}$ between gradients at layer $l$ is:
-$$\dot{\Lambda}^{(l)}(\rho) = \frac{1}{2\pi}\sqrt{1-\rho^2} + \frac{\rho}{2\pi}(\pi - \arccos(\rho))$$
-where $\rho = \frac{\Sigma^{(l)}(\x,\x')}{\sqrt{\Sigma^{(l)}(\x,\x)\Sigma^{(l)}(\x',\x')}}$
-\end{theorem}
 \subsubsection{The Sobolev Training}
 
 Sobolev training is an approach that incorporates derivative information into the learning process. For a function $f$ and target function $f^*$, the Sobolev training loss is defined as:
@@ -249,612 +224,124 @@ The framework selection can be summarized by the following decision tree:
 
 
 
-\subsection{Key Objectives}
-This document addresses three fundamental objectives: deriving decay rates $\mu_\ell \sim \ell^{-\alpha}$ for NTK operator eigenvalues, understanding how spectral properties determine learning dynamics, and analyzing scaling laws for discrete matrix eigenvalues with respect to network depth $l$ and data size $n$. A crucial distinction exists between the NTK Matrix (discrete sampled version $K \in \mathbb{R}^{n \times n}$ with entries $K_{ij} = K^{\infty}(x_i, x_j)$) and the NTK Operator (continuous integral operator $(\mathcal{L}f)(x) = \int K^{\infty}(x,y)f(y)dy$). It is important to note that the eigenvalues of the sampled NTK matrix are \emph{not} the same as the NTK operator eigenvalues - the matrix spectrum provides discrete approximations that depend on the sampling strategy and data distribution. All analysis assumes Edge of Chaos (EOC) initialization, where weights are initialized as $w_{ij} \sim \mathcal{N}(0, \sigma_w^2/\text{fan-in})$, with $\sigma_w^2 = 2$ for ReLU networks to maintain unit variance through layers, ensuring activations neither explode nor vanish with depth.
+\subsection{Theoretical Framework of the Neural Tangent Kernel}
+
+\subsubsection{The Neural Tangent Kernel}
+
+For a neural network $f(\mathbf{x}; \boldsymbol{\theta})$ with parameters $\boldsymbol{\theta}$, the NTK is defined by:
+$$K^{L}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}} \right\rangle = \sum_{k} \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta})}{\partial \theta_k} \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta})}{\partial \theta_k}$$
+
+\begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018]
+For a network $f(\mathbf{x};\boldsymbol{\theta})$ trained by gradient descent with infinitesimal learning rate, as hidden layer widths tend to infinity, we obtain the convergence $K^{L} \to K_L^{\infty}$ where the infinite-width limit proceeds layer by layer. Starting from the first layer and propagating through the second layer, then the third layer, and so forth until the $L$-th layer, each layer's width is taken to infinity in sequence while maintaining the recursive structure of the kernel computation. This sequential infinite-width limit ensures that the final kernel $K_L^{\infty}$ captures the deterministic behavior of the network in the infinite-width regime, where the network converges to a Gaussian process with kernel $K_L^{\infty}$ and dynamics given by $\frac{\partial f_t(\mathbf{x})}{\partial t} = -\eta \sum_{i=1}^n K_L^{\infty}(\mathbf{x},\mathbf{x}_i)\bigl(f_t(\mathbf{x}_i) - y_i\bigr)$.
+
+The recursive formula for depth $L$ in the infinite-width limit becomes:
+$$K_L^{\infty}(\mathbf{x},\mathbf{x}') = \|\mathbf{x}\| \|\mathbf{x}'\| \left( \sum_{k=1}^{L} \varrho^{\circ (k-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \prod_{k'=k}^{L-1} \varrho'\left( \varrho^{\circ (k'-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \right) \right)$$
+where $\rho_1(\mathbf{x},\mathbf{x}') = \frac{\mathbf{x}^{\top}\mathbf{x}'}{\|\mathbf{x}\| \|\mathbf{x}'\|}$ is the initial correlation, $\varrho$ is the correlation propagation function defined by:
+$$\varrho(\rho) = \sigma^2 \int \ReLU(u_1) \ReLU(u_2) d\mathcal{N}\left( [u_1,u_2] \left| 0,\left[ \begin{smallmatrix} 1 & \rho \\ \rho & 1 \end{smallmatrix} \right] \right. \right)$$
+where $\sigma^2$ is the activation variance parameter and $\ReLU$ is the activation function at the edge of chaos. The notation $\varrho^{\circ k}$ denotes the $k$-fold composition of $\varrho$, and $\varrho'$ represents its derivative.
+
+Edge of Chaos initialization requires choosing $\sigma_w^2 = 2$ to maintain unit variance through layers, ensuring that $\mathbb{E}[\boldsymbol{\Sigma}^{(L)}(\mathbf{x},\mathbf{x})] = \|\mathbf{x}\|^2$ for all layers $L$ in the infinite-width limit.
+\end{theorem}
+
+\textbf{Matrix Structure}: For dataset $\{x_i\}_{i=1}^n$, the infinite-width NTK matrix factorizes as $K_L^{\infty} = D \cdot R \cdot D$ where $D = \text{diag}(\|x_1\|, \ldots, \|x_n\|)$ and $R_{ij} = \tilde{K}_L^{\infty}(\rho_{ij})$ with $\rho_{ij} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$. // we factorize the infinite-width ntk matrix into diagonal and correlation parts
+\textbf{Operator Form}: By rotational invariance, the infinite-width NTK can be seen as an operator acts zonally:
+$$(K_L^{\infty} f)(x) = \int_{\mathbb{S}^{d-1}} \int_{\mathbb{S}^{d-1}} \tilde{K}_L^{\infty}(\langle x, y \rangle) f(y) \delta(\langle x, z \rangle - \langle x, y \rangle) d\sigma(y) d\sigma(z)$$
+where $\sigma$ denotes the uniform surface measure on $\mathbb{S}^{d-1}$.
+
+\textbf{Spectral Properties}: The spherical harmonics $Y_{\ell,p}$ are eigenfunctions with eigenvalues:
+$$\mu_\ell^{L,\infty} = \frac{2\pi^{d/2}}{\Gamma(d/2)} \int_{-1}^1 \tilde{K}_L^{\infty}(t)P_\ell^{((d-2)/2)}(t)(1-t^2)^{(d-3)/2}dt$$
+Eigenvalue decay follows $\mu_\ell^{L,\infty} \sim \ell^{-d}$ with multiplicity $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$. // we apply funk-hecke theorem for zonal kernels in the infinite-width regime
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Personal contribution : NTK-Sobolev Spectral Commutation property}
+
+\begin{theorem}[NTK-Sobolev Matrix Commutation]
+Let $K \in \mathbb{R}^{n \times n}$ be a discrete neural tangent kernel matrix and $P_s \in \mathbb{R}^{n \times n}$ be a discrete Sobolev operator matrix of order $s > 0$, both constructed from the same sample set $\{x_i\}_{i=1}^n \subset \mathbb{S}^{d-1}$ with quadrature weights $\{c_i\}_{i=1}^n$. If both matrices are rotationally invariant (i.e., their entries depend only on inner products $\langle x_i, x_j \rangle$), then:
+\begin{enumerate}
+    \item The matrices commute: $KP_s = P_sK$
+    \item They are simultaneously diagonalizable with shared eigenvectors
+    \item Their eigenspaces are separated according to spherical harmonic degrees
+\end{enumerate}
+Specifically, both matrices admit the spectral decomposition:
+\[
+K = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} \, a_{\ell,p} a_{\ell,p}^\top, \quad
+P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell(\ell+d-2))^s \, a_{\ell,p} a_{\ell,p}^\top
+\]
+where $a_{\ell,p} \in \mathbb{R}^n$ are the sampling vectors $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$ and the eigenspaces are orthogonally separated by harmonic degree $\ell$.
+\end{theorem}
+
+This commutation property establishes a fundamental algebraic structure that underlies the compatibility between neural tangent kernel theory and Sobolev-regularized training. The key insight is that both operators inherit their spectral properties from the underlying rotational symmetry of the sphere, leading to a shared eigenbasis of spherical harmonics. In the discrete setting, this translates to exact matrix commutation when both the NTK and Sobolev matrices are constructed consistently from the same sample points and quadrature scheme. The eigenspace separation by harmonic degree means that the learning dynamics can be analyzed frequency-by-frequency, with each degree $\ell$ evolving independently under the composite operator $KP_s$. This spectral decomposition enables us to completely disentangle the analysis of dimensionality (encoded in $P_s$ via harmonic degrees $\ell$) from the analysis of network width and depth (encoded in $K$ via NTK properties). This separation provides the theoretical foundation for understanding how Sobolev regularization modifies the effective learning dynamics in the NTK regime, enabling precise control over which frequency components are emphasized or suppressed during training. // we establish the commutative structure between ntk and sobolev operators through their shared rotational invariance
+
 
 \newpage
 
-\section{NTK Matrix Structure and Spectrum}
 
-\subsection{Example NTK Matrix Structure}
 
-Consider a dataset of $n$ points $x_1, x_2, \ldots, x_n \in \RR^d$. The NTK matrix has entries:
-\[
-K^{\infty} = D \cdot R \cdot D = \begin{pmatrix} 
-\|x_1\| & 0 & \cdots & 0 \\
-0 & \|x_2\| & \cdots & 0 \\
-\vdots & \vdots & \ddots & \vdots \\
-0 & 0 & \cdots & \|x_n\|
-\end{pmatrix} \begin{pmatrix} 
-\tilde{K}(\rho_{1,1}) & \tilde{K}(\rho_{1,2}) & \cdots & \tilde{K}(\rho_{1,n}) \\
-\tilde{K}(\rho_{2,1}) & \tilde{K}(\rho_{2,2}) & \cdots & \tilde{K}(\rho_{2,n}) \\
-\vdots & \vdots & \ddots & \vdots \\
-\tilde{K}(\rho_{n,1}) & \tilde{K}(\rho_{n,2}) & \cdots & \tilde{K}(\rho_{n,n})
-\end{pmatrix} \begin{pmatrix} 
-\|x_1\| & 0 & \cdots & 0 \\
-0 & \|x_2\| & \cdots & 0 \\
-\vdots & \vdots & \ddots & \vdots \\
-0 & 0 & \cdots & \|x_n\|
-\end{pmatrix}
-\]
-where $\rho_{i,j} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$ represents the cosine distance between points $x_i$ and $x_j$.
-For general depth $L$ networks at EOC with bi-homogeneous leaky ReLU activation $\phi(x) = a\cdot\text{id}(x) + b\cdot|x|$, where $a,b \in \mathbb{R}$ are fixed parameters, the NTK kernel function is:
-\[
-\tilde{K}^{\infty}(\rho) = \left( \sum_{k=1}^L \varrho^{\circ (k-1)}(\rho) \prod_{k'=k+1}^L \varrho'(\varrho^{\circ (k'-2)}(\rho)) \right) 
-\]
-where $\varrho$ and $\varrho'$ are defined recursively through Gaussian expectations:
-\begin{align*}
-\rho_1(x_1,x_2) &= \frac{x_1^T x_2}{\|x_1\| \|x_2\|} \\
-\varrho(\rho) &= \mathbb{E}_{[u_1,u_2] \sim \mathcal{N}(0,\Sigma_u)} \ReLU(u_1) \ReLU(u_2) \text{ where } \Sigma_u = \begin{pmatrix} 1 & \rho \\ \rho & 1 \end{pmatrix} \\
-\varrho'(\rho) &= \mathbb{E}_{[u_1,u_2] \sim \mathcal{N}(0,\Sigma_u)} \ReLU'(u_1) \ReLU'(u_2) \text{ where } \Sigma_u = \begin{pmatrix} 1 & \rho \\ \rho & 1 \end{pmatrix} \\
-\varrho^{\circ k}(\rho) &= \underbrace{\varrho(\varrho(\cdots \varrho}_{k \text{ times}}(\rho) \cdots))
-\end{align*}
 
-for $k \in [2:L]$, where $\sigma^2 = (a^2 + b^2)$ at the Edge of Chaos initialization and $\phi$ is the activation function.
 
-For 2-layer ReLU networks, this simplifies to:
-\[
-\tilde{K}^{\infty}(\rho) = \frac{1}{\pi}\left(\rho(\pi - \arccos(\rho)) + \sqrt{1-\rho^2}\right)
-\]
 
-\subsection{NTK Operator Structure and Spectral Analysis}
 
-The Neural Tangent Kernel operator $K^{\infty}$ acts on $L^2(\mathbb{S}^{d-1})$ via:
-\[
-(K^{\infty} f)(x) = \int_{\mathbb{S}^{d-1}} K^{\infty}(x,y)f(y)d\sigma(y)
-\]
-By rotational invariance, the kernel is zonal:
-\[
-K^{\infty}(x,y) = \tilde{K}^{\infty}(\langle x,y \rangle)
-\]
-where $\langle x,y \rangle = \frac{x^T y}{\|x\| \|y\|}$ is the cosine distance.
 
-We use fubini theorem using parametrization $y = \cos(\theta)x + \sin(\theta)u$ with $u \perp x$, $\|u\| = 1$, and setting $t = \cos(\theta)$:
-\[
-(K^{\infty} f)(x) = \omega_{d-2} \int_{-1}^1 \tilde{K}^{\infty}(t) \bar{f}(t) (1-t^2)^{(d-3)/2} dt
-\]
-\[
-= \int_{\mathbb{S}^{d-1}} K^{\infty}(x,y)f(y)d\sigma(y) = \omega_{d-2} \int_{-1}^1 \tilde{K}^{\infty}(t) \bar{f}(t) (1-t^2)^{(d-3)/2} dt
-\]
-where $\omega_{d-2}$ is the surface area of $\mathbb{S}^{d-2}$ and $\bar{f}(t)$ represents the average of $f$ over directions making angle $\arccos(t)$ with $x$.
 
-\textbf{Spectral Properties and Funk-Hecke Theory}: The NTK operator possesses several important spectral properties that characterize its behavior on the sphere. The operator is symmetric positive definite by construction, guaranteeing the existence of a complete spectral decomposition with real, non-negative eigenvalues. The eigenfunctions are the spherical harmonics $Y_{\ell,p}$, which form a complete orthonormal basis of $L^2(\mathbb{S}^{d-1})$ and provide the natural coordinate system for analyzing functions on the sphere. Due to the zonal symmetry, the Funk-Hecke theorem applies, yielding eigenvalues $\mu_\ell$ given by:
-\[
-\mu_\ell = \frac{2\pi^{d/2}}{\Gamma(d/2)} \int_{-1}^1 \tilde{K}^{\infty}(t)P_\ell^{((d-2)/2)}(t)(1-t^2)^{(d-3)/2}dt
-\]
-where $P_\ell^{(\alpha)}$ are the Gegenbauer polynomials. The eigenvalues $\mu_\ell$ exhibit polynomial decay characterized by $\mu_\ell \sim \ell^{-d}$, reflecting the smoothness and regularity properties of the kernel function. The multiplicity of each eigenvalue $\mu_\ell$ is given by the dimension of the corresponding spherical harmonic space, which grows as $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$ for large $\ell$, indicating the increasing complexity of higher-order harmonics.
-\subsection{NTK-Sobolev Operator Framework}
 
-The NTK-Sobolev framework integrates the Neural Tangent Kernel with Sobolev training by constructing a composite operator that incorporates high-order derivative information. The key innovation lies in modifying the standard $L^2$ loss to penalize the Sobolev norm, thereby controlling the smoothness of learned functions on the sphere $\mathbb{S}^{d-1}$.
 
-\textbf{Definition of the Sobolev Operator}: The Sobolev operator $P_s$ acts on $L^2(\mathbb{S}^{d-1})$ through its spectral representation:
-\[ P_s = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} P_{\ell,p} \]
-where $P_{\ell,p}$ denotes the orthogonal projection onto the span of the spherical harmonic $Y_{\ell,p}$, and $s > 0$ controls the strength of the Sobolev regularization.
 
-\textbf{Discrete Matrix Formulation}: For data points $\{x_i\}_{i=1}^n \subset \mathbb{S}^{d-1}$, the discrete Sobolev operator matrix has entries:
-\[ (P_s)_{ij} = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} Y_{\ell,p}(x_i) Y_{\ell,p}(x_j) \]
-where $\ell_{\max}$ is chosen to ensure adequate spectral resolution.
 
-\subsection{Sobolev Loss Formulation and Spectral Decomposition}
 
-The Sobolev loss functional extends the standard $L^2$ norm by incorporating gradient penalties:
-\[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x)^2 d\sigma(x) + \int_{\mathbb{S}^{d-1}} \|\nabla f(x)\|^2 d\sigma(x) \]
 
-Through Fourier analysis on the sphere, this admits the spectral representation:
-\[ \mathcal{L}_s[f] = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell(\ell+d-2))^s |\hat{f}_{\ell,p}|^2 \]
-where $\hat{f}_{\ell,p} = \int_{\mathbb{S}^{d-1}} f(x) Y_{\ell,p}(x) d\sigma(x)$ are the spherical harmonic coefficients.
 
-For discrete data, the coefficients are approximated as:
-\[ \hat{f}_{\ell,p} \approx \frac{1}{n} \sum_{i=1}^n f(x_i) Y_{\ell,p}(x_i) \]
-yielding the matrix form $\mathcal{L}_s[f] \approx f^T P_s f$ for $f = (f(x_1), \ldots, f(x_n))^T$.
 
-\subsection{Theoretical Properties and Spectral Analysis}
 
-\begin{theorem}[Common Eigenfunction Structure]
-The NTK operator $K^{\infty}$ and Sobolev operator $P_s$ on $\mathbb{S}^{d-1}$ share spherical harmonics $\{Y_{\ell,p}\}$ as common eigenfunctions. Specifically:
-\begin{align}
-K^{\infty} Y_{\ell,p} &= \mu_\ell Y_{\ell,p} \\
-P_s Y_{\ell,p} &= (1+\ell)^{2s} Y_{\ell,p}
-\end{align}
-where $\mu_\ell$ are the NTK eigenvalues given by the Funk-Hecke integral.
-\end{theorem}
 
-\begin{theorem}[Operator Commutation]
-The NTK and Sobolev operators commute on $L^2(\mathbb{S}^{d-1})$:
-\[ [K^{\infty}, P_s] = K^{\infty} P_s - P_s K^{\infty} = 0 \]
-This commutation property extends to their discrete matrix approximations under appropriate sampling conditions.
-\end{theorem}
 
-\textbf{Spectral Complexity}: The dimension growth $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$ for large $\ell$ determines the computational complexity of exact Sobolev operator construction, necessitating finite-rank approximations in practice.
 
-\subsection{Edge of Chaos Initialization for Deep Networks}
 
-For deep MLPs with parameterized ReLU activation $\phi(s) = as + b|s|$ where $a,b \in \mathbb{R}$, the Edge of Chaos initialization prevents gradient explosion or vanishing across network depth.
-
-\textbf{Critical Parameters}:
-\begin{itemize}
-\item Weight variance: $\sigma^2 = (a^2+b^2)^{-1}$
-\item Activation ratio: $\Delta_\phi = \frac{b^2}{a^2+b^2}$ (standard ReLU: $\Delta_\phi = 1/2$)
-\item Correlation map: $\varrho(\rho) = \rho + \Delta_\phi \frac{2}{\pi}\left( \sqrt{1-\rho^2} - \rho \arccos(\rho) \right)$
-\end{itemize}
-
-At Edge of Chaos, the correlation function remains depth-invariant: $\varrho^{\circ L}(\rho) = \rho$ for all $L \geq 1$, ensuring stable signal propagation through the network.
-
-\section{Reconciling NTK matrix spectrum and Sobolev Training}
-
-\subsection{A Unified Spectral Viewpoint: Commutation and Eigenvalue Products}
-
-The reconciliation between the geometric view of the NTK (approximated by the inverse cosine distance matrix) and the functional view of Sobolev training lies in their shared algebraic structure.
-
-\begin{itemize}
-    \item \textbf{Shared Invariance}: Both the NTK matrix $K$ and the discrete Sobolev operator matrix $P_s$ are rotationally invariant. This means their entries $(K)_{ij}$ and $(P_s)_{ij}$ depend only on the inner product $\langle x_i, x_j \rangle$.
-    
-    \item \textbf{Matrix Commutation}: As a consequence, both matrices can be expressed as functions of the Gram matrix $G$ (where $G_{ij} = \langle x_i, x_j \rangle$). For two such matrices, $K=f(G)$ and $P_s=g(G)$, they commute:
-    \[ K P_s = f(G)g(G) = g(G)f(G) = P_s K \]
-    This is the discrete analogue of the commutation of their underlying continuous operators.
-    
-    \item \textbf{Simultaneous Diagonalization}: Since they commute, $K$ and $P_s$ are simultaneously diagonalizable. They share the same set of eigenvectors, which are the eigenvectors of the Gram matrix $G$.
-    
-    \item \textbf{Product of Eigenvalues}: The spectrum of the Sobolev-modified NTK operator, $K P_s$, which governs the learning dynamics, is directly given by the product of the individual spectra:
-    \[ \lambda_i(K P_s) = \lambda_i(K) \cdot \lambda_i(P_s) \]
-    (after aligning the eigenvector bases).
-\end{itemize}
-
-\textbf{Key Insight}: The challenge of analyzing the complex operator $K P_s$ is reduced to separately analyzing the spectra of $K$ and $P_s$. We can leverage the geometric approximation for $K$ and combine it with a spectral analysis of $P_s$.
-
-\subsection{A Path Forward: Geometric Approximation and Experimental Validation}
-
-Based on the unified spectral viewpoint, a clear research path emerges to develop a predictive model for Sobolev training dynamics.
-
-\textbf{Goal}: Develop a semi-analytic model for the spectrum of the Sobolev-modified NTK matrix $K P_s$.
-
-\textbf{Proposed Strategy}:
-
-\begin{enumerate}
-    \item \textbf{Approximate the NTK Spectrum}:
-    Use the established near-affine relationship between the NTK and the inverse cosine distance matrix $W_l$:
-    \[ K \approx A W_l + B \]
-    The spectrum of the geometric matrix $W_l$ can be analyzed to provide an approximation for the eigenvalues $\lambda_i(K)$.
-
-    \item \textbf{Analyze the Sobolev Operator Spectrum}:
-    The matrix $P_s$ is itself a kernel matrix with a well-defined kernel $p_s(t) = \sum_{\ell} (1+\ell)^{2s} N(d,\ell) P_\ell(t)$, where $P_\ell$ are Legendre polynomials. Its spectrum $\lambda_i(P_s)$ can be characterized:
-    \begin{itemize}
-        \item Analytically, through its kernel polynomial expansion.
-        \item Or by viewing it as a differential operator on the data manifold (graph), relating its spectrum to that of the graph Laplacian.
-    \end{itemize}
-
-    \item \textbf{Combine Spectra and Validate}:
-    The core prediction is that the eigenvalues of the learning operator are given by the product of the component eigenvalues:
-    \[ \lambda_i(K P_s) \approx \lambda_i(A W_l + B) \cdot \lambda_i(P_s) \]
-    
-    \textbf{Experimental Validation Plan}:
-    \begin{itemize}
-        \item For a dataset on $\mathbb{S}^{d-1}$, numerically compute the matrices $K$, $P_s$, and the product $K P_s$.
-        \item Compare the analytically predicted spectrum with the true, numerically computed spectrum of $K P_s$.
-        \item Investigate the quality of this approximation as a function of the Sobolev parameter $s$, dimension $d$, data size $n$, and network depth $l$.
-    \end{itemize}
-\end{enumerate}
-
-\begin{remark}[The Sobolev Operator as a Kernel Matrix]
-The statement that the discrete Sobolev operator matrix $P_s$ is itself a kernel matrix is a subtle but fundamental point. Here is a detailed derivation.
-
-\paragraph{1. Definition of the Matrix $P_s$}
-We start from its construction via projectors on the spherical harmonics:
-\[
-(P_s)_{ij} = \left( \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} a_{\ell,p}a_{\ell,p}^\top \right)_{ij}
-\]
-With the coefficient $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$, this becomes:
-\begin{align*}
-(P_s)_{ij} &= \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} (a_{\ell,p})_i (a_{\ell,p})_j \\
-&= \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} (c_i Y_{\ell,p}(x_i)) (c_j Y_{\ell,p}(x_j))
-\end{align*}
-
-\paragraph{2. Reorganization and Application of the Addition Theorem}
-We can factor out the quadrature weights $c_i, c_j$ and apply the spherical harmonic addition theorem, which is the key step.
-\[
-(P_s)_{ij} = c_i c_j \sum_{\ell=0}^{\ell_{\max}} (1+\ell)^{2s} \left[ \sum_{p=1}^{N(d,\ell)} Y_{\ell,p}(x_i) Y_{\ell,p}(x_j) \right]
-\]
-The addition theorem states that the term in brackets is a function only of the inner product $\langle x_i, x_j \rangle$:
-\[
-\sum_{p=1}^{N(d,\ell)} Y_{\ell,p}(x) Y_{\ell,p}(y) = K_\ell(\langle x, y \rangle)
-\]
-where $K_\ell(t) = \frac{N(d,\ell)}{\text{Area}(\mathbb{S}^{d-1})} P_\ell^{((d-2)/2)}(t)$ and $P_\ell^{(\lambda)}$ is a Gegenbauer polynomial.
-
-\paragraph{3. Definition of the Kernel $p_s(t)$}
-By substituting this back, we can define a kernel function $p_s(t)$ that depends only on the inner product $t = \langle x_i, x_j \rangle$:
-\[
-p_s(t) := \sum_{\ell=0}^{\ell_{\max}} (1+\ell)^{2s} K_\ell(t)
-\]
-Thus, the matrix element is indeed a weighted kernel evaluation:
-\[
-(P_s)_{ij} = c_i c_j \cdot p_s(\langle x_i, x_j \rangle)
-\]
-
-\paragraph{Conclusion}
-The matrix $P_s$ is a \textbf{weighted kernel matrix}. If the sampling is uniform, the weights $c_i$ are constant and $P_s$ becomes a standard kernel matrix (up to a scaling factor). This rotational invariance, shared with the NTK, is what guarantees that they commute.
-\end{remark}
 
 \subsection{Deep NTK Properties}
 
-The limiting NTK at EOC for $L$-layer networks is given by:
-\begin{align}
-K^{\infty}(\mathbf{x}_1, \mathbf{x}_2) &= \|\mathbf{x}_1\| \|\mathbf{x}_2\| \left( \sum_{k=1}^l \varrho^{\circ (k-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right) \right. \\
-&\quad \left. \times \prod_{k'=k}^{l-1} \varrho'\left(\varrho^{\circ (k'-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right)\right) \right) \mathbf{I}_{m_l}
-\end{align}
+The limiting NTK at EOC for $L$-layer networks is given by: $K^{\infty}(\mathbf{x}_1, \mathbf{x}_2) = \|\mathbf{x}_1\| \|\mathbf{x}_2\| \left( \sum_{k=1}^l \varrho^{\circ (k-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right) \times \prod_{k'=k}^{l-1} \varrho'\left(\varrho^{\circ (k'-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right)\right) \right) \mathbf{I}_{m_l}$. For $L$-layer ReLU networks with $L \geq 3$, we observe eigenvalue decay as $\mu_k \sim C(d, L)k^{-d}$ where $C(d, L)$ depends on the parity of $k$ and grows quadratically with $L$, while for the normalized NTK $\kappa^L_{\text{NTK}}/L$, the constant $C(d, L)$ grows linearly with $L$. The analysis is facilitated through the inverse cosine distance matrix $W_k$ for depth $k$, defined as ${W_k}_{i,i} = 0$ and ${W_k}_{i_1,i_2} = \left( \frac{1 - \rho_k(x_{i_1},x_{i_2})}{2} \right)^{-\frac{1}{2}}$ for $i_1 \neq i_2$, which exhibits near-affine behavior with the NTK matrix as $K^{\infty} \approx A \cdot W_l + B$, enabling indirect spectral analysis through simpler geometric matrices with error terms of order $O(k^{-1})$ that decrease with depth. // we present the deep ntk properties including eigenvalue decay, inverse cosine distance matrix analysis, and near-affine behavior facilitating spectral analysis
 
-\textbf{Eigenvalue Decay}: For $L$-layer ReLU networks with $L \geq 3$:
-\[ \mu_k \sim C(d, L)k^{-d} \]
-where $C(d, L)$ depends on the parity of $k$ and grows quadratically with $L$.
-
-For the normalized NTK $\kappa^L_{\text{NTK}}/L$, the constant $C(d, L)$ grows linearly with $L$.
-
-\subsection{Inverse Cosine Distance Matrix Analysis}
-
-\textbf{Inverse cosine distance matrix} $W_k$ for depth $k$:
-\[ {W_k}_{i,i} = 0, \quad {W_k}_{i_1,i_2} = \left( \frac{1 - \rho_k(x_{i_1},x_{i_2})}{2} \right)^{-\frac{1}{2}} \text{ for } i_1 \neq i_2 \]
-
-\textbf{Near-affine behavior}:
-\begin{itemize}
-\item NTK matrix $K^{\infty} \approx A \cdot W_l + B$ (affine dependence)
-\item Spectral bounds transfer from $W_k$ to NTK via this affine relationship  
-\item Error terms: $O(k^{-1})$ - decreases with depth
-\end{itemize}
-
-This relationship enables indirect analysis of NTK spectral properties through simpler geometric matrices.
-
-\section{Deep Narrow Neural Networks}
-
-\subsection{Scaled NTK at Initialization}
-
-\begin{theorem}[Theorem 1: Scaled NTK at Initialization]
-For $f^L_\theta$ initialized appropriately, as $L \to \infty$:
-\[ \tilde{\Theta}^L_0(x, x') \xrightarrow{p} \tilde{\Theta}^\infty(x, x') \]
-where
-\[ \tilde{\Theta}^\infty(x, x') = (x^T x' + 1 + \E_g[\sigma(g(x))\sigma(g(x'))]) I_{d_{out}} \]
-with $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random field).
-\end{theorem}
-
-\textbf{Alternative formulation}: $\kappa_1(\cos(u) \cdot v)$ where:
-\begin{itemize}
-\item $v = \frac{1}{1 + \beta^2/\alpha^2}$, where $\beta$ is the bias variance
-\item $\alpha = \frac{\|x\| \|x'\| \rho}{d_{in}}$, where $\cos(u)$ is the cosine distance between $x, x'$
-\end{itemize}
-
-This framework provides a promising direction for analyzing deep narrow networks through limited expansion analysis.
-
-\subsection{Research Perspectives for Deep Narrow Networks}
-
-\textbf{Architectural modifications}:
-   \begin{itemize}
-\item \textbf{Unit concatenation}: Combine multiple narrow networks to increase expressivity
-\item \textbf{Skip connections}: Investigate ResNet-style connections:
-  \[ \tilde{\Theta}^\infty_{\text{skip}}(x, x') = \tilde{\Theta}^\infty(x, x') + \text{skip terms} \]
-   \end{itemize}
-
-\textbf{Initialization studies}:
-\begin{itemize}
-\item \textbf{Alternative initializations}: Explore different schemes beyond current setup
-\item \textbf{$\beta \to 0$ limit}: Analyze behavior when bias variance vanishes:
-  \[ v = \frac{1}{1 + \beta^2/\alpha^2} \to 1 \text{ as } \beta \to 0 \]
-\item \textbf{Complex kernel structures}: Find initializations that yield more intricate kernel forms
-\end{itemize}
-
-\textbf{Theoretical extensions}:
-\begin{itemize}
-\item Extension of Hayou \& Yang's work on ResNets showing "wide and deep limits commute"
-\item Mean field analysis for deep narrow frameworks
-\item Careful analysis of stochasticity in initialization (not dropout)
-\item Experimental validation on practical tasks
-\end{itemize}
-
-
-
-
-
-\section{Main Proofs}
-
-\subsection{Proof 1: Sobolev Loss as Fractional Laplacian}
-
-\begin{theorem}[Fractional Laplacian Representation of Sobolev Loss]
-For a function $f \in H^s(\mathbb{S}^{d-1})$ with $s > 0$, the Sobolev loss can be written as:
-\[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\sigma(x) \]
-where $(I + (-\Delta)^{1/2})^s$ is the fractional Laplacian operator of order $s$.
-\end{theorem>
-
-\begin{proof}
-Consider the spherical harmonic expansion $f(x) = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} \hat{f}_{\ell,p} Y_{\ell,p}(x)$. The spherical Laplacian acts on these harmonics as eigenvalue operators: $(-\Delta)^{1/2}_{\mathbb{S}^{d-1}} Y_{\ell,p}(x) = \sqrt{\ell(\ell + d - 2)} Y_{\ell,p}(x)$.
-
-The fractional operator $(I + (-\Delta)^{1/2})^s$ is naturally defined through its spectral action: $(I + (-\Delta)^{1/2})^s Y_{\ell,p}(x) = (1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p}(x)$. For the unit sphere where $d = 2$, this simplifies to $(1 + \ell)^s Y_{\ell,p}(x)$.
-
-Computing the bilinear form using orthonormality of spherical harmonics:
-\begin{align}
-\int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\sigma(x) &= \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1 + \sqrt{\ell(\ell + d - 2)})^s |\hat{f}_{\ell,p}|^2
-\end{align}
-
-The standard Sobolev norm is defined as $\|f\|_{H^s}^2 = \sum_{\ell,p} (1 + \ell)^{2s} |\hat{f}_{\ell,p}|^2$. The connection becomes clear when we observe that for large $\ell$, the expressions $(1 + \ell)^{2s}$ and $(1 + \sqrt{\ell(\ell + d - 2)})^s$ are asymptotically equivalent up to normalization constants. The precise relationship depends on the specific Sobolev space convention, but the essential spectral structure remains identical.
-\end{proof}
-
-\subsection{Alternative Proof: Sobolev Loss on Unbounded Domains via Integration by Parts}
-
-\begin{theorem}[Sobolev Loss on Unbounded Domains]
-For functions $f \in H^s(\mathbb{R}^d)$ with $s \geq 1$ and sufficient decay at infinity, the Sobolev loss can be expressed via integration by parts as:
-\[ \mathcal{L}_s[f] = \int_{\mathbb{R}^d} f(x)^2 dx + \int_{\mathbb{R}^d} \|\nabla f(x)\|^2 dx + \text{higher order terms} \]
-\end{theorem}
-
-\begin{proof}
-\textbf{Starting Point}
-For $s = 1$, the $H^1$ Sobolev norm is:
-\[ \|f\|_{H^1}^2 = \|f\|_{L^2}^2 + \|\nabla f\|_{L^2}^2 = \int_{\mathbb{R}^d} f(x)^2 dx + \int_{\mathbb{R}^d} \|\nabla f(x)\|^2 dx \]
-
-\textbf{Integration by Parts (Stokes' Theorem)}
-The key insight is that we can relate the gradient term to the Laplacian using integration by parts. For functions with sufficient decay at infinity (so boundary terms vanish):
-\begin{align}
-\int_{\mathbb{R}^d} \|\nabla f(x)\|^2 dx &= \int_{\mathbb{R}^d} \nabla f(x) \cdot \nabla f(x) dx \\
-&= -\int_{\mathbb{R}^d} f(x) \Delta f(x) dx \quad \text{(by integration by parts)} \\
-&= \int_{\mathbb{R}^d} f(x) (-\Delta) f(x) dx
-\end{align}
-
-Therefore:
-\[ \|f\|_{H^1}^2 = \int_{\mathbb{R}^d} f(x) (I + (-\Delta)^{1/2})^2 f(x) dx \]
-
-\textbf{Extension to Higher Orders}
-For general $s \geq 1$, repeated integration by parts yields:
-\[ \|f\|_{H^s}^2 = \int_{\mathbb{R}^d} f(x) (I + (-\Delta)^{1/2})^{2s} f(x) dx \]
-
-\textbf{Fractional Case}
-For fractional $s$, this extends to:
-\[ \mathcal{L}_s[f] = \int_{\mathbb{R}^d} f(x) (I + (-\Delta)^{1/2})^s f(x) dx \]
-
-The integration by parts approach via Stokes' theorem transforms the gradient squared terms into Laplacian terms, providing the connection between differential and spectral formulations.
-\end{proof}
-
-\subsection{Case of Limited Regularity: Fourier-Based Proof}
-
-\begin{remark}[Non-Differentiable Functions]
-When functions are not twice differentiable, the integration by parts approach fails due to insufficient regularity. In such cases, the \textbf{Fourier-based proof becomes the master approach}.
-
-For $f \in L^2(\mathbb{R}^d)$ with Fourier transform $\hat{f}(\xi)$, the fractional Sobolev norm is defined directly in frequency space:
-\[ \|f\|_{H^s}^2 = \int_{\mathbb{R}^d} (1 + |\xi|^2)^s |\hat{f}(\xi)|^2 d\xi \]
-
-This definition:
-\begin{itemize}
-\item Requires no differentiability assumptions on $f$
-\item Extends naturally to negative Sobolev indices $s < 0$
-\item Provides the most general framework for Sobolev spaces
-\item Reduces to classical definitions when sufficient regularity exists
-\end{itemize}
-
-The operator $(I + (-\Delta)^{1/2})^s$ acts in Fourier space as multiplication by $(1 + |\xi|)^s$, making this the fundamental definition from which all other formulations are derived.
-\end{remark}
-
-\subsection{Proof 2: NTK Operator Multiplication by Sobolev Operator}
-
-\begin{theorem}[NTK-Sobolev Composition]
-Under Sobolev training, the learning operator is given by the composition:
-\[ \mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s \]
-where $K^{\infty}$ is the NTK operator and $(I + (-\Delta)^{1/2})^s$ is the fractional Laplacian.
-\end{theorem>
-
-\begin{proof}
-Standard gradient descent on the $L^2$ loss $\mathcal{L}(\theta) = \frac{1}{2}\|f(\cdot; \theta) - y\|^2_{L^2}$ gives parameter dynamics $\frac{d\theta}{dt} = -\nabla_\theta \mathcal{L}(\theta)$. In the NTK regime, this translates to function dynamics $\frac{df}{dt} = -K^{\infty}(f - y)$.
-
-When we replace the $L^2$ loss with the Sobolev loss $\mathcal{L}_s(\theta) = \frac{1}{2}\|f(\cdot; \theta) - y\|^2_{H^s}$, the gradient computation changes fundamentally. Using our fractional Laplacian representation from Theorem 1, the Sobolev loss becomes:
-\[ \mathcal{L}_s(\theta) = \frac{1}{2}\int (f(x; \theta) - y(x)) (I + (-\Delta)^{1/2})^s (f(x; \theta) - y(x)) d\sigma(x) \]
-
-The gradient with respect to parameters now involves the chain rule through the fractional operator:
-\[ \nabla_\theta \mathcal{L}_s(\theta) = \int \nabla_\theta f(x; \theta) \cdot (I + (-\Delta)^{1/2})^s (f(x; \theta) - y(x)) d\sigma(x) \]
-
-Since the NTK is defined as $K^{\infty}(x, x') = \langle \nabla_\theta f(x; \theta), \nabla_\theta f(x'; \theta) \rangle$, the function dynamics become:
-\[ \frac{df}{dt} = -\int K^{\infty}(x, x') (I + (-\Delta)^{1/2})^s (f(x') - y(x')) d\sigma(x') = -K^{\infty} \circ (I + (-\Delta)^{1/2})^s (f - y) \]
-
-Therefore, the learning operator is indeed $\mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s$. The rotational invariance of both operators ensures they share the same spherical harmonic eigenfunctions, making this composition well-defined and commutative.
-\end{proof}
-
-\subsection{Proof 3: Spectral Properties of the Composite Operator}
-\begin{theorem}[Spectrum of NTK-Sobolev Operator]
-The eigenvalues of the composite operator $\mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s$ are given by the product of individual eigenvalues: $\mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s$.
-\end{theorem}
-
-\begin{proof}
-Since both operators $K^{\infty}$ and $(I + (-\Delta)^{1/2})^s$ share the same eigenfunctions (spherical harmonics $Y_{\ell,p}$), we can analyze their composition through eigenvalues:
-
-1) For the NTK operator $K^{\infty}$:
-   \[ K^{\infty} Y_{\ell,p} = \mu_\ell^{(K)} Y_{\ell,p} \]
-
-2) For the Sobolev operator $(I + (-\Delta)^{1/2})^s$:
-   \[ (I + (-\Delta)^{1/2})^s Y_{\ell,p} = (1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p} \]
-
-3) Therefore, for their composition:
-   \begin{align*}
-   \mathcal{T}_s Y_{\ell,p} &= K^{\infty} \circ (I + (-\Delta)^{1/2})^s Y_{\ell,p} \\
-   &= K^{\infty}((1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p}) \\
-   &= (1 + \sqrt{\ell(\ell + d - 2)})^s \cdot \mu_\ell^{(K)} Y_{\ell,p}
-   \end{align*}
-
-Thus, $\mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s$ are indeed the eigenvalues of the composite operator.
-\end{proof}
-
-
-\subsection{NTK-Sobolev Operator Framework}
-
-The key innovation in Sobolev training is the modification of the standard $L^2$ loss to incorporate high-order derivatives. The NTK-Sobolev operator $P_s$ acts on the sphere $\mathbb{S}^{d-1}$ with the commutation property:
-
-\textbf{Spherical Harmonics Transform}: Let $\mathcal{F}$ denote the mapping from $L^2(\mathbb{S}^d)$ to the spectral domain $\bigoplus_{\ell=0}^{\infty} \mathbb{C}^{N(d,\ell)}$, where $N(d,\ell)$ is the dimension of the $\ell$-th spherical harmonic space.
-
-The Sobolev operator $P_s$ is defined through its action in Fourier space:
-\[ P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}P_{\ell,p} \]
-
-where $P_{\ell,p} = a_{\ell,p}a_{\ell,p}^T$ with spectral coefficients $(a_{\ell,p})_i = c_iY_{\ell,p}(x_i)$.
-
-
-
-\subsection{Proof 4: Commutation of Discrete Matrix Operators}
-
-\begin{theorem}[Matrix Commutation]
-The discrete matrices $K$ and $P_s$ commute: $KP_s = P_sK$.
-\end{theorem}
-
-\begin{proof}
-We establish commutation by expanding both matrices in terms of spherical harmonic projectors using the sampling measure (sum of Dirac masses).
-
-\textbf{NTK Matrix Expansion}
-The NTK matrix can be written using its spectral decomposition with respect to spherical harmonics:
-\[ K_{ij} = K^{\infty}(x_i, x_j) = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} (a_{\ell,p})_i (a_{\ell,p})_j \]
-where $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$ with quadrature weights $c_i$ and $\mu_\ell^{(K)}$ are the NTK operator eigenvalues.
-
-This gives us the matrix form:
-\[ K = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T \]
-
-\textbf{Sobolev Matrix Expansion}
-Similarly, the Sobolev matrix has the expansion:
-\[ P_s = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1 + \sqrt{\ell(\ell + d - 2)})^s a_{\ell,p} a_{\ell,p}^T \]
-
-\textbf{Matrix Product Computation}
-Computing the product $KP_s$:
-\begin{align}
-KP_s &= \left(\sum_{\ell,p} \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T\right) \left(\sum_{\ell',p'} (1 + \sqrt{\ell'(\ell' + d - 2)})^s a_{\ell',p'} a_{\ell',p'}^T\right) \\
-&= \sum_{\ell,p} \sum_{\ell',p'} \mu_\ell^{(K)} (1 + \sqrt{\ell'(\ell' + d - 2)})^s a_{\ell,p} (a_{\ell,p}^T a_{\ell',p'}) a_{\ell',p'}^T
-\end{align}
-
-\textbf{Orthogonality and Commutation}
-The key observation is that $a_{\ell,p}^T a_{\ell',p'} = \delta_{\ell,\ell'} \delta_{p,p'} \|a_{\ell,p}\|^2$ due to the orthogonality of spherical harmonics under the sampling measure. Therefore:
-\begin{align}
-KP_s &= \sum_{\ell,p} \mu_\ell^{(K)} (1 + \sqrt{\ell(\ell + d - 2)})^s a_{\ell,p} a_{\ell,p}^T \\
-P_sK &= \sum_{\ell,p} (1 + \sqrt{\ell(\ell + d - 2)})^s \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T
-\end{align}
-
-Since multiplication of scalars commutes, we have $KP_s = P_sK$.
-
-\textbf{Underlying Reason}: This commutation property reflects the fact that both $K^{\infty}$ and $P_s$ operators commute in the continuous setting because they share spherical harmonics as eigenfunctions due to rotational invariance.
-\end{proof}
-
-\subsection{Proof 5: Eigenvalue Scaling Laws}
-
-\begin{theorem}[Asymptotic Scaling Laws]
-For the NTK-Sobolev operator, eigenvalues follow the scaling laws $\lambda_\ell \sim \ell^{-d} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s$.
-\end{theorem}
-
-\begin{proof}
-\textbf{Individual Operator Eigenvalues}
-From previous analysis:
-\begin{itemize}
-\item NTK operator eigenvalues: $\mu_\ell^{(K)} \sim C(d, L) \ell^{-d}$ for large $\ell$
-\item Sobolev operator eigenvalues: $\mu_\ell^{(P_s)} = (1 + \sqrt{\ell(\ell + d - 2)})^s$
-\end{itemize}
-
-\textbf{Composite Operator Spectrum}
-Since the operators commute and share eigenfunctions, the eigenvalues of the composite operator are products:
-\[ \lambda_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot \mu_\ell^{(P_s)} = C(d, L) \ell^{-d} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s \]
-
-\textbf{Asymptotic Analysis}
-For large $\ell$, we have $\sqrt{\ell(\ell + d - 2)} \sim \ell \sqrt{1 + (d-2)/\ell} \sim \ell$ for $d$ fixed. Therefore:
-\[ \lambda_\ell^{(\mathcal{T}_s)} \sim C(d, L) \ell^{-d} \cdot (1 + \ell)^s = C(d, L) \ell^{s-d} \]
-
-\textbf{Critical Scaling Behavior}
-The spectral behavior depends on the relationship between $s$ and $d$:
-\begin{itemize}
-\item $s < d$: Eigenvalues decay $(\lambda_\ell \to 0)$ - regularizing effect
-\item $s = d$: Logarithmic corrections appear - critical regime  
-\item $s > d$: Eigenvalues grow $(\lambda_\ell \to \infty)$ - amplifying high frequencies
-\end{itemize}
-
-This scaling law $\lambda_\ell \sim \ell^{s-d}$ determines the spectral properties and learning dynamics of Sobolev-trained networks, with the critical exponent $s - d$ controlling frequency bias.
-\end{proof}
-
-\subsection{Synthesis: Unified Framework for NTK-Sobolev Analysis}
-
-\textbf{Summary}: Rotational invariance of both NTK and Sobolev operators ensures matrix commutation $KP_s = P_sK$, with composite eigenvalues $\lambda_\ell \sim \ell^{s-d}$ determining learning dynamics.
-
-\begin{remark}[Practical Implementation Warning]
-\textbf{Dataset Context}: In practical machine learning settings, we only have access to function values $f(x_i)$ at sampled points, \emph{not} the gradients $\nabla f(x_i)$. This makes the Fourier-based approach the most relevant for theoretical analysis and implementation.
-
-\textbf{Gradient Availability}: If gradients were available (e.g., through physics-informed neural networks or when the true function derivatives are known), the theoretical results presented here remain valid. However, the practical loss implementation in PyTorch should then utilize:
-\begin{itemize}
-\item Automatic differentiation (autograd) to compute gradients
-\item Direct gradient-based Sobolev norms: $\|f\|_{H^1}^2 = \|f\|_{L^2}^2 + \|\nabla f\|_{L^2}^2$
-\item Higher-order derivative computations via successive autograd calls
-\end{itemize}
-
-The spectral analysis framework developed here provides the theoretical foundation regardless of the implementation approach.
-\end{remark}
-
-\subsection{From Sobolev Loss to Discrete Matrix Operator}
-
-\subsubsection{Two Integral Formulations}
-
-\textbf{Formulation 1: Uniform Lebesgue Measure on the Sphere}
-\[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\sigma(x) \]
-where $d\sigma(x)$ is the uniform surface measure on $\mathbb{S}^{d-1}$ with $\int_{\mathbb{S}^{d-1}} d\sigma(x) = \text{Area}(\mathbb{S}^{d-1})$.
-
-\textbf{Formulation 2: Sampling Measure from Dataset}
-\[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\mu_n(x) \]
-where $\mu_n = \frac{1}{n}\sum_{i=1}^n \delta_{x_i}$ is the empirical measure from our sampled dataset $\{x_i\}_{i=1}^n$.
-
-\textbf{Discrete Implementation}:
-Under the sampling measure $\mu_n$, the integral becomes:
-\[ \mathcal{L}_s[f] = \frac{1}{n}\sum_{i=1}^n f(x_i) \left[(I + (-\Delta)^{1/2})^s f\right](x_i) \]
-
-This leads to the matrix form $\mathcal{L}_s[f] \approx \mathbf{f}^T P_s \mathbf{f}$ where $\mathbf{f} = (f(x_1), \ldots, f(x_n))^T$.
-
-\textbf{Relationship Between Formulations}:
-The uniform measure provides the theoretical foundation, while the sampling measure $\mu_n$ represents the practical implementation. As $n \to \infty$ with appropriate sampling, $\mu_n \to d\sigma$ in the weak sense, ensuring convergence of the discrete formulation to the continuous theory.
-
-\subsubsection{Practical Implementation Considerations}
-
-\begin{enumerate}
-\item \textbf{Data-Only Setting}: Since we only have function values $\{f(x_i)\}_{i=1}^n$, the matrix $P_s$ must be constructed via:
-\[ (P_s)_{ij} = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p}(x_i) Y_{\ell,p}(x_j) \]
-
-\item \textbf{Computational Complexity}: The matrix construction requires:
-\begin{itemize}
-\item Evaluation of spherical harmonics $Y_{\ell,p}(x_i)$ for all $(\ell,p)$ and data points
-\item Summation over $\mathcal{O}(\ell_{\max}^{d-1})$ harmonics (due to dimension growth $N(d,\ell) \sim \ell^{d-2}$)
-\item Total complexity: $\mathcal{O}(n^2 \ell_{\max}^{d-1})$ for matrix construction
-\end{itemize}
-
-\item \textbf{Truncation Strategy}: In practice, $\ell_{\max}$ must be chosen to balance:
-\begin{itemize}
-\item Spectral accuracy (larger $\ell_{\max}$ captures more frequencies)
-\item Computational feasibility (smaller $\ell_{\max}$ reduces cost)
-\item Statistical stability (avoid overfitting to high-frequency noise)
-\end{itemize}
-
-\item \textbf{Alternative with Gradients}: If gradients $\{\nabla f(x_i)\}$ were available, direct computation becomes possible:
-\[ \mathcal{L}_s[f] \approx \frac{1}{n}\sum_{i=1}^n \left[ f(x_i)^2 + s \|\nabla f(x_i)\|^2 + \text{higher order terms} \right] \]
-This approach scales as $\mathcal{O}(nd)$ instead of $\mathcal{O}(n^2\ell_{\max}^{d-1})$.
-\end{enumerate}
-
-\textbf{Fourier decomposition}: For $f(x) = \sum_{\ell,p} \hat{f}_{\ell,p} Y_{\ell,p}(x)$:
-\[ \mathcal{L}_s[f] = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} |\hat{f}_{\ell,p}|^2 \]
-
-\textbf{Discretization}: At points $\{x_i\}_{i=1}^n$:
-\[ \hat{f}_{\ell,p} \approx \sum_{i=1}^n c_i f(x_i) Y_{\ell,p}(x_i) \]
-
-\textbf{Final matrix form}: $\mathcal{L}_s[f] \approx f^T P_s f$ where $f = (f(x_1), \ldots, f(x_n))^T$.
-
-\subsection{Spectral Properties and Dimension Growth}
-
-The dimension of spherical harmonic spaces grows as:
-\[ N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!} \quad \text{as } \ell \to \infty \]
-
-This exponential growth in dimension determines the computational complexity of the Sobolev operator discretization.
-
-\subsection{Common Eigenfunctions Property}
-
-\begin{theorem}[Spherical Harmonics as Common Eigenfunctions]
-For rotationally invariant kernels on $\mathbb{S}^{d-1}$:
-\begin{itemize}
-\item NTK operator $K^{\infty}$ and Sobolev operator $P_s$ share spherical harmonics $Y_{\ell,p}$ as eigenfunctions
-\item This is due to rotational invariance and Schur's lemma for irreducible representations
-\item Enables direct spectral modification analysis
-\end{itemize}
-\end{theorem}
-
-\begin{theorem}[Commutation Property]
-The NTK operator $K^{\infty}$ and Sobolev operator $P_s$ commute:
-\[ [K^{\infty}, P_s] = 0 \]
-This holds for any sampling distribution $\rho(x)$ on $\mathbb{S}^{d-1}$ and implies that spectral decompositions are compatible.
-\end{theorem}
 
 
 
@@ -2797,6 +2284,638 @@ This formulation now correctly incorporates the contribution of all trainable pa
 
 \appendix
 \section{Appendix}
+
+
+
+
+
+
+
+
+\section{Deep Narrow Neural Networks}
+
+\subsection{Scaled NTK at Initialization}
+
+\begin{theorem}[Theorem 1: Scaled NTK at Initialization]
+For $f^L_\theta$ initialized appropriately, as $L \to \infty$:
+\[ \tilde{\Theta}^L_0(x, x') \xrightarrow{p} \tilde{\Theta}^\infty(x, x') \]
+where
+\[ \tilde{\Theta}^\infty(x, x') = (x^T x' + 1 + \E_g[\sigma(g(x))\sigma(g(x'))]) I_{d_{out}} \]
+with $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random field).
+\end{theorem}
+
+\textbf{Alternative formulation}: $\kappa_1(\cos(u) \cdot v)$ where:
+\begin{itemize}
+\item $v = \frac{1}{1 + \beta^2/\alpha^2}$, where $\beta$ is the bias variance
+\item $\alpha = \frac{\|x\| \|x'\| \rho}{d_{in}}$, where $\cos(u)$ is the cosine distance between $x, x'$
+\end{itemize}
+
+This framework provides a promising direction for analyzing deep narrow networks through limited expansion analysis.
+
+\subsection{Research Perspectives for Deep Narrow Networks}
+
+\textbf{Architectural modifications}:
+   \begin{itemize}
+\item \textbf{Unit concatenation}: Combine multiple narrow networks to increase expressivity
+\item \textbf{Skip connections}: Investigate ResNet-style connections:
+  \[ \tilde{\Theta}^\infty_{\text{skip}}(x, x') = \tilde{\Theta}^\infty(x, x') + \text{skip terms} \]
+   \end{itemize}
+
+\textbf{Initialization studies}:
+\begin{itemize}
+\item \textbf{Alternative initializations}: Explore different schemes beyond current setup
+\item \textbf{$\beta \to 0$ limit}: Analyze behavior when bias variance vanishes:
+  \[ v = \frac{1}{1 + \beta^2/\alpha^2} \to 1 \text{ as } \beta \to 0 \]
+\item \textbf{Complex kernel structures}: Find initializations that yield more intricate kernel forms
+\end{itemize}
+
+\textbf{Theoretical extensions}:
+\begin{itemize}
+\item Extension of Hayou \& Yang's work on ResNets showing "wide and deep limits commute"
+\item Mean field analysis for deep narrow frameworks
+\item Careful analysis of stochasticity in initialization (not dropout)
+\item Experimental validation on practical tasks
+\end{itemize}
+
+
+
+
+
+
+
+\section{Main Proofs}
+
+\subsection{Proof 1: Sobolev Loss as Fractional Laplacian}
+
+\begin{theorem}[Fractional Laplacian Representation of Sobolev Loss]
+For a function $f \in H^s(\mathbb{S}^{d-1})$ with $s > 0$, the Sobolev loss can be written as:
+\[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\sigma(x) \]
+where $(I + (-\Delta)^{1/2})^s$ is the fractional Laplacian operator of order $s$.
+\end{theorem}
+
+\begin{proof}
+Consider the spherical harmonic expansion $f(x) = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} \hat{f}_{\ell,p} Y_{\ell,p}(x)$. The spherical Laplacian acts on these harmonics as eigenvalue operators: $(-\Delta)^{1/2}_{\mathbb{S}^{d-1}} Y_{\ell,p}(x) = \sqrt{\ell(\ell + d - 2)} Y_{\ell,p}(x)$.
+
+The fractional operator $(I + (-\Delta)^{1/2})^s$ is naturally defined through its spectral action: $(I + (-\Delta)^{1/2})^s Y_{\ell,p}(x) = (1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p}(x)$. For the unit sphere where $d = 2$, this simplifies to $(1 + \ell)^s Y_{\ell,p}(x)$.
+
+Computing the bilinear form using orthonormality of spherical harmonics:
+\begin{align}
+\int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\sigma(x) &= \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1 + \sqrt{\ell(\ell + d - 2)})^s |\hat{f}_{\ell,p}|^2
+\end{align}
+
+The standard Sobolev norm is defined as $\|f\|_{H^s}^2 = \sum_{\ell,p} (1 + \ell)^{2s} |\hat{f}_{\ell,p}|^2$. The connection becomes clear when we observe that for large $\ell$, the expressions $(1 + \ell)^{2s}$ and $(1 + \sqrt{\ell(\ell + d - 2)})^s$ are asymptotically equivalent up to normalization constants. The precise relationship depends on the specific Sobolev space convention, but the essential spectral structure remains identical.
+\end{proof}
+
+\subsection{Alternative Proof: Sobolev Loss on Unbounded Domains via Integration by Parts}
+
+\begin{theorem}[Sobolev Loss on Unbounded Domains]
+For functions $f \in H^s(\mathbb{R}^d)$ with $s \geq 1$ and sufficient decay at infinity, the Sobolev loss can be expressed via integration by parts as:
+\[ \mathcal{L}_s[f] = \int_{\mathbb{R}^d} f(x)^2 dx + \int_{\mathbb{R}^d} \|\nabla f(x)\|^2 dx + \text{higher order terms} \]
+\end{theorem}
+
+\begin{proof}
+\textbf{Starting Point}
+For $s = 1$, the $H^1$ Sobolev norm is:
+\[ \|f\|_{H^1}^2 = \|f\|_{L^2}^2 + \|\nabla f\|_{L^2}^2 = \int_{\mathbb{R}^d} f(x)^2 dx + \int_{\mathbb{R}^d} \|\nabla f(x)\|^2 dx \]
+
+\textbf{Integration by Parts (Stokes' Theorem)}
+The key insight is that we can relate the gradient term to the Laplacian using integration by parts. For functions with sufficient decay at infinity (so boundary terms vanish):
+\begin{align}
+\int_{\mathbb{R}^d} \|\nabla f(x)\|^2 dx &= \int_{\mathbb{R}^d} \nabla f(x) \cdot \nabla f(x) dx \\
+&= -\int_{\mathbb{R}^d} f(x) \Delta f(x) dx \quad \text{(by integration by parts)} \\
+&= \int_{\mathbb{R}^d} f(x) (-\Delta) f(x) dx
+\end{align}
+
+Therefore:
+\[ \|f\|_{H^1}^2 = \int_{\mathbb{R}^d} f(x) (I + (-\Delta)^{1/2})^2 f(x) dx \]
+
+\textbf{Extension to Higher Orders}
+For general $s \geq 1$, repeated integration by parts yields:
+\[ \|f\|_{H^s}^2 = \int_{\mathbb{R}^d} f(x) (I + (-\Delta)^{1/2})^{2s} f(x) dx \]
+
+\textbf{Fractional Case}
+For fractional $s$, this extends to:
+\[ \mathcal{L}_s[f] = \int_{\mathbb{R}^d} f(x) (I + (-\Delta)^{1/2})^s f(x) dx \]
+
+The integration by parts approach via Stokes' theorem transforms the gradient squared terms into Laplacian terms, providing the connection between differential and spectral formulations.
+\end{proof}
+
+\subsection{Case of Limited Regularity: Fourier-Based Proof}
+
+\begin{remark}[Non-Differentiable Functions]
+When functions are not twice differentiable, the integration by parts approach fails due to insufficient regularity. In such cases, the \textbf{Fourier-based proof becomes the master approach}.
+
+For $f \in L^2(\mathbb{R}^d)$ with Fourier transform $\hat{f}(\xi)$, the fractional Sobolev norm is defined directly in frequency space:
+\[ \|f\|_{H^s}^2 = \int_{\mathbb{R}^d} (1 + |\xi|^2)^s |\hat{f}(\xi)|^2 d\xi \]
+
+This definition:
+\begin{itemize}
+\item Requires no differentiability assumptions on $f$
+\item Extends naturally to negative Sobolev indices $s < 0$
+\item Provides the most general framework for Sobolev spaces
+\item Reduces to classical definitions when sufficient regularity exists
+\end{itemize}
+
+The operator $(I + (-\Delta)^{1/2})^s$ acts in Fourier space as multiplication by $(1 + |\xi|)^s$, making this the fundamental definition from which all other formulations are derived.
+\end{remark}
+
+\subsection{Proof 2: NTK Operator Multiplication by Sobolev Operator}
+
+\begin{theorem}[NTK-Sobolev Composition]
+Under Sobolev training, the learning operator is given by the composition:
+\[ \mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s \]
+where $K^{\infty}$ is the NTK operator and $(I + (-\Delta)^{1/2})^s$ is the fractional Laplacian.
+\end{theorem}
+
+\begin{proof}
+Standard gradient descent on the $L^2$ loss $\mathcal{L}(\theta) = \frac{1}{2}\|f(\cdot; \theta) - y\|^2_{L^2}$ gives parameter dynamics $\frac{d\theta}{dt} = -\nabla_\theta \mathcal{L}(\theta)$. In the NTK regime, this translates to function dynamics $\frac{df}{dt} = -K^{\infty}(f - y)$.
+
+When we replace the $L^2$ loss with the Sobolev loss $\mathcal{L}_s(\theta) = \frac{1}{2}\|f(\cdot; \theta) - y\|^2_{H^s}$, the gradient computation changes fundamentally. Using our fractional Laplacian representation from Theorem 1, the Sobolev loss becomes:
+\[ \mathcal{L}_s(\theta) = \frac{1}{2}\int (f(x; \theta) - y(x)) (I + (-\Delta)^{1/2})^s (f(x; \theta) - y(x)) d\sigma(x) \]
+
+The gradient with respect to parameters now involves the chain rule through the fractional operator:
+\[ \nabla_\theta \mathcal{L}_s(\theta) = \int \nabla_\theta f(x; \theta) \cdot (I + (-\Delta)^{1/2})^s (f(x; \theta) - y(x)) d\sigma(x) \]
+
+Since the NTK is defined as $K^{\infty}(x, x') = \langle \nabla_\theta f(x; \theta), \nabla_\theta f(x'; \theta) \rangle$, the function dynamics become:
+\[ \frac{df}{dt} = -\int K^{\infty}(x, x') (I + (-\Delta)^{1/2})^s (f(x') - y(x')) d\sigma(x') = -K^{\infty} \circ (I + (-\Delta)^{1/2})^s (f - y) \]
+
+Therefore, the learning operator is indeed $\mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s$. The rotational invariance of both operators ensures they share the same spherical harmonic eigenfunctions, making this composition well-defined and commutative.
+\end{proof}
+
+\subsection{Proof 3: Spectral Properties of the Composite Operator}
+\begin{theorem}[Spectrum of NTK-Sobolev Operator]
+The eigenvalues of the composite operator $\mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s$ are given by the product of individual eigenvalues: $\mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s$.
+\end{theorem}
+
+\begin{proof}
+Since both operators $K^{\infty}$ and $(I + (-\Delta)^{1/2})^s$ share the same eigenfunctions (spherical harmonics $Y_{\ell,p}$), we can analyze their composition through eigenvalues:
+
+1) For the NTK operator $K^{\infty}$:
+   \[ K^{\infty} Y_{\ell,p} = \mu_\ell^{(K)} Y_{\ell,p} \]
+
+2) For the Sobolev operator $(I + (-\Delta)^{1/2})^s$:
+   \[ (I + (-\Delta)^{1/2})^s Y_{\ell,p} = (1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p} \]
+
+3) Therefore, for their composition:
+   \begin{align*}
+   \mathcal{T}_s Y_{\ell,p} &= K^{\infty} \circ (I + (-\Delta)^{1/2})^s Y_{\ell,p} \\
+   &= K^{\infty}((1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p}) \\
+   &= (1 + \sqrt{\ell(\ell + d - 2)})^s \cdot \mu_\ell^{(K)} Y_{\ell,p}
+   \end{align*}
+
+Thus, $\mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s$ are indeed the eigenvalues of the composite operator.
+\end{proof}
+
+
+
+
+
+
+\subsection{Proof 4: Commutation of Discrete Matrix Operators}
+
+\begin{theorem}[Matrix Commutation]
+The discrete matrices $K$ and $P_s$ commute: $KP_s = P_sK$.
+\end{theorem}
+
+\begin{proof}
+We establish commutation by expanding both matrices in terms of spherical harmonic projectors using the sampling measure (sum of Dirac masses).
+
+\textbf{NTK Matrix Expansion}
+The NTK matrix can be written using its spectral decomposition with respect to spherical harmonics:
+\[ K_{ij} = K^{\infty}(x_i, x_j) = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} (a_{\ell,p})_i (a_{\ell,p})_j \]
+where $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$ with quadrature weights $c_i$ and $\mu_\ell^{(K)}$ are the NTK operator eigenvalues.
+
+This gives us the matrix form:
+\[ K = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T \]
+
+\textbf{Sobolev Matrix Expansion}
+Similarly, the Sobolev matrix has the expansion:
+\[ P_s = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1 + \sqrt{\ell(\ell + d - 2)})^s a_{\ell,p} a_{\ell,p}^T \]
+
+\textbf{Matrix Product Computation}
+Computing the product $KP_s$:
+\begin{align}
+KP_s &= \left(\sum_{\ell,p} \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T\right) \left(\sum_{\ell',p'} (1 + \sqrt{\ell'(\ell' + d - 2)})^s a_{\ell',p'} a_{\ell',p'}^T\right) \\
+&= \sum_{\ell,p} \sum_{\ell',p'} \mu_\ell^{(K)} (1 + \sqrt{\ell'(\ell' + d - 2)})^s a_{\ell,p} (a_{\ell,p}^T a_{\ell',p'}) a_{\ell',p'}^T
+\end{align}
+
+\textbf{Orthogonality and Commutation}
+The key observation is that $a_{\ell,p}^T a_{\ell',p'} = \delta_{\ell,\ell'} \delta_{p,p'} \|a_{\ell,p}\|^2$ due to the orthogonality of spherical harmonics under the sampling measure. Therefore:
+\begin{align}
+KP_s &= \sum_{\ell,p} \mu_\ell^{(K)} (1 + \sqrt{\ell(\ell + d - 2)})^s a_{\ell,p} a_{\ell,p}^T \\
+P_sK &= \sum_{\ell,p} (1 + \sqrt{\ell(\ell + d - 2)})^s \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T
+\end{align}
+
+Since multiplication of scalars commutes, we have $KP_s = P_sK$.
+
+\textbf{Underlying Reason}: This commutation property reflects the fact that both $K^{\infty}$ and $P_s$ operators commute in the continuous setting because they share spherical harmonics as eigenfunctions due to rotational invariance.
+\end{proof}
+
+\subsection{Proof 5: Eigenvalue Scaling Laws}
+
+\begin{theorem}[Asymptotic Scaling Laws]
+For the NTK-Sobolev operator, eigenvalues follow the scaling laws $\lambda_\ell \sim \ell^{-d} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s$.
+\end{theorem}
+
+\begin{proof}
+\textbf{Individual Operator Eigenvalues}
+From previous analysis:
+\begin{itemize}
+\item NTK operator eigenvalues: $\mu_\ell^{(K)} \sim C(d, L) \ell^{-d}$ for large $\ell$
+\item Sobolev operator eigenvalues: $\mu_\ell^{(P_s)} = (1 + \sqrt{\ell(\ell + d - 2)})^s$
+\end{itemize}
+
+\textbf{Composite Operator Spectrum}
+Since the operators commute and share eigenfunctions, the eigenvalues of the composite operator are products:
+\[ \lambda_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot \mu_\ell^{(P_s)} = C(d, L) \ell^{-d} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s \]
+
+\textbf{Asymptotic Analysis}
+For large $\ell$, we have $\sqrt{\ell(\ell + d - 2)} \sim \ell \sqrt{1 + (d-2)/\ell} \sim \ell$ for $d$ fixed. Therefore:
+\[ \lambda_\ell^{(\mathcal{T}_s)} \sim C(d, L) \ell^{-d} \cdot (1 + \ell)^s = C(d, L) \ell^{s-d} \]
+
+\textbf{Critical Scaling Behavior}
+The spectral behavior depends on the relationship between $s$ and $d$:
+\begin{itemize}
+\item $s < d$: Eigenvalues decay $(\lambda_\ell \to 0)$ - regularizing effect
+\item $s = d$: Logarithmic corrections appear - critical regime  
+\item $s > d$: Eigenvalues grow $(\lambda_\ell \to \infty)$ - amplifying high frequencies
+\end{itemize}
+
+This scaling law $\lambda_\ell \sim \ell^{s-d}$ determines the spectral properties and learning dynamics of Sobolev-trained networks, with the critical exponent $s - d$ controlling frequency bias.
+\end{proof}
+
+\subsection{Synthesis: Unified Framework for NTK-Sobolev Analysis}
+
+\textbf{Summary}: Rotational invariance of both NTK and Sobolev operators ensures matrix commutation $KP_s = P_sK$, with composite eigenvalues $\lambda_\ell \sim \ell^{s-d}$ determining learning dynamics.
+
+\begin{remark}[Practical Implementation Warning]
+\textbf{Dataset Context}: In practical machine learning settings, we only have access to function values $f(x_i)$ at sampled points, \emph{not} the gradients $\nabla f(x_i)$. This makes the Fourier-based approach the most relevant for theoretical analysis and implementation.
+
+\textbf{Gradient Availability}: If gradients were available (e.g., through physics-informed neural networks or when the true function derivatives are known), the theoretical results presented here remain valid. However, the practical loss implementation in PyTorch should then utilize:
+\begin{itemize}
+\item Automatic differentiation (autograd) to compute gradients
+\item Direct gradient-based Sobolev norms: $\|f\|_{H^1}^2 = \|f\|_{L^2}^2 + \|\nabla f\|_{L^2}^2$
+\item Higher-order derivative computations via successive autograd calls
+\end{itemize}
+
+The spectral analysis framework developed here provides the theoretical foundation regardless of the implementation approach.
+\end{remark}
+
+\subsection{From Sobolev Loss to Discrete Matrix Operator}
+
+\subsubsection{Two Integral Formulations}
+
+\textbf{Formulation 1: Uniform Lebesgue Measure on the Sphere}
+\[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\sigma(x) \]
+where $d\sigma(x)$ is the uniform surface measure on $\mathbb{S}^{d-1}$ with $\int_{\mathbb{S}^{d-1}} d\sigma(x) = \text{Area}(\mathbb{S}^{d-1})$.
+
+\textbf{Formulation 2: Sampling Measure from Dataset}
+\[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\mu_n(x) \]
+where $\mu_n = \frac{1}{n}\sum_{i=1}^n \delta_{x_i}$ is the empirical measure from our sampled dataset $\{x_i\}_{i=1}^n$.
+
+\textbf{Discrete Implementation}:
+Under the sampling measure $\mu_n$, the integral becomes:
+\[ \mathcal{L}_s[f] = \frac{1}{n}\sum_{i=1}^n f(x_i) \left[(I + (-\Delta)^{1/2})^s f\right](x_i) \]
+
+This leads to the matrix form $\mathcal{L}_s[f] \approx \mathbf{f}^T P_s \mathbf{f}$ where $\mathbf{f} = (f(x_1), \ldots, f(x_n))^T$.
+
+\textbf{Relationship Between Formulations}:
+The uniform measure provides the theoretical foundation, while the sampling measure $\mu_n$ represents the practical implementation. As $n \to \infty$ with appropriate sampling, $\mu_n \to d\sigma$ in the weak sense, ensuring convergence of the discrete formulation to the continuous theory.
+
+\subsubsection{Practical Implementation Considerations}
+
+\begin{enumerate}
+\item \textbf{Data-Only Setting}: Since we only have function values $\{f(x_i)\}_{i=1}^n$, the matrix $P_s$ must be constructed via:
+\[ (P_s)_{ij} = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p}(x_i) Y_{\ell,p}(x_j) \]
+
+\item \textbf{Computational Complexity}: The matrix construction requires:
+\begin{itemize}
+\item Evaluation of spherical harmonics $Y_{\ell,p}(x_i)$ for all $(\ell,p)$ and data points
+\item Summation over $\mathcal{O}(\ell_{\max}^{d-1})$ harmonics (due to dimension growth $N(d,\ell) \sim \ell^{d-2}$)
+\item Total complexity: $\mathcal{O}(n^2 \ell_{\max}^{d-1})$ for matrix construction
+\end{itemize}
+
+\item \textbf{Truncation Strategy}: In practice, $\ell_{\max}$ must be chosen to balance:
+\begin{itemize}
+\item Spectral accuracy (larger $\ell_{\max}$ captures more frequencies)
+\item Computational feasibility (smaller $\ell_{\max}$ reduces cost)
+\item Statistical stability (avoid overfitting to high-frequency noise)
+\end{itemize}
+
+\item \textbf{Alternative with Gradients}: If gradients $\{\nabla f(x_i)\}$ were available, direct computation becomes possible:
+\[ \mathcal{L}_s[f] \approx \frac{1}{n}\sum_{i=1}^n \left[ f(x_i)^2 + s \|\nabla f(x_i)\|^2 + \text{higher order terms} \right] \]
+This approach scales as $\mathcal{O}(nd)$ instead of $\mathcal{O}(n^2\ell_{\max}^{d-1})$.
+\end{enumerate}
+
+\textbf{Fourier decomposition}: For $f(x) = \sum_{\ell,p} \hat{f}_{\ell,p} Y_{\ell,p}(x)$:
+\[ \mathcal{L}_s[f] = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} |\hat{f}_{\ell,p}|^2 \]
+
+\textbf{Discretization}: At points $\{x_i\}_{i=1}^n$:
+\[ \hat{f}_{\ell,p} \approx \sum_{i=1}^n c_i f(x_i) Y_{\ell,p}(x_i) \]
+
+\textbf{Final matrix form}: $\mathcal{L}_s[f] \approx f^T P_s f$ where $f = (f(x_1), \ldots, f(x_n))^T$.
+
+\subsection{Spectral Properties and Dimension Growth}
+
+The dimension of spherical harmonic spaces grows as:
+\[ N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!} \quad \text{as } \ell \to \infty \]
+
+This exponential growth in dimension determines the computational complexity of the Sobolev operator discretization.
+
+\subsection{Common Eigenfunctions Property}
+
+\begin{theorem}[Spherical Harmonics as Common Eigenfunctions]
+For rotationally invariant kernels on $\mathbb{S}^{d-1}$:
+\begin{itemize}
+\item NTK operator $K^{\infty}$ and Sobolev operator $P_s$ share spherical harmonics $Y_{\ell,p}$ as eigenfunctions
+\item This is due to rotational invariance and Schur's lemma for irreducible representations
+\item Enables direct spectral modification analysis
+\end{itemize}
+\end{theorem}
+
+\begin{theorem}[Commutation Property]
+The NTK operator $K^{\infty}$ and Sobolev operator $P_s$ commute:
+\[ [K^{\infty}, P_s] = 0 \]
+This holds for any sampling distribution $\rho(x)$ on $\mathbb{S}^{d-1}$ and implies that spectral decompositions are compatible.
+\end{theorem}
+
+
+
+
+
+\section{Reconciling NTK matrix spectrum and Sobolev Training}
+
+\subsection{A Unified Spectral Viewpoint: Commutation and Eigenvalue Products}
+
+The reconciliation between the geometric view of the NTK (approximated by the inverse cosine distance matrix) and the functional view of Sobolev training lies in their shared algebraic structure.
+
+\begin{itemize}
+    \item \textbf{Shared Invariance}: Both the NTK matrix $K$ and the discrete Sobolev operator matrix $P_s$ are rotationally invariant. This means their entries $(K)_{ij}$ and $(P_s)_{ij}$ depend only on the inner product $\langle x_i, x_j \rangle$.
+    
+    \item \textbf{Matrix Commutation}: As a consequence, both matrices can be expressed as functions of the Gram matrix $G$ (where $G_{ij} = \langle x_i, x_j \rangle$). For two such matrices, $K=f(G)$ and $P_s=g(G)$, they commute:
+    \[ K P_s = f(G)g(G) = g(G)f(G) = P_s K \]
+    This is the discrete analogue of the commutation of their underlying continuous operators.
+    
+    \item \textbf{Simultaneous Diagonalization}: Since they commute, $K$ and $P_s$ are simultaneously diagonalizable. They share the same set of eigenvectors, which are the eigenvectors of the Gram matrix $G$.
+    
+    \item \textbf{Product of Eigenvalues}: The spectrum of the Sobolev-modified NTK operator, $K P_s$, which governs the learning dynamics, is directly given by the product of the individual spectra:
+    \[ \lambda_i(K P_s) = \lambda_i(K) \cdot \lambda_i(P_s) \]
+    (after aligning the eigenvector bases).
+\end{itemize}
+
+\textbf{Key Insight}: The challenge of analyzing the complex operator $K P_s$ is reduced to separately analyzing the spectra of $K$ and $P_s$. We can leverage the geometric approximation for $K$ and combine it with a spectral analysis of $P_s$.
+
+\subsection{A Path Forward: Geometric Approximation and Experimental Validation}
+
+Based on the unified spectral viewpoint, a clear research path emerges to develop a predictive model for Sobolev training dynamics.
+
+\textbf{Goal}: Develop a semi-analytic model for the spectrum of the Sobolev-modified NTK matrix $K P_s$.
+
+\textbf{Proposed Strategy}:
+
+\begin{enumerate}
+    \item \textbf{Approximate the NTK Spectrum}:
+    Use the established near-affine relationship between the NTK and the inverse cosine distance matrix $W_l$:
+    \[ K \approx A W_l + B \]
+    The spectrum of the geometric matrix $W_l$ can be analyzed to provide an approximation for the eigenvalues $\lambda_i(K)$.
+
+    \item \textbf{Analyze the Sobolev Operator Spectrum}:
+    The matrix $P_s$ is itself a kernel matrix with a well-defined kernel $p_s(t) = \sum_{\ell} (1+\ell)^{2s} N(d,\ell) P_\ell(t)$, where $P_\ell$ are Legendre polynomials. Its spectrum $\lambda_i(P_s)$ can be characterized:
+    \begin{itemize}
+        \item Analytically, through its kernel polynomial expansion.
+        \item Or by viewing it as a differential operator on the data manifold (graph), relating its spectrum to that of the graph Laplacian.
+    \end{itemize}
+
+    \item \textbf{Combine Spectra and Validate}:
+    The core prediction is that the eigenvalues of the learning operator are given by the product of the component eigenvalues:
+    \[ \lambda_i(K P_s) \approx \lambda_i(A W_l + B) \cdot \lambda_i(P_s) \]
+    
+    \textbf{Experimental Validation Plan}:
+    \begin{itemize}
+        \item For a dataset on $\mathbb{S}^{d-1}$, numerically compute the matrices $K$, $P_s$, and the product $K P_s$.
+        \item Compare the analytically predicted spectrum with the true, numerically computed spectrum of $K P_s$.
+        \item Investigate the quality of this approximation as a function of the Sobolev parameter $s$, dimension $d$, data size $n$, and network depth $l$.
+    \end{itemize}
+\end{enumerate}
+
+\begin{remark}[The Sobolev Operator as a Kernel Matrix]
+The statement that the discrete Sobolev operator matrix $P_s$ is itself a kernel matrix is a subtle but fundamental point. Here is a detailed derivation.
+
+\paragraph{1. Definition of the Matrix $P_s$}
+We start from its construction via projectors on the spherical harmonics:
+\[
+(P_s)_{ij} = \left( \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} a_{\ell,p}a_{\ell,p}^\top \right)_{ij}
+\]
+With the coefficient $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$, this becomes:
+\begin{align*}
+(P_s)_{ij} &= \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} (a_{\ell,p})_i (a_{\ell,p})_j \\
+&= \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} (c_i Y_{\ell,p}(x_i)) (c_j Y_{\ell,p}(x_j))
+\end{align*}
+
+\paragraph{2. Reorganization and Application of the Addition Theorem}
+We can factor out the quadrature weights $c_i, c_j$ and apply the spherical harmonic addition theorem, which is the key step.
+\[
+(P_s)_{ij} = c_i c_j \sum_{\ell=0}^{\ell_{\max}} (1+\ell)^{2s} \left[ \sum_{p=1}^{N(d,\ell)} Y_{\ell,p}(x_i) Y_{\ell,p}(x_j) \right]
+\]
+The addition theorem states that the term in brackets is a function only of the inner product $\langle x_i, x_j \rangle$:
+\[
+\sum_{p=1}^{N(d,\ell)} Y_{\ell,p}(x) Y_{\ell,p}(y) = K_\ell(\langle x, y \rangle)
+\]
+where $K_\ell(t) = \frac{N(d,\ell)}{\text{Area}(\mathbb{S}^{d-1})} P_\ell^{((d-2)/2)}(t)$ and $P_\ell^{(\lambda)}$ is a Gegenbauer polynomial.
+
+\paragraph{3. Definition of the Kernel $p_s(t)$}
+By substituting this back, we can define a kernel function $p_s(t)$ that depends only on the inner product $t = \langle x_i, x_j \rangle$:
+\[
+p_s(t) := \sum_{\ell=0}^{\ell_{\max}} (1+\ell)^{2s} K_\ell(t)
+\]
+Thus, the matrix element is indeed a weighted kernel evaluation:
+\[
+(P_s)_{ij} = c_i c_j \cdot p_s(\langle x_i, x_j \rangle)
+\]
+
+\paragraph{Conclusion}
+The matrix $P_s$ is a \textbf{weighted kernel matrix}. If the sampling is uniform, the weights $c_i$ are constant and $P_s$ becomes a standard kernel matrix (up to a scaling factor). This rotational invariance, shared with the NTK, is what guarantees that they commute.
+\end{remark}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Personal contribution : NTK-Sobolev Spectral Commutation property}
+
+In this section we consolidate the analytic and spectral properties of Sobolev operators and their relationship with the Laplace--Beltrami operator on the sphere, together with their discrete realizations on finite samples and their interaction with neural tangent kernels (NTKs). Throughout, we work on the unit sphere $\mathbb{S}^{d-1}$ equipped with its uniform surface measure, and we denote by $\{Y_{\ell,p}\}_{\ell \ge 0,\, 1 \le p \le N(d,\ell)}$ an orthonormal basis of spherical harmonics of degree $\ell$, where $N(d,\ell)$ is the multiplicity. We use the standard Laplace--Beltrami spectrum $-\Delta_{\mathbb{S}^{d-1}} Y_{\ell,p} = \ell(\ell+d-2)\,Y_{\ell,p}$ and the usual $L^2$-normalization of harmonics. We adopt the conventional Sobolev spectral weighting based on the shifted Laplace--Beltrami eigenvalues $(1+\ell(\ell+d-2))^s$.
+
+\subsubsection{Sobolev operator and Sobolev norms}
+
+We define the Sobolev operator $P_s$ of order $s>0$ as the spectral multiplier of the Laplace--Beltrami operator:
+\[
+P_s \, Y_{\ell,p} \,=\, (1+\ell(\ell+d-2))^{s}\, Y_{\ell,p}\,.
+\]
+Equivalently, if $f = \sum_{\ell,p} \hat f_{\ell,p} Y_{\ell,p}$ denotes the spherical harmonic expansion of $f \in L^2(\mathbb{S}^{d-1})$, then
+\[
+P_s f \,=\, \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell(\ell+d-2))^{s}\,\hat f_{\ell,p}\, Y_{\ell,p}\,.
+\]
+The associated Sobolev quadratic form (Sobolev loss) is
+\[
+\mathcal{L}_s[f] \,=\, \int_{\mathbb{S}^{d-1}} f(x)\, (I - \Delta_{\mathbb{S}^{d-1}})^{s}\, f(x)\, d\sigma(x) \,=\, \sum_{\ell=0}^{\infty}\sum_{p=1}^{N(d,\ell)} (1+\ell(\ell+d-2))^{s}\, |\hat f_{\ell,p}|^2\,,
+\]
+which coincides with the standard $H^s$ norm up to the conventional choice of Laplacian sign. In particular, for integer $s$, $\mathcal{L}_s$ aggregates derivatives up to order $s$, while for fractional $s$ it provides a spectral definition that requires no pointwise differentiability of $f$.
+
+\begin{proposition}[Equivalent formulations of the Sobolev norm]
+For $s>0$, the Sobolev norm on $\mathbb{S}^{d-1}$ admits the equivalent characterizations
+\[
+\|f\|_{H^s(\mathbb{S}^{d-1})}^2 \,=\, \sum_{\ell,p} (1+\ell(\ell+d-2))^{s}\, |\hat f_{\ell,p}|^2 \,=\, \int_{\mathbb{S}^{d-1}} f(x)\, (I - \Delta_{\mathbb{S}^{d-1}})^{s}\, f(x)\, d\sigma(x)\,.
+\]
+On Euclidean domains $\mathbb{R}^d$, the Fourier characterization holds:
+\[
+\|f\|_{H^s(\mathbb{R}^d)}^2 \,=\, \int_{\mathbb{R}^d} \bigl(1+|\xi|^2\bigr)^{s}\, |\hat f(\xi)|^2\, d\xi\,,
+\]
+which reduces to the derivative-based definition when $f$ is sufficiently regular and $s$ is an integer.
+\end{proposition}
+
+\begin{theorem}[Fractional Laplacian representation of the Sobolev loss]
+For $s>0$ and $f \in H^s(\mathbb{S}^{d-1})$,
+\[
+\mathcal{L}_s[f] \,=\, \int_{\mathbb{S}^{d-1}} f(x)\, (I - \Delta_{\mathbb{S}^{d-1}})^{s}\, f(x)\, d\sigma(x) \,=\, \sum_{\ell,p} (1+\ell(\ell+d-2))^{s}\, |\hat f_{\ell,p}|^2\,.
+\]
+In particular, the operator $(I - \Delta_{\mathbb{S}^{d-1}})^{s}$ is positive, self-adjoint, and defines an equivalent norm on $H^s(\mathbb{S}^{d-1})$.
+\end{theorem}
+
+\begin{remark}[Limited regularity and Fourier-based definitions]
+When $f$ lacks sufficient smoothness for integration-by-parts arguments, the Sobolev norm is defined spectrally. On $\mathbb{R}^d$, the Fourier multiplier definition by $(1+|\xi|^2)^s$ is canonical and extends to negative indices. On $\mathbb{S}^{d-1}$, the spherical-harmonic multiplier $(1+\ell(\ell+d-2))^s$ plays the same role.
+\end{remark}
+
+\subsubsection{Discrete realization on sampled data}
+
+Let $\{x_i\}_{i=1}^n \subset \mathbb{S}^{d-1}$ denote sample points with (possibly uniform) quadrature weights $\{c_i\}_{i=1}^n$. Define the sampling vectors $a_{\ell,p} \in \mathbb{R}^n$ by $(a_{\ell,p})_i = c_i\, Y_{\ell,p}(x_i)$. The discrete Sobolev matrix $P_s \in \mathbb{R}^{n\times n}$ is given spectrally by
+\[
+P_s \,=\, \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell(\ell+d-2))^{s}\, a_{\ell,p} a_{\ell,p}^\top\,.
+\]
+By the spherical-harmonic addition theorem, this matrix is a weighted kernel matrix whose entries depend only on the inner products $\langle x_i, x_j\rangle$.
+
+\begin{remark}[Sobolev operator as a kernel matrix]
+Let $K_\ell(t)$ denote the zonal addition kernel at degree $\ell$, normalized so that $\sum_{p=1}^{N(d,\ell)} Y_{\ell,p}(x)Y_{\ell,p}(y) = K_\ell(\langle x,y\rangle)$. Then
+\[
+(P_s)_{ij} \,=\, c_i c_j \sum_{\ell=0}^{\ell_{\max}} (1+\ell(\ell+d-2))^{s} \, K_\ell(\langle x_i,x_j\rangle)\,.
+\]
+Under uniform sampling, the weights $c_i$ are constant and $P_s$ coincides with a standard rotationally invariant kernel matrix up to a global rescaling.
+\end{remark}
+
+The dimension of the spherical-harmonic subspace of degree $\ell$ satisfies $N(d,\ell) \sim \tfrac{2\, \ell^{d-2}}{(d-2)!}$ as $\ell \to \infty$. Consequently, a naive construction of $P_s$ by truncation at $\ell_{\max}$ has complexity $\mathcal{O}\!\left(n^2 \ell_{\max}^{d-1}\right)$ due to the growth of the number of harmonics.
+
+\subsubsection{Persona contribution : Interaction with rotationally invariant NTK operators}
+
+Let $K^{\infty}$ denote an NTK operator on $\mathbb{S}^{d-1}$ that is rotationally invariant, hence zonal. Its eigenfunctions are the spherical harmonics and its eigenvalues are denoted by $\{\mu_\ell^{(K)}\}_{\ell \ge 0}$. The commutation and simultaneous diagonalization with $P_s$ follow immediately from the shared harmonic basis.
+
+\begin{theorem}[Common eigenfunctions and operator commutation]
+The operators $K^{\infty}$ and $P_s$ share the spherical harmonics $\{Y_{\ell,p}\}$ as a complete orthonormal eigenbasis:
+\[
+K^{\infty} Y_{\ell,p} \,=\, \mu_\ell^{(K)} Y_{\ell,p}\,, \qquad
+P_s Y_{\ell,p} \,=\, (1+\ell(\ell+d-2))^{s} Y_{\ell,p}\,.
+\]
+In particular, they commute on $L^2(\mathbb{S}^{d-1})$: $[K^{\infty}, P_s]=0$.
+\end{theorem}
+
+The same structure carries to finite samples. Using the sampling vectors $a_{\ell,p}$, one has the discrete expansions
+\[
+K \,=\, \sum_{\ell,p} \mu_\ell^{(K)}\, a_{\ell,p} a_{\ell,p}^\top,\qquad
+P_s \,=\, \sum_{\ell,p} (1+\ell(\ell+d-2))^{s}\, a_{\ell,p} a_{\ell,p}^\top\,,
+\]
+which implies exact commutation under the sampling inner product by mean of integration over dirac measures.
+
+\begin{theorem}[Matrix commutation and simultaneous diagonalization]
+Let $K, P_s \in \mathbb{R}^{n\times n}$ denote the discrete NTK and Sobolev matrices built from the same sample set and weights $\{c_i\}$. Then $KP_s = P_s K$ and both matrices are simultaneously diagonalizable in the span of $\{a_{\ell,p}\}$. Their eigenvalues align degree-wise.
+\end{theorem}
+
+\subsubsection{Sobolev-trained dynamics and composite spectra}
+
+Under Sobolev training with loss $\tfrac{1}{2}\|f-y\|_{H^s}^2$, the gradient flow in the NTK regime applies the fractional operator to the residual before the NTK action. This yields a composite learning operator
+\[
+\mathcal{T}_s \,=\, K^{\infty} \circ (I - \Delta_{\mathbb{S}^{d-1}})^{s}\,,
+\]
+whose eigenfunctions remain spherical harmonics and whose eigenvalues are products.
+
+\begin{theorem}[NTK--Sobolev composition]
+Let $\mathcal{T}_s = K^{\infty} \circ (I - \Delta_{\mathbb{S}^{d-1}})^{s}$. Then for every $\ell \ge 0$ and $1 \le p \le N(d,\ell)$,
+\[
+\mathcal{T}_s Y_{\ell,p} \,=\, \mu_\ell^{(K)} \,(1+\ell(\ell+d-2))^{s}\, Y_{\ell,p}\,.
+\]
+In particular, the spectrum of $\mathcal{T}_s$ is given by $\mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} (1+\ell(\ell+d-2))^{s}$, degree-wise with multiplicity $N(d,\ell)$.
+\end{theorem}
+
+Assuming the standard polynomial decay for NTK eigenvalues on the sphere, $\mu_\ell^{(K)} \sim C(d,L)\, \ell^{-d}$ for large $\ell$, the composite spectrum follows a simple scaling law.
+
+\begin{theorem}[Asymptotic scaling laws]
+If $\mu_\ell^{(K)} \sim C(d,L)\, \ell^{-d}$ as $\ell \to \infty$ for fixed $d$, then
+\[
+\mu_\ell^{(\mathcal{T}_s)} \,=\, \mu_\ell^{(K)} (1+\ell(\ell+d-2))^{s} \,\sim\, C(d,L)\, \ell^{s-d}\,.
+\]
+Thus: (i) for $s<d$ the high-frequency eigenvalues decay; (ii) for $s=d$ critical logarithmic corrections may arise; (iii) for $s>d$ the spectrum grows, amplifying high frequencies.
+\end{theorem}
+
+\subsubsection{Sampling measures, discretization, and computational aspects}
+
+In practice, only sample values $\{f(x_i)\}$ are available. The continuous Sobolev functional with respect to the uniform surface measure,
+\[
+\mathcal{L}_s[f] \,=\, \int_{\mathbb{S}^{d-1}} f(x)\, (I - \Delta_{\mathbb{S}^{d-1}})^{s}\, f(x)\, d\sigma(x)\,,
+\]
+admits a discrete counterpart under the empirical measure $\mu_n = \tfrac{1}{n}\sum_{i=1}^n \delta_{x_i}$,
+\[
+\mathcal{L}_s[f] \,\approx\, \frac{1}{n}\sum_{i=1}^n f(x_i)\, \bigl[(I - \Delta_{\mathbb{S}^{d-1}})^{s} f\bigr](x_i) \,=\, \mathbf{f}^\top P_s\, \mathbf{f}\,,
+\]
+where $\mathbf{f} = (f(x_1),\ldots,f(x_n))^\top$. The construction of $P_s$ by truncation at $\ell_{\max}$ requires evaluating spherical harmonics up to degree $\ell_{\max}$ and summing over $\mathcal{O}(\ell_{\max}^{d-1})$ modes, yielding a cost $\mathcal{O}(n^2 \ell_{\max}^{d-1})$. The choice of $\ell_{\max}$ trades spectral resolution against computational burden and statistical stability. Under uniform sampling, $c_i$ can be chosen constant; for nonuniform sampling, accurate quadrature weights improve the fidelity to the continuous theory.
+
+\begin{remark}[Practical considerations and alternatives]
+When derivative information $\{\nabla f(x_i)\}$ is available (e.g., in physics-informed learning), one may approximate lower-order Sobolev norms directly in the data domain, potentially reducing cost. Absent derivatives, the spectral or kernel constructions above provide a principled route that preserves rotational invariance and commutation with rotationally invariant NTKs.
+\end{remark}
+
+
+\newpage
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \subsection{Proof of the NNGP kernel for a single-layer MMFN}
 
 \subsection{Proof of the NTK Recurrence Relation}
