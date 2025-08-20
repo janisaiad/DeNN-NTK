@@ -25,7 +25,9 @@ bien garder à l'esprit que l'on garde en vue le fait que dans les applications 
 que de trouver la meilleure approximation (les théoremes d'approximations on s'en fout un peu)
 c'est surtout la généralisation qui intéresse et l'optimization en 1er lieu
 
-
+pour la wk 3 kernel integral operator à clarifier
+et bien expliciter que l'on travaille sur 2 domaines et qu'en sciml/optimization les 2 sont importants, que ce soit 
+pour le rkhs ou pour l'optimization bounds
 un aspect super important est qu'il faut guider vers la comprehension de deeper or wider pour nn regression
 et qu'on repond d'abord pour nn regression, ensuite pour sobolev avec la decomposition
 le fait est qu'en parallele on apprend aussi à fitter nos données et leurs normes, ce n'est pas la 1ere chose que l'on fait

@@ -1,43 +1,91 @@
 \babel@toc {french}{}\relax 
-\contentsline {section}{Résumé}{4}{Doc-Start}%
-\contentsline {section}{Executive summary}{5}{Doc-Start}%
-\contentsline {section}{Introduction}{6}{Doc-Start}%
-\contentsline {section}{Notations}{7}{Doc-Start}%
-\contentsline {section}{\numberline {1}Cadre Théorique du Noyau de Tangente Neuronale}{8}{section.1}%
-\contentsline {subsection}{\numberline {1.1}Entraînement de Sobolev et Décomposition du NTK}{8}{subsection.1.1}%
-\contentsline {subsection}{\numberline {1.2}Analyse Spectrale du NTK et Bornes sur les Valeurs Propres}{8}{subsection.1.2}%
-\contentsline {section}{\numberline {2}Corrections à Largeur Finie et Régimes d'Apprentissage}{8}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Développement Théorique pour les FCNN}{8}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Approches Alternatives et Concentration}{8}{subsection.2.2}%
-\contentsline {section}{\numberline {3}Analyse d'Architectures Spécifiques}{8}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Réseaux à Mémoire Matricielle (MMNN) et Transformeurs}{9}{subsection.3.1}%
-\contentsline {section}{\numberline {4}MMNN NTK for 2 hidden layers}{9}{section.4}%
-\contentsline {subsection}{\numberline {4.1}recursive}{9}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Expression for random variables $\rho _1$, $\|x_1\|^2$, $\|y_1\|^2$}{11}{subsection.4.2}%
-\contentsline {subsubsection}{\numberline {4.2.1}Final result}{11}{subsubsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.3}Intuitions sur les Performances}{12}{subsection.4.3}%
-\contentsline {section}{\numberline {5}Résultats Expérimentaux et Applications}{12}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Validation des Lois de Scaling et des Corrections}{12}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}Analyse Hessienne et Dynamique}{12}{subsection.5.2}%
-\contentsline {subsection}{\numberline {5.3}Applications en SciML et Discussion}{12}{subsection.5.3}%
-\contentsline {section}{\numberline {A}Fisher, Kibble distributions and the fake "Curse of Dimensionality"}{14}{appendix.A}%
-\contentsline {subsection}{\numberline {A.1}Distribution of the Correlation Coefficient $r$}{14}{subsection.A.1}%
-\contentsline {subsection}{\numberline {A.2}The Kibble Distribution}{14}{subsection.A.2}%
-\contentsline {section}{\numberline {B}Price's Theorem and Derivations}{14}{appendix.B}%
-\contentsline {paragraph}{Step 1: Inner integral}{15}{appendix.B}%
-\contentsline {paragraph}{Step 2: Change of variable}{15}{appendix.B}%
-\contentsline {paragraph}{Step 3: Simplification}{15}{appendix.B}%
-\contentsline {paragraph}{Step 4: Using the conditional density formula}{15}{appendix.B}%
-\contentsline {subsection}{\numberline {B.1}Computing ReLU Product Expectations}{17}{subsection.B.1}%
-\contentsline {subsection}{\numberline {B.2}Decomposition}{17}{subsection.B.2}%
-\contentsline {subsection}{\numberline {B.3}Calculation of the Components}{17}{subsection.B.3}%
-\contentsline {section}{\numberline {C}Unsuccessful Attempts to Calculate $I_{22}$}{18}{appendix.C}%
-\contentsline {subsection}{\numberline {C.1}Via the Identity on the Derivative of $\phi _2$}{18}{subsection.C.1}%
-\contentsline {section}{\numberline {D}Special Case: Zero Means ($\mu _1=\mu _2=0$)}{19}{appendix.D}%
-\contentsline {subsection}{\numberline {D.1}Explicit Formulas for $\Sigma $ and $\dot {\Sigma }$}{19}{subsection.D.1}%
-\contentsline {subsection}{\numberline {D.2}Differential and Integral Form}{20}{subsection.D.2}%
-\contentsline {subsection}{\numberline {D.3}Calculating the Constant (Independent Case $\rho =0$)}{20}{subsection.D.3}%
-\contentsline {subsection}{\numberline {D.4}Exact moments and correlation for Kibble variables}{20}{subsection.D.4}%
-\contentsline {subsection}{\numberline {D.5}Product of Square Roots of Kibble Variables}{21}{subsection.D.5}%
-\contentsline {subsection}{\numberline {D.6}Independence Properties and Asymptotic Behavior}{21}{subsection.D.6}%
-\contentsline {section}{\numberline {E}Expériences numériques}{21}{appendix.E}%
+\contentsline {section}{Résumé}{5}{Doc-Start}%
+\contentsline {section}{Executive summary}{6}{Doc-Start}%
+\contentsline {section}{Introduction}{7}{Doc-Start}%
+\contentsline {section}{Notations}{8}{Doc-Start}%
+\contentsline {section}{\numberline {1}Cadre Théorique du Noyau de Tangente Neuronale}{9}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Entraînement de Sobolev et Décomposition du NTK}{9}{subsection.1.1}%
+\contentsline {section}{\numberline {2}Introduction: Eigenvalue Scaling Laws and Learning Dynamics}{9}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Key Objectives}{9}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}NTK Matrix vs. NTK Operator}{9}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Initialization: Edge of Chaos}{10}{subsection.2.3}%
+\contentsline {section}{\numberline {3}NTK Matrix Structure and Spectrum}{11}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Example NTK Matrix Structure}{11}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}NTK Operator Structure}{11}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Matrix Spectrum Results}{11}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Sobolev Training and NTK Spectral Modification}{12}{section.4}%
+\contentsline {subsection}{\numberline {4.1}NTK-Sobolev Operator Framework}{12}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}From Sobolev Loss to Discrete Matrix Operator}{12}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Spectral Properties and Dimension Growth}{13}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Common Eigenfunctions Property}{13}{subsection.4.4}%
+\contentsline {section}{\numberline {5}Deep NTK Analysis and Theoretical Results}{14}{section.5}%
+\contentsline {subsection}{\numberline {5.1}NTK at Edge of Chaos}{14}{subsection.5.1}%
+\contentsline {section}{\numberline {6}Reconciling NTK matrix spectrum and Sobolev Training}{14}{section.6}%
+\contentsline {subsection}{\numberline {6.1}A Unified Spectral Viewpoint: Commutation and Eigenvalue Products}{14}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}A Path Forward: Geometric Approximation and Experimental Validation}{15}{subsection.6.2}%
+\contentsline {paragraph}{1. Definition of the Matrix $P_s$}{15}{Item.6}%
+\contentsline {paragraph}{2. Reorganization and Application of the Addition Theorem}{16}{Item.6}%
+\contentsline {paragraph}{3. Definition of the Kernel $p_s(t)$}{16}{Item.6}%
+\contentsline {paragraph}{Conclusion}{16}{Item.6}%
+\contentsline {subsection}{\numberline {6.3}Deep NTK Properties}{16}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}Inverse Cosine Distance Matrix Analysis}{17}{subsection.6.4}%
+\contentsline {section}{\numberline {7}Deep Narrow Neural Networks}{17}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Scaled NTK at Initialization}{17}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Research Perspectives for Deep Narrow Networks}{17}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Analyse Spectrale du NTK et Bornes sur les Valeurs Propres}{18}{subsection.7.3}%
+\contentsline {section}{\numberline {8}Mathematical Foundation: Concentration Inequalities}{18}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Scalar Concentration Inequalities}{18}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Quadratic Forms and Hanson-Wright Inequalities}{18}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Matrix Concentration Inequalities}{19}{subsection.8.3}%
+\contentsline {section}{\numberline {9}Fundamental Mathematical Tools}{19}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Matrix Analysis Techniques}{19}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Specialized Neural Network Tools}{20}{subsection.9.2}%
+\contentsline {section}{\numberline {10}Proof Schemes and High-Level Strategies}{21}{section.10}%
+\contentsline {subsection}{\numberline {10.1}General Framework for Eigenvalue Bounds}{21}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Proof Scheme 1: Empirical NTK Decomposition (Nguyen et al.)}{22}{subsection.10.2}%
+\contentsline {subsubsection}{\numberline {10.2.1}Step 1: Fundamental Chain Rule Decomposition}{22}{subsubsection.10.2.1}%
+\contentsline {subsubsection}{\numberline {10.2.2}Step 2: Application of Schur Product Theorem and Weyl's Inequality}{22}{subsubsection.10.2.2}%
+\contentsline {subsubsection}{\numberline {10.2.3}Step 3: Bounding Feature Matrix Eigenvalues}{23}{subsubsection.10.2.3}%
+\contentsline {subsubsection}{\numberline {10.2.4}Step 4: Spectral Analysis via Hermite Expansion}{23}{subsubsection.10.2.4}%
+\contentsline {subsubsection}{\numberline {10.2.5}Step 5: Reduction to Khatri-Rao Powers}{23}{subsubsection.10.2.5}%
+\contentsline {subsubsection}{\numberline {10.2.6}Step 6: Feature Centering and Hadamard Power Analysis}{23}{subsubsection.10.2.6}%
+\contentsline {subsubsection}{\numberline {10.2.7}Step 7: Application of Gershgorin Circle Theorem}{24}{subsubsection.10.2.7}%
+\contentsline {subsubsection}{\numberline {10.2.8}Step 8: Bounding Derivative Term Norms, very technical}{24}{subsubsection.10.2.8}%
+\contentsline {subsubsection}{\numberline {10.2.9}Step 9: Final Assembly and Width Optimization}{24}{subsubsection.10.2.9}%
+\contentsline {subsubsection}{\numberline {10.2.10}Upper Bound via Diagonal Analysis}{25}{subsubsection.10.2.10}%
+\contentsline {subsubsection}{\numberline {10.2.11}Final Result}{25}{subsubsection.10.2.11}%
+\contentsline {section}{\numberline {11}Corrections à Largeur Finie et Régimes d'Apprentissage}{25}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Développement Théorique pour les FCNN}{25}{subsection.11.1}%
+\contentsline {subsection}{\numberline {11.2}Approches Alternatives et Concentration}{25}{subsection.11.2}%
+\contentsline {section}{\numberline {12}Analyse d'Architectures Spécifiques}{26}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Réseaux à Mémoire Matricielle (MMNN) et Transformeurs}{26}{subsection.12.1}%
+\contentsline {section}{\numberline {13}MMNN NTK for 2 hidden layers}{26}{section.13}%
+\contentsline {subsection}{\numberline {13.1}recursive}{26}{subsection.13.1}%
+\contentsline {subsection}{\numberline {13.2}Expression for random variables $\rho _1$, $\|x_1\|^2$, $\|y_1\|^2$}{28}{subsection.13.2}%
+\contentsline {subsubsection}{\numberline {13.2.1}Final result}{29}{subsubsection.13.2.1}%
+\contentsline {subsection}{\numberline {13.3}Intuitions sur les Performances}{29}{subsection.13.3}%
+\contentsline {section}{\numberline {14}Résultats Expérimentaux et Applications}{29}{section.14}%
+\contentsline {subsection}{\numberline {14.1}Validation des Lois de Scaling et des Corrections}{29}{subsection.14.1}%
+\contentsline {subsection}{\numberline {14.2}Analyse Hessienne et Dynamique}{29}{subsection.14.2}%
+\contentsline {subsection}{\numberline {14.3}Applications en SciML et Discussion}{29}{subsection.14.3}%
+\contentsline {section}{\numberline {A}Fisher, Kibble distributions and the fake "Curse of Dimensionality"}{31}{appendix.A}%
+\contentsline {subsection}{\numberline {A.1}Distribution of the Correlation Coefficient $r$}{31}{subsection.A.1}%
+\contentsline {subsection}{\numberline {A.2}The Kibble Distribution}{31}{subsection.A.2}%
+\contentsline {section}{\numberline {B}Price's Theorem and Derivations}{31}{appendix.B}%
+\contentsline {paragraph}{Step 1: Inner integral}{32}{appendix.B}%
+\contentsline {paragraph}{Step 2: Change of variable}{32}{appendix.B}%
+\contentsline {paragraph}{Step 3: Simplification}{32}{appendix.B}%
+\contentsline {paragraph}{Step 4: Using the conditional density formula}{32}{appendix.B}%
+\contentsline {subsection}{\numberline {B.1}Computing ReLU Product Expectations}{34}{subsection.B.1}%
+\contentsline {subsection}{\numberline {B.2}Decomposition}{34}{subsection.B.2}%
+\contentsline {subsection}{\numberline {B.3}Calculation of the Components}{34}{subsection.B.3}%
+\contentsline {section}{\numberline {C}Unsuccessful Attempts to Calculate $I_{22}$}{35}{appendix.C}%
+\contentsline {subsection}{\numberline {C.1}Via the Identity on the Derivative of $\phi _2$}{35}{subsection.C.1}%
+\contentsline {section}{\numberline {D}Special Case: Zero Means ($\mu _1=\mu _2=0$)}{36}{appendix.D}%
+\contentsline {subsection}{\numberline {D.1}Explicit Formulas for $\Sigma $ and $\dot {\Sigma }$}{36}{subsection.D.1}%
+\contentsline {subsection}{\numberline {D.2}Differential and Integral Form}{37}{subsection.D.2}%
+\contentsline {subsection}{\numberline {D.3}Calculating the Constant (Independent Case $\rho =0$)}{37}{subsection.D.3}%
+\contentsline {subsection}{\numberline {D.4}Exact moments and correlation for Kibble variables}{37}{subsection.D.4}%
+\contentsline {subsection}{\numberline {D.5}Product of Square Roots of Kibble Variables}{38}{subsection.D.5}%
+\contentsline {subsection}{\numberline {D.6}Independence Properties and Asymptotic Behavior}{38}{subsection.D.6}%
+\contentsline {section}{\numberline {E}Expériences numériques}{38}{appendix.E}%
