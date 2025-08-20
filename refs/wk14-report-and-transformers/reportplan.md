@@ -34,6 +34,8 @@ le fait est qu'en parallele on apprend aussi à fitter nos données et leurs nor
 (car on a une matrice diagonale), c'est pas on apprend 2 noyaux orthogonaux, on apprend en fait 1 noyaux et son scaling
 
 
+détailler aussi tout le setup experimental et mis en oeuvre avec toutes les stats de commit et de fichiers
+décrire aussi que j'ai fait des lives, contacts etc ..
 mettre aussi l'aspect ingéniérie et le fait que l'asd et le ntk est dual, et que ça explique en partie la double descente
 il existe d'autres explications rigoureuses pour une regression L2, l'asd a des eigenvalues nulles et donc
 une partie de l'espace des parametres ne sert à rien
