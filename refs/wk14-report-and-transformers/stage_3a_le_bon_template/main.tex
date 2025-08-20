@@ -137,8 +137,646 @@ $\dd x$ : Élément différentiel utilisé dans les intégrales.
 \subsection{Entraînement de Sobolev et Décomposition du NTK}
 (Présentation des théorèmes sur la décomposition du NTK via le Sobolev training. Description du RKHS pour le noyau de Sobolev et le noyau de Laplace.)
 
+
+\section{Introduction: Eigenvalue Scaling Laws and Learning Dynamics}
+
+The Neural Tangent Kernel (NTK) has emerged as a fundamental tool for understanding the training dynamics of deep neural networks. For a neural network $f(\x; \theta)$ with parameters $\theta$, the NTK is defined as:
+$$K^{\infty}(x_i, x_j) = \left\langle \frac{\partial f(\x_i; \theta)}{\partial \theta}, \frac{\partial f(\x_j; \theta)}{\partial \theta} \right\rangle$$
+
+\subsection{Key Objectives}
+
+This document addresses three fundamental objectives:
+\begin{enumerate}
+\item \textbf{Eigenvalue scaling laws}: Derive decay rates $\mu_\ell \sim \ell^{-\alpha}$ for NTK operator eigenvalues
+\item \textbf{Spectral impact on learning}: Understand how spectral properties determine learning dynamics  
+\item \textbf{Matrix vs. Operator relationship}: Analyze scaling laws for discrete matrix eigenvalues with respect to network depth $l$ and data size $n$
+\end{enumerate}
+
+\subsection{NTK Matrix vs. NTK Operator}
+
+A crucial distinction exists between:
+\begin{itemize}
+\item \textbf{NTK Matrix}: Discrete sampled version $K \in \mathbb{R}^{n \times n}$ with entries $K_{ij} = K^{\infty}(x_i, x_j)$
+\item \textbf{NTK Operator}: Continuous integral operator $(\mathcal{L}f)(x) = \int K^{\infty}(x,y)f(y)dy$
+\end{itemize}
+
+\textbf{Warning}: The eigenvalues of the sampled NTK matrix are \emph{not} the same as the NTK operator eigenvalues. The matrix spectrum provides discrete approximations that depend on the sampling strategy and data distribution.
+
+\subsection{Initialization: Edge of Chaos}
+
+All analysis assumes Edge of Chaos (EOC) initialization:
+\begin{itemize}
+\item Initialize weights as $w_{ij} \sim \mathcal{N}(0, \sigma_w^2/\text{fan-in})$ 
+\item For ReLU networks: $\sigma_w^2 = 2$ to maintain unit variance through layers
+\item This ensures activations neither explode nor vanish with depth
+\end{itemize}
+
+\newpage
+
+\section{NTK Matrix Structure and Spectrum}
+
+\subsection{Example NTK Matrix Structure}
+
+Consider a dataset of 3 points $x_1, x_2, x_3 \in \mathbb{R}^d$. The NTK matrix has entries:
+\[
+K^{\infty} = \begin{pmatrix} 
+k(x_1,x_1) & k(x_1,x_2) & k(x_1,x_3) \\
+k(x_2,x_1) & k(x_2,x_2) & k(x_2,x_3) \\
+k(x_3,x_1) & k(x_3,x_2) & k(x_3,x_3)
+\end{pmatrix}
+\]
+
+For general depth $l$ networks at EOC, the NTK kernel function is:
+\begin{align}
+K^{\infty}(\mathbf{x}_1, \mathbf{x}_2) &= \|\mathbf{x}_1\| \|\mathbf{x}_2\| \left( \sum_{k=1}^l \varrho^{\circ (k-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right) \right. \\
+&\quad \left. \times \prod_{k'=k}^{l-1} \varrho'\left(\varrho^{\circ (k'-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right)\right) \right) \mathbf{I}_{m_l}
+\end{align}
+
+For 2-layer ReLU networks, this simplifies to:
+\[
+k(x_i,x_j) = x_i^T x_j \cdot \arccos(-\langle x_i,x_j \rangle) + \sqrt{1-\langle x_i,x_j \rangle^2}
+\]
+
+\subsection{NTK Operator Structure}
+
+For functions $f,g \in L^2(\mathbb{S}^{d-1})$, the NTK operator acts as:
+\[
+(K^{\infty} f)(x) = \int_{\mathbb{S}^{d-1}} k(x,y)f(y)d\sigma(y)
+\]
+
+\textbf{Key Properties}:
+\begin{itemize}
+\item Symmetric positive definite operator
+\item Eigenfunctions are spherical harmonics $Y_{\ell,p}$
+\item Eigenvalues decay polynomially: $\mu_\ell \sim \ell^{-d}$
+\end{itemize}
+
+\subsection{Matrix Spectrum Results}
+
+The key scaling laws for the discrete NTK matrix are:
+
+\textbf{Condition Number}:
+\[ \kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l) \]
+The condition number grows linearly with data size $n$ but improves with depth $l$.
+
+\textbf{Eigenvalue Distribution}:
+\[ \lambda_{\text{min}} \sim \frac{3l}{4}, \quad \lambda_{\text{max}} \sim \frac{3nl}{4} \pm \xi \text{ where } \xi \sim \log(l) \]
+
+The minimum eigenvalue scales linearly with depth, while the maximum scales with both depth and data size.
+
+\textbf{Key Insight}: The training dynamics are dictated by the NTK matrix eigenvalues, not the operator eigenvalues. Deeper networks ($l \uparrow$) improve conditioning but with diminishing returns.
+
+\section{Sobolev Training and NTK Spectral Modification}
+
+\subsection{NTK-Sobolev Operator Framework}
+
+The key innovation in Sobolev training is the modification of the standard $L^2$ loss to incorporate high-order derivatives. The NTK-Sobolev operator $P_s$ acts on the sphere $\mathbb{S}^{d-1}$ with the commutation property:
+
+\textbf{Spherical Harmonics Transform}: Let $\mathcal{F}$ denote the mapping from $L^2(\mathbb{S}^d)$ to the spectral domain $\bigoplus_{\ell=0}^{\infty} \mathbb{C}^{N(d,\ell)}$, where $N(d,\ell)$ is the dimension of the $\ell$-th spherical harmonic space.
+
+The Sobolev operator $P_s$ is defined through its action in Fourier space:
+\[ P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}P_{\ell,p} \]
+
+where $P_{\ell,p} = a_{\ell,p}a_{\ell,p}^T$ with spectral coefficients $(a_{\ell,p})_i = c_iY_{\ell,p}(x_i)$.
+
+\subsection{From Sobolev Loss to Discrete Matrix Operator}
+
+\textbf{Sobolev loss with gradients}:
+\[ \mathcal{L}_s[f] = \|f\|_{L^2}^2 + \|\nabla f\|_{L^2}^2 = \int_{\mathbb{S}^d} f(x)^2 d\sigma(x) + \int_{\mathbb{S}^d} \|\nabla f(x)\|^2 d\sigma(x) \]
+
+\textbf{Fourier decomposition}: For $f(x) = \sum_{\ell,p} \hat{f}_{\ell,p} Y_{\ell,p}(x)$:
+\[ \mathcal{L}_s[f] = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} |\hat{f}_{\ell,p}|^2 \]
+
+\textbf{Discretization}: At points $\{x_i\}_{i=1}^n$:
+\[ \hat{f}_{\ell,p} \approx \sum_{i=1}^n c_i f(x_i) Y_{\ell,p}(x_i) \]
+
+\textbf{Final matrix form}: $\mathcal{L}_s[f] \approx f^T P_s f$ where $f = (f(x_1), \ldots, f(x_n))^T$.
+
+\subsection{Spectral Properties and Dimension Growth}
+
+The dimension of spherical harmonic spaces grows as:
+\[ N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!} \quad \text{as } \ell \to \infty \]
+
+This exponential growth in dimension determines the computational complexity of the Sobolev operator discretization.
+
+\subsection{Common Eigenfunctions Property}
+
+\begin{theorem}[Spherical Harmonics as Common Eigenfunctions]
+For rotationally invariant kernels on $\mathbb{S}^{d-1}$:
+\begin{itemize}
+\item NTK operator $K^{\infty}$ and Sobolev operator $P_s$ share spherical harmonics $Y_{\ell,p}$ as eigenfunctions
+\item This is due to rotational invariance and Schur's lemma for irreducible representations
+\item Enables direct spectral modification analysis
+\end{itemize}
+\end{theorem}
+
+\begin{theorem}[Commutation Property]
+The NTK operator $K^{\infty}$ and Sobolev operator $P_s$ commute:
+\[ [K^{\infty}, P_s] = 0 \]
+This holds for any sampling distribution $\rho(x)$ on $\mathbb{S}^{d-1}$ and implies that spectral decompositions are compatible.
+\end{theorem}
+
+\newpage
+
+\section{Deep NTK Analysis and Theoretical Results}
+
+\subsection{NTK at Edge of Chaos}
+
+For MLPs with $(a,b)$-ReLU activation $\phi(s) = as + b|s|$, the Edge of Chaos initialization requires:
+\begin{itemize}
+\item Initialization: $\sigma^2 = (a^2+b^2)^{-1}$
+\item Key parameter: $\Delta_\phi = \frac{b^2}{a^2+b^2}$ (for standard ReLU: $\Delta_\phi = 0.5$)
+\item Cosine map: $\varrho(\rho) = \rho + \Delta_\phi \frac{2}{\pi}\left( \sqrt{1-\rho^2} - \rho \arccos(\rho) \right)$
+\end{itemize}
+
+The Edge of Chaos is the unique initialization that remains invariant to network depth, preventing activation explosion or vanishing.
+
+\section{Reconciling NTK matrix spectrum and Sobolev Training}
+
+\subsection{A Unified Spectral Viewpoint: Commutation and Eigenvalue Products}
+
+The reconciliation between the geometric view of the NTK (approximated by the inverse cosine distance matrix) and the functional view of Sobolev training lies in their shared algebraic structure.
+
+\begin{itemize}
+    \item \textbf{Shared Invariance}: Both the NTK matrix $K$ and the discrete Sobolev operator matrix $P_s$ are rotationally invariant. This means their entries $(K)_{ij}$ and $(P_s)_{ij}$ depend only on the inner product $\langle x_i, x_j \rangle$.
+    
+    \item \textbf{Matrix Commutation}: As a consequence, both matrices can be expressed as functions of the Gram matrix $G$ (where $G_{ij} = \langle x_i, x_j \rangle$). For two such matrices, $K=f(G)$ and $P_s=g(G)$, they commute:
+    \[ K P_s = f(G)g(G) = g(G)f(G) = P_s K \]
+    This is the discrete analogue of the commutation of their underlying continuous operators.
+    
+    \item \textbf{Simultaneous Diagonalization}: Since they commute, $K$ and $P_s$ are simultaneously diagonalizable. They share the same set of eigenvectors, which are the eigenvectors of the Gram matrix $G$.
+    
+    \item \textbf{Product of Eigenvalues}: The spectrum of the Sobolev-modified NTK operator, $K P_s$, which governs the learning dynamics, is directly given by the product of the individual spectra:
+    \[ \lambda_i(K P_s) = \lambda_i(K) \cdot \lambda_i(P_s) \]
+    (after aligning the eigenvector bases).
+\end{itemize}
+
+\textbf{Key Insight}: The challenge of analyzing the complex operator $K P_s$ is reduced to separately analyzing the spectra of $K$ and $P_s$. We can leverage the geometric approximation for $K$ and combine it with a spectral analysis of $P_s$.
+
+\subsection{A Path Forward: Geometric Approximation and Experimental Validation}
+
+Based on the unified spectral viewpoint, a clear research path emerges to develop a predictive model for Sobolev training dynamics.
+
+\textbf{Goal}: Develop a semi-analytic model for the spectrum of the Sobolev-modified NTK matrix $K P_s$.
+
+\textbf{Proposed Strategy}:
+
+\begin{enumerate}
+    \item \textbf{Approximate the NTK Spectrum}:
+    Use the established near-affine relationship between the NTK and the inverse cosine distance matrix $W_l$:
+    \[ K \approx A W_l + B \]
+    The spectrum of the geometric matrix $W_l$ can be analyzed to provide an approximation for the eigenvalues $\lambda_i(K)$.
+
+    \item \textbf{Analyze the Sobolev Operator Spectrum}:
+    The matrix $P_s$ is itself a kernel matrix with a well-defined kernel $p_s(t) = \sum_{\ell} (1+\ell)^{2s} N(d,\ell) P_\ell(t)$, where $P_\ell$ are Legendre polynomials. Its spectrum $\lambda_i(P_s)$ can be characterized:
+    \begin{itemize}
+        \item Analytically, through its kernel polynomial expansion.
+        \item Or by viewing it as a differential operator on the data manifold (graph), relating its spectrum to that of the graph Laplacian.
+    \end{itemize}
+
+    \item \textbf{Combine Spectra and Validate}:
+    The core prediction is that the eigenvalues of the learning operator are given by the product of the component eigenvalues:
+    \[ \lambda_i(K P_s) \approx \lambda_i(A W_l + B) \cdot \lambda_i(P_s) \]
+    
+    \textbf{Experimental Validation Plan}:
+    \begin{itemize}
+        \item For a dataset on $\mathbb{S}^{d-1}$, numerically compute the matrices $K$, $P_s$, and the product $K P_s$.
+        \item Compare the analytically predicted spectrum with the true, numerically computed spectrum of $K P_s$.
+        \item Investigate the quality of this approximation as a function of the Sobolev parameter $s$, dimension $d$, data size $n$, and network depth $l$.
+    \end{itemize}
+\end{enumerate}
+
+\begin{remark}[The Sobolev Operator as a Kernel Matrix]
+The statement that the discrete Sobolev operator matrix $P_s$ is itself a kernel matrix is a subtle but fundamental point. Here is a detailed derivation.
+
+\paragraph{1. Definition of the Matrix $P_s$}
+We start from its construction via projectors on the spherical harmonics:
+\[
+(P_s)_{ij} = \left( \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} a_{\ell,p}a_{\ell,p}^\top \right)_{ij}
+\]
+With the coefficient $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$, this becomes:
+\begin{align*}
+(P_s)_{ij} &= \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} (a_{\ell,p})_i (a_{\ell,p})_j \\
+&= \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} (c_i Y_{\ell,p}(x_i)) (c_j Y_{\ell,p}(x_j))
+\end{align*}
+
+\paragraph{2. Reorganization and Application of the Addition Theorem}
+We can factor out the quadrature weights $c_i, c_j$ and apply the spherical harmonic addition theorem, which is the key step.
+\[
+(P_s)_{ij} = c_i c_j \sum_{\ell=0}^{\ell_{\max}} (1+\ell)^{2s} \left[ \sum_{p=1}^{N(d,\ell)} Y_{\ell,p}(x_i) Y_{\ell,p}(x_j) \right]
+\]
+The addition theorem states that the term in brackets is a function only of the inner product $\langle x_i, x_j \rangle$:
+\[
+\sum_{p=1}^{N(d,\ell)} Y_{\ell,p}(x) Y_{\ell,p}(y) = K_\ell(\langle x, y \rangle)
+\]
+where $K_\ell(t) = \frac{N(d,\ell)}{\text{Area}(\mathbb{S}^{d-1})} P_\ell^{((d-2)/2)}(t)$ and $P_\ell^{(\lambda)}$ is a Gegenbauer polynomial.
+
+\paragraph{3. Definition of the Kernel $p_s(t)$}
+By substituting this back, we can define a kernel function $p_s(t)$ that depends only on the inner product $t = \langle x_i, x_j \rangle$:
+\[
+p_s(t) := \sum_{\ell=0}^{\ell_{\max}} (1+\ell)^{2s} K_\ell(t)
+\]
+Thus, the matrix element is indeed a weighted kernel evaluation:
+\[
+(P_s)_{ij} = c_i c_j \cdot p_s(\langle x_i, x_j \rangle)
+\]
+
+\paragraph{Conclusion}
+The matrix $P_s$ is a \textbf{weighted kernel matrix}. If the sampling is uniform, the weights $c_i$ are constant and $P_s$ becomes a standard kernel matrix (up to a scaling factor). This rotational invariance, shared with the NTK, is what guarantees that they commute.
+\end{remark}
+
+\subsection{Deep NTK Properties}
+
+The limiting NTK at EOC for $L$-layer networks is given by:
+\begin{align}
+K^{\infty}(\mathbf{x}_1, \mathbf{x}_2) &= \|\mathbf{x}_1\| \|\mathbf{x}_2\| \left( \sum_{k=1}^l \varrho^{\circ (k-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right) \right. \\
+&\quad \left. \times \prod_{k'=k}^{l-1} \varrho'\left(\varrho^{\circ (k'-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right)\right) \right) \mathbf{I}_{m_l}
+\end{align}
+
+\textbf{Eigenvalue Decay}: For $L$-layer ReLU networks with $L \geq 3$:
+\[ \mu_k \sim C(d, L)k^{-d} \]
+where $C(d, L)$ depends on the parity of $k$ and grows quadratically with $L$.
+
+For the normalized NTK $\kappa^L_{\text{NTK}}/L$, the constant $C(d, L)$ grows linearly with $L$.
+
+\subsection{Inverse Cosine Distance Matrix Analysis}
+
+\textbf{Inverse cosine distance matrix} $W_k$ for depth $k$:
+\[ {W_k}_{i,i} = 0, \quad {W_k}_{i_1,i_2} = \left( \frac{1 - \rho_k(x_{i_1},x_{i_2})}{2} \right)^{-\frac{1}{2}} \text{ for } i_1 \neq i_2 \]
+
+\textbf{Near-affine behavior}:
+\begin{itemize}
+\item NTK matrix $K^{\infty} \approx A \cdot W_l + B$ (affine dependence)
+\item Spectral bounds transfer from $W_k$ to NTK via this affine relationship  
+\item Error terms: $O(k^{-1})$ - decreases with depth
+\end{itemize}
+
+This relationship enables indirect analysis of NTK spectral properties through simpler geometric matrices.
+
+\section{Deep Narrow Neural Networks}
+
+\subsection{Scaled NTK at Initialization}
+
+\begin{theorem}[Theorem 1: Scaled NTK at Initialization]
+For $f^L_\theta$ initialized appropriately, as $L \to \infty$:
+\[ \tilde{\Theta}^L_0(x, x') \xrightarrow{p} \tilde{\Theta}^\infty(x, x') \]
+where
+\[ \tilde{\Theta}^\infty(x, x') = (x^T x' + 1 + \E_g[\sigma(g(x))\sigma(g(x'))]) I_{d_{out}} \]
+with $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random field).
+\end{theorem}
+
+\textbf{Alternative formulation}: $\kappa_1(\cos(u) \cdot v)$ where:
+\begin{itemize}
+\item $v = \frac{1}{1 + \beta^2/\alpha^2}$, where $\beta$ is the bias variance
+\item $\alpha = \frac{\|x\| \|x'\| \rho}{d_{in}}$, where $\cos(u)$ is the cosine distance between $x, x'$
+\end{itemize}
+
+This framework provides a promising direction for analyzing deep narrow networks through limited expansion analysis.
+
+\subsection{Research Perspectives for Deep Narrow Networks}
+
+\textbf{Architectural modifications}:
+   \begin{itemize}
+\item \textbf{Unit concatenation}: Combine multiple narrow networks to increase expressivity
+\item \textbf{Skip connections}: Investigate ResNet-style connections:
+  \[ \tilde{\Theta}^\infty_{\text{skip}}(x, x') = \tilde{\Theta}^\infty(x, x') + \text{skip terms} \]
+   \end{itemize}
+
+\textbf{Initialization studies}:
+\begin{itemize}
+\item \textbf{Alternative initializations}: Explore different schemes beyond current setup
+\item \textbf{$\beta \to 0$ limit}: Analyze behavior when bias variance vanishes:
+  \[ v = \frac{1}{1 + \beta^2/\alpha^2} \to 1 \text{ as } \beta \to 0 \]
+\item \textbf{Complex kernel structures}: Find initializations that yield more intricate kernel forms
+\end{itemize}
+
+\textbf{Theoretical extensions}:
+\begin{itemize}
+\item Extension of Hayou \& Yang's work on ResNets showing "wide and deep limits commute"
+\item Mean field analysis for deep narrow frameworks
+\item Careful analysis of stochasticity in initialization (not dropout)
+\item Experimental validation on practical tasks
+\end{itemize}
+
+
+
+
+
 \subsection{Analyse Spectrale du NTK et Bornes sur les Valeurs Propres}
 (Discussion sur la plus grande valeur propre du NTK. Présentation des théorèmes de Terjek et du plan de preuve pour obtenir une borne sur la plus petite valeur propre en utilisant la RMT.)
+
+
+
+\section{Mathematical Foundation: Concentration Inequalities}
+
+\subsection{Scalar Concentration Inequalities}
+
+The foundation of modern NTK analysis rests on powerful concentration inequalities that control the deviation of random variables from their expectations.
+
+\begin{theorem}[Chernoff Bound for Bounded Random Variables]
+Let $X_1, \ldots, X_n$ be independent random variables with $X_i \in [0,1]$ and $\E[X_i] = \mu_i$. Let $S = \sum_{i=1}^n X_i$ and $\mu = \E[S] = \sum_{i=1}^n \mu_i$. Then:
+$$\Pr(S \geq (1+\delta)\mu) \leq e^{-\frac{\delta^2 \mu}{2+\delta}}$$
+$$\Pr(S \leq (1-\delta)\mu) \leq e^{-\frac{\delta^2 \mu}{2}}$$
+for $\delta > 0$.
+\end{theorem}
+
+3\begin{theorem}[Bernstein's Inequality]
+Let $X_1, \ldots, X_n$ be independent random variables with $\E[X_i] = 0$, $|X_i| \leq M$, and $\E[X_i^2] \leq \sigma_i^2$. Let $S = \sum_{i=1}^n X_i$ and $\sigma^2 = \sum_{i=1}^n \sigma_i^2$. Then:
+$$\Pr(|S| \geq t) \leq 2\exp\left(-\frac{t^2/2}{\sigma^2 + Mt/3}\right)$$
+\end{theorem}
+
+\subsection{Quadratic Forms and Hanson-Wright Inequalities}
+
+For neural networks, we frequently encounter quadratic forms in random variables, necessitating more sophisticated concentration tools.
+
+\begin{theorem}[Classical Hanson-Wright Inequality]
+Let $Y_1, \ldots, Y_n$ be independent mean-zero $\alpha$-subgaussian random variables, and $\mathbf{A} = (a_{i,j})$ be a symmetric matrix. Then:
+$$\Pr\left(\left|\sum_{i,j=1}^n a_{i,j}(Y_i Y_j - \E[Y_i Y_j])\right| \geq t\right) \leq 2\exp\left(-\frac{1}{C}\min\left\{\frac{t^2}{\beta^4\|\mathbf{A}\|_{HS}^2}, \frac{t}{\beta^2\|\mathbf{A}\|_{op}}\right\}\right)$$
+\end{theorem}
+
+where $\|\mathbf{A}\|_{HS} = \sqrt{\sum_{i,j} |a_{i,j}|^2}$ is the Hilbert-Schmidt norm and $\|\mathbf{A}\|_{op}$ is the operator norm.
+
+\begin{theorem}[Generalized Hanson-Wright for Random Tensors (Chang, 2022)]
+For random tensor vector $\overline{\mathcal{X}} \in \C^{(n \times I_1 \times \cdots \times I_M) \times (I_1 \times \cdots \times I_M)}$ and fixed tensor $\overline{\overline{\mathcal{A}}}$, the polynomial function:
+$$f_j(\overline{\mathcal{X}}) = \left(\sum_{i,k=1}^n \mathcal{A}_{i,k} \star_M (\mathcal{X}_i - \E[\mathcal{X}_i]) \star_M (\mathcal{X}_k - \E[\mathcal{X}_k])\right)^j$$
+satisfies concentration bounds involving Ky Fan $k$-norms of tensor sums, extending classical matrix concentration to tensor settings.
+\end{theorem}
+
+\subsection{Matrix Concentration Inequalities}
+
+Matrix concentration inequalities provide direct control over eigenvalues of random matrix sums, which is essential for NTK analysis.
+
+\begin{theorem}[Matrix Chernoff Bound (Tropp, 2012)]
+Let $X_1, \ldots, X_n$ be independent random Hermitian matrices with $X_i \preceq R \cdot I$ and $\E[X_i] \preceq \mu \cdot I$. Let $S = \sum_{i=1}^n X_i$. Then:
+$$\Pr(\lambda_{\max}(S) \geq (1+\delta)\mu n) \leq d \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^{\mu n / R}$$
+\end{theorem}
+
+\begin{theorem}[Matrix Bernstein Inequality (Vershynin, 2018)]
+Let $X_1, \ldots, X_n$ be independent random matrices with $\E[X_i] = 0$, $\|X_i\| \leq L$, and $\left\|\sum_{i=1}^n \E[X_i X_i^*]\right\| \leq \sigma^2$. Then:
+$$\Pr\left(\left\|\sum_{i=1}^n X_i\right\| \geq t\right) \leq 2d \exp\left(-\frac{t^2/2}{\sigma^2 + Lt/3}\right)$$
+\end{theorem}
+
+\section{Fundamental Mathematical Tools}
+
+\subsection{Matrix Analysis Techniques}
+
+\begin{lemma}[Weyl's Inequality]
+For Hermitian matrices $A, B$:
+$$\lambda_i(A) + \lambda_n(B) \leq \lambda_i(A + B) \leq \lambda_i(A) + \lambda_1(B)$$
+\end{lemma}
+
+\begin{lemma}[Schur Product Theorem]
+For PSD matrices $P, Q$:
+$$\evmin{P \circ Q} \geq \evmin{P} \min_i Q_{ii}$$
+\end{lemma}
+
+\begin{lemma}[Gershgorin Circle Theorem]
+For matrix $A = (a_{ij})$, all eigenvalues lie in the union of discs:
+$$\bigcup_{i=1}^n \left\{z \in \C : |z - a_{ii}| \leq \sum_{j \neq i} |a_{ij}|\right\}$$
+\end{lemma}
+
+\subsection{Specialized Neural Network Tools}
+
+\begin{definition}[Khatri-Rao Product]
+For matrices $A \in \R^{m \times k}$ and $B \in \R^{n \times k}$, the Khatri-Rao product $A \star B \in \R^{mn \times k}$ is the column-wise Kronecker product.
+\end{definition}
+
+\begin{definition}[Hadamard Power]
+For matrix $A$ and positive integer $r$, the $r$-th Hadamard power $A^{\odot r}$ is the element-wise $r$-th power.
+\end{definition}
+
+\newpage
+
+\section{Proof Schemes and High-Level Strategies}
+
+\subsection{General Framework for Eigenvalue Bounds}
+
+All modern approaches to bounding $\lambdaMin(\KNTK)$ follow a common high-level structure, though they differ in technical details and specific tools employed.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+    % Define styles
+    \tikzset{
+        box/.style={rectangle, draw, thick, minimum width=3cm, minimum height=1.2cm, text centered, fill=blue!15},
+        arrow/.style={->, thick, blue!70}
+    }
+
+    % Main boxes
+    \node[box] (step1) at (0,4) {\textbf{Step 1} \\ Problem Decomposition};
+    \node[box] (step2) at (0,2) {\textbf{Step 2} \\ Concentration Analysis};
+    \node[box] (step3) at (0,0) {\textbf{Step 3} \\ Spectral Analysis};
+
+    % Arrows
+    \draw[arrow] (step1) -- (step2);
+    \draw[arrow] (step2) -- (step3);
+
+    % Annotations
+    \node[align=left, text width=4cm] at (4.5,4) {
+        $\bullet$ Decompose NTK \\
+        $\bullet$ Identify key terms \\
+        $\bullet$ Separate components
+    };
+    
+    \node[align=left, text width=4cm] at (4.5,2) {
+        $\bullet$ Apply matrix bounds \\
+        $\bullet$ Control randomness \\
+        $\bullet$ High-probability results
+    };
+    
+    \node[align=left, text width=4cm] at (4.5,0) {
+        $\bullet$ Matrix inequalities \\
+        $\bullet$ Combine bounds \\
+        $\bullet$ Final $\lambda_{\min}$ result
+    };
+
+\end{tikzpicture}
+\caption{General Framework for NTK Eigenvalue Bounds}
+\end{figure}
+
+
+\newpage
+
+\subsection{Proof Scheme 1: Empirical NTK Decomposition (Nguyen et al.)}
+
+\textbf{High-Level Strategy}: Direct decomposition of empirical NTK $\bar{K}^{(L)} = JJ^T$ using feature matrices and chain rule to obtain precise bounds on $\lambdaMin$.
+
+\subsubsection{Step 1: Fundamental Chain Rule Decomposition}
+
+The proof begins by decomposing the empirical NTK $\bar{K}^{(L)} = JJ^T$ where $J$ is the Jacobian matrix \eqref{eq:Jac}. Applying the chain rule and standard algebraic manipulations yields the fundamental decomposition:
+
+\begin{align}
+\bar{K}^{(L)} = JJ^T = \sum_{k=0}^{L-1} F_k F_k^T \circ B_{k+1} B_{k+1}^T
+\end{align}
+
+where:
+\begin{itemize}
+    \item $F_k = [f_k(x_1), \ldots, f_k(x_N)]^T \in \R^{N \times n_k}$ are the \textbf{feature matrices} at layer $k$
+    \item $B_k \in \R^{N \times n_k}$ are the \textbf{derivative term matrices} with $i$-th row given by:
+\end{itemize}
+
+\begin{align}
+(B_k)_{i:} = \begin{cases}
+\Sigma_k(x_i) \left(\prod_{l=k+1}^{L-1} W_l \Sigma_l(x_i)\right) W_L, & k \in [L-2] \\
+\Sigma_{L-1}(x_i) W_L, & k = L-1 \\
+\frac{1}{\sqrt{N}} \mathbf{1}_N, & k = L
+\end{cases}
+\end{align}
+
+where $\Sigma_k(x) = \text{diag}([\sigma'(g_{k,j}(x))]_{j=1}^{n_k})$ is the diagonal matrix of activation derivatives.
+
+\subsubsection{Step 2: Application of Schur Product Theorem and Weyl's Inequality}
+
+For PSD matrices $P, Q \in \R^{n \times n}$, the Schur product theorem :
+\begin{align}
+\evmin{P \circ Q} \geq \evmin{P} \min_{i \in [n]} Q_{ii}
+\end{align}
+
+Applying this to each term, then using Weyl's inequality for the sum:
+
+\begin{align}
+\evmin{JJ^T} &\geq \sum_{k=0}^{L-1} \evmin{F_k F_k^T \circ B_{k+1} B_{k+1}^T} \\
+&\geq \sum_{k=0}^{L-1} \evmin{F_k F_k^T} \min_{i \in [N]} \|(B_{k+1})_{i:}\|_2^2
+\end{align}
+
+This reduction separates the problem into:
+\begin{enumerate}
+    \item The \textbf{minimum eigenvalues of feature Gram matrices}: $\evmin{F_k F_k^T}$
+    \item The \textbf{minimum row norms of derivative matrices}: $\min_{i \in [N]} \|(B_{k+1})_{i:}\|_2^2$
+\end{enumerate}
+
+\subsubsection{Step 3: Bounding Feature Matrix Eigenvalues}
+
+To bound $\evmin{F_k F_k^T}$, the strategy uses Chernoff-type matrix concentration. The fundamental bound is given by:
+\begin{lemma}[Matrix Concentration for Features]
+Let $\lambda = \evmin{\E_{w \sim \mathcal{N}(0, \beta_k^2 \mathbf{I}_{n_{k-1}})}[\sigma(F_{k-1}w)\sigma(F_{k-1}w)^T]}$. If 
+\begin{align}
+n_k \geq \max\left(N, c Q \max(1, \log(4Q)) \log\frac{N}{\delta}\right)
+\end{align}
+where $Q = \frac{\beta_k^2 \|F_{k-1}\|_F^2}{\lambda}$, then with probability at least $1-\delta$:
+\begin{align}
+\svmin{F_k}^2 \geq \frac{n_k \lambda}{4}
+\end{align}
+
+This lemma assumes that:
+\begin{itemize}
+\item The width $n_k$ of layer $k$ is sufficiently large compared to the number of samples $N$
+\item The feature matrix $F_{k-1}$ from the previous layer has bounded Frobenius norm
+\end{itemize}
+These conditions ensure concentration of the minimum singular value of the feature matrix around its expected value.
+\end{lemma}
+
+\subsubsection{Step 4: Spectral Analysis via Hermite Expansion}
+
+To bound $\lambda$, we use the Hermite expansion of the ReLU. and exploiting the homogeneity of $\sigma$ (unless, generalized hermite):
+
+\begin{align}
+\lambda &= \evmin{\E[\sigma(F_{k-1}w)\sigma(F_{k-1}w)^T]} \\
+&= \evmin{D \E[\sigma(\hat{F}_{k-1}w)\sigma(\hat{F}_{k-1}w)^T] D}
+\end{align}
+
+where $D = \text{diag}(\|\{F_{k-1}\}_{i:}\|_2)$ and $\hat{F}_{k-1} = D^{-1}F_{k-1}$.
+
+Applying the Hermite expansion $\sigma(x) = \sum_{r=0}^{\infty} \mu_r(\sigma) H_r(x)$:
+
+\begin{align}
+\E[\sigma(\hat{F}_{k-1}w)\sigma(\hat{F}_{k-1}w)^T] = \mu_0(\sigma)^2 \mathbf{1}_N \mathbf{1}_N^T + \sum_{s=1}^{\infty} \mu_s(\sigma)^2 (\hat{F}_{k-1}^{*s})(\hat{F}_{k-1}^{*s})^T
+\end{align}
+
+where $\hat{F}_{k-1}^{*s}$ represents the $s$-th Khatri-Rao power of $\hat{F}_{k-1}$.
+
+\subsubsection{Step 5: Reduction to Khatri-Rao Powers}
+
+For an integer $r \geq 2$, we can lower bound:
+\begin{align}
+\lambda \geq \mu_r(\sigma)^2 \evmin{D(\hat{F}_{k-1}^{*r})(\hat{F}_{k-1}^{*r})^T D} = \mu_r(\sigma)^2 \frac{\evmin{(F_{k-1}^{*r})(F_{k-1}^{*r})^T}}{\max_{i \in [N]} \|(F_{k-1})_{i:}\|_2^{2(r-1)}}
+\end{align}
+
+\subsubsection{Step 6: Feature Centering and Hadamard Power Analysis}
+
+To analyze $(F_{k-1}^{*r})(F_{k-1}^{*r})^T = (F_{k-1}F_{k-1}^T)^{\circ r}$, we introduce centered features $\tilde{F}_{k-1} = F_{k-1} - \E_X[F_{k-1}]$. 
+
+Let $\mu = \E_x[f_{k-1}(x)] \in \R^{n_{k-1}}$ and $\Lambda = \text{diag}(F_{k-1}\mu - \|\mu\|_2^2 \mathbf{1}_N)$. Then:
+
+\begin{align}
+(F_{k-1}^{*r})(F_{k-1}^{*r})^T = (F_{k-1}F_{k-1}^T)^{\circ r} \succeq \left(\tilde{F}_{k-1}\tilde{F}_{k-1}^T - \frac{\Lambda \mathbf{1}_N \mathbf{1}_N^T \Lambda}{\|\mu\|_2^2}\right)^{\circ r}
+\end{align}
+
+\subsubsection{Step 7: Application of Gershgorin Circle Theorem}
+
+To bound the minimum eigenvalue of $(\tilde{F}_{k-1}\tilde{F}_{k-1}^T)^{\circ r}$, we apply the Gershgorin circle theorem:
+
+\begin{align}
+\evmin{(\tilde{F}_{k-1}^{*r})(\tilde{F}_{k-1}^{*r})^T} &\geq \min_{i \in [N]} \|(\tilde{F}_{k-1})_{i:}\|_2^{2r} - N \max_{i \neq j} |\langle (\tilde{F}_{k-1})_{i:}, (\tilde{F}_{k-1})_{j:} \rangle|^r
+\end{align}
+
+Using concentration properties of centered features, we show:
+\begin{align}
+\|(\tilde{F}_{k-1})_{i:}\|_2^{2r} &= \Theta\left(\left(d \prod_{l=1}^{k-1} n_l \beta_l^2\right)^r\right) \\
+N \max_{i \neq j} |\langle (\tilde{F}_{k-1})_{i:}, (\tilde{F}_{k-1})_{j:} \rangle|^r &= o\left(\left(d \prod_{l=1}^{k-1} n_l \beta_l^2\right)^r\right)
+\end{align}
+
+with exponentially high probability.
+
+\subsubsection{Step 8: Bounding Derivative Term Norms, very technical}
+
+To bound $\min_{i \in [N]} \|(B_{k+1})_{i:}\|_2^2$, we analyze each case:
+
+For $k \in [L-2]$:
+\begin{align}
+\|(B_{k+1})_{i:}\|_2^2 &= \|\Sigma_{k+1}(x_i) \left(\prod_{l=k+2}^{L-1} W_l \Sigma_l(x_i)\right) W_L\|_2^2 \\
+&= \Theta\left(\beta_L^2 n_{k+1} \prod_{l=k+2}^{L-1} n_l \beta_l^2\right)
+\end{align}
+
+This bound uses some very technical and important tools:
+\begin{itemize}
+    \item \textbf{Operator norm for  concentration of Gaussian matrices}
+    \item \textbf{Inductive analysis of random matrix products for every layer}
+    \item \textbf{Properties of derivative matrices $\Sigma_l(x)$ for every layer}
+\end{itemize}
+
+\subsubsection{Step 9: Final Assembly and Width Optimization}
+
+Combining all bounds via union bound yields:
+
+\begin{align}
+\evmin{\bar{K}^{(L)}} &\geq \sum_{k=0}^{L-1} \mu_r(\sigma)^2 \Theta\left(d \prod_{l=1}^k n_l \beta_l^2\right) \Theta\left(\beta_L^2 \prod_{l=k+1}^{L-1} n_l \beta_l^2\right) \\
+&= \mu_r(\sigma)^2 \Theta\left(d \beta_L^2 \sum_{k=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
+\end{align}
+
+The width condition requires at least one layer to satisfy:
+\begin{align}
+n_k = \tilde{\Omega}(N \log N), \quad \text{with } \xi_k = 1
+\end{align}
+
+where $\xi_k$ indicates layer $k$ is "wide".
+
+\subsubsection{Upper Bound via Diagonal Analysis}
+
+For the upper bound, we use:
+\begin{align}
+\evmin{JJ^T} &\leq (JJ^T)_{11} = \sum_{k=0}^{L-1} \|(F_k)_{1:}\|_2^2 \|(B_{k+1})_{1:}\|_2^2 \\
+&= \sum_{k=0}^{L-1} \|f_k(x_1)\|_2^2 \|(B_{k+1})_{1:}\|_2^2 \\
+&= \mathcal{O}\left(d \beta_L^2 \sum_{k=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
+\end{align}
+
+\subsubsection{Final Result}
+
+Assuming $\beta_l = 1$ for simplicity and that some layer $k^*$ satisfies $n_{k^*} = \tilde{\Omega}(N)$, the main theorem gives:
+
+\begin{align}
+\mu_r(\sigma)^2 \Omega(d) \leq \evmin{\bar{K}^{(L)}} \leq \mathcal{O}(d L)
+\end{align}
+
+with probability at least $1 - \text{poly}(N) \exp(-\Omega(\min_l n_l))$.
+
+This approach significantly reduces width requirements compared to classical methods, requiring only one wide layer rather than all layers.
+
+
+
+
+
+
 
 \section{Corrections à Largeur Finie et Régimes d'Apprentissage}
 

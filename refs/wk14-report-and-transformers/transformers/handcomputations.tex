@@ -331,6 +331,36 @@ We can now posit a more realistic hypothesis for the dominant logit: the "bulk" 
 
 This large, outlier correlation coefficient provides a physical mechanism that creates the dominant logit, making the perturbative expansion not just a statistical assumption based on extreme value theory, but a direct consequence of the geometric structure of the embedding space. This hypothesis is, in principle, \textbf{numerically verifiable} by analyzing the distribution of scalar products between word embeddings in pre-trained models.
 
+\subsubsection{Remarque sur la concentration en grande dimension}
+
+Pour affiner l'argument précédent sur la géométrie des plongements, nous pouvons calculer explicitement la variance du produit scalaire de deux vecteurs aléatoires.
+
+En notant $X, Y$ deux vecteurs unitaires i.i.d. et uniformes sur la sphère $S^{d-1}$ et $Z = X \cdot Y = \cos\theta \in [-1, 1]$, on sait que $Z$ a pour densité de probabilité $f(z) \propto (1-z^2)^{(d-3)/2}$. Nous nous intéressons à la variance de $|Z|$.
+
+Deux faits sont utiles :
+\begin{itemize}
+    \item L'espérance de $Z$ est nulle par symétrie, donc $\mathbb{E}[Z^2] = \text{Var}(Z) = \frac{1}{d}$.
+    \item L'espérance de $|Z|$ s'obtient exactement par intégration :
+    \[
+    \mathbb{E}[|Z|] = \frac{\Gamma(\frac{d}{2})}{\sqrt{\pi} \Gamma(\frac{d-1}{2})}
+    \]
+\end{itemize}
+Comme $|Z|^2 = Z^2$, on a donc :
+\[
+\text{Var}(|Z|) = \mathbb{E}[Z^2] - (\mathbb{E}[|Z|])^2 = \mathbb{E}[Z^2] - (\mathbb{E}[|Z|])^2 = \frac{1}{d} - \left[ \frac{\Gamma(\frac{d}{2})}{\sqrt{\pi} \Gamma(\frac{d-1}{2})} \right]^2
+\]
+
+\paragraph{Comportement asymptotique en grande dimension.}
+En utilisant l'approximation de Stirling pour la fonction Gamma, qui implique $\Gamma(z+\frac{1}{2}) / \Gamma(z) \sim \sqrt{z}$ quand $z \to \infty$, on obtient les équivalents suivants :
+\[
+\mathbb{E}[|Z|] \sim \sqrt{\frac{2}{\pi d}}
+\]
+et par conséquent :
+\[
+\text{Var}(|Z|) \sim \left(1 - \frac{2}{\pi}\right) \frac{1}{d} \approx \frac{0.36338}{d}
+\]
+Ainsi, à cause de la \textit{malédiction de la dimension}, non seulement l'espérance du produit scalaire est nulle, mais la variance de sa valeur absolue $|X \cdot Y|$ décroît en $\Theta(1/d)$. Ceci justifie rigoureusement l'hypothèse que les produits scalaires entre des plongements aléatoires sont typiquement petits et concentrés autour de zéro.
+
 \subsection{Comparison of Taylor Expansion Strategies}
 Given the assumption of a dominant logit, we can factorize the partition function $Z_a$:
 \[
