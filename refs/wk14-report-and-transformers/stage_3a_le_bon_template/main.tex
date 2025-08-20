@@ -323,71 +323,62 @@ where $\omega_{d-2}$ is the surface area of $\mathbb{S}^{d-2}$ and $\bar{f}(t)$ 
 \mu_\ell = \frac{2\pi^{d/2}}{\Gamma(d/2)} \int_{-1}^1 \tilde{K}^{\infty}(t)P_\ell^{((d-2)/2)}(t)(1-t^2)^{(d-3)/2}dt
 \]
 where $P_\ell^{(\alpha)}$ are the Gegenbauer polynomials. The eigenvalues $\mu_\ell$ exhibit polynomial decay characterized by $\mu_\ell \sim \ell^{-d}$, reflecting the smoothness and regularity properties of the kernel function. The multiplicity of each eigenvalue $\mu_\ell$ is given by the dimension of the corresponding spherical harmonic space, which grows as $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$ for large $\ell$, indicating the increasing complexity of higher-order harmonics.
-
-\section{Sobolev Training and NTK Spectral Modification}
-
 \subsection{NTK-Sobolev Operator Framework}
 
-The key innovation in Sobolev training is the modification of the standard $L^2$ loss to incorporate high-order derivatives. The NTK-Sobolev operator $P_s$ acts on the sphere $\mathbb{S}^{d-1}$ with the commutation property:
+The NTK-Sobolev framework integrates the Neural Tangent Kernel with Sobolev training by constructing a composite operator that incorporates high-order derivative information. The key innovation lies in modifying the standard $L^2$ loss to penalize the Sobolev norm, thereby controlling the smoothness of learned functions on the sphere $\mathbb{S}^{d-1}$.
 
-\textbf{Spherical Harmonics Transform}: Let $\mathcal{F}$ denote the mapping from $L^2(\mathbb{S}^d)$ to the spectral domain $\bigoplus_{\ell=0}^{\infty} \mathbb{C}^{N(d,\ell)}$, where $N(d,\ell)$ is the dimension of the $\ell$-th spherical harmonic space.
+\textbf{Definition of the Sobolev Operator}: The Sobolev operator $P_s$ acts on $L^2(\mathbb{S}^{d-1})$ through its spectral representation:
+\[ P_s = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} P_{\ell,p} \]
+where $P_{\ell,p}$ denotes the orthogonal projection onto the span of the spherical harmonic $Y_{\ell,p}$, and $s > 0$ controls the strength of the Sobolev regularization.
 
-The Sobolev operator $P_s$ is defined through its action in Fourier space:
-\[ P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s}P_{\ell,p} \]
+\textbf{Discrete Matrix Formulation}: For data points $\{x_i\}_{i=1}^n \subset \mathbb{S}^{d-1}$, the discrete Sobolev operator matrix has entries:
+\[ (P_s)_{ij} = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} Y_{\ell,p}(x_i) Y_{\ell,p}(x_j) \]
+where $\ell_{\max}$ is chosen to ensure adequate spectral resolution.
 
-where $P_{\ell,p} = a_{\ell,p}a_{\ell,p}^T$ with spectral coefficients $(a_{\ell,p})_i = c_iY_{\ell,p}(x_i)$.
+\subsection{Sobolev Loss Formulation and Spectral Decomposition}
 
-\subsection{From Sobolev Loss to Discrete Matrix Operator}
+The Sobolev loss functional extends the standard $L^2$ norm by incorporating gradient penalties:
+\[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x)^2 d\sigma(x) + \int_{\mathbb{S}^{d-1}} \|\nabla f(x)\|^2 d\sigma(x) \]
 
-\textbf{Sobolev loss with gradients}:
-\[ \mathcal{L}_s[f] = \|f\|_{L^2}^2 + \|\nabla f\|_{L^2}^2 = \int_{\mathbb{S}^d} f(x)^2 d\sigma(x) + \int_{\mathbb{S}^d} \|\nabla f(x)\|^2 d\sigma(x) \]
+Through Fourier analysis on the sphere, this admits the spectral representation:
+\[ \mathcal{L}_s[f] = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell(\ell+d-2))^s |\hat{f}_{\ell,p}|^2 \]
+where $\hat{f}_{\ell,p} = \int_{\mathbb{S}^{d-1}} f(x) Y_{\ell,p}(x) d\sigma(x)$ are the spherical harmonic coefficients.
 
-\textbf{Fourier decomposition}: For $f(x) = \sum_{\ell,p} \hat{f}_{\ell,p} Y_{\ell,p}(x)$:
-\[ \mathcal{L}_s[f] = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1+\ell)^{2s} |\hat{f}_{\ell,p}|^2 \]
+For discrete data, the coefficients are approximated as:
+\[ \hat{f}_{\ell,p} \approx \frac{1}{n} \sum_{i=1}^n f(x_i) Y_{\ell,p}(x_i) \]
+yielding the matrix form $\mathcal{L}_s[f] \approx f^T P_s f$ for $f = (f(x_1), \ldots, f(x_n))^T$.
 
-\textbf{Discretization}: At points $\{x_i\}_{i=1}^n$:
-\[ \hat{f}_{\ell,p} \approx \sum_{i=1}^n c_i f(x_i) Y_{\ell,p}(x_i) \]
+\subsection{Theoretical Properties and Spectral Analysis}
 
-\textbf{Final matrix form}: $\mathcal{L}_s[f] \approx f^T P_s f$ where $f = (f(x_1), \ldots, f(x_n))^T$.
-
-\subsection{Spectral Properties and Dimension Growth}
-
-The dimension of spherical harmonic spaces grows as:
-\[ N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!} \quad \text{as } \ell \to \infty \]
-
-This exponential growth in dimension determines the computational complexity of the Sobolev operator discretization.
-
-\subsection{Common Eigenfunctions Property}
-
-\begin{theorem}[Spherical Harmonics as Common Eigenfunctions]
-For rotationally invariant kernels on $\mathbb{S}^{d-1}$:
-\begin{itemize}
-\item NTK operator $K^{\infty}$ and Sobolev operator $P_s$ share spherical harmonics $Y_{\ell,p}$ as eigenfunctions
-\item This is due to rotational invariance and Schur's lemma for irreducible representations
-\item Enables direct spectral modification analysis
-\end{itemize}
+\begin{theorem}[Common Eigenfunction Structure]
+The NTK operator $K^{\infty}$ and Sobolev operator $P_s$ on $\mathbb{S}^{d-1}$ share spherical harmonics $\{Y_{\ell,p}\}$ as common eigenfunctions. Specifically:
+\begin{align}
+K^{\infty} Y_{\ell,p} &= \mu_\ell Y_{\ell,p} \\
+P_s Y_{\ell,p} &= (1+\ell)^{2s} Y_{\ell,p}
+\end{align}
+where $\mu_\ell$ are the NTK eigenvalues given by the Funk-Hecke integral.
 \end{theorem}
 
-\begin{theorem}[Commutation Property]
-The NTK operator $K^{\infty}$ and Sobolev operator $P_s$ commute:
-\[ [K^{\infty}, P_s] = 0 \]
-This holds for any sampling distribution $\rho(x)$ on $\mathbb{S}^{d-1}$ and implies that spectral decompositions are compatible.
+\begin{theorem}[Operator Commutation]
+The NTK and Sobolev operators commute on $L^2(\mathbb{S}^{d-1})$:
+\[ [K^{\infty}, P_s] = K^{\infty} P_s - P_s K^{\infty} = 0 \]
+This commutation property extends to their discrete matrix approximations under appropriate sampling conditions.
 \end{theorem}
 
-\newpage
+\textbf{Spectral Complexity}: The dimension growth $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$ for large $\ell$ determines the computational complexity of exact Sobolev operator construction, necessitating finite-rank approximations in practice.
 
-\section{Deep NTK Analysis and Theoretical Results}
+\subsection{Edge of Chaos Initialization for Deep Networks}
 
-\subsection{NTK at Edge of Chaos}
+For deep MLPs with parameterized ReLU activation $\phi(s) = as + b|s|$ where $a,b \in \mathbb{R}$, the Edge of Chaos initialization prevents gradient explosion or vanishing across network depth.
 
-For MLPs with $(a,b)$-ReLU activation $\phi(s) = as + b|s|$, the Edge of Chaos initialization requires:
+\textbf{Critical Parameters}:
 \begin{itemize}
-\item Initialization: $\sigma^2 = (a^2+b^2)^{-1}$
-\item Key parameter: $\Delta_\phi = \frac{b^2}{a^2+b^2}$ (for standard ReLU: $\Delta_\phi = 0.5$)
-\item Cosine map: $\varrho(\rho) = \rho + \Delta_\phi \frac{2}{\pi}\left( \sqrt{1-\rho^2} - \rho \arccos(\rho) \right)$
+\item Weight variance: $\sigma^2 = (a^2+b^2)^{-1}$
+\item Activation ratio: $\Delta_\phi = \frac{b^2}{a^2+b^2}$ (standard ReLU: $\Delta_\phi = 1/2$)
+\item Correlation map: $\varrho(\rho) = \rho + \Delta_\phi \frac{2}{\pi}\left( \sqrt{1-\rho^2} - \rho \arccos(\rho) \right)$
 \end{itemize}
 
-The Edge of Chaos is the unique initialization that remains invariant to network depth, preventing activation explosion or vanishing.
+At Edge of Chaos, the correlation function remains depth-invariant: $\varrho^{\circ L}(\rho) = \rho$ for all $L \geq 1$, ensuring stable signal propagation through the network.
 
 \section{Reconciling NTK matrix spectrum and Sobolev Training}
 
