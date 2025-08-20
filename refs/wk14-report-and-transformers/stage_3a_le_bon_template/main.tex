@@ -278,79 +278,51 @@ K^{\infty} = D \cdot R \cdot D = \begin{pmatrix}
 \end{pmatrix}
 \]
 where $\rho_{i,j} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$ represents the cosine distance between points $x_i$ and $x_j$.
-
-For general depth $L$ networks at EOC with bi-homogeneous leaky ReLU activation $\phi(x) = a\cdot\text{id}(x) + b\cdot|x|$, where $a,b \in \RR$ are fixed parameters, the NTK kernel function is:
+For general depth $L$ networks at EOC with bi-homogeneous leaky ReLU activation $\phi(x) = a\cdot\text{id}(x) + b\cdot|x|$, where $a,b \in \mathbb{R}$ are fixed parameters, the NTK kernel function is:
 \[
-K^{\infty}(\rho) = \left( \sum_{k=1}^L \color{blue}\Sigma_k(\rho) \prod_{k'=k+1}^L \color{red}\Sigma'_{k'}(\rho) \right) 
+\tilde{K}^{\infty}(\rho) = \left( \sum_{k=1}^L \varrho^{\circ (k-1)}(\rho) \prod_{k'=k+1}^L \varrho'(\varrho^{\circ (k'-2)}(\rho)) \right) 
 \]
-where $\color{blue}\Sigma_k$ and $\color{red}\Sigma'_k$ are defined recursively through Gaussian expectations:
-
+where $\varrho$ and $\varrho'$ are defined recursively through Gaussian expectations:
 \begin{align*}
 \rho_1(x_1,x_2) &= \frac{x_1^T x_2}{\|x_1\| \|x_2\|} \\
-\color{blue}\Sigma_1(x_1,x_2) &= \|x_1\| \|x_2\| \rho_1(x_1,x_2) \\
-\color{blue}\Sigma^{(k)}(x_1,x_2) &= \mathbb{E}_{f \sim \mathcal{N}(0, \color{blue}\Sigma^{(k-1)})} \left[ \phi(f(x_1)) \phi(f(x_2)) \right] + \sigma_w^2 \\
-\color{blue}\Sigma_k(x_1,x_2) &= \|x_1\| \|x_2\| \rho_k(x_1,x_2) \\
-\color{red}\Sigma'_k(x_1,x_2) &= \|x_1\| \|x_2\| \rho_k(x_1,x_2)
+\varrho(\rho) &= \mathbb{E}_{[u_1,u_2] \sim \mathcal{N}(0,\Sigma_u)} \ReLU(u_1) \ReLU(u_2) \text{ where } \Sigma_u = \begin{pmatrix} 1 & \rho \\ \rho & 1 \end{pmatrix} \\
+\varrho'(\rho) &= \mathbb{E}_{[u_1,u_2] \sim \mathcal{N}(0,\Sigma_u)} \ReLU'(u_1) \ReLU'(u_2) \text{ where } \Sigma_u = \begin{pmatrix} 1 & \rho \\ \rho & 1 \end{pmatrix} \\
+\varrho^{\circ k}(\rho) &= \underbrace{\varrho(\varrho(\cdots \varrho}_{k \text{ times}}(\rho) \cdots))
 \end{align*}
 
-for $k \in [2:L]$, where $\sigma = (a^2 + b^2)^{-\frac{1}{2}}$ at the Edge of Chaos initialization and $\phi$ is the activation function.
+for $k \in [2:L]$, where $\sigma^2 = (a^2 + b^2)$ at the Edge of Chaos initialization and $\phi$ is the activation function.
 
 For 2-layer ReLU networks, this simplifies to:
 \[
-\tilde{K}(\rho) = \color{blue}\arccos(-\color{red}\rho\color{blue})\color{black} \cdot \color{blue}\rho\color{black} + \color{red}\sqrt{1-\rho^2}\color{black}
+\tilde{K}^{\infty}(\rho) = \frac{1}{\pi}\left(\rho(\pi - \arccos(\rho)) + \sqrt{1-\rho^2}\right)
 \]
 
 \subsection{NTK Operator Structure and Spectral Analysis}
 
-The Neural Tangent Kernel operator $K^{\infty}$ acts on the space of square-integrable functions $L^2(\mathbb{S}^{d-1})$ through the integral representation:
+The Neural Tangent Kernel operator $K^{\infty}$ acts on $L^2(\mathbb{S}^{d-1})$ via:
 \[
-(K^{\infty} f)(x) = \int_{\mathbb{S}^{d-1}} k(x,y)f(y)d\sigma(y)
+(K^{\infty} f)(x) = \int_{\mathbb{S}^{d-1}} K^{\infty}(x,y)f(y)d\sigma(y)
 \]
-where $d\sigma$ is the uniform measure on the sphere. Due to rotational invariance, the kernel exhibits zonal symmetry:
+By rotational invariance, the kernel is zonal:
 \[
-k(x,y) = \tilde{K}_L^{\infty}(\langle x,y \rangle)
+K^{\infty}(x,y) = \tilde{K}^{\infty}(\langle x,y \rangle)
 \]
-for some function $\tilde{K}_L^{\infty}: [-1,1] \to \mathbb{R}$. This zonal structure allows application of the Funk-Hecke formula:
+where $\langle x,y \rangle = \frac{x^T y}{\|x\| \|y\|}$ is the cosine distance.
+
+We use fubini theorem using parametrization $y = \cos(\theta)x + \sin(\theta)u$ with $u \perp x$, $\|u\| = 1$, and setting $t = \cos(\theta)$:
 \[
-\int_{\mathbb{S}^{d-1}} \tilde{K}_L^{\infty}(\langle x,y \rangle)Y_{\ell,p}(y)d\sigma(y) = \lambda_\ell Y_{\ell,p}(x)
+(K^{\infty} f)(x) = \omega_{d-2} \int_{-1}^1 \tilde{K}^{\infty}(t) \bar{f}(t) (1-t^2)^{(d-3)/2} dt
 \]
-where
 \[
-\lambda_\ell = |\mathbb{S}^{d-2}| \int_{-1}^1 \tilde{K}_L^{\infty}(t)P_\ell^{(\frac{d-3}{2},\frac{d-3}{2})}(t)(1-t^2)^{\frac{d-3}{2}}dt
+= \int_{\mathbb{S}^{d-1}} K^{\infty}(x,y)f(y)d\sigma(y) = \omega_{d-2} \int_{-1}^1 \tilde{K}^{\infty}(t) \bar{f}(t) (1-t^2)^{(d-3)/2} dt
 \]
-and $P_\ell^{(\alpha,\beta)}$ are the Jacobi polynomials.
-\textbf{Spectral Properties}:
-\begin{table}[h!]
-\centering
-\begin{tabular}{|l|p{8cm}|}
-\hline
-\textbf{Property} & \textbf{Description} \\
-\hline
-Symmetry & The operator is symmetric positive definite by construction \\
-\hline
-Eigenfunctions & The eigenfunctions are spherical harmonics $Y_{\ell,p}$, forming a complete orthonormal basis \\
-\hline
-Eigenvalues & The eigenvalues $\mu_\ell$ exhibit polynomial decay: $\mu_\ell \sim \ell^{-d}$ \\
-\hline
-Multiplicity & The multiplicity of each eigenvalue $\mu_\ell$ is given by the dimension of the corresponding spherical harmonic space \\
-\hline
-\end{tabular}
-\end{table}
+where $\omega_{d-2}$ is the surface area of $\mathbb{S}^{d-2}$ and $\bar{f}(t)$ represents the average of $f$ over directions making angle $\arccos(t)$ with $x$.
 
-\subsection{Matrix Spectrum Results}
-
-The key scaling laws for the discrete NTK matrix are:
-
-\textbf{Condition Number}:
-\[ \kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l) \]
-The condition number grows linearly with data size $n$ but improves with depth $l$.
-
-\textbf{Eigenvalue Distribution}:
-\[ \lambda_{\text{min}} \sim \frac{3l}{4}, \quad \lambda_{\text{max}} \sim \frac{3nl}{4} \pm \xi \text{ where } \xi \sim \log(l) \]
-
-The minimum eigenvalue scales linearly with depth, while the maximum scales with both depth and data size.
-
-\textbf{Key Insight}: The training dynamics are dictated by the NTK matrix eigenvalues, not the operator eigenvalues. Deeper networks ($l \uparrow$) improve conditioning but with diminishing returns.
+\textbf{Spectral Properties and Funk-Hecke Theory}: The NTK operator possesses several important spectral properties that characterize its behavior on the sphere. The operator is symmetric positive definite by construction, guaranteeing the existence of a complete spectral decomposition with real, non-negative eigenvalues. The eigenfunctions are the spherical harmonics $Y_{\ell,p}$, which form a complete orthonormal basis of $L^2(\mathbb{S}^{d-1})$ and provide the natural coordinate system for analyzing functions on the sphere. Due to the zonal symmetry, the Funk-Hecke theorem applies, yielding eigenvalues $\mu_\ell$ given by:
+\[
+\mu_\ell = \frac{2\pi^{d/2}}{\Gamma(d/2)} \int_{-1}^1 \tilde{K}^{\infty}(t)P_\ell^{((d-2)/2)}(t)(1-t^2)^{(d-3)/2}dt
+\]
+where $P_\ell^{(\alpha)}$ are the Gegenbauer polynomials. The eigenvalues $\mu_\ell$ exhibit polynomial decay characterized by $\mu_\ell \sim \ell^{-d}$, reflecting the smoothness and regularity properties of the kernel function. The multiplicity of each eigenvalue $\mu_\ell$ is given by the dimension of the corresponding spherical harmonic space, which grows as $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$ for large $\ell$, indicating the increasing complexity of higher-order harmonics.
 
 \section{Sobolev Training and NTK Spectral Modification}
 
@@ -898,6 +870,21 @@ This holds for any sampling distribution $\rho(x)$ on $\mathbb{S}^{d-1}$ and imp
 \subsection{Analyse Spectrale du NTK et Bornes sur les Valeurs Propres}
 (Discussion sur la plus grande valeur propre du NTK. Présentation des théorèmes de Terjek et du plan de preuve pour obtenir une borne sur la plus petite valeur propre en utilisant la RMT.)
 
+
+\subsection{Matrix Spectrum Results}
+
+The key scaling laws for the discrete NTK matrix are:
+
+\textbf{Condition Number}:
+\[ \kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l) \]
+The condition number grows linearly with data size $n$ but improves with depth $l$.
+
+\textbf{Eigenvalue Distribution}:
+\[ \lambda_{\text{min}} \sim \frac{3l}{4}, \quad \lambda_{\text{max}} \sim \frac{3nl}{4} \pm \xi \text{ where } \xi \sim \log(l) \]
+
+The minimum eigenvalue scales linearly with depth, while the maximum scales with both depth and data size.
+
+\textbf{Key Insight}: The training dynamics are dictated by the NTK matrix eigenvalues, not the operator eigenvalues. Deeper networks ($l \uparrow$) improve conditioning but with diminishing returns.
 
 
 \section{Mathematical Foundation: Concentration Inequalities}
