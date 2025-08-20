@@ -76,8 +76,8 @@
 
 \author{Janis AIAD}
 \date{\today}
-\title{Analyse de la dynamique d'apprentissage des réseaux de neurones profonds à travers le prisme du Noyau de Tangente Neuronale}
-\subtitle{Contributions à la compréhension des corrections à largeur finie et des régimes d'apprentissage}
+\title{Analyse de la dynamique d'apprentissage des réseaux de neurones profonds à travers le prisme du NTK}
+\subtitle{Deeper or Wider ? A 1st answer under the NTK perspective}
 % pour changer de logo, ajoutez l'image dans un fomat PDF
 % ou image en la glissant à droite et remplacez typographix
 % par le nom de l'image, si vous ne voulez pas de logo, 
@@ -97,79 +97,160 @@
 	\tableofcontents
 \newpage
 
-
-\addcontentsline{toc}{section}{Résumé}
-\section*{Résumé}
-Ce rapport présente les résultats d'un stage de recherche axé sur l'étude de la dynamique d'apprentissage des réseaux de neurones profonds. Nous explorons les mécanismes sous-jacents à travers le formalisme du Noyau de Tangente Neuronale (NTK), en portant une attention particulière aux corrections à largeur finie. Nos travaux s'articulent autour de la décomposition du NTK via l'entraînement de Sobolev, l'analyse de son espace à noyau reproduisant (RKHS) et l'étude des valeurs propres extrêmes. Nous présentons des bornes théoriques pour la plus petite valeur propre du NTK en nous appuyant sur des techniques de matrices aléatoires (RMT). Ces résultats sont ensuite appliqués à l'analyse de différentes architectures, notamment les réseaux de neurones à propagation avant (FCNN), les réseaux à mémoire matricielle (MMNN) et les transformeurs. Nous discutons également des implications de nos découvertes pour les applications en calcul scientifique (SciML) et proposons des pistes pour de futures recherches.
+\addcontentsline{toc}{section}{Abstract}
+\section*{Abstract}
+This report presents the results of a research internship focused on studying the learning dynamics of deep neural networks. We explore the underlying mechanisms through the Neural Tangent Kernel (NTK) formalism, with particular attention to finite-width corrections. Our work revolves around the decomposition of the NTK via Sobolev training, the analysis of its reproducing kernel Hilbert space (RKHS), and the study of extreme eigenvalues. We present theoretical bounds for the smallest eigenvalue of the NTK using random matrix theory (RMT) techniques. These results are then applied to analyze different architectures, including feed-forward neural networks (FCNN), matrix memory neural networks (MMNN), and transformers. We also discuss the implications of our findings for scientific machine learning (SciML) applications and propose directions for future research.
 
 \newpage
 \addcontentsline{toc}{section}{Executive summary}
-\section*{Executive summary}
-(Executive summary placeholder)
+
 
 \newpage
 \addcontentsline{toc}{section}{Introduction}
 \section*{Introduction}
-L'étude de la dynamique d'apprentissage dans les réseaux de neurones profonds constitue un domaine de recherche fondamental. Le régime du Noyau de Tangente Neuronale (NTK) a fourni un cadre puissant pour analyser le comportement des réseaux infiniment larges, où la dynamique d'entraînement se linéarise. Cependant, les réseaux pratiques ont une largeur finie, ce qui introduit des corrections complexes et un comportement d'apprentissage des caractéristiques (feature learning). Ce rapport vise à approfondir notre compréhension de ces phénomènes.
+The study of learning dynamics in deep neural networks constitutes a fundamental research area. Our approach focuses on the desingularization of Sobolev training by decomposing the problem into two distinct contributions: an independent neural tangent kernel (NTK) and a Sobolev contribution. This decomposition relies on the commutation between integral operators and the fractional Laplace operator.
 
-Nous commençons par une analyse théorique du NTK, en présentant sa décomposition basée sur l'entraînement de Sobolev et en caractérisant son RKHS. Une partie centrale de nos travaux est consacrée à l'étude du spectre du NTK, où nous cherchons à borner ses plus petites valeurs propres à l'aide d'outils issus de la théorie des matrices aléatoires. Ces résultats théoriques sont ensuite mis en perspective à travers l'analyse de plusieurs architectures : FCNN, MMNN et transformeurs. Pour les FCNN, nous étudions les corrections à largeur finie et le scaling des paramètres. Pour les MMNN et les transformeurs, nous discutons des défis spécifiques liés à l'optimisation et des intuitions sur leurs performances.
+Our analysis continues with the study of NTK preconditioning through a freeze weights method, illustrated by neural networks factorizing low-rank weight matrices. This approach is supported by a rigorous approximation theorem. For classical feed-forward networks (FCNN), we develop a finite-width correction that proves particularly fruitful. Finally, we explore Transformers as an alternative solution, offering a new learning paradigm.
 
-Enfin, nous explorons les applications de nos travaux, notamment en SciML, et discutons de l'alignement entre les hypothèses théoriques et les observations empiriques. Nous abordons également des perspectives inspirées de la physique statistique pour interpréter la convergence des modèles vers l'équilibre.
+Across these different architectures, we study feature learning regimes and their scaling with network width. Our results rely on statistical physics tools to characterize model convergence and asymptotic behavior. This analysis enables a better understanding of finite-width corrections and their implications for the practical optimization of deep neural networks.
 
 
 \newpage
 \addcontentsline{toc}{section}{Notations}
 \section*{Notations}
-$\ReLU$ : La fonction d'activation ReLU (Rectified Linear Unit), définie par $\ReLU(x) = \max(0, x)$.
+$\ReLU$ : The ReLU (Rectified Linear Unit) activation function, defined as $\ReLU(x) = \max(0, x)$.
 \newline
-$\E[\cdot]$ : Espérance math    ématique.
+$\E[\cdot]$ : Mathematical expectation.
 \newline
-$\Var(\cdot)$ : Variance d'une variable aléatoire.
+$\Var(\cdot)$ : Variance of a random variable.
 \newline
-$\indic\{\cdot\}$ : Fonction indicatrice, valant 1 si la condition est vraie, 0 sinon.
+$\indic\{\cdot\}$ : Indicator function, equal to 1 if the condition is true, 0 otherwise.
 \newline
-$\dd x$ : Élément différentiel utilisé dans les intégrales.
+$\dd x$ : Differential element used in integrals.
+\newline
+$\Cov(\cdot,\cdot)$ : Covariance between two random variables.
+\newline
+$\Corr(\cdot,\cdot)$ : Correlation between two random variables.
+\newline
+$\mathbb{R}$ : Set of real numbers.
+\newline
+$\mathbb{N}$ : Set of natural numbers.
+\newline
+$\mathbb{S}^{d-1}$ : Unit sphere of dimension $d-1$.
+\newline
+$\nabla$ : Gradient operator.
+\newline
+$\Delta$ : Laplacian operator.
+\newline
+$\|\cdot\|$ : Euclidean norm.
+\newline
+$\langle \cdot,\cdot \rangle$ : Inner product.
+\newline
+$\mathcal{O}(\cdot)$ : Landau notation (big O).
+\newline
+$\tilde{\Omega}(\cdot)$ : Landau notation (big Omega tilde).
 
 \newpage
 
-\section{Cadre Théorique du Noyau de Tangente Neuronale}
+\section{Theoretical Framework of the Neural Tangent Kernel}
 
-\subsection{Entraînement de Sobolev et Décomposition du NTK}
-(Présentation des théorèmes sur la décomposition du NTK via le Sobolev training. Description du RKHS pour le noyau de Sobolev et le noyau de Laplace.)
-
-
-\section{Introduction: Eigenvalue Scaling Laws and Learning Dynamics}
-
+\subsection{Introduction: Eigenvalue Scaling Laws and Learning Dynamics}
+\subsubsection{The Neural Tangent Kernel}
 The Neural Tangent Kernel (NTK) has emerged as a fundamental tool for understanding the training dynamics of deep neural networks. For a neural network $f(\x; \theta)$ with parameters $\theta$, the NTK is defined as:
-$$K^{\infty}(x_i, x_j) = \left\langle \frac{\partial f(\x_i; \theta)}{\partial \theta}, \frac{\partial f(\x_j; \theta)}{\partial \theta} \right\rangle$$
+$$K^{\infty}(x_i, x_j) = \left\langle \frac{\partial f(\x_i; \theta)}{\partial \theta}, \frac{\partial f(\x_j; \theta)}{\partial \theta} \right\rangle = \sum_{k} \frac{\partial f(\x_i; \theta)}{\partial \theta_k} \frac{\partial f(\x_j; \theta)}{\partial \theta_k}$$
+
+For L2 gradient descent with learning rate $\eta$, the dynamics are given by:
+
+$$\frac{d}{dt}f_t(x) = -\eta \sum_{i=1}^n K^{\infty}(x,x_i)(f_t(x_i) - y_i)$$
+The following theorem from Jacot et al. \cite{jacot2020neuraltangentkernelconvergence} establishes the convergence of neural networks to their linearized version in the infinite width limit, along with the recursive kernel formulation:
+
+\begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018]
+Consider a neural network $f(\x;\theta)$ trained by gradient descent with infinitesimal learning rate. As the width of the hidden layers tends to infinity:
+
+1) The network converges to a Gaussian process with kernel $K^{\infty}$, with dynamics:
+$$\frac{\partial f_t(\x)}{\partial t} = -\eta \sum_{i=1}^n K^{\infty}(\x,\x_i)(f_t(\x_i) - y_i)$$
+
+2) The kernel follows the recursive formula for depth $l$:
+$$K^{(l)}(\x,\x') = \sigma_w^2 \cdot K^{(l-1)}(\x,\x') \cdot \E_{g \sim \mathcal{N}(0,\Sigma^{(l-1)})} [\phi'(g(\x))\phi'(g(\x'))]$$
+where $\Sigma^{(l)}$ is the covariance of pre-activations at layer $l$:
+$$\Sigma^{(l)}(\x,\x') = \sigma_w^2 \cdot \E_{g \sim \mathcal{N}(0,\Sigma^{(l-1)})} [\phi(g(\x))\phi(g(\x'))]$$
+with $\Sigma^{(0)}(\x,\x') = \x^\top\x'$ and $\phi$ the activation function.
+
+3) For ReLU networks, the correlation function $\dot{\Lambda}^{(l)}$ between gradients at layer $l$ is:
+$$\dot{\Lambda}^{(l)}(\rho) = \frac{1}{2\pi}\sqrt{1-\rho^2} + \frac{\rho}{2\pi}(\pi - \arccos(\rho))$$
+where $\rho = \frac{\Sigma^{(l)}(\x,\x')}{\sqrt{\Sigma^{(l)}(\x,\x)\Sigma^{(l)}(\x',\x')}}$
+\end{theorem}
+\subsubsection{The Sobolev Training}
+
+Sobolev training is an approach that incorporates derivative information into the learning process. For a function $f$ and target function $f^*$, the Sobolev training loss is defined as:
+
+$$\mathcal{L}_{\text{Sobolev}}(f) = \|f - f^*\|_{H^s}^2 = \sum_{k=0}^s \int_{\Omega} |D^k f(x) - D^k f^*(x)|^2 dx$$
+
+where $D^k$ denotes the $k$-th derivative operator and $H^s$ is the Sobolev space of order $s$. This formulation leads to several key properties:
+
+1) The loss incorporates both function values and derivatives up to order $s$
+2) Training in $H^s$ norm induces smoother function approximation
+3) The NTK eigenvalues exhibit polynomial decay related to the Sobolev order $s$
+
+For neural networks, this translates to augmenting the training data with derivative information:
+
+$$\mathcal{L}_{\text{discrete}}(f) = \sum_{i=1}^n \sum_{k=0}^s |D^k f(x_i) - D^k f^*(x_i)|^2$$
+
+This framework provides a natural connection between neural network training and classical function approximation theory in Sobolev spaces.
+
+\subsubsection{Two Equivalent Sobolev Norms}
+
+The Sobolev space $H^s(\Omega)$ can be equipped with two equivalent norms:
+
+1) \textbf{Gradient-Based Norm}: Defined using derivatives up to order $s$:
+$$\|f\|_{H^s}^2 = \sum_{k=0}^s \int_{\Omega} |D^k f(x)|^2 dx$$
+where $D^k$ represents the $k$-th derivative operator.
+
+2) \textbf{Fourier-Based Norm}: Defined using the Fourier transform $\hat{f}$:
+$$\|f\|_{H^s}^2 = \int_{\mathbb{R}^d} (1 + |\xi|^2)^s |\hat{f}(\xi)|^2 d\xi$$
+where $\xi$ represents the frequency variable.
+
+These norms are equivalent in the sense that there exist constants $c, C > 0$ such that:
+$$c\|f\|_{H^s,\text{grad}} \leq \|f\|_{H^s,\text{Four}} \leq C\|f\|_{H^s,\text{grad}}$$
+
+The gradient-based norm is more intuitive for implementation in neural network training, while the Fourier-based norm provides a natural connection to spectral properties and eigenvalue decay rates of the NTK operator.
+
+
+\subsection{The NN regression framework}
+
+In our analysis, we consider two distinct learning frameworks:
+
+1) \textbf{Standard Neural Network Regression}: Here we only observe output values $y_i$ for inputs $x_i$ (as in Fourier Neural Operators for instance), leading to the classical mean squared error loss:
+$$\mathcal{L}_{\text{MSE}}(f) = \sum_{i=1}^n |f(x_i) - y_i|^2$$
+The gradient descent dynamics follow:
+$$\frac{d}{dt}f_t(x) = -\eta \sum_{i=1}^n K^{\infty}(x,x_i)(f_t(x_i) - y_i)$$
+
+2) \textbf{Derivative-Augmented Learning}: We observe both outputs and derivatives, as in Sobolev training and Physics-Informed Neural Networks (PINNs) or DeepONet architectures, with loss:
+$$\mathcal{L}_{\text{deriv}}(f) = \sum_{i=1}^n \left(|f(x_i) - y_i|^2 + \sum_{k=1}^s |D^k f(x_i) - D^k y_i|^2\right)$$
+Leading to modified gradient dynamics incorporating derivative information.
+
+These frameworks result in different gradient descent trajectories and convergence behaviors, despite sharing the same underlying NTK structure. The choice between them depends on whether derivative information is available and beneficial for the specific learning task.
+
+The framework selection can be summarized by the following decision tree:
+
+\begin{tikzpicture}[
+    level 1/.style={sibling distance=6cm},
+    level 2/.style={sibling distance=3cm}
+]
+\node {Available Data}
+    child {node {Derivative Information Available}
+        child {node {Use Derivative-Augmented\\Learning}}
+    }
+    child {node {Only Function Values}
+        child {node {Use Fourier-Based\\Standard Regression}}
+    };
+\end{tikzpicture}
+
+
+
 
 \subsection{Key Objectives}
-
-This document addresses three fundamental objectives:
-\begin{enumerate}
-\item \textbf{Eigenvalue scaling laws}: Derive decay rates $\mu_\ell \sim \ell^{-\alpha}$ for NTK operator eigenvalues
-\item \textbf{Spectral impact on learning}: Understand how spectral properties determine learning dynamics  
-\item \textbf{Matrix vs. Operator relationship}: Analyze scaling laws for discrete matrix eigenvalues with respect to network depth $l$ and data size $n$
-\end{enumerate}
-
-\subsection{NTK Matrix vs. NTK Operator}
-
-A crucial distinction exists between:
-\begin{itemize}
-\item \textbf{NTK Matrix}: Discrete sampled version $K \in \mathbb{R}^{n \times n}$ with entries $K_{ij} = K^{\infty}(x_i, x_j)$
-\item \textbf{NTK Operator}: Continuous integral operator $(\mathcal{L}f)(x) = \int K^{\infty}(x,y)f(y)dy$
-\end{itemize}
-
-\textbf{Warning}: The eigenvalues of the sampled NTK matrix are \emph{not} the same as the NTK operator eigenvalues. The matrix spectrum provides discrete approximations that depend on the sampling strategy and data distribution.
-
-\subsection{Initialization: Edge of Chaos}
-
-All analysis assumes Edge of Chaos (EOC) initialization:
-\begin{itemize}
-\item Initialize weights as $w_{ij} \sim \mathcal{N}(0, \sigma_w^2/\text{fan-in})$ 
-\item For ReLU networks: $\sigma_w^2 = 2$ to maintain unit variance through layers
-\item This ensures activations neither explode nor vanish with depth
-\end{itemize}
+This document addresses three fundamental objectives: deriving decay rates $\mu_\ell \sim \ell^{-\alpha}$ for NTK operator eigenvalues, understanding how spectral properties determine learning dynamics, and analyzing scaling laws for discrete matrix eigenvalues with respect to network depth $l$ and data size $n$. A crucial distinction exists between the NTK Matrix (discrete sampled version $K \in \mathbb{R}^{n \times n}$ with entries $K_{ij} = K^{\infty}(x_i, x_j)$) and the NTK Operator (continuous integral operator $(\mathcal{L}f)(x) = \int K^{\infty}(x,y)f(y)dy$). It is important to note that the eigenvalues of the sampled NTK matrix are \emph{not} the same as the NTK operator eigenvalues - the matrix spectrum provides discrete approximations that depend on the sampling strategy and data distribution. All analysis assumes Edge of Chaos (EOC) initialization, where weights are initialized as $w_{ij} \sim \mathcal{N}(0, \sigma_w^2/\text{fan-in})$, with $\sigma_w^2 = 2$ for ReLU networks to maintain unit variance through layers, ensuring activations neither explode nor vanish with depth.
 
 \newpage
 
@@ -177,39 +258,84 @@ All analysis assumes Edge of Chaos (EOC) initialization:
 
 \subsection{Example NTK Matrix Structure}
 
-Consider a dataset of 3 points $x_1, x_2, x_3 \in \mathbb{R}^d$. The NTK matrix has entries:
+Consider a dataset of $n$ points $x_1, x_2, \ldots, x_n \in \RR^d$. The NTK matrix has entries:
 \[
-K^{\infty} = \begin{pmatrix} 
-k(x_1,x_1) & k(x_1,x_2) & k(x_1,x_3) \\
-k(x_2,x_1) & k(x_2,x_2) & k(x_2,x_3) \\
-k(x_3,x_1) & k(x_3,x_2) & k(x_3,x_3)
+K^{\infty} = D \cdot R \cdot D = \begin{pmatrix} 
+\|x_1\| & 0 & \cdots & 0 \\
+0 & \|x_2\| & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & \|x_n\|
+\end{pmatrix} \begin{pmatrix} 
+\tilde{K}(\rho_{1,1}) & \tilde{K}(\rho_{1,2}) & \cdots & \tilde{K}(\rho_{1,n}) \\
+\tilde{K}(\rho_{2,1}) & \tilde{K}(\rho_{2,2}) & \cdots & \tilde{K}(\rho_{2,n}) \\
+\vdots & \vdots & \ddots & \vdots \\
+\tilde{K}(\rho_{n,1}) & \tilde{K}(\rho_{n,2}) & \cdots & \tilde{K}(\rho_{n,n})
+\end{pmatrix} \begin{pmatrix} 
+\|x_1\| & 0 & \cdots & 0 \\
+0 & \|x_2\| & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & \|x_n\|
 \end{pmatrix}
 \]
+where $\rho_{i,j} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$ represents the cosine distance between points $x_i$ and $x_j$.
 
-For general depth $l$ networks at EOC, the NTK kernel function is:
-\begin{align}
-K^{\infty}(\mathbf{x}_1, \mathbf{x}_2) &= \|\mathbf{x}_1\| \|\mathbf{x}_2\| \left( \sum_{k=1}^l \varrho^{\circ (k-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right) \right. \\
-&\quad \left. \times \prod_{k'=k}^{l-1} \varrho'\left(\varrho^{\circ (k'-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right)\right) \right) \mathbf{I}_{m_l}
-\end{align}
+For general depth $L$ networks at EOC with bi-homogeneous leaky ReLU activation $\phi(x) = a\cdot\text{id}(x) + b\cdot|x|$, where $a,b \in \RR$ are fixed parameters, the NTK kernel function is:
+\[
+K^{\infty}(\rho) = \left( \sum_{k=1}^L \color{blue}\Sigma_k(\rho) \prod_{k'=k+1}^L \color{red}\Sigma'_{k'}(\rho) \right) 
+\]
+where $\color{blue}\Sigma_k$ and $\color{red}\Sigma'_k$ are defined recursively through Gaussian expectations:
+
+\begin{align*}
+\rho_1(x_1,x_2) &= \frac{x_1^T x_2}{\|x_1\| \|x_2\|} \\
+\color{blue}\Sigma_1(x_1,x_2) &= \|x_1\| \|x_2\| \rho_1(x_1,x_2) \\
+\color{blue}\Sigma^{(k)}(x_1,x_2) &= \mathbb{E}_{f \sim \mathcal{N}(0, \color{blue}\Sigma^{(k-1)})} \left[ \phi(f(x_1)) \phi(f(x_2)) \right] + \sigma_w^2 \\
+\color{blue}\Sigma_k(x_1,x_2) &= \|x_1\| \|x_2\| \rho_k(x_1,x_2) \\
+\color{red}\Sigma'_k(x_1,x_2) &= \|x_1\| \|x_2\| \rho_k(x_1,x_2)
+\end{align*}
+
+for $k \in [2:L]$, where $\sigma = (a^2 + b^2)^{-\frac{1}{2}}$ at the Edge of Chaos initialization and $\phi$ is the activation function.
 
 For 2-layer ReLU networks, this simplifies to:
 \[
-k(x_i,x_j) = x_i^T x_j \cdot \arccos(-\langle x_i,x_j \rangle) + \sqrt{1-\langle x_i,x_j \rangle^2}
+\tilde{K}(\rho) = \color{blue}\arccos(-\color{red}\rho\color{blue})\color{black} \cdot \color{blue}\rho\color{black} + \color{red}\sqrt{1-\rho^2}\color{black}
 \]
 
-\subsection{NTK Operator Structure}
+\subsection{NTK Operator Structure and Spectral Analysis}
 
-For functions $f,g \in L^2(\mathbb{S}^{d-1})$, the NTK operator acts as:
+The Neural Tangent Kernel operator $K^{\infty}$ acts on the space of square-integrable functions $L^2(\mathbb{S}^{d-1})$ through the integral representation:
 \[
 (K^{\infty} f)(x) = \int_{\mathbb{S}^{d-1}} k(x,y)f(y)d\sigma(y)
 \]
-
-\textbf{Key Properties}:
-\begin{itemize}
-\item Symmetric positive definite operator
-\item Eigenfunctions are spherical harmonics $Y_{\ell,p}$
-\item Eigenvalues decay polynomially: $\mu_\ell \sim \ell^{-d}$
-\end{itemize}
+where $d\sigma$ is the uniform measure on the sphere. Due to rotational invariance, the kernel exhibits zonal symmetry:
+\[
+k(x,y) = \tilde{K}_L^{\infty}(\langle x,y \rangle)
+\]
+for some function $\tilde{K}_L^{\infty}: [-1,1] \to \mathbb{R}$. This zonal structure allows application of the Funk-Hecke formula:
+\[
+\int_{\mathbb{S}^{d-1}} \tilde{K}_L^{\infty}(\langle x,y \rangle)Y_{\ell,p}(y)d\sigma(y) = \lambda_\ell Y_{\ell,p}(x)
+\]
+where
+\[
+\lambda_\ell = |\mathbb{S}^{d-2}| \int_{-1}^1 \tilde{K}_L^{\infty}(t)P_\ell^{(\frac{d-3}{2},\frac{d-3}{2})}(t)(1-t^2)^{\frac{d-3}{2}}dt
+\]
+and $P_\ell^{(\alpha,\beta)}$ are the Jacobi polynomials.
+\textbf{Spectral Properties}:
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|p{8cm}|}
+\hline
+\textbf{Property} & \textbf{Description} \\
+\hline
+Symmetry & The operator is symmetric positive definite by construction \\
+\hline
+Eigenfunctions & The eigenfunctions are spherical harmonics $Y_{\ell,p}$, forming a complete orthonormal basis \\
+\hline
+Eigenvalues & The eigenvalues $\mu_\ell$ exhibit polynomial decay: $\mu_\ell \sim \ell^{-d}$ \\
+\hline
+Multiplicity & The multiplicity of each eigenvalue $\mu_\ell$ is given by the dimension of the corresponding spherical harmonic space \\
+\hline
+\end{tabular}
+\end{table}
 
 \subsection{Matrix Spectrum Results}
 
@@ -3606,7 +3732,15 @@ N=128, D_IN=20, M=20 | 1.526 | 0.994 | 4
 
 
 
-
+@misc{jacot2020neuraltangentkernelconvergence,
+      title={Neural Tangent Kernel: Convergence and Generalization in Neural Networks}, 
+      author={Arthur Jacot and Franck Gabriel and Clément Hongler},
+      year={2020},
+      eprint={1806.07572},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/1806.07572}, 
+}
 
 \printbibliography
 
