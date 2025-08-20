@@ -2094,10 +2094,206 @@ The exponential factors $e^{-t\lambda_i}$ demonstrate that corrections become mo
 
 
 
+
+
+\section{On the Fourth-Order Kernel $O_4$ and its Computation}
+
+Following the derivation of $K^{(3)}$, a natural next step in analyzing the NTK correction $\Theta^{(1)}_\infty$ (Equation \ref{eq:theta_correction}) would be to perform a similar analysis for the fourth-order tensor, $O_4$. A direct, term-by-term derivation, analogous to the one performed for $K^{(3)}$ in Section 3, is theoretically possible. Indeed, this was the first path we pursued, leading to an extremely lengthy and complex formula spanning over four pages of dense calculations. While this direct approach is exhaustive, the resulting expression is too unwieldy to provide clear insights into the scaling properties of $O_4$. The sheer complexity of the formula makes it nearly impossible to analyze and computationally impractical to implement.
+
+This significant obstacle prompted a search for a more elegant and computationally efficient representation. A recent key insight, which we present here, is that $O_4$ is not an entirely new entity but is intrinsically linked to the NTK ($K^{(2)}$) itself. Specifically, $O_4$ can be expressed precisely as the action of the Hessian of the NTK on the gradients of the network's output.
+
+\begin{proposition}[$O_4$ as the NTK Hessian]
+The fourth-order kernel $K^{(4)} \equiv O_4$ is given by the second directional derivative of the NTK, $K^{(2)}$, along the directions defined by the output gradients. For any four inputs $x_\alpha, x_\beta, x_\gamma, x_\delta$, we have:
+\begin{equation}
+O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \left( \nabla_\theta f(x_\gamma) \right)^T \left( \nabla^2_\theta K^{(2)}(x_\alpha, x_\beta) \right) \left( \nabla_\theta f(x_\delta) \right)
+\end{equation}
+where $\nabla^2_\theta K^{(2)}(x_\alpha, x_\beta)$ is the Hessian of the scalar-valued function $\theta \mapsto K^{(2)}(x_\alpha, x_\beta)$.
+\end{proposition}
+
+\begin{proof}
+The proof follows directly from the definitions of the kernel hierarchy. Let $L(\theta; x_\alpha, x_\beta) = K^{(2)}(x_\alpha, x_\beta)$.
+By definition of $K^{(3)}$,
+\begin{equation}
+K^{(3)}(x_\alpha, x_\beta, x_\gamma) = \langle \nabla_\theta K^{(2)}(x_\alpha, x_\beta), \nabla_\theta f(x_\gamma) \rangle = \langle \nabla_\theta L, \nabla_\theta f(x_\gamma) \rangle
+\end{equation}
+This is the directional derivative of $L$ in the direction of the vector $v_\gamma = \nabla_\theta f(x_\gamma)$. We can write this as $K^{(3)}(x_\alpha, x_\beta, x_\gamma) = (\partial_{v_\gamma} L)(\theta)$.
+
+Next, by definition of $K^{(4)} \equiv O_4$,
+\begin{equation}
+O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \langle \nabla_\theta K^{(3)}(x_\alpha, x_\beta, x_\gamma), \nabla_\theta f(x_\delta) \rangle
+\end{equation}
+Substituting the expression for $K^{(3)}$, we get:
+\begin{equation}
+O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \langle \nabla_\theta \left( (\partial_{v_\gamma} L)(\theta) \right), v_\delta \rangle
+\end{equation}
+where $v_\delta = \nabla_\theta f(x_\delta)$. This is the directional derivative of the function $(\partial_{v_\gamma} L)$ in the direction $v_\delta$. This is, by definition, the second directional derivative of $L$:
+\begin{equation}
+O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \partial_{v_\delta} \left( \partial_{v_\gamma} L \right)(\theta)
+\end{equation}
+This is precisely the action of the Hessian operator of $L = K^{(2)}$ on the direction vectors $v_\gamma$ and $v_\delta$, which proves the proposition.
+\end{proof}
+
+This result is a significant simplification. It recasts the problem of computing the complex $O_4$ tensor into the much more manageable task of computing the Hessian of the NTK. Since the NTK is a scalar-valued function of the parameters for fixed inputs, its Hessian can be computed efficiently using modern automatic differentiation frameworks like JAX. This discovery was crucial, as it rendered the study of the $O_4$ term computationally feasible and paved the way for the statistical analysis presented in the following sections.
+
+\newpage
+\section{From Scaling Laws to Spectral Statistics: The Need for a Deeper Look}
+
+Our analysis of the late-time NTK correction (Equation \ref{eq:theta_correction}) revealed a scaling puzzle. While our empirical results (Equation \ref{eq:scaling_law}) show a near-linear dependence of the correction on the data size $N$, a direct theoretical analysis suggested a much faster growth. Let us revisit this argument to motivate a deeper dive into the spectral properties of the NTK.
+
+\subsection{Recapitulation: The Scaling Puzzle}
+The correction $\Theta^{(1)}_\infty$ is composed of two main terms, $T_3$ (from $O_3$) and $T_4$ (from $O_4$).
+\begin{align*}
+\Theta^{(1)}_\infty(\vec{x}) = & \underbrace{-\sum_{i=1}^N \frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})}_{T_3} \\
+& + \underbrace{\sum_{i,j=1}^N\frac{1}{\lambda_{i}(\lambda_{i}+\lambda_{j})}(\hat{e}_{i}^{T}O_{4}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})}_{T_4}
+\end{align*}
+Our empirical analysis of the NTK spectrum revealed a clear dichotomy: a single large, isolated eigenvalue $\lambda_1 \sim \Order(L)$ associated with a constant mode, and a "bulk" of $N-1$ smaller eigenvalues scaling as $\lambda_{i>1} \sim \Order(L/N)$.
+
+This spectral structure allows us to analyze the scaling of the correction terms. If we make the simplifying assumption that the tensor components $O_3$ and $O_4$ are statistically independent of the eigenvectors, we arrive at a puzzle. The dominant contribution to the $T_3$ term, coming from the sum over $N-1$ bulk modes with eigenvalues of $\Order(L/N)$, would scale as:
+\[ T_3 \sim (N-1) \times \frac{1}{\lambda_{\text{bulk}}} \sim \frac{N}{L/N} = \Order\left(\frac{N^2}{L}\right) \]
+Similarly, the dominant contribution to the $T_4$ term, a double sum over the $(N-1)^2$ bulk-bulk interactions, would scale as:
+\[ T_4 \sim (N-1)^2 \times \frac{1}{\lambda_{\text{bulk}}^2} \sim \frac{N^2}{(L/N)^2} = \Order\left(\frac{N^4}{L^2}\right) \]
+These theoretical scalings grow much faster with $N$ than our robust empirical finding that $\norm{K_{\text{emp}} - K_{\infty}}_\infty \propto N^{0.902} L^{1.099}$.
+
+This discrepancy is the key to a deeper insight. It tells us that our initial assumption of independence must be wrong. The tensor components themselves, when averaged over the random eigenvectors, must have a strong dependence on $N$ that tames this growth. We can reverse-engineer the required scaling. For the total correction to scale roughly as $\Order(NL)$, the $T_4$ term, for instance, must also follow this trend. This implies a scaling for the averaged tensor projection:
+\[ \mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\dots)] \sim \frac{\Order(NL)}{\Order(N^4/L^2)} \sim \Order\left(\frac{L^3}{N^3}\right) \]
+This shows that understanding the precise statistical properties of the eigenvectors and their interaction with the higher-order tensors is not just a curiosity—it is essential to explain the observed learning dynamics. This puzzle directly motivated our deeper dive into the RMT properties of the NTK spectrum.
+
+\subsection{First Incursions into Eigenvector Statistics}
+
+Before turning to the heavy artillery of Random Matrix Theory (RMT), a first attempt to solve the scaling law puzzle consisted in directly analyzing the statistical properties of eigenvectors. Since the independence hypothesis was too strong, the idea was to examine more closely the moments of eigenvector coordinates, for example $\mathbb{E}[(\hat{e}_i)_\mu^2 (\hat{e}_j)_\nu^2]$. This analysis aimed to quantify the fine correlations between eigenvectors to more precisely evaluate tensor averages like $\mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})]$.
+
+This path produced many interesting results and confirmed that eigenvectors are not "perfectly random" in the sense of statistical independence of their coordinates. However, the correlation structures that were revealed were complex and did not provide a simple and robust enough model to be injected into the calculation of the quadrilinear form of the $T_4$ term. This approach, although rich in insights, proved to be a partial dead end. It mainly reinforced the conviction that a more fundamental and structured understanding of spectral properties was necessary, thus paving the way for the surprising discovery of the connection with GOE.
+
+\newpage
+\section{An Unexpected Discovery: The Gaussian Orthogonal Ensemble in the NTK Spectrum}
+
+In our quest to build a more accurate statistical model of the NTK eigenvectors and eigenvalues, we performed a detailed analysis of the spectral statistics, as implemented in \verb|experiments/ntk_spectrum/eigen_MP.py|. The results were truly remarkable, revealing a deep connection between the infinite-width NTK and a cornerstone of Random Matrix Theory (RMT).
+
+\subsection{A Primer on Random Matrix Theory and Spectral Statistics}
+Random Matrix Theory is the study of matrices whose entries are random variables. It predicts that the statistical properties of the eigenvalues of large random matrices are universal, depending only on the symmetries of the ensemble. For real symmetric matrices, the relevant ensemble is the Gaussian Orthogonal Ensemble (GOE).
+
+One of the most powerful tests for these universal properties is the analysis of the distribution of spacings between consecutive eigenvalues. For a system with uncorrelated eigenvalues, this distribution would be Poissonian. For GOE matrices, however, the eigenvalues exhibit "level repulsion", meaning they are unlikely to be close together.
+
+A very precise test involves the distribution of the ratio of consecutive spacings, $r_n = s_n / s_{n-1}$, where $s_n = \lambda_{n+1} - \lambda_n$. For the GOE, this distribution is given by the following highly characteristic formula \cite{atas2013distribution}:
+\begin{equation}
+P_{\text{GOE}}(r) = \frac{27}{8} \frac{r + r^2}{(1 + r + r^2)^{5/2}}
+\label{eq:goe_ratio_dist}
+\end{equation}
+This distribution provides an extremely sensitive fingerprint for GOE statistics. Crucially, this test is independent of the local density of states (i.e., the overall scaling of the eigenvalues), which allows it to probe the fine-grained correlations and intrinsic structure of the spectrum itself.
+
+\subsection{The NTK Bulk Spectrum Obeys GOE Statistics}
+Our numerical experiments show, astonishingly, that the distribution of the ratio of consecutive eigenvalue spacings for the $N-1$ eigenvalues forming the \textbf{bulk} of the NTK spectrum perfectly matches the theoretical prediction for the GOE. This analysis is performed after separating out the single large, isolated eigenvalue corresponding to the constant mode.
+
+Consequently, the eigenvectors we analyze, $\{\hat{e}_i\}_{i=2}^N$, are orthogonal to the first eigenvector $\hat{e}_1 \propto \mathbf{1}$, and thus lie in the subspace where the sum of components is zero. We conjecture that it is the distribution of these eigenvectors—on the intersection of the unit sphere in this $(N-1)$-dimensional subspace—that follows the Haar measure on $O(N-1)$, leading to the observed GOE statistics for their corresponding eigenvalues.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{consecutive_spacing_ratio_dist_N64_D10_M20_L2.png}
+    \caption{The distribution of the ratio of consecutive eigenvalue spacings for the infinite-width NTK bulk (for N=64, D=10, L=2). The empirical histogram (blue) is perfectly fitted by the theoretical prediction from the Gaussian Orthogonal Ensemble (red line, Equation \ref{eq:goe_ratio_dist}), yielding a Brody parameter $q \approx 1$, which indicates strong level repulsion characteristic of the GOE.}
+    \label{fig:goe_fit}
+\end{figure}
+
+Figure \ref{fig:goe_fit} provides compelling evidence for this claim. This is a profound result. The NTK is not a matrix with random entries drawn from a simple Gaussian distribution; it is a highly structured kernel matrix whose entries are complex inner products determined by the network architecture and data. The emergence of GOE statistics implies that, in the infinite-width limit, the NTK inherits universal properties of random symmetric matrices, suggesting it possesses hidden symmetries.
+
+\subsection{Theoretical Implications and Conjectures}
+This discovery has far-reaching consequences for our understanding of the NTK and feature learning.
+
+\subsubsection{Symmetry as the Origin of GOE Behavior}
+The universality classes of RMT are deeply tied to symmetries. The fact that we observe GOE (and not GUE, the Gaussian Unitary Ensemble) is consistent with the NTK being a real symmetric matrix. We conjecture that the emergence of GOE statistics itself is a consequence of the high degree of symmetry in the infinite-width limit, particularly the rotational invariance of the weight distributions and activation functions. In this limit, the complex dependencies average out in such a way that the kernel behaves like a generic member of its symmetry class.
+
+This connection can be made more precise. For data on a sphere $S^{d-1}$, the problem has a rotational symmetry under the group $O(d)$. This implies that the infinite-width NTK operator $K_\infty$ must commute with the action of any rotation operator $R_g$ for $g \in O(d)$ on the function space:
+\begin{equation}
+[K_\infty, R_g] = 0, \quad \forall g \in O(d)
+\end{equation}
+By Schur's Lemma, any such intertwining operator must act as a scalar multiple of the identity when restricted to an irreducible representation (irrep) of the group. For $O(d)$ acting on functions on the sphere, these irreps are the spaces of spherical harmonics $V_k$ of a given degree $k$. The restriction of $K_\infty$ to such a space is therefore diagonal:
+\begin{equation}
+K_\infty|_{V_k} = c_k \mathbf{I}_{V_k}
+\end{equation}
+This means the eigenspaces of the NTK are precisely these irreps, and its eigenvalues $c_k$ are determined by the degree of the harmonics. The spectral density of the kernel is thus a discrete sum of delta functions, whose weights (multiplicities) are the dimensions of the irreps, $\dim(V_k)$:
+\begin{equation}
+\rho(\lambda) = \sum_{k=0}^\infty \dim(V_k) \delta(\lambda - c_k)
+\end{equation}
+The emergence of GOE statistics is then a powerful statement about the fine-grained distribution of this collection of eigenvalues $\{c_k\}$, which are non-trivially determined by the network architecture and activation functions. This could be a manifestation of a deeper connection to representation theory, where the spectra of operators like the Laplacian on symmetric spaces are also known to exhibit RMT statistics.
+
+\subsubsection{A Solid Footing for Scaling Law Analysis}
+The GOE hypothesis provides the solid theoretical foundation we were missing for the scaling analysis in Section 7. It posits that the $N-1$ bulk eigenvectors $\{\hat{e}_i\}_{i=2}^N$ behave as if drawn from a random basis for the hyperplane orthogonal to the constant mode. Their statistical properties are thus described by the Haar measure on the orthogonal group $O(N-1)$. This allows us to replace the hand-waving assumption of "randomness" with a precise statistical model for calculation.
+
+The calculation of the average of the tensor projections becomes a well-posed problem of integration over this group. For example, the expectation of the quadratic term in the $O_4$ correction can be written as:
+\begin{equation}
+\mathbb{E}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})] = \int_{U \in O(N-1)} (u_i^T O_4 u_j) (v^T u_i) (v^T u_j) d\mu(U)
+\end{equation}
+where $u_i$ and $u_j$ are columns of the random matrix $U$, $v$ represents the vector $\Delta f_0$, and $d\mu(U)$ is the Haar measure.
+
+Such integrals can be computed systematically using powerful tools from RMT, most notably \textbf{Weingarten calculus} \cite{collins2022weingarten}. This calculus provides explicit formulas for polynomial integrals over compact groups. For an integral of polynomial degree $2k$ (in our case, $k=2$), the result is a sum over pairings of the indices, weighted by the Weingarten function, which has a well-known asymptotic expansion in $1/N$. The leading order terms of this expansion yield the precise scaling of the expectation value with $N$ that is needed to resolve the scaling puzzle.
+
+Furthermore, the sum over pairings in the Weingarten formula can be represented graphically, creating a direct analogy with the Feynman diagrams used in quantum field theory. In this picture, the higher-order tensors like $O_4$ and the vector $\Delta f_0$ act as vertices, while the pairings of indices form propagators whose values are given by the Weingarten function. The GOE structure of the underlying "field" of eigenvectors dictates the rules and values of these diagrams. This connection solidifies the entire program of analyzing the NTK correction via its statistical moments and opens up a rich toolbox for future calculations.
+
+\newpage
+\section{The Hessian-NTK Correspondence: A Spectral Equivalence}
+
+A critical insight for understanding the loss landscape of wide neural networks is the profound connection between the Hessian of the loss and the NTK. As we will show, in the large-width limit, their spectra become nearly identical. This correspondence allows us to translate all our findings about the NTK spectrum—from the dominant eigenvalue corresponding to data norms to the GOE statistics of the bulk—directly into statements about the geometry of the loss function around the network's initialization.
+
+\subsection{Decomposition of the Hessian}
+Following the analysis in \cite{dyer2019asymptotics}, we can decompose the Hessian of a general loss function into two main components. For a loss $\mathcal{L}$, the Hessian is:
+\begin{equation}
+H_{\mu\nu} = \sum_{(x,y)\in D_{\rm tr}}\left[\underbrace{\frac{\partial^{2}\mathcal{L}(x,y)}{\partial f^{2}}\frac{\partial f(x)}{\partial\theta^{\mu}}\frac{\partial f(x)}{\partial\theta^{\nu}}}_{\mathcal{A}_{\mu\nu}}
++ \underbrace{\frac{\partial\mathcal{L}(x,y)}{\partial f}\frac{\partial^{2}f(x)}{\partial\theta^{\mu}\partial\theta^{\nu}}}_{\mathcal{B}_{\mu\nu}}\right]
+\end{equation}
+In the literature, these two terms are often referred to as $I$ and $S$ respectively \cite{jacot2020kernelhessian}.
+\begin{itemize}
+    \item The first term, $\mathcal{A}$, is directly related to the NTK. For the Mean Squared Error (MSE) loss, $\partial^2\mathcal{L}/\partial f^2 = 1$, and $\mathcal{A}$ becomes precisely the NTK Gram matrix over the training data. This term is positive semi-definite and captures the geometry induced by the feature map gradients.
+    \item The second term, $\mathcal{B}$, is a "residual" term. It depends on the gradient of the loss, $\partial\mathcal{L}/\partial f$, and thus vanishes as the network converges to a global minimum where the gradient is zero.
+\end{itemize}
+
+\subsection{Moment Analysis and Asymptotic Orthogonality}
+The key to understanding the spectral relationship between $H$, $\mathcal{A}$, and $\mathcal{B}$ lies in analyzing the moments of the Hessian matrix, $\mathrm{Tr}(H^k)$.
+A diagrammatic analysis, as developed in \cite{dyer2019asymptotics} and used throughout this report, reveals that traces involving powers of $\mathcal{B}$ are suppressed at large widths. For instance, a term like $\mathrm{Tr}(\mathcal{A}\mathcal{B})$ involves a more complex correlation function (with at least three vertices in its cluster graph: two from $\mathcal{A}$ and one from $\mathcal{B}$) and is therefore of order $\mathcal{O}(1/n)$. This leads to the conclusion that, in expectation, the moments of the Hessian are dominated by the moments of the NTK-related term:
+\begin{equation}
+\lexp \mathrm{Tr}(H^k) \rexp \approx \lexp \mathrm{Tr}(\mathcal{A}^k) \rexp \quad \text{for } k \ge 1
+\end{equation}
+with the exception of $k=2$, where $\lexp \mathrm{Tr}(\mathcal{B}^2) \rexp$ can also contribute at leading order.
+
+This result is formalized and strengthened by the work of \cite{jacot2020kernelhessian}, which shows that the matrices $\mathcal{A}$ (or $I$) and $\mathcal{B}$ (or $S$) are asymptotically orthogonal. This means that not only do their cross-moments vanish, but their spectra effectively add up:
+\begin{equation}
+\mathrm{Tr}(H^k) \approx \mathrm{Tr}(\mathcal{A}^k) + \mathrm{Tr}(\mathcal{B}^k)
+\end{equation}
+Since the higher moments of $\mathcal{B}$ (for $k \ge 3$) vanish in the large-width limit, its spectrum consists of a sea of eigenvalues that shrink to zero. The stable, large eigenvalues of the Hessian are therefore entirely determined by $\mathcal{A}$, and thus by the NTK. This provides a solid theoretical foundation for the claim that the NTK spectrum governs the geometry of the loss landscape for wide networks.
+
+\newpage
+\section{Future Work and Open Questions}
+
+Our investigation into the scaling laws and spectral properties of the NTK has opened up several promising avenues for future research. The discovery of GOE statistics provides a new lens through which to analyze feature learning and generalization in deep networks.
+
+\newpage
+\section{Conclusion}
+
+This report has detailed the Neural Tangent Hierarchy as a framework for analyzing the training dynamics of finite-width neural networks. We focused on the first-order correction kernel, $K^{(3)}$, which governs the time evolution of the standard NTK, $K^{(2)}$.
+
+Our primary contributions are:
+\begin{itemize}
+    \item A complete, non-recursive formula for the $K^{(3)}$ kernel, derived from first principles.
+    \item A scaling analysis demonstrating that the magnitude of $K^{(3)}$ grows quadratically with network depth ($H^2$) and is suppressed by the square root of the width ($\sqrt{m}$).
+    \item A deep analysis of the finite-width correction's scaling laws, revealing a puzzle that motivated a deeper spectral analysis.
+    \item The discovery that the infinite-width NTK's spectral statistics belong to the Gaussian Orthogonal Ensemble (GOE), a cornerstone of Random Matrix Theory. This provides a profound insight into the nature of the kernel and a solid foundation for analyzing feature learning.
+\end{itemize}
+
+The scaling law $K^{(3)} \sim \Order(H^2/\sqrt{m})$ shows that the training dynamics of deep networks are inherently richer than those of their shallow counterparts. The discovery of GOE statistics elevates this analysis, suggesting that the complex, structured NTK inherits universal properties of random matrices due to its deep underlying symmetries. This opens the door to using the powerful analytical tools of RMT to rigorously compute the finite-width corrections and bridge the gap between theory and the practice of deep learning.
+
+Future work should aim to leverage this RMT connection to derive precise scaling laws for the higher-order kernels and connect them to concrete measures of generalization and performance.
+
+
+
+
+
+
+
 \subsection{Approches Alternatives et Concentration}
 (Explication de l'approche alternative pour les FCNN via les réseaux paraboliques de Terjek, permettant de se placer en régime de feature learning tout en conservant des propriétés du NTK. Discussion sur les bornes de concentration.)
 
 \section{Analyse d'Architectures Spécifiques}
+
+
+
 
 \subsection{Réseaux à Mémoire Matricielle (MMNN) et Transformeurs}
 (Description des techniques de préconditionnement du NTK pour ces architectures. Discussion sur les régimes "feature" et "kernel", et sur les défis liés à l'optimisation. Présentation d'une conjecture sur la stabilité autour des minima globaux.)

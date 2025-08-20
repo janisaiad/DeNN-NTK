@@ -47,6 +47,8 @@ et d'ailleurs on peut calculer ces eigenvalues (en L2 par exemple pour moindres 
 et ça dépend des données, selon un noyau, qui est celui de laplace ! donc 
 c'est du point de vue du RKHS qu'il faut se baser pour expliquer la double descente (comme en moindre carrés) !! donc c'est cohérent
 
+
+il y a beaucoup de choses à récupérer dans les beamers j
 les poids apprennent une representation sacling independantes en meme temps que le scaling (juste en divisant)
 les eigenvectors de AU sont, la bihomogeneite ne change pas les directoins
 mais relativement aux autres, un point vraiment loin va etre mal appris, car la matrice diagonale va avoir N-1 eigenvalue positives
