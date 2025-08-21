@@ -105,3 +105,7 @@ be careful, the orthogonality under sampling measure is orthogonal in mean ! tha
 remarque sur le fait qu'avoir des senseurs sur chebyshev est quelque chose de très très courant, on maitrise cette partie là
 
 ce qui reste )à faire : rederive NTK for tranformers ultra rapidos, et theorem pour mmnn
+rajouter une partie explicite sur le fait que noter graphe (en tikz) peut avoir plusieurs minima globaux, et que le ntk garantit que l'on verge bien vers lui
+
+
+pour la soutenance on parlera surtout de physique https://arxiv.org/pdf/2008.08601
