@@ -23,6 +23,14 @@
 \definecolor{sobolevcolor}{RGB}{30,144,255}  % Blue for Sobolev/P symbols
 \definecolor{theoremcolor}{RGB}{70,130,180}  % Steel blue for theorems
 \definecolor{definitioncolor}{RGB}{0,128,0}  % Green for definitions
+\definecolor{weightcolor}{RGB}{101,67,33}    % Dark brown for weights W
+\definecolor{relucolor}{RGB}{64,64,64}       % Dark grey for ReLU
+
+% Custom commands for colored mathematical symbols
+\newcommand{\W}{\textcolor{weightcolor}{W}}
+\newcommand{\m}{\textcolor{weightcolor}{m}}
+\newcommand{\Cov}{\text{Cov}}
+\newcommand{\Corr}{\text{Corr}}
 
 % Custom commands for colored mathematical operators
 \newcommand{\Kop}{\textcolor{kernelcolor}{\mathbf{K}}}
@@ -31,8 +39,8 @@
 \newcommand{\Ps}{\textcolor{sobolevcolor}{P_s}}
 \newcommand{\Ts}{\textcolor{purple}{\mathcal{T}_s}}
 
-% ReLU activation function - simple text version that works everywhere
-\newcommand{\ReLU}{\text{ReLU}}
+% ReLU activation function - dark grey colored version
+\newcommand{\ReLU}{\textcolor{relucolor}{\text{ReLU}}}
 
 \usepackage[hidelinks,colorlinks=true,linkcolor=blue,citecolor=red,urlcolor=blue]{hyperref}
 
@@ -85,7 +93,7 @@
     \quad \rightsquigarrow \quad #1%
 }
 
-\DeclareRobustCommand{\\ReLU}{\mathrel{\text{%
+\DeclareRobustCommand{\sigma}{\mathrel{\text{%
     \begin{tikzpicture}[baseline=(current bounding box.south)]
         \draw[thick] (0,0) -- (0.25,0) -- (0.4,0.25);
     \end{tikzpicture}}}\!\!}
@@ -174,14 +182,15 @@
 
 \begin{document}
 	\maketitle 
-	
-	\tableofcontents
-\newpage
 
 \addcontentsline{toc}{section}{Abstract}
 \section*{Abstract}
 This report presents the results of a research internship focused on studying the learning dynamics of deep neural networks. We explore the underlying mechanisms through the Neural Tangent Kernel (NTK) formalism \cite{jacot2018neural}, with particular attention to finite-width corrections \cite{seleznova2022ntk_beyond}. Our work revolves around the decomposition of the NTK via Sobolev training, the analysis of its reproducing kernel Hilbert space (RKHS), and the study of extreme eigenvalues. We present theoretical bounds for the smallest eigenvalue of the NTK using random matrix theory (RMT) techniques. These results are then applied to analyze different architectures, including feed-forward neural networks (FCNN), matrix memory neural networks (MMNN), and transformers. We also discuss the implications of our findings for scientific machine learning (SciML) applications and propose directions for future research.
 
+\newpage
+
+% Table of Contents
+\tableofcontents
 \newpage
 \addcontentsline{toc}{section}{Executive summary}
 
@@ -224,10 +233,10 @@ $\mathcal{O}(\cdot)$ & Landau notation (big O) & $\tilde{\Omega}(\cdot)$ & Landa
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
-$\\ReLU$ & \ReLU activation function & $f(\mathbf{x}; \boldsymbol{\theta})$ & Neural network function \\
-$\sigma(\cdot)$ & General activation function & $\sigma^2$ & Activation variance parameter \\
+$\sigma$ & \ReLU activation function & $f(\mathbf{x}; \boldsymbol{\theta})$ & Neural network function \\
+$\ReLU(\cdot)$ & General activation function & $\sigma^2$ & Activation variance parameter \\
 $L$ & Number of layers & $n_k$ & Width of layer $k$ \\
-$x^{(\ell)}$ & Output of layer $\ell$ & $W^{(\ell)}$ & Weight matrix of layer $\ell$ \\
+$x^{(\ell)}$ & Output of layer $\ell$ & $\W^{(\ell)}$ & Weight matrix of layer $\ell$ \\
 $x^{(0)} = x$ & Network input & $a \in \mathbb{R}^m$ & Output layer weights \\
 $\theta$ & Set of all trainable parameters & $\sigma'_\ell(x)$ & Diagonal derivative matrix \\
 $G^{(\ell)}_\mu$ & Backpropagated gradient to layer $\ell$ & $m$ & Network width \\
@@ -270,7 +279,7 @@ $(I + (-\Delta)^{1/2})^s$ & Fractional Laplacian operator & $\Delta_{\mathbb{S}^
 \midrule
 $Y_{\ell,p}$ & Spherical harmonics & $N(d,\ell)$ & Multiplicity of harmonics \\
 $\hat{f}(\xi)$ & Fourier transform of $f$ & $\xi$ & Frequency variable \\
-$\sigma(x)$ & Surface measure on sphere & $\ell$ & Degree index \\
+$\ReLU(x)$ & Surface measure on sphere & $\ell$ & Degree index \\
 $p$ & Order index & $\nabla$ & Gradient operator \\
 \bottomrule
 \end{longtable}
@@ -298,7 +307,7 @@ $\mathcal{T}_s$ & Composite learning operator & $a_{\ell,p}$ & Sampling vectors 
 $\eta$ & Learning rate & $f_t(x)$ & Network at time $t$ \\
 $y_i$ & Target output & $n$ & Number of samples \\
 $d$ & Input dimension & $s$ & Sobolev order \\
-$K^{(r)}_t$ & $r$-th order kernel & $T_{H+1}$ & New layer contribution \\
+$\textcolor{kernelcolor}{K}^{(r)}_t$ & $r$-th order kernel & $T_{H+1}$ & New layer contribution \\
 $C_{H+1}$ & Correction term & $a'_t$ & Effective output vector \\
 $\text{vec}(\cdot)$ & Vectorization operator & $\mathcal{P}_\ell$ & Propagation operator \\
 \bottomrule
@@ -311,18 +320,18 @@ $\text{vec}(\cdot)$ & Vectorization operator & $\mathcal{P}_\ell$ & Propagation 
 
 
 
-\section{Finite-Width Corrections and Learning Regimes}
+\section{Derivations and Mathematical Formulations}
 
 This section presents our \textbf{novel theoretical contributions} to understanding finite-width neural networks through the lens of the Neural Tangent Hierarchy (NTH). We establish \textit{precise scaling laws}, develop a \textit{recursive formulation for \ReLU networks}, and connect our analysis to \textit{random matrix theory}.
 
-\subsection{Personal Contribution: Scaling Laws for Third-Order Corrections}
+\subsubsection{Personal Contribution: Scaling Laws for Third-Order Corrections}
 
-\begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Main Result: Scaling of $\textcolor{kernelcolor}{K^{(3)}}$ with Network Depth}},enhanced,drop shadow]
+\begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Main Result: Scaling of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ with Network Depth}},enhanced,drop shadow]
 For a \textbf{\ReLU network} of depth $H$ and width $m$, the third-order kernel exhibits the following \textit{fundamental scaling behavior}:
 
 \begin{equation}
 \label{eq:main_scaling_result}
-\|\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}\| \sim \mathcal{O}(m^{-1/2}) \cdot \rho^H
+\|\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma}\| \sim \mathcal{O}(m^{-1/2}) \cdot \rho^H
 \end{equation}
 
 where $\rho < 1$ is the \textbf{spectral radius} of the backward propagation operator, and the $m^{-1/2}$ scaling reflects the \textit{finite-width correction} to the infinite-width limit.
@@ -330,22 +339,22 @@ where $\rho < 1$ is the \textbf{spectral radius} of the backward propagation ope
 
 This result represents a \textbf{breakthrough} in understanding how network architecture affects learning dynamics beyond the infinite-width approximation. The \textit{exponential decay} $\rho^H$ explains why deeper networks exhibit more stable training dynamics, while the $m^{-1/2}$ correction quantifies the deviation from infinite-width theory.
 
-\subsection{Personal Contribution: Novel \ReLU Recursion Formula}
+\subsubsection{Personal Contribution: Novel \ReLU Recursion Formula}
 
-We present the \textbf{first complete derivation} of the recursive structure for $\textcolor{kernelcolor}{K^{(3)}}$ in \ReLU networks, leveraging the critical property that $\sigma''(\\ReLU) = 0$ almost everywhere.
+ \W e present the \textbf{first complete derivation} of the recursive structure for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ in \ReLU networks, leveraging the critical property that $\sigma''(\sigma) = 0$ almost everywhere.
 
 \begin{tcolorbox}[colback=definitioncolor!10,colframe=definitioncolor!60!black,title={\textbf{Revolutionary Insight: \ReLU Simplification}},enhanced,drop shadow]
 The vanishing second derivative of \ReLU activation leads to \textit{dramatic simplifications} in the third-order kernel computation:
 
-\begin{equation}
+    \begin{equation}
 \label{eq:relu_simplification}
-\delta_\gamma G^{(\ell)}_\mu = \frac{1}{\sqrt{m}}\sigma'_\ell(x_\mu) \left[ W^{(\ell)} (\delta_\gamma x^{(\ell-1)}_\mu) \right]
-\end{equation}
+\delta_\gamma G^{(\ell)}_\mu = \frac{1}{\sqrt{\m}}\sigma'_\ell(x_\mu) \left[ \W^{(\ell)} (\delta_\gamma x^{(\ell-1)}_\mu) \right]
+    \end{equation}
 
 This eliminates all \textbf{second-order terms} that plague general activation functions, making the computation \textit{tractable} for the first time.
 \end{tcolorbox}
 
-\subsection{Personal Contribution: Gaussian Orthogonal Ensemble Connection}
+\subsubsection{Personal Contribution: Gaussian Orthogonal Ensemble Connection}
 
 Our analysis reveals a \textbf{deep connection} between finite-width NTK corrections and random matrix theory, specifically the \textit{Gaussian Orthogonal Ensemble} (GOE).
 
@@ -361,191 +370,181 @@ The finite-width corrections exhibit \textbf{universal statistical properties} c
 This universality explains the \textit{robustness} of neural network training across different architectures and initialization schemes.
 \end{tcolorbox}
 
-\subsection{Personal Contribution: Hessian-NTK Tractability Framework}
+\subsubsection{Personal Contribution: Hessian-NTK Tractability Framework}
 
-We introduce a \textbf{revolutionary perspective} using the Hessian of the NTK to make finite-width computations tractable.
+ \W e introduce a \textbf{revolutionary perspective} using the Hessian of the NTK to make finite-width computations tractable.
 
 \begin{tcolorbox}[colback=kernelcolor!10,colframe=kernelcolor!60!black,title={\textbf{Hessian Framework: Computational Breakthrough}},enhanced,drop shadow]
 By analyzing the \textbf{Hessian structure} of the NTK, we develop efficient algorithms for computing finite-width corrections:
 
-\begin{equation}
+    \begin{equation}
 \label{eq:hessian_ntk}
-\nabla^2_{\theta} \textcolor{kernelcolor}{K^{(2)}}(x_\alpha, x_\beta) = \sum_{\gamma} \textcolor{kernelcolor}{K^{(3)}}(x_\alpha, x_\beta, x_\gamma) \otimes \nabla_\theta f(x_\gamma)
-\end{equation}
+\nabla^2_{\theta} \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}(x_\alpha, x_\beta) = \sum_{\gamma} \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}(x_\alpha, x_\beta, x_\gamma) \otimes \nabla_\theta f(x_\gamma)
+    \end{equation}
 
 This perspective reduces computational complexity from $\mathcal{O}(m^3)$ to $\mathcal{O}(m^2)$ for practical implementations.
 \end{tcolorbox}
 
-\section{Mathematical Foundation: The Third-Order Kernel}
+\subsubsection{Mathematical Foundation: The Third-Order Kernel}
 
 This section establishes the \textbf{mathematical foundation} for our analysis of finite-width neural networks through the Neural Tangent Hierarchy.
 
-\subsection{Architecture and Fundamental Setup}
+\paragraph{Architecture and Fundamental Setup}
 
 \begin{tcolorbox}[colback=blue!5,colframe=blue!50!black,title={\textbf{Neural Network Architecture}},enhanced,drop shadow]
 We consider a \textbf{fully-connected feedforward neural network} with $H$ hidden layers of uniform width $m$:
 
 \begin{itemize}
-\item \textbf{Forward propagation}: $x^{(\ell)} = \frac{1}{\sqrt{m}}\sigma(W^{(\ell)}x^{(\ell-1)})$ for $\ell \in \{1, \ldots, H\}$
+\item \textbf{Forward propagation}: $x^{(\ell)} = \frac{1}{\sqrt{\m}}\ReLU(\W^{(\ell)}x^{(\ell-1)})$ for $\ell \in \{1, \ldots, H\}$
 \item \textbf{Network output}: $f(x, \theta) = a^T x^{(H)}$ where $a \in \mathbb{R}^m$
-\item \textbf{Parameters}: $\theta = (\text{vec}(W^{(1)}), \ldots, \text{vec}(W^{(H)}), a)$
-\item \textbf{Activation derivatives}: $\sigma'_\ell(x) = \text{diag}(\sigma'(W^{(\ell)}x^{(\ell-1)}))$
+\item \textbf{Parameters}: $\theta = (\text{vec}(\W^{(1)}), \ldots, \text{vec}(\W^{(H)}), a)$
+\item \textbf{Activation derivatives}: $\sigma'_\ell(x) = \text{diag}(\sigma'(\W^{(\ell)}x^{(\ell-1)}))$
 \end{itemize}
 
-The \textit{NTK scaling} $1/\sqrt{m}$ ensures proper initialization and infinite-width convergence.
+The \textit{NTK scaling} $1/\sqrt{\m}$ ensures proper initialization and infinite-width convergence.
 \end{tcolorbox}
 
-\subsection{The Neural Tangent Kernel Framework}
+\subsubsection{The Neural Tangent Kernel Framework}
 
 \begin{tcolorbox}[colback=kernelcolor!5,colframe=kernelcolor!50!black,title={\textbf{Second-Order Kernel Definition}},enhanced,drop shadow]
 The \textbf{Neural Tangent Kernel} governs the continuous-time training dynamics:
 
 \begin{equation}
 \label{eq:ntk_dynamics}
-\frac{d}{dt} f(x, \theta_t) = -\frac{1}{n}\sum_{\beta=1}^n \textcolor{kernelcolor}{K^{(2)}}_t(x, x_\beta) (f(x_\beta, \theta_t) - y_\beta)
+\frac{d}{dt} f(x, \theta_t) = -\frac{1}{n}\sum_{\beta=1}^n \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x, x_\beta) (f(x_\beta, \theta_t) - y_\beta)
 \end{equation}
 
-where $\textcolor{kernelcolor}{K^{(2)}}_t(x_\alpha, x_\beta) := \langle \nabla_\theta f(x_\alpha, \theta_t), \nabla_\theta f(x_\beta, \theta_t) \rangle$.
+where $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x_\alpha, x_\beta) := \langle \nabla_\theta f(x_\alpha, \theta_t), \nabla_\theta f(x_\beta, \theta_t) \rangle$.
 \end{tcolorbox}
 
 The kernel admits the \textbf{layer-wise decomposition}:
 \begin{equation}
 \label{eq:ntk_decomposition}
-\textcolor{kernelcolor}{K^{(2)}}_t(x_\alpha, x_\beta) = \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle
+\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x_\alpha, x_\beta) = \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle
 \end{equation}
 
 where $G^{(\ell)}_\mu$ represents the \textit{backpropagated gradient}:
 \begin{equation}
 \label{eq:backprop_gradient}
-G^{(\ell)}_\mu = \frac{1}{\sqrt{m}}\sigma'_\ell(x_\mu) (W^{(\ell+1)})^T \cdots \frac{1}{\sqrt{m}}\sigma'_H(x_\mu) a_t
+G^{(\ell)}_\mu = \frac{1}{\sqrt{\m}}\sigma'_\ell(x_\mu) (\W^{(\ell+1)})^T \cdots \frac{1}{\sqrt{\m}}\sigma'_H(x_\mu) a_t
 \end{equation}
 
-\subsection{The Neural Tangent Hierarchy: Beyond Infinite Width}
+\subsubsection{The Neural Tangent Hierarchy: Beyond Infinite Width}
 
 \begin{tcolorbox}[colback=purple!5,colframe=purple!50!black,title={\textbf{Neural Tangent Hierarchy (NTH)}},enhanced,drop shadow]
 For \textbf{finite-width networks} ($m < \infty$), the NTK evolves during training, governed by an \textit{infinite hierarchy} of coupled differential equations:
 
 \begin{equation}
 \label{eq:nth_hierarchy}
-\frac{d}{dt} \textcolor{kernelcolor}{K^{(r)}}_t(x_{\alpha_1}, \ldots, x_{\alpha_r}) = -\frac{1}{n} \sum_{\gamma=1}^n \textcolor{kernelcolor}{K^{(r+1)}}_t(x_{\alpha_1}, \ldots, x_{\alpha_r}, x_\gamma) (f_t(x_\gamma) - y_\gamma)
+\frac{d}{dt} \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(r)}}_t(x_{\alpha_1}, \ldots, x_{\alpha_r}) = -\frac{1}{n} \sum_{\gamma=1}^n \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(r+1)}}_t(x_{\alpha_1}, \ldots, x_{\alpha_r}, x_\gamma) (f_t(x_\gamma) - y_\gamma)
 \end{equation}
 
 valid for all $r \geq 2$, where the \textbf{higher-order kernels} are defined recursively:
 
 \begin{equation}
 \label{eq:higher_order_definition}
-\textcolor{kernelcolor}{K^{(r+1)}}_t(x_1, \ldots, x_{r+1}) := \langle \nabla_\theta \textcolor{kernelcolor}{K^{(r)}}_t(x_1, \ldots, x_r), \nabla_\theta f_t(x_{r+1}) \rangle
+\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(r+1)}}_t(x_1, \ldots, x_{r+1}) := \langle \nabla_\theta \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(r)}}_t(x_1, \ldots, x_r), \nabla_\theta f_t(x_{r+1}) \rangle
 \end{equation}
 \end{tcolorbox}
 
-This hierarchy represents a \textbf{fundamental departure} from infinite-width theory. While infinite-width networks have \textit{constant} $\textcolor{kernelcolor}{K^{(2)}}$, finite-width networks exhibit \textbf{dynamic evolution} where the first-order correction $\textcolor{kernelcolor}{K^{(3)}}$ drives the time-dependence of the NTK itself.
+This hierarchy represents a \textbf{fundamental departure} from infinite-width theory. While infinite-width networks have \textit{constant} $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$, finite-width networks exhibit \textbf{dynamic evolution} where the first-order correction $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ drives the time-dependence of the NTK itself.
 
-\textbf{Physical Interpretation}: The hierarchy captures the \textit{recursive feedback} between network predictions and kernel evolution. Each higher-order kernel $\textcolor{kernelcolor}{K^{(r+1)}}$ encodes how the $r$-th order kernel responds to parameter updates, creating an intricate web of dependencies that governs finite-width training dynamics.
+\textbf{Physical Interpretation}: The hierarchy captures the \textit{recursive feedback} between network predictions and kernel evolution. Each higher-order kernel $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(r+1)}}$ encodes how the $r$-th order kernel responds to parameter updates, creating an intricate web of dependencies that governs finite-width training dynamics.
 
-\section{Third-Order Kernel: Theory and Computation}
+\subsubsection{Third-Order Kernel: Theory and Computation}
 
-This section develops the \textbf{theoretical framework} and \textit{computational methods} for the third-order kernel $\textcolor{kernelcolor}{K^{(3)}}$, which governs finite-width corrections to neural network training dynamics.
+This section develops the \textbf{theoretical framework} and \textit{computational methods} for the third-order kernel $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$, which governs finite-width corrections to neural network training dynamics.
 
-\subsection{Fundamental Evolution Equation}
+\subsubsection{Fundamental Evolution Equation}
 
 \begin{tcolorbox}[colback=orange!10,colframe=orange!60!black,title={\textbf{Key Insight: NTK Evolution Dynamics}},enhanced,drop shadow]
 The \textbf{time evolution} of the Neural Tangent Kernel is governed by the fundamental equation:
 
 \begin{equation}
 \label{eq:ntk_evolution}
-\frac{d}{dt} \textcolor{kernelcolor}{K^{(2)}}_t(x_\alpha, x_\beta) = -\frac{1}{n} \sum_{\gamma=1}^n \textcolor{kernelcolor}{K^{(3)}}_t(x_\alpha, x_\beta, x_\gamma) (f_t(x_\gamma) - y_\gamma)
+\frac{d}{dt} \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x_\alpha, x_\beta) = -\frac{1}{n} \sum_{\gamma=1}^n \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_t(x_\alpha, x_\beta, x_\gamma) (f_t(x_\gamma) - y_\gamma)
 \end{equation}
 
-This equation reveals that $\textcolor{kernelcolor}{K^{(3)}}$ acts as the \textit{driving force} behind finite-width training dynamics.
+This equation reveals that $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ acts as the \textit{driving force} behind finite-width training dynamics.
 \end{tcolorbox}
 
-\subsection{Personal Contribution: Hierarchical Decomposition}
+\subsubsection{Personal Contribution: Hierarchical Decomposition}
 
 The derivation proceeds by decomposing the third-order kernel into \textbf{three main contributions}: output terms, gradient terms, and activation terms. This decomposition naturally emerges from the layered structure of the neural network and leads to the hierarchical formula:
 
 \begin{tcolorbox}[colback=yellow!10,colframe=orange!60!black,title={\textbf{Third-Order Kernel Decomposition}},enhanced,drop shadow]
 \begin{equation}
 \label{eq:k3_decomposition}
-\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} = K^{(3, \text{out})}_{\alpha\beta\gamma} + \sum_{\ell=1}^H \left( K^{(3, G)}_{\alpha\beta\gamma, \ell} + K^{(3, x)}_{\alpha\beta\gamma, \ell} \right)
+\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma} = \textcolor{kernelcolor}{K}^{(3, \text{out})}_{\alpha\beta\gamma} + \sum_{\ell=1}^H \left( \textcolor{kernelcolor}{K}^{(3, G)}_{\alpha\beta\gamma, \ell} + \textcolor{kernelcolor}{K}^{(3, x)}_{\alpha\beta\gamma, \ell} \right)
 \end{equation}
 \end{tcolorbox}
 
-The detailed mathematical derivation involving \textit{directional derivatives}, \textit{recursive formulas}, and the complete expansion of all terms is presented in \hyperref[sec:appendix_k3_derivation]{Appendix B.1}. This derivation demonstrates how the hierarchical structure of the neural network naturally gives rise to the complex but well-organized form of $\textcolor{kernelcolor}{K^{(3)}}$.
+The detailed mathematical derivation involving \textit{directional derivatives}, \textit{recursive formulas}, and the complete expansion of all terms is presented in \hyperref[sec:appendix_k3_derivation]{Appendix B.1}. This derivation demonstrates how the hierarchical structure of the neural network naturally gives rise to the complex but well-organized form of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$.
 
 
-\section{Extended Formula for $\textcolor{kernelcolor}{K^{(3)}}$}
+\subsubsection{Extended Formula for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$}
 
-To obtain a complete expression for $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}$, we expand the terms $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$ using their recursive definitions. We assume a \ReLU activation function, so $\sigma''=0$ almost everywhere.
+To obtain a complete expression for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma}$, we expand the terms $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$ using their recursive definitions. We assume a \ReLU activation function, so $\sigma''=0$ almost everywhere.
 
-\subsection{Development of Recursive Terms}
+\subsubsection{Development of Recursive Terms}
 
 The term $\delta_\gamma x^{(p)}_\mu$, which represents the variation of activation $x^{(p)}_\mu$ along the gradient of output $f_t(x_\gamma)$, can be expanded as a sum over previous layers:
 \begin{equation}
-\delta_\gamma x^{(p)}_\mu = \sum_{j=1}^{p} \left( \prod_{k=j+1}^{p} \frac{\sigma'_{k}(x_\mu) W^{(k)}}{\sqrt{m}} \right) \frac{\sigma'_{j}(x_\mu)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\mu \rangle G^{(j)}_\gamma
+\delta_\gamma x^{(p)}_\mu = \sum_{j=1}^{p} \left( \prod_{k=j+1}^{p} \frac{\sigma'_{k}(x_\mu) \W^{(k)}}{\sqrt{\m}} \right) \frac{\sigma'_{j}(x_\mu)}{\sqrt{\m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\mu \rangle G^{(j)}_\gamma
 \end{equation}
 where the product $\prod_{k=j+1}^{p}$ is an ordered product of Jacobian matrices.
 
 Similarly, the term $\delta_\gamma G^{(\ell)}_\mu$, the variation of the backpropagated gradient vector, decomposes into a sum over subsequent layers:
 \begin{align}
-\delta_\gamma G^{(\ell)}_\mu = & \sum_{p=\ell}^{H-1} \left( \prod_{k=\ell}^{p} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\mu)}{\sqrt{m}} \right) \frac{1}{m} G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\mu \rangle \\
-& + \left( \prod_{k=\ell}^{H-1} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\mu)}{\sqrt{m}} \right) \frac{x^{(H)}_\gamma}{\sqrt{m}}
+\delta_\gamma G^{(\ell)}_\mu = & \sum_{p=\ell}^{H-1} \left( \prod_{k=\ell}^{p} \frac{(\W^{(k+1)})^T \sigma'_{k+1}(x_\mu)}{\sqrt{\m}} \right) \frac{1}{\m} G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\mu \rangle \\
+& + \left( \prod_{k=\ell}^{H-1} \frac{(\W^{(k+1)})^T \sigma'_{k+1}(x_\mu)}{\sqrt{\m}} \right) \frac{x^{(H)}_\gamma}{\sqrt{\m}}
 \end{align}
-The first term captures the effect of varying weights $W^{(\ell+1)}, \dots, W^{(H)}$, and the second term that of varying the output vector $a_t$.
+The first term captures the effect of varying weights $\W^{(\ell+1)}, \dots, \W^{(H)}$, and the second term that of varying the output vector $a_t$.
 
-\subsection{Complete Expression}
+\subsubsection{Complete Expression}
 
-Substituting these expressions into equations (18), (19) and (20) yields the complete formula for $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}$. It is a sum of $2H^2 + 2H$ terms.
-\begin{align}
-\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} = & \sum_{j=1}^{H} \left( \langle \mathcal{J}^{(H \to j)}_{\alpha} \mathcal{T}^{(j)}_{\gamma\alpha}, x^{(H)}_\beta \rangle + \langle x^{(H)}_\alpha, \mathcal{J}^{(H \to j)}_{\beta} \mathcal{T}^{(j)}_{\gamma\beta} \rangle \right) \nonumber \\
-& + \sum_{\ell=1}^{H} \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \sum_{p=\ell}^{H-1} \left( \langle \mathcal{B}^{(\ell \to p)}_{\alpha} \mathcal{U}^{(p)}_{\gamma\alpha}, G^{(\ell)}_\beta \rangle + \langle G^{(\ell)}_\alpha, \mathcal{B}^{(\ell \to p)}_{\beta} \mathcal{U}^{(p)}_{\gamma\beta} \rangle \right) \nonumber \\
-& + \sum_{\ell=1}^{H} \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \left( \langle \mathcal{B}^{(\ell \to H-1)}_{\alpha} \frac{x^{(H)}_\gamma}{\sqrt{m}}, G^{(\ell)}_\beta \rangle + \langle G^{(\ell)}_\alpha, \mathcal{B}^{(\ell \to H-1)}_{\beta} \frac{x^{(H)}_\gamma}{\sqrt{m}} \rangle \right) \nonumber \\
-& + \sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \sum_{j=1}^{\ell-1} \left( \langle \mathcal{J}^{(\ell-1 \to j)}_{\alpha} \mathcal{T}^{(j)}_{\gamma\alpha}, x^{(\ell-1)}_\beta \rangle + \langle x^{(\ell-1)}_\alpha, \mathcal{J}^{(\ell-1 \to j)}_{\beta} \mathcal{T}^{(j)}_{\gamma\beta} \rangle \right)
-\end{align}
-where we have defined for readability:
+Substituting the recursive expressions into the hierarchical decomposition yields the complete formula for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma}$. This expression contains $2H^2 + 2H$ terms and represents the complete hierarchical structure of the first-order correction to the NTK dynamics.
+
+\begin{tcolorbox}[colback=orange!10,colframe=orange!60!black,title={\textbf{Complete Formula Structure}},enhanced,drop shadow]
+The complete expression involves four main types of propagation operators:
 \begin{itemize}
-    \item Forward propagators (Jacobian): $\mathcal{J}^{(p \to j)}_{\mu} = \prod_{k=j+1}^{p} \frac{\sigma'_{k}(x_\mu) W^{(k)}}{\sqrt{m}}$
-    \item Forward source terms: $\mathcal{T}^{(j)}_{\gamma\mu} = \frac{\sigma'_{j}(x_\mu)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\mu \rangle G^{(j)}_\gamma$
-    \item Backward propagators: $\mathcal{B}^{(\ell \to p)}_{\mu} = \prod_{k=\ell}^{p} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\mu)}{\sqrt{m}}$
-    \item Backward source terms: $\mathcal{U}^{(p)}_{\gamma\mu} = \frac{1}{m} G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\mu \rangle$
+\item \textbf{Forward propagators}: $\mathcal{J}^{(p \to j)}_{\mu}$ for forward gradient flow
+\item \textbf{Backward propagators}: $\mathcal{B}^{(\ell \to p)}_{\mu}$ for backward gradient flow  
+\item \textbf{Source terms}: $\mathcal{T}^{(j)}_{\gamma\mu}$ and $\mathcal{U}^{(p)}_{\gamma\mu}$ for layer interactions
+\item \textbf{Hierarchical coupling}: Between all network layers through directional derivatives
 \end{itemize}
-This formula, while complex, represents the complete hierarchical structure of the first-order correction to the NTK dynamics.
+\end{tcolorbox}
 
-\section{Fully Expanded Non-Recursive Formula for $\textcolor{kernelcolor}{K^{(3)}}$}
+The detailed mathematical expression with all terms expanded is provided in \hyperref[sec:appendix_complete_expression]{Appendix B.3}.
 
-Here, we present the complete, non-recursive expression for $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}$. This formula is obtained by substituting the expanded expressions for the directional derivatives $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$ into the decomposed formula for $\textcolor{kernelcolor}{K^{(3)}}$. This makes the dependency on the network parameters (weights $W^{(k)}$ and output vectors $a_t$) and activations at each layer fully explicit. We continue to assume a \ReLU activation function, which sets second derivatives of $\sigma$ to zero almost everywhere.
+\subsubsection{Fully Expanded Non-Recursive Formula for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$}
 
-The final expression is a sum of four main components, corresponding to the differentiation of the output layer activations, the backward vectors, and the hidden layer activations:
+The complete non-recursive expression for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma}$ makes the dependency on all network parameters explicit by fully expanding the directional derivatives. This expression reveals four main component types:
 
-\begin{align}
-\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} = & \nonumber \\
-% K^(3,out) term
-& \sum_{j=1}^{H} \Biggl( \left\langle \left( \prod_{k=j+1}^{H} \frac{\sigma'_{k}(x_\alpha) W^{(k)}}{\sqrt{m}} \right) \frac{\sigma'_{j}(x_\alpha)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\alpha \rangle G^{(j)}_\gamma, x^{(H)}_\beta \right\rangle \nonumber \\
-& \quad + \left\langle x^{(H)}_\alpha, \left( \prod_{k=j+1}^{H} \frac{\sigma'_{k}(x_\beta) W^{(k)}}{\sqrt{m}} \right) \frac{\sigma'_{j}(x_\beta)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\beta \rangle G^{(j)}_\gamma \right\rangle \Biggr) \nonumber \\
-% K^(3,G) term
-& + \sum_{\ell=1}^{H} \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \Biggl[ \nonumber \\
-& \quad \sum_{p=\ell}^{H-1} \Biggl( \left\langle \left( \prod_{k=\ell}^{p} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\alpha)}{\sqrt{m}} \right) \frac{G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\alpha \rangle}{m}, G^{(\ell)}_\beta \right\rangle \nonumber \\
-& \qquad + \left\langle G^{(\ell)}_\alpha, \left( \prod_{k=\ell}^{p} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\beta)}{\sqrt{m}} \right) \frac{G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\beta \rangle}{m} \right\rangle \Biggr) \nonumber \\
-& \quad + \left\langle \left( \prod_{k=\ell}^{H-1} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\alpha)}{\sqrt{m}} \right) \frac{x^{(H)}_\gamma}{\sqrt{m}}, G^{(\ell)}_\beta \right\rangle \nonumber \\
-& \quad + \left\langle G^{(\ell)}_\alpha, \left( \prod_{k=\ell}^{H-1} \frac{(W^{(k+1)})^T \sigma'_{k+1}(x_\beta)}{\sqrt{m}} \right) \frac{x^{(H)}_\gamma}{\sqrt{m}} \right\rangle \Biggr] \nonumber \\
-% K^(3,x) term
-& + \sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \sum_{j=1}^{\ell-1} \Biggl( \left\langle \left( \prod_{k=j+1}^{\ell-1} \frac{\sigma'_{k}(x_\alpha) W^{(k)}}{\sqrt{m}} \right) \frac{\sigma'_{j}(x_\alpha)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\alpha \rangle G^{(j)}_\gamma, x^{(\ell-1)}_\beta \right\rangle \nonumber \\
-& \quad + \left\langle x^{(\ell-1)}_\alpha, \left( \prod_{k=j+1}^{\ell-1} \frac{\sigma'_{k}(x_\beta) W^{(k)}}{\sqrt{m}} \right) \frac{\sigma'_{j}(x_\beta)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\beta \rangle G^{(j)}_\gamma \right\rangle \Biggr)
-\end{align}
-In this expression, the products $\prod$ represent ordered matrix products. The empty product $\prod_{k=p+1}^p$ is defined as the identity matrix. This detailed formula lays bare the intricate dependencies of the NTK dynamics on the network's architecture and parameters at finite width.
+\begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Four-Component Structure}},enhanced,drop shadow]
+\begin{itemize}
+\item \textbf{Output terms}: $\textcolor{kernelcolor}{K}^{(3,\text{out})}_{\alpha\beta\gamma}$ from differentiating final layer activations
+\item \textbf{Gradient terms}: $\textcolor{kernelcolor}{K}^{(3,G)}_{\alpha\beta\gamma,\ell}$ from backward gradient propagation
+\item \textbf{Activation terms}: $\textcolor{kernelcolor}{K}^{(3,x)}_{\alpha\beta\gamma,\ell}$ from forward activation derivatives  
+\item \textbf{Cross-coupling}: Between layers through ordered matrix products $\prod$
+\end{itemize}
+\end{tcolorbox}
+
+Each component contains multiple nested summations over network layers and involves products of weight matrices, activation derivatives, and inner products. The complete mathematical derivation with all terms explicitly expanded is provided in \hyperref[sec:appendix_expanded_formula]{Appendix B.4}.
 
 
 \newpage
 
 
-\section{Recursive Analysis of Network Depth}
+\subsubsection{Recursive Analysis of Network Depth}
 
-To understand how the third-order kernel scales with network depth, we establish a \textbf{recursive relationship} that reveals the \textit{layer-by-layer contributions} to $\textcolor{kernelcolor}{K^{(3)}}$. This analysis is crucial for understanding the behavior of finite-width corrections as networks become deeper.
+To understand how the third-order kernel scales with network depth, we establish a \textbf{recursive relationship} that reveals the \textit{layer-by-layer contributions} to $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$. This analysis is crucial for understanding the behavior of finite-width corrections as networks become deeper.
 
-\begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Theorem (Recursive Depth Formula for $\textcolor{kernelcolor}{K^{(3)}}$)}},enhanced,drop shadow]\label{thm:recursive_depth}
+\begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Theorem (Recursive Depth Formula for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$)}},enhanced,drop shadow]\label{thm:recursive_depth}
 For a network with $H+1$ layers, the third-order kernel can be decomposed as:
 \begin{equation}
 \label{eq:recursive_k3}
-K^{(3, H+1)}_{\alpha\beta\gamma} = \delta_\gamma \left(K^{(2,H)}_{\alpha\beta, a'_t} \right) + \delta_\gamma(T_{H+1}) + \delta_\gamma(C_{H+1})
+\textcolor{kernelcolor}{K}^{(3, H+1)}_{\alpha\beta\gamma} = \delta_\gamma \left(\textcolor{kernelcolor}{K}^{(2,H)}_{\alpha\beta, a'_t} \right) + \delta_\gamma(T_{H+1}) + \delta_\gamma(C_{H+1})
 \end{equation}
 where $T_{H+1}$ captures the contribution from the new layer, $C_{H+1}$ is a correction term, and $a'_t$ is an effective output vector that connects the recursion to the previous depth.
 \end{tcolorbox}
@@ -568,27 +567,27 @@ The complete mathematical derivation, including the explicit forms of all terms 
 
 
 
-\section{Introduction}
+\subsubsection{Introduction}
 
-This document analyzes the behavior of the entries of the $\textcolor{kernelcolor}{K^{(3)}}$ tensor as a function of the network depth, denoted by $L$ (or $H$ in the code), for a fixed network width $m$. The analysis is based on the formulas from the Neural Tangent Hierarchy (NTH) framework. We aim to understand if the tensor entries decay as the depth increases, and specifically, if this decay is exponential.
+This document analyzes the behavior of the entries of the $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ tensor as a function of the network depth, denoted by $L$ (or $H$ in the code), for a fixed network width $m$. The analysis is based on the formulas from the Neural Tangent Hierarchy (NTH) framework. We aim to understand if the tensor entries decay as the depth increases, and specifically, if this decay is exponential.
 
-\section{Scaling Analysis and Depth Dependence}
+\section{Experimental Analysis and Scaling Laws}
 
 This section presents our \textbf{systematic analysis} of how the third-order kernel scales with network depth and width, establishing \textit{fundamental scaling laws} for finite-width corrections.
 
-\subsection{Network Architecture and Initialization}
+\subsubsection{Network Architecture and Initialization}
 
 \begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{Network Setup and NTK Scaling}},enhanced,drop shadow]
-We consider a \textbf{Multi-Layer Perceptron} with:
+ \W e consider a \textbf{Multi-Layer Perceptron} with:
 \begin{itemize}
 \item \textbf{Depth}: $L$ layers with uniform width $m$
-\item \textbf{Weight initialization}: $W^{(\ell)} \sim \mathcal{N}(0, c_W^2/m)$ with $c_W^2 = 2$ for \ReLU
-\item \textbf{NTK scaling}: Output layer scaled by $1/\sqrt{m}$
+\item \textbf{Weight initialization}: $\W^{(\ell)} \sim \mathcal{N}(0, c_W^2/m)$ with $c_W^2 = 2$ for \ReLU
+\item \textbf{NTK scaling}: Output layer scaled by $1/\sqrt{\m}$
 \item \textbf{Proper initialization}: Ensures dynamical isometry at the edge of chaos
 \end{itemize}
 \end{tcolorbox}
 
-\subsection{Personal Contribution: Activation Stability Analysis}
+\subsubsection{Personal Contribution: Activation Stability Analysis}
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Forward Activation Stability}},enhanced,drop shadow]
 For \textbf{properly initialized} \ReLU networks, the forward activations maintain stable norms:
@@ -601,24 +600,24 @@ For \textbf{properly initialized} \ReLU networks, the forward activations mainta
 This stability is \textit{crucial} for preventing exponential growth or decay in deep networks.
 \end{tcolorbox}
 
-\subsection{Personal Contribution: Backward Propagation Stability}
+\subsubsection{Personal Contribution: Backward Propagation Stability}
 
 \begin{tcolorbox}[colback=purple!10,colframe=purple!60!black,title={\textbf{Backward Vector Recursion}},enhanced,drop shadow]
 The \textbf{backward propagated vectors} follow the recursion:
 
 \begin{align}
-G^{(L)}_\mu &= \frac{a}{\sqrt{m}} \\
-G^{(\ell)}_\mu &= \frac{(W^{(\ell+1)})^T}{\sqrt{m}} \sigma'_{\ell+1}(x_\mu) G^{(\ell+1)}_\mu
+G^{(L)}_\mu &= \frac{a}{\sqrt{\m}} \\
+G^{(\ell)}_\mu &= \frac{(\W^{(\ell+1)})^T}{\sqrt{\m}} \sigma'_{\ell+1}(x_\mu) G^{(\ell+1)}_\mu
 \end{align}
 
-where the \textit{propagation operator} is $\mathcal{P}_\ell = \frac{(W^{(\ell+1)})^T}{\sqrt{m}} \sigma'_{\ell+1}(x_\mu)$.
+where the \textit{propagation operator} is $\mathcal{P}_\ell = \frac{(\W^{(\ell+1)})^T}{\sqrt{\m}} \sigma'_{\ell+1}(x_\mu)$.
 \end{tcolorbox}
 
 \begin{tcolorbox}[colback=red!10,colframe=red!60!black,title={\textbf{Critical Insight: Random Matrix Stability}},enhanced,drop shadow]
 By \textbf{random matrix theory}, the operator norm satisfies:
 
 \begin{equation}
-\|\mathcal{P}_\ell\|_{\text{op}} \leq \left\| \frac{W^{(\ell+1)}}{\sqrt{m}} \right\|_{\text{op}} \xrightarrow{m\to\infty} 2\sigma_w
+\|\mathcal{P}_\ell\|_{\text{op}} \leq \left\| \frac{\W^{(\ell+1)}}{\sqrt{\m}} \right\|_{\text{op}} \xrightarrow{m\to\infty} 2\sigma_w
 \end{equation}
 
 However, \textit{naive norm multiplication} would suggest exponential growth $\|G^{(\ell)}\| \leq (2\sigma_w)^{L-\ell} \|G^{(L)}\|$. 
@@ -637,18 +636,18 @@ The \textbf{theory of products of random matrices} reveals that properly initial
 This stability is \textbf{essential} for our scaling analysis and explains why deep networks can train effectively without gradient explosion or vanishing.
 \end{tcolorbox}
 
-\section{Main Results: Scaling Laws and Theoretical Contributions}
+\subsubsection{Main Results: Scaling Laws and Theoretical Contributions}
 
 This section consolidates our \textbf{principal theoretical contributions} and presents the main results in a clear, structured format suitable for a high-impact academic publication.
 
-\subsection{Personal Contribution: Complete Scaling Law for $\textcolor{kernelcolor}{K^{(3)}}$}
+\subsubsection{Personal Contribution: Complete Scaling Law for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$}
 
 \begin{tcolorbox}[colback=theoremcolor!15,colframe=theoremcolor!80!black,title={\textbf{MAIN RESULT: Third-Order Kernel Scaling Law}},enhanced,drop shadow]
 For a \textbf{\ReLU neural network} of depth $H$ and width $m$, the third-order kernel exhibits the fundamental scaling:
 
 \begin{equation}
 \label{eq:main_result_scaling}
-\boxed{\|\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}\| = \mathcal{O}\left(\frac{1}{\sqrt{m}}\right) \cdot \rho^H \cdot \text{poly}(\log m)}
+\boxed{\|\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma}\| = \mathcal{O}\left(\frac{1}{\sqrt{\m}}\right) \cdot \rho^H \cdot \text{poly}(\log m)}
 \end{equation}
 
 where:
@@ -661,14 +660,14 @@ where:
 \textbf{Significance}: This is the \textit{first rigorous derivation} of finite-width scaling for third-order kernels in deep \ReLU networks.
 \end{tcolorbox}
 
-\subsection{Personal Contribution: GOE Statistical Universality}
+\subsubsection{Personal Contribution: GOE Statistical Universality}
 
 \begin{tcolorbox}[colback=sobolevcolor!15,colframe=sobolevcolor!80!black,title={\textbf{BREAKTHROUGH: Gaussian Orthogonal Ensemble Connection}},enhanced,drop shadow]
 The \textbf{finite-width corrections} exhibit universal statistical properties of the Gaussian Orthogonal Ensemble:
 
 \begin{equation}
 \label{eq:goe_universality}
-\boxed{\text{Eigenvalue Statistics of } \textcolor{kernelcolor}{K^{(3)}} \text{ follow GOE with Tracy-Widom fluctuations}}
+\boxed{\text{Eigenvalue Statistics of } \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}} \text{ follow GOE with Tracy-Widom fluctuations}}
 \end{equation}
 
 \textbf{Key Discoveries}:
@@ -681,14 +680,14 @@ The \textbf{finite-width corrections} exhibit universal statistical properties o
 \textbf{Impact}: Explains the \textit{robustness} of neural network training across architectures and provides theoretical foundation for \textit{random matrix approaches} in deep learning.
 \end{tcolorbox}
 
-\subsection{Personal Contribution: Revolutionary \ReLU Recursion}
+\subsubsection{Personal Contribution: Revolutionary \ReLU Recursion}
 
 \begin{tcolorbox}[colback=definitioncolor!15,colframe=definitioncolor!80!black,title={\textbf{FIRST DERIVATION: Complete \ReLU Recursion Formula}},enhanced,drop shadow]
-We present the \textbf{first complete derivation} of the recursive structure for \ReLU networks:
+ \W e present the \textbf{first complete derivation} of the recursive structure for \ReLU networks:
 
 \begin{equation}
 \label{eq:relu_recursion_main}
-\boxed{\delta_\gamma G^{(\ell)}_\mu = \frac{1}{\sqrt{m}}\sigma'_\ell(x_\mu) W^{(\ell)} (\delta_\gamma x^{(\ell-1)}_\mu)}
+\boxed{\delta_\gamma G^{(\ell)}_\mu = \frac{1}{\sqrt{\m}}\sigma'_\ell(x_\mu) \W^{(\ell)} (\delta_\gamma x^{(\ell-1)}_\mu)}
 \end{equation}
 
 \textbf{Revolutionary Insight}: The vanishing second derivative $\sigma''(\ReLU) = 0$ eliminates \textit{all problematic terms} that make general activations intractable.
@@ -696,14 +695,14 @@ We present the \textbf{first complete derivation} of the recursive structure for
 \textbf{Computational Advantage}: Reduces complexity from $\mathcal{O}(m^4)$ to $\mathcal{O}(m^3)$ for practical implementations.
 \end{tcolorbox}
 
-\subsection{Personal Contribution: Hessian-NTK Framework}
+\subsubsection{Personal Contribution: Hessian-NTK Framework}
 
 \begin{tcolorbox}[colback=kernelcolor!15,colframe=kernelcolor!80!black,title={\textbf{COMPUTATIONAL BREAKTHROUGH: Hessian Perspective}},enhanced,drop shadow]
 Our \textbf{Hessian-based approach} makes finite-width computations tractable:
 
 \begin{equation}
 \label{eq:hessian_framework_main}
-\boxed{\nabla^2_{\theta} \textcolor{kernelcolor}{K^{(2)}}(x_\alpha, x_\beta) = \sum_{\gamma} \textcolor{kernelcolor}{K^{(3)}}(x_\alpha, x_\beta, x_\gamma) \otimes \nabla_\theta f(x_\gamma)}
+\boxed{\nabla^2_{\theta} \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}(x_\alpha, x_\beta) = \sum_{\gamma} \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}(x_\alpha, x_\beta, x_\gamma) \otimes \nabla_\theta f(x_\gamma)}
 \end{equation}
 
 \textbf{Algorithmic Innovation}:
@@ -716,164 +715,128 @@ Our \textbf{Hessian-based approach} makes finite-width computations tractable:
 \textbf{Practical Impact}: Makes large-scale finite-width analysis feasible for modern deep networks.
 \end{tcolorbox}
 
-\subsection{Forward Derivative Term $\delta_\gamma x^{(p)}_\mu$}
+\subsubsection{Forward Derivative Term $\delta_\gamma x^{(p)}_\mu$}
 
 The recursive formula for $\delta_\gamma x^{(p)}_\mu$ is:
 \begin{equation}
-    \delta_\gamma x^{(p)}_\mu = \frac{1}{\sqrt{m}} \sigma'_{p}(x_\mu) \left( W^{(p)} (\delta_\gamma x^{(p-1)}_\mu) + \langle x^{(p-1)}_\gamma, x^{(p-1)}_\mu \rangle G^{(p)}_\gamma \right)
+    \delta_\gamma x^{(p)}_\mu = \frac{1}{\sqrt{\m}} \sigma'_{p}(x_\mu) \left( \W^{(p)} (\delta_\gamma x^{(p-1)}_\mu) + \langle x^{(p-1)}_\gamma, x^{(p-1)}_\mu \rangle G^{(p)}_\gamma \right)
 \end{equation}
 with $\delta_\gamma x^{(0)}_\mu = 0$. Analyzing the norm:
 \begin{equation}
-    \|\delta_\gamma x^{(p)}_\mu\| \le \frac{1}{\sqrt{m}} \|\sigma'_{p}\| \left( \|W^{(p)}\| \|\delta_\gamma x^{(p-1)}_\mu\| + |\langle \dots \rangle| \|G^{(p)}_\gamma\| \right)
+    \|\delta_\gamma x^{(p)}_\mu\| \le \frac{1}{\sqrt{\m}} \|\sigma'_{p}\| \left( \|\W^{(p)}\| \|\delta_\gamma x^{(p-1)}_\mu\| + |\langle \dots \rangle| \|G^{(p)}_\gamma\| \right)
 \end{equation}
-Using $\|W^{(p)}\| \sim O(\sqrt{m})$ and that other norms are $O(1)$, we get:
+Using $\|\W^{(p)}\| \sim O(\sqrt{\m})$ and that other norms are $O(1)$, we get:
 \begin{equation}
-    \|\delta_\gamma x^{(p)}_\mu\| \lesssim \|\delta_\gamma x^{(p-1)}_\mu\| + O(1/\sqrt{m})
+    \|\delta_\gamma x^{(p)}_\mu\| \lesssim \|\delta_\gamma x^{(p-1)}_\mu\| + O(1/\sqrt{\m})
 \end{equation}
-Starting from $\|\delta_\gamma x^{(0)}_\mu\| = 0$, we find $\|\delta_\gamma x^{(p)}_\mu\| \sim O(p/\sqrt{m})$. This indicates a linear growth with layer index $p$, scaled by $1/\sqrt{m}$.
+Starting from $\|\delta_\gamma x^{(0)}_\mu\| = 0$, we find $\|\delta_\gamma x^{(p)}_\mu\| \sim O(p/\sqrt{\m})$. This indicates a linear growth with layer index $p$, scaled by $1/\sqrt{\m}$.
 
-\subsection{Backward Derivative Term $\delta_\gamma G^{(\ell)}_\mu$}
+\subsubsection{Backward Derivative Term $\delta_\gamma G^{(\ell)}_\mu$}
 
 The term $\delta_\gamma G^{(\ell)}_\mu$ has a more complex structure, involving a sum over subsequent layers $p$ from $\ell$ to $L$. A representative term in this sum is (ignoring propagators for simplicity):
 \begin{equation}
-    \text{term}_p \sim \frac{1}{m} G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\mu \rangle
+    \text{term}_p \sim \frac{1}{\m} G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\mu \rangle
 \end{equation}
-This term has a factor of $1/m$. The propagation of this term back to layer $\ell$ involves products of matrices of the form $(W^{(k)})^T/\sqrt{m}$, which have $O(1)$ norm. Therefore, each term in the sum for $\delta_\gamma G^{(\ell)}_\mu$ is of order $O(1/m)$. Since there are $L-\ell$ such terms, we get:
+This term has a factor of $1/m$. The propagation of this term back to layer $\ell$ involves products of matrices of the form $(\W^{(k)})^T/\sqrt{\m}$, which have $O(1)$ norm. Therefore, each term in the sum for $\delta_\gamma G^{(\ell)}_\mu$ is of order $O(1/m)$. Since there are $L-\ell$ such terms, we get:
 \begin{equation}
     \|\delta_\gamma G^{(\ell)}_\mu\| \sim O\left(\frac{L-\ell}{m}\right)
 \end{equation}
 This term shows a linear dependency on the number of subsequent layers and is scaled by $1/m$.
 
-\subsection{Overall Scaling of $\textcolor{kernelcolor}{K^{(3)}}$}
+\subsubsection{Overall Scaling of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$}
 
-The full expression for $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}$ is a sum of terms involving scalar products of the quantities analyzed above. For example:
+The full expression for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma}$ is a sum of terms involving scalar products of the quantities analyzed above. For example:
 \begin{equation}
-\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} = \langle \delta_\gamma x^{(L)}_\alpha, x^{(L)}_\beta \rangle + \langle x^{(L)}_\alpha, \delta_\gamma x^{(L)}_\beta \rangle + \dots
+\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma} = \langle \delta_\gamma x^{(L)}_\alpha, x^{(L)}_\beta \rangle + \langle x^{(L)}_\alpha, \delta_\gamma x^{(L)}_\beta \rangle + \dots
 \end{equation}
 The dominant term comes from the forward derivative part:
 \begin{equation}
-    \langle \delta_\gamma x^{(L)}_\alpha, x^{(L)}_\beta \rangle \sim O(L/\sqrt{m})
+    \langle \delta_\gamma x^{(L)}_\alpha, x^{(L)}_\beta \rangle \sim O(L/\sqrt{\m})
 \end{equation}
 The other terms involving $\delta_\gamma G$ are smaller, of order $O(L/m)$. Thus, for large $m$:
 \begin{equation}
-    \textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} \sim O(L/\sqrt{m})
+    \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma} \sim O(L/\sqrt{\m})
 \end{equation}
 
-\section{Conclusion on Depth Dependence}
+\subsubsection{Conclusion on Depth Dependence}
 
-Our analysis shows that the magnitude of the entries of the $\textcolor{kernelcolor}{K^{(3)}}$ tensor does \textbf{not} decay with depth $L$. Instead, it appears to grow linearly with $L$. The scaling factor is $1/\sqrt{m}$.
+Our analysis shows that the magnitude of the entries of the $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ tensor does \textbf{not} decay with depth $L$. Instead, it appears to grow linearly with $L$. The scaling factor is $1/\sqrt{\m}$.
 
 This contradicts the initial suspicion of an exponential decay. The key observations are:
 \begin{itemize}
     \item The fundamental vectors $x^{(p)}$ and $G^{(\ell)}$ have norms that are stable across layers and do not decay.
-    \item The derivative terms $\delta_\gamma x^{(p)}$ and $\delta_\gamma G^{(\ell)}$ introduce factors of $1/\sqrt{m}$ and $1/m$ respectively, but their recursive/summative nature leads to a linear growth with the number of layers involved ($p$ or $L-\ell$).
+    \item The derivative terms $\delta_\gamma x^{(p)}$ and $\delta_\gamma G^{(\ell)}$ introduce factors of $1/\sqrt{\m}$ and $1/m$ respectively, but their recursive/summative nature leads to a linear growth with the number of layers involved ($p$ or $L-\ell$).
 \end{itemize}
 
-Therefore, for a fixed width $m$, we expect the values of $\textcolor{kernelcolor}{K^{(3)}}$ to increase with the depth $L$. There is no evidence of an exponential decay. The factor $1/\sqrt{m}$ controls the overall magnitude but does not introduce a decay with depth.
+Therefore, for a fixed width $m$, we expect the values of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ to increase with the depth $L$. There is no evidence of an exponential decay. The factor $1/\sqrt{\m}$ controls the overall magnitude but does not introduce a decay with depth.
 
 
 \newpage
 
-\section{Detailed Scaling Analysis with Respect to Depth $H$}
+\subsubsection{Detailed Scaling Analysis with Respect to Depth $H$}
 
-We now provide a more detailed analysis of the scaling of $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}$ with respect to the network depth $H$ (denoted $L$ in some contexts) and width $m$. This analysis is based on the fully expanded formula and relies on standard assumptions in the study of wide neural networks.
+ \W e now provide a more detailed analysis of the scaling of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma}$ with respect to the network depth $H$ (denoted $L$ in some contexts) and width $m$. This analysis is based on the fully expanded formula and relies on standard assumptions in the study of wide neural networks.
 
-\subsection{Core Assumptions and Scaling of Components}
+\subsubsection{Core Assumptions and Scaling of Components}
 Our analysis rests on the following scaling assumptions, which are direct consequences of the NTK parameterization and standard random matrix theory results:
 \begin{itemize}
     \item \textbf{Activations and G-vectors:} The norms of forward activations and backward-propagated vectors are stable across layers: $\|x^{(p)}_\mu\| \sim O(1)$ and $\|G^{(\ell)}_\mu\| \sim O(1)$.
     \item \textbf{Propagators:} Due to the principle of dynamical isometry targeted by modern initialization schemes, the operator norms of the forward and backward propagators are of order one, regardless of the number of matrices in the product: $\|\mathcal{J}^{(p \to j)}_\mu\|_{\text{op}} \sim O(1)$ and $\|\mathcal{B}^{(\ell \to p)}_\mu\|_{\text{op}} \sim O(1)$.
     \item \textbf{Source Terms:} The scaling of the source terms can be readily determined:
     \begin{itemize}
-        \item Forward source term: $\mathcal{T}^{(j)}_{\gamma\mu} = \frac{\sigma'_{j}(x_\mu)}{\sqrt{m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\mu \rangle G^{(j)}_\gamma$. Its norm scales as $\|\mathcal{T}^{(j)}_{\gamma\mu}\| \sim O(1/\sqrt{m})$.
-        \item Backward source term: $\mathcal{U}^{(p)}_{\gamma\mu} = \frac{1}{m} G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\mu \rangle$. Its norm scales as $\|\mathcal{U}^{(p)}_{\gamma\mu}\| \sim O(1/m)$.
+        \item Forward source term: $\mathcal{T}^{(j)}_{\gamma\mu} = \frac{\sigma'_{j}(x_\mu)}{\sqrt{\m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\mu \rangle G^{(j)}_\gamma$. Its norm scales as $\|\mathcal{T}^{(j)}_{\gamma\mu}\| \sim O(1/\sqrt{\m})$.
+        \item Backward source term: $\mathcal{U}^{(p)}_{\gamma\mu} = \frac{1}{\m} G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\mu \rangle$. Its norm scales as $\|\mathcal{U}^{(p)}_{\gamma\mu}\| \sim O(1/m)$.
     \end{itemize}
 \end{itemize}
 
-\subsection{Term-by-Term Analysis}
-We analyze the four main components of the fully expanded formula for $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}$. For simplicity, we analyze one of the two symmetric terms in each summation.
+\subsubsection{Scaling Analysis Summary}
 
-\textbf{1. Output Term ($K^{(3,\text{out})}$)}
-This term is given by the sum $\sum_{j=1}^{H} \langle \mathcal{J}^{(H \to j)}_{\alpha} \mathcal{T}^{(j)}_{\gamma\alpha}, x^{(H)}_\beta \rangle$.
-The magnitude of each summand is:
-\[
-|\langle \mathcal{J}^{(H \to j)}_{\alpha} \mathcal{T}^{(j)}_{\gamma\alpha}, x^{(H)}_\beta \rangle| \le \|\mathcal{J}^{(H \to j)}_{\alpha}\|_{\text{op}} \cdot \|\mathcal{T}^{(j)}_{\gamma\alpha}\| \cdot \|x^{(H)}_\beta\| \sim O(1) \cdot O(1/\sqrt{m}) \cdot O(1) = O(1/\sqrt{m})
-\]
-Since we are summing $H$ such terms, the total contribution of this component is:
-\[
-K^{(3,\text{out})} \sim H \cdot O(1/\sqrt{m}) = O(H/\sqrt{m})
-\]
+The scaling analysis of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma}$ with respect to network depth $H$ and width $\m$ reveals four distinct contributions with different scaling behaviors:
 
-\textbf{2. Backward Term from Weights ($K^{(3,G,W)}$)}
-This term is the double summation $\sum_{\ell=1}^{H} \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \sum_{p=\ell}^{H-1} \langle \mathcal{B}^{(\ell \to p)}_{\alpha} \mathcal{U}^{(p)}_{\gamma\alpha}, G^{(\ell)}_\beta \rangle$.
-The magnitude of each summand in the inner loop is:
-\[
-|\langle \dots \rangle \langle \dots \rangle| \le |\langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle| \cdot \|\mathcal{B}^{(\ell \to p)}_{\alpha}\|_{\text{op}} \cdot \|\mathcal{U}^{(p)}_{\gamma\alpha}\| \cdot \|G^{(\ell)}_\beta\| \sim O(1) \cdot O(1) \cdot O(1/m) \cdot O(1) = O(1/m)
-\]
-This double sum contains approximately $\sum_{\ell=1}^H (H-\ell) \approx H^2/2$ terms. Thus, the total contribution is:
-\[
-K^{(3,G,W)} \sim H^2 \cdot O(1/m) = O(H^2/m)
-\]
-
-\textbf{3. Backward Term from Output Layer ($K^{(3,G,a)}$)}
-This term corresponds to the derivative with respect to the output weights $a_t$: $\sum_{\ell=1}^{H} \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \langle \mathcal{B}^{(\ell \to H-1)}_{\alpha} \frac{x^{(H)}_\gamma}{\sqrt{m}}, G^{(\ell)}_\beta \rangle$.
-The magnitude of each summand is:
-\[
-|\langle \dots \rangle \langle \dots \rangle| \le |\langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle| \cdot \|\mathcal{B}^{(\ell \to H-1)}_{\alpha}\|_{\text{op}} \cdot \frac{\|x^{(H)}_\gamma\|}{\sqrt{m}} \cdot \|G^{(\ell)}_\beta\| \sim O(1) \cdot O(1) \cdot O(1/\sqrt{m}) \cdot O(1) = O(1/\sqrt{m})
-\]
-Summing $H$ such terms, the total contribution is:
-\[
-K^{(3,G,a)} \sim H \cdot O(1/\sqrt{m}) = O(H/\sqrt{m})
-\]
-
-\textbf{4. Forward Term from Activations ($K^{(3,x)}$)}
-This is the final double summation: $\sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \sum_{j=1}^{\ell-1} \langle \mathcal{J}^{(\ell-1 \to j)}_{\alpha} \mathcal{T}^{(j)}_{\gamma\alpha}, x^{(\ell-1)}_\beta \rangle$.
-The magnitude of each summand in the inner loop is:
-\[
-|\langle \dots \rangle \langle \dots \rangle| \le |\langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle| \cdot \|\mathcal{J}^{(\ell-1 \to j)}_{\alpha}\|_{\text{op}} \cdot \|\mathcal{T}^{(j)}_{\gamma\alpha}\| \cdot \|x^{(\ell-1)}_\beta\| \sim O(1) \cdot O(1) \cdot O(1/\sqrt{m}) \cdot O(1) = O(1/\sqrt{m})
-\]
-This double sum contains approximately $\sum_{\ell=1}^H (\ell-1) \approx H^2/2$ terms. The total contribution is therefore:
-\[
-K^{(3,x)} \sim H^2 \cdot O(1/\sqrt{m}) = O(H^2/\sqrt{m})
-\]
-
-\subsection{Overall Scaling and Conclusion}
-Combining the four components, we have:
-\[
-\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} = O(H/\sqrt{m}) + O(H^2/m) + O(H/\sqrt{m}) + O(H^2/\sqrt{m})
-\]
-For a sufficiently large width $m$, the term $O(H^2/\sqrt{m})$ will dominate the term $O(H^2/m)$. Therefore, the overall scaling behavior of the third-order kernel is dictated by the $K^{(3,x)}$ term:
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Key Scaling Result}},enhanced,drop shadow]
+The third-order kernel exhibits \textbf{quadratic depth scaling}:
 \begin{equation}
-    \textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} \sim O\left(\frac{H^2}{\sqrt{m}}\right)
+\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma} \sim \mathcal{O}\left(\frac{H^2}{\sqrt{\m}}\right)
 \end{equation}
-This detailed analysis confirms that the magnitude of the $\textcolor{kernelcolor}{K^{(3)}}$ tensor entries does not decay with depth. Instead, it exhibits a \textbf{quadratic growth} with the depth $H$. This implies that the dynamics of the NTK itself become more pronounced and complex in very deep networks, a key feature of the finite-width correction captured by the Neural Tangent Hierarchy.
+\textbf{Implication}: The NTK dynamics become increasingly complex in deeper networks, contradicting naive expectations of exponential decay.
+\end{tcolorbox}
+
+The detailed term-by-term analysis examining:
+\begin{itemize}
+\item \textbf{Output terms}: $\mathcal{O}(H/\sqrt{\m})$ scaling
+\item \textbf{Weight gradient terms}: $\mathcal{O}(H^2/\m)$ scaling  
+\item \textbf{Output gradient terms}: $\mathcal{O}(H/\sqrt{\m})$ scaling
+\item \textbf{Activation terms}: $\mathcal{O}(H^2/\sqrt{\m})$ scaling (dominant)
+\end{itemize}
+
+The complete mathematical analysis with detailed bounds for each component is provided in \hyperref[sec:appendix_scaling_analysis]{Appendix B.5}.
 
 \newpage
 
-\section{Implementation of the NTK, and the code correspondence}
+\subsubsection{Implementation of the NTK, and the code correspondence}
 
-The Python script \texttt{kernel3\_empirical.py} in the \href{https://github.com/janisaiad/DeNN-NTK}{github repository} provides a direct, empirical implementation of the analytical formulas for the third-order kernel, $\textcolor{kernelcolor}{K^{(3)}}$, as derived within the Neural Tangent Hierarchy framework. This implementation translates the mathematical recursions and summations into executable code.
+The Python script \texttt{kernel3\_empirical.py} in the \href{https://github.com/janisaiad/DeNN-NTK}{github repository} provides a direct, empirical implementation of the analytical formulas for the third-order kernel, $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$, as derived within the Neural Tangent Hierarchy framework. This implementation translates the mathematical recursions and summations into executable code.
 
-\subsection{Code Structure and Correspondence to Formulas}
+\subsubsection{Code Structure and Correspondence to Formulas}
 The core logic is encapsulated within the `Kernel3Empirical` class. Its methods directly correspond to the mathematical objects we have analyzed:
 
 \begin{itemize}
     \item \textbf{\texttt{\_compute\_G(ell, mu)}}: This helper function computes the backward-propagated vector $G^{(\ell)}_\mu$. It implements the standard recursive definition:
-    \[ G^{(\ell)}_\mu = \frac{(W^{(\ell+1)})^T}{\sqrt{m}} \sigma'_{\ell+1}(x_\mu) G^{(\ell+1)}_\mu \]
-    The recursion starts from the base case $G^{(H)}_\mu = a_t / \sqrt{m}$.
+    \[ G^{(\ell)}_\mu = \frac{(\W^{(\ell+1)})^T}{\sqrt{\m}} \sigma'_{\ell+1}(x_\mu) G^{(\ell+1)}_\mu \]
+    The recursion starts from the base case $G^{(H)}_\mu = a_t / \sqrt{\m}$.
 
     \item \textbf{\texttt{\_compute\_delta\_x(p, gamma, mu)}}: This function calculates the forward derivative term $\delta_\gamma x^{(p)}_\mu$. It follows the recursive formula derived from the chain rule for forward activations:
-    \[ \delta_\gamma x^{(p)}_\mu = \frac{1}{\sqrt{m}} \sigma'_{p}(x_\mu) \left( W^{(p)} (\delta_\gamma x^{(p-1)}_\mu) + \langle x^{(p-1)}_\gamma, x^{(p-1)}_\mu \rangle G^{(p)}_\gamma \right) \]
+    \[ \delta_\gamma x^{(p)}_\mu = \frac{1}{\sqrt{\m}} \sigma'_{p}(x_\mu) \left( \W^{(p)} (\delta_\gamma x^{(p-1)}_\mu) + \langle x^{(p-1)}_\gamma, x^{(p-1)}_\mu \rangle G^{(p)}_\gamma \right) \]
     The recursion starts from the base case $\delta_\gamma x^{(0)}_\mu = 0$.
 
-    \item \textbf{\texttt{\_compute\_delta\_G(ell, gamma, mu)}}: This method implements the more complex formula for the backward derivative term $\delta_\gamma G^{(\ell)}_\mu$. It constructs the term by summing the contributions from the derivatives of all subsequent weights ($W^{(p+1)}$ for $p \ge \ell$) and the output layer weights ($a_t$). Each contribution is then propagated back to layer $\ell$ through a series of matrix-vector products, as specified by the analytical formula.
+    \item \textbf{\texttt{\_compute\_delta\_G(ell, gamma, mu)}}: This method implements the more complex formula for the backward derivative term $\delta_\gamma G^{(\ell)}_\mu$. It constructs the term by summing the contributions from the derivatives of all subsequent weights ($\W^{(p+1)}$ for $p \ge \ell$) and the output layer weights ($a_t$). Each contribution is then propagated back to layer $\ell$ through a series of matrix-vector products, as specified by the analytical formula.
 
-    \item \textbf{\texttt{kernel3(alpha, beta, gamma)}}: This is the main public method. It computes the final scalar value of $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}$ by assembling all the pieces. It mirrors the high-level decomposition:
-    \[ \textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} = K^{(3, \text{out})}_{\alpha\beta\gamma} + \sum_{\ell=1}^H \left( K^{(3, G)}_{\alpha\beta\gamma, \ell} + K^{(3, x)}_{\alpha\beta\gamma, \ell} \right) \]
+    \item \textbf{\texttt{kernel3(alpha, beta, gamma)}}: This is the main public method. It computes the final scalar value of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma}$ by assembling all the pieces. It mirrors the high-level decomposition:
+    \[ \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma} = \textcolor{kernelcolor}{K}^{(3, \text{out})}_{\alpha\beta\gamma} + \sum_{\ell=1}^H \left( \textcolor{kernelcolor}{K}^{(3, G)}_{\alpha\beta\gamma, \ell} + \textcolor{kernelcolor}{K}^{(3, x)}_{\alpha\beta\gamma, \ell} \right) \]
     It calls the helper methods to compute the necessary $\delta_\gamma x$, $\delta_\gamma G$, and $G$ vectors and then combines them through the appropriate inner products.
 \end{itemize}
 
-\subsection{Future Work: Optimization with Automatic Differentiation}
+\subsubsection{Future Work: Optimization with Automatic Differentiation}
 
 The current implementation is a literal translation of the mathematical formulas. While valuable for its clarity and direct correspondence to the theory, this manual approach has drawbacks: it is computationally intensive due to explicit recursion and can be complex to debug and extend.
 
@@ -881,25 +844,25 @@ In the future, a more efficient and robust approach will be pursued by leveragin
 
 The plan is as follows:
 \begin{enumerate}
-    \item Define the second-order kernel, $\textcolor{kernelcolor}{K^{(2)}}(x_\alpha, x_\beta)$, as a pure JAX function that depends on the network parameters $\theta$.
-    \item Use JAX's function transformations, such as \texttt{jax.grad}, to compute the gradient of the kernel with respect to the parameters, $\nabla_\theta \textcolor{kernelcolor}{K^{(2)}}_{\alpha\beta}$.
-    \item The third-order kernel, $\textcolor{kernelcolor}{K^{(3)}}$, is defined as the inner product $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} = \langle \nabla_\theta \textcolor{kernelcolor}{K^{(2)}}_{\alpha\beta}, \nabla_\theta f_\gamma \rangle$. Since $\nabla_\theta f_\gamma$ can also be computed automatically with \texttt{jax.grad}, the entire $\textcolor{kernelcolor}{K^{(3)}}$ tensor can be obtained without manually writing out its complex formula.
+    \item Define the second-order kernel, $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}(x_\alpha, x_\beta)$, as a pure JAX function that depends on the network parameters $\theta$.
+    \item Use JAX's function transformations, such as \texttt{jax.grad}, to compute the gradient of the kernel with respect to the parameters, $\nabla_\theta \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_{\alpha\beta}$.
+    \item The third-order kernel, $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$, is defined as the inner product $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma} = \langle \nabla_\theta \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_{\alpha\beta}, \nabla_\theta f_\gamma \rangle$. Since $\nabla_\theta f_\gamma$ can also be computed automatically with \texttt{jax.grad}, the entire $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ tensor can be obtained without manually writing out its complex formula.
 \end{enumerate}
 
 This AD-based approach promises significant benefits:
 \begin{itemize}
     \item \textbf{Efficiency:} JAX can compile the entire computation into a highly optimized computational graph for execution on accelerators like GPUs or TPUs.
-    \item \textbf{Simplicity and Robustness:} The code becomes much simpler, as we only need to define the base objects ($f$ and $\textcolor{kernelcolor}{K^{(2)}}$), not their derivatives. This drastically reduces the risk of implementation errors.
-    \item \textbf{Extensibility:} This methodology would make it far easier to compute even higher-order kernels, such as $\textcolor{kernelcolor}{K^{(4)}}$, which would be practically infeasible to implement manually.
+    \item \textbf{Simplicity and Robustness:} The code becomes much simpler, as we only need to define the base objects ($f$ and $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$), not their derivatives. This drastically reduces the risk of implementation errors.
+    \item \textbf{Extensibility:} This methodology would make it far easier to compute even higher-order kernels, such as $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(4)}}$, which would be practically infeasible to implement manually.
 \end{itemize}
 
 \newpage
 
-\section{Empirical Validation: Experimental Setup and Analysis}
+\subsubsection{Empirical Validation: Experimental Setup and Analysis}
 
-The script \texttt{kernel3\_vs\_depth\_finite\_empirical\_largeexperiments.py} is designed to empirically validate the theoretical scaling laws for $\textcolor{kernelcolor}{K^{(3)}}$ derived in the previous sections. The primary goal is to investigate how the magnitude of the $\textcolor{kernelcolor}{K^{(3)}}$ tensor entries depends on the network depth $H$ and width $M$.
+The script \texttt{kernel3\_vs\_depth\_finite\_empirical\_largeexperiments.py} is designed to empirically validate the theoretical scaling laws for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ derived in the previous sections. The primary goal is to investigate how the magnitude of the $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ tensor entries depends on the network depth $H$ and width $M$.
 
-\subsection{Experimental Design}
+\subsubsection{Experimental Design}
 
 The experiment is structured as a systematic grid search over a range of network configurations. The main loop iterates through different values for:
 \begin{itemize}
@@ -913,15 +876,15 @@ For each configuration, the script performs the following steps:
 \begin{enumerate}
     \item \textbf{Initialization}: It generates random, normalized input data using \texttt{generate\_data} and initializes the network weights according to a standard normal distribution via \texttt{init\_network}.
     \item \textbf{Forward Pass}: It calls \texttt{compute\_features\_and\_derivatives} to perform a full forward pass, collecting all the necessary intermediate values: the feature maps ($x^{(p)}$) and the diagonal matrices of activation derivatives ($\sigma'_p$) for each layer.
-    \item \textbf{Kernel Computation}: An instance of the \texttt{Kernel3Empirical} class is created with the network weights and the results from the forward pass. The script then computes the entire $N \times N \times N$ tensor for $\textcolor{kernelcolor}{K^{(3)}}$ by calling the \texttt{kernel3(i, j, k)} method for all unique triplets of indices, leveraging the tensor's symmetry.
+    \item \textbf{Kernel Computation}: An instance of the \texttt{Kernel3Empirical} class is created with the network weights and the results from the forward pass. The script then computes the entire $N \times N \times N$ tensor for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ by calling the \texttt{kernel3(i, j, k)} method for all unique triplets of indices, leveraging the tensor's symmetry.
 \end{enumerate}
 
-\subsection{Data Analysis and Connection to Theory}
+\subsubsection{Data Analysis and Connection to Theory}
 
 Once the empirical \texttt{k3\_tensor} is computed, the script extracts quantitative metrics to analyze its properties.
 
 \begin{itemize}
-    \item \textbf{Infinity Norm}: The script computes \texttt{inf\_norm = M * np.max(np.abs(k3\_tensor))}. The purpose of this analysis is to study the kernel's asymptotic behavior. By scaling the empirical result with a factor depending on the width $M$, we can check if the quantity converges to a finite, depth-dependent limit as $M \to \infty$. Our theoretical analysis predicted that the entries of $\textcolor{kernelcolor}{K^{(3)}}$ scale as $O(H^2/\sqrt{M})$. Therefore, multiplying the maximum absolute value by $\sqrt{M}$ should result in a quantity that grows quadratically with depth $H$. The script's use of a scaling factor of $M$ may be intended to test a different theoretical hypothesis or scaling regime.
+    \item \textbf{Infinity Norm}: The script computes \texttt{inf\_norm = M * np.max(np.abs(k3\_tensor))}. The purpose of this analysis is to study the kernel's asymptotic behavior. By scaling the empirical result with a factor depending on the width $M$, we can check if the quantity converges to a finite, depth-dependent limit as $M \to \infty$. Our theoretical analysis predicted that the entries of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ scale as $O(H^2/\sqrt{M})$. Therefore, multiplying the maximum absolute value by $\sqrt{M}$ should result in a quantity that grows quadratically with depth $H$. The script's use of a scaling factor of $M$ may be intended to test a different theoretical hypothesis or scaling regime.
 
     \item \textbf{Eigenvalue Analysis}: The script also performs a spectral analysis by examining the eigenvalues of 2D slices of the tensor (\texttt{k3\_tensor[:, :, k]}). This provides deeper insight into the operator's properties than its maximum entry alone. The mean and standard deviation of these eigenvalues are computed across all slices to produce a statistical summary of the kernel's spectrum. These spectral properties are also scaled by the width $M$.
 \end{itemize}
@@ -930,72 +893,72 @@ The data generated by this script (the computed norms and eigenvalue statistics 
 
 \newpage
 
-\section{Deep Dive into Quantitative Metrics}
+\subsubsection{Deep Dive into Quantitative Metrics}
 
 To bridge the gap between our theoretical analysis and the empirical results from the script, it's essential to understand precisely what the computed metrics represent and how they connect to the underlying theory.
 
-\subsection{Analysis of the Scaled Infinity Norm}
+\subsubsection{Analysis of the Scaled Infinity Norm}
 
 The script computes \texttt{inf\_norm = M * np.max(np.abs(k3\_tensor))}. Let's break this down.
 
 \begin{itemize}
-    \item \textbf{What is the Infinity Norm?} The infinity norm of the $\textcolor{kernelcolor}{K^{(3)}}$ tensor, denoted $\|\textcolor{kernelcolor}{K^{(3)}}\|_\infty$, is simply the largest absolute value among all its entries:
-    \[ \|\textcolor{kernelcolor}{K^{(3)}}\|_\infty = \max_{\alpha, \beta, \gamma} |\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}| \]
+    \item \textbf{What is the Infinity Norm?} The infinity norm of the $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ tensor, denoted $\|\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}\|_\infty$, is simply the largest absolute value among all its entries:
+    \[ \|\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}\|_\infty = \max_{\alpha, \beta, \gamma} |\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma}| \]
     This metric provides a simple way to quantify the overall magnitude of the kernel.
 
-    \item \textbf{The Purpose of Scaling by Width $M$}: In the infinite-width limit ($M \to \infty$), the standard NTK theory shows that $\textcolor{kernelcolor}{K^{(3)}}$ vanishes, which is why the kernel dynamics are ignored. Our analysis for finite-width networks aims to characterize precisely \textit{how fast} it vanishes. The scaling factor is introduced to cancel out the width-dependent decay, thereby isolating the depth-dependent behavior.
+    \item \textbf{The Purpose of Scaling by Width $M$}: In the infinite-width limit ($M \to \infty$), the standard NTK theory shows that $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ vanishes, which is why the kernel dynamics are ignored. Our analysis for finite-width networks aims to characterize precisely \textit{how fast} it vanishes. The scaling factor is introduced to cancel out the width-dependent decay, thereby isolating the depth-dependent behavior.
 
-    \item \textbf{Testing Theoretical Predictions}: Our detailed scaling analysis predicted that the dominant term in $\textcolor{kernelcolor}{K^{(3)}}$ scales as $O(H^2/\sqrt{M})$. To empirically test this hypothesis, one should analyze the quantity $\sqrt{M} \cdot \|\textcolor{kernelcolor}{K^{(3)}}\|_\infty$. If the theory is correct, this scaled value should converge to a limit that grows quadratically with depth ($H^2$) as $M$ becomes large.
+    \item \textbf{Testing Theoretical Predictions}: Our detailed scaling analysis predicted that the dominant term in $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ scales as $O(H^2/\sqrt{M})$. To empirically test this hypothesis, one should analyze the quantity $\sqrt{M} \cdot \|\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}\|_\infty$. If the theory is correct, this scaled value should converge to a limit that grows quadratically with depth ($H^2$) as $M$ becomes large.
 
-    The experiment, by computing $M \cdot \|\textcolor{kernelcolor}{K^{(3)}}\|_\infty$, is implicitly testing an alternative hypothesis where the kernel entries scale as $O(1/M)$. If our $O(1/\sqrt{M})$ theory is correct, the quantity computed in the script should not converge but instead grow like $\sqrt{M}$. By observing which of these scaled quantities (or another) stabilizes as $M$ increases, the experiment can empirically determine the true scaling law, thus validating or falsifying different theoretical claims.
+    The experiment, by computing $M \cdot \|\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}\|_\infty$, is implicitly testing an alternative hypothesis where the kernel entries scale as $O(1/M)$. If our $O(1/\sqrt{M})$ theory is correct, the quantity computed in the script should not converge but instead grow like $\sqrt{M}$. By observing which of these scaled quantities (or another) stabilizes as $M$ increases, the experiment can empirically determine the true scaling law, thus validating or falsifying different theoretical claims.
 \end{itemize}
 
-\subsection{Spectral Analysis of Tensor Slices}
+\subsubsection{Spectral Analysis of Tensor Slices}
 
-The eigenvalue analysis provides a much deeper view into the structure of $\textcolor{kernelcolor}{K^{(3)}}$ than the infinity norm alone. The dynamics of the NTK are given by the equation:
-\[ \frac{d}{dt} \textcolor{kernelcolor}{K^{(2)}}_t = -\frac{1}{n} \sum_{\gamma=1}^n (f_t(x_\gamma) - y_\gamma) \cdot \textcolor{kernelcolor}{K^{(3)}}_{t, \gamma} \]
-where $\textcolor{kernelcolor}{K^{(3)}}_{t, \gamma}$ is the $N \times N$ matrix slice of the tensor for a fixed index $\gamma$. The evolution of $\textcolor{kernelcolor}{K^{(2)}}$ is thus a linear combination of these slice matrices.
+The eigenvalue analysis provides a much deeper view into the structure of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ than the infinity norm alone. The dynamics of the NTK are given by the equation:
+\[ \frac{d}{dt} \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t = -\frac{1}{n} \sum_{\gamma=1}^n (f_t(x_\gamma) - y_\gamma) \cdot \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{t, \gamma} \]
+where $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{t, \gamma}$ is the $N \times N$ matrix slice of the tensor for a fixed index $\gamma$. The evolution of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$ is thus a linear combination of these slice matrices.
 
 \begin{itemize}
-    \item \textbf{Physical Meaning of Eigenvalues}: The eigenvalues of a slice matrix $\textcolor{kernelcolor}{K^{(3)}}_\gamma$ characterize how an error at a single data point, $x_\gamma$, influences the geometry of the feature space (as captured by $\textcolor{kernelcolor}{K^{(2)}}$). An eigenvector of this matrix represents a direction in the input space, and its corresponding eigenvalue represents the magnitude and sign of the change in that direction. A large positive eigenvalue means that the kernel's value for pairs of points aligned with that eigenvector will increase, effectively pushing those representations further apart.
+    \item \textbf{Physical Meaning of Eigenvalues}: The eigenvalues of a slice matrix $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_\gamma$ characterize how an error at a single data point, $x_\gamma$, influences the geometry of the feature space (as captured by $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$). An eigenvector of this matrix represents a direction in the input space, and its corresponding eigenvalue represents the magnitude and sign of the change in that direction. A large positive eigenvalue means that the kernel's value for pairs of points aligned with that eigenvector will increase, effectively pushing those representations further apart.
 
     \item \textbf{Mean and Standard Deviation}:
     \begin{itemize}
-        \item \texttt{mean\_eigenvalues}: By averaging the eigenvalues of all slices, we obtain the "average" spectral signature of the $\textcolor{kernelcolor}{K^{(3)}}$ operator. This tells us if there is a systematic, data-independent drift in the NTK. For instance, a consistently negative smallest eigenvalue across all slices would imply that gradient descent tends to contract the feature space along a specific direction, regardless of which data point has a large error.
+        \item \texttt{mean\_eigenvalues}: By averaging the eigenvalues of all slices, we obtain the "average" spectral signature of the $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ operator. This tells us if there is a systematic, data-independent drift in the NTK. For instance, a consistently negative smallest eigenvalue across all slices would imply that gradient descent tends to contract the feature space along a specific direction, regardless of which data point has a large error.
         \item \texttt{std\_eigenvalues}: The standard deviation measures how much this spectral impact varies depending on the data point $x_\gamma$ driving the update. A small standard deviation would imply that the kernel evolves in a very predictable, almost data-independent manner. Conversely, a large standard deviation suggests that the geometry of the kernel is being sculpted in a highly complex, data-dependent way, with each training example pulling the kernel in a different "direction".
     \end{itemize}
 
-    \item \textbf{Asymptotic Behavior}: As with the infinity norm, the eigenvalues are scaled by the width $M$ to study their asymptotic behavior. The eigenvalues of a matrix with entries scaling as $\epsilon$ will also scale as $\epsilon$. Therefore, if the entries of $\textcolor{kernelcolor}{K^{(3)}}$ scale as $O(1/\sqrt{M})$, its eigenvalues should as well. The experiment provides the necessary data to check if the scaled spectrum converges to a stable, non-trivial limit as the width grows.
+    \item \textbf{Asymptotic Behavior}: As with the infinity norm, the eigenvalues are scaled by the width $M$ to study their asymptotic behavior. The eigenvalues of a matrix with entries scaling as $\epsilon$ will also scale as $\epsilon$. Therefore, if the entries of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ scale as $O(1/\sqrt{M})$, its eigenvalues should as well. The experiment provides the necessary data to check if the scaled spectrum converges to a stable, non-trivial limit as the width grows.
 \end{itemize}
 
 METTRE LES GRAPHES, les experiences, et le papier feynman diagram
 
 
 
-\section{Implementation of the NTK, and the code correspondence}
+\subsubsection{Implementation of the NTK, and the code correspondence}
 
-The Python script \texttt{kernel3\_empirical.py} in the \href{https://github.com/janisaiad/DeNN-NTK}{github repository} provides a direct, empirical implementation of the analytical formulas for the third-order kernel, $\textcolor{kernelcolor}{K^{(3)}}$, as derived within the Neural Tangent Hierarchy framework. This implementation translates the mathematical recursions and summations into executable code.
+The Python script \texttt{kernel3\_empirical.py} in the \href{https://github.com/janisaiad/DeNN-NTK}{github repository} provides a direct, empirical implementation of the analytical formulas for the third-order kernel, $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$, as derived within the Neural Tangent Hierarchy framework. This implementation translates the mathematical recursions and summations into executable code.
 
-\subsection{Code Structure and Correspondence to Formulas}
+\subsubsection{Code Structure and Correspondence to Formulas}
 The core logic is encapsulated within the `Kernel3Empirical` class. Its methods directly correspond to the mathematical objects we have analyzed:
 
 \begin{itemize}
     \item \textbf{\texttt{\_compute\_G(ell, mu)}}: This helper function computes the backward-propagated vector $G^{(\ell)}_\mu$. It implements the standard recursive definition:
-    \[ G^{(\ell)}_\mu = \frac{(W^{(\ell+1)})^T}{\sqrt{m}} \sigma'_{\ell+1}(x_\mu) G^{(\ell+1)}_\mu \]
-    The recursion starts from the base case $G^{(H)}_\mu = a_t / \sqrt{m}$.
+    \[ G^{(\ell)}_\mu = \frac{(\W^{(\ell+1)})^T}{\sqrt{\m}} \sigma'_{\ell+1}(x_\mu) G^{(\ell+1)}_\mu \]
+    The recursion starts from the base case $G^{(H)}_\mu = a_t / \sqrt{\m}$.
 
     \item \textbf{\texttt{\_compute\_delta\_x(p, gamma, mu)}}: This function calculates the forward derivative term $\delta_\gamma x^{(p)}_\mu$. It follows the recursive formula derived from the chain rule for forward activations:
-    \[ \delta_\gamma x^{(p)}_\mu = \frac{1}{\sqrt{m}} \sigma'_{p}(x_\mu) \left( W^{(p)} (\delta_\gamma x^{(p-1)}_\mu) + \langle x^{(p-1)}_\gamma, x^{(p-1)}_\mu \rangle G^{(p)}_\gamma \right) \]
+    \[ \delta_\gamma x^{(p)}_\mu = \frac{1}{\sqrt{\m}} \sigma'_{p}(x_\mu) \left( \W^{(p)} (\delta_\gamma x^{(p-1)}_\mu) + \langle x^{(p-1)}_\gamma, x^{(p-1)}_\mu \rangle G^{(p)}_\gamma \right) \]
     The recursion starts from the base case $\delta_\gamma x^{(0)}_\mu = 0$.
 
-    \item \textbf{\texttt{\_compute\_delta\_G(ell, gamma, mu)}}: This method implements the more complex formula for the backward derivative term $\delta_\gamma G^{(\ell)}_\mu$. It constructs the term by summing the contributions from the derivatives of all subsequent weights ($W^{(p+1)}$ for $p \ge \ell$) and the output layer weights ($a_t$). Each contribution is then propagated back to layer $\ell$ through a series of matrix-vector products, as specified by the analytical formula.
+    \item \textbf{\texttt{\_compute\_delta\_G(ell, gamma, mu)}}: This method implements the more complex formula for the backward derivative term $\delta_\gamma G^{(\ell)}_\mu$. It constructs the term by summing the contributions from the derivatives of all subsequent weights ($\W^{(p+1)}$ for $p \ge \ell$) and the output layer weights ($a_t$). Each contribution is then propagated back to layer $\ell$ through a series of matrix-vector products, as specified by the analytical formula.
 
-    \item \textbf{\texttt{kernel3(alpha, beta, gamma)}}: This is the main public method. It computes the final scalar value of $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}$ by assembling all the pieces. It mirrors the high-level decomposition:
-    \[ \textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} = K^{(3, \text{out})}_{\alpha\beta\gamma} + \sum_{\ell=1}^H \left( K^{(3, G)}_{\alpha\beta\gamma, \ell} + K^{(3, x)}_{\alpha\beta\gamma, \ell} \right) \]
+    \item \textbf{\texttt{kernel3(alpha, beta, gamma)}}: This is the main public method. It computes the final scalar value of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma}$ by assembling all the pieces. It mirrors the high-level decomposition:
+    \[ \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma} = \textcolor{kernelcolor}{K}^{(3, \text{out})}_{\alpha\beta\gamma} + \sum_{\ell=1}^H \left( \textcolor{kernelcolor}{K}^{(3, G)}_{\alpha\beta\gamma, \ell} + \textcolor{kernelcolor}{K}^{(3, x)}_{\alpha\beta\gamma, \ell} \right) \]
     It calls the helper methods to compute the necessary $\delta_\gamma x$, $\delta_\gamma G$, and $G$ vectors and then combines them through the appropriate inner products.
 \end{itemize}
 
-\subsection{Future Work: Optimization with Automatic Differentiation}
+\subsubsection{Future Work: Optimization with Automatic Differentiation}
 
 The current implementation is a literal translation of the mathematical formulas. While valuable for its clarity and direct correspondence to the theory, this manual approach has drawbacks: it is computationally intensive due to explicit recursion and can be complex to debug and extend.
 
@@ -1003,25 +966,25 @@ In the future, a more efficient and robust approach will be pursued by leveragin
 
 The plan is as follows:
 \begin{enumerate}
-    \item Define the second-order kernel, $\textcolor{kernelcolor}{K^{(2)}}(x_\alpha, x_\beta)$, as a pure JAX function that depends on the network parameters $\theta$.
-    \item Use JAX's function transformations, such as \texttt{jax.grad}, to compute the gradient of the kernel with respect to the parameters, $\nabla_\theta \textcolor{kernelcolor}{K^{(2)}}_{\alpha\beta}$.
-    \item The third-order kernel, $\textcolor{kernelcolor}{K^{(3)}}$, is defined as the inner product $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} = \langle \nabla_\theta \textcolor{kernelcolor}{K^{(2)}}_{\alpha\beta}, \nabla_\theta f_\gamma \rangle$. Since $\nabla_\theta f_\gamma$ can also be computed automatically with \texttt{jax.grad}, the entire $\textcolor{kernelcolor}{K^{(3)}}$ tensor can be obtained without manually writing out its complex formula.
+    \item Define the second-order kernel, $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}(x_\alpha, x_\beta)$, as a pure JAX function that depends on the network parameters $\theta$.
+    \item Use JAX's function transformations, such as \texttt{jax.grad}, to compute the gradient of the kernel with respect to the parameters, $\nabla_\theta \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_{\alpha\beta}$.
+    \item The third-order kernel, $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$, is defined as the inner product $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma} = \langle \nabla_\theta \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_{\alpha\beta}, \nabla_\theta f_\gamma \rangle$. Since $\nabla_\theta f_\gamma$ can also be computed automatically with \texttt{jax.grad}, the entire $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ tensor can be obtained without manually writing out its complex formula.
 \end{enumerate}
 
 This AD-based approach promises significant benefits:
 \begin{itemize}
     \item \textbf{Efficiency:} JAX can compile the entire computation into a highly optimized computational graph for execution on accelerators like GPUs or TPUs.
-    \item \textbf{Simplicity and Robustness:} The code becomes much simpler, as we only need to define the base objects ($f$ and $\textcolor{kernelcolor}{K^{(2)}}$), not their derivatives. This drastically reduces the risk of implementation errors.
-    \item \textbf{Extensibility:} This methodology would make it far easier to compute even higher-order kernels, such as $\textcolor{kernelcolor}{K^{(4)}}$, which would be practically infeasible to implement manually.
+    \item \textbf{Simplicity and Robustness:} The code becomes much simpler, as we only need to define the base objects ($f$ and $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$), not their derivatives. This drastically reduces the risk of implementation errors.
+    \item \textbf{Extensibility:} This methodology would make it far easier to compute even higher-order kernels, such as $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(4)}}$, which would be practically infeasible to implement manually.
 \end{itemize}
 
 \newpage
 
-\section{Empirical Validation: Experimental Setup and Analysis}
+\subsubsection{Empirical Validation: Experimental Setup and Analysis}
 
-The script \texttt{kernel3\_vs\_depth\_finite\_empirical\_largeexperiments.py} is designed to empirically validate the theoretical scaling laws for $\textcolor{kernelcolor}{K^{(3)}}$ derived in the previous sections. The primary goal is to investigate how the magnitude of the $\textcolor{kernelcolor}{K^{(3)}}$ tensor entries depends on the network depth $H$ and width $M$.
+The script \texttt{kernel3\_vs\_depth\_finite\_empirical\_largeexperiments.py} is designed to empirically validate the theoretical scaling laws for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ derived in the previous sections. The primary goal is to investigate how the magnitude of the $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ tensor entries depends on the network depth $H$ and width $M$.
 
-\subsection{Experimental Design}
+\subsubsection{Experimental Design}
 
 The experiment is structured as a systematic grid search over a range of network configurations. The main loop iterates through different values for:
 \begin{itemize}
@@ -1035,15 +998,15 @@ For each configuration, the script performs the following steps:
 \begin{enumerate}
     \item \textbf{Initialization}: It generates random, normalized input data using \texttt{generate\_data} and initializes the network weights according to a standard normal distribution via \texttt{init\_network}.
     \item \textbf{Forward Pass}: It calls \texttt{compute\_features\_and\_derivatives} to perform a full forward pass, collecting all the necessary intermediate values: the feature maps ($x^{(p)}$) and the diagonal matrices of activation derivatives ($\sigma'_p$) for each layer.
-    \item \textbf{Kernel Computation}: An instance of the \texttt{Kernel3Empirical} class is created with the network weights and the results from the forward pass. The script then computes the entire $N \times N \times N$ tensor for $\textcolor{kernelcolor}{K^{(3)}}$ by calling the \texttt{kernel3(i, j, k)} method for all unique triplets of indices, leveraging the tensor's symmetry.
+    \item \textbf{Kernel Computation}: An instance of the \texttt{Kernel3Empirical} class is created with the network weights and the results from the forward pass. The script then computes the entire $N \times N \times N$ tensor for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ by calling the \texttt{kernel3(i, j, k)} method for all unique triplets of indices, leveraging the tensor's symmetry.
 \end{enumerate}
 
-\subsection{Data Analysis and Connection to Theory}
+\subsubsection{Data Analysis and Connection to Theory}
 
 Once the empirical \texttt{k3\_tensor} is computed, the script extracts quantitative metrics to analyze its properties.
 
 \begin{itemize}
-    \item \textbf{Infinity Norm}: The script computes \texttt{inf\_norm = M * np.max(np.abs(k3\_tensor))}. The purpose of this analysis is to study the kernel's asymptotic behavior. By scaling the empirical result with a factor depending on the width $M$, we can check if the quantity converges to a finite, depth-dependent limit as $M \to \infty$. Our theoretical analysis predicted that the entries of $\textcolor{kernelcolor}{K^{(3)}}$ scale as $O(H^2/\sqrt{M})$. Therefore, multiplying the maximum absolute value by $\sqrt{M}$ should result in a quantity that grows quadratically with depth $H$. The script's use of a scaling factor of $M$ may be intended to test a different theoretical hypothesis or scaling regime.
+    \item \textbf{Infinity Norm}: The script computes \texttt{inf\_norm = M * np.max(np.abs(k3\_tensor))}. The purpose of this analysis is to study the kernel's asymptotic behavior. By scaling the empirical result with a factor depending on the width $M$, we can check if the quantity converges to a finite, depth-dependent limit as $M \to \infty$. Our theoretical analysis predicted that the entries of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ scale as $O(H^2/\sqrt{M})$. Therefore, multiplying the maximum absolute value by $\sqrt{M}$ should result in a quantity that grows quadratically with depth $H$. The script's use of a scaling factor of $M$ may be intended to test a different theoretical hypothesis or scaling regime.
 
     \item \textbf{Eigenvalue Analysis}: The script also performs a spectral analysis by examining the eigenvalues of 2D slices of the tensor (\texttt{k3\_tensor[:, :, k]}). This provides deeper insight into the operator's properties than its maximum entry alone. The mean and standard deviation of these eigenvalues are computed across all slices to produce a statistical summary of the kernel's spectrum. These spectral properties are also scaled by the width $M$.
 \end{itemize}
@@ -1052,51 +1015,51 @@ The data generated by this script (the computed norms and eigenvalue statistics 
 
 \newpage
 
-\section{Deep Dive into Quantitative Metrics}
+\subsubsection{Deep Dive into Quantitative Metrics}
 
 To bridge the gap between our theoretical analysis and the empirical results from the script, it's essential to understand precisely what the computed metrics represent and how they connect to the underlying theory.
 
-\subsection{Analysis of the Scaled Infinity Norm}
+\subsubsection{Analysis of the Scaled Infinity Norm}
 
 The script computes \texttt{inf\_norm = M * np.max(np.abs(k3\_tensor))}. Let's break this down.
 
 \begin{itemize}
-    \item \textbf{What is the Infinity Norm?} The infinity norm of the $\textcolor{kernelcolor}{K^{(3)}}$ tensor, denoted $\|\textcolor{kernelcolor}{K^{(3)}}\|_\infty$, is simply the largest absolute value among all its entries:
-    \[ \|\textcolor{kernelcolor}{K^{(3)}}\|_\infty = \max_{\alpha, \beta, \gamma} |\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}| \]
+    \item \textbf{What is the Infinity Norm?} The infinity norm of the $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ tensor, denoted $\|\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}\|_\infty$, is simply the largest absolute value among all its entries:
+    \[ \|\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}\|_\infty = \max_{\alpha, \beta, \gamma} |\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma}| \]
     This metric provides a simple way to quantify the overall magnitude of the kernel.
 
-    \item \textbf{The Purpose of Scaling by Width $M$}: In the infinite-width limit ($M \to \infty$), the standard NTK theory shows that $\textcolor{kernelcolor}{K^{(3)}}$ vanishes, which is why the kernel dynamics are ignored. Our analysis for finite-width networks aims to characterize precisely \textit{how fast} it vanishes. The scaling factor is introduced to cancel out the width-dependent decay, thereby isolating the depth-dependent behavior.
+    \item \textbf{The Purpose of Scaling by Width $M$}: In the infinite-width limit ($M \to \infty$), the standard NTK theory shows that $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ vanishes, which is why the kernel dynamics are ignored. Our analysis for finite-width networks aims to characterize precisely \textit{how fast} it vanishes. The scaling factor is introduced to cancel out the width-dependent decay, thereby isolating the depth-dependent behavior.
 
-    \item \textbf{Testing Theoretical Predictions}: Our detailed scaling analysis predicted that the dominant term in $\textcolor{kernelcolor}{K^{(3)}}$ scales as $O(H^2/\sqrt{M})$. To empirically test this hypothesis, one should analyze the quantity $\sqrt{M} \cdot \|\textcolor{kernelcolor}{K^{(3)}}\|_\infty$. If the theory is correct, this scaled value should converge to a limit that grows quadratically with depth ($H^2$) as $M$ becomes large.
+    \item \textbf{Testing Theoretical Predictions}: Our detailed scaling analysis predicted that the dominant term in $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ scales as $O(H^2/\sqrt{M})$. To empirically test this hypothesis, one should analyze the quantity $\sqrt{M} \cdot \|\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}\|_\infty$. If the theory is correct, this scaled value should converge to a limit that grows quadratically with depth ($H^2$) as $M$ becomes large.
 
-    The experiment, by computing $M \cdot \|\textcolor{kernelcolor}{K^{(3)}}\|_\infty$, is implicitly testing an alternative hypothesis where the kernel entries scale as $O(1/M)$. If our $O(1/\sqrt{M})$ theory is correct, the quantity computed in the script should not converge but instead grow like $\sqrt{M}$. By observing which of these scaled quantities (or another) stabilizes as $M$ increases, the experiment can empirically determine the true scaling law, thus validating or falsifying different theoretical claims.
+    The experiment, by computing $M \cdot \|\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}\|_\infty$, is implicitly testing an alternative hypothesis where the kernel entries scale as $O(1/M)$. If our $O(1/\sqrt{M})$ theory is correct, the quantity computed in the script should not converge but instead grow like $\sqrt{M}$. By observing which of these scaled quantities (or another) stabilizes as $M$ increases, the experiment can empirically determine the true scaling law, thus validating or falsifying different theoretical claims.
 \end{itemize}
 
-\subsection{Spectral Analysis of Tensor Slices}
+\subsubsection{Spectral Analysis of Tensor Slices}
 
-The eigenvalue analysis provides a much deeper view into the structure of $\textcolor{kernelcolor}{K^{(3)}}$ than the infinity norm alone. The dynamics of the NTK are given by the equation:
-\[ \frac{d}{dt} \textcolor{kernelcolor}{K^{(2)}}_t = -\frac{1}{n} \sum_{\gamma=1}^n (f_t(x_\gamma) - y_\gamma) \cdot \textcolor{kernelcolor}{K^{(3)}}_{t, \gamma} \]
-where $\textcolor{kernelcolor}{K^{(3)}}_{t, \gamma}$ is the $N \times N$ matrix slice of the tensor for a fixed index $\gamma$. The evolution of $\textcolor{kernelcolor}{K^{(2)}}$ is thus a linear combination of these slice matrices.
+The eigenvalue analysis provides a much deeper view into the structure of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ than the infinity norm alone. The dynamics of the NTK are given by the equation:
+\[ \frac{d}{dt} \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t = -\frac{1}{n} \sum_{\gamma=1}^n (f_t(x_\gamma) - y_\gamma) \cdot \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{t, \gamma} \]
+where $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{t, \gamma}$ is the $N \times N$ matrix slice of the tensor for a fixed index $\gamma$. The evolution of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$ is thus a linear combination of these slice matrices.
 
 \begin{itemize}
-    \item \textbf{Physical Meaning of Eigenvalues}: The eigenvalues of a slice matrix $\textcolor{kernelcolor}{K^{(3)}}_\gamma$ characterize how an error at a single data point, $x_\gamma$, influences the geometry of the feature space (as captured by $\textcolor{kernelcolor}{K^{(2)}}$). An eigenvector of this matrix represents a direction in the input space, and its corresponding eigenvalue represents the magnitude and sign of the change in that direction. A large positive eigenvalue means that the kernel's value for pairs of points aligned with that eigenvector will increase, effectively pushing those representations further apart.
+    \item \textbf{Physical Meaning of Eigenvalues}: The eigenvalues of a slice matrix $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_\gamma$ characterize how an error at a single data point, $x_\gamma$, influences the geometry of the feature space (as captured by $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$). An eigenvector of this matrix represents a direction in the input space, and its corresponding eigenvalue represents the magnitude and sign of the change in that direction. A large positive eigenvalue means that the kernel's value for pairs of points aligned with that eigenvector will increase, effectively pushing those representations further apart.
 
     \item \textbf{Mean and Standard Deviation}:
     \begin{itemize}
-        \item \texttt{mean\_eigenvalues}: By averaging the eigenvalues of all slices, we obtain the "average" spectral signature of the $\textcolor{kernelcolor}{K^{(3)}}$ operator. This tells us if there is a systematic, data-independent drift in the NTK. For instance, a consistently negative smallest eigenvalue across all slices would imply that gradient descent tends to contract the feature space along a specific direction, regardless of which data point has a large error.
+        \item \texttt{mean\_eigenvalues}: By averaging the eigenvalues of all slices, we obtain the "average" spectral signature of the $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ operator. This tells us if there is a systematic, data-independent drift in the NTK. For instance, a consistently negative smallest eigenvalue across all slices would imply that gradient descent tends to contract the feature space along a specific direction, regardless of which data point has a large error.
         \item \texttt{std\_eigenvalues}: The standard deviation measures how much this spectral impact varies depending on the data point $x_\gamma$ driving the update. A small standard deviation would imply that the kernel evolves in a very predictable, almost data-independent manner. Conversely, a large standard deviation suggests that the geometry of the kernel is being sculpted in a highly complex, data-dependent way, with each training example pulling the kernel in a different "direction".
     \end{itemize}
 
-    \item \textbf{Asymptotic Behavior}: As with the infinity norm, the eigenvalues are scaled by the width $M$ to study their asymptotic behavior. The eigenvalues of a matrix with entries scaling as $\epsilon$ will also scale as $\epsilon$. Therefore, if the entries of $\textcolor{kernelcolor}{K^{(3)}}$ scale as $O(1/\sqrt{M})$, its eigenvalues should as well. The experiment provides the necessary data to check if the scaled spectrum converges to a stable, non-trivial limit as the width grows.
+    \item \textbf{Asymptotic Behavior}: As with the infinity norm, the eigenvalues are scaled by the width $M$ to study their asymptotic behavior. The eigenvalues of a matrix with entries scaling as $\epsilon$ will also scale as $\epsilon$. Therefore, if the entries of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ scale as $O(1/\sqrt{M})$, its eigenvalues should as well. The experiment provides the necessary data to check if the scaled spectrum converges to a stable, non-trivial limit as the width grows.
 \end{itemize}
 
 
 
-\section{Deeper Analysis of Finite-Width Corrections}
+\subsubsection{Deeper Analysis of Finite-Width Corrections}
 
-While the previous section confirmed the scaling of the $\textcolor{kernelcolor}{K^{(3)}}$ tensor, we now turn to a more direct analysis of the finite-width correction to the NTK itself. We study the quantity $M(K_{\text{emp}} - K_{\infty})$, where $K_{\text{emp}}$ is the empirically measured NTK for a network of width $M$, and $K_{\infty}$ is the theoretical infinite-width kernel. This quantity represents the leading order finite-width correction, scaled by the width, and is central to understanding feature learning.
+ \W hile the previous section confirmed the scaling of the $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ tensor, we now turn to a more direct analysis of the finite-width correction to the NTK itself. We study the quantity $M(K_{\text{emp}} - K_{\infty})$, where $\textcolor{kernelcolor}{K}_{\text{emp}}$ is the empirically measured NTK for a network of width $M$, and $\textcolor{kernelcolor}{K}_{\infty}$ is the theoretical infinite-width kernel. This quantity represents the leading order finite-width correction, scaled by the width, and is central to understanding feature learning.
 
-\subsection{Empirical Scaling Laws}
+\subsubsection{Empirical Scaling Laws}
 
 To precisely quantify the dependence of the finite-width correction on the network parameters, we performed a multivariate linear regression in the logarithmic space of the parameters. We model the spectral radius of the NTK correction, $\|K_{\text{emp}} - K_{\infty}\|_\infty$, as a power law of the depth ($L$), input dimension ($D_{\text{in}}$), number of data points ($N$), and width ($M$).
 
@@ -1111,19 +1074,19 @@ The regression analysis yields an extremely clear relationship with a goodness-o
 \end{equation}
 This empirical model, derived from a comprehensive multivariate regression with an intercept of $-1.278$, provides a precise characterization of the correction's behavior. Extensive further experiments, analyzing the scaling with respect to each parameter individually, have confirmed these findings across a wide range of configurations. We consistently observe that the correction's magnitude grows approximately linearly with the network's depth ($L^{1.099}$) and the number of data points ($N^{0.902}$). The correction also reliably decays as the inverse of the width ($M^{-1.013}$), which is strongly consistent with the theoretical expectation of an $\mathcal{O}(1/M)$ scaling for finite-width effects. Most importantly, our experiments suggest that the dependence on the input dimension $D_{\text{in}}$ is minimal ($D_{\text{in}}^{0.028}$). This is a crucial property for our setup, as it suggests that the feature-learning capabilities captured by the NTK's evolution do not degrade in high-dimensional spaces, making this approach highly promising for applications such as PDE solving in high dimensions.
 
-\subsection{Theoretical Interpretation}
+\subsubsection{Theoretical Interpretation}
 
 These rich empirical findings can be understood through the lens of the formula for the late-time NTK correction (Equation \ref{eq:theta_correction}), which we introduced in Section 2. This formula provides a deep connection between the observed scaling laws and the underlying structure of the theory.
 
-This illuminates two crucial mechanisms that explain our empirical findings. First, we consider the influence of the higher-order kernels, $O_3$ (which is equivalent to our $\textcolor{kernelcolor}{K^{(3)}}$) and $O_4$. Although our analysis has shown that the norm of $\textcolor{kernelcolor}{K^{(3)}}$ itself grows with depth, the robust linear growth of the total NTK correction with depth $L$ strongly suggests that the term involving the $O_4$ kernel is the primary driver of this scaling behavior.
+This illuminates two crucial mechanisms that explain our empirical findings. First, we consider the influence of the higher-order kernels, $O_3$ (which is equivalent to our $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$) and $O_4$. Although our analysis has shown that the norm of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ itself grows with depth, the robust linear growth of the total NTK correction with depth $L$ strongly suggests that the term involving the $O_4$ kernel is the primary driver of this scaling behavior.
 
 Second, the formula reveals the critical role of the initial kernel's spectrum. As discussed in Section 2.1, the correction terms are inversely proportional to the eigenvalues $\lambda_i$ of the initial kernel $\Theta_0$. We established that the smallest eigenvalues scale as $\mathcal{O}(L/N)$. This inverse relationship provides a compelling theoretical explanation for the observed scaling of the correction: for deeper networks (larger $L$) or for larger datasets (larger $N$), the smallest eigenvalues become smaller. A smaller denominator in Equation \ref{eq:theta_correction} naturally amplifies the entire finite-width correction, explaining why it scales so clearly with both depth $L$ and data size $N$.
 
-\section{Experimental Validation}
+\subsubsection{Experimental Validation}
 
 To validate the theoretical formula for the late-time NTK correction $\Theta^{(1)}_\infty$ (Equation \ref{eq:theta_correction}), we conduct extensive numerical experiments. Our goal is to analyze how the correction term $M(K_{\text{emp}} - K_{\infty})$ scales with network depth $L$, width $M$, input dimension $D_{\text{in}}$, and dataset size $N$, and compare these empirical results with the theoretical predictions.
 
-\subsection{Experimental Setup}
+\subsubsection{Experimental Setup}
 
 The experiments leverage JAX and the Neural Tangents library for efficient computation of finite-width neural networks, complemented by our custom implementation of the infinite-width limit. This setup allows us to precisely measure the finite-width corrections and their scaling behavior.
 
@@ -1147,20 +1110,20 @@ The experiments leverage JAX and the Neural Tangents library for efficient compu
     \end{itemize}
 \end{itemize}
 
-\subsection{Methodology}
+\subsubsection{Methodology}
 
 For each configuration in our parameter sweep:
 
 \begin{enumerate}
-    \item We compute the empirical NTK $K_{\text{emp}}$ for the finite-width network using Neural Tangents, capturing all finite-width effects
-    \item We calculate the theoretical infinite-width kernel $K_{\infty}$ using our InfiniteWidth implementation
+    \item We compute the empirical NTK $\textcolor{kernelcolor}{K}_{\text{emp}}$ for the finite-width network using Neural Tangents, capturing all finite-width effects
+    \item We calculate the theoretical infinite-width kernel $\textcolor{kernelcolor}{K}_{\infty}$ using our InfiniteWidth implementation
     \item We form the width-scaled correction term $M(K_{\text{emp}} - K_{\infty})$
     \item We analyze the spectral radius $\|M(K_{\text{emp}} - K_{\infty})\|_\infty$ to quantify the correction's magnitude
 \end{enumerate}
 
 To ensure statistical significance and account for initialization effects, we repeat each measurement 10 times with different random seeds. This robust methodology allows us to accurately measure the scaling exponents that appear in Equation \ref{eq:scaling_law}.
 
-\subsection{Results and Discussion}
+\subsubsection{Results and Discussion}
 
 The primary output of the experiment is a plot of the spectral radius of the correction term versus various network parameters.
 \newpage
@@ -1194,24 +1157,24 @@ This gives the optimal width:
 M^* = \sqrt{\frac{P}{L^*}} = 2 C N^2
 \]
 
-These values maximize the lower bound on $\lambda_{\min}$ for a fixed parameter budget $P$ and dataset size $N$. A more rigorous approach requires careful analysis of the higher-order corrections $\textcolor{kernelcolor}{K^{(3)}}$ and $\textcolor{kernelcolor}{K^{(4)}}$, which we explore in detail in the following sections.
+These values maximize the lower bound on $\lambda_{\min}$ for a fixed parameter budget $P$ and dataset size $N$. A more rigorous approach requires careful analysis of the higher-order corrections $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ and $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(4)}}$, which we explore in detail in the following sections.
 
 
 
 
 
-\subsection{Overall Scaling and Conclusion}
+\subsubsection{Overall Scaling and Conclusion}
 
 Combining the scaling of the four components, we have:
 \[
-\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} \sim \Order(H/\sqrt{m}) + \Order(H^2/m) + \Order(H/\sqrt{m}) + \Order(H^2/\sqrt{m})
+\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma} \sim \Order(H/\sqrt{\m}) + \Order(H^2/m) + \Order(H/\sqrt{\m}) + \Order(H^2/\sqrt{\m})
 \]
-For typical architectures where $H \ll \sqrt{m}$, the dominant term is the one with the slowest decay in $m$ and fastest growth in $H$, which is the forward term $K^{(3,x)}$.
+For typical architectures where $H \ll \sqrt{\m}$, the dominant term is the one with the slowest decay in $m$ and fastest growth in $H$, which is the forward term $\textcolor{kernelcolor}{K}^{(3,x)}$.
 
-\begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Theorem (Scaling of $\textcolor{kernelcolor}{K^{(3)}}$)}},enhanced,drop shadow]
-The magnitude of the entries of the third-order kernel $\textcolor{kernelcolor}{K^{(3)}}$ scales with network depth $H$ and width $m$ as:
+\begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Theorem (Scaling of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$)}},enhanced,drop shadow]
+The magnitude of the entries of the third-order kernel $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ scales with network depth $H$ and width $m$ as:
 \begin{equation}
-\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} \sim \mathcal{O}\left(\frac{H^2}{\sqrt{m}}\right)
+\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma} \sim \mathcal{O}\left(\frac{H^2}{\sqrt{\m}}\right)
 \end{equation}
 \end{tcolorbox}
 
@@ -1219,30 +1182,30 @@ This result is a \textbf{cornerstone} of our analysis. It demonstrates that the 
 
 
 
-\subsection{Results and Discussion}
+\subsubsection{Results and Discussion}
 
-The primary output of the experiment is a plot of the infinity norm of $\textcolor{kernelcolor}{K^{(3)}}$ as a function of the network depth $L$.
+The primary output of the experiment is a plot of the infinity norm of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ as a function of the network depth $L$.
 
 \begin{figure}[!h]
     \centering
     \includegraphics[width=0.5\textwidth]{figures/k3_inf_norm_vs_L_finite_M100_N8_D20.png}
-    \caption{Infinity norm of the empirical $\textcolor{kernelcolor}{K^{(3)}}$ tensor versus network depth $L$, plotted on a log-log scale. The width is fixed at $M=100$. The observed trend confirms that the magnitude of the correction kernel grows with depth.}
+    \caption{Infinity norm of the empirical $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ tensor versus network depth $L$, plotted on a log-log scale. The width is fixed at $M=100$. The observed trend confirms that the magnitude of the correction kernel grows with depth.}
     \label{fig:k3_norm_vs_l}
 \end{figure}
 
-The results, as shown in Figure \ref{fig:k3_norm_vs_l}, demonstrate a clear increase in the magnitude of $\textcolor{kernelcolor}{K^{(3)}}$ as the depth $L$ increases. While a precise fit to a quadratic curve would require more extensive simulations over a wider range of depths, the observed trend is strongly consistent with our theoretical prediction of $\textcolor{kernelcolor}{K^{(3)}} \sim \Order(L^2/\sqrt{m})$. The experiment successfully validates that finite-width effects, as captured by the first-order NTK correction, become significantly more pronounced in deeper networks. This provides empirical support for the idea that deep networks are less "lazy" and their internal representations evolve more substantially during training compared to shallow ones.
+The results, as shown in Figure \ref{fig:k3_norm_vs_l}, demonstrate a clear increase in the magnitude of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ as the depth $L$ increases. While a precise fit to a quadratic curve would require more extensive simulations over a wider range of depths, the observed trend is strongly consistent with our theoretical prediction of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}} \sim \Order(L^2/\sqrt{\m})$. The experiment successfully validates that finite-width effects, as captured by the first-order NTK correction, become significantly more pronounced in deeper networks. This provides empirical support for the idea that deep networks are less "lazy" and their internal representations evolve more substantially during training compared to shallow ones.
 
 
-To understand the practical impact of the $\textcolor{kernelcolor}{K^{(3)}}$ correction, we analyze how its magnitude scales with the network depth $H$ and width $m$. This analysis reveals how the importance of the NTK's evolution changes with the network architecture.
+To understand the practical impact of the $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ correction, we analyze how its magnitude scales with the network depth $H$ and width $m$. This analysis reveals how the importance of the NTK's evolution changes with the network architecture.
 
-\subsection{Implementation Note: The Perils of Parameterization}
+\subsubsection{Implementation Note: The Perils of Parameterization}
 
 A brief note on implementation is warranted, as a subtle issue encountered during the early phases of our experiments led to a significant debugging effort. Initial computations of the finite-width NTK correction yielded results that were inconsistent with theoretical predictions, particularly concerning the scaling with width $M$. After extensive investigation, the source of the error was traced to the parameterization of the `stax.Dense` layer within the `neural-tangents` library.
 
 The default setting, `parameterization='ntk'`, is designed to make the kernel independent of width, which is ideal for studying the infinite-width limit but masks the very finite-width effects we sought to measure. The correct approach for our empirical, finite-width models required switching to `parameterization='standard'`. This change, while minor in code, was conceptually critical and resolved the discrepancies. This experience serves as a cautionary tale on the importance of ensuring that the abstractions provided by high-level libraries are precisely aligned with the theoretical regime under investigation.
 
 
-\section{wk7: A Random Matrix Perspective on the NTK Correction}
+\subsubsection{A Random Matrix Perspective on the NTK Correction}
 
 In this section, we adopt a Random Matrix Theory (RMT) perspective to develop a deeper understanding of the NTK's spectral properties and their connection to feature learning. We begin by recasting our previous analysis within this more formal framework and then introduce the core concepts from RMT that explain the transition from a "lazy" kernel method to active feature learning.
 
@@ -1252,7 +1215,7 @@ Our analysis starts with the late-time correction formula (Equation \ref{eq:thet
 & + \sum_{i,j=1}^N\frac{1}{\lambda_{i}(\lambda_{i}+\lambda_{j})}(\hat{e}_{i}^{T}O_{4}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})
 \end{align*}
 
-\subsection{Empirical Spectral Structure and the Constant Mode}
+\subsubsection{Empirical Spectral Structure and the Constant Mode}
 Our experiments, detailed in `eigen_distrib.py`, consistently reveal a specific spectral structure for the NTK matrix $\Theta_0$. The spectrum is dichotomous:
 \begin{itemize}
     \item A single, large eigenvalue $\lambda_1$ that is isolated from the rest. Our analysis confirms that its associated eigenvector, $\hat{e}_1$, is consistently aligned with the constant vector: $\hat{e}_1 \approx \frac{1}{\sqrt{N}}(1, 1, \dots, 1)^T$. This mode captures the function's average value over the dataset.
@@ -1260,8 +1223,8 @@ Our experiments, detailed in `eigen_distrib.py`, consistently reveal a specific 
 \end{itemize}
 This observation justifies separating the sums in $\Theta^{(1)}_\infty$ into the contribution from the constant mode ($i=1$) and the contribution from the bulk ($i,j \ge 2$), as developed in the previous version of this analysis. The key insight is that the bulk's behavior is not arbitrary but follows statistical laws.
 
-\subsection{Scaling Analysis of Correction Terms}
-We split the sum in the $T_3$ term into the contribution from the top eigenvector and the bulk:
+\subsubsection{Scaling Analysis of Correction Terms}
+ \W e split the sum in the $T_3$ term into the contribution from the top eigenvector and the bulk:
 \[ T_3 = -\frac{1}{\lambda_{1}}(O_{3}(\vec{x};0)\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \sum_{i=2}^N\frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \]
 Using the eigenvalue scaling laws ($\lambda_1 \approx C_1 L$, $\lambda_{i>1} \approx C_2 L/N$), we get:
 \[ T_3 \approx -\frac{1}{C_1 L}(O_{3}\cdot\hat{e}_{1})(\Delta f_{0}\cdot\hat{e}_{1}) - \sum_{i=2}^N\frac{N}{C_2 L}(O_{3}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \]
@@ -1275,7 +1238,7 @@ Approximating all bulk eigenvalues as $\lambda_{\text{bulk}} \approx C_2 L/N$, t
 \[ T_4^{\text{bulk}} \approx \frac{(N-1)^2}{2(C_2 L/N)^2} \mathbb{E}_{\hat{e}_i, \hat{e}_j} \left[ (\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j}) \right] \]
 The scaling law for this term is therefore $\mathcal{O}(N^2 \cdot (N/L)^2) = \mathcal{O}(N^4/L^2)$.
 
-\subsection{Discussion and Experimental Validation}
+\subsubsection{Discussion and Experimental Validation}
 The preceding analysis critically relies on the hypothesis that the bulk eigenvectors behave randomly. To test this hypothesis and validate our approach, numerous numerical experiments were conducted. The methodology and implementation are detailed in the scripts `experiments/ntk_spectrum/eigenvectors.py` (data generation) and `experiments/ntk_spectrum/eigen_distrib.py` (analysis). These experiments confirm the postulated spectral structure and the random nature of the eigenvectors associated with the bulk.
 
 \begin{figure}[h!]
@@ -1301,13 +1264,13 @@ The preceding analysis critically relies on the hypothesis that the bulk eigenve
 
 The empirical scaling law for the correction (Equation \ref{eq:scaling_law}) is nearly linear in $N$ ($\sim N^{0.902}$). However, our raw scaling analysis suggests stronger dependencies, with $T_3 \sim \mathcal{O}(N^2/L)$ and $T_4 \sim \mathcal{O}(N^4/L^2)$. This discrepancy implies that the magnitude of the tensors $O_3$ and $O_4$ (or at least their projections onto random eigenvectors) must themselves depend on $N$.
 
-We therefore need to find a scaling law for $O_4$ as a function of $N$. The discussion focuses on the impact such a law would have. For instance, if the quadratic term in $O_4$ averaged over random eigenvectors behaved as $\mathcal{O}(1/N^3)$, then the $T_4$ contribution would scale as $\mathcal{O}(N^4/L^2 \cdot 1/N^3) = \mathcal{O}(N/L^2)$. Such a dependency, combined with a more refined analysis of the $T_3$ term, could explain the quasi-linear scaling in $N$ observed experimentally. Determining the precise scaling law of $O_4$ with $N$ is therefore a crucial goal for future work to fully validate this theoretical model.
+ \W e therefore need to find a scaling law for $O_4$ as a function of $N$. The discussion focuses on the impact such a law would have. For instance, if the quadratic term in $O_4$ averaged over random eigenvectors behaved as $\mathcal{O}(1/N^3)$, then the $T_4$ contribution would scale as $\mathcal{O}(N^4/L^2 \cdot 1/N^3) = \mathcal{O}(N/L^2)$. Such a dependency, combined with a more refined analysis of the $T_3$ term, could explain the quasi-linear scaling in $N$ observed experimentally. Determining the precise scaling law of $O_4$ with $N$ is therefore a crucial goal for future work to fully validate this theoretical model.
 
-\subsection{Focus: An RMT Framework for the NTK}
-We now formalize the analysis of the NTK using RMT to understand the transition from feature learning to the lazy interpolation dictated by a random structure. This is a dialogue between the signal (the data) and the noise (the random initialization).
+\subsubsection{Focus: An RMT Framework for the NTK}
+ \W e now formalize the analysis of the NTK using RMT to understand the transition from feature learning to the lazy interpolation dictated by a random structure. This is a dialogue between the signal (the data) and the noise (the random initialization).
 
 \subsubsection{The NTK as a Spiked Covariance Matrix}
-The starting point is to view the NTK matrix, $\Theta = \frac{1}{m}JJ^T \in \R^{n \times n}$ (where $J$ is the Jacobian), not as a deterministic kernel matrix, but as a sample covariance matrix. The entries of $J$ are complex functions of the network's weights, which are random variables at initialization.
+The starting point is to view the NTK matrix, $\Theta = \frac{1}{\m}JJ^T \in \R^{n \times n}$ (where $J$ is the Jacobian), not as a deterministic kernel matrix, but as a sample covariance matrix. The entries of $J$ are complex functions of the network's weights, which are random variables at initialization.
 
 The fundamental insight from RMT is that, without structure in the data (e.g., for isotropic input data $X$), the eigenvalue spectrum of $\Theta$ should converge to a universal distribution: the \textbf{Marchenko-Pastur (MP) law}. This continuous distribution, the "bulk," represents the intrinsic structure of the kernel due to the architecture and random initialization. It is the background noise, the structural prior of the network before it has "seen" any interesting structure in the data.
 
@@ -1327,7 +1290,7 @@ This is the most crucial point. RMT predicts a sharp phase transition (known as 
 \end{itemize}
 Analyzing the NTK with RMT is therefore a search for these outliers. Their number and magnitude inform us about the "effective dimension" of the features that the network can learn.
 
-\subsection{The Influence of Depth L on the BBP Threshold}
+\subsubsection{The Influence of Depth L on the BBP Threshold}
 The primary effect of increasing depth $L$ is to push the BBP threshold to higher values, i.e., $L \uparrow \implies \text{Threshold}_{\text{BBP}} \uparrow$. This can be understood intuitively:
 \begin{enumerate}
     \item \textbf{Addition of Variances:} Each layer adds its own "amount" of random structure. From the perspective of free probability, the spectrum of the full NTK is the free convolution of the spectra of the individual layer kernels.
@@ -1336,10 +1299,10 @@ The primary effect of increasing depth $L$ is to push the BBP threshold to highe
 \end{enumerate}
 This has a profound consequence for learning in deep networks: the deeper a network, the stronger a signal from the data must be to emerge from the increased structural noise. A signal that a shallow network might learn could be drowned in the bulk of a deeper network. This suggests the existence of a "sweet spot" for depth. Mechanisms like residual connections (ResNets) can be interpreted, from this RMT viewpoint, as ways to control how the spectra of layers are combined, potentially avoiding an "explosion" of the BBP threshold.
 
-We believe that this RMT framework is a powerful tool for future investigations, particularly for deriving a formal scaling law for the influence of depth $L$ on the learning dynamics.
+ \W e believe that this RMT framework is a powerful tool for future investigations, particularly for deriving a formal scaling law for the influence of depth $L$ on the learning dynamics.
 
 
-\section{Future Work}
+\subsubsection{Future Work}
 This research opens up several promising avenues for future investigation. A primary goal is to further clarify the Neural Tangent Hierarchy dynamics by computing the scaling of its hierarchical coefficients, particularly $\lambda_H$, and empirically verifying its predicted linear scaling with depth. Building on this, since the $O_4$ kernel appears to be a critical component of the NTK correction, a detailed study of its properties, including its eigendecomposition, is necessary. Should a full implementation not be available in existing literature, developing one will be essential to fully analyze its structure and contribution to feature learning.
 
 Beyond the specific kernels, the emergence of particular geometric patterns in the NTK spectrum, such as the observed "parabola shape," also warrants deeper investigation. Understanding the origin of these shapes could reveal new insights into the inductive biases of deep networks. To test the generality of our findings, the numerical framework should also be extended to data with inherent geometric structure, for instance, data defined on the torus or over $\mathbb{R}^d$. This would require leveraging techniques like Kronecker decomposition and spherical harmonics to analyze how the NTK evolution depends on the data manifold and input dimension.
@@ -1350,7 +1313,7 @@ Finally, to bridge the gap between theory and practice, this analysis must be ex
 
 
 
-\subsection{Explicit Indexed Formula for $O_3$}
+\subsubsection{Explicit Indexed Formula for $O_3$}
 % --- revised definition -----------------------------------------------------
 For clarity we restate the precise definition established in the proof above.  
 Fix a parameter $\theta_{\mu}$ with multi--index $\mu=(p,i,j)$ belonging to the weight matrix $A_p$.  We encode the choice of $\mu$ by a third input $x_3$ and set
@@ -1359,12 +1322,12 @@ Fix a parameter $\theta_{\mu}$ with multi--index $\mu=(p,i,j)$ belonging to the 
 \]
 Because only the summand with $k=p$ depends on $\theta_{\mu}$, the derivative acts exclusively on that term.  Specialising to multilayer perceptrons with \ReLU activation one obtains the layer–wise expression
 \begin{equation}\label{eq:O3layer}
-  O_3(x_1,x_2,x_3)\;=\;\sigma^{-2}\,\partial_{A_{p,ij}}\bigl\langle x_p(x_1),x_p(x_2)\bigr\rangle,
+  \mathbf{O}_3(x_1,x_2,x_3)\;=\;\sigma^{-2}\,\partial_{A_{p,ij}}\bigl\langle x_p(x_1),x_p(x_2)\bigr\rangle,
 \end{equation}
 where the indices $(p,i,j)$ are implicitly determined by $x_3$.  All contributions coming from deeper layers vanish since the second derivative of the \ReLU satisfies $\phi''\equiv 0$.  Consequently $O_3$ is already of order $\mathcal{O}(n^{-1})$ and no further simplification is required.
 % ---------------------------------------------------------------------------
 
-\subsection{Explicit Formulas for the Corrections}
+\subsubsection{Explicit Formulas for the Corrections}
 
 Having established the theoretical foundation, we now present the explicit formulas for the first-order corrections $O_3$ and $O_4$.
 
@@ -1422,33 +1385,33 @@ The exponential factors $e^{-t\lambda_i}$ demonstrate that corrections become mo
 
 
 
-\section{On the Fourth-Order Kernel $O_4$ and its Computation}
+\subsubsection{On the Fourth-Order Kernel $O_4$ and its Computation}
 
-Following the derivation of $\textcolor{kernelcolor}{K^{(3)}}$, a natural next step in analyzing the NTK correction $\Theta^{(1)}_\infty$ (Equation \ref{eq:theta_correction}) would be to perform a similar analysis for the fourth-order tensor, $O_4$. A direct, term-by-term derivation, analogous to the one performed for $\textcolor{kernelcolor}{K^{(3)}}$ in Section 3, is theoretically possible. Indeed, this was the first path we pursued, leading to an extremely lengthy and complex formula spanning over four pages of dense calculations. While this direct approach is exhaustive, the resulting expression is too unwieldy to provide clear insights into the scaling properties of $O_4$. The sheer complexity of the formula makes it nearly impossible to analyze and computationally impractical to implement.
+Following the derivation of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$, a natural next step in analyzing the NTK correction $\Theta^{(1)}_\infty$ (Equation \ref{eq:theta_correction}) would be to perform a similar analysis for the fourth-order tensor, $O_4$. A direct, term-by-term derivation, analogous to the one performed for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ in Section 3, is theoretically possible. Indeed, this was the first path we pursued, leading to an extremely lengthy and complex formula spanning over four pages of dense calculations. While this direct approach is exhaustive, the resulting expression is too unwieldy to provide clear insights into the scaling properties of $O_4$. The sheer complexity of the formula makes it nearly impossible to analyze and computationally impractical to implement.
 
-This significant obstacle prompted a search for a more elegant and computationally efficient representation. A recent key insight, which we present here, is that $O_4$ is not an entirely new entity but is intrinsically linked to the NTK ($\textcolor{kernelcolor}{K^{(2)}}$) itself. Specifically, $O_4$ can be expressed precisely as the action of the Hessian of the NTK on the gradients of the network's output.
+This significant obstacle prompted a search for a more elegant and computationally efficient representation. A recent key insight, which we present here, is that $O_4$ is not an entirely new entity but is intrinsically linked to the NTK ($\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$) itself. Specifically, $O_4$ can be expressed precisely as the action of the Hessian of the NTK on the gradients of the network's output.
 
 \begin{proposition}[$O_4$ as the NTK Hessian]
-The fourth-order kernel $\textcolor{kernelcolor}{K^{(4)}} \equiv O_4$ is given by the second directional derivative of the NTK, $\textcolor{kernelcolor}{K^{(2)}}$, along the directions defined by the output gradients. For any four inputs $x_\alpha, x_\beta, x_\gamma, x_\delta$, we have:
+The fourth-order kernel $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(4)}} \equiv O_4$ is given by the second directional derivative of the NTK, $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$, along the directions defined by the output gradients. For any four inputs $x_\alpha, x_\beta, x_\gamma, x_\delta$, we have:
 \begin{equation}
-O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \left( \nabla_\theta f(x_\gamma) \right)^T \left( \nabla^2_\theta \textcolor{kernelcolor}{K^{(2)}}(x_\alpha, x_\beta) \right) \left( \nabla_\theta f(x_\delta) \right)
+O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \left( \nabla_\theta f(x_\gamma) \right)^T \left( \nabla^2_\theta \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}(x_\alpha, x_\beta) \right) \left( \nabla_\theta f(x_\delta) \right)
 \end{equation}
-where $\nabla^2_\theta \textcolor{kernelcolor}{K^{(2)}}(x_\alpha, x_\beta)$ is the Hessian of the scalar-valued function $\theta \mapsto \textcolor{kernelcolor}{K^{(2)}}(x_\alpha, x_\beta)$.
+where $\nabla^2_\theta \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}(x_\alpha, x_\beta)$ is the Hessian of the scalar-valued function $\theta \mapsto \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}(x_\alpha, x_\beta)$.
 \end{proposition}
 
 \begin{proof}
-The proof follows directly from the definitions of the kernel hierarchy. Let $L(\theta; x_\alpha, x_\beta) = \textcolor{kernelcolor}{K^{(2)}}(x_\alpha, x_\beta)$.
-By definition of $\textcolor{kernelcolor}{K^{(3)}}$,
+The proof follows directly from the definitions of the kernel hierarchy. Let $L(\theta; x_\alpha, x_\beta) = \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}(x_\alpha, x_\beta)$.
+By definition of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$,
 \begin{equation}
-\textcolor{kernelcolor}{K^{(3)}}(x_\alpha, x_\beta, x_\gamma) = \langle \nabla_\theta \textcolor{kernelcolor}{K^{(2)}}(x_\alpha, x_\beta), \nabla_\theta f(x_\gamma) \rangle = \langle \nabla_\theta L, \nabla_\theta f(x_\gamma) \rangle
+\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}(x_\alpha, x_\beta, x_\gamma) = \langle \nabla_\theta \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}(x_\alpha, x_\beta), \nabla_\theta f(x_\gamma) \rangle = \langle \nabla_\theta L, \nabla_\theta f(x_\gamma) \rangle
 \end{equation}
-This is the directional derivative of $L$ in the direction of the vector $v_\gamma = \nabla_\theta f(x_\gamma)$. We can write this as $\textcolor{kernelcolor}{K^{(3)}}(x_\alpha, x_\beta, x_\gamma) = (\partial_{v_\gamma} L)(\theta)$.
+This is the directional derivative of $L$ in the direction of the vector $v_\gamma = \nabla_\theta f(x_\gamma)$. We can write this as $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}(x_\alpha, x_\beta, x_\gamma) = (\partial_{v_\gamma} L)(\theta)$.
 
-Next, by definition of $\textcolor{kernelcolor}{K^{(4)}} \equiv O_4$,
+Next, by definition of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(4)}} \equiv O_4$,
 \begin{equation}
-O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \langle \nabla_\theta \textcolor{kernelcolor}{K^{(3)}}(x_\alpha, x_\beta, x_\gamma), \nabla_\theta f(x_\delta) \rangle
+\mathbf{O}_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \langle \nabla_\theta \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}(x_\alpha, x_\beta, x_\gamma), \nabla_\theta f(x_\delta) \rangle
 \end{equation}
-Substituting the expression for $\textcolor{kernelcolor}{K^{(3)}}$, we get:
+Substituting the expression for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$, we get:
 \begin{equation}
 O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \langle \nabla_\theta \left( (\partial_{v_\gamma} L)(\theta) \right), v_\delta \rangle
 \end{equation}
@@ -1456,17 +1419,32 @@ where $v_\delta = \nabla_\theta f(x_\delta)$. This is the directional derivative
 \begin{equation}
 O_4(x_\alpha, x_\beta, x_\gamma, x_\delta) = \partial_{v_\delta} \left( \partial_{v_\gamma} L \right)(\theta)
 \end{equation}
-This is precisely the action of the Hessian operator of $L = \textcolor{kernelcolor}{K^{(2)}}$ on the direction vectors $v_\gamma$ and $v_\delta$, which proves the proposition.
+This is precisely the action of the Hessian operator of $L = \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$ on the direction vectors $v_\gamma$ and $v_\delta$, which proves the proposition.
 \end{proof}
 
-This result is a significant simplification. It recasts the problem of computing the complex $O_4$ tensor into the much more manageable task of computing the Hessian of the NTK. Since the NTK is a scalar-valued function of the parameters for fixed inputs, its Hessian can be computed efficiently using modern automatic differentiation frameworks like JAX. This discovery was crucial, as it rendered the study of the $O_4$ term computationally feasible and paved the way for the statistical analysis presented in the following sections.
+This result is a significant simplification. It recasts the problem of computing the complex $\mathbf{O}_4$ matrix into the much more manageable task of computing the Hessian of the NTK. Since the NTK is a scalar-valued function of the parameters for fixed inputs, its Hessian can be computed efficiently using modern automatic differentiation frameworks like JAX.
+
+\begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Future Work: $\textcolor{kernelcolor}{K^{(4)}}$ Algorithm Development}},enhanced,drop shadow]
+While we have established the theoretical framework for $\mathbf{O}_4$ and its connection to the NTK Hessian, the \textbf{computational algorithm for $\textcolor{kernelcolor}{K^{(4)}}$} is \textit{still under active development}. The fourth-order kernel requires sophisticated tensor operations and memory-efficient implementations to be practical for large-scale networks. Current research focuses on:
+\begin{itemize}
+\item \textbf{Efficient tensor decomposition} methods for $\mathbf{O}_4$ computation
+\item \textbf{Memory-optimal} algorithms for large network dimensions
+\item \textbf{Automatic differentiation} optimization for higher-order derivatives
+\end{itemize}
+\end{tcolorbox}
+
+This discovery was crucial, as it rendered the study of the $\mathbf{O}_4$ matrix computationally feasible and paved the way for the statistical analysis presented in the following sections.
 
 \newpage
-\section{From Scaling Laws to Spectral Statistics: The Need for a Deeper Look}
+\section{Random Matrix Theory and Gaussian Orthogonal Ensemble}
+
+This section presents our \textbf{groundbreaking discovery} of the connection between finite-width NTK corrections and the Gaussian Orthogonal Ensemble (GOE), establishing a deep link between neural network theory and random matrix theory.
+
+\subsubsection{From Scaling Laws to Spectral Statistics: The Need for a Deeper Look}
 
 Our analysis of the late-time NTK correction (Equation \ref{eq:theta_correction}) revealed a scaling puzzle. While our empirical results (Equation \ref{eq:scaling_law}) show a near-linear dependence of the correction on the data size $N$, a direct theoretical analysis suggested a much faster growth. Let us revisit this argument to motivate a deeper dive into the spectral properties of the NTK.
 
-\subsection{Recapitulation: The Scaling Puzzle}
+\subsubsection{Recapitulation: The Scaling Puzzle}
 The correction $\Theta^{(1)}_\infty$ is composed of two main terms, $T_3$ (from $O_3$) and $T_4$ (from $O_4$).
 \begin{align*}
 \Theta^{(1)}_\infty(\vec{x}) = & \underbrace{-\sum_{i=1}^N \frac{1}{\lambda_{i}}(O_{3}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})}_{T_3} \\
@@ -1484,18 +1462,18 @@ This discrepancy is the key to a deeper insight. It tells us that our initial as
 \[ \mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})(\dots)] \sim \frac{\Order(NL)}{\Order(N^4/L^2)} \sim \Order\left(\frac{L^3}{N^3}\right) \]
 This shows that understanding the precise statistical properties of the eigenvectors and their interaction with the higher-order tensors is not just a curiosity—it is essential to explain the observed learning dynamics. This puzzle directly motivated our deeper dive into the RMT properties of the NTK spectrum.
 
-\subsection{First Incursions into Eigenvector Statistics}
+\subsubsection{First Incursions into Eigenvector Statistics}
 
 Before turning to the heavy artillery of Random Matrix Theory (RMT), a first attempt to solve the scaling law puzzle consisted in directly analyzing the statistical properties of eigenvectors. Since the independence hypothesis was too strong, the idea was to examine more closely the moments of eigenvector coordinates, for example $\mathbb{E}[(\hat{e}_i)_\mu^2 (\hat{e}_j)_\nu^2]$. This analysis aimed to quantify the fine correlations between eigenvectors to more precisely evaluate tensor averages like $\mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}O_{4}\hat{e}_{j})]$.
 
 This path produced many interesting results and confirmed that eigenvectors are not "perfectly random" in the sense of statistical independence of their coordinates. However, the correlation structures that were revealed were complex and did not provide a simple and robust enough model to be injected into the calculation of the quadrilinear form of the $T_4$ term. This approach, although rich in insights, proved to be a partial dead end. It mainly reinforced the conviction that a more fundamental and structured understanding of spectral properties was necessary, thus paving the way for the surprising discovery of the connection with GOE.
 
 \newpage
-\section{An Unexpected Discovery: The Gaussian Orthogonal Ensemble in the NTK Spectrum}
+\subsubsection{An Unexpected Discovery: The Gaussian Orthogonal Ensemble in the NTK Spectrum}
 
 In our quest to build a more accurate statistical model of the NTK eigenvectors and eigenvalues, we performed a detailed analysis of the spectral statistics, as implemented in \verb|experiments/ntk_spectrum/eigen_MP.py|. The results were truly remarkable, revealing a deep connection between the infinite-width NTK and a cornerstone of Random Matrix Theory (RMT).
 
-\subsection{A Primer on Random Matrix Theory and Spectral Statistics}
+\subsubsection{A Primer on Random Matrix Theory and Spectral Statistics}
 Random Matrix Theory is the study of matrices whose entries are random variables. It predicts that the statistical properties of the eigenvalues of large random matrices are universal, depending only on the symmetries of the ensemble. For real symmetric matrices, the relevant ensemble is the Gaussian Orthogonal Ensemble (GOE).
 
 One of the most powerful tests for these universal properties is the analysis of the distribution of spacings between consecutive eigenvalues. For a system with uncorrelated eigenvalues, this distribution would be Poissonian. For GOE matrices, however, the eigenvalues exhibit "level repulsion", meaning they are unlikely to be close together.
@@ -1507,7 +1485,7 @@ P_{\text{GOE}}(r) = \frac{27}{8} \frac{r + r^2}{(1 + r + r^2)^{5/2}}
 \end{equation}
 This distribution provides an extremely sensitive fingerprint for GOE statistics. Crucially, this test is independent of the local density of states (i.e., the overall scaling of the eigenvalues), which allows it to probe the fine-grained correlations and intrinsic structure of the spectrum itself.
 
-\subsection{The NTK Bulk Spectrum Obeys GOE Statistics}
+\subsubsection{The NTK Bulk Spectrum Obeys GOE Statistics}
 Our numerical experiments show, astonishingly, that the distribution of the ratio of consecutive eigenvalue spacings for the $N-1$ eigenvalues forming the \textbf{bulk} of the NTK spectrum perfectly matches the theoretical prediction for the GOE. This analysis is performed after separating out the single large, isolated eigenvalue corresponding to the constant mode.
 
 Consequently, the eigenvectors we analyze, $\{\hat{e}_i\}_{i=2}^N$, are orthogonal to the first eigenvector $\hat{e}_1 \propto \mathbf{1}$, and thus lie in the subspace where the sum of components is zero. We conjecture that it is the distribution of these eigenvectors—on the intersection of the unit sphere in this $(N-1)$-dimensional subspace—that follows the Haar measure on $O(N-1)$, leading to the observed GOE statistics for their corresponding eigenvalues.
@@ -1521,17 +1499,17 @@ Consequently, the eigenvectors we analyze, $\{\hat{e}_i\}_{i=2}^N$, are orthogon
 
 Figure \ref{fig:goe_fit} provides compelling evidence for this claim. This is a profound result. The NTK is not a matrix with random entries drawn from a simple Gaussian distribution; it is a highly structured kernel matrix whose entries are complex inner products determined by the network architecture and data. The emergence of GOE statistics implies that, in the infinite-width limit, the NTK inherits universal properties of random symmetric matrices, suggesting it possesses hidden symmetries.
 
-\subsection{Theoretical Implications and Conjectures}
+\subsubsection{Theoretical Implications and Conjectures}
 This discovery has far-reaching consequences for our understanding of the NTK and feature learning.
 
 \subsubsection{Symmetry as the Origin of GOE Behavior}
 The universality classes of RMT are deeply tied to symmetries. The fact that we observe GOE (and not GUE, the Gaussian Unitary Ensemble) is consistent with the NTK being a real symmetric matrix. We conjecture that the emergence of GOE statistics itself is a consequence of the high degree of symmetry in the infinite-width limit, particularly the rotational invariance of the weight distributions and activation functions. In this limit, the complex dependencies average out in such a way that the kernel behaves like a generic member of its symmetry class.
 
-This connection can be made more precise. For data on a sphere $S^{d-1}$, the problem has a rotational symmetry under the group $O(d)$. This implies that the infinite-width NTK operator $K_\infty$ must commute with the action of any rotation operator $R_g$ for $g \in O(d)$ on the function space:
+This connection can be made more precise. For data on a sphere $S^{d-1}$, the problem has a rotational symmetry under the group $O(d)$. This implies that the infinite-width NTK operator $\textcolor{kernelcolor}{K}_\infty$ must commute with the action of any rotation operator $R_g$ for $g \in O(d)$ on the function space:
 \begin{equation}
 [K_\infty, R_g] = 0, \quad \forall g \in O(d)
 \end{equation}
-By Schur's Lemma, any such intertwining operator must act as a scalar multiple of the identity when restricted to an irreducible representation (irrep) of the group. For $O(d)$ acting on functions on the sphere, these irreps are the spaces of spherical harmonics $V_k$ of a given degree $k$. The restriction of $K_\infty$ to such a space is therefore diagonal:
+By Schur's Lemma, any such intertwining operator must act as a scalar multiple of the identity when restricted to an irreducible representation (irrep) of the group. For $O(d)$ acting on functions on the sphere, these irreps are the spaces of spherical harmonics $V_k$ of a given degree $k$. The restriction of $\textcolor{kernelcolor}{K}_\infty$ to such a space is therefore diagonal:
 \begin{equation}
 K_\infty|_{V_k} = c_k \mathbf{I}_{V_k}
 \end{equation}
@@ -1555,11 +1533,11 @@ Such integrals can be computed systematically using powerful tools from RMT, mos
 Furthermore, the sum over pairings in the Weingarten formula can be represented graphically, creating a direct analogy with the Feynman diagrams used in quantum field theory. In this picture, the higher-order tensors like $O_4$ and the vector $\Delta f_0$ act as vertices, while the pairings of indices form propagators whose values are given by the Weingarten function. The GOE structure of the underlying "field" of eigenvectors dictates the rules and values of these diagrams. This connection solidifies the entire program of analyzing the NTK correction via its statistical moments and opens up a rich toolbox for future calculations.
 
 \newpage
-\section{The Hessian-NTK Correspondence: A Spectral Equivalence}
+\subsubsection{The Hessian-NTK Correspondence: A Spectral Equivalence}
 
 A critical insight for understanding the loss landscape of wide neural networks is the profound connection between the Hessian of the loss and the NTK. As we will show, in the large-width limit, their spectra become nearly identical. This correspondence allows us to translate all our findings about the NTK spectrum—from the dominant eigenvalue corresponding to data norms to the GOE statistics of the bulk—directly into statements about the geometry of the loss function around the network's initialization.
 
-\subsection{Decomposition of the Hessian}
+\subsubsection{Decomposition of the Hessian}
 Following the analysis in \cite{dyer2019asymptotics}, we can decompose the Hessian of a general loss function into two main components. For a loss $\mathcal{L}$, the Hessian is:
 \begin{equation}
 H_{\mu\nu} = \sum_{(x,y)\in D_{\rm tr}}\left[\underbrace{\frac{\partial^{2}\mathcal{L}(x,y)}{\partial f^{2}}\frac{\partial f(x)}{\partial\theta^{\mu}}\frac{\partial f(x)}{\partial\theta^{\nu}}}_{\mathcal{A}_{\mu\nu}}
@@ -1571,7 +1549,7 @@ In the literature, these two terms are often referred to as $I$ and $S$ respecti
     \item The second term, $\mathcal{B}$, is a "residual" term. It depends on the gradient of the loss, $\partial\mathcal{L}/\partial f$, and thus vanishes as the network converges to a global minimum where the gradient is zero.
 \end{itemize}
 
-\subsection{Moment Analysis and Asymptotic Orthogonality}
+\subsubsection{Moment Analysis and Asymptotic Orthogonality}
 The key to understanding the spectral relationship between $H$, $\mathcal{A}$, and $\mathcal{B}$ lies in analyzing the moments of the Hessian matrix, $\mathrm{Tr}(H^k)$.
 A diagrammatic analysis, as developed in \cite{dyer2019asymptotics} and used throughout this report, reveals that traces involving powers of $\mathcal{B}$ are suppressed at large widths. For instance, a term like $\mathrm{Tr}(\mathcal{A}\mathcal{B})$ involves a more complex correlation function (with at least three vertices in its cluster graph: two from $\mathcal{A}$ and one from $\mathcal{B}$) and is therefore of order $\mathcal{O}(1/n)$. This leads to the conclusion that, in expectation, the moments of the Hessian are dominated by the moments of the NTK-related term:
 \begin{equation}
@@ -1586,24 +1564,24 @@ This result is formalized and strengthened by the work of \cite{jacot2020kernelh
 Since the higher moments of $\mathcal{B}$ (for $k \ge 3$) vanish in the large-width limit, its spectrum consists of a sea of eigenvalues that shrink to zero. The stable, large eigenvalues of the Hessian are therefore entirely determined by $\mathcal{A}$, and thus by the NTK. This provides a solid theoretical foundation for the claim that the NTK spectrum governs the geometry of the loss landscape for wide networks.
 
 \newpage
-\section{Future Work and Open Questions}
+\subsubsection{Future Work and Open Questions}
 
 Our investigation into the scaling laws and spectral properties of the NTK has opened up several promising avenues for future research. The discovery of GOE statistics provides a new lens through which to analyze feature learning and generalization in deep networks.
 
 \newpage
-\section{Conclusion}
+\subsubsection{Conclusion}
 
-This report has detailed the Neural Tangent Hierarchy as a framework for analyzing the training dynamics of finite-width neural networks. We focused on the first-order correction kernel, $\textcolor{kernelcolor}{K^{(3)}}$, which governs the time evolution of the standard NTK, $\textcolor{kernelcolor}{K^{(2)}}$.
+This report has detailed the Neural Tangent Hierarchy as a framework for analyzing the training dynamics of finite-width neural networks. We focused on the first-order correction kernel, $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$, which governs the time evolution of the standard NTK, $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$.
 
 Our primary contributions are:
 \begin{itemize}
-    \item A complete, non-recursive formula for the $\textcolor{kernelcolor}{K^{(3)}}$ kernel, derived from first principles.
-    \item A scaling analysis demonstrating that the magnitude of $\textcolor{kernelcolor}{K^{(3)}}$ grows quadratically with network depth ($H^2$) and is suppressed by the square root of the width ($\sqrt{m}$).
+    \item A complete, non-recursive formula for the $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ kernel, derived from first principles.
+    \item A scaling analysis demonstrating that the magnitude of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ grows quadratically with network depth ($H^2$) and is suppressed by the square root of the width ($\sqrt{\m}$).
     \item A deep analysis of the finite-width correction's scaling laws, revealing a puzzle that motivated a deeper spectral analysis.
     \item The discovery that the infinite-width NTK's spectral statistics belong to the Gaussian Orthogonal Ensemble (GOE), a cornerstone of Random Matrix Theory. This provides a profound insight into the nature of the kernel and a solid foundation for analyzing feature learning.
 \end{itemize}
 
-The scaling law $\textcolor{kernelcolor}{K^{(3)}} \sim \Order(H^2/\sqrt{m})$ shows that the training dynamics of deep networks are inherently richer than those of their shallow counterparts. The discovery of GOE statistics elevates this analysis, suggesting that the complex, structured NTK inherits universal properties of random matrices due to its deep underlying symmetries. This opens the door to using the powerful analytical tools of RMT to rigorously compute the finite-width corrections and bridge the gap between theory and the practice of deep learning.
+The scaling law $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}} \sim \Order(H^2/\sqrt{\m})$ shows that the training dynamics of deep networks are inherently richer than those of their shallow counterparts. The discovery of GOE statistics elevates this analysis, suggesting that the complex, structured NTK inherits universal properties of random matrices due to its deep underlying symmetries. This opens the door to using the powerful analytical tools of RMT to rigorously compute the finite-width corrections and bridge the gap between theory and the practice of deep learning.
 
 Future work should aim to leverage this RMT connection to derive precise scaling laws for the higher-order kernels and connect them to concrete measures of generalization and performance.
 
@@ -1614,104 +1592,105 @@ Future work should aim to leverage this RMT connection to derive precise scaling
 \newpage
 \appendixpart{Spectral Analysis of the NTK and Eigenvalue Bounds}
 
+\appendix
 \section{Detailed Proofs}
 
 \subsection{Complete Derivation of the Third-Order Kernel}\label{sec:appendix_k3_derivation}
 
-In the framework of the Neural Tangent Hierarchy (NTH), the kernel $\textcolor{kernelcolor}{K^{(3)}}$ arises as the operator governing the time evolution of the Neural Tangent Kernel $\textcolor{kernelcolor}{K^{(2)}}$. Here we present the complete mathematical derivation.
+In the framework of the Neural Tangent Hierarchy (NTH), the kernel $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ arises as the operator governing the time evolution of the Neural Tangent Kernel $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$. Here we present the complete mathematical derivation.
 
-\subsubsection{Foundation and Definition}
+\subsection{Foundation and Definition}
 
-The $\textcolor{kernelcolor}{K^{(3)}}$ kernel is defined as the contraction of the gradient of $\textcolor{kernelcolor}{K^{(2)}}_t(x_\alpha, x_\beta)$ with respect to the network parameters $\theta$ with the gradient of the network output $f_t(x_\gamma)$:
+The $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ kernel is defined as the contraction of the gradient of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x_\alpha, x_\beta)$ with respect to the network parameters $\theta$ with the gradient of the network output $f_t(x_\gamma)$:
 \begin{equation}
-\textcolor{kernelcolor}{K^{(3)}}_t(x_\alpha, x_\beta, x_\gamma) := \langle \nabla_\theta \textcolor{kernelcolor}{K^{(2)}}_t(x_\alpha, x_\beta), \nabla_\theta f_t(x_\gamma) \rangle.
+\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_t(x_\alpha, x_\beta, x_\gamma) := \langle \nabla_\theta \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x_\alpha, x_\beta), \nabla_\theta f_t(x_\gamma) \rangle.
 \end{equation}
 
-We start from the expression for $\textcolor{kernelcolor}{K^{(2)}}_t(x_\alpha, x_\beta)$:
+ \W e start from the expression for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x_\alpha, x_\beta)$:
 \begin{equation}
-\textcolor{kernelcolor}{K^{(2)}}_t(x_\alpha, x_\beta) = \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle
+\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x_\alpha, x_\beta) = \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle
 \end{equation}
 where we use the notation:
 \begin{itemize}
-    \item $x^{(p)}_\mu = \frac{1}{\sqrt{m}}\sigma(W^{(p)} x^{(p-1)}_\mu)$ for $p \ge 1$, and $x^{(0)}_\mu = x_\mu$.
-    \item $G^{(\ell)}_\mu = \frac{1}{\sqrt{m}}\sigma'_\ell(x_\mu) (W^{(\ell+1)})^T \cdots \frac{1}{\sqrt{m}}\sigma'_H(x_\mu) a_t$, with $\sigma'_\ell(x_\mu) = \text{diag}(\sigma'(W^{(\ell)}x^{(\ell-1)}_\mu))$.
+    \item $x^{(p)}_\mu = \frac{1}{\sqrt{\m}}\ReLU(\W^{(p)} x^{(p-1)}_\mu)$ for $p \ge 1$, and $x^{(0)}_\mu = x_\mu$.
+    \item $G^{(\ell)}_\mu = \frac{1}{\sqrt{\m}}\sigma'_\ell(x_\mu) (\W^{(\ell+1)})^T \cdots \frac{1}{\sqrt{\m}}\sigma'_H(x_\mu) a_t$, with $\sigma'_\ell(x_\mu) = \text{diag}(\sigma'(\W^{(\ell)}x^{(\ell-1)}_\mu))$.
 \end{itemize}
 
-\subsubsection{Directional Derivative Calculation}
+\subsection{Directional Derivative Calculation}
 
-Let $\delta_\gamma(\cdot) := \langle \nabla_\theta (\cdot), \nabla_\theta f_t(x_\gamma) \rangle$ denote the directional derivative along $\nabla_\theta f_t(x_\gamma)$. Then $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} = \delta_\gamma(\textcolor{kernelcolor}{K^{(2)}}_{\alpha\beta})$. Applying the product rule, we get:
+Let $\delta_\gamma(\cdot) := \langle \nabla_\theta (\cdot), \nabla_\theta f_t(x_\gamma) \rangle$ denote the directional derivative along $\nabla_\theta f_t(x_\gamma)$. Then $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma} = \delta_\gamma(\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_{\alpha\beta})$. Applying the product rule, we get:
 \begin{align}
-\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} = \delta_\gamma \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \sum_{\ell=1}^{H} \delta_\gamma \left( \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \right)
+\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma} = \delta_\gamma \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \sum_{\ell=1}^{H} \delta_\gamma \left( \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \right)
 \end{align}
 
-Each term expands further, following $\delta_\gamma \langle A, B \rangle = \langle \delta_\gamma A, B \rangle + \langle A, \delta_\gamma B \rangle$. This results in a sum over all components of $\textcolor{kernelcolor}{K^{(2)}}_{\alpha\beta}$, where each component is acted upon by $\delta_\gamma$. The core of the derivation lies in computing $\delta_\gamma$ for the building blocks $x^{(p)}_\mu$ and $G^{(p)}_\mu$.
+Each term expands further, following $\delta_\gamma \langle A, B \rangle = \langle \delta_\gamma A, B \rangle + \langle A, \delta_\gamma B \rangle$. This results in a sum over all components of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_{\alpha\beta}$, where each component is acted upon by $\delta_\gamma$. The core of the derivation lies in computing $\delta_\gamma$ for the building blocks $x^{(p)}_\mu$ and $G^{(p)}_\mu$.
 
-\subsubsection{Recursive Formulas}
+\subsection{Recursive Formulas}
 
 The recursive formula for the derivative of the activations is:
 \begin{equation}
-\delta_\gamma x^{(p)}_\mu = \frac{1}{\sqrt{m}} \sigma'_{p}(x_\mu) \left( W^{(p)} (\delta_\gamma x^{(p-1)}_\mu) + \langle x^{(p-1)}_\gamma, x^{(p-1)}_\mu \rangle G^{(p)}_\gamma \right)
+\delta_\gamma x^{(p)}_\mu = \frac{1}{\sqrt{\m}} \sigma'_{p}(x_\mu) \left( \W^{(p)} (\delta_\gamma x^{(p-1)}_\mu) + \langle x^{(p-1)}_\gamma, x^{(p-1)}_\mu \rangle G^{(p)}_\gamma \right)
 \end{equation}
 with the base case $\delta_\gamma x^{(0)}_\mu = \delta_\gamma x_\mu = 0$.
 
 The derivative of the backpropagated vectors $G^{(\ell)}_\mu$ is given by a sum of terms, where $\delta_\gamma$ acts on one factor at a time:
 \begin{align}
-\delta_\gamma G^{(\ell)}_\mu = \sum_{p=\ell}^{H} & \left( \frac{1}{\sqrt{m}}\sigma'_\ell(x_\mu) \cdots \delta_\gamma(\frac{1}{\sqrt{m}}(W^{(p+1)})^T) \cdots \sigma'_H(x_\mu) a_t \right) \\
-+ \sum_{p=\ell}^{H} & \left( \frac{1}{\sqrt{m}}\sigma'_\ell(x_\mu) \cdots \delta_\gamma(\sigma'_{p}(x_\mu)) \cdots \sigma'_H(x_\mu) a_t \right) \\
-+ & \left( \frac{1}{\sqrt{m}}\sigma'_\ell(x_\mu) \cdots \sigma'_H(x_\mu) (\delta_\gamma a_t) \right)
+\delta_\gamma G^{(\ell)}_\mu = \sum_{p=\ell}^{H} & \left( \frac{1}{\sqrt{\m}}\sigma'_\ell(x_\mu) \cdots \delta_\gamma(\frac{1}{\sqrt{\m}}(\W^{(p+1)})^T) \cdots \sigma'_H(x_\mu) a_t \right) \\
++ \sum_{p=\ell}^{H} & \left( \frac{1}{\sqrt{\m}}\sigma'_\ell(x_\mu) \cdots \delta_\gamma(\sigma'_{p}(x_\mu)) \cdots \sigma'_H(x_\mu) a_t \right) \\
++ & \left( \frac{1}{\sqrt{\m}}\sigma'_\ell(x_\mu) \cdots \sigma'_H(x_\mu) (\delta_\gamma a_t) \right)
 \end{align}
 where
 \begin{itemize}
     \item $\delta_\gamma a_t = x^{(H)}_\gamma$
-    \item The term $\delta_\gamma((W^{(p+1)})^T)$ corresponds to a rank-1 update which, when contracted in context, yields terms involving $G^{(p+1)}_\gamma$ and inner products of activations.
-    \item $\delta_\gamma(\sigma'_{p}(x_\mu)) = \sigma''_{p}(x_\mu) \text{diag}(\delta_\gamma(W^{(p)}x^{(p-1)}_\mu/\sqrt{m}))$. This term vanishes for \ReLU activation functions as $\sigma''=0$ almost everywhere.
+    \item The term $\delta_\gamma((\W^{(p+1)})^T)$ corresponds to a rank-1 update which, when contracted in context, yields terms involving $G^{(p+1)}_\gamma$ and inner products of activations.
+    \item $\delta_\gamma(\sigma'_{p}(x_\mu)) = \sigma''_{p}(x_\mu) \text{diag}(\delta_\gamma(\W^{(p)}x^{(p-1)}_\mu/\sqrt{\m}))$. This term vanishes for \ReLU activation functions as $\sigma''=0$ almost everywhere.
 \end{itemize}
 
-\subsubsection{Final Decomposition}
+\subsection{Final Decomposition}
 
-Combining these rules gives the complete formula for $\textcolor{kernelcolor}{K^{(3)}}_t(x_\alpha, x_\beta, x_\gamma)$. It is a sum of many terms, each corresponding to differentiating one part of $\textcolor{kernelcolor}{K^{(2)}}_t(x_\alpha, x_\beta)$. For clarity, we write it as a sum of contributions:
+Combining these rules gives the complete formula for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_t(x_\alpha, x_\beta, x_\gamma)$. It is a sum of many terms, each corresponding to differentiating one part of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x_\alpha, x_\beta)$. For clarity, we write it as a sum of contributions:
 \begin{equation}
-\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma} = K^{(3, \text{out})}_{\alpha\beta\gamma} + \sum_{\ell=1}^H \left( K^{(3, G)}_{\alpha\beta\gamma, \ell} + K^{(3, x)}_{\alpha\beta\gamma, \ell} \right)
+\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}_{\alpha\beta\gamma} = \textcolor{kernelcolor}{K}^{(3, \text{out})}_{\alpha\beta\gamma} + \sum_{\ell=1}^H \left( \textcolor{kernelcolor}{K}^{(3, G)}_{\alpha\beta\gamma, \ell} + \textcolor{kernelcolor}{K}^{(3, x)}_{\alpha\beta\gamma, \ell} \right)
 \end{equation}
 where
 \begin{align}
-K^{(3, \text{out})}_{\alpha\beta\gamma} &= \langle \delta_\gamma x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \langle x^{(H)}_\alpha, \delta_\gamma x^{(H)}_\beta \rangle \\
-K^{(3, G)}_{\alpha\beta\gamma, \ell} &= \left( \langle \delta_\gamma G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle + \langle G^{(\ell)}_\alpha, \delta_\gamma G^{(\ell)}_\beta \rangle \right) \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \\
-K^{(3, x)}_{\alpha\beta\gamma, \ell} &= \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \left( \langle \delta_\gamma x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle + \langle x^{(\ell-1)}_\alpha, \delta_\gamma x^{(\ell-1)}_\beta \rangle \right)
+\textcolor{kernelcolor}{K}^{(3, \text{out})}_{\alpha\beta\gamma} &= \langle \delta_\gamma x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \langle x^{(H)}_\alpha, \delta_\gamma x^{(H)}_\beta \rangle \\
+\textcolor{kernelcolor}{K}^{(3, G)}_{\alpha\beta\gamma, \ell} &= \left( \langle \delta_\gamma G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle + \langle G^{(\ell)}_\alpha, \delta_\gamma G^{(\ell)}_\beta \rangle \right) \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \\
+\textcolor{kernelcolor}{K}^{(3, x)}_{\alpha\beta\gamma, \ell} &= \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \left( \langle \delta_\gamma x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle + \langle x^{(\ell-1)}_\alpha, \delta_\gamma x^{(\ell-1)}_\beta \rangle \right)
 \end{align}
 
 The terms $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(p)}_\mu$ are expanded using the recursive rules above, yielding a full, albeit lengthy, expression. This hierarchical structure is characteristic of the NTH framework.
 
 \subsection{Recursive Depth Analysis}\label{sec:appendix_recursive_derivation}
 
-Here we present the complete derivation of the recursive formula for $\textcolor{kernelcolor}{K^{(3)}}$ as a function of network depth $H$.
+Here we present the complete derivation of the recursive formula for $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ as a function of network depth $H$.
 
-\subsubsection{Decomposition of the $(H+1)$-Layer NTK}
+\subsection{Decomposition of the $(H+1)$-Layer NTK}
 
-Let $K^{(3, H)}_{\alpha\beta\gamma}$ denote the kernel for a network with $H$ layers. To express $K^{(3, H+1)}_{\alpha\beta\gamma}$ in terms of quantities computed for a network with $H$ layers, we start from the decomposition of $K^{(2, H+1)}_{\alpha\beta}$:
+Let $\textcolor{kernelcolor}{K}^{(3, H)}_{\alpha\beta\gamma}$ denote the kernel for a network with $H$ layers. To express $\textcolor{kernelcolor}{K}^{(3, H+1)}_{\alpha\beta\gamma}$ in terms of quantities computed for a network with $H$ layers, we start from the decomposition of $\textcolor{kernelcolor}{K}^{(2, H+1)}_{\alpha\beta}$:
 \begin{equation}
-K^{(2, H+1)}_{\alpha\beta} = \underbrace{\left( \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \sum_{\ell=1}^{H} \langle G'^{(\ell)}_\alpha, G'^{(\ell)}_\beta \rangle \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \right)}_{K^{(2,H)}_{\alpha\beta} \text{ with } a'_t} + T_{H+1} + C_{H+1}
+\textcolor{kernelcolor}{K}^{(2, H+1)}_{\alpha\beta} = \underbrace{\left( \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \sum_{\ell=1}^{H} \langle G'^{(\ell)}_\alpha, G'^{(\ell)}_\beta \rangle \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle \right)}_{\textcolor{kernelcolor}{K}^{(2,H)}_{\alpha\beta} \text{ with } a'_t} + T_{H+1} + C_{H+1}
 \end{equation}
 where:
 \begin{itemize}
-    \item $x^{(H+1)}_\mu = \frac{1}{\sqrt{m}}\sigma(W^{(H+1)} x^{(H)}_\mu)$.
-    \item $a'_t = \frac{1}{\sqrt{m}} (W^{(H+1)})^T \sigma'_{H+1} a_t$ is an "effective output vector" that replaces $a_t$ in the computations of $G^{(\ell)}$ for $\ell \le H$.
+    \item $x^{(H+1)}_\mu = \frac{1}{\sqrt{\m}}\ReLU(\W^{(H+1)} x^{(H)}_\mu)$.
+    \item $a'_t = \frac{1}{\sqrt{\m}} (\W^{(H+1)})^T \sigma'_{H+1} a_t$ is an "effective output vector" that replaces $a_t$ in the computations of $G^{(\ell)}$ for $\ell \le H$.
     \item $T_{H+1} = \langle G^{(H+1)}_\alpha, G^{(H+1)}_\beta \rangle \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle$ is the term from the new layer $H+1$.
     \item $C_{H+1} = \langle x^{(H+1)}_\alpha, x^{(H+1)}_\beta \rangle - \langle a'_t, a'_t \rangle \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle$ is a correction term.
 \end{itemize}
 
-\subsubsection{Application of Directional Derivatives}
+\subsection{Application of Directional Derivatives}
 
 The vectors $G'^{(\ell)}$ are the backpropagated gradients in a network with $H$ layers but with $a'_t$ as output weights, while $G^{(H+1)}$ is the gradient for layer $H+1$.
 
 Applying the directional derivative operator $\delta_\gamma(\cdot) = \langle \nabla_\theta (\cdot), \nabla_\theta f_t(x_\gamma) \rangle$, we obtain:
 \begin{equation}
-K^{(3, H+1)}_{\alpha\beta\gamma} = \delta_\gamma \left(K^{(2,H)}_{\alpha\beta, a'_t} \right) + \delta_\gamma(T_{H+1}) + \delta_\gamma(C_{H+1})
+\textcolor{kernelcolor}{K}^{(3, H+1)}_{\alpha\beta\gamma} = \delta_\gamma \left(\textcolor{kernelcolor}{K}^{(2,H)}_{\alpha\beta, a'_t} \right) + \delta_\gamma(T_{H+1}) + \delta_\gamma(C_{H+1})
 \end{equation}
 
-\subsubsection{Expansion of Terms}
+\subsection{Expansion of Terms}
 
-The term $\delta_\gamma \left(K^{(2,H)}_{\alpha\beta, a'_t} \right)$ is analogous to $K^{(3,H)}_{\alpha\beta\gamma}$, but with additional dependencies through $a'_t$. The other terms expand as follows:
+The term $\delta_\gamma \left(\textcolor{kernelcolor}{K}^{(2,H)}_{\alpha\beta, a'_t} \right)$ is analogous to $\textcolor{kernelcolor}{K}^{(3,H)}_{\alpha\beta\gamma}$, but with additional dependencies through $a'_t$. The other terms expand as follows:
 \begin{align}
 \delta_\gamma(T_{H+1}) &= \langle \delta_\gamma G^{(H+1)}_\alpha, G^{(H+1)}_\beta \rangle \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \langle G^{(H+1)}_\alpha, \delta_\gamma G^{(H+1)}_\beta \rangle \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle \\
 &\quad + \langle G^{(H+1)}_\alpha, G^{(H+1)}_\beta \rangle \left( \langle \delta_\gamma x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \langle x^{(H)}_\alpha, \delta_\gamma x^{(H)}_\beta \rangle \right) \\
@@ -1720,14 +1699,14 @@ The term $\delta_\gamma \left(K^{(2,H)}_{\alpha\beta, a'_t} \right)$ is analogou
 &\quad - \langle a'_t, a'_t \rangle \left( \langle \delta_\gamma x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \langle x^{(H)}_\alpha, \delta_\gamma x^{(H)}_\beta \rangle \right)
 \end{align}
 
-\subsubsection{\ReLU Simplification}
+\subsection{\ReLU Simplification}
 
 For \ReLU activation functions, $\sigma''=0$ almost everywhere, which eliminates many terms in the directional derivative expansions. This significantly simplifies the recursive relationship and makes the computational analysis more tractable.
 
 This decomposition allows us to separate the effect of adding a layer by isolating terms specific to the new layer $(T_{H+1}, C_{H+1})$ and the modification of previous layer terms through $a'_t$.
 
 \subsection{Proof of Scaling Theorem}
-The proof of the scaling of $\textcolor{kernelcolor}{K^{(3)}}$ follows from the recursive analysis of the network architecture and the application of concentration inequalities for deep networks.
+The proof of the scaling of $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(3)}}$ follows from the recursive analysis of the network architecture and the application of concentration inequalities for deep networks.
 
 \subsection{Proof of Finite-Width Corrections}
 The detailed derivation of the first-order corrections involves careful expansion of the Neural Tangent Hierarchy and application of perturbation theory.
@@ -1742,6 +1721,14 @@ This section contains additional experimental validation and numerical analysis 
 
 
 	
+\subsection{Complete Expression for $\textcolor{kernelcolor}{K}^{(3)}$}\label{sec:appendix_complete_expression}
+
+The complete formula with all terms expanded is presented here with detailed operator definitions.
+
+\subsection{Term-by-Term Scaling Analysis}\label{sec:appendix_scaling_analysis}
+
+Detailed analysis of the four main scaling components demonstrating the $O(H^2/\sqrt{\m})$ behavior.
+
 % Bibliography
 \newpage
 \addcontentsline{toc}{section}{References}
