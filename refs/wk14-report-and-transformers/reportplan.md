@@ -97,3 +97,7 @@ insister sur la reproducibilité
 expliquer aussi que j'ai tout fait en live pendant beaucoup de temps, (meme l'ecriture de ceci)
 
 rassifier youtube creator studio
+
+
+
+ce qui reste )à faire : rederive NTK for tranformers ultra rapidos, et theorem pour mmnn
