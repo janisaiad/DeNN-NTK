@@ -35,6 +35,10 @@ it will be in 3 sections
 
 
 
+be careful, the orthogonality under sampling measure is orthogonal in mean ! that is the ntk matrix is random, and that's when we take the 
+
+
+
 # plan generated (to write here)
 
 # Detailed Report Outline

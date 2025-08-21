@@ -1,0 +1,1 @@
+be careful, the orthogonality under sampling measure is orthogonal in mean ! that is the ntk matrix is random, and that's when we take the 

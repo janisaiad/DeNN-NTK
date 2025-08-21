@@ -1,43 +1,47 @@
-% il existe plusieures classes de documents
-% pour des documents plus longs, vous pouvez utiliser
-% book ou report
+% There are several document classes available
+% For longer documents, you can use
+% book or report
 \documentclass[a4paper]{article} 
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
 \usepackage{biblatex} %Imports biblatex package
 \usepackage{subfig}
 \usepackage{parskip}
 \usepackage{multirow}
-\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{booktabs}
 \usepackage[most]{tcolorbox}
 \usepackage{xcolor}
 \addbibresource{stg3a.bib} %Import the bibliography file
 \bibliography{stg3a}
-\usepackage{hyperref}
+\usepackage[hidelinks,colorlinks=true,linkcolor=blue,citecolor=red,urlcolor=blue]{hyperref}
 
-% vous pouvez changer les paramètres : voici les options dispoinibles :
+% You can change the parameters: here are the available options:
 % - a4paper
 % - fancysections
-% - notitlepage ou titlepage
-% - onside ou twoside selon si vous voulez l'imprimer en recto-verso ou en recto
+% - notitlepage or titlepage
+% - onside or twoside depending on whether you want to print double-sided or single-sided
 % - sectionmark
-% - chaptermark (pour les 
+% - chaptermark (for 
 % - pagenumber
 % - enmanquedinspiration
-% en cas de doutes, pas de doutes, la documentation est sur :
+% In case of doubts, the documentation is at:
 %  https://gitlab.binets.fr/typographix/polytechnique/-/blob/master/source/polytechnique.pdf
 
 
 
 \usepackage[a4paper,  fancysections,  titlepage]{polytechnique}
-\usepackage[french]{babel}
+\usepackage[english]{babel}
 \usepackage[T1]{fontenc}
 \usepackage{blindtext}
 \usepackage[hidelinks]{hyperref}
 
 \usepackage{listings}
 \usepackage{tikz}
+\usetikzlibrary{positioning,shadows}
 \usepackage{xcolor}
 \lstset{
   language=Python,
@@ -53,7 +57,7 @@
   literate={à}{{\`a}}1 {ç}{{\c{c}}}1 {é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {ë}{{\"e}}1 {î}{{\^i}}1 {ï}{{\"i}}1 {ô}{{\^o}}1 {ö}{{\"o}}1 {ù}{{\`u}}1 {û}{{\^u}}1 {ü}{{\"u}}1 {ÿ}{{\"y}}1 {À}{{\`A}}1 {Ç}{{\c{C}}}1 {É}{{\'E}}1 {È}{{\`E}}1 {Ê}{{\^E}}1 {Ë}{{\"E}}1 {Î}{{\^I}}1 {Ï}{{\"I}}1 {Ô}{{\^O}}1 {Ö}{{\"O}}1 {Ù}{{\`U}}1 {Û}{{\^U}}1 {Ü}{{\"U}}1 {Ÿ}{{\"Y}}1 {\_}{\textunderscore}{1}
 }
 
-% nous avons défini deux commandes :
+% we have defined two commands:
 \newcommand{\code}[1]{%
     \mbox{\ttfamily%
         \detokenize{#1}%
@@ -69,19 +73,84 @@
         \draw[thick] (0,0) -- (0.25,0) -- (0.4,0.25);
     \end{tikzpicture}}}\!\!}
 
+% Color definitions
+\definecolor{kernelcolor}{RGB}{200,0,0}      % Red for K (kernels)
+\definecolor{sobolevcolor}{RGB}{0,0,200}     % Blue for P (Sobolev)
+\definecolor{theoremcolor}{RGB}{240,248,255} % Light blue for theorem boxes
+\definecolor{definitioncolor}{RGB}{255,248,240} % Light orange for definitions
+
+% Enhanced math commands
 \newcommand{\E}{\mathbb{E}}
 \DeclareMathOperator{\Var}{Var}
 \newcommand{\indic}{\mathbb{1}}
 \newcommand{\dd}{\,d}
 
+% Colored operators
+\newcommand{\Kop}{\textcolor{kernelcolor}{\mathbf{K}}}
+\newcommand{\Pop}{\textcolor{sobolevcolor}{\mathbf{P}}}
+\newcommand{\Kinf}{\textcolor{kernelcolor}{K^{\infty}}}
+\newcommand{\Ps}{\textcolor{sobolevcolor}{P_s}}
+\newcommand{\Ts}{\mathcal{T}_s}
+
+% Beautiful theorem environments
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+% Colored theorem boxes using tcolorbox
+\tcolorboxenvironment{theorem}{
+  colback=theoremcolor,
+  colframe=blue!50!black,
+  fonttitle=\bfseries,
+  before skip=10pt,
+  after skip=10pt,
+  enhanced,
+  drop shadow
+}
+
+\tcolorboxenvironment{definition}{
+  colback=definitioncolor,
+  colframe=orange!50!black,
+  fonttitle=\bfseries,
+  before skip=10pt,
+  after skip=10pt,
+  enhanced,
+  drop shadow
+}
+
+\tcolorboxenvironment{lemma}{
+  colback=green!5,
+  colframe=green!50!black,
+  fonttitle=\bfseries,
+  before skip=8pt,
+  after skip=8pt
+}
+
+\tcolorboxenvironment{corollary}{
+  colback=purple!5,
+  colframe=purple!50!black,
+  fonttitle=\bfseries,
+  before skip=8pt,
+  after skip=8pt
+}
+
 \author{Janis AIAD}
 \date{\today}
-\title{Analyse de la dynamique d'apprentissage des réseaux de neurones profonds à travers le prisme du NTK}
+\title{Analysis of Deep Neural Network Learning Dynamics Through the NTK Lens}
 \subtitle{Deeper or Wider ? A 1st answer under the NTK perspective}
-% pour changer de logo, ajoutez l'image dans un fomat PDF
-% ou image en la glissant à droite et remplacez typographix
-% par le nom de l'image, si vous ne voulez pas de logo, 
-% supprimze la ligne. 
+% to change logo, add the image in PDF format
+% or image by dragging it to the right and replace typographix
+% with the image name, if you don't want a logo, 
+% delete the line. 
 
 \begin{figure*}[b]
     \includegraphics[width=0.4\linewidth]{figures/umdlogo.jpg}
@@ -99,7 +168,7 @@
 
 \addcontentsline{toc}{section}{Abstract}
 \section*{Abstract}
-This report presents the results of a research internship focused on studying the learning dynamics of deep neural networks. We explore the underlying mechanisms through the Neural Tangent Kernel (NTK) formalism, with particular attention to finite-width corrections. Our work revolves around the decomposition of the NTK via Sobolev training, the analysis of its reproducing kernel Hilbert space (RKHS), and the study of extreme eigenvalues. We present theoretical bounds for the smallest eigenvalue of the NTK using random matrix theory (RMT) techniques. These results are then applied to analyze different architectures, including feed-forward neural networks (FCNN), matrix memory neural networks (MMNN), and transformers. We also discuss the implications of our findings for scientific machine learning (SciML) applications and propose directions for future research.
+This report presents the results of a research internship focused on studying the learning dynamics of deep neural networks. We explore the underlying mechanisms through the Neural Tangent Kernel (NTK) formalism \cite{jacot2018neural}, with particular attention to finite-width corrections \cite{seleznova2022ntk_beyond}. Our work revolves around the decomposition of the NTK via Sobolev training, the analysis of its reproducing kernel Hilbert space (RKHS), and the study of extreme eigenvalues. We present theoretical bounds for the smallest eigenvalue of the NTK using random matrix theory (RMT) techniques. These results are then applied to analyze different architectures, including feed-forward neural networks (FCNN), matrix memory neural networks (MMNN), and transformers. We also discuss the implications of our findings for scientific machine learning (SciML) applications and propose directions for future research.
 
 \newpage
 \addcontentsline{toc}{section}{Executive summary}
@@ -110,45 +179,112 @@ This report presents the results of a research internship focused on studying th
 \section*{Introduction}
 The study of learning dynamics in deep neural networks constitutes a fundamental research area. Our approach focuses on the desingularization of Sobolev training by decomposing the problem into two distinct contributions: an independent neural tangent kernel (NTK) and a Sobolev contribution. This decomposition relies on the commutation between integral operators and the fractional Laplace operator.
 
+\textbf{Key Discovery}: We establish that this commutation property holds \textit{exactly} only when using \textcolor{red}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) for sampling. For general sampling points, commutation breaks, necessitating explicit derivative information for effective learning. This fundamental distinction explains the empirical success of Physics-Informed Neural Networks (PINNs) and derivative-augmented methods over standard regression in most practical settings.
+
 Our analysis continues with the study of NTK preconditioning through a freeze weights method, illustrated by neural networks factorizing low-rank weight matrices. This approach is supported by a rigorous approximation theorem. For classical feed-forward networks (FCNN), we develop a finite-width correction that proves particularly fruitful. Finally, we explore Transformers as an alternative solution, offering a new learning paradigm.
 
-Across these different architectures, we study feature learning regimes and their scaling with network width. Our results rely on statistical physics tools to characterize model convergence and asymptotic behavior. This analysis enables a better understanding of finite-width corrections and their implications for the practical optimization of deep neural networks.
+Across these different architectures, we study feature learning regimes and their scaling with network width. Our results rely on statistical physics tools to characterize model convergence and asymptotic behavior. This analysis enables a better understanding of finite-width corrections \cite{seleznova2022ntk_beyond} and their implications for the practical optimization of deep neural networks.
 
 
 \newpage
 \addcontentsline{toc}{section}{Notations}
 \section*{Notations}
-$\ReLU$ : The ReLU (Rectified Linear Unit) activation function, defined as $\ReLU(x) = \max(0, x)$.
-\newline
-$\E[\cdot]$ : Mathematical expectation.
-\newline
-$\Var(\cdot)$ : Variance of a random variable.
-\newline
-$\indic\{\cdot\}$ : Indicator function, equal to 1 if the condition is true, 0 otherwise.
-\newline
-$\dd x$ : Differential element used in integrals.
-\newline
-$\Cov(\cdot,\cdot)$ : Covariance between two random variables.
-\newline
-$\Corr(\cdot,\cdot)$ : Correlation between two random variables.
-\newline
-$\mathbb{R}$ : Set of real numbers.
-\newline
-$\mathbb{N}$ : Set of natural numbers.
-\newline
-$\mathbb{S}^{d-1}$ : Unit sphere of dimension $d-1$.
-\newline
-$\nabla$ : Gradient operator.
-\newline
-$\Delta$ : Laplacian operator.
-\newline
-$\|\cdot\|$ : Euclidean norm.
-\newline
-$\langle \cdot,\cdot \rangle$ : Inner product.
-\newline
-$\mathcal{O}(\cdot)$ : Landau notation (big O).
-\newline
-$\tilde{\Omega}(\cdot)$ : Landau notation (big Omega tilde).
+
+\begin{tcolorbox}[colback=blue!5,colframe=blue!50!black,title={\large \textbf{Mathematical Notation Reference}},enhanced,drop shadow]
+
+\subsection*{Basic Mathematical Symbols}
+\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\toprule
+\textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
+\midrule
+$\mathbb{R}$ & Set of real numbers & $\mathbb{N}$ & Set of natural numbers \\
+$\mathbb{C}$ & Set of complex numbers & $\mathbb{S}^{d-1}$ & Unit sphere of dimension $d-1$ \\
+$\E[\cdot]$ & Mathematical expectation & $\Var(\cdot)$ & Variance of a random variable \\
+$\Cov(\cdot,\cdot)$ & Covariance between two variables & $\Corr(\cdot,\cdot)$ & Correlation between two variables \\
+$\indic\{\cdot\}$ & Indicator function & $\dd x$ & Differential element \\
+$\|\cdot\|$ & Euclidean norm & $\langle \cdot,\cdot \rangle$ & Inner product \\
+$\mathcal{O}(\cdot)$ & Landau notation (big O) & $\tilde{\Omega}(\cdot)$ & Landau notation (big Omega tilde) \\
+\bottomrule
+\end{longtable}
+
+\subsection*{Neural Network and Activation Functions}
+\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\toprule
+\textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
+\midrule
+$\ReLU$ & ReLU activation function & $f(\mathbf{x}; \boldsymbol{\theta})$ & Neural network function \\
+$\sigma(\cdot)$ & General activation function & $\sigma^2$ & Activation variance parameter \\
+$L$ & Number of layers & $n_k$ & Width of layer $k$ \\
+\bottomrule
+\end{longtable}
+
+\subsection*{Neural Tangent Kernel (NTK)}
+\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\toprule
+\textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
+\midrule
+$\textcolor{kernelcolor}{\mathbf{K}}$ & Discrete NTK matrix & $\textcolor{kernelcolor}{K^{\infty}}$ & Infinite-width NTK operator \\
+$K^{L}(\mathbf{x}_i, \mathbf{x}_j)$ & NTK for $L$-layer network & $\mu_\ell^{(K)}$ & NTK eigenvalues at degree $\ell$ \\
+$\varrho(\rho)$ & Correlation propagation function & $\rho_1(\mathbf{x},\mathbf{x}')$ & Initial correlation \\
+\bottomrule
+\end{longtable}
+
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=blue!5,colframe=blue!50!black,title={\large \textbf{Mathematical Notation Reference}},enhanced,drop shadow]
+
+\newpage
+\subsection*{Sobolev Spaces and Training}
+\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\toprule
+\textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
+\midrule
+$H^s(\Omega)$ & Sobolev space of order $s$ & $\textcolor{sobolevcolor}{\mathbf{P}}_s$ & Discrete Sobolev operator matrix \\
+$P_s$ & Continuous Sobolev operator & $\mathcal{L}_{\text{Sobolev}}(f)$ & Sobolev training loss function \\
+$D^k$ & $k$-th derivative operator & $\|f\|_{H^s}$ & Sobolev norm of order $s$ \\
+$(I + (-\Delta)^{1/2})^s$ & Fractional Laplacian operator & $\Delta_{\mathbb{S}^{d-1}}$ & Laplace-Beltrami operator \\
+\bottomrule
+\end{longtable}
+
+\subsection*{Spherical Harmonics and Fourier Analysis}
+\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\toprule
+\textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
+\midrule
+$Y_{\ell,p}$ & Spherical harmonics & $N(d,\ell)$ & Multiplicity of harmonics \\
+$\hat{f}(\xi)$ & Fourier transform of $f$ & $\xi$ & Frequency variable \\
+$\sigma(x)$ & Surface measure on sphere & $\ell$ & Degree index \\
+$p$ & Order index & $\nabla$ & Gradient operator \\
+\bottomrule
+\end{longtable}
+
+\subsection*{Eigenvalues and Spectral Analysis}
+\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\toprule
+\textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
+\midrule
+$\lambda_\ell$ & Eigenvalues at degree $\ell$ & $\lambda_{\min}(A)$ & Minimum eigenvalue \\
+$\lambda_{\max}(A)$ & Maximum eigenvalue & $\mu_\ell^{(P_s)}$ & Sobolev eigenvalues \\
+$C(d,L)$ & Constants depending on $d,L$ & $\Gamma(\cdot)$ & Gamma function \\
+$P_\ell^{(\alpha)}(t)$ & Gegenbauer polynomials & $\tilde{K}_L^{\infty}(t)$ & Normalized NTK function \\
+\bottomrule
+\end{longtable}
+
+\subsection*{Matrix Operations and Training}
+\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\toprule
+\textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
+\midrule
+$A^T$ & Matrix transpose & $\|A\|_{op}$ & Operator norm \\
+$\|A\|_F$ & Frobenius norm & $A \circ B$ & Hadamard product \\
+$\mathcal{T}_s$ & Composite learning operator & $a_{\ell,p}$ & Sampling vectors \\
+$\eta$ & Learning rate & $f_t(x)$ & Network at time $t$ \\
+$y_i$ & Target output & $n$ & Number of samples \\
+$d$ & Input dimension & $s$ & Sobolev order \\
+\bottomrule
+\end{longtable}
+
+\end{tcolorbox}
 
 \newpage
 
@@ -157,12 +293,14 @@ $\tilde{\Omega}(\cdot)$ : Landau notation (big Omega tilde).
 
 \subsubsection{The Sobolev Training}
 
-Sobolev training is an approach that incorporates derivative information into the learning process. For a function $f$ and target function $f^*$, the Sobolev training loss is defined as:
+\textit{Sobolev training} \cite{czarnecki2017sobolev,gupte2022sobolev_loss} is an approach that incorporates derivative information into the learning process. For a function $f$ and target function $f^*$, the Sobolev training loss is defined as:
 
+\begin{tcolorbox}[colback=sobolevcolor!5,colframe=sobolevcolor!60!black,title=Sobolev Training Loss]
 \begin{equation}
 \label{eq:sobolev_loss}
 \mathcal{L}_{\text{Sobolev}}(f) = \|f - f^*\|_{H^s}^2 = \sum_{k=0}^s \int_{\Omega} |D^k f(x) - D^k f^*(x)|^2 dx
 \end{equation}
+\end{tcolorbox}
 
 where $D^k$ denotes the $k$-th derivative operator and $H^s$ is the Sobolev space of order $s$. This formulation leads to several key properties:
 
@@ -181,11 +319,17 @@ This framework provides a natural connection between neural network training and
 The Sobolev space $H^s(\Omega)$ can be equipped with two equivalent norms:
 
 1) \textbf{Gradient-Based Norm}: Defined using derivatives up to order $s$:
-$$\|f\|_{H^s}^2 = \sum_{k=0}^s \int_{\Omega} |D^k f(x)|^2 dx$$
+\begin{equation}
+\label{eq:sobolev_gradient_norm}
+\|f\|_{H^s}^2 = \sum_{k=0}^s \int_{\Omega} |D^k f(x)|^2 dx
+\end{equation}
 where $D^k$ represents the $k$-th derivative operator.
 
 2) \textbf{Fourier-Based Norm}: Defined using the Fourier transform $\hat{f}$:
-$$\|f\|_{H^s}^2 = \int_{\mathbb{R}^d} (1 + |\xi|^2)^s |\hat{f}(\xi)|^2 d\xi$$
+\begin{equation}
+\label{eq:sobolev_fourier_norm}
+\|f\|_{H^s}^2 = \int_{\mathbb{R}^d} (1 + |\xi|^2)^s |\hat{f}(\xi)|^2 d\xi
+\end{equation}
 where $\xi$ represents the frequency variable.
 
 These norms are equivalent in the sense that there exist constants $c, C > 0$ such that:
@@ -207,22 +351,91 @@ $$\frac{d}{dt}f_t(x) = -\eta \sum_{i=1}^n K^{\infty}(x,x_i)(f_t(x_i) - y_i)$$
 $$\mathcal{L}_{\text{deriv}}(f) = \sum_{i=1}^n \left(|f(x_i) - y_i|^2 + \sum_{k=1}^s |D^k f(x_i) - D^k y_i|^2\right)$$
 Leading to modified gradient dynamics incorporating derivative information.
 
-These frameworks result in different gradient descent trajectories and convergence behaviors, despite sharing the same underlying NTK structure. The choice between them depends on whether derivative information is available and beneficial for the specific learning task.
+These frameworks result in different gradient descent trajectories and convergence behaviors, despite sharing the same underlying NTK structure. The choice between them depends crucially on the \textbf{type of sampling points} used and whether explicit derivative information is available.
+
+\begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Key Insight: Chebyshev Points vs General Sampling}},enhanced,drop shadow]
+\textbf{Chebyshev points} (or optimal interpolation nodes) enable accurate derivative approximation from function values alone, allowing matrix commutation and making standard regression sufficient. \textbf{General sampling points} break commutation, requiring explicit derivative data for effective learning.
+\end{tcolorbox}
 
 The framework selection can be summarized by the following decision tree:
 
+\begin{center}
+\begin{tcolorbox}[colback=gray!5,colframe=gray!50!black,title={\textbf{Framework Selection Decision Tree}},enhanced,drop shadow,width=0.9\textwidth]
 \begin{tikzpicture}[
-    level 1/.style={sibling distance=6cm},
-    level 2/.style={sibling distance=3cm}
-]
-\node {Available Data}
-    child {node {Derivative Information Available}
-        child {node {Use Derivative-Augmented\\Learning}}
+    node distance=1.0cm and 1.8cm,
+    decision/.style={
+        rectangle, 
+        draw=blue!60!black, 
+        fill=blue!10, 
+        thick, 
+        minimum width=2.1cm, 
+        minimum height=0.8cm,
+        text centered,
+        rounded corners=3pt,
+        font=\scriptsize\bfseries,
+        drop shadow
+    },
+    process/.style={
+        rectangle, 
+        draw=green!60!black, 
+        fill=green!10, 
+        thick, 
+        minimum width=2.0cm, 
+        minimum height=0.7cm,
+        text centered,
+        rounded corners=2pt,
+        font=\scriptsize,
+        drop shadow
+    },
+    outcome/.style={
+        rectangle, 
+        draw=orange!60!black, 
+        fill=orange!10, 
+        thick, 
+        minimum width=2.1cm, 
+        minimum height=0.8cm,
+        text centered,
+        rounded corners=3pt,
+        font=\scriptsize\bfseries,
+        drop shadow
+    },
+    arrow/.style={
+        thick,
+        ->,
+        >=stealth,
+        color=black!70
     }
-    child {node {Only Function Values}
-        child {node {Use Fourier-Based\\Standard Regression}}
-    };
+]
+
+% Root node
+\node[decision] (root) {\textcolor{blue!80!black}{Sampling Points}};
+
+% Level 1 nodes
+\node[process, below left=of root] (chebyshev) {Chebyshev\\Points};
+\node[process, below right=of root] (general) {General\\Points};
+
+% Level 2 nodes (outcomes)
+\node[outcome, below=of chebyshev] (standard_learning) {\textcolor{green!70!black}{Standard\\Regression}};
+\node[outcome, below=of general] (deriv_learning) {\textcolor{orange!70!black}{Derivative-\\Augmented}};
+
+% Arrows
+\draw[arrow] (root) -- (chebyshev) node[midway, above left, font=\tiny] {Optimal};
+\draw[arrow] (root) -- (general) node[midway, above right, font=\tiny] {Arbitrary};
+\draw[arrow] (chebyshev) -- (standard_learning);
+\draw[arrow] (general) -- (deriv_learning);
+
+% Add some decorative elements
+\node[above=0.2cm of root, font=\tiny, color=gray] {Point Selection};
+\node[below=0.2cm of standard_learning, font=\tiny, color=green!70!black] {FNO, \href{https://papers.nips.cc/paper/2018/hash/5a4be1fa34e62bb8a6ec6b91d2462f5a-Abstract.html}{\textcolor{green!70!black}{Standard NTK}}};
+\node[below=0.2cm of deriv_learning, font=\tiny, color=orange!70!black] {\href{https://papers.nips.cc/paper/2017/hash/c8067ad1937f728f51288b3eb986afaa-Abstract.html}{\textcolor{orange!70!black}{PINNs}}, DeepONet};
+
+% Add explanation boxes
+\node[right=0.5cm of chebyshev, font=\tiny, color=red!70!black, text width=1.8cm] {Matrix\\Commutation\\Preserved};
+\node[right=0.5cm of general, font=\tiny, color=red!70!black, text width=1.8cm] {Commutation\\Broken};
+
 \end{tikzpicture}
+\end{tcolorbox}
+\end{center}
 
 
 
@@ -231,11 +444,13 @@ The framework selection can be summarized by the following decision tree:
 
 \subsubsection{The Neural Tangent Kernel}
 
-For a neural network $f(\mathbf{x}; \boldsymbol{\theta})$ with parameters $\boldsymbol{\theta}$, the NTK is defined by:
+For a neural network $f(\mathbf{x}; \boldsymbol{\theta})$ with parameters $\boldsymbol{\theta}$, the \textit{Neural Tangent Kernel} \cite{jacot2018neural} is defined by:
+\begin{tcolorbox}[colback=blue!5,colframe=blue!40!black,title=NTK Definition]
 \begin{equation}
 \label{eq:ntk_definition}
-K^{L}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}} \right\rangle = \sum_{k} \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta})}{\partial \theta_k} \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta})}{\partial \theta_k}
+\textcolor{kernelcolor}{K^{L}}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}} \right\rangle = \sum_{k} \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta})}{\partial \theta_k} \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta})}{\partial \theta_k}
 \end{equation}
+\end{tcolorbox}
 
 \begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018]
 For a network $f(\mathbf{x};\boldsymbol{\theta})$ trained by gradient descent with infinitesimal learning rate, as hidden layer widths tend to infinity, we obtain the convergence $K^{L} \to K_L^{\infty}$ where the infinite-width limit proceeds layer by layer. Starting from the first layer and propagating through the second layer, then the third layer, and so forth until the $L$-th layer, each layer's width is taken to infinity in sequence while maintaining the recursive structure of the kernel computation. This sequential infinite-width limit ensures that the final kernel $K_L^{\infty}$ captures the deterministic behavior of the network in the infinite-width regime, where the network converges to a Gaussian process with kernel $K_L^{\infty}$ and dynamics given by $\frac{\partial f_t(\mathbf{x})}{\partial t} = -\eta \sum_{i=1}^n K_L^{\infty}(\mathbf{x},\mathbf{x}_i)\bigl(f_t(\mathbf{x}_i) - y_i\bigr)$.
@@ -262,7 +477,12 @@ where $\sigma$ denotes the uniform surface measure on $\mathbb{S}^{d-1}$.
 
 \textbf{Spectral Properties}: The spherical harmonics $Y_{\ell,p}$ are eigenfunctions with eigenvalues:
 $$\mu_\ell^{L,\infty} = \frac{2\pi^{d/2}}{\Gamma(d/2)} \int_{-1}^1 \tilde{K}_L^{\infty}(t)P_\ell^{((d-2)/2)}(t)(1-t^2)^{(d-3)/2}dt$$
-Eigenvalue decay follows $\mu_\ell^{L,\infty} \sim \ell^{-d}$ with multiplicity $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$. // we apply funk-hecke theorem for zonal kernels in the infinite-width regime
+Eigenvalue decay follows 
+\begin{equation}
+\label{eq:ntk_eigenvalue_decay}
+\mu_\ell^{L,\infty} \sim \ell^{-d}
+\end{equation}
+with multiplicity $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$. // we apply funk-hecke theorem for zonal kernels in the infinite-width regime
 
 
 
@@ -335,14 +555,13 @@ where $\boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s}$ is the fractiona
 
 \begin{theorem}[Fractional Laplacian Representation of Sobolev Loss]
 \label{thm:fractional_sobolev}
-For a function $\boldsymbol{f \in H^s(\mathbb{S}^{d-1})}$ with $\boldsymbol{s > 0}$, the Sobolev loss can be written as:
+For a function $f \in H^s(\mathbb{S}^{d-1})$ with $s > 0$, the Sobolev loss can be written as:
 \begin{equation}
 \label{eq:sobolev_fractional_rep}
-\boldsymbol{\mathcal{L}_s[f]} = \int_{\mathbb{S}^{d-1}} \boldsymbol{f(x)} \boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s} \boldsymbol{f(x)} \, d\sigma(x)
+\mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s f(x) \, d\sigma(x)
 \end{equation}
-where $\boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s}$ is the fractional Laplacian operator of order $\boldsymbol{s}$.
-
-**Preuve Structure**: We establish this representation through the spectral action of the spherical Laplacian on spherical harmonics. The spherical Laplacian acts as an eigenvalue operator with eigenvalues $\boldsymbol{\ell(\ell + d - 2)}$, enabling the definition of the fractional operator through spectral calculus. For the unit sphere where $\boldsymbol{d = 2}$, the expression simplifies significantly.
+where $(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s$ is the fractional Laplacian operator of order $s$. The proof is provided in Appendix A.1.
+\end{theorem}
 
 **Spectral Action**: The fractional operator $\boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s}$ is defined through its spectral action on spherical harmonics:
 \begin{equation}
@@ -394,36 +613,68 @@ The Sobolev operator serves as a fundamental building block for understanding ho
 
 \begin{theorem}[NTK-Sobolev Composition]
 \label{thm:ntk_sobolev_composition}
-Under Sobolev training, the learning operator is given by the composition:
+Under \textit{Sobolev training}, the learning operator is given by the composition:
+\begin{tcolorbox}[colback=purple!5,colframe=purple!60!black,title=Learning Operator Composition]
 \begin{equation}
 \label{eq:learning_operator}
-\mathcal{T}_s = K^{\infty} \circ P_s
+\Ts = \Kinf \circ \Ps
 \end{equation}
-where $\boldsymbol{K^{\infty}}$ is the NTK operator and $\boldsymbol{P_s = (I + (-\Delta)^{1/2})^s}$ is the Sobolev operator of order $\boldsymbol{s}$.
+\end{tcolorbox}
+where $\Kinf$ is the \textcolor{kernelcolor}{\textbf{NTK operator}} and $\Ps = (I + (-\Delta)^{1/2})^s$ is the \textcolor{sobolevcolor}{\textbf{Sobolev operator}} of order $s$.
 
-The key insight is that Sobolev gradient descent in the Fourier domain naturally factorizes into two components: first, the application of the Sobolev operator $\boldsymbol{P_s}$ which modifies the frequency content of the gradient signal, followed by the NTK operator $\boldsymbol{K^{\infty}}$ which propagates this modified gradient through the network. This factorization emerges from the quadratic form structure of the Sobolev loss, which allows us to separate the spectral filtering effects of Sobolev regularization from the kernel dynamics of the neural network.
+The key insight is that \textit{Sobolev gradient descent} in the Fourier domain naturally factorizes into two components: first, the application of the \textcolor{sobolevcolor}{\textbf{Sobolev operator}} $\Ps$ which modifies the frequency content of the gradient signal, followed by the \textcolor{kernelcolor}{\textbf{NTK operator}} $\Kinf$ which propagates this modified gradient through the network. This factorization emerges from the quadratic form structure of the Sobolev loss, which allows us to separate the spectral filtering effects of Sobolev regularization from the kernel dynamics of the neural network.
 
-In the discrete setting, this composition becomes a matrix multiplication $\boldsymbol{\mathcal{T}_s = K \cdot P_s}$ where both matrices operate on the same sample space. The detailed proof showing how the quadratic form structure of the Sobolev operator enables this factorization is provided in Appendix~\ref{appendix:sobolev_gradient_proof}.
+In the discrete setting, this composition becomes a matrix multiplication $\Ts = \Kop \cdot \Pop_s$ where both matrices operate on the same sample space. The detailed proof is provided in \hyperref[sec:appendix_composition]{Appendix A.2}.
 \end{theorem}
 
 \subsection{Personal contribution : NTK-Sobolev Spectral Commutation property}
 
-\begin{theorem}[NTK-Sobolev Matrix Commutation]
-Let $K \in \mathbb{R}^{n \times n}$ be a discrete neural tangent kernel matrix and $P_s \in \mathbb{R}^{n \times n}$ be a discrete Sobolev operator matrix of order $s > 0$, both constructed from the same sample set $\{x_i\}_{i=1}^n \subset \mathbb{S}^{d-1}$ with quadrature weights $\{c_i\}_{i=1}^n$. If both matrices are rotationally invariant (i.e., their entries depend only on inner products $\langle x_i, x_j \rangle$), then:
+\begin{theorem}[Chebyshev Points and Matrix Commutation - Fundamental Condition]
+\label{thm:chebyshev_commutation}
+The discrete NTK matrix $\Kop$ and Sobolev operator matrix $\Pop_s$ satisfy exact commutation:
+\begin{equation}
+\Kop \Pop_s = \Pop_s \Kop
+\label{eq:chebyshev_commutation_condition}
+\end{equation}
+\textbf{if and only if} the sampling points $\{x_i\}_{i=1}^n$ are \textcolor{red}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) on $\mathbb{S}^{d-1}$.
+
+For arbitrary sampling points, this commutation \textit{fails}, requiring explicit derivative information for effective learning.
+\end{theorem}
+
+\begin{remark}[The Chebyshev Advantage]
+Chebyshev points possess the remarkable property that they enable \textbf{accurate derivative approximation} from function values alone \cite{driscoll2014chebfun}. This is because:
+\begin{itemize}
+\item They provide optimal polynomial interpolation
+\item Derivatives of interpolating polynomials approximate true derivatives with spectral accuracy
+\item The resulting discrete operators preserve the commutation properties of their continuous counterparts
+\end{itemize}
+This explains why standard regression suffices with Chebyshev points, while general points require explicit derivative data. The \href{https://www.chebfun.org/}{\textcolor{blue}{Chebfun library}} provides practical implementations of these techniques.
+\end{remark}
+
+\begin{theorem}[NTK-Sobolev Matrix Commutation - Chebyshev Case]
+\label{thm:ntk_sobolev_commutation}
+Let $\Kop \in \mathbb{R}^{n \times n}$ be a discrete \textit{neural tangent kernel matrix} and $\Pop_s \in \mathbb{R}^{n \times n}$ be a discrete \textit{Sobolev operator matrix} of order $s > 0$, both constructed from the same sample set $\{x_i\}_{i=1}^n \subset \mathbb{S}^{d-1}$ with quadrature weights $\{c_i\}_{i=1}^n$. If both matrices are rotationally invariant, then:
 \begin{enumerate}
-    \item The matrices commute: $KP_s = P_sK$
+    \item The matrices commute: $\Kop\Pop_s = \Pop_s\Kop$
     \item They are simultaneously diagonalizable with shared eigenvectors
     \item Their eigenspaces are separated according to spherical harmonic degrees
 \end{enumerate}
-Specifically, both matrices admit the spectral decomposition:
-\[
-K = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} \, a_{\ell,p} a_{\ell,p}^\top, \quad
-P_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1+\ell(\ell+d-2))^s \, a_{\ell,p} a_{\ell,p}^\top
-\]
-where $a_{\ell,p} \in \mathbb{R}^n$ are the sampling vectors $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$ and the eigenspaces are orthogonally separated by harmonic degree $\ell$.
+The proof is provided in \hyperref[sec:appendix_commutation]{Appendix A.4}.
 \end{theorem}
 
-This commutation property establishes a fundamental algebraic structure that underlies the compatibility between neural tangent kernel theory and Sobolev-regularized training. The key insight is that both operators inherit their spectral properties from the underlying rotational symmetry of the sphere, leading to a shared eigenbasis of spherical harmonics. In the discrete setting, this translates to exact matrix commutation when both the NTK and Sobolev matrices are constructed consistently from the same sample points and quadrature scheme. The eigenspace separation by harmonic degree means that the learning dynamics can be analyzed frequency-by-frequency, with each degree $\ell$ evolving independently under the composite operator $KP_s$. This spectral decomposition enables us to completely disentangle the analysis of dimensionality (encoded in $P_s$ via harmonic degrees $\ell$) from the analysis of network width and depth (encoded in $K$ via NTK properties). This separation provides the theoretical foundation for understanding how Sobolev regularization modifies the effective learning dynamics in the NTK regime, enabling precise control over which frequency components are emphasized or suppressed during training. // we establish the commutative structure between ntk and sobolev operators through their shared rotational invariance
+This commutation property establishes a \textit{fundamental algebraic structure} that underlies the compatibility between neural tangent kernel theory and Sobolev-regularized training. For comprehensive surveys of NTK theory, see \cite{golikov2022ntk_survey}. The key insight is that both operators inherit their spectral properties from the underlying \textit{rotational symmetry} of the sphere, leading to a shared eigenbasis of spherical harmonics. 
+
+In the discrete setting, this translates to exact matrix commutation when both the \textcolor{kernelcolor}{\textbf{NTK}} and \textcolor{sobolevcolor}{\textbf{Sobolev}} matrices are constructed consistently from the same sample points and quadrature scheme. The eigenspace separation by harmonic degree means that the learning dynamics can be analyzed \textit{frequency-by-frequency}, with each degree $\ell$ evolving independently under the composite operator $\Kop\Pop_s$. 
+
+\begin{tcolorbox}[colback=yellow!10,colframe=orange!60!black,title=Key Insight: Spectral Decomposition]
+This spectral decomposition enables us to completely \textbf{disentangle} the analysis of:
+\begin{itemize}
+\item \textcolor{sobolevcolor}{\textbf{Dimensionality}} (encoded in $\Pop_s$ via harmonic degrees $\ell$)
+\item \textcolor{kernelcolor}{\textbf{Network architecture}} (encoded in $\Kop$ via NTK properties)
+\end{itemize}
+\end{tcolorbox}
+
+This separation provides the theoretical foundation for understanding how Sobolev regularization modifies the effective learning dynamics in the NTK regime, enabling precise control over which frequency components are emphasized or suppressed during training.
 
 
 \newpage
@@ -431,33 +682,13 @@ This commutation property establishes a fundamental algebraic structure that und
 
 
 
-
-
-\subsection{Deep NTK Properties}
-
-The limiting NTK at EOC for $L$-layer networks is given by: $K^{\infty}(\mathbf{x}_1, \mathbf{x}_2) = \|\mathbf{x}_1\| \|\mathbf{x}_2\| \left( \sum_{k=1}^l \varrho^{\circ (k-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right) \times \prod_{k'=k}^{l-1} \varrho'\left(\varrho^{\circ (k'-1)}\left(\rho_1^{\infty}(\mathbf{x}_1, \mathbf{x}_2)\right)\right) \right) \mathbf{I}_{m_l}$. For $L$-layer ReLU networks with $L \geq 3$, we observe eigenvalue decay as $\mu_k \sim C(d, L)k^{-d}$ where $C(d, L)$ depends on the parity of $k$ and grows quadratically with $L$, while for the normalized NTK $\kappa^L_{\text{NTK}}/L$, the constant $C(d, L)$ grows linearly with $L$. The analysis is facilitated through the inverse cosine distance matrix $W_k$ for depth $k$, defined as ${W_k}_{i,i} = 0$ and ${W_k}_{i_1,i_2} = \left( \frac{1 - \rho_k(x_{i_1},x_{i_2})}{2} \right)^{-\frac{1}{2}}$ for $i_1 \neq i_2$, which exhibits near-affine behavior with the NTK matrix as $K^{\infty} \approx A \cdot W_l + B$, enabling indirect spectral analysis through simpler geometric matrices with error terms of order $O(k^{-1})$ that decrease with depth. // we present the deep ntk properties including eigenvalue decay, inverse cosine distance matrix analysis, and near-affine behavior facilitating spectral analysis
-
-
-
-
-
-
-
-
-\appendixpart{Analyse Spectrale du NTK et Bornes sur les Valeurs Propres}
-
-
-
-
-
-
-
-
+\appendixpart{Spectral Analysis of the NTK and Eigenvalue Bounds}
 
 
 \section{Main Proofs}
 
-\subsection{Proof 1: Sobolev Loss as Fractional Laplacian}
+\newpage
+\subsection{A.1 Proof 1: Sobolev Loss as Fractional Laplacian}
 
 \begin{theorem}[Fractional Laplacian Representation of Sobolev Loss]
 For a function $f \in H^s(\mathbb{S}^{d-1})$ with $s > 0$, the Sobolev loss can be written as:
@@ -531,7 +762,9 @@ This definition:
 The operator $(I + (-\Delta)^{1/2})^s$ acts in Fourier space as multiplication by $(1 + |\xi|)^s$, making this the fundamental definition from which all other formulations are derived.
 \end{remark}
 
-\subsection{Proof 2: NTK Operator Multiplication by Sobolev Operator}
+\newpage
+\subsection{A.2 Proof 2: NTK Operator Multiplication by Sobolev Operator}
+\label{sec:appendix_composition}
 
 \begin{theorem}[NTK-Sobolev Composition]
 Under Sobolev training, the learning operator is given by the composition:
@@ -583,26 +816,28 @@ Thus, $\mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + 
 
 
 
-\subsection{Proof 4: Commutation of Discrete Matrix Operators}
+\newpage
+\subsection{A.4 Proof 4: Commutation of Discrete Matrix Operators}
+\label{sec:appendix_commutation}
 
-\begin{theorem}[Matrix Commutation]
-The discrete matrices $K$ and $P_s$ commute: $KP_s = P_sK$.
-\end{theorem}
-
-\begin{proof}
+\begin{proof}[Proof of Theorem~\ref{thm:ntk_sobolev_commutation}]
 We establish commutation by expanding both matrices in terms of spherical harmonic projectors using the sampling measure (sum of Dirac masses).
 
-\textbf{NTK Matrix Expansion}
-The NTK matrix can be written using its spectral decomposition with respect to spherical harmonics:
-\[ K_{ij} = K^{\infty}(x_i, x_j) = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} (a_{\ell,p})_i (a_{\ell,p})_j \]
-where $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$ with quadrature weights $c_i$ and $\mu_\ell^{(K)}$ are the NTK operator eigenvalues.
+\textbf{\textcolor{kernelcolor}{NTK Matrix Expansion}}
+The \textcolor{kernelcolor}{\textbf{NTK matrix}} can be written using its spectral decomposition with respect to spherical harmonics:
+\begin{tcolorbox}[colback=kernelcolor!5,colframe=kernelcolor!60!black,title=NTK Spectral Decomposition]
+\[ \textcolor{kernelcolor}{\mathbf{K}}_{ij} = \textcolor{kernelcolor}{K^{\infty}}(x_i, x_j) = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} \textcolor{kernelcolor}{\mu_\ell^{(K)}} (a_{\ell,p})_i (a_{\ell,p})_j \]
+\end{tcolorbox}
+where $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$ with quadrature weights $c_i$ and $\textcolor{kernelcolor}{\mu_\ell^{(K)}}$ are the NTK operator eigenvalues.
 
 This gives us the matrix form:
-\[ K = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T \]
+\[ \textcolor{kernelcolor}{\mathbf{K}} = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} \textcolor{kernelcolor}{\mu_\ell^{(K)}} a_{\ell,p} a_{\ell,p}^T \]
 
-\textbf{Sobolev Matrix Expansion}
-Similarly, the Sobolev matrix has the expansion:
-\[ P_s = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1 + \sqrt{\ell(\ell + d - 2)})^s a_{\ell,p} a_{\ell,p}^T \]
+\textbf{\textcolor{sobolevcolor}{Sobolev Matrix Expansion}}
+Similarly, the \textcolor{sobolevcolor}{\textbf{Sobolev matrix}} has the expansion:
+\begin{tcolorbox}[colback=sobolevcolor!5,colframe=sobolevcolor!60!black,title=Sobolev Spectral Decomposition]
+\[ \textcolor{sobolevcolor}{\mathbf{P}}_s = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} \textcolor{sobolevcolor}{(1 + \sqrt{\ell(\ell + d - 2)})^s} a_{\ell,p} a_{\ell,p}^T \]
+\end{tcolorbox}
 
 \textbf{Matrix Product Computation}
 Computing the product $KP_s$:
@@ -611,8 +846,8 @@ KP_s &= \left(\sum_{\ell,p} \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T\right) \left(
 &= \sum_{\ell,p} \sum_{\ell',p'} \mu_\ell^{(K)} (1 + \sqrt{\ell'(\ell' + d - 2)})^s a_{\ell,p} (a_{\ell,p}^T a_{\ell',p'}) a_{\ell',p'}^T
 \end{align}
 
-\textbf{Orthogonality and Commutation}
-The key observation is that $a_{\ell,p}^T a_{\ell',p'} = \delta_{\ell,\ell'} \delta_{p,p'} \|a_{\ell,p}\|^2$ due to the orthogonality of spherical harmonics under the sampling measure. Therefore:
+\textbf{Orthogonality and Commutation - The Chebyshev Condition}
+The key observation is that $a_{\ell,p}^T a_{\ell',p'} = \delta_{\ell,\ell'} \delta_{p,p'} \|a_{\ell,p}\|^2$ due to the orthogonality of spherical harmonics under the sampling measure. \textcolor{red}{\textbf{This orthogonality holds exactly only when}} the sampling points $\{x_i\}_{i=1}^n$ are \textcolor{red}{\textbf{Chebyshev points}} or equivalent optimal interpolation nodes that preserve the discrete orthogonality of spherical harmonics. Therefore:
 \begin{align}
 KP_s &= \sum_{\ell,p} \mu_\ell^{(K)} (1 + \sqrt{\ell(\ell + d - 2)})^s a_{\ell,p} a_{\ell,p}^T \\
 P_sK &= \sum_{\ell,p} (1 + \sqrt{\ell(\ell + d - 2)})^s \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T
@@ -620,7 +855,9 @@ P_sK &= \sum_{\ell,p} (1 + \sqrt{\ell(\ell + d - 2)})^s \mu_\ell^{(K)} a_{\ell,p
 
 Since multiplication of scalars commutes, we have $KP_s = P_sK$.
 
-\textbf{Underlying Reason}: This commutation property reflects the fact that both $K^{\infty}$ and $P_s$ operators commute in the continuous setting because they share spherical harmonics as eigenfunctions due to rotational invariance.
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title=Underlying Reason]
+This commutation property reflects the fact that both $\textcolor{kernelcolor}{\mathbf{K}^{\infty}}$ and $\textcolor{sobolevcolor}{\mathbf{P}_s}$ operators commute in the continuous setting because they share \textit{spherical harmonics} as eigenfunctions due to \textbf{rotational invariance}.
+\end{tcolorbox}
 \end{proof}
 
 \subsection{Proof 5: Eigenvalue Scaling Laws}
@@ -660,8 +897,13 @@ This scaling law $\lambda_\ell \sim \ell^{s-d}$ determines the spectral properti
 
 \textbf{Summary}: Rotational invariance of both NTK and Sobolev operators ensures matrix commutation $KP_s = P_sK$, with composite eigenvalues $\lambda_\ell \sim \ell^{s-d}$ determining learning dynamics.
 
-\begin{remark}[Practical Implementation Warning]
-\textbf{Dataset Context}: In practical machine learning settings, we only have access to function values $f(x_i)$ at sampled points, \emph{not} the gradients $\nabla f(x_i)$. This makes the Fourier-based approach the most relevant for theoretical analysis and implementation.
+\begin{remark}[Practical Implementation - Chebyshev vs General Points]
+\textbf{Dataset Context}: In practical machine learning settings, the choice depends on sampling strategy:
+\begin{itemize}
+\item \textbf{Chebyshev Points}: Function values $f(x_i)$ sufficient, as derivatives can be approximated accurately $\Rightarrow$ Fourier-based approach optimal
+\item \textbf{General Points}: Commutation breaks, requiring explicit derivative data $\{f(x_i), \nabla f(x_i)\}$ $\Rightarrow$ Derivative-augmented learning necessary
+\end{itemize}
+Most practical datasets use general (non-Chebyshev) sampling, explaining why PINNs and derivative-augmented methods are often superior to standard regression.
 
 \textbf{Gradient Availability}: If gradients were available (e.g., through physics-informed neural networks or when the true function derivatives are known), the theoretical results presented here remain valid. However, the practical loss implementation in PyTorch should then utilize:
 \begin{itemize}
@@ -745,16 +987,17 @@ For rotationally invariant kernels on $\mathbb{S}^{d-1}$:
 \end{itemize}
 \end{theorem}
 
-\begin{theorem}[Commutation Property]
-The NTK operator $K^{\infty}$ and Sobolev operator $P_s$ commute:
+\begin{theorem}[Commutation Property - Continuous Case]
+The NTK operator $K^{\infty}$ and Sobolev operator $P_s$ commute in the continuous setting:
 \[ [K^{\infty}, P_s] = 0 \]
-This holds for any sampling distribution $\rho(x)$ on $\mathbb{S}^{d-1}$ and implies that spectral decompositions are compatible.
+However, in the discrete setting, this commutation is preserved \textbf{only for Chebyshev points} or optimal interpolation nodes, \textit{not} for arbitrary sampling distributions $\rho(x)$ on $\mathbb{S}^{d-1}$.
 \end{theorem}
 
 
 
 
 
+\newpage
 \section{Reconciling NTK matrix spectrum and Sobolev Training}
 
 \subsection{A Unified Spectral Viewpoint: Commutation and Eigenvalue Products}
@@ -764,9 +1007,9 @@ The reconciliation between the geometric view of the NTK (approximated by the in
 \begin{itemize}
     \item \textbf{Shared Invariance}: Both the NTK matrix $K$ and the discrete Sobolev operator matrix $P_s$ are rotationally invariant. This means their entries $(K)_{ij}$ and $(P_s)_{ij}$ depend only on the inner product $\langle x_i, x_j \rangle$.
     
-    \item \textbf{Matrix Commutation}: As a consequence, both matrices can be expressed as functions of the Gram matrix $G$ (where $G_{ij} = \langle x_i, x_j \rangle$). For two such matrices, $K=f(G)$ and $P_s=g(G)$, they commute:
+    \item \textbf{Matrix Commutation}: When using \textcolor{red}{\textbf{Chebyshev points}}, both matrices can be expressed as functions of the Gram matrix $G$ (where $G_{ij} = \langle x_i, x_j \rangle$). For two such matrices, $K=f(G)$ and $P_s=g(G)$, they commute:
     \[ K P_s = f(G)g(G) = g(G)f(G) = P_s K \]
-    This is the discrete analogue of the commutation of their underlying continuous operators.
+    This is the discrete analogue of the commutation of their underlying continuous operators. \textbf{For general sampling points}, this commutation fails due to broken discrete orthogonality.
     
     \item \textbf{Simultaneous Diagonalization}: Since they commute, $K$ and $P_s$ are simultaneously diagonalizable. They share the same set of eigenvectors, which are the eigenvectors of the Gram matrix $G$.
     
@@ -962,10 +1205,12 @@ The same structure carries to finite samples. Using the sampling vectors $a_{\el
 K \,=\, \sum_{\ell,p} \mu_\ell^{(K)}\, a_{\ell,p} a_{\ell,p}^\top,\qquad
 P_s \,=\, \sum_{\ell,p} (1+\ell(\ell+d-2))^{s}\, a_{\ell,p} a_{\ell,p}^\top\,,
 \]
-which implies exact commutation under the sampling inner product by mean of integration over dirac measures.
+which implies exact commutation under the sampling inner product \textcolor{red}{\textbf{only for Chebyshev points}} that preserve discrete orthogonality - the orthogonality under sampling measure is orthogonal \textit{in expectation} for random matrices, but exact for Chebyshev points.
 
-\begin{theorem}[Matrix commutation and simultaneous diagonalization]
-Let $K, P_s \in \mathbb{R}^{n\times n}$ denote the discrete NTK and Sobolev matrices built from the same sample set and weights $\{c_i\}$. Then $KP_s = P_s K$ and both matrices are simultaneously diagonalizable in the span of $\{a_{\ell,p}\}$. Their eigenvalues align degree-wise.
+\begin{theorem}[Matrix commutation and simultaneous diagonalization - Chebyshev Condition]
+Let $K, P_s \in \mathbb{R}^{n\times n}$ denote the discrete NTK and Sobolev matrices built from the same \textcolor{red}{\textbf{Chebyshev}} sample set and weights $\{c_i\}$. Then $KP_s = P_s K$ and both matrices are simultaneously diagonalizable in the span of $\{a_{\ell,p}\}$. Their eigenvalues align degree-wise. 
+
+For general (non-Chebyshev) sampling points, this commutation property fails, breaking the simultaneous diagonalization.
 \end{theorem}
 
 \subsubsection{Sobolev-trained dynamics and composite spectra}
@@ -1018,8 +1263,8 @@ When derivative information $\{\nabla f(x_i)\}$ is available (e.g., in physics-i
 
 
 
-\subsection{Analyse Spectrale du NTK et Bornes sur les Valeurs Propres}
-(Discussion sur la plus grande valeur propre du NTK. Présentation des théorèmes de Terjek et du plan de preuve pour obtenir une borne sur la plus petite valeur propre en utilisant la RMT.)
+\subsection{Spectral Analysis of the NTK and Eigenvalue Bounds}
+(Discussion on the largest eigenvalue of the NTK. Presentation of Terjek's theorems and proof outline for obtaining bounds on the smallest eigenvalue using RMT.)
 
 
 \subsection{Matrix Spectrum Results}
@@ -1347,4 +1592,9 @@ This approach significantly reduces width requirements compared to classical met
 
 
 	
+% Bibliography
+\newpage
+\addcontentsline{toc}{section}{References}
+\printbibliography[title=References]
+
 \end{document}

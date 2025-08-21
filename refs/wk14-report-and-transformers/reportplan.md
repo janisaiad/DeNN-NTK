@@ -99,8 +99,9 @@ laisser mes refs seulement dans une branche
 insister sur la reproducibilité
 expliquer aussi que j'ai tout fait en live pendant beaucoup de temps, (meme l'ecriture de ceci)
 
-rassifier youtube creator studio
+rassifier youtube creator studio, sur chaque video mettre ce que je fais avec timecode
 
-
+be careful, the orthogonality under sampling measure is orthogonal in mean ! that is the ntk matrix is random, and that's when we take the 
+remarque sur le fait qu'avoir des senseurs sur chebyshev est quelque chose de très très courant, on maitrise cette partie là
 
 ce qui reste )à faire : rederive NTK for tranformers ultra rapidos, et theorem pour mmnn
