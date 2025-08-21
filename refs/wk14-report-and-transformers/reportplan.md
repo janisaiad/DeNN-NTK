@@ -30,9 +30,12 @@ c'est surtout la généralisation qui intéresse et l'optimization en 1er lieu
 pour la wk 3 kernel integral operator à clarifier
 et bien expliciter que l'on travaille sur 2 domaines et qu'en sciml/optimization les 2 sont importants, que ce soit 
 pour le rkhs ou pour l'optimization bounds
-un aspect super important est qu'il faut guider vers la comprehension de deeper or wider pour nn regression
+
+
+IMPORTANT : un aspect super important est qu'il faut guider vers la comprehension de deeper or wider pour nn regression
 et qu'on repond d'abord pour nn regression, ensuite pour sobolev avec la decomposition
-le fait est qu'en parallele on apprend aussi à fitter nos données et leurs normes, ce n'est pas la 1ere chose que l'on fait
+
+IMPORTANT : le fait est qu'en parallele on apprend aussi à fitter nos données et leurs normes, ce n'est pas la 1ere chose que l'on fait
 (car on a une matrice diagonale), c'est pas on apprend 2 noyaux orthogonaux, on apprend en fait 1 noyaux et son scaling
 
 expliciter aussi que l'usage de l'IA s'est restreint le plus possible lors de l'écriture de tex, et quand je me suis retrouvé bloqué et que
