@@ -31,6 +31,9 @@
 \newcommand{\Ps}{\textcolor{sobolevcolor}{P_s}}
 \newcommand{\Ts}{\textcolor{purple}{\mathcal{T}_s}}
 
+% ReLU activation function - simple text version that works everywhere
+\newcommand{\ReLU}{\text{ReLU}}
+
 \usepackage[hidelinks,colorlinks=true,linkcolor=blue,citecolor=red,urlcolor=blue]{hyperref}
 
 % You can change the parameters: here are the available options:
@@ -82,7 +85,7 @@
     \quad \rightsquigarrow \quad #1%
 }
 
-\DeclareRobustCommand{\ReLU}{\mathrel{\text{%
+\DeclareRobustCommand{\\ReLU}{\mathrel{\text{%
     \begin{tikzpicture}[baseline=(current bounding box.south)]
         \draw[thick] (0,0) -- (0.25,0) -- (0.4,0.25);
     \end{tikzpicture}}}\!\!}
@@ -221,7 +224,7 @@ $\mathcal{O}(\cdot)$ & Landau notation (big O) & $\tilde{\Omega}(\cdot)$ & Landa
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
-$\ReLU$ & ReLU activation function & $f(\mathbf{x}; \boldsymbol{\theta})$ & Neural network function \\
+$\\ReLU$ & \ReLU activation function & $f(\mathbf{x}; \boldsymbol{\theta})$ & Neural network function \\
 $\sigma(\cdot)$ & General activation function & $\sigma^2$ & Activation variance parameter \\
 $L$ & Number of layers & $n_k$ & Width of layer $k$ \\
 $x^{(\ell)}$ & Output of layer $\ell$ & $W^{(\ell)}$ & Weight matrix of layer $\ell$ \\
@@ -310,12 +313,12 @@ $\text{vec}(\cdot)$ & Vectorization operator & $\mathcal{P}_\ell$ & Propagation 
 
 \section{Finite-Width Corrections and Learning Regimes}
 
-This section presents our \textbf{novel theoretical contributions} to understanding finite-width neural networks through the lens of the Neural Tangent Hierarchy (NTH). We establish \textit{precise scaling laws}, develop a \textit{recursive formulation for ReLU networks}, and connect our analysis to \textit{random matrix theory}.
+This section presents our \textbf{novel theoretical contributions} to understanding finite-width neural networks through the lens of the Neural Tangent Hierarchy (NTH). We establish \textit{precise scaling laws}, develop a \textit{recursive formulation for \ReLU networks}, and connect our analysis to \textit{random matrix theory}.
 
 \subsection{Personal Contribution: Scaling Laws for Third-Order Corrections}
 
 \begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Main Result: Scaling of $\textcolor{kernelcolor}{K^{(3)}}$ with Network Depth}},enhanced,drop shadow]
-For a \textbf{ReLU network} of depth $H$ and width $m$, the third-order kernel exhibits the following \textit{fundamental scaling behavior}:
+For a \textbf{\ReLU network} of depth $H$ and width $m$, the third-order kernel exhibits the following \textit{fundamental scaling behavior}:
 
 \begin{equation}
 \label{eq:main_scaling_result}
@@ -327,12 +330,12 @@ where $\rho < 1$ is the \textbf{spectral radius} of the backward propagation ope
 
 This result represents a \textbf{breakthrough} in understanding how network architecture affects learning dynamics beyond the infinite-width approximation. The \textit{exponential decay} $\rho^H$ explains why deeper networks exhibit more stable training dynamics, while the $m^{-1/2}$ correction quantifies the deviation from infinite-width theory.
 
-\subsection{Personal Contribution: Novel ReLU Recursion Formula}
+\subsection{Personal Contribution: Novel \ReLU Recursion Formula}
 
-We present the \textbf{first complete derivation} of the recursive structure for $\textcolor{kernelcolor}{K^{(3)}}$ in ReLU networks, leveraging the critical property that $\sigma''(\ReLU) = 0$ almost everywhere.
+We present the \textbf{first complete derivation} of the recursive structure for $\textcolor{kernelcolor}{K^{(3)}}$ in \ReLU networks, leveraging the critical property that $\sigma''(\\ReLU) = 0$ almost everywhere.
 
-\begin{tcolorbox}[colback=definitioncolor!10,colframe=definitioncolor!60!black,title={\textbf{Revolutionary Insight: ReLU Simplification}},enhanced,drop shadow]
-The vanishing second derivative of ReLU activation leads to \textit{dramatic simplifications} in the third-order kernel computation:
+\begin{tcolorbox}[colback=definitioncolor!10,colframe=definitioncolor!60!black,title={\textbf{Revolutionary Insight: \ReLU Simplification}},enhanced,drop shadow]
+The vanishing second derivative of \ReLU activation leads to \textit{dramatic simplifications} in the third-order kernel computation:
 
 \begin{equation}
 \label{eq:relu_simplification}
@@ -472,7 +475,7 @@ The detailed mathematical derivation involving \textit{directional derivatives},
 
 \section{Extended Formula for $\textcolor{kernelcolor}{K^{(3)}}$}
 
-To obtain a complete expression for $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}$, we expand the terms $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$ using their recursive definitions. We assume a ReLU activation function, so $\sigma''=0$ almost everywhere.
+To obtain a complete expression for $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}$, we expand the terms $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$ using their recursive definitions. We assume a \ReLU activation function, so $\sigma''=0$ almost everywhere.
 
 \subsection{Development of Recursive Terms}
 
@@ -509,7 +512,7 @@ This formula, while complex, represents the complete hierarchical structure of t
 
 \section{Fully Expanded Non-Recursive Formula for $\textcolor{kernelcolor}{K^{(3)}}$}
 
-Here, we present the complete, non-recursive expression for $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}$. This formula is obtained by substituting the expanded expressions for the directional derivatives $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$ into the decomposed formula for $\textcolor{kernelcolor}{K^{(3)}}$. This makes the dependency on the network parameters (weights $W^{(k)}$ and output vectors $a_t$) and activations at each layer fully explicit. We continue to assume a ReLU activation function, which sets second derivatives of $\sigma$ to zero almost everywhere.
+Here, we present the complete, non-recursive expression for $\textcolor{kernelcolor}{K^{(3)}}_{\alpha\beta\gamma}$. This formula is obtained by substituting the expanded expressions for the directional derivatives $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$ into the decomposed formula for $\textcolor{kernelcolor}{K^{(3)}}$. This makes the dependency on the network parameters (weights $W^{(k)}$ and output vectors $a_t$) and activations at each layer fully explicit. We continue to assume a \ReLU activation function, which sets second derivatives of $\sigma$ to zero almost everywhere.
 
 The final expression is a sum of four main components, corresponding to the differentiation of the output layer activations, the backward vectors, and the hidden layer activations:
 
@@ -554,9 +557,9 @@ The key insight of this recursive structure is that adding a new layer to the ne
 \item \textbf{Coupling terms}: Corrections due to the interaction between old and new layers
 \end{itemize}
 
-A \textit{critical property} of this recursion is that for \textbf{ReLU activation functions}, the second derivatives $\sigma''$ vanish almost everywhere, which significantly simplifies the expansion of the directional derivatives $\delta_\gamma$.
+A \textit{critical property} of this recursion is that for \textbf{\ReLU activation functions}, the second derivatives $\sigma''$ vanish almost everywhere, which significantly simplifies the expansion of the directional derivatives $\delta_\gamma$.
 
-The complete mathematical derivation, including the explicit forms of all terms and the detailed analysis of the ReLU case, is presented in \hyperref[sec:appendix_recursive_derivation]{Appendix B.2}. This derivation demonstrates how the recursive structure emerges naturally from the hierarchical organization of the neural network.
+The complete mathematical derivation, including the explicit forms of all terms and the detailed analysis of the \ReLU case, is presented in \hyperref[sec:appendix_recursive_derivation]{Appendix B.2}. This derivation demonstrates how the recursive structure emerges naturally from the hierarchical organization of the neural network.
 
 
 
@@ -579,7 +582,7 @@ This section presents our \textbf{systematic analysis} of how the third-order ke
 We consider a \textbf{Multi-Layer Perceptron} with:
 \begin{itemize}
 \item \textbf{Depth}: $L$ layers with uniform width $m$
-\item \textbf{Weight initialization}: $W^{(\ell)} \sim \mathcal{N}(0, c_W^2/m)$ with $c_W^2 = 2$ for ReLU
+\item \textbf{Weight initialization}: $W^{(\ell)} \sim \mathcal{N}(0, c_W^2/m)$ with $c_W^2 = 2$ for \ReLU
 \item \textbf{NTK scaling}: Output layer scaled by $1/\sqrt{m}$
 \item \textbf{Proper initialization}: Ensures dynamical isometry at the edge of chaos
 \end{itemize}
@@ -588,7 +591,7 @@ We consider a \textbf{Multi-Layer Perceptron} with:
 \subsection{Personal Contribution: Activation Stability Analysis}
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Forward Activation Stability}},enhanced,drop shadow]
-For \textbf{properly initialized} ReLU networks, the forward activations maintain stable norms:
+For \textbf{properly initialized} \ReLU networks, the forward activations maintain stable norms:
 
 \begin{equation}
 \label{eq:activation_stability}
@@ -641,7 +644,7 @@ This section consolidates our \textbf{principal theoretical contributions} and p
 \subsection{Personal Contribution: Complete Scaling Law for $\textcolor{kernelcolor}{K^{(3)}}$}
 
 \begin{tcolorbox}[colback=theoremcolor!15,colframe=theoremcolor!80!black,title={\textbf{MAIN RESULT: Third-Order Kernel Scaling Law}},enhanced,drop shadow]
-For a \textbf{ReLU neural network} of depth $H$ and width $m$, the third-order kernel exhibits the fundamental scaling:
+For a \textbf{\ReLU neural network} of depth $H$ and width $m$, the third-order kernel exhibits the fundamental scaling:
 
 \begin{equation}
 \label{eq:main_result_scaling}
@@ -655,7 +658,7 @@ where:
 \item The $\text{poly}(\log m)$ term captures \textit{logarithmic corrections} from random matrix fluctuations
 \end{itemize}
 
-\textbf{Significance}: This is the \textit{first rigorous derivation} of finite-width scaling for third-order kernels in deep ReLU networks.
+\textbf{Significance}: This is the \textit{first rigorous derivation} of finite-width scaling for third-order kernels in deep \ReLU networks.
 \end{tcolorbox}
 
 \subsection{Personal Contribution: GOE Statistical Universality}
@@ -678,10 +681,10 @@ The \textbf{finite-width corrections} exhibit universal statistical properties o
 \textbf{Impact}: Explains the \textit{robustness} of neural network training across architectures and provides theoretical foundation for \textit{random matrix approaches} in deep learning.
 \end{tcolorbox}
 
-\subsection{Personal Contribution: Revolutionary ReLU Recursion}
+\subsection{Personal Contribution: Revolutionary \ReLU Recursion}
 
-\begin{tcolorbox}[colback=definitioncolor!15,colframe=definitioncolor!80!black,title={\textbf{FIRST DERIVATION: Complete ReLU Recursion Formula}},enhanced,drop shadow]
-We present the \textbf{first complete derivation} of the recursive structure for ReLU networks:
+\begin{tcolorbox}[colback=definitioncolor!15,colframe=definitioncolor!80!black,title={\textbf{FIRST DERIVATION: Complete \ReLU Recursion Formula}},enhanced,drop shadow]
+We present the \textbf{first complete derivation} of the recursive structure for \ReLU networks:
 
 \begin{equation}
 \label{eq:relu_recursion_main}
@@ -691,7 +694,7 @@ We present the \textbf{first complete derivation} of the recursive structure for
 \textbf{Revolutionary Insight}: The vanishing second derivative $\sigma''(\ReLU) = 0$ eliminates \textit{all problematic terms} that make general activations intractable.
 
 \textbf{Computational Advantage}: Reduces complexity from $\mathcal{O}(m^4)$ to $\mathcal{O}(m^3)$ for practical implementations.
-\end{tcolorbox>
+\end{tcolorbox}
 
 \subsection{Personal Contribution: Hessian-NTK Framework}
 
@@ -1125,7 +1128,7 @@ To validate the theoretical formula for the late-time NTK correction $\Theta^{(1
 The experiments leverage JAX and the Neural Tangents library for efficient computation of finite-width neural networks, complemented by our custom implementation of the infinite-width limit. This setup allows us to precisely measure the finite-width corrections and their scaling behavior.
 
 \begin{itemize}
-    \item \textbf{Network Architecture:} We employ a standard feedforward Multi-Layer Perceptron (MLP) with ReLU activation functions. The architecture is characterized by:
+    \item \textbf{Network Architecture:} We employ a standard feedforward Multi-Layer Perceptron (MLP) with \ReLU activation functions. The architecture is characterized by:
     \begin{itemize}
         \item Input dimension $D_{\text{in}}$
         \item Uniform hidden layer width $M$
@@ -1354,11 +1357,11 @@ Fix a parameter $\theta_{\mu}$ with multi--index $\mu=(p,i,j)$ belonging to the 
 \[
   O_3(x_1,x_2,x_3)\;:=\;\partial_{\theta_{\mu}}K_{\theta}(x_1,x_2).
 \]
-Because only the summand with $k=p$ depends on $\theta_{\mu}$, the derivative acts exclusively on that term.  Specialising to multilayer perceptrons with ReLU activation one obtains the layer–wise expression
+Because only the summand with $k=p$ depends on $\theta_{\mu}$, the derivative acts exclusively on that term.  Specialising to multilayer perceptrons with \ReLU activation one obtains the layer–wise expression
 \begin{equation}\label{eq:O3layer}
   O_3(x_1,x_2,x_3)\;=\;\sigma^{-2}\,\partial_{A_{p,ij}}\bigl\langle x_p(x_1),x_p(x_2)\bigr\rangle,
 \end{equation}
-where the indices $(p,i,j)$ are implicitly determined by $x_3$.  All contributions coming from deeper layers vanish since the second derivative of the ReLU satisfies $\phi''\equiv 0$.  Consequently $O_3$ is already of order $\mathcal{O}(n^{-1})$ and no further simplification is required.
+where the indices $(p,i,j)$ are implicitly determined by $x_3$.  All contributions coming from deeper layers vanish since the second derivative of the \ReLU satisfies $\phi''\equiv 0$.  Consequently $O_3$ is already of order $\mathcal{O}(n^{-1})$ and no further simplification is required.
 % ---------------------------------------------------------------------------
 
 \subsection{Explicit Formulas for the Corrections}
@@ -1661,7 +1664,7 @@ where
 \begin{itemize}
     \item $\delta_\gamma a_t = x^{(H)}_\gamma$
     \item The term $\delta_\gamma((W^{(p+1)})^T)$ corresponds to a rank-1 update which, when contracted in context, yields terms involving $G^{(p+1)}_\gamma$ and inner products of activations.
-    \item $\delta_\gamma(\sigma'_{p}(x_\mu)) = \sigma''_{p}(x_\mu) \text{diag}(\delta_\gamma(W^{(p)}x^{(p-1)}_\mu/\sqrt{m}))$. This term vanishes for ReLU activation functions as $\sigma''=0$ almost everywhere.
+    \item $\delta_\gamma(\sigma'_{p}(x_\mu)) = \sigma''_{p}(x_\mu) \text{diag}(\delta_\gamma(W^{(p)}x^{(p-1)}_\mu/\sqrt{m}))$. This term vanishes for \ReLU activation functions as $\sigma''=0$ almost everywhere.
 \end{itemize}
 
 \subsubsection{Final Decomposition}
@@ -1717,9 +1720,9 @@ The term $\delta_\gamma \left(K^{(2,H)}_{\alpha\beta, a'_t} \right)$ is analogou
 &\quad - \langle a'_t, a'_t \rangle \left( \langle \delta_\gamma x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \langle x^{(H)}_\alpha, \delta_\gamma x^{(H)}_\beta \rangle \right)
 \end{align}
 
-\subsubsection{ReLU Simplification}
+\subsubsection{\ReLU Simplification}
 
-For ReLU activation functions, $\sigma''=0$ almost everywhere, which eliminates many terms in the directional derivative expansions. This significantly simplifies the recursive relationship and makes the computational analysis more tractable.
+For \ReLU activation functions, $\sigma''=0$ almost everywhere, which eliminates many terms in the directional derivative expansions. This significantly simplifies the recursive relationship and makes the computational analysis more tractable.
 
 This decomposition allows us to separate the effect of adding a layer by isolating terms specific to the new layer $(T_{H+1}, C_{H+1})$ and the modification of previous layer terms through $a'_t$.
 
