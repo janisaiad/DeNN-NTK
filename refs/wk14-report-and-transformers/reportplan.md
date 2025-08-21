@@ -110,3 +110,6 @@ rajouter une partie explicite sur le fait que noter graphe (en tikz) peut avoir 
 faut pas oublier la condition de dérivée seconde nulle qui est très douteuse et en fait on s'appuie sur un théorèmedeep pour le trianing, et à l'initialisation de mesure nulle
 pour le scaling faudra bien rapport les preuves aussi car ce n'est pas forcément giga clair cette linéarité de K3 ou quadratique de K4
 pour la soutenance on parlera surtout de physique https://arxiv.org/pdf/2008.08601
+
+
+evaluation et declaration de plagiat

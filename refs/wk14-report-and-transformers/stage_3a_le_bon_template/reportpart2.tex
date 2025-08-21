@@ -19,6 +19,64 @@
 \bibliography{stg3a}
 \usepackage[hidelinks,colorlinks=true,linkcolor=blue,citecolor=red,urlcolor=blue]{hyperref}
 
+% Enhanced Color Scheme inspired by reportpart3.tex
+\definecolor{kernelcolor}{RGB}{220,20,60}    % Red for NTK/K symbols (Crimson)
+\definecolor{sobolevcolor}{RGB}{30,144,255}  % Blue for Sobolev/P symbols (DodgerBlue)
+\definecolor{theoremcolor}{RGB}{70,130,180}  % Steel blue for theorems
+\definecolor{definitioncolor}{RGB}{0,128,0}  % Green for definitions
+\definecolor{weightcolor}{RGB}{101,67,33}    % Dark brown for weights W
+\definecolor{relucolor}{RGB}{64,64,64}       % Dark grey for ReLU
+\definecolor{k3color}{RGB}{148,0,211}        % Purple for K^{(3)} specifically (DarkViolet)
+
+% Additional vibrant colors for enhanced visual impact
+\definecolor{lighttheoremcolor}{RGB}{240,248,255} % Light blue for theorem boxes
+\definecolor{lightdefinitioncolor}{RGB}{255,248,240} % Light orange for definitions
+
+% Schéma de couleurs selon les préférences avec intensité renforcée
+\definecolor{remarkcolor}{RGB}{0,0,255}      % Bleu pour remarques
+\definecolor{personalcontribcolor}{RGB}{255,0,0} % Rouge pour contributions personnelles
+\definecolor{generalremarkcolor}{RGB}{0,128,0}   % Vert pour remarques générales
+\definecolor{theoremtextcolor}{RGB}{64,64,64}    % Gris pour théorèmes
+
+% New vibrant colors for enhanced visual formatting
+\definecolor{breakthroughcolor}{RGB}{255,20,147} % DeepPink for breakthroughs
+\definecolor{insightcolor}{RGB}{255,140,0}    % DarkOrange for insights
+\definecolor{resultcolor}{RGB}{50,205,50}     % LimeGreen for results
+\definecolor{methodcolor}{RGB}{138,43,226}    % BlueViolet for methods
+\definecolor{validationcolor}{RGB}{255,69,0}  % OrangeRed for validation
+
+% Commandes pour le schéma de couleurs préféré
+\newcommand{\remarque}[1]{\textcolor{remarkcolor}{\textbf{Remarque:} #1}}
+\newcommand{\personalcontrib}[1]{\textcolor{personalcontribcolor}{\textbf{Contribution personnelle:} #1}}
+\newcommand{\generalremark}[1]{\textcolor{generalremarkcolor}{\textbf{Remarque générale:} #1}}
+\newcommand{\theoremtext}[1]{\textcolor{theoremtextcolor}{#1}}
+
+% Enhanced colored mathematical commands inspired by reportpart3.tex
+\newcommand{\W}{\textcolor{weightcolor}{W}}
+\newcommand{\m}{\textcolor{weightcolor}{m}}
+\newcommand{\Cov}{\text{Cov}}
+\newcommand{\Corr}{\text{Corr}}
+
+% Custom commands for colored mathematical operators
+\newcommand{\Kop}{\textcolor{kernelcolor}{\mathbf{K}}}
+\newcommand{\Pop}{\textcolor{sobolevcolor}{\mathbf{P}}}
+\newcommand{\Kinf}{\textcolor{kernelcolor}{K^{\infty}}}
+\newcommand{\Ps}{\textcolor{sobolevcolor}{P_s}}
+\newcommand{\Ts}{\textcolor{k3color}{\mathcal{T}_s}}
+
+% ReLU activation function - colored version
+\newcommand{\ReLU}{\textcolor{relucolor}{\text{ReLU}}}
+
+% K3 colored command
+\newcommand{\KThree}{\textcolor{k3color}{K^{(3)}}}
+
+% Enhanced visual formatting commands
+\newcommand{\breakthrough}[1]{\textcolor{breakthroughcolor}{\textbf{🔥 BREAKTHROUGH:} #1}}
+\newcommand{\keyinsight}[1]{\textcolor{insightcolor}{\textbf{💡 KEY INSIGHT:} #1}}
+\newcommand{\mainresult}[1]{\textcolor{resultcolor}{\textbf{📊 MAIN RESULT:} #1}}
+\newcommand{\method}[1]{\textcolor{methodcolor}{\textbf{🔧 METHOD:} #1}}
+\newcommand{\validation}[1]{\textcolor{validationcolor}{\textbf{✅ VALIDATION:} #1}}
+
 % You can change the parameters: here are the available options:
 % - a4paper
 % - fancysections
@@ -73,6 +131,20 @@
         \draw[thick] (0,0) -- (0.25,0) -- (0.4,0.25);
     \end{tikzpicture}}}\!\!}
 
+% Enhanced math commands
+\newcommand{\E}{\mathbb{E}}
+\DeclareMathOperator{\Var}{Var}
+\newcommand{\indic}{\mathbb{1}}
+\newcommand{\dd}{\,d}
+
+% Colored operators
+\newcommand{\Kop}{\textcolor{kernelcolor}{\mathbf{K}}}
+\newcommand{\Pop}{\textcolor{sobolevcolor}{\mathbf{P}}}
+\newcommand{\Kinf}{\textcolor{kernelcolor}{K^{\infty}}}
+\newcommand{\Ps}{\textcolor{sobolevcolor}{P_s}}
+\newcommand{\Ts}{\mathcal{T}_s}
+\newcommand{\KThree}{\textcolor{k3color}{K_3}}
+
 % Color definitions
 \definecolor{kernelcolor}{RGB}{200,0,0}      % Red for K (kernels)
 \definecolor{sobolevcolor}{RGB}{0,0,200}     % Blue for P (Sobolev)
@@ -106,41 +178,47 @@
 \theoremstyle{remark}
 \newtheorem*{remark}{Remark}
 
-% Colored theorem boxes using tcolorbox
+% Enhanced colored theorem boxes using tcolorbox with vibrant colors
 \tcolorboxenvironment{theorem}{
-  colback=theoremcolor,
-  colframe=blue!50!black,
+  colback=lighttheoremcolor,
+  colframe=theoremcolor!80!black,
   fonttitle=\bfseries,
   before skip=10pt,
   after skip=10pt,
   enhanced,
-  drop shadow
+  drop shadow,
+  boxrule=1.5pt
 }
 
 \tcolorboxenvironment{definition}{
-  colback=definitioncolor,
-  colframe=orange!50!black,
+  colback=lightdefinitioncolor,
+  colframe=definitioncolor!80!black,
   fonttitle=\bfseries,
   before skip=10pt,
   after skip=10pt,
   enhanced,
-  drop shadow
+  drop shadow,
+  boxrule=1.5pt
 }
 
 \tcolorboxenvironment{lemma}{
-  colback=green!5,
-  colframe=green!50!black,
+  colback=resultcolor!10,
+  colframe=resultcolor!70!black,
   fonttitle=\bfseries,
   before skip=8pt,
-  after skip=8pt
+  after skip=8pt,
+  enhanced,
+  boxrule=1.2pt
 }
 
 \tcolorboxenvironment{corollary}{
-  colback=purple!5,
-  colframe=purple!50!black,
+  colback=k3color!10,
+  colframe=k3color!70!black,
   fonttitle=\bfseries,
   before skip=8pt,
-  after skip=8pt
+  after skip=8pt,
+  enhanced,
+  boxrule=1.2pt
 }
 
 \author{Janis AIAD}
@@ -177,13 +255,27 @@ This report presents the results of a research internship focused on studying th
 \newpage
 \addcontentsline{toc}{section}{Introduction}
 \section*{Introduction}
-The study of learning dynamics in deep neural networks constitutes a fundamental research area. Our approach focuses on the desingularization of Sobolev training by decomposing the problem into two distinct contributions: an independent neural tangent kernel (NTK) and a Sobolev contribution. This decomposition relies on the commutation between integral operators and the fractional Laplace operator.
+\begin{tcolorbox}[colback=insightcolor!15,colframe=insightcolor!80!black,title={\keyinsight{Fundamental Research Direction}},enhanced,drop shadow,boxrule=2pt]
+The study of learning dynamics in deep neural networks constitutes a fundamental research area. Our approach focuses on the desingularization of \textcolor{sobolevcolor}{\textbf{Sobolev training}} by decomposing the problem into two distinct contributions: an independent \Kop and a \Pop contribution. This decomposition relies on the commutation between integral operators and the fractional Laplace operator.
 
-\textbf{Key Discovery}: We establish that this commutation property holds \textit{exactly} only when using \textcolor{red}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) for sampling. For general sampling points, commutation breaks, necessitating explicit derivative information for effective learning. This fundamental distinction explains the empirical success of Physics-Informed Neural Networks (PINNs) and derivative-augmented methods over standard regression in most practical settings.
+\personalcontrib{Les calculs détaillés de ces contributions sont présentés dans l'Appendice~\ref{app:mmnn}.}
+\end{tcolorbox}
 
-Our analysis continues with the study of NTK preconditioning through a freeze weights method, illustrated by neural networks factorizing low-rank weight matrices. This approach is supported by a rigorous approximation theorem. For classical feed-forward networks (FCNN), we develop a finite-width correction that proves particularly fruitful. Finally, we explore Transformers as an alternative solution, offering a new learning paradigm.
+\begin{tcolorbox}[colback=breakthroughcolor!15,colframe=breakthroughcolor!80!black,title={\breakthrough{Fundamental Discovery}},enhanced,drop shadow,boxrule=2pt]
+We establish that this commutation property holds \textit{exactly} only when using \textcolor{resultcolor}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) for sampling. For general sampling points, commutation breaks, necessitating explicit derivative information for effective learning. 
 
-Across these different architectures, we study feature learning regimes and their scaling with network width. Our results rely on statistical physics tools to characterize model convergence and asymptotic behavior. This analysis enables a better understanding of finite-width corrections \cite{seleznova2022ntk_beyond} and their implications for the practical optimization of deep neural networks.
+\textbf{Impact}: This fundamental distinction explains the empirical success of \textcolor{methodcolor}{\textbf{Physics-Informed Neural Networks (PINNs)}} and derivative-augmented methods over standard regression in most practical settings.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=methodcolor!15,colframe=methodcolor!80!black,title={\method{Multi-Architecture Analysis Framework}},enhanced,drop shadow,boxrule=2pt]
+Our analysis continues with the study of \Kop preconditioning through a freeze weights method, illustrated by neural networks factorizing low-rank weight matrices. This approach is supported by a rigorous approximation theorem. For classical feed-forward networks \textcolor{definitioncolor}{\textbf{(FCNN)}}, we develop a finite-width correction that proves particularly fruitful. Finally, we explore \textcolor{kernelcolor}{\textbf{Transformers}} as an alternative solution, offering a new learning paradigm.
+
+\personalcontrib{Une analyse théorique complète des intégrales avec mesures gaussiennes et fonctions softmax pour les Transformers est détaillée dans l'Appendice~\ref{app:transformers}.}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=resultcolor!15,colframe=resultcolor!80!black,title={\mainresult{Statistical Physics Approach}},enhanced,drop shadow,boxrule=2pt]
+Across these different architectures, we study \textcolor{breakthroughcolor}{\textbf{feature learning regimes}} and their scaling with network width. Our results rely on \textcolor{insightcolor}{\textbf{statistical physics tools}} to characterize model convergence and asymptotic behavior. This analysis enables a better understanding of finite-width corrections \cite{seleznova2022ntk_beyond} and their implications for the practical optimization of deep neural networks.
+\end{tcolorbox}
 
 
 \newpage
@@ -231,9 +323,8 @@ $\varrho(\rho)$ & Correlation propagation function & $\rho_1(\mathbf{x},\mathbf{
 
 \end{tcolorbox}
 
-\begin{tcolorbox}[colback=blue!5,colframe=blue!50!black,title={\large \textbf{Mathematical Notation Reference}},enhanced,drop shadow]
+\begin{tcolorbox}[colback=blue!5,colframe=blue!50!black,title={\large \textbf{Mathematical Notation Reference (continued)}},enhanced,drop shadow]
 
-\newpage
 \subsection*{Sobolev Spaces and Training}
 \begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
 \toprule
@@ -295,32 +386,59 @@ $d$ & Input dimension & $s$ & Sobolev order \\
 
 
 \section{Model Definition and Asymptotic Regime}
-This work derives the Neural Tangent Kernel (NTK) of a Multi-layer Mean-field Matrix-Normal Network (MMNN). The kernel is computed with respect to a specific set of trainable parameters, under the standard "NTK parameterization" which ensures a well-defined infinite-width limit.
+\begin{tcolorbox}[colback=insightcolor!15,colframe=insightcolor!80!black,title={\keyinsight{Objective and Scope}},enhanced,drop shadow,boxrule=2pt]
+This work derives the \Kop of a Multi-layer Mean-field Matrix-Normal Network \textcolor{definitioncolor}{\textbf{(MMNN)}}. The kernel is computed with respect to a specific set of trainable parameters, under the standard \textcolor{methodcolor}{\textbf{"NTK parameterization"}} which ensures a well-defined infinite-width limit.
+\end{tcolorbox}
 
 \subsection{Multi-Layer MMNN Architecture}
-We consider an MMNN of depth $L$. Let the input be $\bm{h}^{(0)}(\bm{x}) = \bm{x} \in \mathbb{R}^{d_0}$. For each layer $\ell = 1, \dots, L$, the output $\bm{h}^{(\ell)}$ is defined recursively:
-\begin{equation}
-    \bm{h}^{(\ell)}(\bm{x}) = \bm{c}^{(\ell)} + \frac{\sigma_A}{\sqrt{n_\ell}} \sum_{j=1}^{n_\ell} \bm{A}_j^{(\ell)} \sigma\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)}\right)
-\end{equation}
-where $n_\ell$ is the width of layer $\ell$ and $\bm{h}^{(\ell)} \in \mathbb{R}^{d_\ell}$.
 
+\begin{tcolorbox}[colback=definitioncolor!15,colframe=definitioncolor!80!black,title={\textbf{DEFINITION: MMNN Architecture}},enhanced,drop shadow,boxrule=2pt]
+We consider an \textcolor{definitioncolor}{\textbf{MMNN}} of depth $\textcolor{breakthroughcolor}{L}$. Let the input be $\bm{h}^{(0)}(\bm{x}) = \bm{x} \in \mathbb{R}^{d_0}$. For each layer $\ell = 1, \dots, L$, the output $\bm{h}^{(\ell)}$ is defined recursively:
+
+\begin{equation}
+    \bm{h}^{(\ell)}(\bm{x}) = \bm{c}^{(\ell)} + \frac{\textcolor{methodcolor}{\sigma_A}}{\sqrt{\textcolor{weightcolor}{n_\ell}}} \sum_{j=1}^{n_\ell} \textcolor{weightcolor}{\bm{A}_j^{(\ell)}} \sigma\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)}\right)
+\end{equation}
+
+where $\textcolor{weightcolor}{n_\ell}$ is the width of layer $\ell$ and $\bm{h}^{(\ell)} \in \mathbb{R}^{d_\ell}$.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=methodcolor!15,colframe=methodcolor!80!black,title={\method{Parameter Classification}},enhanced,drop shadow,boxrule=2pt]
 The parameters for each layer are divided into two groups:
+
+\textbf{1. Trainable Parameters:} The output weights $\{\textcolor{weightcolor}{\bm{A}_j^{(\ell)}}\}_{j=1}^{n_\ell}$ and biases $\textcolor{weightcolor}{\bm{c}^{(\ell)}}$ are optimized during training. The \Kop is computed with respect to these parameters.
+
+\textbf{Initialization:}
 \begin{itemize}
-    \item \textbf{Trainable Parameters:} The output weights $\{\bm{A}_j^{(\ell)}\}_{j=1}^{n_\ell}$ and biases $\bm{c}^{(\ell)}$ are optimized during training. The NTK is computed with respect to these parameters. They are initialized as follows:
-    \begin{itemize}
-        \item The weights $\bm{A}_j^{(\ell)}$ are drawn from a standard normal distribution, $\bm{A}_j^{(\ell)} \sim \mathcal{N}(0, 1)$. The term $\frac{\sigma_A}{\sqrt{n_\ell}}$ is the \textbf{NTK parameterization}, which ensures that the kernel converges as $n_\ell \to \infty$. The hyperparameter $\sigma_A$ controls the variance of the layer's output.
-        \item The bias $\bm{c}^{(\ell)}$ is initialized at zero. For the kernel computation, its variance is taken as $\sigma_c^2 = 1$ for all layers.
-    \end{itemize}
-    \item \textbf{Random Parameters:} The input weights $\bm{w}_j^{(\ell)}$ and biases $b_j^{(\ell)}$ are randomly initialized and fixed throughout training. They are drawn from standard normal distributions: $\bm{w}_j^{(\ell)} \sim \mathcal{N}(0, \mathbf{I})$ and $b_j^{(\ell)} \sim \mathcal{N}(0, 1)$. The parameter $\beta$ controls the variance of the random bias term inside the activation. The choice of an isotropic distribution for the random weights is deliberate: the network is not designed with a bias for any specific input directions at any given layer. Instead, it learns to represent preferred directions by transforming the input space through the trainable parameters of the preceding layers. The output of layer $\ell-1$, $\bm{h}^{(\ell-1)}$, is already a structured, non-isotropic representation of the original data, and the isotropic random projections of layer $\ell$ act upon this learned representation.
+\item The weights $\textcolor{weightcolor}{\bm{A}_j^{(\ell)}} \sim \mathcal{N}(0, 1)$. The term $\frac{\textcolor{methodcolor}{\sigma_A}}{\sqrt{\textcolor{weightcolor}{n_\ell}}}$ is the \textcolor{breakthroughcolor}{\textbf{NTK parameterization}}, ensuring kernel convergence as $\textcolor{weightcolor}{n_\ell} \to \infty$.
+\item The bias $\textcolor{weightcolor}{\bm{c}^{(\ell)}}$ is initialized at zero with variance $\textcolor{methodcolor}{\sigma_c^2 = 1}$.
 \end{itemize}
+
+\textbf{2. Random Parameters:} The input weights $\textcolor{relucolor}{\bm{w}_j^{(\ell)}}$ and biases $\textcolor{relucolor}{b_j^{(\ell)}}$ are randomly initialized and \textcolor{validationcolor}{\textbf{fixed}} throughout training.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=insightcolor!15,colframe=insightcolor!80!black,title={\keyinsight{Architectural Philosophy}},enhanced,drop shadow,boxrule=2pt]
+The choice of isotropic distribution for random weights is deliberate: the network learns to represent preferred directions by transforming the input space through \textcolor{weightcolor}{\textbf{trainable parameters}} of preceding layers. The output $\bm{h}^{(\ell-1)}$ is already a structured representation, and the isotropic random projections act upon this \textcolor{resultcolor}{\textbf{learned representation}}.
+\end{tcolorbox}
 
 \subsection{Parameterization and Training Regime}
-The choice of scaling for the trainable parameters, known as the parameterization, critically determines the network's behavior in the infinite-width limit.
+
+\begin{tcolorbox}[colback=breakthroughcolor!15,colframe=breakthroughcolor!80!black,title={\breakthrough{Critical Parameterization Choice}},enhanced,drop shadow,boxrule=2pt]
+The choice of scaling for the trainable parameters critically determines the network's behavior in the infinite-width limit.
+
+\textbf{1. NTK Parameterization (this work):} We use the $\textcolor{methodcolor}{\frac{1}{\sqrt{n_\ell}}}$ scaling.
 \begin{itemize}
-    \item \textbf{NTK Parameterization (this work):} We use the $\frac{1}{\sqrt{n_\ell}}$ scaling. With this choice, the output function $h^{(\ell)}(x)$ has a variance of order $\mathcal{O}(\sigma_A^2)$, meaning its magnitude is stable as the width grows. However, the gradient of the function with respect to the non-scaled weights $\bm{A}_j^{(\ell)}$ is small, of order $\mathcal{O}(\frac{1}{\sqrt{n_\ell}})$. This leads to a "lazy training" regime where network parameters change very little during training. The network's dynamics can be accurately described by a linear model, whose kernel is the NTK.
-    \item \textbf{Mean-Field (or \(\mu\)) Parameterization:} An alternative is to use a $\frac{1}{n_\ell}$ scaling. This would result in function outputs of order $\mathcal{O}(\frac{1}{\sqrt{n_\ell}})$ but gradients of order $\mathcal{O}(\frac{1}{n_\ell})$, which allows for more significant parameter movement and "feature learning," leading to a different, non-linear training dynamic.
+\item Output function $h^{(\ell)}(x)$ has variance $\mathcal{O}(\textcolor{resultcolor}{\sigma_A^2})$ → \textcolor{validationcolor}{\textbf{stable magnitude}}
+\item Gradient w.r.t. weights is small: $\mathcal{O}(\textcolor{weightcolor}{\frac{1}{\sqrt{n_\ell}}})$ → \textcolor{insightcolor}{\textbf{"lazy training"}}
+\item Network dynamics → linear model with \Kop
 \end{itemize}
-Our use of the NTK parameterization is standard for deriving the NTK and analyzing the network at initialization.
+
+\textbf{2. Mean-Field ($\mu$) Parameterization:} Alternative $\textcolor{methodcolor}{\frac{1}{n_\ell}}$ scaling.
+\begin{itemize}
+\item Function outputs: $\mathcal{O}(\textcolor{relucolor}{\frac{1}{\sqrt{n_\ell}}})$
+\item Gradients: $\mathcal{O}(\textcolor{weightcolor}{\frac{1}{n_\ell}})$ → \textcolor{breakthroughcolor}{\textbf{significant parameter movement}}
+\item Result: \textcolor{k3color}{\textbf{Feature learning}} and non-linear dynamics
+\end{itemize}
+\end{tcolorbox}
 
 \subsection{Asymptotic Regime}
 The entire NTK and NNGP formalism relies on the infinite-width limit. Following the framework established by Jacot et al., we analyze the network in a specific asymptotic regime:
@@ -744,6 +862,182 @@ This framework provides a promising direction for analyzing deep narrow networks
 
 
 	
+\newpage
+\appendix
+\addcontentsline{toc}{section}{Appendices}
+
+\section{Detailed Mathematical Computations for Transformers and Softmax Analysis}
+\label{app:transformers}
+
+\begin{tcolorbox}[colback=breakthroughcolor!15,colframe=breakthroughcolor!80!black,title={\breakthrough{Contribution Personnelle Majeure}},enhanced,drop shadow,boxrule=2pt]
+Cette appendice présente les calculs détaillés pour l'analyse théorique des \textcolor{insightcolor}{\textbf{intégrales avec mesures gaussiennes}} et \textcolor{methodcolor}{\textbf{fonctions softmax}}, développée spécifiquement pour les modèles \textcolor{kernelcolor}{\textbf{Transformer}}. Ces résultats constituent une contribution originale à la compréhension mathématique des \textcolor{k3color}{\textbf{mécanismes d'attention}}.
+\end{tcolorbox}
+
+\subsection{Formulation initiale du problème}
+
+\begin{tcolorbox}[colback=definitioncolor!15,colframe=definitioncolor!80!black,title={\textbf{PROBLÈME: Intégrales Gaussiennes-Softmax}},enhanced,drop shadow,boxrule=2pt]
+La discussion a commencé avec le défi de calculer des intégrales de la forme :
+
+\begin{equation}
+\textcolor{kernelcolor}{\mathbf{I}} = \int_{-\infty}^{\infty} \frac{e^{\textcolor{insightcolor}{-ax^2 + bx + c}} \cdot e^{\textcolor{methodcolor}{f(x)}}}{\sum_{i=1}^{N} e^{\textcolor{k3color}{g_i(x)}}} dx
+\end{equation}
+
+où le terme $e^{\textcolor{insightcolor}{-ax^2+bx+c}}$ représente une \textcolor{breakthroughcolor}{\textbf{mesure gaussienne}}.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=validationcolor!15,colframe=validationcolor!80!black,title={\validation{Constat Fondamental}},enhanced,drop shadow,boxrule=2pt]
+Il a été établi qu'il n'existe généralement pas de \textcolor{resultcolor}{\textbf{solution analytique simple}} pour cette forme générale. Plusieurs \textcolor{methodcolor}{\textbf{stratégies}} ont été proposées :
+\begin{itemize}
+    \item \textcolor{methodcolor}{\textbf{Approximation}} par un terme dominant dans le dénominateur
+    \item \textcolor{insightcolor}{\textbf{Utilisation des symétries}} de l'intégrande
+    \item \textcolor{k3color}{\textbf{Changements de variable}} pour simplifier l'expression
+\end{itemize}
+\end{tcolorbox}
+
+\subsection{Approximation de Laplace}
+
+Cette méthode est adaptée lorsque la gaussienne est fortement piquée. L'intégrale est réécrite sous la forme $\int e^{-F(x)} dx$ en incorporant le dénominateur dans l'exposant via un logarithme :
+\begin{equation}
+\int \exp\left(-ax^2 + bx + c + h(x) - \ln\left(\sum_i e^{g_i(x)}\right)\right) dx
+\end{equation}
+
+L'approximation est alors donnée par :
+\begin{equation}
+\textcolor{kernelcolor}{\mathbf{I}} \approx e^{-F(x_0)} \sqrt{\frac{2\pi}{F''(x_0)}}
+\end{equation}
+où $x_0$ est le minimum de $F(x)$.
+
+\subsection{Application aux modèles Transformer en NLP}
+
+\begin{tcolorbox}[colback=generalremarkcolor!10,colframe=generalremarkcolor,title={\textbf{Application concrète}},enhanced,drop shadow]
+Le cadre théorique développé ci-dessus s'applique directement à l'analyse des modèles Transformer en traitement du langage naturel (NLP). Nous modélisons l'entrée d'une couche Transformer comme un processus gaussien, ce qui permet d'étudier la propagation de l'incertitude et des corrélations à travers le réseau.
+\end{tcolorbox}
+
+Soit la séquence d'entrée des plongements de mots représentée par une matrice $\textcolor{kernelcolor}{\mathbf{X}} \in \mathbb{R}^{N \times D}$, où $N$ est la longueur de séquence et $D$ la dimension du plongement. La sortie du mécanisme d'attention est déterminée par la fonction softmax appliquée colonne par colonne à $\textcolor{kernelcolor}{\mathbf{A}}$ :
+\begin{equation}
+\textcolor{personalcontribcolor}{\mathbf{S}}_{ij} = \frac{e^{\textcolor{kernelcolor}{\mathbf{A}}_{ij}}}{\sum_{k=1}^{N} e^{\textcolor{kernelcolor}{\mathbf{A}}_{kj}}}
+\end{equation}
+
+\section{Calculs détaillés pour MMNN à deux couches cachées}
+\label{app:mmnn}
+
+\begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{Contribution : Développement complet MMNN}},enhanced,drop shadow]
+Cette section présente le développement complet des calculs pour les réseaux MMNN (Matrix Memory Neural Networks) à deux couches cachées, incluant les dérivations exactes du \textcolor{kernelcolor}{\textbf{NTK}} et l'analyse des distributions de Fisher et Kibble.
+\end{tcolorbox}
+
+\subsection{Calcul de l'espérance $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$}
+
+Une fois que nous calculons le \textcolor{kernelcolor}{\textbf{NTK}} de MMNN pour 1 couche, nous devons résoudre le problème du calcul de l'espérance $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$ pour une paire de variables aléatoires $(X_1, X_2)$ suivant une distribution normale bivariée.
+
+\begin{tcolorbox}[colback=theoremcolor,colframe=blue!50!black,title={\textbf{Décomposition fondamentale}},enhanced]
+L'approche consiste à standardiser les variables ($Z_i = (X_i - \mu_i)/\sigma_i$) et décomposer l'intégrale en quatre termes :
+\begin{equation}
+\E[\dots] = \sigma_1\sigma_2 \textcolor{personalcontribcolor}{\mathbf{I}}_{22} + \mu_1\sigma_2 \textcolor{personalcontribcolor}{\mathbf{I}}_{12} + \mu_2\sigma_1 \textcolor{personalcontribcolor}{\mathbf{I}}_{21} + \mu_1\mu_2 \textcolor{personalcontribcolor}{\mathbf{I}}_{11}
+\end{equation}
+\end{tcolorbox}
+
+où les intégrales $\textcolor{personalcontribcolor}{\mathbf{I}}_{ij}$ sont définies sur le domaine $z_1 > a$ et $z_2 > b$, avec $a = -\mu_1/\sigma_1$ et $b = -\mu_2/\sigma_2$.
+
+\subsubsection{Calcul de $\textcolor{personalcontribcolor}{\mathbf{I}}_{11}$ (Probabilité)}
+
+$\textcolor{personalcontribcolor}{\mathbf{I}}_{11}$ est la probabilité $P(Z_1 > a, Z_2 > b)$. Elle est calculée via la fonction de répartition (CDF) de la distribution normale bivariée standard :
+\begin{equation}
+\textcolor{personalcontribcolor}{\mathbf{I}}_{11} = P(Z_1 > a, Z_2 > b) = \Phi_2\left(\frac{\mu_1}{\sigma_1}, \frac{\mu_2}{\sigma_2}; \rho\right)
+\end{equation}
+
+\subsubsection{Cas spécial : Moyennes nulles ($\mu_1=\mu_2=0$)}
+
+\begin{tcolorbox}[colback=generalremarkcolor!10,colframe=generalremarkcolor,title={\textbf{Théorème de Price}},enhanced,drop shadow]
+Dans ce cas, la dérivation "from scratch" mène à une formule élégante. Le théorème de Price était un outil central dans notre analyse :
+\begin{equation}
+\frac{\partial \E[\text{ReLU}(X_1)\text{ReLU}(X_2)]}{\partial \rho} = \E[\indic(X_1>0, X_2>0)] = \frac{1}{2\pi}\arccos(-\rho)
+\end{equation}
+\end{tcolorbox}
+
+En intégrant de $0$ à $\rho$ et en ajoutant la constante $\E[g](0) = 1/(2\pi)$, nous obtenons :
+\begin{equation}
+\E[\text{ReLU}(Z_1)\text{ReLU}(Z_2)] = \frac{1}{2\pi}(\sqrt{1-\rho^2} + \rho\arccos(-\rho))
+\end{equation}
+
+\subsection{Architecture MMNN à 2 couches cachées}
+
+L'architecture considérée est :
+\begin{center}
+\begin{tikzpicture}[scale=0.8]
+    \node (x) at (0,0) {$(x,y)$};
+    \node (h1) at (3,0) {$\bm{h}_1$};
+    \node (r) at (6,0) {$\textcolor{k3color}{\bm{r}}$};
+    \node (h2) at (9,0) {$\bm{h}_2$};
+    \node (y) at (12,0) {$(x_2,y_2)$};
+    
+    \draw[-latex,thick,blue] (x) -- node[above] {$\sigma W_1$} (h1);
+    \draw[-latex,thick,red] (h1) -- node[above] {$A_1 \cdot+c_1$} (r);
+    \draw[-latex,thick,blue] (r) -- node[above] {$\sigma W_2$} (h2);
+    \draw[-latex,thick,red] (h2) -- node[above] {$A_2 \cdot +c_2$} (y);
+    
+    \node[below] at (3,-0.5) {$N$};
+    \node[below] at (6,-0.5) {\textcolor{k3color}{$(x_1,y_1)$ in $\mathbb{R}^r$}};
+    \node[below] at (9,-0.5) {$N$};
+\end{tikzpicture}
+\end{center}
+
+\begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{Formule principale : NTK MMNN 2 couches}},enhanced,drop shadow]
+Pour $\beta = 0$, le \textcolor{kernelcolor}{\textbf{NTK}} pour deux couches cachées s'écrit :
+\begin{align}
+\textcolor{kernelcolor}{\boldsymbol{\Theta}}^{(1)} &= \mathbb{E}_{\bm{w}} \left[ \sigma(\bm{w}^\top x) \sigma(\bm{w}^\top x') \right] + 1 \\
+\textcolor{kernelcolor}{\boldsymbol{\Theta}}^{(2)} &= \textcolor{kernelcolor}{\boldsymbol{\Theta}}^{(1)} \cdot \left(\sigma_A^2 \mathbb{E}_{\bm{w}} \left[ \dot{\sigma}(\bm{w}^\top \bm{h}^{(1)}(x)) \dot{\sigma}(\bm{w}^\top \bm{h}^{(1)}(x')) \bm{w}^\top\bm{w} \right]\right) \nonumber\\
+&\quad + \mathbb{E}_{\bm{w}} \left[ \sigma(\bm{w}^\top \bm{h}^{(1)}(x)) \sigma(\bm{w}^\top \bm{h}^{(1)}(x')) \right] + 1
+\end{align}
+\end{tcolorbox}
+
+\subsection{Distributions de Fisher et Kibble}
+
+\begin{tcolorbox}[colback=theoremcolor,colframe=blue!50!black,title={\textbf{Lois de probabilité exactes}},enhanced,drop shadow]
+Les variables aléatoires $(\rho_1, \|x_1\|^2, \|y_1\|^2)$ suivent des distributions exactes :
+
+\textbf{Distribution de Fisher} pour la corrélation :
+\begin{equation}
+\rho_1 \sim \text{Fisher}(\rho, r) = \frac{(r-2)\Gamma(r-1)(1-\rho^2)^{\frac{r-1}{2}}(1-\theta^2)^{\frac{r-4}{2}}}{\sqrt{2\pi}\Gamma(r-\frac{1}{2})(1-\rho \theta)^{r-\frac{3}{2}}} \times {}_2F_1\left(\frac{1}{2}, \frac{1}{2}; r-\frac{1}{2}; \frac{1+\rho \theta}{2}\right)
+\end{equation}
+
+\textbf{Distribution de Kibble} pour les normes au carré :
+\begin{equation}
+(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho) = \frac{(uv)^{\frac{r/2-1}{2}} e^{-\frac{u+v}{2(1-\rho^2)}}}{\Gamma(r/2) (2(1-\rho^2))^{r/2+1} \rho^{\frac{r/2-1}{2}}} \cdot I_{r/2-1}\left(\frac{\rho\sqrt{uv}}{1-\rho^2}\right)
+\end{equation}
+\end{tcolorbox}
+
+\subsubsection{Résultat final}
+
+\begin{tcolorbox}[colback=personalcontribcolor!20,colframe=personalcontribcolor,title={\textbf{RÉSULTAT PRINCIPAL}},enhanced,drop shadow,breakable]
+Pour 2 entrées $x,y \in \mathbb{R}^d$ et une couche cachée de rang faible $r$, le \textcolor{kernelcolor}{\textbf{NTK}} pour un MMNN à 2 couches cachées est :
+
+\begin{equation}
+\boxed{\textcolor{kernelcolor}{\boldsymbol{\Theta}}^{(2)}(x,y) = \textcolor{kernelcolor}{\boldsymbol{\Theta}}^{(1)}(\rho) \cdot \left(1 - \frac{\arccos(\rho_1)}{\pi}\right)\frac{1}{r} + \frac{1}{r}\textcolor{sobolevcolor}{\boldsymbol{\Sigma}}^{(1)}(\rho_1)\|x_1\| \|y_1\| + 1}
+\end{equation}
+
+avec $\textcolor{sobolevcolor}{\boldsymbol{\Sigma}}^{(1)}(\rho) = \frac{1}{\pi}\left(\sqrt{1-\rho^2} + \rho(1-\arccos(\rho))\right)$
+
+où les variables aléatoires suivent :
+\begin{itemize}
+\item $\rho_1 \sim \text{Fisher}(\rho, r)$ est indépendante des normes
+\item $(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho)$ sont des variables chi-deux avec $r$ degrés de liberté
+\end{itemize}
+\end{tcolorbox}
+
+\subsection{Propriétés asymptotiques et "Malédiction de la dimension"}
+
+\begin{tcolorbox}[colback=generalremarkcolor!10,colframe=generalremarkcolor,title={\textbf{Comportement en grande dimension}},enhanced]
+Pour de grandes valeurs de $r$, la transformation $z$ de Fisher donne $z = \text{arctanh}(r) \sim \mathcal{N}\left(\text{arctanh}(\rho) + \frac{\rho}{2(r-1)}, \frac{1}{r-3}\right)$. 
+
+La variance de $r$ décroît comme $O(1/r)$. Quand $\rho \sim O(1/\sqrt{r})$, le bruit géométrique masque la corrélation.
+
+Pour le produit normalisé $S/r = \|\textcolor{kernelcolor}{\mathbf{X}}\|\|\textcolor{kernelcolor}{\mathbf{Y}}\|/r$, nous avons :
+\begin{equation}
+\frac{S}{r} \xrightarrow{r \to \infty} 1
+\end{equation}
+Cette convergence se produit avec des fluctuations d'ordre $O(1/\sqrt{r})$.
+\end{tcolorbox}
+
 % Bibliography
 \newpage
 \addcontentsline{toc}{section}{References}
