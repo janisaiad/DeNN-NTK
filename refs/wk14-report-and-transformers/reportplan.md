@@ -117,8 +117,9 @@ evaluation et declaration de plagiat
 be careful with d/2
 bien détailler la def des chebyshev points, aussi pour c_i=1/n
 provide proof in appendices
+à la fin faire une revue de tous les théorèmes et preuves
 
-
+faire bien attention à l'initialisation de A avec ou pas sigma et l'influence sur le NTK
 faire une revue de littérature en appendix et sur internet
 analyse du x12(2015) : acknowledgements, resume & abstract
 intro avec images très générales, et declaration

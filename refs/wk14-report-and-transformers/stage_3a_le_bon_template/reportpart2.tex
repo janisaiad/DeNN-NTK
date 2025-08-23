@@ -607,6 +607,90 @@ The NTK is the Gram matrix of function gradients. For any finite width, it is a 
 
 
 
+\section{Two Hidden Layer MMNN Architecture}
+
+The considered architecture is:
+\begin{center}
+\begin{tikzpicture}[scale=0.8]
+    \node (x) at (0,0) {$(x,y)$};
+    \node (h1) at (3,0) {$\bm{h}_1$};
+    \node (r) at (6,0) {$\textcolor{k3color}{\bm{r}}$};
+    \node (h2) at (9,0) {$\bm{h}_2$};
+    \node (y) at (12,0) {$(x_2,y_2)$};
+    
+    \draw[-latex,thick,blue] (x) -- node[above] {$\sigma W_1$} (h1);
+    \draw[-latex,thick,red] (h1) -- node[above] {$A_1 \cdot+c_1$} (r);
+    \draw[-latex,thick,blue] (r) -- node[above] {$\sigma W_2$} (h2);
+    \draw[-latex,thick,red] (h2) -- node[above] {$A_2 \cdot +c_2$} (y);
+    
+    \node[below] at (3,-0.5) {$N$};
+    \node[below] at (6,-0.5) {\textcolor{k3color}{$(x_1,y_1)$ in $\mathbb{R}^r$}};
+    \node[below] at (9,-0.5) {$N$};
+\end{tikzpicture}
+\end{center}
+
+\begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{Main Formula: Two Layer MMNN NTK}},enhanced,drop shadow]
+For $\beta = 0$, the \textcolor{red}{\textbf{NTK}} for two hidden layers is written as:
+\begin{align}
+\textcolor{red}{\boldsymbol{\Theta}}^{(1)} &= \mathbb{E}_{\bm{w}} \left[ \sigma(\bm{w}^\top x) \sigma(\bm{w}^\top x') \right] + 1 \\
+\textcolor{red}{\boldsymbol{\Theta}}^{(2)} &= \textcolor{red}{\boldsymbol{\Theta}}^{(1)} \cdot \left(\sigma_A^2 \mathbb{E}_{\bm{w}} \left[ \dot{\sigma}(\bm{w}^\top \bm{h}^{(1)}(x)) \dot{\sigma}(\bm{w}^\top \bm{h}^{(1)}(x')) \bm{w}^\top\bm{w} \right]\right) \nonumber\\
+&\quad + \mathbb{E}_{\bm{w}} \left[ \sigma(\bm{w}^\top \bm{h}^{(1)}(x)) \sigma(\bm{w}^\top \bm{h}^{(1)}(x')) \right] + 1
+\end{align}
+\end{tcolorbox}
+
+
+\newpage
+
+
+\subsection{Fisher and Kibble Distributions}
+
+\begin{tcolorbox}[colback=blue!15,colframe=blue!50!black,title={\textbf{Exact Probability Laws}},enhanced,drop shadow]
+The random variables $(\rho_1, \|x_1\|^2, \|y_1\|^2)$ follow exact distributions:
+
+\textbf{Fisher Distribution} for correlation:
+\begin{equation}
+\boxed{\rho_1 \sim \text{Fisher}(\rho, r) = \frac{(r-2)\Gamma(r-1)(1-\rho^2)^{\frac{r-1}{2}}(1-\theta^2)^{\frac{r-4}{2}}}{\sqrt{2\pi}\Gamma(r-\frac{1}{2})(1-\rho \theta)^{r-\frac{3}{2}}} \times {}_2F_1\left(\frac{1}{2}, \frac{1}{2}; r-\frac{1}{2}; \frac{1+\rho \theta}{2}\right)}
+\end{equation}
+
+\textbf{Kibble Distribution} for squared norms:
+\begin{equation}
+\boxed{(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho) = \frac{(uv)^{\frac{r/2-1}{2}} e^{-\frac{u+v}{2(1-\rho^2)}}}{\Gamma(r/2) (2(1-\rho^2))^{r/2+1} \rho^{\frac{r/2-1}{2}}} \cdot I_{r/2-1}\left(\frac{\rho\sqrt{uv}}{1-\rho^2}\right)}
+\end{equation}
+\end{tcolorbox}
+
+\subsubsection{Final Result}
+
+\begin{tcolorbox}[colback=personalcontribcolor!20,colframe=personalcontribcolor,title={\textbf{MAIN RESULT}},enhanced,drop shadow,breakable]
+For 2 inputs $x,y \in \mathbb{R}^d$ and a low-rank hidden layer $r$, the \textcolor{red}{\textbf{NTK}} for a two hidden layer MMNN is:
+
+\begin{equation}
+\boxed{\textcolor{red}{\boldsymbol{\Theta}}^{(2)}(x,y) = \textcolor{red}{\boldsymbol{\Theta}}^{(1)}(\rho) \cdot \left(1 - \frac{\arccos(\rho_1)}{\pi}\right)\frac{1}{r} + \frac{1}{r}\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\rho_1)\|x_1\| \|y_1\| + 1}
+\end{equation}
+
+with $\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\rho) = \frac{1}{\pi}\left(\sqrt{1-\rho^2} + \rho(1-\arccos(\rho))\right)$
+
+where the random variables follow:
+\begin{itemize}
+\item $\rho_1 \sim \text{Fisher}(\rho, r)$ is independent of the norms
+\item $(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho)$ are chi-squared variables with $r$ degrees of freedom
+\end{itemize}
+\end{tcolorbox}
+
+\subsection{Asymptotic Properties and "Curse of Dimensionality"}
+
+\begin{tcolorbox}[colback=green!10,colframe=green,title={\textbf{High-Dimensional Behavior}},enhanced]
+For large values of $r$, Fisher's $z$-transformation gives $z = \text{arctanh}(r) \sim \mathcal{N}\left(\text{arctanh}(\rho) + \frac{\rho}{2(r-1)}, \frac{1}{r-3}\right)$. 
+
+The variance of $r$ decreases as $O(1/r)$. When $\rho \sim O(1/\sqrt{r})$, geometric noise masks the correlation.
+
+For the normalized product $S/r = \|\textcolor{red}{\mathbf{X}}\|\|\textcolor{red}{\mathbf{Y}}\|/r$, we have:
+\begin{equation}
+\boxed{\frac{S}{r} \xrightarrow{r \to \infty} 1}
+\end{equation}
+This convergence occurs with fluctuations of order $O(1/\sqrt{r})$.
+\end{tcolorbox}
+
+
 
 
 
@@ -646,7 +730,7 @@ A concrete step in this direction is to ensure the network has sufficient regula
 
 
 
-
+\newpage
 \section{Future Work}
 The initial results are promising and open several avenues for both numerical and theoretical investigation.
 
@@ -699,9 +783,9 @@ graphy[title=References]
 
 
 
+\section{NTK formulas for MMNNs}
 
-
-\section{NTK for a Single-Layer MMFN}
+\subsection{NTK for a Single-Layer MMFN}
 \label{sec:single_layer_mmfn}
 We begin by deriving the Neural Tangent Kernel for a single-layer Mean-field Matrix-Normal Network (MMFN). This result forms the base case for the multi-layer recursion. For simplicity, we consider a single scalar output, such that the network is defined as:
 
@@ -767,28 +851,11 @@ where the terms $I_{ij}$ are moments of standardized bivariate normal variables 
 
 
 
-
-
-
-
-
-
-
-\section{Recursion for Multi-Layer MMNNs}
+\subsection{Recursion for Multi-Layer MMNNs}
 We now extend the single-layer result to deep networks. The recursion involves two distinct but intertwined random fields: the NNGP kernel $\Sigma^{(\ell)}$ and the NTK kernel $\Theta^{(\ell)}$.
 
 \begin{tcolorbox}[colback=red!10,colframe=red!80!black,title={\textbf{Crucial Remark: Random Kernels in Deep Networks}},enhanced,drop shadow,boxrule=2pt]
 An important fact is that the NNGP kernel $\Sigma^{(\ell)}$ is a random field that is NOT a gaussian process but a deep gaussian process, while the NTK kernel $\Theta^{(\ell)}$ is also a random field that is not a gaussian process. This is because the composition of a non-linear function with a Gaussian Process, $g(f(x))$, is not, in general, a Gaussian Process.
-\end{tcolorbox}
-
-\subsection{Remark on Model Structure and the Role of \(\beta\)}
-A key feature of this model is the structure of the pre-activation at each layer: $g = \bm{w}^\top \bm{h}_{in} + \beta b$. This structure, where $\bm{w}$ and $b$ are random parameters, is central to the model's behavior. It introduces two sources of randomness that are propagated through the network:
-
-\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Dual Sources of Randomness}},enhanced,drop shadow,boxrule=2pt]
-\begin{enumerate}
-    \item \textbf{Function-space Randomness:} In the infinite-width limit, the output of each layer is a random function drawn from a Gaussian Process, whose covariance is the NNGP kernel $\Sigma^{(\ell)}$.
-    \item \textbf{Parameter Randomness:} The explicit random parameter $b$, scaled by $\beta$, inside the non-linearity adds another layer of randomness. It ensures that the pre-activation remains a random variable even if the layer's input becomes deterministic.
-\end{enumerate}
 \end{tcolorbox}
 
 \subsection{NNGP Kernel \(\Sigma^{(\ell)}\) Recursion}
@@ -800,43 +867,184 @@ The NNGP kernel describes the covariance of the network's output function at ini
     \begin{equation}
         \boxed{\Sigma^{(1)}(x, x') = \mathbb{E}_{\bm{w},b}\left[\sigma(\bm{w}^\top x + b)\sigma(\bm{w}^\top x' + b)\right]}
     \end{equation}
-    \item \textbf{Recursive Step (\(\ell > 1\)):} For subsequent layers, the base kernel $\Sigma^{(\ell)}$ is defined by taking the expectation only over the random parameters of the current layer ($\bm{w}, b$), for a given realization of the previous layer's output GP $\bm{h}^{(\ell-1)}$:
+    \item \textbf{Recursive Step (\(\ell > 1\)):} For subsequent layers:
     \begin{equation}
         \boxed{\Sigma^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \right]}
-    \end{equation}
-    and for the full NNGP kernel:
-    \begin{equation}
-        \boxed{\mathcal{K}_{NNGP}^{(\ell)}=\sigma_A^2\Sigma^{(\ell-1)}+\sigma_c^2}
     \end{equation}
 \end{itemize}
 \end{tcolorbox}
 
-\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Non-propagation of Gaussian Process Property}},enhanced,drop shadow,boxrule=2pt]
-It is crucial to understand how the Gaussian Process property is not maintained from layer to layer. While $\bm{h}^{(\ell-1)}$ is a GP, the output of the non-linear activation, $\sigma(\bm{w}^\top \bm{h}^{(\ell-1)} + \beta b)$, is not. In general, if you want to compute the mean value of this deep gaussian process, you need to compute the expectation over the random field of the previous layer by conditioning on it, which means changing $\mathbb{E}_{\bm{w}, b} \left[ \dots \right]$ to $\mathbb{E}_{\bm{w}, b, \bm{h}^{(\ell-1)}} \left[ \dots \right]$.
+\subsection{NTK Kernel \(\Theta^{(\ell)}\) Recursion}
+The NTK is the Gram matrix of function gradients with respect to the trainable parameters. For any finite width, it is a random matrix because it depends on the specific parameter initialization. The following recursion describes its deterministic limit, $\Theta^{(\ell)}$, as the layer widths tend sequentially to infinity.
 
-So the NNGP kernel that is defined is not the same as the NNGP that you can compute for MLPs, because the NNGP of MLPs is a gaussian process, while the NNGP of MMNNs is a deep gaussian process.
+\begin{theorem}[NTK Recursion for Multi-Layer MMNNs]
+\label{thm:ntk_recursion}
+For a multi-layer MMNN with $\ReLU$ activation, the NTK satisfies the recursive relation:
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{NTK Recursion Formula}},enhanced,drop shadow,boxrule=2pt]
+\begin{equation}
+\label{eq:ntk_recursion}
+\boxed{\Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \sigma_A^2 \dot{\Sigma}^{(\ell)}(x, x') + \Sigma^{(\ell)}(x, x') + \sigma_c^2}
+\end{equation}
+where $\dot{\Sigma}^{(\ell)}$ is the derivative of the NNGP kernel with respect to the pre-activation.
+\end{tcolorbox}
+\end{theorem}
+
+\begin{proof}[Outline of Proof Structure]
+We establish this recursion by decomposing the total NTK at layer $\ell$ into contributions from different parameter groups:
+
+\textbf{Goal:} We aim to show that the NTK at layer $\ell$ can be written as a sum of contributions from previous layers and the current layer.
+
+\textbf{Intuition:} We use the chain rule to decompose gradients with respect to parameters at different layers, then apply the Law of Large Numbers in the infinite-width limit.
+
+\textbf{Properties we use:}
+\begin{enumerate}
+    \item Chain rule for gradients across layers
+    \item Law of Large Numbers for infinite-width convergence  
+    \item Independence of random parameters across neurons
+\end{enumerate}
+
+The total NTK at layer $\ell$ is the sum of contributions from all trainable parameters up to that layer:
+\begin{equation}
+\label{eq:ntk_decomposition}
+\Theta^{(\ell)}_{rand}(x, x') = \underbrace{(\nabla_{\theta^{(\ell-1)}} f^{(\ell)}(x))^\top (\nabla_{\theta^{(\ell-1)}} f^{(\ell)}(x'))}_{\text{Term 1}} + \underbrace{\sum_{j=1}^{n_\ell} \frac{\partial f^{(\ell)}(x)}{\partial A_j^{(\ell)}} \frac{\partial f^{(\ell)}(x')}{\partial A_j^{(\ell)}}}_{\text{Term 2}} + \underbrace{\frac{\partial f^{(\ell)}(x)}{\partial c^{(\ell)}} \frac{\partial f^{(\ell)}(x')}{\partial c^{(\ell)}}}_{\text{Term 3}}
+\end{equation}
+
+\textbf{Term 3 (Bias contribution):} This term is deterministic and equals $\sigma_c^2$ from the bias parameter.
+
+\textbf{Term 2 (Layer $\ell$ weights contribution):} The gradient with respect to a weight $A_j^{(\ell)}$ is:
+\begin{equation}
+\frac{\partial f^{(\ell)}(x)}{\partial A_j^{(\ell)}} = \frac{\sigma_A}{\sqrt{n_\ell}} \sigma(w_j^\top h^{(\ell-1)}(x) + \beta b_j)
+\end{equation}
+
+Term 2 becomes:
+\begin{equation}
+\frac{\sigma_A^2}{n_\ell} \sum_{j=1}^{n_\ell} \sigma(w_j^\top h^{(\ell-1)}(x) + \beta b_j) \sigma(w_j^\top h^{(\ell-1)}(x') + \beta b_j)
+\end{equation}
+
+For a fixed realization of the previous layer's output $h^{(\ell-1)}$, this is a sum of i.i.d. random variables over $(w_j, b_j)$. By the Law of Large Numbers, as $n_\ell \to \infty$:
+\begin{equation}
+\text{Term 2} \xrightarrow{p} \sigma_A^2 \mathbb{E}_{w,b} \left[ \sigma(\cdot) \sigma(\cdot) \right] = \sigma_A^2 \Sigma^{(\ell)}(x, x')
+\end{equation}
+
+\textbf{Term 1 (Previous layers contribution):} Using the chain rule:
+\begin{equation}
+\nabla_{\theta^{(\ell-1)}} f^{(\ell)}(x) = \frac{\partial f^{(\ell)}(x)}{\partial h^{(\ell-1)}(x)} \nabla_{\theta^{(\ell-1)}} h^{(\ell-1)}(x)
+\end{equation}
+
+Term 1 becomes:
+\begin{equation}
+(\nabla_{\theta^{(\ell-1)}} h^{(\ell-1)}(x))^\top \left(\frac{\partial f^{(\ell)}}{\partial h^{(\ell-1)}}(x)\right)^\top \left(\frac{\partial f^{(\ell)}}{\partial h^{(\ell-1)}}(x')\right) (\nabla_{\theta^{(\ell-1)}} h^{(\ell-1)}(x'))
+\end{equation}
+
+The first and last parts form the NTK of the previous layers, $\Theta^{(\ell-1)}(x, x')$. The middle part is a product of Jacobians that, as $n_\ell \to \infty$, converges to:
+\begin{equation}
+\left(\frac{\partial f^{(\ell)}}{\partial h^{(\ell-1)}}\right)^\top \left(\frac{\partial f^{(\ell)}}{\partial h^{(\ell-1)}}\right) \xrightarrow{p} \sigma_A^2 \dot{\Sigma}^{(\ell)}(x, x')
+\end{equation}
+
+Thus:
+\begin{equation}
+\text{Term 1} \xrightarrow{p} \Theta^{(\ell-1)}(x, x') \cdot \sigma_A^2 \dot{\Sigma}^{(\ell)}(x, x')
+\end{equation}
+
+\textbf{Combining terms:} In the infinite-width limit, we obtain:
+\begin{equation}
+\Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \sigma_A^2 \dot{\Sigma}^{(\ell)}(x, x') + \sigma_A^2 \Sigma^{(\ell)}(x, x') + \sigma_c^2
+\end{equation}
+
+Absorbing the $\sigma_A^2$ factor into the kernel definitions gives the stated recursion.
+\end{proof}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\appendix
+
+We focus here on understanding NTK for other architectures and handcomputations made through this comparison.
+
+
+\subsection{Detailed approach for Transformers and Softmax Analysis}
+\label{app:transformers}
+
+We present there our approach to the analysis of the softmax function and the Gaussian measure integrals that appears
+in Transformers NTK [Hron et al]
+
+\begin{tcolorbox}[colback=personalcontribcolor!15,colframe=personalcontribcolor!80!black,title={\textbf{Major Personal Contribution}},enhanced,drop shadow,boxrule=2pt]
+This appendix presents the detailed calculations for the theoretical analysis of \textcolor{insightcolor}{\textbf{Gaussian measure integrals}} and \textcolor{methodcolor}{\textbf{softmax functions}}, specifically developed for \textcolor{kernelcolor}{\textbf{Transformer}} models. These results constitute an original contribution to the mathematical understanding of \textcolor{k3color}{\textbf{attention mechanisms}}.
 \end{tcolorbox}
 
+\subsubsection{Initial Problem Formulation}
+
+The discussion began with the challenge of computing integrals of the form involving Gaussian measures and softmax denominators. We established that there generally exists no simple analytical solution for this general form. Several strategies were proposed including approximation by a dominant term in the denominator, use of symmetries of the integrand, and variable changes to simplify the expression.
+
+\begin{equation}
+\boxed{\textcolor{red}{\mathbf{I}} = \int_{-\infty}^{\infty} \frac{e^{\textcolor{insightcolor}{-ax^2 + bx + c}} \cdot e^{\textcolor{methodcolor}{f(x)}}}{\sum_{i=1}^{N} e^{\textcolor{k3color}{g_i(x)}}} dx}
+\end{equation}
+
+where the term $e^{\textcolor{insightcolor}{-ax^2+bx+c}}$ represents a Gaussian measure component that is fundamental to our theoretical framework.
+
+\subsubsection{Laplace Approximation}
+
+This method is suitable when the Gaussian is sharply peaked. The integral is rewritten in the form $\int e^{-F(x)} dx$ by incorporating the denominator into the exponent via a logarithm. We integrate the exponential form involving both the original Gaussian terms and the logarithmic transformation of the softmax denominator. The approximation is then given by the standard Laplace formula where $x_0$ represents the minimum of the combined function $F(x)$.
+
+\begin{equation}
+\boxed{\textcolor{red}{\mathbf{I}} \approx e^{-F(x_0)} \sqrt{\frac{2\pi}{F''(x_0)}}}
+\end{equation}
+
+\subsubsection{Application to Transformer Models in NLP}
+
+The theoretical framework developed above applies directly to the analysis of Transformer models in natural language processing. We model the input to a Transformer layer as a Gaussian process, allowing us to study the propagation of uncertainty and correlations through the network. Let the input sequence of word embeddings be represented by a matrix $\mathbf{X} \in \mathbb{R}^{N \times D}$, where $N$ is the sequence length and $D$ is the embedding dimension. The output of the attention mechanism is determined by the softmax function applied column-wise to the attention matrix, which forms the core computational element of our analysis.
+
+\subsection{Detailed Calculations for Two Hidden Layer MMNN}
+\label{app:mmnn}
+
+This section presents the complete development of calculations for two hidden layer MMNN (Matrix Memory Neural Networks), including exact derivations of the NTK and analysis of Fisher and Kibble distributions.
+
+\subsubsection{Calculation of the Expectation $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$}
+
+Once we calculate the NTK of MMNN for 1 layer, we must solve the problem of calculating the expectation $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$ for a pair of random variables $(X_1, X_2)$ following a bivariate normal distribution. The approach consists of standardizing the variables and decomposing the integral into four terms corresponding to different moments of the standardized variables.
+
+\subsubsection{Calculation of $\mathbf{I}_{11}$ (Probability)}
+
+The term $\mathbf{I}_{11}$ represents the probability $P(Z_1 > a, Z_2 > b)$ where $Z_i$ are the standardized variables. It is calculated via the cumulative distribution function of the standard bivariate normal distribution, providing the foundational probability measure for our subsequent calculations.
+
+\subsubsection{Special Case: Zero Means ($\mu_1=\mu_2=0$)}
+
+In this case, the derivation leads to an elegant formula through Price's theorem, which was a central tool in our analysis. By integrating from $0$ to $\rho$ and adding the appropriate normalization constant, we obtain the final expression for the zero-mean case. This result forms the backbone of our theoretical understanding of ReLU interactions in the infinite-width limit.
+
+\begin{equation}
+\boxed{\E[\text{ReLU}(Z_1)\text{ReLU}(Z_2)] = \frac{1}{2\pi}(\sqrt{1-\rho^2} + \rho\arccos(-\rho))}
+\end{equation}
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\newpage
 
 
 \section{Deep Narrow Neural Networks}
@@ -904,259 +1112,6 @@ This framework provides a promising direction for analyzing deep narrow networks
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\section{Detailed Mathematical Computations for Transformers and Softmax Analysis}
-\label{app:transformers}
-
-\begin{tcolorbox}[colback=personalcontribcolor!15,colframe=personalcontribcolor!80!black,title={\textbf{Major Personal Contribution}},enhanced,drop shadow,boxrule=2pt]
-This appendix presents the detailed calculations for the theoretical analysis of \textcolor{insightcolor}{\textbf{Gaussian measure integrals}} and \textcolor{methodcolor}{\textbf{softmax functions}}, specifically developed for \textcolor{kernelcolor}{\textbf{Transformer}} models. These results constitute an original contribution to the mathematical understanding of \textcolor{k3color}{\textbf{attention mechanisms}}.
-\end{tcolorbox}
-
-\subsection{Initial Problem Formulation}
-
-\begin{tcolorbox}[colback=yellow!15,colframe=yellow!80!black,title={\textbf{PROBLEM: Gaussian-Softmax Integrals}},enhanced,drop shadow,boxrule=2pt]
-The discussion began with the challenge of computing integrals of the form:
-
-\begin{equation}
-\boxed{\textcolor{red}{\mathbf{I}} = \int_{-\infty}^{\infty} \frac{e^{\textcolor{insightcolor}{-ax^2 + bx + c}} \cdot e^{\textcolor{methodcolor}{f(x)}}}{\sum_{i=1}^{N} e^{\textcolor{k3color}{g_i(x)}}} dx}
-\end{equation}
-
-where the term $e^{\textcolor{insightcolor}{-ax^2+bx+c}}$ represents a \textcolor{personalcontribcolor}{\textbf{Gaussian measure}}.
-\end{tcolorbox}
-
-\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Fundamental Observation}},enhanced,drop shadow,boxrule=2pt]
-It was established that there generally exists no \textcolor{resultcolor}{\textbf{simple analytical solution}} for this general form. Several \textcolor{methodcolor}{\textbf{strategies}} were proposed:
-\begin{itemize}
-    \item \textcolor{methodcolor}{\textbf{Approximation}} by a dominant term in the denominator
-    \item \textcolor{insightcolor}{\textbf{Use of symmetries}} of the integrand
-    \item \textcolor{k3color}{\textbf{Variable changes}} to simplify the expression
-\end{itemize}
-\end{tcolorbox}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\subsection{Laplace Approximation}
-
-This method is suitable when the Gaussian is sharply peaked. The integral is rewritten in the form $\int e^{-F(x)} dx$ by incorporating the denominator into the exponent via a logarithm:
-
-\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Laplace Approximation Formula}},enhanced,drop shadow,boxrule=2pt]
-\begin{equation}
-\boxed{\int \exp\left(-ax^2 + bx + c + h(x) - \ln\left(\sum_i e^{g_i(x)}\right)\right) dx}
-\end{equation}
-
-The approximation is then given by:
-\begin{equation}
-\boxed{\textcolor{red}{\mathbf{I}} \approx e^{-F(x_0)} \sqrt{\frac{2\pi}{F''(x_0)}}}
-\end{equation}
-where $x_0$ is the minimum of $F(x)$.
-\end{tcolorbox}
-
-\subsection{Application to Transformer Models in NLP}
-
-\begin{tcolorbox}[colback=green!5,colframe=green,title={\textbf{Concrete Application}},enhanced,drop shadow]
-The theoretical framework developed above applies directly to the analysis of Transformer models in natural language processing (NLP). We model the input to a Transformer layer as a Gaussian process, allowing us to study the propagation of uncertainty and correlations through the network.
-\end{tcolorbox}
-
-Let the input sequence of word embeddings be represented by a matrix $\textcolor{red}{\mathbf{X}} \in \mathbb{R}^{N \times D}$, where $N$ is the sequence length and $D$ is the embedding dimension. The output of the attention mechanism is determined by the softmax function applied column-wise to $\textcolor{red}{\mathbf{A}}$:
-
-\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Attention Softmax}},enhanced,drop shadow,boxrule=2pt]
-\begin{equation}
-\boxed{\textcolor{personalcontribcolor}{\mathbf{S}}_{ij} = \frac{e^{\textcolor{red}{\mathbf{A}}_{ij}}}{\sum_{k=1}^{N} e^{\textcolor{red}{\mathbf{A}}_{kj}}}}
-\end{equation}
-\end{tcolorbox}
-
-\section{Detailed Calculations for Two Hidden Layer MMNN}
-\label{app:mmnn}
-
-\begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{Contribution: Complete MMNN Development}},enhanced,drop shadow]
-This section presents the complete development of calculations for two hidden layer MMNN (Matrix Memory Neural Networks), including exact derivations of the \textcolor{red}{\textbf{NTK}} and analysis of Fisher and Kibble distributions.
-\end{tcolorbox}
-
-\subsection{Calculation of the Expectation $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$}
-
-Once we calculate the \textcolor{red}{\textbf{NTK}} of MMNN for 1 layer, we must solve the problem of calculating the expectation $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$ for a pair of random variables $(X_1, X_2)$ following a bivariate normal distribution.
-
-\begin{tcolorbox}[colback=blue!15,colframe=blue!50!black,title={\textbf{Fundamental Decomposition}},enhanced]
-The approach consists of standardizing the variables ($Z_i = (X_i - \mu_i)/\sigma_i$) and decomposing the integral into four terms:
-\begin{equation}
-\boxed{\E[\dots] = \sigma_1\sigma_2 \textcolor{personalcontribcolor}{\mathbf{I}}_{22} + \mu_1\sigma_2 \textcolor{personalcontribcolor}{\mathbf{I}}_{12} + \mu_2\sigma_1 \textcolor{personalcontribcolor}{\mathbf{I}}_{21} + \mu_1\mu_2 \textcolor{personalcontribcolor}{\mathbf{I}}_{11}}
-\end{equation}
-\end{tcolorbox}
-
-where the integrals $\textcolor{personalcontribcolor}{\mathbf{I}}_{ij}$ are defined on the domain $z_1 > a$ and $z_2 > b$, with $a = -\mu_1/\sigma_1$ and $b = -\mu_2/\sigma_2$.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\subsubsection{Calculation of $\textcolor{personalcontribcolor}{\mathbf{I}}_{11}$ (Probability)}
-
-$\textcolor{personalcontribcolor}{\mathbf{I}}_{11}$ is the probability $P(Z_1 > a, Z_2 > b)$. It is calculated via the cumulative distribution function (CDF) of the standard bivariate normal distribution:
-
-\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Probability Calculation}},enhanced,drop shadow,boxrule=2pt]
-\begin{equation}
-\boxed{\textcolor{personalcontribcolor}{\mathbf{I}}_{11} = P(Z_1 > a, Z_2 > b) = \Phi_2\left(\frac{\mu_1}{\sigma_1}, \frac{\mu_2}{\sigma_2}; \rho\right)}
-\end{equation}
-\end{tcolorbox}
-
-\subsubsection{Special Case: Zero Means ($\mu_1=\mu_2=0$)}
-
-\begin{tcolorbox}[colback=green!5,colframe=green,title={\textbf{Price's Theorem}},enhanced,drop shadow]
-In this case, the "from scratch" derivation leads to an elegant formula. Price's theorem was a central tool in our analysis:
-\begin{equation}
-\boxed{\frac{\partial \E[\text{ReLU}(X_1)\text{ReLU}(X_2)]}{\partial \rho} = \E[\indic(X_1>0, X_2>0)] = \frac{1}{2\pi}\arccos(-\rho)}
-\end{equation}
-\end{tcolorbox}
-
-By integrating from $0$ to $\rho$ and adding the constant $\E[g](0) = 1/(2\pi)$, we obtain:
-
-\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Zero-Mean Case Result}},enhanced,drop shadow,boxrule=2pt]
-\begin{equation}
-\boxed{\E[\text{ReLU}(Z_1)\text{ReLU}(Z_2)] = \frac{1}{2\pi}(\sqrt{1-\rho^2} + \rho\arccos(-\rho))}
-\end{equation}
-\end{tcolorbox}
-
-
-
-
-
-
-
-
-
-
-
-
-\subsection{Two Hidden Layer MMNN Architecture}
-
-The considered architecture is:
-\begin{center}
-\begin{tikzpicture}[scale=0.8]
-    \node (x) at (0,0) {$(x,y)$};
-    \node (h1) at (3,0) {$\bm{h}_1$};
-    \node (r) at (6,0) {$\textcolor{k3color}{\bm{r}}$};
-    \node (h2) at (9,0) {$\bm{h}_2$};
-    \node (y) at (12,0) {$(x_2,y_2)$};
-    
-    \draw[-latex,thick,blue] (x) -- node[above] {$\sigma W_1$} (h1);
-    \draw[-latex,thick,red] (h1) -- node[above] {$A_1 \cdot+c_1$} (r);
-    \draw[-latex,thick,blue] (r) -- node[above] {$\sigma W_2$} (h2);
-    \draw[-latex,thick,red] (h2) -- node[above] {$A_2 \cdot +c_2$} (y);
-    
-    \node[below] at (3,-0.5) {$N$};
-    \node[below] at (6,-0.5) {\textcolor{k3color}{$(x_1,y_1)$ in $\mathbb{R}^r$}};
-    \node[below] at (9,-0.5) {$N$};
-\end{tikzpicture}
-\end{center}
-
-\begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{Main Formula: Two Layer MMNN NTK}},enhanced,drop shadow]
-For $\beta = 0$, the \textcolor{red}{\textbf{NTK}} for two hidden layers is written as:
-\begin{align}
-\textcolor{red}{\boldsymbol{\Theta}}^{(1)} &= \mathbb{E}_{\bm{w}} \left[ \sigma(\bm{w}^\top x) \sigma(\bm{w}^\top x') \right] + 1 \\
-\textcolor{red}{\boldsymbol{\Theta}}^{(2)} &= \textcolor{red}{\boldsymbol{\Theta}}^{(1)} \cdot \left(\sigma_A^2 \mathbb{E}_{\bm{w}} \left[ \dot{\sigma}(\bm{w}^\top \bm{h}^{(1)}(x)) \dot{\sigma}(\bm{w}^\top \bm{h}^{(1)}(x')) \bm{w}^\top\bm{w} \right]\right) \nonumber\\
-&\quad + \mathbb{E}_{\bm{w}} \left[ \sigma(\bm{w}^\top \bm{h}^{(1)}(x)) \sigma(\bm{w}^\top \bm{h}^{(1)}(x')) \right] + 1
-\end{align}
-\end{tcolorbox}
-
-
-
-
-\subsection{Fisher and Kibble Distributions}
-
-\begin{tcolorbox}[colback=blue!15,colframe=blue!50!black,title={\textbf{Exact Probability Laws}},enhanced,drop shadow]
-The random variables $(\rho_1, \|x_1\|^2, \|y_1\|^2)$ follow exact distributions:
-
-\textbf{Fisher Distribution} for correlation:
-\begin{equation}
-\boxed{\rho_1 \sim \text{Fisher}(\rho, r) = \frac{(r-2)\Gamma(r-1)(1-\rho^2)^{\frac{r-1}{2}}(1-\theta^2)^{\frac{r-4}{2}}}{\sqrt{2\pi}\Gamma(r-\frac{1}{2})(1-\rho \theta)^{r-\frac{3}{2}}} \times {}_2F_1\left(\frac{1}{2}, \frac{1}{2}; r-\frac{1}{2}; \frac{1+\rho \theta}{2}\right)}
-\end{equation}
-
-\textbf{Kibble Distribution} for squared norms:
-\begin{equation}
-\boxed{(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho) = \frac{(uv)^{\frac{r/2-1}{2}} e^{-\frac{u+v}{2(1-\rho^2)}}}{\Gamma(r/2) (2(1-\rho^2))^{r/2+1} \rho^{\frac{r/2-1}{2}}} \cdot I_{r/2-1}\left(\frac{\rho\sqrt{uv}}{1-\rho^2}\right)}
-\end{equation}
-\end{tcolorbox}
-
-\subsubsection{Final Result}
-
-\begin{tcolorbox}[colback=personalcontribcolor!20,colframe=personalcontribcolor,title={\textbf{MAIN RESULT}},enhanced,drop shadow,breakable]
-For 2 inputs $x,y \in \mathbb{R}^d$ and a low-rank hidden layer $r$, the \textcolor{red}{\textbf{NTK}} for a two hidden layer MMNN is:
-
-\begin{equation}
-\boxed{\textcolor{red}{\boldsymbol{\Theta}}^{(2)}(x,y) = \textcolor{red}{\boldsymbol{\Theta}}^{(1)}(\rho) \cdot \left(1 - \frac{\arccos(\rho_1)}{\pi}\right)\frac{1}{r} + \frac{1}{r}\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\rho_1)\|x_1\| \|y_1\| + 1}
-\end{equation}
-
-with $\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\rho) = \frac{1}{\pi}\left(\sqrt{1-\rho^2} + \rho(1-\arccos(\rho))\right)$
-
-where the random variables follow:
-\begin{itemize}
-\item $\rho_1 \sim \text{Fisher}(\rho, r)$ is independent of the norms
-\item $(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho)$ are chi-squared variables with $r$ degrees of freedom
-\end{itemize}
-\end{tcolorbox}
-
-\subsection{Asymptotic Properties and "Curse of Dimensionality"}
-
-\begin{tcolorbox}[colback=green!10,colframe=green,title={\textbf{High-Dimensional Behavior}},enhanced]
-For large values of $r$, Fisher's $z$-transformation gives $z = \text{arctanh}(r) \sim \mathcal{N}\left(\text{arctanh}(\rho) + \frac{\rho}{2(r-1)}, \frac{1}{r-3}\right)$. 
-
-The variance of $r$ decreases as $O(1/r)$. When $\rho \sim O(1/\sqrt{r})$, geometric noise masks the correlation.
-
-For the normalized product $S/r = \|\textcolor{red}{\mathbf{X}}\|\|\textcolor{red}{\mathbf{Y}}\|/r$, we have:
-\begin{equation}
-\boxed{\frac{S}{r} \xrightarrow{r \to \infty} 1}
-\end{equation}
-This convergence occurs with fluctuations of order $O(1/\sqrt{r})$.
-\end{tcolorbox}
 
 % Bibliography
 \newpage
