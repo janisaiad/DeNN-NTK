@@ -682,14 +682,7 @@ For general $\boldsymbol{s \geq 1}$, repeated integration by parts yields the fr
 \label{eq:sobolev_general}
 \boldsymbol{\|f\|_{H^s}^2} = \int_{\mathbb{S}^{d-1}} \boldsymbol{f(x)} \boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^{2s}} \boldsymbol{f(x)} \, d\sigma(x)
 \end{equation}
-
-The integration by parts approach via Stokes' theorem transforms the gradient squared terms into Laplacian terms, providing the connection between differential and spectral formulations.
 \end{theorem}
-
-
-
-
-
 
 
 
@@ -697,29 +690,16 @@ The integration by parts approach via Stokes' theorem transforms the gradient sq
 
 \subsection{Personal contribution : Sobolev Gradient Descent in Fourier Domain}
 
+Chebyshev points are uniformly distributed on the sphere, and are the points that maximize the minimum separation between adjacent samples.
 
-
-\begin{definition}[Discrete Sobolev Operator]
-\label{def:discrete_sobolev_operator}
-For a set of sampling points $\{x_i\}_{i=1}^n \subset \mathbb{S}^{d-1}$ with associated quadrature weights $\{c_i\}_{i=1}^n$, the discrete Sobolev operator $\Pop_s \in \mathbb{R}^{n \times n}$ of order $s > 0$ is defined by:
-
-\begin{tcolorbox}[colback=blue!5,colframe=blue!60!black,title=Matrix Definition]
+\begin{tcolorbox}[colback=yellow!10,colframe=orange!60!black,title=Definition: Chebyshev Points on the Sphere]
+The \textcolor{red}{\textbf{Chebyshev points}} on the sphere $\mathbb{S}^{d-1}$ are defined as the projections of classical Chebyshev points onto the unit sphere. For $d = 2$ (unit circle), these points are given by:
 \begin{equation}
-\label{eq:discrete_sobolev_matrix}
-[\Pop_s]_{ij} = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(\ell)} \boldsymbol{(1 + \sqrt{\ell(\ell + d - 2)})^s} \boldsymbol{Y_{\ell,p}(x_i)} \boldsymbol{Y_{\ell,p}(x_j)} c_j
+\label{eq:chebyshev_circle}
+\boldsymbol{x_k} = \left(\cos\left(\frac{(2k-1)\pi}{2n}\right), \sin\left(\frac{(2k-1)\pi}{2n}\right)\right), \quad k = 1, 2, \ldots, n
 \end{equation}
+
 \end{tcolorbox}
-
-where $Y_{\ell,p}$ are the spherical harmonics of degree $\ell$ and order $p$, and $N(\ell) = \binom{\ell + d - 1}{\ell} - \binom{\ell + d - 3}{\ell - 1}$ is the dimension of the space of spherical harmonics of degree $\ell$ in dimension $d$.
-
-For \textbf{Chebyshev points}, we obtain the exact spectral representation:
-\begin{equation}
-\label{eq:chebyshev_sobolev_exact}
-[\Pop_s]_{ij} = \boldsymbol{\delta_{ij} (1 + \sqrt{\ell_i(\ell_i + d - 2)})^s}
-\end{equation}
-where $\ell_i$ is the harmonic degree associated with point $x_i$.
-\end{definition}
-
 
 
 \begin{theorem}[NTK-Sobolev Composition]
@@ -736,8 +716,6 @@ where $\Kinf$ is the \textcolor{kernelcolor}{\textbf{NTK operator}} and $\Ps = (
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Insight : Factorization of Learning Dynamics}},enhanced,drop shadow]
     The key insight is that \textit{Sobolev gradient descent} in the Fourier domain naturally factorizes into two components: first, the application of the \textcolor{sobolevcolor}{\textbf{Sobolev operator}} $\Ps$ which modifies the frequency content of the gradient signal, followed by the \textcolor{kernelcolor}{\textbf{NTK operator}} $\Kinf$ which propagates this modified gradient through the network. This factorization emerges from the quadratic form structure of the Sobolev loss, which allows us to separate the spectral filtering effects of Sobolev regularization from the kernel dynamics of the neural network.
-
-    In the discrete setting, this composition becomes a matrix multiplication $\Ts = \Kop \cdot \Pop_s$ where both matrices operate on the same sample space. The detailed proof is provided in \hyperref[sec:appendix_composition]{Appendix A.2}.
 \end{tcolorbox}
 
 \subsection{Personal contribution : NTK-Sobolev Spectral Commutation property}
@@ -764,33 +742,28 @@ Let $\Kop \in \mathbb{R}^{n \times n}$ be a discrete \textit{neural tangent kern
 \end{enumerate}
 The proof is provided in \hyperref[sec:appendix_commutation]{Appendix A.4}.
 \end{theorem}
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Personal Contribution : Fundamental Algebraic Structure of NTK-Sobolev Commutation}},enhanced,drop shadow]
+    This commutation property establishes a \textit{fundamental algebraic structure} that underlies the compatibility between neural tangent kernel theory and Sobolev regularized training. For comprehensive studies of NTK theory, see \cite{golikov2022ntk_survey}. The key insight is that both operators inherit their spectral properties from the underlying \textit{rotational symmetry} of the sphere, leading to a shared eigenbasis of spherical harmonics.
 
-This commutation property establishes a \textit{fundamental algebraic structure} that underlies the compatibility between neural tangent kernel theory and Sobolev-regularized training. For comprehensive surveys of NTK theory, see \cite{golikov2022ntk_survey}. The key insight is that both operators inherit their spectral properties from the underlying \textit{rotational symmetry} of the sphere, leading to a shared eigenbasis of spherical harmonics. 
-
-In the discrete setting, this translates to exact matrix commutation when both the \textcolor{kernelcolor}{\textbf{NTK}} and \textcolor{sobolevcolor}{\textbf{Sobolev}} matrices are constructed consistently from the same sample points and quadrature scheme. The eigenspace separation by harmonic degree means that the learning dynamics can be analyzed \textit{frequency-by-frequency}, with each degree $\ell$ evolving independently under the composite operator $\Kop\Pop_s$. 
-
-\begin{tcolorbox}[colback=yellow!10,colframe=orange!60!black,title=Key Insight: Spectral Decomposition]
-This spectral decomposition enables us to completely \textbf{disentangle} the analysis of:
+    In the discrete setting, this translates to exact matrix commutation when the \textcolor{kernelcolor}{\textbf{NTK}} and \textcolor{sobolevcolor}{\textbf{Sobolev}} matrices are constructed consistently from the same sampling points and quadrature scheme. The separation of eigenspaces by harmonic degree means that learning dynamics can be analyzed \textit{frequency by frequency}, with each degree $\ell$ evolving independently under the composite operator $\Kop\Pop_s$.
+    This spectral decomposition enables us to completely \textbf{disentangle} the analysis of:
 \begin{itemize}
 \item \textcolor{sobolevcolor}{\textbf{Dimensionality}} (encoded in $\Pop_s$ via harmonic degrees $\ell$)
 \item \textcolor{kernelcolor}{\textbf{Network architecture}} (encoded in $\Kop$ via NTK properties)
 \end{itemize}
 \end{tcolorbox}
 
-This separation provides the theoretical foundation for understanding how Sobolev regularization modifies the effective learning dynamics in the NTK regime, enabling precise control over which frequency components are emphasized or suppressed during training.
-
 
 \newpage
 
 
 
 
-\appendixpart{Spectral Analysis of the NTK and Eigenvalue Bounds}
+ Analysis of the NTK and Eigenvalue Bounds}
 
 
 \section{Main Proofs}
-
-\newpage
+\appendixpart{Spectral
 \subsection{A.1 Proof 1: Sobolev Loss as Fractional Laplacian}
 
 \begin{theorem}[Fractional Laplacian Representation of Sobolev Loss]

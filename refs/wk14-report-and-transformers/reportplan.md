@@ -115,6 +115,8 @@ pour la soutenance on parlera surtout de physique https://arxiv.org/pdf/2008.086
 evaluation et declaration de plagiat
 
 
+bien détailler la def des chebyshev points, aussi pour c_i=1/n
+provide proof in appendices
 
 analyse du x12(2015) : acknowledgements, resume & abstract
 intro avec images très générales, et declaration
