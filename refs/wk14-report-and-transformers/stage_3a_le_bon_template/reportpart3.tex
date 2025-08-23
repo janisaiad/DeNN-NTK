@@ -1115,6 +1115,34 @@ This result is a \textbf{cornerstone} of our analysis. It demonstrates that the 
 
 
 
+
+
+
+
+\subsection{Spectral Analysis of the NTK and Eigenvalue Bounds}
+(Discussion on the largest eigenvalue of the NTK. Presentation of Terjek's theorems and proof outline for obtaining bounds on the smallest eigenvalue using RMT.)
+
+
+\subsection{Matrix Spectrum Results}
+
+The key scaling laws for the discrete NTK matrix are:
+
+\textbf{Condition Number}:
+\[ \kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l) \]
+The condition number grows linearly with data size $n$ but improves with depth $l$.
+
+\textbf{Eigenvalue Distribution}:
+\[ \lambda_{\text{min}} \sim \frac{3l}{4}, \quad \lambda_{\text{max}} \sim \frac{3nl}{4} \pm \xi \text{ where } \xi \sim \log(l) \]
+
+The minimum eigenvalue scales linearly with depth, while the maximum scales with both depth and data size.
+
+\textbf{Key Insight}: The training dynamics are dictated by the NTK matrix eigenvalues, not the operator eigenvalues. Deeper networks ($l \uparrow$) improve conditioning but with diminishing returns.
+
+
+
+
+
+
 \subsubsection{Results and Discussion}
 
 The primary output of the experiment is a plot of the infinity norm of $\textcolor{k3color}{K^{(3)}}$ as a function of the network depth $L$.

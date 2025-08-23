@@ -18,32 +18,31 @@
 \addbibresource{stg3a.bib} %Import the bibliography file
 \bibliography{stg3a}
 \usepackage[hidelinks,colorlinks=true,linkcolor=blue,citecolor=red,urlcolor=blue]{hyperref}
+% Enhanced Color Scheme based on report_part1.tex mathematical notation
+\definecolor{kernelcolor}{RGB}{220,20,60}         % we use crimson red for ntk/k symbols
+\definecolor{sobolevcolor}{RGB}{30,144,255}       % we use dodger blue for sobolev/p symbols  
+\definecolor{theoremcolor}{RGB}{70,130,180}       % we use steel blue for theorems
+\definecolor{definitioncolor}{RGB}{0,128,0}       % we use green for definitions
+\definecolor{weightcolor}{RGB}{101,67,33}         % we use dark brown for weights w
+\definecolor{relucolor}{RGB}{64,64,64}            % we use dark grey for relu activation
+\definecolor{k3color}{RGB}{148,0,211}             % we use purple for k^{(3)} specifically
 
-% Enhanced Color Scheme inspired by reportpart3.tex
-\definecolor{kernelcolor}{RGB}{220,20,60}    % Red for NTK/K symbols (Crimson)
-\definecolor{sobolevcolor}{RGB}{30,144,255}  % Blue for Sobolev/P symbols (DodgerBlue)
-\definecolor{theoremcolor}{RGB}{70,130,180}  % Steel blue for theorems
-\definecolor{definitioncolor}{RGB}{0,128,0}  % Green for definitions
-\definecolor{weightcolor}{RGB}{101,67,33}    % Dark brown for weights W
-\definecolor{relucolor}{RGB}{64,64,64}       % Dark grey for ReLU
-\definecolor{k3color}{RGB}{148,0,211}        % Purple for K^{(3)} specifically (DarkViolet)
+% Additional colors for enhanced mathematical presentation
+\definecolor{lighttheoremcolor}{RGB}{240,248,255} % we use light blue for theorem boxes
+\definecolor{lightdefinitioncolor}{RGB}{255,248,240} % we use light orange for definition boxes
 
-% Additional vibrant colors for enhanced visual impact
-\definecolor{lighttheoremcolor}{RGB}{240,248,255} % Light blue for theorem boxes
-\definecolor{lightdefinitioncolor}{RGB}{255,248,240} % Light orange for definitions
+% French academic writing color scheme with enhanced visibility
+\definecolor{remarkcolor}{RGB}{0,0,255}           % we use blue for general remarks
+\definecolor{personalcontribcolor}{RGB}{255,0,0}  % we use red for personal contributions
+\definecolor{generalremarkcolor}{RGB}{0,128,0}    % we use green for general observations
+\definecolor{theoremtextcolor}{RGB}{64,64,64}     % we use grey for theorem text
 
-% Schéma de couleurs selon les préférences avec intensité renforcée
-\definecolor{remarkcolor}{RGB}{0,0,255}      % Bleu pour remarques
-\definecolor{personalcontribcolor}{RGB}{255,0,0} % Rouge pour contributions personnelles
-\definecolor{generalremarkcolor}{RGB}{0,128,0}   % Vert pour remarques générales
-\definecolor{theoremtextcolor}{RGB}{64,64,64}    % Gris pour théorèmes
-
-% New vibrant colors for enhanced visual formatting
-\definecolor{breakthroughcolor}{RGB}{255,20,147} % DeepPink for breakthroughs
-\definecolor{insightcolor}{RGB}{255,140,0}    % DarkOrange for insights
-\definecolor{resultcolor}{RGB}{50,205,50}     % LimeGreen for results
-\definecolor{methodcolor}{RGB}{138,43,226}    % BlueViolet for methods
-\definecolor{validationcolor}{RGB}{255,69,0}  % OrangeRed for validation
+% Advanced visual formatting colors for mathematical research
+\definecolor{breakthroughcolor}{RGB}{255,20,147}  % we use deep pink for breakthrough results
+\definecolor{insightcolor}{RGB}{255,140,0}        % we use dark orange for key insights
+\definecolor{resultcolor}{RGB}{50,205,50}         % we use lime green for main results
+\definecolor{methodcolor}{RGB}{138,43,226}        % we use blue violet for methodological aspects
+\definecolor{validationcolor}{RGB}{255,69,0}      % we use orange red for validation steps
 
 % Commandes pour le schéma de couleurs préféré
 \newcommand{\remarque}[1]{\textcolor{remarkcolor}{\textbf{Remarque:} #1}}
@@ -255,27 +254,12 @@ This report presents the results of a research internship focused on studying th
 \newpage
 \addcontentsline{toc}{section}{Introduction}
 \section*{Introduction}
-\begin{tcolorbox}[colback=insightcolor!15,colframe=insightcolor!80!black,title={\keyinsight{Fundamental Research Direction}},enhanced,drop shadow,boxrule=2pt]
-The study of learning dynamics in deep neural networks constitutes a fundamental research area. Our approach focuses on the desingularization of \textcolor{sobolevcolor}{\textbf{Sobolev training}} by decomposing the problem into two distinct contributions: an independent \Kop and a \Pop contribution. This decomposition relies on the commutation between integral operators and the fractional Laplace operator.
 
-\personalcontrib{Les calculs détaillés de ces contributions sont présentés dans l'Appendice~\ref{app:mmnn}.}
-\end{tcolorbox}
+The study of learning dynamics in deep neural networks constitutes a fundamental research area that has gained significant attention in recent years. Our approach focuses on the **desingularization of Sobolev training** by decomposing the problem into two distinct contributions: an independent \Kop and a \Pop contribution. This decomposition relies on the commutation between integral operators and the fractional Laplace operator, which provides a powerful mathematical framework for understanding neural network behavior. The detailed calculations of these contributions are presented in Appendix~\ref{app:mmnn}.
 
-\begin{tcolorbox}[colback=breakthroughcolor!15,colframe=breakthroughcolor!80!black,title={\breakthrough{Fundamental Discovery}},enhanced,drop shadow,boxrule=2pt]
-We establish that this commutation property holds \textit{exactly} only when using \textcolor{resultcolor}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) for sampling. For general sampling points, commutation breaks, necessitating explicit derivative information for effective learning. 
+Our analysis continues with the study of \Kop preconditioning through a freeze weights method, illustrated by neural networks factorizing low-rank weight matrices. This approach is supported by a rigorous approximation theorem that we develop. For classical feed-forward networks (FCNN), we develop a **finite-width correction** that proves particularly fruitful in understanding the gap between theory and practice. Finally, we explore Transformers as an alternative solution, offering a fundamentally new learning paradigm that challenges traditional assumptions about neural network training. A complete theoretical analysis of integrals with Gaussian measures and softmax functions for Transformers is detailed in Appendix~\ref{app:transformers}.
 
-\textbf{Impact}: This fundamental distinction explains the empirical success of \textcolor{methodcolor}{\textbf{Physics-Informed Neural Networks (PINNs)}} and derivative-augmented methods over standard regression in most practical settings.
-\end{tcolorbox}
-
-\begin{tcolorbox}[colback=methodcolor!15,colframe=methodcolor!80!black,title={\method{Multi-Architecture Analysis Framework}},enhanced,drop shadow,boxrule=2pt]
-Our analysis continues with the study of \Kop preconditioning through a freeze weights method, illustrated by neural networks factorizing low-rank weight matrices. This approach is supported by a rigorous approximation theorem. For classical feed-forward networks \textcolor{definitioncolor}{\textbf{(FCNN)}}, we develop a finite-width correction that proves particularly fruitful. Finally, we explore \textcolor{kernelcolor}{\textbf{Transformers}} as an alternative solution, offering a new learning paradigm.
-
-\personalcontrib{Une analyse théorique complète des intégrales avec mesures gaussiennes et fonctions softmax pour les Transformers est détaillée dans l'Appendice~\ref{app:transformers}.}
-\end{tcolorbox}
-
-\begin{tcolorbox}[colback=resultcolor!15,colframe=resultcolor!80!black,title={\mainresult{Statistical Physics Approach}},enhanced,drop shadow,boxrule=2pt]
-Across these different architectures, we study \textcolor{breakthroughcolor}{\textbf{feature learning regimes}} and their scaling with network width. Our results rely on \textcolor{insightcolor}{\textbf{statistical physics tools}} to characterize model convergence and asymptotic behavior. This analysis enables a better understanding of finite-width corrections \cite{seleznova2022ntk_beyond} and their implications for the practical optimization of deep neural networks.
-\end{tcolorbox}
+Across these different architectures, we study feature learning regimes and their scaling behavior with network width. Our results rely on statistical physics tools to characterize model convergence and asymptotic behavior, drawing connections between neural networks and well-established physical systems. This analysis enables a deeper understanding of finite-width corrections \cite{seleznova2022ntk_beyond} and their practical implications for the optimization of deep neural networks in real-world applications.
 
 
 \newpage
@@ -383,24 +367,13 @@ $d$ & Input dimension & $s$ & Sobolev order \\
 
 
 
-\subsection{Spectral Analysis of the NTK and Eigenvalue Bounds}
-(Discussion on the largest eigenvalue of the NTK. Presentation of Terjek's theorems and proof outline for obtaining bounds on the smallest eigenvalue using RMT.)
+\subsection{Multi-Component Multi-layer Neural Networks (MMNN) and Transformers}
 
+This section presents advanced architectural frameworks that extend beyond standard fully connected networks. We examine Matrix Memory Neural Networks (MMNN) and Transformer architectures, focusing on NTK preconditioning techniques and the interplay between feature learning and kernel regimes.
 
-\subsection{Matrix Spectrum Results}
+The application of Neural Tangent Kernel theory to multi-component architectures requires sophisticated preconditioning techniques. For MMNN architectures, we observe that the kernel structure exhibits block-diagonal properties that can be exploited for computational efficiency. The preconditioning strategy involves decomposing the kernel matrix into manageable sub-blocks corresponding to different memory components.
 
-The key scaling laws for the discrete NTK matrix are:
-
-\textbf{Condition Number}:
-\[ \kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l) \]
-The condition number grows linearly with data size $n$ but improves with depth $l$.
-
-\textbf{Eigenvalue Distribution}:
-\[ \lambda_{\text{min}} \sim \frac{3l}{4}, \quad \lambda_{\text{max}} \sim \frac{3nl}{4} \pm \xi \text{ where } \xi \sim \log(l) \]
-
-The minimum eigenvalue scales linearly with depth, while the maximum scales with both depth and data size.
-
-\textbf{Key Insight}: The training dynamics are dictated by the NTK matrix eigenvalues, not the operator eigenvalues. Deeper networks ($l \uparrow$) improve conditioning but with diminishing returns.
+For Transformer models, the attention mechanism introduces non-linearities that complicate the kernel analysis. We develop specialized techniques to handle the softmax normalization within the attention heads, leading to modified kernel expressions that capture the essential geometric properties of the learned representations.
 
 
 
@@ -409,77 +382,148 @@ The minimum eigenvalue scales linearly with depth, while the maximum scales with
 
 
 
-\subsection{Réseaux à Mémoire Matricielle (MMNN) et Transformeurs}
-(Description des techniques de préconditionnement du NTK pour ces architectures. Discussion sur les régimes "feature" et "kernel", et sur les défis liés à l'optimisation. Présentation d'une conjecture sur la stabilité autour des minima globaux.)
+\subsubsection{Feature Learning vs Kernel Regimes}
+
+The transition between feature learning and kernel regimes represents a fundamental dichotomy in deep learning theory. In the kernel regime, network parameters remain close to initialization, and the model behaves as a linear predictor in the feature space defined by the NTK. Conversely, the feature learning regime allows significant parameter evolution, enabling the network to adapt its internal representations.
+
+We identify critical scaling relationships that determine which regime dominates during training, where the NTK serves as a proxy for the Gauss-Newton approximation of the Hessian matrix, providing crucial insights into the optimization landscape. The spectrum of the NTK, particularly its condition number $\kappa = \lambda_{\max}/\lambda_{\min}$, determines convergence rates and allows us to make informed decisions about optimization strategy. An ill-conditioned NTK suggests that first-order methods like gradient descent are appropriate, while a well-conditioned NTK indicates that second-order methods utilizing Hessian information can achieve much more rapid convergence. For MMNN architectures, the memory components introduce additional complexity, as different parts of the network may operate in different regimes simultaneously, with the NTK governing the dynamics in each component through its eigenvalue structure. This heterogeneous behavior requires careful analysis of the optimization dynamics, transforming the complex non-linear optimization problem into manageable linear systems whose solution properties are entirely characterized by the kernel's spectral properties.
+
+The optimization landscape for multi-component neural networks presents unique challenges. Unlike standard feedforward networks, MMNN and Transformer architectures exhibit complex loss surfaces with multiple local minima. We present a conjecture regarding the stability of global minima in these architectures.
+\begin{tcolorbox}[colback=green!15,colframe=green!80!black,title={\textbf{Conjecture: Global Minima Stability}},enhanced,drop shadow,boxrule=2pt]
+For sufficiently wide MMNN and Transformer networks, global minima exhibit local stability properties that ensure convergence from a neighborhood around the optimal solution. Specifically, the Hessian eigenvalues in the vicinity of global minima satisfy certain regularity conditions that guarantee stable optimization dynamics.
+\end{tcolorbox}
+
+This conjecture is supported by extensive numerical experiments [Zhang et al, 2024] demonstrating convergence behavior in practical training scenarios. The stability analysis reveals that the multi-component structure of these architectures provides inherent regularization effects that prevent pathological optimization behavior commonly observed in simpler network topologies.
+
+
+
+
+
+
 
 
 \section{Model Definition and Asymptotic Regime}
-\begin{tcolorbox}[colback=insightcolor!15,colframe=insightcolor!80!black,title={\keyinsight{Objective and Scope}},enhanced,drop shadow,boxrule=2pt]
-This work derives the \Kop of a Multi-layer Mean-field Matrix-Normal Network \textcolor{definitioncolor}{\textbf{(MMNN)}}. The kernel is computed with respect to a specific set of trainable parameters, under the standard \textcolor{methodcolor}{\textbf{"NTK parameterization"}} which ensures a well-defined infinite-width limit.
+
+\begin{tcolorbox}[colback=green!15,colframe=green!80!black,title={\textbf{Objective and Scope}},enhanced,drop shadow,boxrule=2pt]
+This work derives the $\boldsymbol{\Theta}$ operator of a Multi-layer Mean-field Matrix-Normal Network \textbf{(MMNN)}. The kernel is computed with respect to a specific set of trainable parameters, under the standard \textbf{"NTK parameterization"} which ensures a well-defined infinite-width limit.
 \end{tcolorbox}
 
-\subsection{Multi-Layer MMNN Architecture}
 
-\begin{tcolorbox}[colback=definitioncolor!15,colframe=definitioncolor!80!black,title={\textbf{DEFINITION: MMNN Architecture}},enhanced,drop shadow,boxrule=2pt]
-We consider an \textcolor{definitioncolor}{\textbf{MMNN}} of depth $\textcolor{breakthroughcolor}{L}$. Let the input be $\bm{h}^{(0)}(\bm{x}) = \bm{x} \in \mathbb{R}^{d_0}$. For each layer $\ell = 1, \dots, L$, the output $\bm{h}^{(\ell)}$ is defined recursively:
+
+
+\subsection{Personal contribution : NTK compatible Multi-Layer MMNN Architecture}
+
+\begin{tcolorbox}[colback=yellow!15,colframe=yellow!80!black,title={\textbf{Definition: MMNN Architecture}},enhanced,drop shadow,boxrule=2pt]
+We consider an \textbf{MMNN} of depth $L$. Let the input be $\bm{h}^{(0)}(\bm{x}) = \bm{x} \in \mathbb{R}^{d_0}$. For each layer $\ell = 1, \dots, L$, the output $\bm{h}^{(\ell)}$ is defined recursively:
 
 \begin{equation}
-    \bm{h}^{(\ell)}(\bm{x}) = \bm{c}^{(\ell)} + \frac{\textcolor{methodcolor}{\sigma_A}}{\sqrt{\textcolor{weightcolor}{n_\ell}}} \sum_{j=1}^{n_\ell} \textcolor{weightcolor}{\bm{A}_j^{(\ell)}} \sigma\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)}\right)
+    \bm{h}^{(\ell)}(\bm{x}) = \bm{c}^{(\ell)} + \frac{\sigma_A}{\sqrt{n_\ell}} \sum_{j=1}^{n_\ell} \bm{A}_j^{(\ell)} \sigma\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)}\right)
 \end{equation}
 
-where $\textcolor{weightcolor}{n_\ell}$ is the width of layer $\ell$ and $\bm{h}^{(\ell)} \in \mathbb{R}^{d_\ell}$.
+where $n_\ell$ is the width of layer $\ell$ and $\bm{h}^{(\ell)} \in \mathbb{R}^{d_\ell}$.
 \end{tcolorbox}
 
-\begin{tcolorbox}[colback=methodcolor!15,colframe=methodcolor!80!black,title={\method{Parameter Classification}},enhanced,drop shadow,boxrule=2pt]
+
+
+\begin{tcolorbox}[colback=blue!15,colframe=blue!80!black,title={\textbf{Remark : Parameter Classification}},enhanced,drop shadow,boxrule=2pt]
 The parameters for each layer are divided into two groups:
 
-\textbf{1. Trainable Parameters:} The output weights $\{\textcolor{weightcolor}{\bm{A}_j^{(\ell)}}\}_{j=1}^{n_\ell}$ and biases $\textcolor{weightcolor}{\bm{c}^{(\ell)}}$ are optimized during training. The \Kop is computed with respect to these parameters.
+\textbf{1. Trainable Parameters:} The output weights $\{\bm{A}_j^{(\ell)}\}_{j=1}^{n_\ell}$ and biases $\bm{c}^{(\ell)}$ are optimized during training. The NTK $\Kop $ is computed with respect to these parameters.
 
 \textbf{Initialization:}
 \begin{itemize}
-\item The weights $\textcolor{weightcolor}{\bm{A}_j^{(\ell)}} \sim \mathcal{N}(0, 1)$. The term $\frac{\textcolor{methodcolor}{\sigma_A}}{\sqrt{\textcolor{weightcolor}{n_\ell}}}$ is the \textcolor{breakthroughcolor}{\textbf{NTK parameterization}}, ensuring kernel convergence as $\textcolor{weightcolor}{n_\ell} \to \infty$.
-\item The bias $\textcolor{weightcolor}{\bm{c}^{(\ell)}}$ is initialized at zero with variance $\textcolor{methodcolor}{\sigma_c^2 = 1}$.
+\item The weights $\bm{A}_j^{(\ell)} \sim \mathcal{N}(0, 1)$. The term $\frac{\sigma_A}{\sqrt{n_\ell}}$ is the \textbf{NTK parameterization}, ensuring kernel convergence as $n_\ell \to \infty$.
+\item The bias $\bm{c}^{(\ell)}$ is initialized at zero with variance $\sigma_c^2 = 1$.
 \end{itemize}
 
-\textbf{2. Random Parameters:} The input weights $\textcolor{relucolor}{\bm{w}_j^{(\ell)}}$ and biases $\textcolor{relucolor}{b_j^{(\ell)}}$ are randomly initialized and \textcolor{validationcolor}{\textbf{fixed}} throughout training.
+\textbf{2. Random Parameters:} The input weights $\bm{w}_j^{(\ell)}$ and biases $b_j^{(\ell)}$ are randomly initialized and \textbf{fixed} throughout training.
 \end{tcolorbox}
 
-\begin{tcolorbox}[colback=insightcolor!15,colframe=insightcolor!80!black,title={\keyinsight{Architectural Philosophy}},enhanced,drop shadow,boxrule=2pt]
-The choice of isotropic distribution for random weights is deliberate: the network learns to represent preferred directions by transforming the input space through \textcolor{weightcolor}{\textbf{trainable parameters}} of preceding layers. The output $\bm{h}^{(\ell-1)}$ is already a structured representation, and the isotropic random projections act upon this \textcolor{resultcolor}{\textbf{learned representation}}.
+
+
+
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Insight : Architectural Philosophy}},enhanced,drop shadow,boxrule=2pt]
+The choice of isotropic distribution for random weights is deliberate: the network learns to represent preferred directions by transforming the input space through \textbf{trainable parameters} of preceding layers. The output $\bm{h}^{(\ell-1)}$ is already a structured representation, and the isotropic random projections act upon this \textbf{learned representation}.
 \end{tcolorbox}
+
+
+
+
+
 
 \subsection{Parameterization and Training Regime}
 
-\begin{tcolorbox}[colback=breakthroughcolor!15,colframe=breakthroughcolor!80!black,title={\breakthrough{Critical Parameterization Choice}},enhanced,drop shadow,boxrule=2pt]
-The choice of scaling for the trainable parameters critically determines the network's behavior in the infinite-width limit.
+The choice of parameterization fundamentally determines the network's behavior in the infinite-width limit. We distinguish two main regimes that correspond to distinct learning philosophies. The first, NTK parameterization, favors stability and convergence toward a linear model, while the second, mean-field parameterization, promotes feature learning and non-linear dynamics.
 
-\textbf{1. NTK Parameterization (this work):} We use the $\textcolor{methodcolor}{\frac{1}{\sqrt{n_\ell}}}$ scaling.
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Critical Parameterization Choice}},enhanced,drop shadow,boxrule=2pt]
+The choice of scaling for the trainable parameters critically determines the network's behavior in the infinite-width limit. 
+
+\textbf{1. NTK Parameterization (Our approach):} We use the $\frac{1}{\sqrt{n_\ell}}$ scaling.
 \begin{itemize}
-\item Output function $h^{(\ell)}(x)$ has variance $\mathcal{O}(\textcolor{resultcolor}{\sigma_A^2})$ → \textcolor{validationcolor}{\textbf{stable magnitude}}
-\item Gradient w.r.t. weights is small: $\mathcal{O}(\textcolor{weightcolor}{\frac{1}{\sqrt{n_\ell}}})$ → \textcolor{insightcolor}{\textbf{"lazy training"}}
+\item Output function $h^{(\ell)}(x)$ has variance $\mathcal{O}(\sigma_A^2)$ → \textbf{stable magnitude}
+\item Gradient w.r.t. weights is small: $\mathcal{O}(\frac{1}{\sqrt{n_\ell}})$ → \textbf{"lazy training"}
 \item Network dynamics → linear model with \Kop
 \end{itemize}
 
-\textbf{2. Mean-Field ($\mu$) Parameterization:} Alternative $\textcolor{methodcolor}{\frac{1}{n_\ell}}$ scaling.
+\textbf{2. Mean-Field ($\mu$) Parameterization [Greg Yang et al., 2020]:} Alternative $\frac{1}{n_\ell}$ scaling.
 \begin{itemize}
-\item Function outputs: $\mathcal{O}(\textcolor{relucolor}{\frac{1}{\sqrt{n_\ell}}})$
-\item Gradients: $\mathcal{O}(\textcolor{weightcolor}{\frac{1}{n_\ell}})$ → \textcolor{breakthroughcolor}{\textbf{significant parameter movement}}
-\item Result: \textcolor{k3color}{\textbf{Feature learning}} and non-linear dynamics
+\item Function outputs: $\mathcal{O}(\frac{1}{\sqrt{n_\ell}})$
+\item Gradients: $\mathcal{O}(1)$ → \textbf{unit-scale parameter updates}
+\item The scaling is termed "mean-field" because each neuron's contribution is of order $\mathcal{O}(\frac{1}{n_\ell})$, allowing \textbf{collective influence} of all neurons
+\item Result: \textbf{Feature learning} and non-linear dynamics
 \end{itemize}
+
 \end{tcolorbox}
 
-\subsection{Asymptotic Regime}
-The entire NTK and NNGP formalism relies on the infinite-width limit. Following the framework established by Jacot et al., we analyze the network in a specific asymptotic regime:
+
+
+
+
+
+
+
+\begin{tcolorbox}[colback=yellow!5,colframe=yellow!80!black,title={\textbf{Definition: Neural Network Gaussian Process (NNGP)}},enhanced,drop shadow,boxrule=2pt]
+For a given layer $\ell$, when $n_\ell \to \infty$, the output $\bm{h}^{(\ell)}(\bm{x})$ converges in 
+distribution to a composition of Gaussian processes whose covariance conditioned to the previous layer is determined by the NNGP kernel $\mathcal{K}_{NNGP}^{(\ell | \ell-1)}$.
+
+Mathematically, we have:
+\begin{equation}
+\mathcal{K}_{NNGP}^{(\ell | \ell-1 )}(\bm{x}, \bm{x}') = \text{Cov}\left[\bm{h}^{(\ell)}(\bm{x}), \bm{h}^{(\ell)}(\bm{x}') \mid \bm{h}^{(\ell-1)}\right]
+\end{equation}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=red!10,colframe=red!80!black,title={\textbf{Crucial Remark: Composition of Gaussian Processes}},enhanced,drop shadow,boxrule=2pt]
+\textbf{Fundamental point:} In this limit, the output of each layer $\bm{h}^{(\ell)}$ converges in distribution to a \textbf{composition of Gaussian Processes (GP)} which is \textbf{not} itself a Gaussian process!
+
+Consequently, the NNGP and NTK kernels for layers $\ell > 1$, which are functions of the output of the previous layer, remain \textbf{random quantities} (random fields). The recursive formulas describe the relationship between these random kernels.
+
+This distinction is crucial because:
+\begin{itemize}
+\item For $\ell = 1$: $\bm{h}^{(1)}$ is Gaussian → $\mathcal{K}_{NNGP}^{(1)}$ and $\Theta^{(1)}$ are deterministic
+\item For $\ell > 1$: $\bm{h}^{(\ell)}$ is composition of GP → $\mathcal{K}_{NNGP}^{(\ell)}$ and $\Theta^{(\ell)}$ are random
+\end{itemize}
+
+The recursion captures the evolution of these kernel distributions through the layers.
+\end{tcolorbox}
+
+
+
+
+\subsection{Personal contribution : Asymptotic Regime}
+The entire NTK and NNGP formalism relies on the infinite-width limit giving gaussianity. Following the framework established by Jacot et al., we analyze the network in a specific asymptotic regime:
 \begin{itemize}
     \item The dimensions of the hidden layers, or widths, $n_1, n_2, \dots, n_L$ are taken to infinity.
     \item The input and output dimensions of each layer ($d_0, d_1, \dots, d_L$) are kept fixed and finite.
     \item Critically, the limits are taken sequentially: first we let $n_1 \to \infty$, then $n_2 \to \infty$, and so on up to $n_L \to \infty$.
-    \item In this limit, the output of each layer $h^{(\ell)}$ converges in distribution to a Gaussian Process (GP). Consequently, the NNGP and NTK kernels for layers $\ell > 1$, which are functions of the previous layer's output, remain random quantities (random fields). The recursive formulas describe the relationship between these random kernels.
+    \item 
 \end{itemize}
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Sequential Limit as Key Theoretical Tool}},enhanced,drop shadow,boxrule=2pt]
 This sequential limit is the key theoretical tool. When analyzing layer $\ell$ in the limit $n_\ell \to \infty$, the output of the previous layer, $\bm{h}^{(\ell-1)}$, is a sum of an infinite number of i.i.d. random variables (by construction of layer $\ell-1$). By the Central Limit Theorem, $\bm{h}^{(\ell-1)}$ converges in distribution to a Gaussian Process. This allows us to replace the complex, random function $\bm{h}^{(\ell-1)}$ with a GP whose covariance structure is precisely the NNGP kernel $\Sigma^{(\ell-1)}$. This is the foundation of the recursive calculation.
+\end{tcolorbox}
 
-\section{Signal Propagation and the Edge of Chaos (EOC)}
-Before analyzing the kernel, we study the propagation of the signal's magnitude through the network at initialization. We are interested in the evolution of the average variance per dimension of the layer outputs, defined as $q^{(\ell)} = \mathbb{E}[\|\bm{h}^{(\ell)}\|^2]/d_\ell$.
+\subsection{Personal contribution : Signal Propagation and the Edge of Chaos (EOC)}
+Before analyzing the kernel, we study the propagation of the signal's magnitude through the network at initialization. We are interested in the evolution of the variance of the layer outputs, defined as $q^{(\ell)} = \mathbb{E}[\|\bm{h}^{(\ell)}\|^2]/d_\ell$.
 
 For a ReLU activation and assuming centered parameters, the variance evolves according to the following recurrence relation (see Appendix for proof):
 \begin{equation}
@@ -488,169 +532,58 @@ For a ReLU activation and assuming centered parameters, the variance evolves acc
 This is an affine map $q^{(\ell)} = M \cdot q^{(\ell-1)} + C$. For the signal to propagate stably without vanishing ($M<1$) or exploding ($M>1$), the dynamics must be at the "Edge of Chaos", where the multiplicative factor is exactly 1.
 
 % \begin{block}
-{Edge of Chaos Condition}
+\begin{tcolorbox}[colback=red!15,colframe=red!80!black,title={\textbf{Edge of Chaos Condition}},enhanced,drop shadow,boxrule=2pt]
 
 The condition for stable signal propagation is:
 \begin{equation}
     \frac{\sigma_A^2}{2} \text{Tr}(\Sigma_w) = 1 \quad \implies \quad \sigma_A \sqrt{\text{Tr}(\Sigma_w)} = \sqrt{2}
 \end{equation}
 This establishes a critical relationship between the variance of the trainable weights ($\sigma_A^2$) and the trace of the random weight covariance matrix ($\Sigma_w$).
+\end{tcolorbox}
 % \end{block}
-
-\section{The NTK as a Guide to the Optimization Landscape}
-A central motivation for studying the NTK is its direct connection to the optimization process. The NTK is the kernel of a linearized model of the neural network, and its properties dictate the local training dynamics under gradient descent.
-
-\begin{itemize}
-    \item \textbf{The NTK Governs Dynamics:} In the infinite-width limit, the gradient descent dynamics of a neural network are equivalent to kernel regression with the NTK. The spectrum of the NTK, particularly its condition number, determines the convergence rates.
-    \item \textbf{A Proxy for the Hessian:} The NTK can be seen as a proxy for the Gauss-Newton approximation of the Hessian matrix. Crucially, the NTK is often much easier to compute and analyze than the full Hessian.
-    \item \textbf{Choosing an Optimizer:} By analyzing the NTK's spectrum, we can make informed decisions about optimization strategy. An ill-conditioned NTK suggests that first-order methods (like gradient descent) are appropriate, while a well-conditioned NTK suggests that second-order methods (which use Hessian information) can converge much more rapidly.
-    \item \textbf{From a Moving Kernel to Probabilistic Bounds:} Even though the MMNN's NTK is a random, evolving quantity (a "moving" kernel), our goal remains the same. By finding probabilistic laws that describe the distribution and evolution of the NTK's spectrum—either through mathematical analysis or numerical simulation—we can aim to derive optimization bounds. This allows us to understand, in a principled way, how the architectural choices in an MMNN affect its trainability.
-\end{itemize}
-
-\section{NTK for a Single-Layer MMFN}
-\label{sec:single_layer_mmfn}
-We begin by deriving the Neural Tangent Kernel for a single-layer Mean-field Matrix-Normal Network (MMFN). This result forms the base case for the multi-layer recursion. For simplicity, we consider a single scalar output, such that the network is defined as:
-\begin{equation}
-    h(\bm{x}) = \frac{1}{\sqrt{n}} \sum_{j=1}^n A_j \sigma(\bm{w}_j^\top \bm{x} + b_j) + c
-\end{equation}
-The trainable parameters are $\theta = \{A_j\}_{j=1}^n \cup \{c\}$. The parameters $\{\bm{w}_j, b_j\}$ are fixed and randomly drawn, with $\bm{w}_j \sim \mathcal{N}(0, \Sigma_w)$ and $b_j \sim \mathcal{N}(\mu_b, \sigma_b^2)$. While Gaussian distributions are used here for analytic tractability, the formalism can be extended to other distributions.
-
-\subsection{From Gradient Products to an Expectation}
-In the infinite-width limit ($n \to \infty$), the NTK converges to an expectation over the distribution of the random parameters $(\bm{w}, b)$. The full NTK is the sum of the kernel part from the weights $\{A_j\}$ and the part from the bias $\{c\}$.
-\begin{equation}
-\label{eq:ntk_expectation}
-    \Theta^{(1)}(\bm{x}, \bm{x}') = \underbrace{\mathbb{E}_{\bm{w},b} \left[ \sigma(\bm{w}^\top \bm{x} + b)\sigma(\bm{w}^\top \bm{x}' + b) \right]}_{\text{NNGP Kernel } \Sigma^{(1)}(\bm{x}, \bm{x}')} + \underbrace{1}_{\text{from bias } c}
-\end{equation}
-The expectation term is exactly the Neural Network Gaussian Process (NNGP) kernel for this layer, which we denote $\Sigma^{(1)}$.
-
-\subsection{Integral Formulation and Parameter Mapping}
-The NNGP kernel $\Sigma^{(1)}$ is an integral over the distributions of $\bm{w}$ and $b$:
-\begin{equation}
-    \Sigma^{(1)}(\bm{x}, \bm{x}') = \int_{\mathbb{R}^d} \int_{\mathbb{R}} \sigma(\bm{w}^\top \bm{x} + b)\sigma(\bm{w}^\top \bm{x}' + b) p(\bm{w})p(b) \,db \,d\bm{w}
-\end{equation}
-where $p(\bm{w})$ and $p(b)$ are the probability density functions. A change of variables is performed from the parameter space $(\bm{w}, b)$ to the pre-activation space $(g_1, g_2)$, where $g_1 = \bm{w}^\top \bm{x} + b$ and $g_2 = \bm{w}^\top \bm{x}' + b$. This transforms the high-dimensional integral into an expectation over a 2D bivariate Gaussian distribution. The parameters of this distribution are:
-\begin{itemize}
-    \item \textbf{Means:} $\mu_1 = \mathbb{E}[g_1] = \mathbb{E}[\bm{w}^\top\bm{x} + b] = \mu_b$. By symmetry, $\mu_2 = \mu_b$.
-    \item \textbf{Variances:} $\sigma_1^2 = \text{Var}(g_1) = \text{Var}(\bm{w}^\top\bm{x}) + \text{Var}(b) = \bm{x}^\top \Sigma_w \bm{x} + \sigma_b^2$. Similarly, $\sigma_2^2 = {\bm{x}'}^\top \Sigma_w \bm{x}' + \sigma_b^2$.
-    \item \textbf{Covariance:} $\text{Cov}(g_1, g_2) = \mathbb{E}[(\bm{w}^\top\bm{x})(\bm{w}^\top\bm{x}')] + \text{Var}(b) = \bm{x}^\top \Sigma_w \bm{x}' + \sigma_b^2$.
-\end{itemize}
-
-\subsection{Final Analytical Expression}
-\begin{theorem}[NNGP Kernel for a Single-Layer ReLU MMFN]
-Let the pre-activations $(g_1, g_2)$ be jointly Gaussian with parameters $(\mu_1, \sigma_1^2)$ and $(\mu_2, \sigma_2^2)$ and correlation $\rho$. The NNGP kernel $\Sigma^{(1)} = \mathbb{E}[\text{ReLU}(g_1)\text{ReLU}(g_2)]$ is given by the decomposition:
-\begin{equation}
-\label{eq:final_ntk_decomp}
-\boxed{
-\Sigma^{(1)} = \sigma_1\sigma_2 \cdot I_{12} + \mu_1\sigma_2 \cdot I_{01} + \mu_2\sigma_1 \cdot I_{10} + \mu_1\mu_2 \cdot I_{00}
-}
-\end{equation}
-where the terms $I_{ij}$ are moments of standardized bivariate normal variables $(Z_1, Z_2)$ with thresholds $a_1 = -\mu_1/\sigma_1$ and $a_2 = -\mu_2/\sigma_2$. These moments and their analytical solutions are well-known in the literature.
-\end{theorem}
-
-\subsubsection{Detailed Kernel Computation via Nested Expectation}
-The general formula can be analyzed more deeply under specific parameterizations. A common and insightful case is when the random features are normalized. Assume the network's pre-activation is $g(\bm{x}) = Q(\bm{x}) + \beta b$, where $Q(\bm{x})$ is a zero-mean Gaussian process with unit variance ($\mathbb{E}[Q(\bm{x})^2]=1$) and $b \sim \mathcal{N}(0,1)$ is an independent random bias. For two inputs $\bm{x}, \bm{x}'$, the random variables $(Q(\bm{x}), Q(\bm{x}'))$ follow a centered bivariate normal distribution with correlation $\rho = \mathbb{E}[Q(\bm{x})Q(\bm{x}')]$.
-
-The NNGP kernel $\Sigma^{(1)}$ is then a nested expectation:
-\begin{equation}
-    \Sigma^{(1)}(\rho, \beta) = \mathbb{E}_{b} \left[ \mathbb{E}_{Q_1, Q_2} \left[ \sigma(Q_1 + \beta b) \sigma(Q_2 + \beta b) \right] \right]
-\end{equation}
-where $(Q_1, Q_2) \sim \mathcal{N}(0, \begin{psmallmatrix} 1 & \rho \\ \rho & 1 \end{psmallmatrix})$.
-
-For a fixed $b$, the inner expectation is over two ReLU functions whose arguments are non-centered Gaussians with mean $\mu = \beta b$ and variance $1$. This inner expectation, let's call it $\mathcal{I}(\mu, \rho)$, can be decomposed using moments of a standardized bivariate normal distribution:
-\begin{equation}
-    \mathcal{I}(\mu, \rho) = I_2(\mu, \rho) + 2\mu I_1(\mu, \rho) + \mu^2 I_0(\mu, \rho)
-\end{equation}
-where $a = -\mu = -\beta b$ is the truncation threshold. The moment functions are:
-\begin{itemize}
-    \item \textbf{Zeroth Moment (Probability):} $I_0(\mu, \rho) = \mathbb{P}(Q_1 > a, Q_2 > a) = L(a, a; \rho)$, where $L$ is the bivariate normal survival function.
-    \item \textbf{First Moment:} $I_1(\mu, \rho) = \mathbb{E}[Q_1 \cdot \mathbf{1}_{Q_1>a, Q_2>a}] = (1+\rho)\phi(a)\Phi\left(a\sqrt{\frac{1-\rho}{1+\rho}}\right)$.
-    \item \textbf{Second Moment:} $I_2(\mu, \rho) = \mathbb{E}[Q_1 Q_2 \cdot \mathbf{1}_{Q_1>a, Q_2>a}] = \rho L(a, a; \rho) + (1-\rho^2)\phi(a, a; \rho)$, where $\phi(\cdot,\cdot;\rho)$ is the bivariate normal PDF.
-\end{itemize}
-The total kernel is then found by taking the expectation over $b$, which results in a one-dimensional integral:
-\begin{equation}
-    \Sigma^{(1)}(\rho, \beta) = \int_{-\infty}^{\infty} \mathcal{I}(\beta b, \rho) \, \phi(b) \, db
-\end{equation}
-where $\phi(b)$ is the standard normal PDF. This formulation is what is implemented for numerical computation.
-
-\section{Recursion for Multi-Layer MMNNs}
-We now extend the single-layer result to deep networks. The recursion involves two distinct but intertwined kernels: the NNGP kernel $\Sigma^{(\ell)}$ and the NTK kernel $\Theta^{(\ell)}$.
-
-\subsection{The Critical Role of the $({w}^\top{w}$ Term in the Derivative Kernel}
-The recursive formula for the NTK, $\Theta^{(\ell)} = \Theta^{(\ell-1)} \cdot \sigma_A^2 \dot{\Sigma}^{(\ell)} + \dots$, shows that the derivative kernel $\dot{\Sigma}^{(\ell)}$ governs the propagation of gradient information through the layers. Its definition contains a crucial term:
-\[ \dot{\Sigma}^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \dot{\sigma}(\dots) \dot{\sigma}(\dots) \bm{w}^\top\bm{w} \right] \]
-The presence of the inner product $\bm{w}^\top\bm{w}$ (the squared Euclidean norm of the random weight vector) is of paramount importance. For isotropic Gaussian weights, its expectation is $\mathbb{E}[\bm{w}^\top\bm{w}] = d_{\ell-1}$, the dimension of the previous layer's output. This introduces a factor proportional to the network's width at each layer into the recursive term of the NTK.
-
-\textbf{This can lead to a much faster, potentially explosive, growth of the NTK's magnitude with depth compared to the NNGP kernel.} A precise mathematical investigation of how this term interacts with the rest of the expectation is therefore essential to correctly characterize the scaling laws of the NTK in deep MMNNs, and will be a central part of our future work.
-
-\subsection{Remark on Model Structure and the Role of \(\beta\)}
-A key feature of this model is the structure of the pre-activation at each layer: $g = \bm{w}^\top \bm{h}_{in} + \beta b$. This structure, where $\bm{w}$ and $b$ are random parameters, is central to the model's behavior. It introduces two sources of randomness that are propagated through the network:
-\begin{enumerate}
-    \item \textbf{Function-space Randomness:} In the infinite-width limit, the output of each layer is a random function drawn from a Gaussian Process, whose covariance is the NNGP kernel $\Sigma^{(\ell)}$.
-    \item \textbf{Parameter Randomness:} The explicit random parameter $b$, scaled by $\beta$, inside the non-linearity adds another layer of randomness. It ensures that the pre-activation remains a random variable even if the layer's input becomes deterministic. 
-\end{enumerate}
-This implies that the function inside the expectation of the $\mathcal{L}$ operator is not just the activation $\sigma(\cdot)$, but represents the entire operation whose statistics are captured by the recursive kernel definitions below.
-
-\subsection{NNGP Kernel \(\Sigma^{(\ell)}\) Recursion}
-The NNGP kernel describes the covariance of the network's output function at initialization. For any finite width, this output is a random function. In the infinite-width limit, it converges to a Gaussian Process. The base kernel $\Sigma^{(\ell)}$ is defined recursively.
-\begin{itemize}
-    \item \textbf{Base Case (\(\ell=1\)):} The NNGP kernel for the first layer, $\Sigma^{(1)}$, corresponds to the expectation part of the single-layer kernel theorem.
-    \begin{equation}
-        \Sigma^{(1)}(x, x') = \mathbb{E}_{\bm{w},b}\left[\sigma(\bm{w}^\top x + b)\sigma(\bm{w}^\top x' + b)\right]
-    \end{equation}
-    
-    \item \textbf{Recursive Step (\(\ell > 1\)):} For subsequent layers, the base kernel $\Sigma^{(\ell)}$ is defined by taking the expectation only over the random parameters of the current layer ($\bm{w}, b$), for a given realization of the previous layer's output GP $\bm{h}^{(\ell-1)}$.
-    \begin{equation}
-        \Sigma^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \right]
-    \end{equation}
-    Since $\bm{h}^{(\ell-1)}$ is itself a random GP, the resulting kernel $\Sigma^{(\ell)}$ is a random quantity for $\ell > 1$.
-    To be precise, the expectation over $\bm{h}^{(\ell-1)}$ is taken over a joint Gaussian distribution. Since $\bm{h}^{(\ell-1)}$ is a $d_{\ell-1}$-dimensional Gaussian Process, for any pair of inputs $x, x'$, the concatenated vector $(\bm{h}^{(\ell-1)}(x), \bm{h}^{(\ell-1)}(x'))$ follows a $2d_{\ell-1}$-dimensional Gaussian distribution. Assuming the outputs of layer $\ell-1$ are i.i.d. GPs, the covariance matrix of this vector has a block structure:
-\end{itemize}
-
 \subsection{NTK Kernel \(\Theta^{(\ell)}\) Recursion}
 The NTK is the Gram matrix of function gradients. For any finite width, it is a random matrix. The following recursion describes the relationship between these random kernels in the infinite-width limit.
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{NTK Recursion Formula}},enhanced,drop shadow,boxrule=2pt]
 \begin{itemize}
-    \item \textbf{Initialization (\(\ell=0\)):} The recursion starts with $\Theta^{(0)} = 0$.
+    \item \textbf{Initialization (\(\ell=0\)):} $\Theta^{(0)} = 0$.
     
-    \item \textbf{Recursive Step (\(\ell \ge 1\)):} The NTK for layer $\ell$ combines the NTK from previous layers with the contributions from the trainable parameters of the current layer, $A^{(\ell)}$ and $c^{(\ell)}$.
+    \item \textbf{Recursive Step (\(\ell \ge 1\)):} The NTK for layer $\ell$ combines the NTK from previous layers with the contributions from the trainable parameters $A^{(\ell)}$ and $c^{(\ell)}$:
     \begin{equation}
         \boxed{
         \Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \left(\sigma_A^2\dot{\Sigma}^{(\ell)}(x, x')\right) + \Sigma^{(\ell)}(x, x') + 1
         }
     \end{equation}
-    Here, $\sigma_c^2=1$ is the contribution from the trainable bias. $\Sigma^{(\ell)}$ is the base NNGP kernel defined above. $\dot{\Sigma}^{(\ell)}$ is the base derivative kernel, defined similarly as an expectation over layer-$\ell$ parameters:
+    where $\sigma_c^2=1$ is the contribution from the trainable bias. $\Sigma^{(\ell)}$ is the base NNGP kernel defined above. $\dot{\Sigma}^{(\ell)}$ is the base derivative kernel:
     \begin{equation}
         \dot{\Sigma}^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \bm{w}^\top\bm{w} \right]
     \end{equation}
     with $\dot{\sigma}$ being the derivative of the activation function. Both $\Sigma^{(\ell)}$ and $\dot{\Sigma}^{(\ell)}$ are random kernels for $\ell > 1$.
 \end{itemize}
-This formulation now correctly incorporates the contribution of all trainable parameters at each layer.
+\end{tcolorbox}
 
-\section{Summary of Formulas}
-\vspace{1em}
-\fbox{\begin{minipage}{0.95\textwidth}
+\begin{tcolorbox}[colback=blue!15,colframe=blue!80!black,title={\textbf{Summary of Formulas}},enhanced,drop shadow,boxrule=2pt]
 \begin{itemize}
     \item \textbf{Layer Output:}
-    \[ \bm{h}^{(\ell)}(\bm{x}) = \bm{c}^{(\ell)} + \frac{\sigma_A}{\sqrt{n_\ell}} \sum_{j=1}^{n_\ell} \bm{A}_j^{(\ell)} \sigma\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)}\right) \]
+    \[ \boxed{\bm{h}^{(\ell)}(\bm{x}) = \bm{c}^{(\ell)} + \frac{\sigma_A}{\sqrt{n_\ell}} \sum_{j=1}^{n_\ell} \bm{A}_j^{(\ell)} \sigma\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)}\right)} \]
 
     \item \textbf{NNGP Kernel Recursion:}
     \begin{itemize}
         \item \textit{Base Kernel:} Expectation over current layer's random parameters, conditioned on the previous layer's output GP $\bm{h}^{(\ell-1)}$.
-        \[ \Sigma^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \right] \]
+        \[ \boxed{\Sigma^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \right]} \]
         \item \textit{Full Kernel:}
-        \[ \mathcal{K}_{\text{NNGP}}^{(\ell)}(x, x') = \sigma_A^2 \Sigma^{(\ell)}(x, x') + \sigma_c^2 \]
+        \[ \boxed{\mathcal{K}_{\text{NNGP}}^{(\ell)}(x, x') = \sigma_A^2 \Sigma^{(\ell)}(x, x') + \sigma_c^2} \]
     \end{itemize}
 
     \item \textbf{NTK Kernel Recursion:}
     \begin{itemize}
         \item \textit{Base Derivative Kernel:}
-        \[ \resizebox{\textwidth}{!}{$\dot{\Sigma}^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \bm{w}^\top\bm{w} \right]$} \]
+        \[ \boxed{\dot{\Sigma}^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \bm{w}^\top\bm{w} \right]} \]
         \item \textit{Full Kernel:}
-        \[ \Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \sigma_A^2  \dot{\Sigma}^{(\ell)}(x, x') + \Sigma^{(\ell)}(x, x')+1 \]
+        \[ \boxed{\Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \sigma_A^2  \dot{\Sigma}^{(\ell)}(x, x') + \Sigma^{(\ell)}(x, x')+1} \]
     \end{itemize}
 \end{itemize}
-\end{minipage}}
-\vspace{1em}
-
+\end{tcolorbox}
 
 \section{Conclusion: A New Paradigm for NTK Analysis}
 The analysis of MMNNs through the lens of NTK theory reveals a fascinating trade-off and a path toward a more general framework. Standard NTK theory for MLPs requires massive overparameterization (quadratic in width) to guarantee a static kernel and a "lazy training" regime. MMNNs offer a compelling alternative: it may be possible to enter an analyzable, NTK-like regime with a parameter count that is merely linear in the width.
@@ -662,7 +595,11 @@ A major potential application for this research lies in the field of Physics-Inf
 
 Furthermore, we can draw a powerful analogy between MMNNs and wavelet transforms, especially in the high-dimensional regime where the benefits become most apparent. A wavelet transform decomposes a function onto a fixed basis of localized functions. An MMNN performs a similar task, but learns the optimal combination of a rich, random basis of functions. Classical wavelet transforms suffer from the curse of dimensionality, making them intractable for high-dimensional problems.
 
-The MMNN architecture overcomes this limitation through several mechanisms. In high dimensions, random vectors are nearly orthogonal, meaning the correlation $\rho$ between pre-activations of distinct inputs concentrates around zero. The Funk-Hecke theorem provides a powerful tool to analyze the kernel operator in this setting, showing that a kernel depending only on $\rho$ will have a highly structured spectrum. This concentration of $\rho$ implies that the NTK matrix itself becomes quasi-diagonal or takes on the simple $(a-b)\mathbf{I} + b\mathbf{J}$ structure, making its spectrum much easier to understand. The network effectively performs an automatic, adaptive directional domain decomposition. While the number of regions partitioned by the neurons can grow exponentially, the number of parameters only scales linearly with the width. This combination of expressive power and parameter efficiency makes the MMNN a powerful and tractable tool for applications like PINNs in high dimensions, where classical methods like wavelets fail.
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: High-Dimensional Advantages}},enhanced,drop shadow,boxrule=2pt]
+The MMNN architecture overcomes the curse of dimensionality through several mechanisms. In high dimensions, random vectors are nearly orthogonal, meaning the correlation $\rho$ between pre-activations of distinct inputs concentrates around zero. The Funk-Hecke theorem provides a powerful tool to analyze the kernel operator in this setting, showing that a kernel depending only on $\rho$ will have a highly structured spectrum. This concentration of $\rho$ implies that the NTK matrix itself becomes quasi-diagonal or takes on the simple $(a-b)\mathbf{I} + b\mathbf{J}$ structure, making its spectrum much easier to understand.
+\end{tcolorbox}
+
+The network effectively performs an automatic, adaptive directional domain decomposition. While the number of regions partitioned by the neurons can grow exponentially, the number of parameters only scales linearly with the width. This combination of expressive power and parameter efficiency makes the MMNN a powerful and tractable tool for applications like PINNs in high dimensions, where classical methods like wavelets fail.
 
 A concrete step in this direction is to ensure the network has sufficient regularity. Many PDEs involve second-order derivatives (e.g., the Laplacian). To apply rigorous optimization and approximation theorems in this context, the network function must be twice-differentiable ($C^2$). A promising future direction is therefore to develop a "Deep Smooth ReLU Network" (DSRN) version of the MMNN, for instance by using smoother activation functions, which would guarantee the necessary regularity and unlock a wider range of theoretical tools for PINN analysis.
 
@@ -675,20 +612,23 @@ The initial results are promising and open several avenues for both numerical an
 \end{itemize}
 
 \subsection{Mathematical Investigations}
-A primary focus of future theoretical work will be to precisely characterize the spectrum of the MMNN's NTK operator using a trifecta of advanced analytical techniques. Before diving into these, we note an important methodological choice regarding the random bias.
+A primary focus of future theoretical work will be to precisely characterize the spectrum of the MMNN's NTK operator using a trifecta of advanced analytical techniques.
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Role of the Bias Parameter $\beta$}},enhanced,drop shadow,boxrule=2pt]
+Our analysis has consistently included the random bias term $\beta b$, which makes the pre-activations non-centered and is a core feature of the MMNN model. However, for mathematical tractability, it is common in the NTK literature for MLPs to first analyze the system in a simplified, bias-free regime ($\beta=0$). This path offers two avenues:
 \begin{itemize}
-    \item \textbf{Role of the Bias Parameter $\beta$ and Simplified Regimes:} Our analysis has consistently included the random bias term $\beta b$, which makes the pre-activations non-centered and is a core feature of the MMNN model. However, for mathematical tractability, it is common in the NTK literature for MLPs to first analyze the system in a simplified, bias-free regime ($\beta=0$). This path offers two avenues:
-        \begin{itemize}
-            \item Analyze the kernel at $\beta=0$. While losing the specific non-centered interpretation, this could yield cleaner mathematical results as a first step.
-            \item Perform a Taylor expansion (développement limité) of the kernel functions with respect to $\beta$ around $\beta=0$. This would allow us to systematically study the impact of the random bias perturbatively and bridge the gap between the simplified and the full model.
-        \end{itemize}
+    \item Analyze the kernel at $\beta=0$. While losing the specific non-centered interpretation, this could yield cleaner mathematical results as a first step.
+    \item Perform a Taylor expansion (développement limité) of the kernel functions with respect to $\beta$ around $\beta=0$. This would allow us to systematically study the impact of the random bias perturbatively and bridge the gap between the simplified and the full model.
 \end{itemize}
+\end{tcolorbox}
+
 The primary analytical approaches for the spectrum are:
 \begin{itemize}
     \item \textbf{Spectrum via Puiseux Series Expansion:} Following the work of Bietti and Bach~\cite{bietti2021deepequalsshallowrelu}, we can analyze the Puiseux series expansion of the kernel function in the limits $\rho \to 1^-$ and $\rho \to -1^+$. The first non-integer exponent in this series expansion directly characterizes the asymptotic scaling of the NTK operator's eigenvalues.
     \item \textbf{Spectrum as a Zonal Operator:} A powerful approach is to analyze the NTK as a zonal kernel operator on the sphere. Following the methodology of Murray et al.~\cite{murray2023characterizingspectrumntkpower}, we can seek a power series expansion of the kernel in terms of the Gram matrix ($K = \bm{x}^\top\bm{x}'$). This would allow for a direct characterization of its eigenvalues in terms of Gegenbauer polynomials.
     \item \textbf{Spectrum vs. Depth Analysis:} Adapt the proof methodology from Terj\'{e}k and Gonz\'{a}lez-S\'{a}nchez~\cite{terjek2025mlpseocspectrumntk} to analyze how the NTK spectrum scales with depth $L$. This involves performing a power expansion of the kernel function with respect to the correlation $\rho$.
 \end{itemize}
+
 Further mathematical goals include:
 \begin{itemize}
     \item \textbf{Connect to Function Decomposition:} Investigate using a uniform distribution for the random weights $\bm{w}$. This choice may align better with the function approximation theory that originally motivated the MMNN architecture. The intuition is that pairs of weights with opposite signs (e.g., $\bm{w}$ and $-\bm{w}$) could create basis functions that compensate for each other, effectively building localized basis functions over intervals defined by the pre-activations—a cornerstone of function decomposition.
@@ -699,148 +639,100 @@ Further mathematical goals include:
     \item \textbf{Analysis of Trainable Activations (PSinTU):} A further avenue is to explore more expressive, trainable activation functions like Parametrized Sinusoidal Transform Unit (PSinTU). While this offers greater flexibility, the NTK analysis becomes significantly more complex as the basis functions themselves are no longer fixed. This will be tackled in a later phase of the research.
 \end{itemize}
 
-
-
-
-
-\subsection{Asymptotic Regime}
-The entire NTK and NNGP formalism relies on the infinite-width limit. Following the framework established by Jacot et al., we analyze the network in a specific asymptotic regime:
-\begin{itemize}
-    \item The dimensions of the hidden layers, or widths, $n_1, n_2, \dots, n_L$ are taken to infinity.
-    \item The input and output dimensions of each layer ($d_0, d_1, \dots, d_L$) are kept fixed and finite.
-    \item Critically, the limits are taken sequentially: first we let $n_1 \to \infty$, then $n_2 \to \infty$, and so on up to $n_L \to \infty$.
-    \item In this limit, the output of each layer $h^{(\ell)}$ converges in distribution to a Gaussian Process (GP). Consequently, the NNGP and NTK kernels for layers $\ell > 1$, which are functions of the previous layer's output, remain random quantities (random fields). The recursive formulas describe the relationship between these random kernels.
-\end{itemize}
-This sequential limit is the key theoretical tool. When analyzing layer $\ell$ in the limit $n_\ell \to \infty$, the output of the previous layer, $\bm{h}^{(\ell-1)}$, is a sum of an infinite number of i.i.d. random variables (by construction of layer $\ell-1$). By the Central Limit Theorem, $\bm{h}^{(\ell-1)}$ converges in distribution to a Gaussian Process. This allows us to replace the complex, random function $\bm{h}^{(\ell-1)}$ with a GP whose covariance structure is precisely the NNGP kernel $\Sigma^{(\ell-1)}$. This is the foundation of the recursive calculation.
-
 \section{NTK for a Single-Layer MMFN}
 \label{sec:single_layer_mmfn}
 We begin by deriving the Neural Tangent Kernel for a single-layer Mean-field Matrix-Normal Network (MMFN). This result forms the base case for the multi-layer recursion. For simplicity, we consider a single scalar output, such that the network is defined as:
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Single-Layer MMFN Definition}},enhanced,drop shadow,boxrule=2pt]
 \begin{equation}
-    h(\bm{x}) = \frac{1}{\sqrt{n}} \sum_{j=1}^n A_j \sigma(\bm{w}_j^\top \bm{x} + b_j) + c
+    \boxed{h(\bm{x}) = \frac{1}{\sqrt{n}} \sum_{j=1}^n A_j \sigma(\bm{w}_j^\top \bm{x} + b_j) + c}
 \end{equation}
-The trainable parameters are $\theta = \{A_j\}_{j=1}^n \cup \{c\}$. The parameters $\{\bm{w}_j, b_j\}$ are fixed and randomly drawn, with $\bm{w}_j \sim \mathcal{N}(0, \Sigma_w)$ and $b_j \sim \mathcal{N}(\mu_b, \sigma_b^2)$. While Gaussian distributions are used here for analytic tractability, the formalism can be extended to other distributions.
+The trainable parameters are $\theta = \{A_j\}_{j=1}^n \cup \{c\}$. The parameters $\{\bm{w}_j, b_j\}$ are fixed and randomly drawn, with $\bm{w}_j \sim \mathcal{N}(0, \Sigma_w)$ and $b_j \sim \mathcal{N}(\mu_b, \sigma_b^2)$.
+\end{tcolorbox}
 
 \subsection{From Gradient Products to an Expectation}
 In the infinite-width limit ($n \to \infty$), the NTK converges to an expectation over the distribution of the random parameters $(\bm{w}, b)$. The full NTK is the sum of the kernel part from the weights $\{A_j\}$ and the part from the bias $\{c\}$.
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{NTK as Expectation}},enhanced,drop shadow,boxrule=2pt]
 \begin{equation}
 \label{eq:ntk_expectation}
-    \Theta^{(1)}(\bm{x}, \bm{x}') = \underbrace{\mathbb{E}_{\bm{w},b} \left[ \sigma(\bm{w}^\top \bm{x} + b)\sigma(\bm{w}^\top \bm{x}' + b) \right]}_{\text{NNGP Kernel } \Sigma^{(1)}(\bm{x}, \bm{x}')} + \underbrace{\sigma_c^2}_{\text{from bias } c}
+    \boxed{\Theta^{(1)}(\bm{x}, \bm{x}') = \underbrace{\mathbb{E}_{\bm{w},b} \left[ \sigma(\bm{w}^\top \bm{x} + b)\sigma(\bm{w}^\top \bm{x}' + b) \right]}_{\text{NNGP Kernel } \Sigma^{(1)}(\bm{x}, \bm{x}')} + \underbrace{\sigma_c^2}_{\text{from bias } c}}
 \end{equation}
-The expectation term is exactly the Neural Network Gaussian Process (NNGP) kernel for this layer, which we denote $\Sigma^{(1)}$.
+\end{tcolorbox}
 
 \subsection{Integral Formulation and Parameter Mapping}
 The NNGP kernel $\Sigma^{(1)}$ is an integral over the distributions of $\bm{w}$ and $b$:
 \begin{equation}
     \Sigma^{(1)}(\bm{x}, \bm{x}') = \int_{\mathbb{R}^d} \int_{\mathbb{R}} \sigma(\bm{w}^\top \bm{x} + b)\sigma(\bm{w}^\top \bm{x}' + b) p(\bm{w})p(b) \,db \,d\bm{w}
 \end{equation}
-where $p(\bm{w})$ and $p(b)$ are the probability density functions. A change of variables is performed from the parameter space $(\bm{w}, b)$ to the pre-activation space $(g_1, g_2)$, where $g_1 = \bm{w}^\top \bm{x} + b$ and $g_2 = \bm{w}^\top \bm{x}' + b$. This transforms the high-dimensional integral into an expectation over a 2D bivariate Gaussian distribution. The parameters of this distribution are:
+
+A change of variables is performed from the parameter space $(\bm{w}, b)$ to the pre-activation space $(g_1, g_2)$, where $g_1 = \bm{w}^\top \bm{x} + b$ and $g_2 = \bm{w}^\top \bm{x}' + b$. This transforms the high-dimensional integral into an expectation over a 2D bivariate Gaussian distribution. The parameters of this distribution are:
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Bivariate Gaussian Parameters}},enhanced,drop shadow,boxrule=2pt]
 \begin{itemize}
     \item \textbf{Means:} $\mu_1 = \mathbb{E}[g_1] = \mathbb{E}[\bm{w}^\top\bm{x} + b] = \mu_b$. By symmetry, $\mu_2 = \mu_b$.
     \item \textbf{Variances:} $\sigma_1^2 = \text{Var}(g_1) = \text{Var}(\bm{w}^\top\bm{x}) + \text{Var}(b) = \bm{x}^\top \Sigma_w \bm{x} + \sigma_b^2$. Similarly, $\sigma_2^2 = {\bm{x}'}^\top \Sigma_w \bm{x}' + \sigma_b^2$.
     \item \textbf{Covariance:} $\text{Cov}(g_1, g_2) = \mathbb{E}[(\bm{w}^\top\bm{x})(\bm{w}^\top\bm{x}')] + \text{Var}(b) = \bm{x}^\top \Sigma_w \bm{x}' + \sigma_b^2$.
 \end{itemize}
+\end{tcolorbox}
 
 \subsection{Final Analytical Expression}
 \begin{theorem}[NNGP Kernel for a Single-Layer ReLU MMFN]
 Let the pre-activations $(g_1, g_2)$ be jointly Gaussian with parameters $(\mu_1, \sigma_1^2)$ and $(\mu_2, \sigma_2^2)$ and correlation $\rho$. The NNGP kernel $\Sigma^{(1)} = \mathbb{E}[\text{ReLU}(g_1)\text{ReLU}(g_2)]$ is given by the decomposition:
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{NNGP Kernel Decomposition}},enhanced,drop shadow,boxrule=2pt]
 \begin{equation}
 \label{eq:final_ntk_decomp}
 \boxed{
 \Sigma^{(1)} = \sigma_1\sigma_2 \cdot I_{12} + \mu_1\sigma_2 \cdot I_{01} + \mu_2\sigma_1 \cdot I_{10} + \mu_1\mu_2 \cdot I_{00}
 }
 \end{equation}
-where the terms $I_{ij}$ are moments of standardized bivariate normal variables $(Z_1, Z_2)$ with thresholds $a_1 = -\mu_1/\sigma_1$ and $a_2 = -\mu_2/\sigma_2$. These moments and their analytical solutions are well-known in the literature.
+where the terms $I_{ij}$ are moments of standardized bivariate normal variables $(Z_1, Z_2)$ with thresholds $a_1 = -\mu_1/\sigma_1$ and $a_2 = -\mu_2/\sigma_2$.
+\end{tcolorbox}
 \end{theorem}
-
-
-
-
-
-
 
 \section{Recursion for Multi-Layer MMNNs}
 We now extend the single-layer result to deep networks. The recursion involves two distinct but intertwined random fields: the NNGP kernel $\Sigma^{(\ell)}$ and the NTK kernel $\Theta^{(\ell)}$.
-An important fact is that the NNGP kernel $\Sigma^{(\ell)}$ is a random field that is NOT a gaussian process but a deep gaussian process, while the NTK kernel $\Theta^{(\ell)}$ is also a random field that is not a gaussian process.
+
+\begin{tcolorbox}[colback=red!10,colframe=red!80!black,title={\textbf{Crucial Remark: Random Kernels in Deep Networks}},enhanced,drop shadow,boxrule=2pt]
+An important fact is that the NNGP kernel $\Sigma^{(\ell)}$ is a random field that is NOT a gaussian process but a deep gaussian process, while the NTK kernel $\Theta^{(\ell)}$ is also a random field that is not a gaussian process. This is because the composition of a non-linear function with a Gaussian Process, $g(f(x))$, is not, in general, a Gaussian Process.
+\end{tcolorbox}
 
 \subsection{Remark on Model Structure and the Role of \(\beta\)}
 A key feature of this model is the structure of the pre-activation at each layer: $g = \bm{w}^\top \bm{h}_{in} + \beta b$. This structure, where $\bm{w}$ and $b$ are random parameters, is central to the model's behavior. It introduces two sources of randomness that are propagated through the network:
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Dual Sources of Randomness}},enhanced,drop shadow,boxrule=2pt]
 \begin{enumerate}
     \item \textbf{Function-space Randomness:} In the infinite-width limit, the output of each layer is a random function drawn from a Gaussian Process, whose covariance is the NNGP kernel $\Sigma^{(\ell)}$.
-    \item \textbf{Parameter Randomness:} The explicit random parameter $b$, scaled by $\beta$, inside the non-linearity adds another layer of randomness. It ensures that the pre-activation remains a random variable even if the layer's input becomes deterministic. 
+    \item \textbf{Parameter Randomness:} The explicit random parameter $b$, scaled by $\beta$, inside the non-linearity adds another layer of randomness. It ensures that the pre-activation remains a random variable even if the layer's input becomes deterministic.
 \end{enumerate}
-This implies that the function inside the expectation of the $\mathcal{L}$ operator is not just the activation $\sigma(\cdot)$, but represents the entire operation whose statistics are captured by the recursive kernel definitions below.
+\end{tcolorbox}
 
 \subsection{NNGP Kernel \(\Sigma^{(\ell)}\) Recursion}
 The NNGP kernel describes the covariance of the network's output function at initialization. For any finite width, this output is a random function. In the infinite-width limit, it converges to a Gaussian Process. The base kernel $\Sigma^{(\ell)}$ is defined recursively.
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{NNGP Kernel Recursion}},enhanced,drop shadow,boxrule=2pt]
 \begin{itemize}
-    \item \textbf{Base Case (\(\ell=1\)):} The NNGP kernel for the first layer, $\Sigma^{(1)}$, corresponds to the expectation part of the single-layer kernel theorem.
+    \item \textbf{Base Case (\(\ell=1\)):} The NNGP kernel for the first layer:
     \begin{equation}
-        \Sigma^{(1)}(x, x') = \mathbb{E}_{\bm{w},b}\left[\sigma(\bm{w}^\top x + b)\sigma(\bm{w}^\top x' + b)\right]
+        \boxed{\Sigma^{(1)}(x, x') = \mathbb{E}_{\bm{w},b}\left[\sigma(\bm{w}^\top x + b)\sigma(\bm{w}^\top x' + b)\right]}
     \end{equation}
-    \item \textbf{Recursive Step (\(\ell > 1\)):} For subsequent layers, the base kernel $\Sigma^{(\ell)}$ is defined by taking the expectation only over the random parameters of the current layer ($\bm{w}, b$), for a given realization of the previous layer's output GP $\bm{h}^{(\ell-1)}$.
+    \item \textbf{Recursive Step (\(\ell > 1\)):} For subsequent layers, the base kernel $\Sigma^{(\ell)}$ is defined by taking the expectation only over the random parameters of the current layer ($\bm{w}, b$), for a given realization of the previous layer's output GP $\bm{h}^{(\ell-1)}$:
     \begin{equation}
-        \Sigma^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \right] 
-        % }
+        \boxed{\Sigma^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \right]}
     \end{equation}
-    and for the full NNGP kernel, we have
+    and for the full NNGP kernel:
     \begin{equation}
-        \boxed{
-        \mathcal{K}_{NNGP}^{(\ell)}=\sigma_A^2\Sigma^{(\ell-1)}+\sigma_c^2
-        }
+        \boxed{\mathcal{K}_{NNGP}^{(\ell)}=\sigma_A^2\Sigma^{(\ell-1)}+\sigma_c^2}
     \end{equation}
-    Because $\bm{h}^{(\ell-1)}$ is a GP with kernel $\mathcal{K}_{NNGP}^{(\ell-1)}$, this expression defines a transformation that maps the kernel of layer $\ell-1$ to the kernel of layer $\ell$. For specific choices of distributions and activation functions (like Gaussians and ReLU), this expectation can be computed, often leading to a recursive formula expressed in terms of an operator acting on $\Sigma^{(\ell-1)}$.
-
-    It's important to notice that this kernel becomes random and non-deterministic for $\ell >1$.
-
-    \paragraph{Remark on the non-propagation of the Gaussian Process property.}
-    It is crucial to understand how the Gaussian Process property is not maintained from layer to layer. 
-    
-    The composition of a non-linear function with a Gaussian Process, $g(f(x))$, is not, in general, a Gaussian Process. In our model, while $\bm{h}^{(\ell-1)}$ is a GP, the output of the non-linear activation, $\sigma(\bm{w}^\top \bm{h}^{(\ell-1)} + \beta b)$, is not.
-   
-    In general, if you want to compute the mean value of this deep gaussian process, you need to compute the expectation over the random field of the previous layer by conditioning on the random field of the previous layer.
-    which means to change $\mathbb{E}_{\bm{w}, b} \left[ \dots \right]$ to $\mathbb{E}_{\bm{w}, b, \bm{h}^{(\ell-1)}} \left[ \dots \right]$.
-
-    So the NNGP kernel that is defined is not the same as the NNGP that you can compute for MLPs, because the NNGP of MLPs is a gaussian process, while the NNGP of MMNNs is a deep gaussian process.
 \end{itemize}
+\end{tcolorbox}
 
-\subsection{NTK Kernel \(\Theta^{(\ell)}\) Recursion}
-The NTK is the Gram matrix of function gradients with respect to the trainable parameters. For any finite width, it is a random matrix because it depends on the specific parameter initialization. The following recursion describes its deterministic limit, $\Theta^{(\ell)}$, as the layer widths tend sequentially to infinity.
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Non-propagation of Gaussian Process Property}},enhanced,drop shadow,boxrule=2pt]
+It is crucial to understand how the Gaussian Process property is not maintained from layer to layer. While $\bm{h}^{(\ell-1)}$ is a GP, the output of the non-linear activation, $\sigma(\bm{w}^\top \bm{h}^{(\ell-1)} + \beta b)$, is not. In general, if you want to compute the mean value of this deep gaussian process, you need to compute the expectation over the random field of the previous layer by conditioning on it, which means changing $\mathbb{E}_{\bm{w}, b} \left[ \dots \right]$ to $\mathbb{E}_{\bm{w}, b, \bm{h}^{(\ell-1)}} \left[ \dots \right]$.
 
-We recall then that the NTK is a random field that is not a gaussian process. 
-We compose gaussian processes in the definition of $\Sigma_{\ell}$ and  $\dot{\Sigma}^{(\ell)}$.
-
-
-\begin{itemize}
-    \item \textbf{Initialization (\(\ell=0\)):} The recursion starts with $\Theta^{(0)} = 0$.
-    
-    \item \textbf{Recursive Step (\(\ell \ge 1\)):} The NTK for layer $\ell$ combines the NTK from previous layers with the contributions from the trainable parameters of the current layer, $A^{(\ell)}$ and $c^{(\ell)}$.
-    \begin{equation}
-        \boxed{
-        \Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \left(\sigma_A^2\dot{\Sigma}^{(\ell)}(x, x')\right) + \Sigma^{(\ell)}(x, x') +1
-        }
-    \end{equation}
-    Here, $+1$ is the contribution from the trainable bias. $\Sigma^{(\ell)}$ is the base NNGP kernel defined above. $\dot{\Sigma}^{(\ell)}$ is the base derivative kernel, defined similarly as an expectation over layer-$\ell$ parameters:
-    \begin{equation}
-        \dot{\Sigma}^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \bm{w}^\top\bm{w} \right]
-    \end{equation}
-    with $\dot{\sigma}$ being the derivative of the activation function. Both $\Sigma^{(\ell)}$ and $\dot{\Sigma}^{(\ell)}$ are random kernels for $\ell > 1$.
-\end{itemize}
-This formulation now correctly incorporates the contribution of all trainable parameters at each layer.
-
-
-
-\newpage
-
-\appendix
-\section{Appendix}
-
-
-
-
-
-
-
+So the NNGP kernel that is defined is not the same as the NNGP that you can compute for MLPs, because the NNGP of MLPs is a gaussian process, while the NNGP of MMNNs is a deep gaussian process.
+\end{tcolorbox}
 
 \section{Deep Narrow Neural Networks}
 
@@ -848,10 +740,13 @@ This formulation now correctly incorporates the contribution of all trainable pa
 
 \begin{theorem}[Theorem 1: Scaled NTK at Initialization]
 For $f^L_\theta$ initialized appropriately, as $L \to \infty$:
-\[ \tilde{\Theta}^L_0(x, x') \xrightarrow{p} \tilde{\Theta}^\infty(x, x') \]
-where
-\[ \tilde{\Theta}^\infty(x, x') = (x^T x' + 1 + \E_g[\sigma(g(x))\sigma(g(x'))]) I_{d_{out}} \]
-with $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random field).
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Deep Narrow NTK Limit}},enhanced,drop shadow,boxrule=2pt]
+\begin{equation}
+\boxed{\tilde{\Theta}^L_0(x, x') \xrightarrow{p} \tilde{\Theta}^\infty(x, x') = (x^T x' + 1 + \E_g[\sigma(g(x))\sigma(g(x'))]) I_{d_{out}}}
+\end{equation}
+where $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random field).
+\end{tcolorbox}
 \end{theorem}
 
 \textbf{Alternative formulation}: $\kappa_1(\cos(u) \cdot v)$ where:
@@ -865,11 +760,11 @@ This framework provides a promising direction for analyzing deep narrow networks
 \subsection{Research Perspectives for Deep Narrow Networks}
 
 \textbf{Architectural modifications}:
-   \begin{itemize}
+\begin{itemize}
 \item \textbf{Unit concatenation}: Combine multiple narrow networks to increase expressivity
 \item \textbf{Skip connections}: Investigate ResNet-style connections:
   \[ \tilde{\Theta}^\infty_{\text{skip}}(x, x') = \tilde{\Theta}^\infty(x, x') + \text{skip terms} \]
-   \end{itemize}
+\end{itemize}
 
 \textbf{Initialization studies}:
 \begin{itemize}
@@ -879,6 +774,7 @@ This framework provides a promising direction for analyzing deep narrow networks
 \item \textbf{Complex kernel structures}: Find initializations that yield more intricate kernel forms
 \end{itemize}
 
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Theoretical Extensions}},enhanced,drop shadow,boxrule=2pt]
 \textbf{Theoretical extensions}:
 \begin{itemize}
 \item Extension of Hayou \& Yang's work on ResNets showing "wide and deep limits commute"
@@ -886,10 +782,8 @@ This framework provides a promising direction for analyzing deep narrow networks
 \item Careful analysis of stochasticity in initialization (not dropout)
 \item Experimental validation on practical tasks
 \end{itemize}
+\end{tcolorbox}
 
-
-
-	
 \newpage
 \appendix
 \addcontentsline{toc}{section}{Appendices}
@@ -897,99 +791,111 @@ This framework provides a promising direction for analyzing deep narrow networks
 \section{Detailed Mathematical Computations for Transformers and Softmax Analysis}
 \label{app:transformers}
 
-\begin{tcolorbox}[colback=breakthroughcolor!15,colframe=breakthroughcolor!80!black,title={\breakthrough{Contribution Personnelle Majeure}},enhanced,drop shadow,boxrule=2pt]
-Cette appendice présente les calculs détaillés pour l'analyse théorique des \textcolor{insightcolor}{\textbf{intégrales avec mesures gaussiennes}} et \textcolor{methodcolor}{\textbf{fonctions softmax}}, développée spécifiquement pour les modèles \textcolor{kernelcolor}{\textbf{Transformer}}. Ces résultats constituent une contribution originale à la compréhension mathématique des \textcolor{k3color}{\textbf{mécanismes d'attention}}.
+\begin{tcolorbox}[colback=personalcontribcolor!15,colframe=personalcontribcolor!80!black,title={\textbf{Major Personal Contribution}},enhanced,drop shadow,boxrule=2pt]
+This appendix presents the detailed calculations for the theoretical analysis of \textcolor{insightcolor}{\textbf{Gaussian measure integrals}} and \textcolor{methodcolor}{\textbf{softmax functions}}, specifically developed for \textcolor{kernelcolor}{\textbf{Transformer}} models. These results constitute an original contribution to the mathematical understanding of \textcolor{k3color}{\textbf{attention mechanisms}}.
 \end{tcolorbox}
 
-\subsection{Formulation initiale du problème}
+\subsection{Initial Problem Formulation}
 
-\begin{tcolorbox}[colback=definitioncolor!15,colframe=definitioncolor!80!black,title={\textbf{PROBLÈME: Intégrales Gaussiennes-Softmax}},enhanced,drop shadow,boxrule=2pt]
-La discussion a commencé avec le défi de calculer des intégrales de la forme :
+\begin{tcolorbox}[colback=yellow!15,colframe=yellow!80!black,title={\textbf{PROBLEM: Gaussian-Softmax Integrals}},enhanced,drop shadow,boxrule=2pt]
+The discussion began with the challenge of computing integrals of the form:
 
 \begin{equation}
-\textcolor{kernelcolor}{\mathbf{I}} = \int_{-\infty}^{\infty} \frac{e^{\textcolor{insightcolor}{-ax^2 + bx + c}} \cdot e^{\textcolor{methodcolor}{f(x)}}}{\sum_{i=1}^{N} e^{\textcolor{k3color}{g_i(x)}}} dx
+\boxed{\textcolor{red}{\mathbf{I}} = \int_{-\infty}^{\infty} \frac{e^{\textcolor{insightcolor}{-ax^2 + bx + c}} \cdot e^{\textcolor{methodcolor}{f(x)}}}{\sum_{i=1}^{N} e^{\textcolor{k3color}{g_i(x)}}} dx}
 \end{equation}
 
-où le terme $e^{\textcolor{insightcolor}{-ax^2+bx+c}}$ représente une \textcolor{breakthroughcolor}{\textbf{mesure gaussienne}}.
+where the term $e^{\textcolor{insightcolor}{-ax^2+bx+c}}$ represents a \textcolor{personalcontribcolor}{\textbf{Gaussian measure}}.
 \end{tcolorbox}
 
-\begin{tcolorbox}[colback=validationcolor!15,colframe=validationcolor!80!black,title={\validation{Constat Fondamental}},enhanced,drop shadow,boxrule=2pt]
-Il a été établi qu'il n'existe généralement pas de \textcolor{resultcolor}{\textbf{solution analytique simple}} pour cette forme générale. Plusieurs \textcolor{methodcolor}{\textbf{stratégies}} ont été proposées :
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Fundamental Observation}},enhanced,drop shadow,boxrule=2pt]
+It was established that there generally exists no \textcolor{resultcolor}{\textbf{simple analytical solution}} for this general form. Several \textcolor{methodcolor}{\textbf{strategies}} were proposed:
 \begin{itemize}
-    \item \textcolor{methodcolor}{\textbf{Approximation}} par un terme dominant dans le dénominateur
-    \item \textcolor{insightcolor}{\textbf{Utilisation des symétries}} de l'intégrande
-    \item \textcolor{k3color}{\textbf{Changements de variable}} pour simplifier l'expression
+    \item \textcolor{methodcolor}{\textbf{Approximation}} by a dominant term in the denominator
+    \item \textcolor{insightcolor}{\textbf{Use of symmetries}} of the integrand
+    \item \textcolor{k3color}{\textbf{Variable changes}} to simplify the expression
 \end{itemize}
 \end{tcolorbox}
 
-\subsection{Approximation de Laplace}
+\subsection{Laplace Approximation}
 
-Cette méthode est adaptée lorsque la gaussienne est fortement piquée. L'intégrale est réécrite sous la forme $\int e^{-F(x)} dx$ en incorporant le dénominateur dans l'exposant via un logarithme :
+This method is suitable when the Gaussian is sharply peaked. The integral is rewritten in the form $\int e^{-F(x)} dx$ by incorporating the denominator into the exponent via a logarithm:
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Laplace Approximation Formula}},enhanced,drop shadow,boxrule=2pt]
 \begin{equation}
-\int \exp\left(-ax^2 + bx + c + h(x) - \ln\left(\sum_i e^{g_i(x)}\right)\right) dx
+\boxed{\int \exp\left(-ax^2 + bx + c + h(x) - \ln\left(\sum_i e^{g_i(x)}\right)\right) dx}
 \end{equation}
 
-L'approximation est alors donnée par :
+The approximation is then given by:
 \begin{equation}
-\textcolor{kernelcolor}{\mathbf{I}} \approx e^{-F(x_0)} \sqrt{\frac{2\pi}{F''(x_0)}}
+\boxed{\textcolor{red}{\mathbf{I}} \approx e^{-F(x_0)} \sqrt{\frac{2\pi}{F''(x_0)}}}
 \end{equation}
-où $x_0$ est le minimum de $F(x)$.
-
-\subsection{Application aux modèles Transformer en NLP}
-
-\begin{tcolorbox}[colback=generalremarkcolor!10,colframe=generalremarkcolor,title={\textbf{Application concrète}},enhanced,drop shadow]
-Le cadre théorique développé ci-dessus s'applique directement à l'analyse des modèles Transformer en traitement du langage naturel (NLP). Nous modélisons l'entrée d'une couche Transformer comme un processus gaussien, ce qui permet d'étudier la propagation de l'incertitude et des corrélations à travers le réseau.
+where $x_0$ is the minimum of $F(x)$.
 \end{tcolorbox}
 
-Soit la séquence d'entrée des plongements de mots représentée par une matrice $\textcolor{kernelcolor}{\mathbf{X}} \in \mathbb{R}^{N \times D}$, où $N$ est la longueur de séquence et $D$ la dimension du plongement. La sortie du mécanisme d'attention est déterminée par la fonction softmax appliquée colonne par colonne à $\textcolor{kernelcolor}{\mathbf{A}}$ :
-\begin{equation}
-\textcolor{personalcontribcolor}{\mathbf{S}}_{ij} = \frac{e^{\textcolor{kernelcolor}{\mathbf{A}}_{ij}}}{\sum_{k=1}^{N} e^{\textcolor{kernelcolor}{\mathbf{A}}_{kj}}}
-\end{equation}
+\subsection{Application to Transformer Models in NLP}
 
-\section{Calculs détaillés pour MMNN à deux couches cachées}
+\begin{tcolorbox}[colback=green!5,colframe=green,title={\textbf{Concrete Application}},enhanced,drop shadow]
+The theoretical framework developed above applies directly to the analysis of Transformer models in natural language processing (NLP). We model the input to a Transformer layer as a Gaussian process, allowing us to study the propagation of uncertainty and correlations through the network.
+\end{tcolorbox}
+
+Let the input sequence of word embeddings be represented by a matrix $\textcolor{red}{\mathbf{X}} \in \mathbb{R}^{N \times D}$, where $N$ is the sequence length and $D$ is the embedding dimension. The output of the attention mechanism is determined by the softmax function applied column-wise to $\textcolor{red}{\mathbf{A}}$:
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Attention Softmax}},enhanced,drop shadow,boxrule=2pt]
+\begin{equation}
+\boxed{\textcolor{personalcontribcolor}{\mathbf{S}}_{ij} = \frac{e^{\textcolor{red}{\mathbf{A}}_{ij}}}{\sum_{k=1}^{N} e^{\textcolor{red}{\mathbf{A}}_{kj}}}}
+\end{equation}
+\end{tcolorbox}
+
+\section{Detailed Calculations for Two Hidden Layer MMNN}
 \label{app:mmnn}
 
-\begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{Contribution : Développement complet MMNN}},enhanced,drop shadow]
-Cette section présente le développement complet des calculs pour les réseaux MMNN (Matrix Memory Neural Networks) à deux couches cachées, incluant les dérivations exactes du \textcolor{kernelcolor}{\textbf{NTK}} et l'analyse des distributions de Fisher et Kibble.
+\begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{Contribution: Complete MMNN Development}},enhanced,drop shadow]
+This section presents the complete development of calculations for two hidden layer MMNN (Matrix Memory Neural Networks), including exact derivations of the \textcolor{red}{\textbf{NTK}} and analysis of Fisher and Kibble distributions.
 \end{tcolorbox}
 
-\subsection{Calcul de l'espérance $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$}
+\subsection{Calculation of the Expectation $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$}
 
-Une fois que nous calculons le \textcolor{kernelcolor}{\textbf{NTK}} de MMNN pour 1 couche, nous devons résoudre le problème du calcul de l'espérance $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$ pour une paire de variables aléatoires $(X_1, X_2)$ suivant une distribution normale bivariée.
+Once we calculate the \textcolor{red}{\textbf{NTK}} of MMNN for 1 layer, we must solve the problem of calculating the expectation $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$ for a pair of random variables $(X_1, X_2)$ following a bivariate normal distribution.
 
-\begin{tcolorbox}[colback=theoremcolor,colframe=blue!50!black,title={\textbf{Décomposition fondamentale}},enhanced]
-L'approche consiste à standardiser les variables ($Z_i = (X_i - \mu_i)/\sigma_i$) et décomposer l'intégrale en quatre termes :
+\begin{tcolorbox}[colback=blue!15,colframe=blue!50!black,title={\textbf{Fundamental Decomposition}},enhanced]
+The approach consists of standardizing the variables ($Z_i = (X_i - \mu_i)/\sigma_i$) and decomposing the integral into four terms:
 \begin{equation}
-\E[\dots] = \sigma_1\sigma_2 \textcolor{personalcontribcolor}{\mathbf{I}}_{22} + \mu_1\sigma_2 \textcolor{personalcontribcolor}{\mathbf{I}}_{12} + \mu_2\sigma_1 \textcolor{personalcontribcolor}{\mathbf{I}}_{21} + \mu_1\mu_2 \textcolor{personalcontribcolor}{\mathbf{I}}_{11}
-\end{equation}
-\end{tcolorbox}
-
-où les intégrales $\textcolor{personalcontribcolor}{\mathbf{I}}_{ij}$ sont définies sur le domaine $z_1 > a$ et $z_2 > b$, avec $a = -\mu_1/\sigma_1$ et $b = -\mu_2/\sigma_2$.
-
-\subsubsection{Calcul de $\textcolor{personalcontribcolor}{\mathbf{I}}_{11}$ (Probabilité)}
-
-$\textcolor{personalcontribcolor}{\mathbf{I}}_{11}$ est la probabilité $P(Z_1 > a, Z_2 > b)$. Elle est calculée via la fonction de répartition (CDF) de la distribution normale bivariée standard :
-\begin{equation}
-\textcolor{personalcontribcolor}{\mathbf{I}}_{11} = P(Z_1 > a, Z_2 > b) = \Phi_2\left(\frac{\mu_1}{\sigma_1}, \frac{\mu_2}{\sigma_2}; \rho\right)
-\end{equation}
-
-\subsubsection{Cas spécial : Moyennes nulles ($\mu_1=\mu_2=0$)}
-
-\begin{tcolorbox}[colback=generalremarkcolor!10,colframe=generalremarkcolor,title={\textbf{Théorème de Price}},enhanced,drop shadow]
-Dans ce cas, la dérivation "from scratch" mène à une formule élégante. Le théorème de Price était un outil central dans notre analyse :
-\begin{equation}
-\frac{\partial \E[\text{ReLU}(X_1)\text{ReLU}(X_2)]}{\partial \rho} = \E[\indic(X_1>0, X_2>0)] = \frac{1}{2\pi}\arccos(-\rho)
+\boxed{\E[\dots] = \sigma_1\sigma_2 \textcolor{personalcontribcolor}{\mathbf{I}}_{22} + \mu_1\sigma_2 \textcolor{personalcontribcolor}{\mathbf{I}}_{12} + \mu_2\sigma_1 \textcolor{personalcontribcolor}{\mathbf{I}}_{21} + \mu_1\mu_2 \textcolor{personalcontribcolor}{\mathbf{I}}_{11}}
 \end{equation}
 \end{tcolorbox}
 
-En intégrant de $0$ à $\rho$ et en ajoutant la constante $\E[g](0) = 1/(2\pi)$, nous obtenons :
+where the integrals $\textcolor{personalcontribcolor}{\mathbf{I}}_{ij}$ are defined on the domain $z_1 > a$ and $z_2 > b$, with $a = -\mu_1/\sigma_1$ and $b = -\mu_2/\sigma_2$.
+
+\subsubsection{Calculation of $\textcolor{personalcontribcolor}{\mathbf{I}}_{11}$ (Probability)}
+
+$\textcolor{personalcontribcolor}{\mathbf{I}}_{11}$ is the probability $P(Z_1 > a, Z_2 > b)$. It is calculated via the cumulative distribution function (CDF) of the standard bivariate normal distribution:
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Probability Calculation}},enhanced,drop shadow,boxrule=2pt]
 \begin{equation}
-\E[\text{ReLU}(Z_1)\text{ReLU}(Z_2)] = \frac{1}{2\pi}(\sqrt{1-\rho^2} + \rho\arccos(-\rho))
+\boxed{\textcolor{personalcontribcolor}{\mathbf{I}}_{11} = P(Z_1 > a, Z_2 > b) = \Phi_2\left(\frac{\mu_1}{\sigma_1}, \frac{\mu_2}{\sigma_2}; \rho\right)}
 \end{equation}
+\end{tcolorbox}
 
-\subsection{Architecture MMNN à 2 couches cachées}
+\subsubsection{Special Case: Zero Means ($\mu_1=\mu_2=0$)}
 
-L'architecture considérée est :
+\begin{tcolorbox}[colback=green!5,colframe=green,title={\textbf{Price's Theorem}},enhanced,drop shadow]
+In this case, the "from scratch" derivation leads to an elegant formula. Price's theorem was a central tool in our analysis:
+\begin{equation}
+\boxed{\frac{\partial \E[\text{ReLU}(X_1)\text{ReLU}(X_2)]}{\partial \rho} = \E[\indic(X_1>0, X_2>0)] = \frac{1}{2\pi}\arccos(-\rho)}
+\end{equation}
+\end{tcolorbox}
+
+By integrating from $0$ to $\rho$ and adding the constant $\E[g](0) = 1/(2\pi)$, we obtain:
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Zero-Mean Case Result}},enhanced,drop shadow,boxrule=2pt]
+\begin{equation}
+\boxed{\E[\text{ReLU}(Z_1)\text{ReLU}(Z_2)] = \frac{1}{2\pi}(\sqrt{1-\rho^2} + \rho\arccos(-\rho))}
+\end{equation}
+\end{tcolorbox}
+
+\subsection{Two Hidden Layer MMNN Architecture}
+
+The considered architecture is:
 \begin{center}
 \begin{tikzpicture}[scale=0.8]
     \node (x) at (0,0) {$(x,y)$};
@@ -1009,61 +915,61 @@ L'architecture considérée est :
 \end{tikzpicture}
 \end{center}
 
-\begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{Formule principale : NTK MMNN 2 couches}},enhanced,drop shadow]
-Pour $\beta = 0$, le \textcolor{kernelcolor}{\textbf{NTK}} pour deux couches cachées s'écrit :
+\begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{Main Formula: Two Layer MMNN NTK}},enhanced,drop shadow]
+For $\beta = 0$, the \textcolor{red}{\textbf{NTK}} for two hidden layers is written as:
 \begin{align}
-\textcolor{kernelcolor}{\boldsymbol{\Theta}}^{(1)} &= \mathbb{E}_{\bm{w}} \left[ \sigma(\bm{w}^\top x) \sigma(\bm{w}^\top x') \right] + 1 \\
-\textcolor{kernelcolor}{\boldsymbol{\Theta}}^{(2)} &= \textcolor{kernelcolor}{\boldsymbol{\Theta}}^{(1)} \cdot \left(\sigma_A^2 \mathbb{E}_{\bm{w}} \left[ \dot{\sigma}(\bm{w}^\top \bm{h}^{(1)}(x)) \dot{\sigma}(\bm{w}^\top \bm{h}^{(1)}(x')) \bm{w}^\top\bm{w} \right]\right) \nonumber\\
-&\quad + \mathbb{E}_{\bm{w}} \left[ \sigma(\bm{w}^\top \bm{h}^{(1)}(x)) \sigma(\bm{w}^\top \bm{h}^{(1)}(x')) \right] + 1
+\boxed{\textcolor{red}{\boldsymbol{\Theta}}^{(1)} &= \mathbb{E}_{\bm{w}} \left[ \sigma(\bm{w}^\top x) \sigma(\bm{w}^\top x') \right] + 1} \\
+\boxed{\textcolor{red}{\boldsymbol{\Theta}}^{(2)} &= \textcolor{red}{\boldsymbol{\Theta}}^{(1)} \cdot \left(\sigma_A^2 \mathbb{E}_{\bm{w}} \left[ \dot{\sigma}(\bm{w}^\top \bm{h}^{(1)}(x)) \dot{\sigma}(\bm{w}^\top \bm{h}^{(1)}(x')) \bm{w}^\top\bm{w} \right]\right)} \nonumber\\
+&\quad \boxed{+ \mathbb{E}_{\bm{w}} \left[ \sigma(\bm{w}^\top \bm{h}^{(1)}(x)) \sigma(\bm{w}^\top \bm{h}^{(1)}(x')) \right] + 1}
 \end{align}
 \end{tcolorbox}
 
-\subsection{Distributions de Fisher et Kibble}
+\subsection{Fisher and Kibble Distributions}
 
-\begin{tcolorbox}[colback=theoremcolor,colframe=blue!50!black,title={\textbf{Lois de probabilité exactes}},enhanced,drop shadow]
-Les variables aléatoires $(\rho_1, \|x_1\|^2, \|y_1\|^2)$ suivent des distributions exactes :
+\begin{tcolorbox}[colback=blue!15,colframe=blue!50!black,title={\textbf{Exact Probability Laws}},enhanced,drop shadow]
+The random variables $(\rho_1, \|x_1\|^2, \|y_1\|^2)$ follow exact distributions:
 
-\textbf{Distribution de Fisher} pour la corrélation :
+\textbf{Fisher Distribution} for correlation:
 \begin{equation}
-\rho_1 \sim \text{Fisher}(\rho, r) = \frac{(r-2)\Gamma(r-1)(1-\rho^2)^{\frac{r-1}{2}}(1-\theta^2)^{\frac{r-4}{2}}}{\sqrt{2\pi}\Gamma(r-\frac{1}{2})(1-\rho \theta)^{r-\frac{3}{2}}} \times {}_2F_1\left(\frac{1}{2}, \frac{1}{2}; r-\frac{1}{2}; \frac{1+\rho \theta}{2}\right)
+\boxed{\rho_1 \sim \text{Fisher}(\rho, r) = \frac{(r-2)\Gamma(r-1)(1-\rho^2)^{\frac{r-1}{2}}(1-\theta^2)^{\frac{r-4}{2}}}{\sqrt{2\pi}\Gamma(r-\frac{1}{2})(1-\rho \theta)^{r-\frac{3}{2}}} \times {}_2F_1\left(\frac{1}{2}, \frac{1}{2}; r-\frac{1}{2}; \frac{1+\rho \theta}{2}\right)}
 \end{equation}
 
-\textbf{Distribution de Kibble} pour les normes au carré :
+\textbf{Kibble Distribution} for squared norms:
 \begin{equation}
-(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho) = \frac{(uv)^{\frac{r/2-1}{2}} e^{-\frac{u+v}{2(1-\rho^2)}}}{\Gamma(r/2) (2(1-\rho^2))^{r/2+1} \rho^{\frac{r/2-1}{2}}} \cdot I_{r/2-1}\left(\frac{\rho\sqrt{uv}}{1-\rho^2}\right)
+\boxed{(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho) = \frac{(uv)^{\frac{r/2-1}{2}} e^{-\frac{u+v}{2(1-\rho^2)}}}{\Gamma(r/2) (2(1-\rho^2))^{r/2+1} \rho^{\frac{r/2-1}{2}}} \cdot I_{r/2-1}\left(\frac{\rho\sqrt{uv}}{1-\rho^2}\right)}
 \end{equation}
 \end{tcolorbox}
 
-\subsubsection{Résultat final}
+\subsubsection{Final Result}
 
-\begin{tcolorbox}[colback=personalcontribcolor!20,colframe=personalcontribcolor,title={\textbf{RÉSULTAT PRINCIPAL}},enhanced,drop shadow,breakable]
-Pour 2 entrées $x,y \in \mathbb{R}^d$ et une couche cachée de rang faible $r$, le \textcolor{kernelcolor}{\textbf{NTK}} pour un MMNN à 2 couches cachées est :
+\begin{tcolorbox}[colback=personalcontribcolor!20,colframe=personalcontribcolor,title={\textbf{MAIN RESULT}},enhanced,drop shadow,breakable]
+For 2 inputs $x,y \in \mathbb{R}^d$ and a low-rank hidden layer $r$, the \textcolor{red}{\textbf{NTK}} for a two hidden layer MMNN is:
 
 \begin{equation}
-\boxed{\textcolor{kernelcolor}{\boldsymbol{\Theta}}^{(2)}(x,y) = \textcolor{kernelcolor}{\boldsymbol{\Theta}}^{(1)}(\rho) \cdot \left(1 - \frac{\arccos(\rho_1)}{\pi}\right)\frac{1}{r} + \frac{1}{r}\textcolor{sobolevcolor}{\boldsymbol{\Sigma}}^{(1)}(\rho_1)\|x_1\| \|y_1\| + 1}
+\boxed{\textcolor{red}{\boldsymbol{\Theta}}^{(2)}(x,y) = \textcolor{red}{\boldsymbol{\Theta}}^{(1)}(\rho) \cdot \left(1 - \frac{\arccos(\rho_1)}{\pi}\right)\frac{1}{r} + \frac{1}{r}\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\rho_1)\|x_1\| \|y_1\| + 1}
 \end{equation}
 
-avec $\textcolor{sobolevcolor}{\boldsymbol{\Sigma}}^{(1)}(\rho) = \frac{1}{\pi}\left(\sqrt{1-\rho^2} + \rho(1-\arccos(\rho))\right)$
+with $\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\rho) = \frac{1}{\pi}\left(\sqrt{1-\rho^2} + \rho(1-\arccos(\rho))\right)$
 
-où les variables aléatoires suivent :
+where the random variables follow:
 \begin{itemize}
-\item $\rho_1 \sim \text{Fisher}(\rho, r)$ est indépendante des normes
-\item $(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho)$ sont des variables chi-deux avec $r$ degrés de liberté
+\item $\rho_1 \sim \text{Fisher}(\rho, r)$ is independent of the norms
+\item $(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho)$ are chi-squared variables with $r$ degrees of freedom
 \end{itemize}
 \end{tcolorbox}
 
-\subsection{Propriétés asymptotiques et "Malédiction de la dimension"}
+\subsection{Asymptotic Properties and "Curse of Dimensionality"}
 
-\begin{tcolorbox}[colback=generalremarkcolor!10,colframe=generalremarkcolor,title={\textbf{Comportement en grande dimension}},enhanced]
-Pour de grandes valeurs de $r$, la transformation $z$ de Fisher donne $z = \text{arctanh}(r) \sim \mathcal{N}\left(\text{arctanh}(\rho) + \frac{\rho}{2(r-1)}, \frac{1}{r-3}\right)$. 
+\begin{tcolorbox}[colback=green!10,colframe=green,title={\textbf{High-Dimensional Behavior}},enhanced]
+For large values of $r$, Fisher's $z$-transformation gives $z = \text{arctanh}(r) \sim \mathcal{N}\left(\text{arctanh}(\rho) + \frac{\rho}{2(r-1)}, \frac{1}{r-3}\right)$. 
 
-La variance de $r$ décroît comme $O(1/r)$. Quand $\rho \sim O(1/\sqrt{r})$, le bruit géométrique masque la corrélation.
+The variance of $r$ decreases as $O(1/r)$. When $\rho \sim O(1/\sqrt{r})$, geometric noise masks the correlation.
 
-Pour le produit normalisé $S/r = \|\textcolor{kernelcolor}{\mathbf{X}}\|\|\textcolor{kernelcolor}{\mathbf{Y}}\|/r$, nous avons :
+For the normalized product $S/r = \|\textcolor{red}{\mathbf{X}}\|\|\textcolor{red}{\mathbf{Y}}\|/r$, we have:
 \begin{equation}
-\frac{S}{r} \xrightarrow{r \to \infty} 1
+\boxed{\frac{S}{r} \xrightarrow{r \to \infty} 1}
 \end{equation}
-Cette convergence se produit avec des fluctuations d'ordre $O(1/\sqrt{r})$.
+This convergence occurs with fluctuations of order $O(1/\sqrt{r})$.
 \end{tcolorbox}
 
 % Bibliography

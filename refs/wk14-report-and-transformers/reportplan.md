@@ -118,6 +118,8 @@ be careful with d/2
 bien détailler la def des chebyshev points, aussi pour c_i=1/n
 provide proof in appendices
 
+
+faire une revue de littérature en appendix et sur internet
 analyse du x12(2015) : acknowledgements, resume & abstract
 intro avec images très générales, et declaration
 option, champ, directeurs, d'option et de stage, dates, nom de l'organisme
