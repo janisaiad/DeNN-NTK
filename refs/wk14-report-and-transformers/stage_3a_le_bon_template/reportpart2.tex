@@ -26,7 +26,7 @@
 \definecolor{weightcolor}{RGB}{101,67,33}         % we use dark brown for weights w
 \definecolor{relucolor}{RGB}{64,64,64}            % we use dark grey for relu activation
 \definecolor{k3color}{RGB}{148,0,211}             % we use purple for k^{(3)} specifically
-
+\definecolor{greencolor}{RGB}{0,128,0}    % we use green for writing
 % Additional colors for enhanced mathematical presentation
 \definecolor{lighttheoremcolor}{RGB}{240,248,255} % we use light blue for theorem boxes
 \definecolor{lightdefinitioncolor}{RGB}{255,248,240} % we use light orange for definition boxes
@@ -556,7 +556,7 @@ This establishes a critical relationship between the variance of the trainable w
 
 
 
-\section{NTK formulas for MMNNs}
+\section{Personal contribution: NTK formulas for MMNNs}
 
 \subsection{NTK for a Single-Layer MMFN}
 \label{sec:single_layer_mmfn}
@@ -660,8 +660,20 @@ For a multi-layer MMNN with $\ReLU$ activation, the NTK satisfies the recursive 
 \end{equation}
 where $\dot{\Sigma}^{(\ell)}$ is the derivative of the NNGP kernel with respect to the pre-activation.
 \end{tcolorbox}
+\begin{proof}
+The complete proof of this recursion relation is provided in Appendix A.
+\end{proof}
 \end{theorem}
 
+\subsubsection{Parameter Influence on NTK Preconditioning}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Activation and Bias Influence on NTK}},enhanced,drop shadow,boxrule=2pt]
+The NTK behavior can be systematically controlled through two key parameters that serve as natural preconditioning mechanisms:
+
+\textbf{1. Activation Function Choice:} The choice of $\sigma$ directly and its convexity affect both $\Sigma^{(\ell)}$ and $\dot{\Sigma}^{(\ell)}$ kernels. For $\ReLU$, we obtain specific analytical forms that enable tractable computations, while alternative activations (sigmoid, tanh) modify the kernel's spectral properties and convergence behavior.
+
+\textbf{2. Bias Parameter $\boldsymbol{\beta}$:} The bias scaling $\beta$ controls NTK preconditioning. Setting $\beta = 0$ yields centered pre-activations, while $\beta > 0$ improves training stability. This provides direct control over the kernel's spectral properties.
+\end{tcolorbox}
 
 
 
@@ -677,10 +689,7 @@ where $\dot{\Sigma}^{(\ell)}$ is the derivative of the NNGP kernel with respect 
 
 
 
-
-
-
-\subsection{NTK Kernel \(\Theta^{(\ell)}\) Recursion}
+\subsection{Personal contribution: NTK Kernel \(\Theta^{(\ell)}\) Recursion}
 The NTK is the Gram matrix of function gradients. For any finite width, it is a random matrix. The following recursion describes the relationship between these random kernels in the infinite-width limit.
 
 \begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{NTK Recursion Formula}},enhanced,drop shadow,boxrule=2pt]
@@ -701,28 +710,6 @@ The NTK is the Gram matrix of function gradients. For any finite width, it is a 
 \end{itemize}
 \end{tcolorbox}
 
-\begin{tcolorbox}[colback=blue!15,colframe=blue!80!black,title={\textbf{Summary of Formulas}},enhanced,drop shadow,boxrule=2pt]
-\begin{itemize}
-    \item \textbf{Layer Output:}
-    \[ \boxed{\bm{h}^{(\ell)}(\bm{x}) = \bm{c}^{(\ell)} + \frac{\sigma_A}{\sqrt{n_\ell}} \sum_{j=1}^{n_\ell} \bm{A}_j^{(\ell)} \sigma\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)}\right)} \]
-
-    \item \textbf{NNGP Kernel Recursion:}
-    \begin{itemize}
-        \item \textit{Base Kernel:} Expectation over current layer's random parameters, conditioned on the previous layer's output GP $\bm{h}^{(\ell-1)}$.
-        \[ \boxed{\Sigma^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \right]} \]
-        \item \textit{Full Kernel:}
-        \[ \boxed{\mathcal{K}_{\text{NNGP}}^{(\ell)}(x, x') = \sigma_A^2 \Sigma^{(\ell)}(x, x') + \sigma_c^2} \]
-    \end{itemize}
-
-    \item \textbf{NTK Kernel Recursion:}
-    \begin{itemize}
-        \item \textit{Base Derivative Kernel:}
-        \[ \boxed{\dot{\Sigma}^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \bm{w}^\top\bm{w} \right]} \]
-        \item \textit{Full Kernel:}
-        \[ \boxed{\Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \sigma_A^2  \dot{\Sigma}^{(\ell)}(x, x') + \Sigma^{(\ell)}(x, x')+1} \]
-    \end{itemize}
-\end{itemize}
-\end{tcolorbox}
 
 
 
@@ -731,11 +718,13 @@ The NTK is the Gram matrix of function gradients. For any finite width, it is a 
 
 
 
-\subsection{Two Hidden Layer MMNN Architecture}
+\subsection{Personal contribution: Two Hidden Layer MMNN Architecture NTK analysis}
+The purpose of this analysis is mainly to expose what the NTK should be when compared in the minimal setup against standard multi-layer perceptron.
+Which means with 2 hidden layers, that is low rank for MMNNs.
 
 The considered architecture is:
 \begin{center}
-\begin{tikzpicture}[scale=0.8]
+\begin{tikzpicture}[scale=0.6]
     \node (x) at (0,0) {$(x,y)$};
     \node (h1) at (3,0) {$\bm{h}_1$};
     \node (r) at (6,0) {$\textcolor{k3color}{\bm{r}}$};
@@ -752,7 +741,6 @@ The considered architecture is:
     \node[below] at (9,-0.5) {$N$};
 \end{tikzpicture}
 \end{center}
-
 \begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{Main Formula: Two Layer MMNN NTK}},enhanced,drop shadow]
 For $\beta = 0$, the \textcolor{red}{\textbf{NTK}} for two hidden layers is written as:
 \begin{align}
@@ -763,46 +751,40 @@ For $\beta = 0$, the \textcolor{red}{\textbf{NTK}} for two hidden layers is writ
 \end{tcolorbox}
 
 
-\subsection{Fisher and Kibble Distributions}
 
-\begin{tcolorbox}[colback=blue!15,colframe=blue!50!black,title={\textbf{Exact Probability Laws}},enhanced,drop shadow]
-The random variables $(\rho_1, \|x_1\|^2, \|y_1\|^2)$ follow exact distributions:
 
-\textbf{Fisher Distribution} for correlation:
-\begin{equation}
-\boxed{\rho_1 \sim \text{Fisher}(\rho, r) = \frac{(r-2)\Gamma(r-1)(1-\rho^2)^{\frac{r-1}{2}}(1-\theta^2)^{\frac{r-4}{2}}}{\sqrt{2\pi}\Gamma(r-\frac{1}{2})(1-\rho \theta)^{r-\frac{3}{2}}} \times {}_2F_1\left(\frac{1}{2}, \frac{1}{2}; r-\frac{1}{2}; \frac{1+\rho \theta}{2}\right)}
-\end{equation}
 
-\textbf{Kibble Distribution} for squared norms:
-\begin{equation}
-\boxed{(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho) = \frac{(uv)^{\frac{r/2-1}{2}} e^{-\frac{u+v}{2(1-\rho^2)}}}{\Gamma(r/2) (2(1-\rho^2))^{r/2+1} \rho^{\frac{r/2-1}{2}}} \cdot I_{r/2-1}\left(\frac{\rho\sqrt{uv}}{1-\rho^2}\right)}
-\end{equation}
+\begin{tcolorbox}[colback=green!15,colframe=green!80!black,title={\textbf{Ongoing Research: Deep Network Scaling via Lyapunov Analysis}},enhanced,drop shadow,boxrule=2pt]
+The MMNN structure presented above is \textbf{particularly interesting} for analyzing deep networks with growing number of layers $L$. We can employ \textbf{Lyapunov analysis} to study the products of independent random variables that emerge through the layer-wise recursions. This approach allows us to derive the expected \textbf{scaling behavior with respect to depth $L$}, which is crucial for understanding the dynamics of very deep networks.
+
+This scaling analysis through products of random matrices is precisely what we are pursuing in our \textbf{current investigations}, extending the two-layer results to arbitrary depth and characterizing the geometric properties of the resulting kernel evolution.
 \end{tcolorbox}
+
 
 \subsubsection{Final Result}
 
-\begin{tcolorbox}[colback=personalcontribcolor!20,colframe=personalcontribcolor,title={\textbf{MAIN RESULT}},enhanced,drop shadow,breakable]
+\begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{MAIN RESULT}},enhanced,drop shadow,breakable]
 For 2 inputs $x,y \in \mathbb{R}^d$ and a low-rank hidden layer $r$, the \textcolor{red}{\textbf{NTK}} for a two hidden layer MMNN is:
 
 \begin{equation}
-\boxed{\textcolor{red}{\boldsymbol{\Theta}}^{(2)}(x,y) = \textcolor{red}{\boldsymbol{\Theta}}^{(1)}(\rho) \cdot \left(1 - \frac{\arccos(\rho_1)}{\pi}\right)\frac{1}{r} + \frac{1}{r}\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\rho_1)\|x_1\| \|y_1\| + 1}
+\boxed{\textcolor{red}{\boldsymbol{\Theta}}^{(2)}(x,y) = \textcolor{red}{\boldsymbol{\Theta}}^{(1)}(\textcolor{magenta}{\rho}) \cdot \left(1 - \frac{\arccos(\textcolor{magenta}{\rho_1})}{\pi}\right)\frac{1}{r} + \frac{1}{r}\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\textcolor{magenta}{\rho_1})\|x_1\| \|y_1\| + 1}
 \end{equation}
 
-with $\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\rho) = \frac{1}{\pi}\left(\sqrt{1-\rho^2} + \rho(1-\arccos(\rho))\right)$
+with $\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\textcolor{magenta}{\rho}) = \frac{1}{\pi}\left(\sqrt{1-\textcolor{magenta}{\rho}^2} + \textcolor{magenta}{\rho}(1-\arccos(\textcolor{magenta}{\rho}))\right)$
 
 where the random variables follow:
 \begin{itemize}
-\item $\rho_1 \sim \text{Fisher}(\rho, r)$ is independent of the norms
-\item $(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho)$ are chi-squared variables with $r$ degrees of freedom
+\item $\textcolor{magenta}{\rho_1} \sim \text{Fisher}(\textcolor{magenta}{\rho}, r)$ is independent of the norms
+\item $(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \textcolor{magenta}{\rho})$ are chi-squared variables with $r$ degrees of freedom
 \end{itemize}
-\end{tcolorbox}
+\end{tcolorbox} 
 
 \subsection{Asymptotic Properties and "Curse of Dimensionality"}
 
 \begin{tcolorbox}[colback=green!10,colframe=green,title={\textbf{High-Dimensional Behavior}},enhanced]
-For large values of $r$, Fisher's $z$-transformation gives $z = \text{arctanh}(r) \sim \mathcal{N}\left(\text{arctanh}(\rho) + \frac{\rho}{2(r-1)}, \frac{1}{r-3}\right)$. 
+For large values of $r$, Fisher's $z$-transformation gives $z = \text{arctanh}(\rho_1) \sim \mathcal{N}\left(\text{arctanh}(\rho) + \frac{\rho}{2(r-1)}, \frac{1}{r-3}\right)$. 
 
-The variance of $r$ decreases as $O(1/r)$. When $\rho \sim O(1/\sqrt{r})$, geometric noise masks the correlation.
+The variance of $\rho_1$ decreases as $O(1/r)$. When $\rho \sim O(1/\sqrt{r})$, geometric noise masks the correlation.
 
 For the normalized product $S/r = \|\textcolor{red}{\mathbf{X}}\|\|\textcolor{red}{\mathbf{Y}}\|/r$, we have:
 \begin{equation}
@@ -821,31 +803,21 @@ This convergence occurs with fluctuations of order $O(1/\sqrt{r})$.
 
 
 
-
-
-
-
-
-
 \newpage
-\section{Future Work and conclusion}
+\section{Personal contribution: Future Work and conclusion}
+
 The initial results are promising and open several avenues for both numerical and theoretical investigation.
 
-\subsection{Numerical Investigations}
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Numerical Investigations}},enhanced,drop shadow,boxrule=2pt]
 \begin{itemize}
     \item \textbf{Integration Accuracy:} Increase the network width/rank used for numerical integration to confirm that the observed phenomena are stable as we better approach the infinite-width limit.
 \end{itemize}
+\end{tcolorbox}
 
-\subsection{Mathematical Investigations}
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Mathematical Investigations: Spectrum Analysis}},enhanced,drop shadow,boxrule=2pt]
 A primary focus of future theoretical work will be to precisely characterize the spectrum of the MMNN's NTK operator using a trifecta of advanced analytical techniques.
 
-\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Role of the Bias Parameter $\beta$}},enhanced,drop shadow,boxrule=2pt]
-Our analysis has consistently included the random bias term $\beta b$, which makes the pre-activations non-centered and is a core feature of the MMNN model. However, for mathematical tractability, it is common in the NTK literature for MLPs to first analyze the system in a simplified, bias-free regime ($\beta=0$). This path offers two avenues:
-\begin{itemize}
-    \item Analyze the kernel at $\beta=0$. While losing the specific non-centered interpretation, this could yield cleaner mathematical results as a first step.
-    \item Perform a Taylor expansion (développement limité) of the kernel functions with respect to $\beta$ around $\beta=0$. This would allow us to systematically study the impact of the random bias perturbatively and bridge the gap between the simplified and the full model.
-\end{itemize}
-\end{tcolorbox}
+Then we can focus on analyzing the influence of beta to ensure huge beta can or not precondition the NTK gram matrix.
 
 The primary analytical approaches for the spectrum are:
 \begin{itemize}
@@ -853,7 +825,9 @@ The primary analytical approaches for the spectrum are:
     \item \textbf{Spectrum as a Zonal Operator:} A powerful approach is to analyze the NTK as a zonal kernel operator on the sphere. Following the methodology of Murray et al.~\cite{murray2023characterizingspectrumntkpower}, we can seek a power series expansion of the kernel in terms of the Gram matrix ($K = \bm{x}^\top\bm{x}'$). This would allow for a direct characterization of its eigenvalues in terms of Gegenbauer polynomials.
     \item \textbf{Spectrum vs. Depth Analysis:} Adapt the proof methodology from Terj\'{e}k and Gonz\'{a}lez-S\'{a}nchez~\cite{terjek2025mlpseocspectrumntk} to analyze how the NTK spectrum scales with depth $L$. This involves performing a power expansion of the kernel function with respect to the correlation $\rho$.
 \end{itemize}
+\end{tcolorbox}
 
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Mathematical Investigations: Extended Goals}},enhanced,drop shadow,boxrule=2pt]
 Further mathematical goals include:
 \begin{itemize}
     \item \textbf{Connect to Function Decomposition:} Investigate using a uniform distribution for the random weights $\bm{w}$. This choice may align better with the function approximation theory that originally motivated the MMNN architecture. The intuition is that pairs of weights with opposite signs (e.g., $\bm{w}$ and $-\bm{w}$) could create basis functions that compensate for each other, effectively building localized basis functions over intervals defined by the pre-activations—a cornerstone of function decomposition.
@@ -863,36 +837,48 @@ Further mathematical goals include:
     \item \textbf{Theory of Evolving Kernels:} Develop a formal framework for analyzing the dynamics of the low-rank NTK, proving that it remains well-conditioned throughout training under certain assumptions.
     \item \textbf{Analysis of Trainable Activations (PSinTU):} A further avenue is to explore more expressive, trainable activation functions like Parametrized Sinusoidal Transform Unit (PSinTU). While this offers greater flexibility, the NTK analysis becomes significantly more complex as the basis functions themselves are no longer fixed. This will be tackled in a later phase of the research.
 \end{itemize}
-graphy[title=References]
+\end{tcolorbox}
 
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Conclusion: A New Paradigm for NTK Analysis}},enhanced,drop shadow,boxrule=2pt]
+MMNN analysis through NTK theory reveals a fundamental trade-off and framework generalization. Standard NTK theory for MLPs requires quadratic overparameterization to guarantee static kernels and lazy training. MMNNs offer an alternative: entering analyzable, NTK-like regimes with linear parameter scaling.
 
+The cost is kernel evolution: no longer deterministic and static, but a random field evolving during training. This randomness is manageable through high-dimensional probability tools. Deriving concentration bounds (Bernstein-type inequalities) on spectrum and kernel evolution provides robust, probabilistic optimization guarantees. This framework rigorously analyzes MMNN structural priors beyond idealized lazy training.
+\end{tcolorbox}
 
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Outlook: PINNs Application and Wavelet Analogy}},enhanced,drop shadow,boxrule=2pt]
+Major applications target Physics-Informed Neural Networks (PINNs) solving PDEs through neural network training satisfying governing equations. Since MMNNs derive from function decomposition theorems, their architecture naturally suits this purpose.
 
+A powerful analogy connects MMNNs to wavelet transforms, particularly in high dimensions. Wavelets decompose functions onto fixed localized bases; MMNNs learn optimal combinations of rich, random function bases. Classical wavelets suffer dimensionality curses, becoming intractable for high-dimensional problems.
 
+Networks perform automatic, adaptive directional domain decomposition. While neuron-partitioned regions grow exponentially, parameters scale linearly with width. This expressive power and parameter efficiency combination makes MMNNs powerful, tractable tools for high-dimensional PINN applications where classical wavelets fail.
 
+Concrete progress requires network regularity. Many PDEs involve second-order derivatives (Laplacians). Applying rigorous optimization and approximation theorems requires twice-differentiable networks ($C^2$). Future directions include developing "Deep Smooth ReLU Network" (DSRN) MMNN versions using smoother activations, guaranteeing necessary regularity and unlocking broader theoretical tools for PINN analysis.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: High-Dimensional Advantages}},enhanced,drop shadow,boxrule=2pt]
+MMNNs overcome dimensionality curses through several mechanisms. In high dimensions, random vectors are nearly orthogonal, meaning correlation $\rho$ between pre-activations concentrates around zero. The Funk-Hecke theorem analyzes kernel operators in this setting, showing $\rho$-dependent kernels have structured spectra. This $\rho$ concentration implies NTK matrices become quasi-diagonal or take $(a-b)\mathbf{I} + b\mathbf{J}$ structure, simplifying spectral analysis.
+\end{tcolorbox}
 
 
 
 
 \subsection{Conclusion: A New Paradigm for NTK Analysis}
-The analysis of MMNNs through the lens of NTK theory reveals a fascinating trade-off and a path toward a more general framework. Standard NTK theory for MLPs requires massive overparameterization (quadratic in width) to guarantee a static kernel and a "lazy training" regime. MMNNs offer a compelling alternative: it may be possible to enter an analyzable, NTK-like regime with a parameter count that is merely linear in the width.
+MMNN analysis through NTK theory reveals a fundamental trade-off and framework generalization. Standard NTK theory for MLPs requires quadratic overparameterization to guarantee static kernels and lazy training. MMNNs offer an alternative: entering analyzable, NTK-like regimes with linear parameter scaling.
 
-The price for this parameter efficiency is that the kernel is no longer a deterministic, static object but a random field that evolves during training. However, this is not an insurmountable obstacle. The path forward is to embrace this randomness and analyze it using the tools of high-dimensional probability. By deriving concentration bounds (e.g., using Bernstein-type inequalities) on the spectrum and evolution of this random kernel, we can obtain robust, probabilistic guarantees on the optimization landscape. This provides a rigorous framework for understanding the benefits of the structural priors imposed by the MMNN architecture, moving beyond the idealized lazy training regime.
+The cost is kernel evolution: no longer deterministic and static, but a random field evolving during training. This randomness is manageable through high-dimensional probability tools. Deriving concentration bounds (Bernstein-type inequalities) on spectrum and kernel evolution provides robust, probabilistic optimization guarantees. This framework rigorously analyzes MMNN structural priors beyond idealized lazy training.
 
-\subsection{Outlook: Application to PINNs and an Analogy to Wavelets}
-A major potential application for this research lies in the field of Physics-Informed Neural Networks (PINNs). PINNs solve Partial Differential Equations (PDEs) by training a neural network to satisfy the governing equations. The core of this task is efficient function approximation. Since MMNNs are explicitly inspired by function decomposition theorems, their architecture is naturally suited for this purpose.
+\subsection{Outlook: PINNs Application and Wavelet Analogy}
+Major applications target Physics-Informed Neural Networks (PINNs) solving PDEs through neural network training satisfying governing equations. Since MMNNs derive from function decomposition theorems, their architecture naturally suits this purpose.
 
-Furthermore, we can draw a powerful analogy between MMNNs and wavelet transforms, especially in the high-dimensional regime where the benefits become most apparent. A wavelet transform decomposes a function onto a fixed basis of localized functions. An MMNN performs a similar task, but learns the optimal combination of a rich, random basis of functions. Classical wavelet transforms suffer from the curse of dimensionality, making them intractable for high-dimensional problems.
+A powerful analogy connects MMNNs to wavelet transforms, particularly in high dimensions. Wavelets decompose functions onto fixed localized bases; MMNNs learn optimal combinations of rich, random function bases. Classical wavelets suffer dimensionality curses, becoming intractable for high-dimensional problems.
 
 \begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: High-Dimensional Advantages}},enhanced,drop shadow,boxrule=2pt]
-The MMNN architecture overcomes the curse of dimensionality through several mechanisms. In high dimensions, random vectors are nearly orthogonal, meaning the correlation $\rho$ between pre-activations of distinct inputs concentrates around zero. The Funk-Hecke theorem provides a powerful tool to analyze the kernel operator in this setting, showing that a kernel depending only on $\rho$ will have a highly structured spectrum. This concentration of $\rho$ implies that the NTK matrix itself becomes quasi-diagonal or takes on the simple $(a-b)\mathbf{I} + b\mathbf{J}$ structure, making its spectrum much easier to understand.
+MMNNs overcome dimensionality curses through several mechanisms. In high dimensions, random vectors are nearly orthogonal, meaning correlation $\rho$ between pre-activations concentrates around zero. The Funk-Hecke theorem analyzes kernel operators in this setting, showing $\rho$-dependent kernels have structured spectra. This $\rho$ concentration implies NTK matrices become quasi-diagonal or take $(a-b)\mathbf{I} + b\mathbf{J}$ structure, simplifying spectral analysis.
 \end{tcolorbox}
 
-The network effectively performs an automatic, adaptive directional domain decomposition. While the number of regions partitioned by the neurons can grow exponentially, the number of parameters only scales linearly with the width. This combination of expressive power and parameter efficiency makes the MMNN a powerful and tractable tool for applications like PINNs in high dimensions, where classical methods like wavelets fail.
+Networks perform automatic, adaptive directional domain decomposition. While neuron-partitioned regions grow exponentially, parameters scale linearly with width. This expressive power and parameter efficiency combination makes MMNNs powerful, tractable tools for high-dimensional PINN applications where classical wavelets fail.
 
-A concrete step in this direction is to ensure the network has sufficient regularity. Many PDEs involve second-order derivatives (e.g., the Laplacian). To apply rigorous optimization and approximation theorems in this context, the network function must be twice-differentiable ($C^2$). A promising future direction is therefore to develop a "Deep Smooth ReLU Network" (DSRN) version of the MMNN, for instance by using smoother activation functions, which would guarantee the necessary regularity and unlock a wider range of theoretical tools for PINN analysis.
-
-
+Concrete progress requires network regularity. Many PDEs involve second-order derivatives (Laplacians). Applying rigorous optimization and approximation theorems requires twice-differentiable networks ($C^2$). Future directions include developing "Deep Smooth ReLU Network" (DSRN) MMNN versions using smoother activations, guaranteeing necessary regularity and unlocking broader theoretical tools for PINN analysis.
 
 
 
@@ -904,18 +890,15 @@ A concrete step in this direction is to ensure the network has sufficient regula
 
 
 
-
-
-
-
-
-
-
-
+\newpage
 
 \appendix
+\section{Appendix}
+
 
 We focus here on understanding NTK for other architectures and handcomputations made through this comparison.
+
+
 \subsection{Detailed approach for Transformers and Softmax Analysis}
 \label{app:transformers}
 
@@ -925,120 +908,187 @@ We present here our approach to the analysis of the softmax function and the Gau
 This appendix presents the detailed calculations for the theoretical analysis of \textcolor{insightcolor}{\textbf{Gaussian measure integrals}} and \textcolor{methodcolor}{\textbf{softmax functions}}, specifically developed for \textcolor{kernelcolor}{\textbf{Transformer}} models. These results constitute an original contribution to the mathematical understanding of \textcolor{k3color}{\textbf{attention mechanisms}}.
 \end{tcolorbox}
 
+
+
 \subsubsection{Problem Statement: Moments of the Softmax Function}
 
 The concrete problem is to calculate the moments of the output of a softmax function applied row-wise to an $N \times P$ Gaussian matrix $\mathbf{X}$ with a correlated covariance structure. The softmax output $\mathbf{S}$ is given by:
-
 \begin{equation}
-\boxed{S_{ik} = \frac{e^{\textcolor{red}{\mathbf{X_{ik}}}}}{Z_i}, \quad \text{where } Z_i = \sum_{l=1}^{P} e^{\textcolor{methodcolor}{\mathbf{X_{il}}}}}
+\boxed{ \textcolor{red}{S_{ik}} = \frac{e^{\textcolor{insightcolor}{\mathbf{X_{ik}}}}}{\textcolor{blue}{Z_i}}, \quad \text{where } \textcolor{blue}{Z_i} = \sum_{l=1}^{P} e^{\textcolor{insightcolor}{\mathbf{X_{il}}}}}
 \end{equation}
 
 The objective is to calculate $\mathbb{E}[P(S_{ik})]$ over the distribution of $\mathbf{X}$. We note that the softmax structure is intrinsically linked to the logarithm of the partition function $Z_i$:
-
 \begin{equation}
-S_{ik} = \frac{\partial \log(Z_i)}{\partial X_{ik}}
+\textcolor{red}{S_{ik}} = \frac{\boldsymbol{\partial} \log(\textcolor{blue}{Z_i})}{\boldsymbol{\partial} \textcolor{insightcolor}{X_{ik}}}
 \end{equation}
 
-Thus, $\mathbb{E}[P(S_{ik})]$ is the expectation of a polynomial of the derivatives of $\log Z_i$, making exact analytical calculation \textbf{intractable}.
+Thus, $\mathbb{E}[P( \textcolor{red}{S_{ik}})] = \mathbb{E}[P( \frac{e^{\textcolor{insightcolor}{\mathbf{X_{ik}}}}}{\textcolor{blue}{Z_i}})] = \mathbb{E}[P( \frac{e^{\textcolor{insightcolor}{\mathbf{X_{ik}}}}}{\sum_{l=1}^{P} e^{\textcolor{insightcolor}{\mathbf{X_{il}}}}})]$ is the expectation of a polynomial of the derivatives of $\log Z_i$, making exact analytical calculation \textbf{intractable}.
 
-\subsubsection{Approximation Strategy: Saddle-Point Method}
 
-We introduce a parameter $\beta$ (inverse temperature) to obtain $S_{ik}(\beta) = e^{\beta X_{ik}} / \sum_l e^{\beta X_{il}}$. Following the asymptotic approach, we factorize the partition function $Z_a$:
+
+\subsubsection{Personal contribution currently in progress : Approximation Strategy: Saddle-Point Method}
+
+We introduce a parameter $\beta$ (inverse temperature) to obtain $\textcolor{red}{S_{ik}}(\beta) = e^{\beta \textcolor{insightcolor}{X_{ik}}} / \sum_l e^{\beta \textcolor{insightcolor}{X_{il}}}$. Following the asymptotic approach, we factorize the partition function $\textcolor{blue}{Z_a}$:
 
 \begin{equation}
-\boxed{Z_a = \sum_{k=1}^{P} e^{\beta G_{ak}} = e^{\textcolor{red}{\beta G_{a, \text{max}}}} \left( 1 + \sum_{k \neq \text{max}} e^{\textcolor{methodcolor}{\beta (G_{ak} - G_{a, \text{max}})}} \right)}
+\boxed{\textcolor{blue}{Z_a} = \sum_{k=1}^{P} e^{\beta \textcolor{greencolor}{G_{ak}}} = e^{\textcolor{red}{\beta \textcolor{greencolor}{G_{a, \text{max}}}}} \left( 1 + \sum_{k \neq \text{max}} e^{\textcolor{methodcolor}{\beta (\textcolor{greencolor}{G_{ak}} - \textcolor{greencolor}{G_{a, \text{max}}})}} \right)}
 \end{equation}
 
-We define $\delta_k = e^{\beta (G_{ak} - G_{a, \text{max}})}$ for $k \neq \text{max}$.
+We define $\textcolor{orange}{\delta_k} = e^{\beta (\textcolor{greencolor}{G_{ak}} - \textcolor{greencolor}{G_{a, \text{max}}})}$ for $k \neq \text{max}$.
 
-\subsubsection{Cumulant Expansion Framework}
+\begin{equation}
+\textcolor{red}{S_{ik}}(\beta) = \frac{e^{\beta \textcolor{insightcolor}{X_{ik}}}}{\sum_{l=1}^{P} e^{\beta \textcolor{insightcolor}{X_{il}}}}, \quad \text{where } \beta = \frac{1}{T}
+\end{equation}
+
+\begin{tcolorbox}[colback=green!10,colframe=green!80!black,title={\textbf{High Temperature Regime in Production Models}},enhanced,drop shadow,boxrule=2pt]
+Current state-of-the-art transformer models operate predominantly in the \textcolor{green}{\textbf{high temperature regime}} with $T \in [3.3, \infty)$ corresponding to $\beta \in (0, 0.3]$ for non-creative applications. This regime is characterized by:
+
+\begin{equation}
+\boxed{T_{\text{typical}} \geq 3.3 \implies \beta_{\text{typical}} \leq 0.3}
+\end{equation}
+
+In this high temperature setting, the softmax distribution approaches uniform behavior, leading to more diverse and less confident predictions. This contrasts with creative applications where lower temperatures ($T < 1$, $\beta > 1$) are used to produce more deterministic outputs.
+\end{tcolorbox}
+
+
+
+\subsubsection{Personal contribution currently in progress : Cumulant Expansion Framework}
 
 We employ the cumulant expansion approach, which is more physically motivated. First, we expand the logarithm:
 
 \begin{align}
-\log(Z_a) &= \log\left(e^{\beta G_{a, \text{max}}}\right) + \log\left( 1 + \sum_{k \neq \text{max}} \delta_k \right) \\
-&\approx \beta G_{a, \text{max}} + \textcolor{insightcolor}{\left(\sum_{k \neq \text{max}} \delta_k\right)} - \textcolor{k3color}{\frac{1}{2}\left(\sum_{k \neq \text{max}} \delta_k\right)^2} + \dots \label{eq:log_expansion}
+\log(\textcolor{blue}{Z_a}) &= \log\left(e^{\beta \textcolor{greencolor}{G_{a, \text{max}}}}\right) + \log\left( 1 + \sum_{k \neq \text{max}} \textcolor{orange}{\delta_k} \right) \\
+&\approx \beta \textcolor{greencolor}{G_{a, \text{max}}} + \textcolor{insightcolor}{\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)} - \textcolor{k3color}{\frac{1}{2}\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)^2} + \dots \label{eq:log_expansion}
 \end{align}
 
 For the dominant output ($l=\text{max}$):
 
 \begin{align}
-S_{a, \text{max}} &= \exp\left(\beta G_{a, \text{max}} - \log(Z_a)\right) \\
-&\approx \exp\left( - \textcolor{insightcolor}{\sum_{k \neq \text{max}} \delta_k} + \textcolor{k3color}{\frac{1}{2}\left(\sum_{k \neq \text{max}} \delta_k\right)^2} - \dots \right) \\
-&\approx 1 - \textcolor{red}{\sum_{k \neq \text{max}} \delta_k} + \textcolor{methodcolor}{\left(\sum_{k \neq \text{max}} \delta_k\right)^2} + \dots \label{eq:dominant_softmax}
+\textcolor{red}{S_{a, \text{max}}} &= \exp\left(\beta \textcolor{greencolor}{G_{a, \text{max}}} - \log(\textcolor{blue}{Z_a})\right) \\
+&\approx \exp\left( - \textcolor{insightcolor}{\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}} + \textcolor{k3color}{\frac{1}{2}\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)^2} - \dots \right) \\
+&\approx 1 - \textcolor{insightcolor}{\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}} + \textcolor{methodcolor}{\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)^2} + \dots \label{eq:dominant_softmax}
 \end{align}
 
 For a perturbative output ($l \neq \text{max}$):
 
 \begin{equation}
-\boxed{S_{al} = \exp(\beta G_{al} - \log(Z_a)) \approx \textcolor{red}{\delta_l} \left(1 - \textcolor{methodcolor}{\sum_{k \neq \text{max}} \delta_k} + \dots \right)} \label{eq:perturbative_softmax}
+\boxed{\textcolor{red}{S_{al}} = \exp(\beta \textcolor{greencolor}{G_{al}} - \log(\textcolor{blue}{Z_a})) \approx \textcolor{orange}{\delta_l} \left(1 - \textcolor{methodcolor}{\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}} + \dots \right)} \label{eq:perturbative_softmax}
 \end{equation}
 
-\subsubsection{High-Dimensional Analysis}
 
-In the high-dimensional regime, we consider the behavior of dot products between random embeddings. For two independent random vectors $\mathbf{X}, \mathbf{Y} \in \mathbb{R}^d$ with i.i.d. $\mathcal{N}(0,1)$ components, their dot product $Z = \mathbf{X} \cdot \mathbf{Y}$ follows $Z \sim \mathcal{N}(0, d)$.
 
-The absolute value $|Z|$ follows the folded normal distribution. We obtain the asymptotic behavior:
+
+
+\subsubsection{High-Dimensional Analysis through Word Embedding Characterization}
+
+We analyze dot products between word embeddings in transformer architectures. Consider two independent word embedding vectors $\mathbf{e}_i$ and $\mathbf{e}_j$ from an embedding matrix $\mathbf{E} \in \mathbb{R}^{V \times d}$, where $V$ is vocabulary size and $d$ is embedding dimension.
+
+Each component is initialized as i.i.d. $\mathcal{N}(0, \sigma_{\text{emb}}^2)$ with $\sigma_{\text{emb}} = 1/\sqrt{d}$ for unit variance. For two independent embeddings $\mathbf{e}_i, \mathbf{e}_j \in \mathbb{R}^d$, their dot product follows $Z = \mathbf{e}_i \cdot \mathbf{e}_j \sim \mathcal{N}(0, 1/d)$.
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{High-Dimensional Embedding Concentration}},enhanced,drop shadow,boxrule=2pt]
+For the absolute value $|Z|$ following folded normal distribution with standard initialization:
 
 \begin{equation}
-\boxed{\mathbb{E}[|Z|] \sim \sqrt{\frac{2}{\pi d}}, \quad \text{Var}(|Z|) \sim \left(1 - \frac{2}{\pi}\right) \frac{1}{d} \approx \frac{0.36338}{d}} \label{eq:high_dim_concentration}
+\boxed{\mathbb{E}[|Z|] = \sqrt{\frac{2}{\pi d}}, \quad \text{Var}(|Z|) = \frac{0.36338}{d}} \label{eq:high_dim_concentration_embeddings}
 \end{equation}
 
-This concentration property justifies rigorously the hypothesis that dot products between random embeddings are typically small and concentrated around zero, which is fundamental for the analysis of attention mechanisms in high-dimensional settings.
+The concentration property becomes pronounced as embedding dimension increases:
+
+\begin{equation}
+\boxed{\lim_{d \to \infty} \mathbb{E}[|Z|] = 0, \quad \lim_{d \to \infty} \text{Var}(|Z|) = 0} \label{eq:embedding_concentration_limit}
+\end{equation}
+\end{tcolorbox}
+
+Under isotropy assumption, embeddings are uniformly distributed on the unit sphere. For unit vectors $\mathbf{u}_i$ and $\mathbf{u}_j$, the dot product satisfies the cosine law:
+
+\begin{equation}
+\boxed{\mathbf{u}_i \cdot \mathbf{u}_j = \cos(\theta_{ij})} \label{eq:cosine_law_embeddings}
+\end{equation}
+
+where $\theta_{ij}$ is the angular distance. Under isotropy, the angle follows:
+
+\begin{equation}
+\boxed{\theta_{ij} \approx \frac{\pi}{2} + \frac{\mathbf{u}_i \cdot \mathbf{u}_j}{\sqrt{d}} + O(d^{-3/2})} \label{eq:angular_concentration}
+\end{equation}
+
+This concentration justifies that dot products between independent embeddings remain small and concentrated around zero as $d \to \infty$. This property ensures we can go through an expansion with small $\rho$
+
+
 
 \subsubsection{Correlated Gaussian Matrix Generation}
 
-For the correlated Gaussian matrix $\mathbf{G}$, we assume a separable covariance structure. If we vectorize the matrix by stacking its columns into an $n^2 \times 1$ vector $\mathbf{g} = \text{vec}(\mathbf{G})$, its covariance matrix is:
+We adopt the generative framework from the analytical calculations using a \textcolor{kernelcolor}{global variable} and \textcolor{sobolevcolor}{row-specific components}. Let $\textcolor{weightcolor}{Z_0} \sim \mathcal{N}(0,1)$ be a \textcolor{kernelcolor}{global random variable}. For each row $\textcolor{k3color}{i} \in \{1, \ldots, \textcolor{methodcolor}{n}\}$, let $\textcolor{sobolevcolor}{Z_i} = (\textcolor{sobolevcolor}{Z_{i1}}, \textcolor{sobolevcolor}{Z_{i2}}, \ldots, \textcolor{sobolevcolor}{Z_{iP}})$ be a vector of $\textcolor{insightcolor}{P}$ independent standard normal variables.
+
+The entries of the correlated Gaussian matrix $\textcolor{kernelcolor}{\mathbf{G}}$ are constructed as:
 
 \begin{equation}
-\boxed{\text{Cov}(\mathbf{g}) = \mathbb{E}[\mathbf{g} \mathbf{g}^T] = \boldsymbol{\rho} \otimes \boldsymbol{\rho}} \label{eq:kronecker_covariance}
+\boxed{\textcolor{kernelcolor}{G_{ij}} = \textcolor{weightcolor}{Z_0} \cdot \textcolor{breakthroughcolor}{\rho_{ij}} + \textcolor{sobolevcolor}{Z_{ij}} \sqrt{1 - \textcolor{breakthroughcolor}{\rho_{ij}^2}}} \label{eq:generative_construction}
 \end{equation}
 
-This implies that the covariance between elements $G_{ik}$ and $G_{jl}$ is:
+This construction ensures the desired \textcolor{resultcolor}{covariance structure}:
 
 \begin{equation}
-\text{Cov}(G_{ik}, G_{jl}) = \textcolor{red}{\rho_{ij}} \textcolor{methodcolor}{\rho_{kl}} \label{eq:separable_covariance}
+\textcolor{insightcolor}{\text{Cov}(\textcolor{kernelcolor}{G_{ik}}, \textcolor{kernelcolor}{G_{jl}})} = \mathbb{E}[\textcolor{kernelcolor}{G_{ik}} \textcolor{kernelcolor}{G_{jl}}] = \textcolor{breakthroughcolor}{\rho_{ik}} \textcolor{methodcolor}{\rho_{jl}} \label{eq:separable_covariance}
 \end{equation}
 
-The standard construction via Cholesky decomposition ensures this exact structure. Let $\boldsymbol{\rho} = \mathbf{L} \mathbf{L}^T$ be the Cholesky decomposition, and $\mathbf{Z}$ be an $n \times n$ matrix of i.i.d. standard normal variables. Then:
+The verification follows directly from the independence of the constituent random variables:
+
+\begin{align}
+\mathbb{E}[\textcolor{kernelcolor}{G_{ik}} \textcolor{kernelcolor}{G_{jl}}] &= \mathbb{E}[(\textcolor{weightcolor}{Z_0} \textcolor{breakthroughcolor}{\rho_{ik}} + \textcolor{sobolevcolor}{Z_{ik}}\sqrt{1-\textcolor{breakthroughcolor}{\rho_{ik}^2}})(\textcolor{weightcolor}{Z_0} \textcolor{breakthroughcolor}{\rho_{jl}} + \textcolor{sobolevcolor}{Z_{jl}}\sqrt{1-\textcolor{breakthroughcolor}{\rho_{jl}^2}})] \\
+&= \textcolor{breakthroughcolor}{\rho_{ik}} \textcolor{breakthroughcolor}{\rho_{jl}} \mathbb{E}[\textcolor{weightcolor}{Z_0^2}] + \textcolor{k3color}{\delta_{i,j}\delta_{k,l}}\sqrt{1-\textcolor{breakthroughcolor}{\rho_{ik}^2}}\sqrt{1-\textcolor{breakthroughcolor}{\rho_{jl}^2}}\mathbb{E}[\textcolor{sobolevcolor}{Z_{ik}}\textcolor{sobolevcolor}{Z_{jl}}] \\
+&= \textcolor{breakthroughcolor}{\rho_{ik}} \textcolor{breakthroughcolor}{\rho_{jl}} + \textcolor{k3color}{\delta_{i,j}\delta_{k,l}}(1-\textcolor{breakthroughcolor}{\rho_{ik}^2}) \\
+&= \textcolor{breakthroughcolor}{\rho_{ik}} \textcolor{breakthroughcolor}{\rho_{jl}} \label{eq:covariance_verification}
+\end{align}
+
+where we used $\textcolor{breakthroughcolor}{\rho_{ii}} = 1$ for the diagonal terms. This generative model requires only $\textcolor{methodcolor}{n}\textcolor{insightcolor}{P} + 1$ independent random variables instead of the full $\textcolor{methodcolor}{n^2}\textcolor{insightcolor}{P}$ variables needed for direct sampling.
+
+
+\subsubsection{Multidimensional Hermite Polynomials and Isserlis-Wick Theorem}
+
+We present our main tools to make this integration tractable at least numerically
+
+\begin{theorem}[Multidimensional Hermite Polynomials and Orthogonality - Mehler (1866)]
+\label{thm:multidim_hermite}
+For a $d$-dimensional Gaussian vector $\mathbf{X} = (X_1, \ldots, X_d)^T$ with mean $\boldsymbol{\mu}$ and covariance matrix $\boldsymbol{\Sigma}$, the probability density function is:
 
 \begin{equation}
-\boxed{\mathbf{G} = \mathbf{L} \mathbf{Z} \mathbf{L}^T} \label{eq:cholesky_construction}
+\boxed{p(\mathbf{x}) = \frac{1}{(2\pi)^{d/2}|\boldsymbol{\Sigma}|^{1/2}} \exp\left(-\frac{1}{2}(\mathbf{x}-\boldsymbol{\mu})^T\boldsymbol{\Sigma}^{-1}(\mathbf{x}-\boldsymbol{\mu})\right)} \label{eq:multivariate_gaussian_pdf}
 \end{equation}
 
-\subsubsection{Connection to Hermite Polynomials and Generating Functions}
-
-For the expansion of complex functions $f(x)$ in terms of Hermite polynomials, we use:
+The multidimensional Hermite polynomials $H_{\boldsymbol{\alpha}}(\mathbf{x})$ for multi-index $\boldsymbol{\alpha} = (\alpha_1, \ldots, \alpha_d)$ satisfy the orthogonality relation:
 
 \begin{equation}
-f(x) = \sum_{n=0}^{\infty} c_n H_n(x), \quad c_n = \frac{1}{\sqrt{\pi} 2^n n!} \int_{-\infty}^{\infty} f(x) H_n(x) e^{-x^2} dx \label{eq:hermite_expansion}
+\boxed{\int_{\mathbb{R}^d} H_{\boldsymbol{\alpha}}(\mathbf{x}) H_{\boldsymbol{\beta}}(\mathbf{x}) p(\mathbf{x}) d\mathbf{x} = \boldsymbol{\alpha}! \delta_{\boldsymbol{\alpha}\boldsymbol{\beta}}} \label{eq:orthogonality_multidim}
 \end{equation}
 
-Using the generating function approach with $e^{2xt-t^2} = \sum_{n=0}^{\infty} \frac{H_n(x)}{n!} t^n$, we arrive at:
+where $\boldsymbol{\alpha}! = \alpha_1! \cdots \alpha_d!$ and $\delta_{\boldsymbol{\alpha}\boldsymbol{\beta}}$ is the Kronecker delta.
+\end{theorem}
+
+\begin{theorem}[Isserlis-Wick Theorem for Gaussian Moments]
+\label{thm:isserlis_wick}
+For a centered multivariate Gaussian random vector $\mathbf{X} \sim \mathcal{N}(\mathbf{0}, \boldsymbol{\Sigma})$, the moments satisfy:
 
 \begin{equation}
-\boxed{\int_{-\infty}^{\infty} f(x) e^{-(x-t)^2} dx = \sqrt{\pi} \sum_{n=0}^{\infty} (2t)^n c_n} \label{eq:generating_function_relation}
+\boxed{\mathbb{E}[X_{i_1} X_{i_2} \cdots X_{i_{2n}}] = \sum_{\text{pairings}} \prod_{\text{pairs } (j,k)} \Sigma_{i_j, i_k}} \label{eq:isserlis_wick_formula}
 \end{equation}
 
-\subsubsection{Multivariate Gaussian Integrals}
-
-For the multivariate case, we introduce the generating functional $Z[\mathbf{J}]$ depending on an external source field $\mathbf{J}$:
+where the sum is over all possible pairings of the $2n$ indices into $n$ pairs. For odd moments:
 
 \begin{equation}
-\boxed{Z[\mathbf{J}] = \int f(\mathbf{x}) \exp\left(-\frac{1}{2} \mathbf{x}^T \boldsymbol{\Sigma}^{-1} \mathbf{x} + \mathbf{J}^T \mathbf{x}\right) d^d x} \label{eq:generating_functional}
+\boxed{\mathbb{E}[X_{i_1} X_{i_2} \cdots X_{i_{2n+1}}] = 0} \label{eq:odd_moments_zero}
 \end{equation}
 
-The moments are obtained by functional differentiation with respect to $\mathbf{J}$, and the combinatorics are governed by Wick's theorem, leading to the Feynman diagram formalism for organizing the calculations.
-
-\subsubsection{Numerical Integration Considerations}
-
-For practical computations, we note that Monte Carlo methods with importance sampling remain the most robust approach. The error decreases as $1/\sqrt{N}$ regardless of dimension:
+The generating function for multidimensional Hermite polynomials is:
 
 \begin{equation}
-I = \int f(\mathbf{x}) p(\mathbf{x}) d^d x \approx \frac{1}{N} \sum_{i=1}^{N} f(\mathbf{x}_i), \quad \mathbf{x}_i \sim p(\mathbf{x}) \label{eq:monte_carlo}
+\boxed{\exp\left(\mathbf{t}^T \mathbf{x} - \frac{1}{2}\mathbf{t}^T \boldsymbol{\Sigma} \mathbf{t}\right) = \sum_{\boldsymbol{\alpha}} \frac{H_{\boldsymbol{\alpha}}(\mathbf{x})}{\boldsymbol{\alpha}!} \mathbf{t}^{\boldsymbol{\alpha}}} \label{eq:multidim_generating_function}
 \end{equation}
 
-For integrals of the form involving Gaussian measures, specialized quadrature methods such as Gauss-Hermite quadrature are particularly effective for integrals of the form $\int_{-\infty}^{\infty} e^{-x^2} g(x) dx$.
+where $\mathbf{t}^{\boldsymbol{\alpha}} = t_1^{\alpha_1} \cdots t_d^{\alpha_d}$.
+\end{theorem}
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Numerical Implementation Strategy}},enhanced,drop shadow,boxrule=2pt]
+From a numerical perspective, the key insight is to leverage these two fundamental properties—the orthogonality of multidimensional Hermite polynomials and the Isserlis-Wick theorem for Gaussian moments—to develop efficient computational strategies. Rather than hardcoding specific formulas for each individual moment calculation, we can implement robust quadrature rules that systematically evaluate these expectations. This approach transforms the computational burden from deriving explicit closed-form expressions for every moment to designing appropriate numerical integration schemes that exploit the underlying mathematical structure, making the analysis both more general and computationally tractable.
+\end{tcolorbox}
 
 
 
@@ -1046,18 +1096,13 @@ For integrals of the form involving Gaussian measures, specialized quadrature me
 
 
 
-
-
-
-
-
-
+\newpage
 \subsection{Detailed Calculations for Two Hidden Layer MMNN}
 \label{app:mmnn}
 
 This section presents the complete development of calculations for two hidden layer MMNN (Matrix Memory Neural Networks), including exact derivations of the NTK and analysis of Fisher and Kibble distributions.
 
-\subsubsection{Calculation of the Expectation $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$}
+\subsubsection{Calculation of activation's correlations}
 
 Once we calculate the NTK of MMNN for 1 layer, we must solve the problem of calculating the expectation $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$ for a pair of random variables $(X_1, X_2)$ following a bivariate normal distribution. The approach consists of standardizing the variables and decomposing the integral into four terms corresponding to different moments of the standardized variables.
 
@@ -1147,6 +1192,49 @@ Absorbing the $\sigma_A^2$ factor into the kernel definitions gives the stated r
 
 
 
+\begin{tcolorbox}[colback=blue!15,colframe=blue!80!black,title={\textbf{Summary of Formulas}},enhanced,drop shadow,boxrule=2pt]
+    \begin{itemize}
+        \item \textbf{Layer Output:}
+        \[ \boxed{\bm{h}^{(\ell)}(\bm{x}) = \bm{c}^{(\ell)} + \frac{\sigma_A}{\sqrt{n_\ell}} \sum_{j=1}^{n_\ell} \bm{A}_j^{(\ell)} \sigma\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)}\right)} \]
+    
+        \item \textbf{NNGP Kernel Recursion:}
+        \begin{itemize}
+            \item \textit{Base Kernel:} Expectation over current layer's random parameters, conditioned on the previous layer's output GP $\bm{h}^{(\ell-1)}$.
+            \[ \boxed{\Sigma^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \right]} \]
+            \item \textit{Full Kernel:}
+            \[ \boxed{\mathcal{K}_{\text{NNGP}}^{(\ell)}(x, x') = \sigma_A^2 \Sigma^{(\ell)}(x, x') + \sigma_c^2} \]
+        \end{itemize}
+    
+        \item \textbf{NTK Kernel Recursion:}
+        \begin{itemize}
+            \item \textit{Base Derivative Kernel:}
+            \[ \boxed{\dot{\Sigma}^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \bm{w}^\top\bm{w} \right]} \]
+            \item \textit{Full Kernel:}
+            \[ \boxed{\Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \sigma_A^2  \dot{\Sigma}^{(\ell)}(x, x') + \Sigma^{(\ell)}(x, x')+1} \]
+        \end{itemize}
+    \end{itemize}
+    \end{tcolorbox}
+
+
+
+
+
+
+\subsection{Fisher and Kibble Distributions}
+
+\begin{tcolorbox}[colback=blue!15,colframe=blue!50!black,title={\textbf{Exact Probability Laws}},enhanced,drop shadow]
+The random variables $(\rho_1, \|x_1\|^2, \|y_1\|^2)$ follow exact distributions:
+
+\textbf{Fisher Distribution} for correlation:
+\begin{equation}
+\boxed{\rho_1 \sim \text{Fisher}(\rho, r) = \frac{(r-2)\Gamma(r-1)(1-\rho^2)^{\frac{r-1}{2}}(1-\theta^2)^{\frac{r-4}{2}}}{\sqrt{2\pi}\Gamma(r-\frac{1}{2})(1-\rho \theta)^{r-\frac{3}{2}}} \times {}_2F_1\left(\frac{1}{2}, \frac{1}{2}; r-\frac{1}{2}; \frac{1+\rho \theta}{2}\right)}
+\end{equation}
+
+\textbf{Kibble Distribution} for squared norms:
+\begin{equation}
+\boxed{(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho) = \frac{(uv)^{\frac{r/2-1}{2}} e^{-\frac{u+v}{2(1-\rho^2)}}}{\Gamma(r/2) (2(1-\rho^2))^{r/2+1} \rho^{\frac{r/2-1}{2}}} \cdot I_{r/2-1}\left(\frac{\rho\sqrt{uv}}{1-\rho^2}\right)}
+\end{equation}
+\end{tcolorbox}
 
 
 
