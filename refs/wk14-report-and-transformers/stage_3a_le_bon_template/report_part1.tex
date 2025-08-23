@@ -186,6 +186,31 @@ Our analysis continues with the study of NTK preconditioning through a freeze we
 Across these different architectures, we study feature learning regimes and their scaling with network width. Our results rely on statistical physics tools to characterize model convergence and asymptotic behavior. This analysis enables a better understanding of finite-width corrections \cite{seleznova2022ntk_beyond} and their implications for the practical optimization of deep neural networks.
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \newpage
 \addcontentsline{toc}{section}{Notations}
 \section*{Notations}
@@ -289,11 +314,41 @@ $d$ & Input dimension & $s$ & Sobolev order \\
 \newpage
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \section{Statement of the problem}
 
 \subsubsection{The Sobolev Training}
 
-\textit{Sobolev training} \cite{czarnecki2017sobolev,gupte2022sobolev_loss} is an approach that incorporates derivative information into the learning process. For a function $f$ and target function $f^*$, the Sobolev training loss is defined as:
+Le's suppose that we are given a function $f^*$ and we want to find a function $f_\theta$ in a model class $\mathcal{F}$ that approximates $f^*$ in the Sobolev space $H^s(\Omega)$.
+
+\textit{Sobolev training} \cite{czarnecki2017sobolev,gupte2022sobolev_loss} 
+is an approach that incorporates derivative information into the learning process. 
+For a function $f$ and target function $f^*$, the Sobolev training loss is defined as:
 
 \begin{tcolorbox}[colback=sobolevcolor!5,colframe=sobolevcolor!60!black,title=Sobolev Training Loss]
 \begin{equation}
@@ -304,15 +359,20 @@ $d$ & Input dimension & $s$ & Sobolev order \\
 
 where $D^k$ denotes the $k$-th derivative operator and $H^s$ is the Sobolev space of order $s$. This formulation leads to several key properties:
 
-1) The loss incorporates both function values and derivatives up to order $s$
-2) Training in $H^s$ norm induces smoother function approximation
-3) The NTK eigenvalues exhibit polynomial decay related to the Sobolev order $s$
+The Sobolev training loss has the following properties:
+\begin{itemize}
+    \item The loss incorporates both function values and derivatives up to order $s$
+    \item Training in $H^s$ norm induces smoother function approximation
+\end{itemize}
 
 For neural networks, this translates to augmenting the training data with derivative information:
 
 $$\mathcal{L}_{\text{discrete}}(f) = \sum_{i=1}^n \sum_{k=0}^s |D^k f(x_i) - D^k f^*(x_i)|^2$$
 
 This framework provides a natural connection between neural network training and classical function approximation theory in Sobolev spaces.
+It's important to note that Sobolev training is mainly used for very smooth functions in general. But the terminology "Sobolev" remains the same
+and is part of the field slang, even if describing it in a sobolev space is ont fully informative.
+
 
 \subsubsection{Two Equivalent Sobolev Norms}
 
@@ -332,30 +392,40 @@ where $D^k$ represents the $k$-th derivative operator.
 \end{equation}
 where $\xi$ represents the frequency variable.
 
-These norms are equivalent in the sense that there exist constants $c, C > 0$ such that:
-$$c\|f\|_{H^s,\text{grad}} \leq \|f\|_{H^s,\text{Four}} \leq C\|f\|_{H^s,\text{grad}}$$
-
-The gradient-based norm is more intuitive for implementation in neural network training, while the Fourier-based norm provides a natural connection to spectral properties and eigenvalue decay rates of the NTK operator.
+These norms are equivalent but not used in the same way. 
+The gradient-based norm is more intuitive for implementation in neural network training, while the Fourier-based norm provides a natural 
+connection to spectral properties and eigenvalue decay rates of the NTK operator.
 
 
 \subsection{The NN regression framework}
 
 In our analysis, we consider two distinct learning frameworks:
 
-1) \textbf{Standard Neural Network Regression}: Here we only observe output values $y_i$ for inputs $x_i$ (as in Fourier Neural Operators for instance), leading to the classical mean squared error loss:
+1) \textbf{Standard Neural Network Regression}: Here we only observe a dataset of output values $y_i$ for inputs $x_i$ (as in Fourier Neural Operators for instance), leading to the classical mean squared error loss:
 $$\mathcal{L}_{\text{MSE}}(f) = \sum_{i=1}^n |f(x_i) - y_i|^2$$
 The gradient descent dynamics follow:
 $$\frac{d}{dt}f_t(x) = -\eta \sum_{i=1}^n K^{\infty}(x,x_i)(f_t(x_i) - y_i)$$
 
-2) \textbf{Derivative-Augmented Learning}: We observe both outputs and derivatives, as in Sobolev training and Physics-Informed Neural Networks (PINNs) or DeepONet architectures, with loss:
+2) \textbf{Derivative-Augmented Learning}: We observe both outputs and derivatives in our dataset, as in Sobolev training and Physics-Informed Neural Networks (PINNs) or DeepONet architectures, with loss:
 $$\mathcal{L}_{\text{deriv}}(f) = \sum_{i=1}^n \left(|f(x_i) - y_i|^2 + \sum_{k=1}^s |D^k f(x_i) - D^k y_i|^2\right)$$
 Leading to modified gradient dynamics incorporating derivative information.
 
-These frameworks result in different gradient descent trajectories and convergence behaviors, despite sharing the same underlying NTK structure. The choice between them depends crucially on the \textbf{type of sampling points} used and whether explicit derivative information is available.
+These frameworks result in different gradient descent trajectories and convergence behaviors. 
+The choice between them depends crucially on the \textbf{type of sampling points} used and whether explicit derivative 
+information is available, mainly through sensors that are disposed on a solution domain.
 
-\begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Key Insight: Chebyshev Points vs General Sampling}},enhanced,drop shadow]
-\textbf{Chebyshev points} (or optimal interpolation nodes) enable accurate derivative approximation from function values alone, allowing matrix commutation and making standard regression sufficient. \textbf{General sampling points} break commutation, requiring explicit derivative data for effective learning.
+\begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Key Insight : Chebyshev Points vs General Sampling}},enhanced,drop shadow]
+\textbf{Chebyshev points} (or optimal interpolation nodes) \cite{driscoll2014chebfun} enable accurate derivative approximation from function values alone, making standard regression sufficient. For spherical domains $\mathbb{S}^{d-1}$, we use Chebyshev nodes for the azimuthal coordinate $\phi \in [-\pi, \pi]$:
+$$\phi_k = \pi \cos\left(\frac{k\pi}{N}\right), \quad k = 0, 1, \ldots, N$$
+This optimal sampling eliminates the need for explicit derivative data in effective learning.
 \end{tcolorbox}
+
+\begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Personal contribution : Chebyshev Points}},enhanced,drop shadow]
+We will prove that sensoring Chebyshev points are not only optimal, but necessary for the standard regression framework to prove
+optimization bounds for neural network training
+\end{tcolorbox}
+
+\newpage
 
 The framework selection can be summarized by the following decision tree:
 
@@ -445,16 +515,32 @@ The framework selection can be summarized by the following decision tree:
 \subsubsection{The Neural Tangent Kernel}
 
 For a neural network $f(\mathbf{x}; \boldsymbol{\theta})$ with parameters $\boldsymbol{\theta}$, the \textit{Neural Tangent Kernel} \cite{jacot2018neural} is defined by:
-\begin{tcolorbox}[colback=blue!5,colframe=blue!40!black,title=NTK Definition]
+\begin{tcolorbox}[colback=yellow!10,colframe=blue!40!black,title=Definition : NTK]
 \begin{equation}
 \label{eq:ntk_definition}
 \textcolor{kernelcolor}{K^{L}}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}} \right\rangle = \sum_{k} \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta})}{\partial \theta_k} \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta})}{\partial \theta_k}
 \end{equation}
 \end{tcolorbox}
 
-\begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018]
-For a network $f(\mathbf{x};\boldsymbol{\theta})$ trained by gradient descent with infinitesimal learning rate, as hidden layer widths tend to infinity, we obtain the convergence $K^{L} \to K_L^{\infty}$ where the infinite-width limit proceeds layer by layer. Starting from the first layer and propagating through the second layer, then the third layer, and so forth until the $L$-th layer, each layer's width is taken to infinity in sequence while maintaining the recursive structure of the kernel computation. This sequential infinite-width limit ensures that the final kernel $K_L^{\infty}$ captures the deterministic behavior of the network in the infinite-width regime, where the network converges to a Gaussian process with kernel $K_L^{\infty}$ and dynamics given by $\frac{\partial f_t(\mathbf{x})}{\partial t} = -\eta \sum_{i=1}^n K_L^{\infty}(\mathbf{x},\mathbf{x}_i)\bigl(f_t(\mathbf{x}_i) - y_i\bigr)$.
+\begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Definition : Edge of Chaos}},enhanced,drop shadow]
+    The Edge of Chaos (EOC) initialization for a layer with weights $\textcolor{blue}{\mathbf{W}_{ij}}$ and biases $\textcolor{red}{\mathbf{b}_j}$ is defined as:
+    \begin{equation}
+    \textcolor{blue}{\mathbf{W}_{ij}} \sim \mathcal{N}\left(0, \frac{\sigma_w^2}{n}\right) \quad \text{and} \quad \textcolor{red}{\mathbf{b}_j} \sim \mathcal{N}\left(0, \frac{\sigma_b^2}{n}\right)
+    \end{equation}
+    where $\sigma_w^2+\sigma_b^2=2$ is the total variance.
+    This initialization strategy maintains the variance of activations through layers and ensures that the network is in the chaotic regime.
+\end{tcolorbox}
 
+
+
+\begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018, convergence]
+For a multi layer perceptron $f(\mathbf{x};\boldsymbol{\theta})$ with hidden layer widths $N_1, \ldots, N_L$ randomly initialized with weights $W_1, \ldots, W_L$  following and trained by gradient descent with infinitesimal learning rate, 
+as hidden layer widths tend to infinity,the network converges to a Gaussian process, with limite NTK kernel $K_L^{\infty}$ and dynamics given by $\frac{\partial f_t(\mathbf{x})}{\partial t}
+    = -\eta \sum_{i=1}^n K_L^{\infty}(\mathbf{x},\mathbf{x}_i)\bigl(f_t(\mathbf{x}_i) - y_i\bigr)$.
+
+\end{theorem}
+
+\begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018, recursive formula]
 The recursive formula for depth $L$ in the infinite-width limit becomes:
 \begin{equation}
 \label{eq:ntk_recursive}
@@ -465,12 +551,20 @@ where $\rho_1(\mathbf{x},\mathbf{x}') = \frac{\mathbf{x}^{\top}\mathbf{x}'}{\|\m
 \label{eq:correlation_propagation}
 \varrho(\rho) = \sigma^2 \int \ReLU(u_1) \ReLU(u_2) d\mathcal{N}\left( [u_1,u_2] \left| 0,\left[ \begin{smallmatrix} 1 & \rho \\ \rho & 1 \end{smallmatrix} \right] \right. \right)
 \end{equation}
-where $\sigma^2$ is the activation variance parameter and $\ReLU$ is the activation function at the edge of chaos. The notation $\varrho^{\circ k}$ denotes the $k$-fold composition of $\varrho$, and $\varrho'$ represents its derivative.
-
-Edge of Chaos initialization requires choosing $\sigma_w^2 = 2$ to maintain unit variance through layers, ensuring that $\mathbb{E}[\boldsymbol{\Sigma}^{(L)}(\mathbf{x},\mathbf{x})] = \|\mathbf{x}\|^2$ for all layers $L$ in the infinite-width limit.
 \end{theorem}
 
+
+
+\begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Remark : Infinite-width}},enhanced,drop shadow]
+    The limit is taken in the sense of the infinite-width limit : $N_1$ goes to infinity first, then $N_2$ goes to infinity, and so forth until $N_L$ goes to infinity.
+\end{tcolorbox}
+
+
+\begin{tcolorbox}[colback=yellow!10,colframe=green!60!black,title={\textbf{[Townsend et al ]NTK's spectrum fundamentals}},enhanced,drop shadow]
+
 \textbf{Matrix Structure}: For dataset $\{x_i\}_{i=1}^n$, the infinite-width NTK matrix factorizes as $K_L^{\infty} = D \cdot R \cdot D$ where $D = \text{diag}(\|x_1\|, \ldots, \|x_n\|)$ and $R_{ij} = \tilde{K}_L^{\infty}(\rho_{ij})$ with $\rho_{ij} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$. // we factorize the infinite-width ntk matrix into diagonal and correlation parts
+
+\newline
 \textbf{Operator Form}: By rotational invariance, the infinite-width NTK can be seen as an operator acts zonally:
 $$(K_L^{\infty} f)(x) = \int_{\mathbb{S}^{d-1}} \int_{\mathbb{S}^{d-1}} \tilde{K}_L^{\infty}(\langle x, y \rangle) f(y) \delta(\langle x, z \rangle - \langle x, y \rangle) d\sigma(y) d\sigma(z)$$
 where $\sigma$ denotes the uniform surface measure on $\mathbb{S}^{d-1}$.
@@ -482,9 +576,12 @@ Eigenvalue decay follows
 \label{eq:ntk_eigenvalue_decay}
 \mu_\ell^{L,\infty} \sim \ell^{-d}
 \end{equation}
-with multiplicity $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$. // we apply funk-hecke theorem for zonal kernels in the infinite-width regime
+with multiplicity $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$.
+
+\end{tcolorbox}
 
 
+\newpage
 
 
 
@@ -521,7 +618,8 @@ with multiplicity $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$. // we apply funk-
 
 \subsection{Personal contribution : The Sobolev Operator}
 
-We introduce the Sobolev operator which plays a central role in our analysis of regularized neural network training. The Sobolev operator encodes differential structure and enables the study of smoothness-regularized learning dynamics.
+We rigorously present the Sobolev operator informally introduced in [Townsend et al ] which plays a central role in our analysis of regularized neural network training.
+
 
 \begin{definition}[Continuous Sobolev Operator]
 \label{def:sobolev_continuous}
@@ -563,53 +661,66 @@ For a function $f \in H^s(\mathbb{S}^{d-1})$ with $s > 0$, the Sobolev loss can 
 where $(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s$ is the fractional Laplacian operator of order $s$. The proof is provided in Appendix A.1.
 \end{theorem}
 
-**Spectral Action**: The fractional operator $\boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s}$ is defined through its spectral action on spherical harmonics:
+\begin{tcolorbox}[colback=green!5,colframe=blue!60!black,title=Spectral Action]
+The fractional operator $\boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s}$ is defined through its spectral action on spherical harmonics:
 \begin{equation}
 \label{eq:fractional_spectral}
 \boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s Y_{\ell,p}(x)} = \boldsymbol{(1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p}(x)}
 \end{equation}
+\end{tcolorbox}
 
-For large $\boldsymbol{\ell}$, the expressions $\boldsymbol{(1 + \ell)^{2s}}$ and $\boldsymbol{(1 + \sqrt{\ell(\ell + d - 2)})^s}$ are asymptotically equivalent up to normalization constants, establishing the connection between classical and fractional formulations.
-\end{theorem}
-
-\begin{theorem}[Sobolev Loss on Unbounded Domains]
+\begin{theorem}[Personal contribution : Sobolev Loss on Unbounded Domains]
 \label{thm:sobolev_unbounded}
-For functions $\boldsymbol{f \in H^s(\mathbb{R}^d)}$ with $\boldsymbol{s \geq 1}$ and sufficient decay at infinity, the Sobolev loss can be expressed via integration by parts as:
+For functions $\boldsymbol{f \in H^s(\mathbb{S}^{d-1})}$ with $\boldsymbol{s \geq 1}$ , the Sobolev loss can be expressed via integration by parts as:
 \begin{equation}
 \label{eq:sobolev_unbounded}
-\boldsymbol{\mathcal{L}_s[f]} = \int_{\mathbb{R}^d} \boldsymbol{f(x)^2} \, dx + \int_{\mathbb{R}^d} \boldsymbol{\|\nabla f(x)\|^2} \, dx + \text{higher order terms}
+\boldsymbol{\mathcal{L}_s[f]} = \int_{\mathbb{R}^d} \boldsymbol{(1 + |\xi|^2)^s} \boldsymbol{|\hat{f}(\xi)|^2} \, d\xi
 \end{equation}
 
 For general $\boldsymbol{s \geq 1}$, repeated integration by parts yields the fractional representation:
 \begin{equation}
 \label{eq:sobolev_general}
-\boldsymbol{\|f\|_{H^s}^2} = \int_{\mathbb{R}^d} \boldsymbol{f(x)} \boldsymbol{(I + (-\Delta)^{1/2})^{2s}} \boldsymbol{f(x)} \, dx
+\boldsymbol{\|f\|_{H^s}^2} = \int_{\mathbb{S}^{d-1}} \boldsymbol{f(x)} \boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^{2s}} \boldsymbol{f(x)} \, d\sigma(x)
 \end{equation}
 
 The integration by parts approach via Stokes' theorem transforms the gradient squared terms into Laplacian terms, providing the connection between differential and spectral formulations.
 \end{theorem}
 
-\begin{proposition}[Spectral Properties of Sobolev Operator]
-\label{prop:sobolev_spectral}
-The Sobolev operator $\boldsymbol{P_s}$ has the following spectral properties. First, the **eigenvalues** are given by $\boldsymbol{(1 + \ell(\ell + d - 2))^s}$ with multiplicity $\boldsymbol{N(d,\ell)}$. Second, for large $\ell$, eigenvalues exhibit **polynomial growth** as $\boldsymbol{\ell^{2s}}$, which characterizes the high-frequency behavior of the operator. Finally, the operator provides **regularity enhancement** by amplifying high-frequency components, thereby promoting smoothness in the functional space.
-\end{proposition}
 
-\begin{remark}[Fourier-Based Extension for Limited Regularity]
-\label{rem:fourier_extension}
-When functions are not twice differentiable, the integration by parts approach fails due to insufficient regularity. In such cases, the **Fourier-based approach becomes the master formulation**. For $\boldsymbol{f \in L^2(\mathbb{R}^d)}$ with Fourier transform $\boldsymbol{\hat{f}(\xi)}$, the fractional Sobolev norm is defined directly in frequency space:
-\begin{equation}
-\label{eq:fourier_sobolev}
-\boldsymbol{\|f\|_{H^s}^2} = \int_{\mathbb{R}^d} \boldsymbol{(1 + |\xi|^2)^s} \boldsymbol{|\hat{f}(\xi)|^2} \, d\xi
-\end{equation}
 
-This definition requires no differentiability assumptions on $\boldsymbol{f}$, extends naturally to negative Sobolev indices $\boldsymbol{s < 0}$, provides the most general framework for Sobolev spaces, and reduces to classical definitions when sufficient regularity exists. The operator $\boldsymbol{(I + (-\Delta)^{1/2})^s}$ acts in Fourier space as multiplication by $\boldsymbol{(1 + |\xi|)^s}$, making this the fundamental definition from which all other formulations are derived.
-\end{remark}
 
-The Sobolev operator serves as a fundamental building block for understanding how derivative information and smoothness constraints modify the learning dynamics in neural networks. Its spectral structure, characterized by polynomial growth in eigenvalues, creates a natural hierarchy of frequency components that interacts with the NTK spectral properties to determine the effective learning behavior.
+
+
+
 
 
 
 \subsection{Personal contribution : Sobolev Gradient Descent in Fourier Domain}
+
+
+
+\begin{definition}[Discrete Sobolev Operator]
+\label{def:discrete_sobolev_operator}
+For a set of sampling points $\{x_i\}_{i=1}^n \subset \mathbb{S}^{d-1}$ with associated quadrature weights $\{c_i\}_{i=1}^n$, the discrete Sobolev operator $\Pop_s \in \mathbb{R}^{n \times n}$ of order $s > 0$ is defined by:
+
+\begin{tcolorbox}[colback=blue!5,colframe=blue!60!black,title=Matrix Definition]
+\begin{equation}
+\label{eq:discrete_sobolev_matrix}
+[\Pop_s]_{ij} = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(\ell)} \boldsymbol{(1 + \sqrt{\ell(\ell + d - 2)})^s} \boldsymbol{Y_{\ell,p}(x_i)} \boldsymbol{Y_{\ell,p}(x_j)} c_j
+\end{equation}
+\end{tcolorbox}
+
+where $Y_{\ell,p}$ are the spherical harmonics of degree $\ell$ and order $p$, and $N(\ell) = \binom{\ell + d - 1}{\ell} - \binom{\ell + d - 3}{\ell - 1}$ is the dimension of the space of spherical harmonics of degree $\ell$ in dimension $d$.
+
+For \textbf{Chebyshev points}, we obtain the exact spectral representation:
+\begin{equation}
+\label{eq:chebyshev_sobolev_exact}
+[\Pop_s]_{ij} = \boldsymbol{\delta_{ij} (1 + \sqrt{\ell_i(\ell_i + d - 2)})^s}
+\end{equation}
+where $\ell_i$ is the harmonic degree associated with point $x_i$.
+\end{definition}
+
+
 
 \begin{theorem}[NTK-Sobolev Composition]
 \label{thm:ntk_sobolev_composition}
@@ -621,11 +732,13 @@ Under \textit{Sobolev training}, the learning operator is given by the compositi
 \end{equation}
 \end{tcolorbox}
 where $\Kinf$ is the \textcolor{kernelcolor}{\textbf{NTK operator}} and $\Ps = (I + (-\Delta)^{1/2})^s$ is the \textcolor{sobolevcolor}{\textbf{Sobolev operator}} of order $s$.
-
-The key insight is that \textit{Sobolev gradient descent} in the Fourier domain naturally factorizes into two components: first, the application of the \textcolor{sobolevcolor}{\textbf{Sobolev operator}} $\Ps$ which modifies the frequency content of the gradient signal, followed by the \textcolor{kernelcolor}{\textbf{NTK operator}} $\Kinf$ which propagates this modified gradient through the network. This factorization emerges from the quadratic form structure of the Sobolev loss, which allows us to separate the spectral filtering effects of Sobolev regularization from the kernel dynamics of the neural network.
-
-In the discrete setting, this composition becomes a matrix multiplication $\Ts = \Kop \cdot \Pop_s$ where both matrices operate on the same sample space. The detailed proof is provided in \hyperref[sec:appendix_composition]{Appendix A.2}.
 \end{theorem}
+
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Insight : Factorization of Learning Dynamics}},enhanced,drop shadow]
+    The key insight is that \textit{Sobolev gradient descent} in the Fourier domain naturally factorizes into two components: first, the application of the \textcolor{sobolevcolor}{\textbf{Sobolev operator}} $\Ps$ which modifies the frequency content of the gradient signal, followed by the \textcolor{kernelcolor}{\textbf{NTK operator}} $\Kinf$ which propagates this modified gradient through the network. This factorization emerges from the quadratic form structure of the Sobolev loss, which allows us to separate the spectral filtering effects of Sobolev regularization from the kernel dynamics of the neural network.
+
+    In the discrete setting, this composition becomes a matrix multiplication $\Ts = \Kop \cdot \Pop_s$ where both matrices operate on the same sample space. The detailed proof is provided in \hyperref[sec:appendix_composition]{Appendix A.2}.
+\end{tcolorbox}
 
 \subsection{Personal contribution : NTK-Sobolev Spectral Commutation property}
 
@@ -636,20 +749,10 @@ The discrete NTK matrix $\Kop$ and Sobolev operator matrix $\Pop_s$ satisfy exac
 \Kop \Pop_s = \Pop_s \Kop
 \label{eq:chebyshev_commutation_condition}
 \end{equation}
-\textbf{if and only if} the sampling points $\{x_i\}_{i=1}^n$ are \textcolor{red}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) on $\mathbb{S}^{d-1}$.
+\textbf{if} the sampling points $\{x_i\}_{i=1}^n$ are \textcolor{red}{\textbf{Chebyshev points}} on $\mathbb{S}^{d-1}$.
 
 For arbitrary sampling points, this commutation \textit{fails}, requiring explicit derivative information for effective learning.
 \end{theorem}
-
-\begin{remark}[The Chebyshev Advantage]
-Chebyshev points possess the remarkable property that they enable \textbf{accurate derivative approximation} from function values alone \cite{driscoll2014chebfun}. This is because:
-\begin{itemize}
-\item They provide optimal polynomial interpolation
-\item Derivatives of interpolating polynomials approximate true derivatives with spectral accuracy
-\item The resulting discrete operators preserve the commutation properties of their continuous counterparts
-\end{itemize}
-This explains why standard regression suffices with Chebyshev points, while general points require explicit derivative data. The \href{https://www.chebfun.org/}{\textcolor{blue}{Chebfun library}} provides practical implementations of these techniques.
-\end{remark}
 
 \begin{theorem}[NTK-Sobolev Matrix Commutation - Chebyshev Case]
 \label{thm:ntk_sobolev_commutation}
