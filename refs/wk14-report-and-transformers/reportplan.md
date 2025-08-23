@@ -113,3 +113,11 @@ pour la soutenance on parlera surtout de physique https://arxiv.org/pdf/2008.086
 
 
 evaluation et declaration de plagiat
+
+
+
+analyse du x12(2015) : acknowledgements, resume & abstract
+intro avec images très générales, et declaration
+option, champ, directeurs, d'option et de stage, dates, nom de l'organisme
+
+
