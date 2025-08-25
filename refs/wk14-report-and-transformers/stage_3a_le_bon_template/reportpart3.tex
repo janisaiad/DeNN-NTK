@@ -15,8 +15,8 @@
 \usepackage{booktabs}
 \usepackage[most]{tcolorbox}
 \usepackage{xcolor}
-\addbibresource{stg3a.bib} %Import the bibliography file
-\bibliography{stg3a}
+\addbibresource{refs.bib} %Import the bibliography file
+\bibliography{refs.bib}
 
 % Define custom colors for mathematical elements [[memory:6864771]]
 \definecolor{kernelcolor}{RGB}{220,20,60}    % Red for NTK/K symbols
@@ -41,7 +41,7 @@
 \newcommand{\Ts}{\textcolor{purple}{\mathcal{T}_s}}
 
 
-\usepackage[hidelinks,colorlinks=true,linkcolor=blue,citecolor=red,urlcolor=blue]{hyperref}
+\usepackage{hyperref}
 
 % You can change the parameters: here are the available options:
 % - a4paper
@@ -61,7 +61,6 @@
 \usepackage[english]{babel}
 \usepackage[T1]{fontenc}
 \usepackage{blindtext}
-\usepackage[hidelinks]{hyperref}
 
 \usepackage{listings}
 \usepackage{tikz}
@@ -227,7 +226,12 @@
 
 \fontsize{40pt}{48pt}
 
-
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=red,
+    urlcolor=blue
+}
 
 
 
@@ -528,22 +532,25 @@ $\mathcal{P}_\ell$ & Propagation operator & $\rho$ & Spectral radius \\
 
 
 \subsubsection{Mathematical Foundation: The Third-Order Kernel}
-
 This section establishes the \textbf{mathematical foundation} for our analysis of finite-width neural networks through the Neural Tangent Hierarchy.
 
-
-\begin{tcolorbox}[colback=blue!5,colframe=blue!50!black,title={\textbf{Neural Network Architecture}},enhanced,drop shadow]
-We consider a \textbf{fully-connected feedforward neural network} with $H$ hidden layers of uniform width $m$:
-
+\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{Network Architecture and Initialization}},enhanced,drop shadow]
+We consider a \textbf{Multi-Layer Perceptron} with:
 \begin{itemize}
+\item \textbf{Depth}: $H$ layers with uniform width $m$
 \item \textbf{Forward propagation}: $x^{(\ell)} = \frac{1}{\sqrt{\m}} \ReLU (\W^{(\ell)}x^{(\ell-1)})$ for $\ell \in \{1, \ldots, H\}$
 \item \textbf{Network output}: $f(x, \theta) = a^T x^{(H)}$ where $a \in \mathbb{R}^m$
 \item \textbf{Parameters}: $\theta = (\text{vec}(\W^{(1)}), \ldots, \text{vec}(\W^{(H)}), a)$
+\item \textbf{Weight initialization}: $\W^{(\ell)} \sim \mathcal{N}(0, c_W^2/m)$ with $c_W^2 = 2$ for ReLU
+\item \textbf{NTK scaling}: Output layer scaled by $1/\sqrt{\m}$
+\item \textbf{Proper initialization}: Ensures dynamical isometry at the edge of chaos
 \item \textbf{Activation derivatives}: $\ReLU'_\ell(x) = \text{diag}(\ReLU'(\W^{(\ell)}x^{(\ell-1)}))$
 \end{itemize}
 
 The \textit{NTK scaling} $1/\sqrt{\m}$ ensures proper initialization and infinite-width convergence, with order 1 weight and small update, contrary to [Greg Yang 2025] $\mu$P
 \end{tcolorbox}
+
+
 
 \subsubsection{The Neural Tangent Kernel Framework}
 
@@ -704,6 +711,10 @@ This section presents our \textbf{systematic analysis} of how the third-order ke
 
 To understand how the third-order kernel scales with network depth, we establish a \textbf{recursive relationship} that reveals the \textit{layer-by-layer contributions} to $\textcolor{k3color}{K^{(3)}}$. This analysis is crucial for understanding the behavior of finite-width corrections as networks become deeper.
 
+\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{Hong Tzer Tau Scaling Results}},enhanced,drop shadow]
+According to Hong Tzer Tau's analysis, the third-order kernel $\textcolor{k3color}{K^{(3)}}$ exhibits zero mean with standard deviation scaling as $\mathcal{O}(1/m)$, while the fourth-order kernel $\textcolor{kernelcolor}{K^{(4)}}$ has standard deviation scaling as $\mathcal{O}(\frac{1}{m \sqrt{m}})$, where $m$ is the network width.
+\end{tcolorbox}
+
 \begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Theorem (Recursive Depth Formula for $\textcolor{k3color}{K^{(3)}}$)}},enhanced,drop shadow]\label{thm:recursive_depth}
 For a network with $H+1$ layers, the third-order kernel can be decomposed as:
 \begin{equation}
@@ -720,23 +731,12 @@ The key insight of this recursive structure is that adding a new layer to the ne
 \item \textbf{Coupling terms}: Corrections due to the interaction between old and new layers
 \end{itemize}
 
-A \textit{critical property} of this recursion is that for \textbf{ReLU activation functions}, the second derivatives $\sigma''$ vanish almost everywhere, which significantly simplifies the expansion of the directional derivatives $\delta_\gamma$.
+A \textit{critical property} of this recursion is that for \textbf{ReLU activation functions}, the second derivatives $\ReLU ''$ vanish almost everywhere, which significantly simplifies the expansion of the directional derivatives $\delta_\gamma$.
+This results is critical provided that during training, there is a probability 0 that any activation encounter 0. [Deep et al]
 
 The complete mathematical derivation, including the explicit forms of all terms and the detailed analysis of the ReLU case, is presented in \hyperref[sec:appendix_recursive_derivation]{Appendix B.2}. This derivation demonstrates how the recursive structure emerges naturally from the hierarchical organization of the neural network.
+We give bounds we found for the behavior of the entries of the $\textcolor{k3color}{K^{(3)}}$ tensor as a function of the network depth, denoted by $L$ (or $H$ in the code), for a fixed network width $m$. The analysis is based on the formulas from the Neural Tangent Hierarchy (NTH) framework. We aim to understand if the tensor entries decay as the depth increases, and specifically, if this decay is exponential.
 
-This document analyzes the behavior of the entries of the $\textcolor{k3color}{K^{(3)}}$ tensor as a function of the network depth, denoted by $L$ (or $H$ in the code), for a fixed network width $m$. The analysis is based on the formulas from the Neural Tangent Hierarchy (NTH) framework. We aim to understand if the tensor entries decay as the depth increases, and specifically, if this decay is exponential.
-
-\subsubsection{Network Architecture and Initialization}
-
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{Network Setup and NTK Scaling}},enhanced,drop shadow]
- \W e consider a \textbf{Multi-Layer Perceptron} with:
-\begin{itemize}
-\item \textbf{Depth}: $L$ layers with uniform width $m$
-\item \textbf{Weight initialization}: $\W^{(\ell)} \sim \mathcal{N}(0, c_W^2/m)$ with $c_W^2 = 2$ for ReLU
-\item \textbf{NTK scaling}: Output layer scaled by $1/\sqrt{\m}$
-\item \textbf{Proper initialization}: Ensures dynamical isometry at the edge of chaos
-\end{itemize}
-\end{tcolorbox}
 
 
 
@@ -822,15 +822,8 @@ This stability is \textbf{essential} for our scaling analysis and explains why d
 
 \subsubsection{Main Results}
 
-Our analysis reveals that the magnitude of the entries of the $\textcolor{k3color}{K^{(3)}}$ tensor does \textbf{not} decay with depth $L$. Instead, it exhibits a quadratic growth with depth, contradicting initial expectations of exponential decay.
+We reveal that the magnitude of the entries of the $\textcolor{k3color}{K^{(3)}}$ tensor does \textbf{not} decay with depth $L$. Instead, it exhibits a quadratic growth with depth, contradicting initial expectations of exponential decay.
 
-\begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Theorem (Scaling of $\textcolor{k3color}{K^{(3)}}$)}},enhanced,drop shadow]
-The magnitude of the entries of the third-order kernel $\textcolor{k3color}{K^{(3)}}$ scales with network depth $H$ and width $m$ as:
-\begin{equation}
-\label{eq:k3_scaling_theorem}
-\textcolor{k3color}{K^{(3)}}_{\alpha\beta\gamma} \sim \mathcal{O}\left(\frac{H^2}{\sqrt{\m}}\right)
-\end{equation}
-\end{tcolorbox}
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Key Scaling Result}},enhanced,drop shadow]
 The third-order kernel exhibits \textbf{quadratic depth scaling}:
@@ -931,7 +924,7 @@ The data generated by this script (the computed norms and eigenvalue statistics 
 \subsection{Personal contribution : Finite-Width Correction numerical results and answer to deeper or wider}
 
 \begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{🎯 EMPIRICAL SCALING LAW}},enhanced,drop shadow]
-Comprehensive regression analysis ($R^2 = 0.987$) reveals the precise finite-width correction scaling:
+Comprehensive regression analysis in log-log scale ($R^2 = 0.987$) reveals the precise finite-width correction scaling:
 
 \begin{equation}
 \|K_{\text{emp}} - K_{\infty}\|_\infty \propto H^{1.099} \cdot D_{\text{in}}^{0.028} \cdot N^{0.902} \cdot M^{-1.013}
@@ -1019,10 +1012,7 @@ $\textcolor{k3color}{K^{(3)}}$ and $\textcolor{kernelcolor}{\textcolor{kernelcol
 
 
 \subsection{Personal contribution : K3 implementation and K4 formula}
-We have implemented the $K^{(3)}$ formula in the code because its algeraic tractability is very good.
-It happens that the $K^{(4)}$ formula is very long (16 pages long, available on this \href{https://drive.google.com/file/d/1-00000000000000000000000000000000000000000}{google drive} in tex format) 
-to implement because it requires the Hessian of the NTK. That is why all the computations there have been done using neural-tangents. 
-To alleviate this intractability, we have introduced a \textbf{ new perspective} using the Hessian of the NTK to make finite-width computations tractable.
+We have implemented the $K^{(3)}$ formula due to its excellent algebraic tractability. The $K^{(4)}$ formula is extremely long (16 pages, available on this \href{https://drive.google.com/file/d/1-00000000000000000000000000000000000000000}{google drive} in tex format) and requires the Hessian of the NTK, hence we use neural-tangents for these computations. To resolve this intractability, we introduce a \textbf{new perspective} using the Hessian of the NTK that transforms previously intractable finite-width computations into tractable problems through automated differentiation, reducing computational complexity from $\mathcal{O}(m^4)$ to $\mathcal{O}(m^2)$ for practical implementations.
 
 \subsubsection{Personal Contribution: Hessian-NTK Tractability Framework}
 
@@ -1038,11 +1028,7 @@ By analyzing the \textbf{Hessian structure} of the NTK, we develop efficient alg
 
 This fundamental relationship reveals that the \textbf{fourth-order kernel} $\textcolor{kernelcolor}{K^{(4)}}$ is precisely obtained by taking the Hessian of the NTK and computing right and left dot products with the gradient of the network output with respect to weights.
 
-\textbf{Revolutionary Extension}: This Hessian framework transforms the previously intractable fourth-order computation into a tractable problem through automated differentiation, reducing computational complexity from $\mathcal{O}(m^4)$ to $\mathcal{O}(m^2)$ for practical implementations.
 \end{tcolorbox}
-
-
-
 
 
 
@@ -1070,7 +1056,7 @@ For a fixed pair of inputs $(x_1, x_2)$, we consider the third-order kernel deri
 \]
 where $\theta_{\mu}$ has multi-index $\mu=(p,i,j)$ belonging to the weight matrix $A_p$. Thus, for fixed $(x_1,x_2)$, we obtain a vector $O_3^{x_1,x_2} \in \mathbb{R}^{|D_{\text{tr}}|}$ with components given by the third derivative of the kernel at each training point.
 
-\subsubsection{Explicit Formulas for the Corrections}
+\subsubsection{Explicit Formulas for the Corrections [Dyer et al]}
 
 Having established the theoretical foundation, we now present the explicit formulas for the first-order corrections $O_3$ and $O_4$.
 
@@ -1085,6 +1071,9 @@ where the correction term is given by:
 \end{align}
 \end{tcolorbox}
 
+
+
+
 \begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Theorem [Dyer] (Eigendecomposition of corrections)}},enhanced,drop shadow]\label{thm:eigen_corrections}
 Using the eigendecomposition of the initial kernel $\Theta_0$, the correction can be expressed as:
 \begin{align}
@@ -1094,11 +1083,8 @@ Using the eigendecomposition of the initial kernel $\Theta_0$, the correction ca
 \end{align}
 where:
 \begin{itemize}
-\item $\hat{e}_{i}$ are the eigenvectors of the initial kernel $\Theta_{0}$
-\item $\textcolor{kernelcolor}{\lambda_{i}}$ are the corresponding eigenvalues
-\item $\vec{x} = (x_1,x_2)$ represents the input pair
-\item $O_{3}(\vec{x};0)$ is a vector over the training dataset
-\item $O_{4}(\vec{x};0)$ is a square matrix over the training dataset
+\item $\hat{e}_{i}$ are the eigenvectors of the initial kernel $\Theta_{0}$ and $\textcolor{kernelcolor}{\lambda_{i}}$ are the corresponding eigenvalues
+\item $\vec{x} = (x_1,x_2)$ represents the input pair, $O_{3}(\vec{x};0)$ is a vector over the training dataset and $O_{4}(\vec{x};0)$ is a square matrix over the training dataset
 \item $\Delta f_{0} := f_{0} - y$ is the initial prediction error vector
 \end{itemize}
 \end{tcolorbox}
@@ -1117,18 +1103,38 @@ f(t) &= y + e^{-\Theta_{0}t}\left(1-\int_{0}^{t}dt'e^{t'\Theta_{0}}\Theta^{(1)}(
 
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Remark: Interpretation of the corrections}},enhanced,drop shadow]
-The formulas in \ref{thm:eigen_corrections} reveal three key properties.
+The formulas in \ref{thm:eigen_corrections} reveal a double Taylor expansion structure that captures finite-width corrections through linear and quadratic correlations.
 
-The $O_3$ term represents linear correction from kernel evolution during training. It scales as $\mathcal{O}(n^{-1})$. It captures finite-width effects on kernel constancy.
+Within the framework of a double Taylor expansion, the $O_3$ term represents linear correlations between the kernel eigenmodes and prediction errors. Mathematically, it encodes the first-order derivative of the kernel dynamics with respect to network parameters, yielding corrections of order $\mathcal{O}(n^{-1})$. These linear correlations capture how the infinite-width kernel constancy is perturbed by finite-width effects.
 
-The $O_4$ term encodes quadratic corrections from eigenmode interactions. It has complex time dependence distinct from the linear term.
+The $O_4$ term encodes quadratic correlations emerging from cross-interactions between pairs of eigenmodes. This quadratic structure appears naturally as the second-order term in the Taylor expansion of the kernel dynamics. The quadratic correlations manifest a complex time dependence distinct from the linear term, reflecting the non-linear nature of eigenmode interactions in the system.
 
-The exponential factors $e^{-t\textcolor{kernelcolor}{\lambda_i}}$ show corrections become significant for eigenvalues near zero. These correspond to slow-learning directions.
+The exponential factors $e^{-t\textcolor{kernelcolor}{\lambda_i}}$ in this Taylor expansion reveal that corrections become significant for eigenvalues near zero. These directions correspond to slow-learning modes, where both linear and quadratic correlations dominate the training dynamics.
 \end{tcolorbox}
 
 
 
-\subsubsection{On the Fourth-Order Kernel $O_4$ and its Computation}
+
+\subsection{[Terjek et al] NTK gram Matrix Spectrum scaling law}
+
+from [terjek] The key scaling laws for the discrete NTK matrix are:
+
+\textbf{Condition Number}:
+\[ \kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l) \]
+The condition number grows linearly with data size $n$ but improves with depth $l$.
+
+\textbf{Eigenvalue Distribution}:
+\[ \lambda_{\text{min}} \sim \frac{3l}{4}, \quad \lambda_{\text{max}} \sim \frac{3nl}{4} \pm \xi \text{ where } \xi \sim \log(l) \]
+
+The minimum eigenvalue scales linearly with depth, while the maximum scales with both depth and data size.
+
+\textbf{Key Insight}: The training dynamics are dictated by the NTK matrix eigenvalues, not the operator eigenvalues. Deeper networks ($l \uparrow$) improve conditioning but with diminishing returns.
+
+
+
+
+
+\subsubsection{Personal Contribution: On the Fourth-Order Kernel $O_4$ and its Computation}
 
 Following the derivation of $\textcolor{k3color}{K^{(3)}}$, we naturally extend our analysis to the fourth-order tensor $O_4$ appearing in the NTK correction $\Theta^{(1)}_\infty$ (Equation \ref{eq:theta_correction}). Direct term-by-term derivation yields an unwieldy four-page formula that obscures the scaling properties and proves computationally impractical.
 
@@ -1157,38 +1163,6 @@ We have established the theoretical framework for $\mathbf{O}_4$ through its con
 This discovery was crucial, as it rendered the study of the $\mathbf{O}_4$ matrix computationally feasible and paved the way for the statistical analysis presented in the following sections.
 
 
-
-\subsection{[Terjek et al] NTK gram Matrix Spectrum scaling law}
-
-from [terjek] The key scaling laws for the discrete NTK matrix are:
-
-\textbf{Condition Number}:
-\[ \kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l) \]
-The condition number grows linearly with data size $n$ but improves with depth $l$.
-
-\textbf{Eigenvalue Distribution}:
-\[ \lambda_{\text{min}} \sim \frac{3l}{4}, \quad \lambda_{\text{max}} \sim \frac{3nl}{4} \pm \xi \text{ where } \xi \sim \log(l) \]
-
-The minimum eigenvalue scales linearly with depth, while the maximum scales with both depth and data size.
-
-\textbf{Key Insight}: The training dynamics are dictated by the NTK matrix eigenvalues, not the operator eigenvalues. Deeper networks ($l \uparrow$) improve conditioning but with diminishing returns.
-
-
-
-\subsection{Results and Discussion}
-
-The primary output of the experiment is a plot of the infinity norm of $\textcolor{k3color}{K^{(3)}}$ as a function of the network depth $L$.
-
-\begin{figure}[!h]
-    \centering
-    \includegraphics[width=0.5\textwidth]{figures/k3_inf_norm_vs_L_finite_M100_N8_D20.png}
-    \caption{Infinity norm of the empirical $\textcolor{k3color}{K^{(3)}}$ tensor versus network depth $L$, plotted on a log-log scale. The width is fixed at $M=100$. The observed trend confirms that the magnitude of the correction kernel decreases with depth.}
-    \label{fig:k3_norm_vs_l}
-\end{figure}
-
-The results, as shown in Figure \ref{fig:k3_norm_vs_l}, demonstrate a clear decrease in the magnitude of $\textcolor{k3color}{K^{(3)}}$ as the depth $L$ increases. While a precise fit to a quadratic curve would require more extensive simulations over a wider range of depths, the observed trend is strongly consistent with our theoretical prediction of $\textcolor{k3color}{K^{(3)}} \sim \Order(L^2/\sqrt{\m})$. The experiment successfully validates that finite-width effects, as captured by the first-order NTK correction, become significantly less pronounced in deeper networks. This provides empirical support for the idea that deeper networks become more "lazy" and their internal representations evolve less substantially during training compared to shallow ones.
-
-To understand the practical impact of the $\textcolor{k3color}{K^{(3)}}$ correction, we analyze how its magnitude scales with the network depth $H$ and width $m$. This analysis reveals how the importance of the NTK's evolution changes with the network architecture.
 
 
 
@@ -1258,63 +1232,87 @@ We therefore need to find a scaling law for $O_4$ as a function of $N$. The disc
 
 
 
-\subsubsection{From Scaling Laws to Spectral Statistics: The Need for a Deeper Look}
 
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{💭 MOTIVATION: The Scaling Puzzle}},enhanced,drop shadow]
-Our analysis of the late-time \textcolor{kernelcolor}{NTK} correction revealed a fundamental \textbf{scaling puzzle}:
 
-\textbf{Empirical Observation}: Near-linear dependence on data size $N$
+\subsection{Results and Discussion}
 
-\textbf{Theoretical Prediction}: Much faster growth with $N$
+The primary output of the experiment is a plot of the infinity norm of $\textcolor{k3color}{K^{(3)}}$ as a function of the network depth $L$.
 
-This discrepancy motivated our deep dive into \textcolor{purple!80!black}{\textbf{spectral properties}} and led to the \textcolor{purple!80!black}{\textbf{GOE}} discovery \cite{anonymous_finite_width_kernel_dynamics_2023}.
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/k3_inf_norm_vs_L_finite_M100_N8_D20.png}
+    \caption{Infinity norm of the empirical $\textcolor{k3color}{K^{(3)}}$ tensor versus network depth $L$, plotted on a log-log scale. The width is fixed at $M=100$. The observed trend confirms that the magnitude of the correction kernel decreases with depth.}
+    \label{fig:k3_norm_vs_l}
+\end{figure}
+
+The results, as shown in Figure \ref{fig:k3_norm_vs_l}, demonstrate a clear decrease in the magnitude of $\textcolor{k3color}{K^{(3)}}$ as the depth $L$ increases. While a precise fit to a quadratic curve would require more extensive simulations over a wider range of depths, the observed trend is strongly consistent with our theoretical prediction of $\textcolor{k3color}{K^{(3)}} \sim \Order(L^2/\sqrt{\m})$. The experiment successfully validates that finite-width effects, as captured by the first-order NTK correction, become significantly less pronounced in deeper networks. This provides empirical support for the idea that deeper networks become more "lazy" and their internal representations evolve less substantially during training compared to shallow ones.
+
+To understand the practical impact of the $\textcolor{k3color}{K^{(3)}}$ correction, we analyze how its magnitude scales with the network depth $H$ and width $m$. This analysis reveals how the importance of the NTK's evolution changes with the network architecture.
+
+
+
+
+
+
+
+\subsubsection{Determining the Scaling of $\textcolor{orange!80!black}{\mathbf{O}_4}$ from Empirical Results}
+
+
+
+\subsubsection{From Empirical Scaling to Theoretical Understanding}
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{💭 MOTIVATION: Understanding the Scaling Law}},enhanced,drop shadow]
+Our empirical analysis of the late-time \textcolor{kernelcolor}{NTK} correction revealed a specific scaling behavior with data size $N$. We now use this information to derive the implicit scaling properties of the tensor components $\textcolor{orange!80!black}{\mathbf{O}_3}$ and $\textcolor{orange!80!black}{\mathbf{O}_4}$ when averaged over random eigenvectors.
 \end{tcolorbox}
 
-\subsubsection{Recapitulation: The Scaling Puzzle}
-
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{📊 GENERAL REMARK: Correction Decomposition}},enhanced,drop shadow]
-The finite-width correction $\textcolor{blue!80!black}{\Theta^{(1)}_\infty}$ decomposes into two main terms involving the tensors $\textcolor{orange!80!black}{\mathbf{O}_3}$ and $\textcolor{orange!80!black}{\mathbf{O}_4}$:
+The finite-width correction $\textcolor{blue!80!black}{\Theta^{(1)}_\infty(\vec{x})}$ decomposes into two main terms involving the tensors $\textcolor{orange!80!black}{\mathbf{O}_3}$ and $\textcolor{orange!80!black}{\mathbf{O}_4}$:
 \end{tcolorbox}
 
 \begin{align}
 \textcolor{blue!80!black}{\Theta^{(1)}_\infty(\vec{x})} = & \underbrace{-\sum_{i=1}^N \frac{1}{\textcolor{kernelcolor}{\lambda_{i}}}(\textcolor{orange!80!black}{\mathbf{O}_{3}}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})}_{\textcolor{purple!80!black}{T_3}} \label{eq:T3_decomposition}\\
 & + \underbrace{\sum_{i,j=1}^N\frac{1}{\textcolor{kernelcolor}{\lambda_{i}}(\textcolor{kernelcolor}{\lambda_{i}}+\textcolor{kernelcolor}{\lambda_{j}})}(\hat{e}_{i}^{T}\textcolor{orange!80!black}{\mathbf{O}_{4}}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})}_{\textcolor{purple!80!black}{T_4}} \label{eq:T4_decomposition}
 \end{align}
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{📈 GENERAL REMARK: Spectral Dichotomy}},enhanced,drop shadow]
-Our empirical analysis of the \textcolor{kernelcolor}{NTK} spectrum revealed a \textbf{clear dichotomy}:
+
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{📈 GENERAL REMARK: Spectral Structure}},enhanced,drop shadow]
+Our empirical analysis of the \textcolor{kernelcolor}{NTK} spectrum revealed a clear structure:
 \begin{itemize}
 \item \textbf{Isolated eigenvalue}: $\textcolor{kernelcolor}{\lambda_1} \sim \mathcal{O}(H)$ (constant mode)
 \item \textbf{Bulk eigenvalues}: $\textcolor{kernelcolor}{\lambda_{i>1}} \sim \mathcal{O}(H/N)$ for $N-1$ modes
 \end{itemize}
-This structure is \textbf{universal} across different initialization schemes \cite{hanin_nica_2019}.
+This structure is universal across different initialization schemes \cite{hanin_nica_2019}.
 \end{tcolorbox}
 
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{💭 NAIVE SCALING ANALYSIS}},enhanced,drop shadow]
-Under the \textit{incorrect} assumption that tensor components $\textcolor{orange!80!black}{\mathbf{O}_3}$ and $\textcolor{orange!80!black}{\mathbf{O}_4}$ are statistically independent of eigenvectors:
+\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{💭 INITIAL SCALING ESTIMATE}},enhanced,drop shadow]
+If we assume that tensor components $\textcolor{orange!80!black}{\mathbf{O}_3}$ and $\textcolor{orange!80!black}{\mathbf{O}_4}$ are statistically independent of eigenvectors, we obtain:
 \end{tcolorbox}
 
 \begin{align}
 \textcolor{purple!80!black}{T_3} &\sim (N-1) \times \frac{1}{\textcolor{kernelcolor}{\lambda_{\text{bulk}}}} \sim \frac{N}{H/N} = \mathcal{O}\left(\frac{N^2}{H}\right) \label{eq:T3_naive_scaling}\\
 \textcolor{purple!80!black}{T_4} &\sim (N-1)^2 \times \frac{1}{\textcolor{kernelcolor}{\lambda_{\text{bulk}}}^2} \sim \frac{N^2}{(H/N)^2} = \mathcal{O}\left(\frac{N^4}{H^2}\right) \label{eq:T4_naive_scaling}
 \end{align}
-\begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{⚡ KEY CONTRADICTION: Theory vs Empirics}},enhanced,drop shadow]
-\textbf{Theoretical Prediction}: $\mathcal{O}(N^4/H^2)$ growth
 
-\textbf{Empirical Finding}: $\|\textcolor{kernelcolor}{K_{\text{emp}}} - \textcolor{kernelcolor}{K_{\infty}}\|_\infty \propto N^{0.902} L^{1.099}$
-
-This \textbf{massive discrepancy} reveals that our independence assumption is fundamentally \textit{wrong}!
+\begin{tcolorbox}[colback=orange!15,colframe=orange!70!black,title={\textbf{📊 EMPIRICAL CONSTRAINT: Observed Scaling}},enhanced,drop shadow]
+Our experiments show that the total correction scales as:
+\[
+\|\textcolor{kernelcolor}{K_{\text{emp}}} - \textcolor{kernelcolor}{K_{\infty}}\|_\infty \propto N^{0.902} L^{1.099} \approx \mathcal{O}(NH)
+\]
+This near-linear scaling in $N$ provides a strong constraint on the behavior of the tensor components.
 \end{tcolorbox}
 
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{💡 KEY INSIGHT: Eigenvector Correlations}},enhanced,drop shadow]
-The tensor components $\textcolor{orange!80!black}{\mathbf{O}_3}$ and $\textcolor{orange!80!black}{\mathbf{O}_4}$, when averaged over random eigenvectors, must have a \textbf{strong $N$-dependence} that tames the growth.
-
-\textbf{Reverse Engineering}: For total correction $\sim \mathcal{O}(NH)$, we need:
+\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{💡 BACKWARD CALCULATION: Deriving $\textcolor{orange!80!black}{\mathbf{O}_4}$ Scaling}},enhanced,drop shadow]
+Working backward from the empirical scaling $\sim \mathcal{O}(NH)$, we can determine the required scaling of the tensor components when averaged over random eigenvectors:
 \end{tcolorbox}
 
 \begin{equation}
 \mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}\textcolor{orange!80!black}{\mathbf{O}_{4}}\hat{e}_{j})(\cdots)] \sim \frac{\mathcal{O}(NH)}{\mathcal{O}(N^4/H^2)} \sim \mathcal{O}\left(\frac{H^3}{N^3}\right) \label{eq:required_scaling}
 \end{equation}
 
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🎯 KEY FINDING: Eigenvector Correlations Matter}},enhanced,drop shadow]
+The significant reduction from $\mathcal{O}(N^4/H^2)$ to $\mathcal{O}(NH)$ reveals that the tensor components $\textcolor{orange!80!black}{\mathbf{O}_3}$ and $\textcolor{orange!80!black}{\mathbf{O}_4}$ have strong correlations with the eigenvector structure. These correlations effectively suppress the naive scaling, leading to the observed near-linear dependence on $N$.
+
+This suggests that the tensors are not independent random objects but are intimately connected to the spectral properties of the \textcolor{kernelcolor}{NTK}, which motivates a deeper investigation using random matrix theory.
+\end{tcolorbox}
 
 
 
@@ -1676,7 +1674,7 @@ This result demonstrates that for fixed computational resources, \textit{moderat
 
 \subsubsection{Personal Contribution: Empirical Verification of Theoretical Predictions}
 
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🎯 VERIFICATION RESULTS}},enhanced,drop shadow]
+\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{🎯 VERIFICATION RESULTS}},enhanced,drop shadow]
 We provide two critical empirical validations that confirm key theoretical predictions from our analysis:
 
 \textbf{Result 1}: Comprehensive regression analysis ($R^2 = 0.987$) validates the finite-width correction scaling law:
@@ -1715,30 +1713,29 @@ These empirical contributions strengthen the validity of our theoretical framewo
 
 Our investigation into the scaling laws and spectral properties of the NTK has opened up several promising avenues for future research. The discovery of GOE statistics provides a new lens through which to analyze feature learning and generalization in deep networks.
 
-\begin{tcolorbox}[colback=orange!10,colframe=orange!60!black,title={\textbf{🔬 IMMEDIATE RESEARCH PRIORITIES}},enhanced,drop shadow]
-The scaling puzzle and GOE discovery motivate several concrete research directions:
+\begin{tcolorbox}[colback=red!5,colframe=red!40!black,title={\textbf{Critical Open Question: The Scaling Puzzle}},enhanced,drop shadow]
+We revealed a fundamental scaling property in 3th and 4th order moments computations for finite-width corrections. Future work should leverage quantum field theory techniques, specifically applying Wick's theorem to systematically compute four-point correlation functions that arise in the expectation values. The combinatorial analysis of all pairwise contractions in these four-term correlations will provide the exact suppression factors, revealing how the naive $N^4$ scaling is reduced to the observed near-linear behavior through intricate cancellations in the tensor structure.
 \end{tcolorbox}
 
-\textbf{Resolving the Scaling Puzzle}: Our analysis revealed a fundamental contradiction between theoretical predictions ($\mathcal{O}(N^4/H^2)$) and empirical observations ($\sim N^{0.902}$) for finite-width corrections. Future work should leverage the GOE framework and Weingarten calculus to compute the precise expectation values in equation \eqref{eq:required_scaling}. The systematic calculation of tensor projections over random orthogonal matrices will finally resolve this discrepancy and provide exact scaling laws.
-
-\textbf{Neural Tangent Hierarchy Dynamics}: A primary goal is to further clarify the hierarchical coefficients, particularly $\textcolor{kernelcolor}{\lambda_H}$, and empirically verify its predicted linear scaling with depth. Since the $\textcolor{orange!80!black}{\mathbf{O}_4}$ kernel appears to be a critical component of the NTK correction, a detailed study of its properties, including its eigendecomposition, is necessary. Should a full implementation not be available in existing literature, developing one will be essential to fully analyze its structure and contribution to feature learning.
-
-\textbf{Geometric Structure in NTK Spectra}: The emergence of particular geometric patterns in the NTK spectrum, such as the observed "parabola shape," warrants deeper investigation. Understanding the origin of these shapes could reveal new insights into the inductive biases of deep networks. The GOE connection suggests these patterns may be universal features arising from the underlying symmetries of the network architecture.
-
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{🌐 EXTENSIONS TO STRUCTURED DATA}},enhanced,drop shadow]
-Testing the generality of our GOE findings across different data geometries:
+\begin{tcolorbox}[colback=blue!5,colframe=blue!40!black,title={\textbf{Neural Tangent Hierarchy Dynamics}},enhanced,drop shadow]
+We aim to further clarify the hierarchical coefficients, particularly $\textcolor{kernelcolor}{\lambda_H}$, and empirically verify its predicted linear scaling with depth. Since the $\textcolor{orange!80!black}{\mathbf{O}_4}$ kernel appears to be a critical component of the NTK correction, a detailed study of its properties, including its eigendecomposition, is necessary. Should a full implementation not be available in existing literature, developing one will be essential to fully analyze its structure and contribution to feature learning.
 \end{tcolorbox}
 
-To test the generality of our findings, the numerical framework should be extended to data with inherent geometric structure, for instance, data defined on the torus or over $\mathbb{R}^d$. This would require leveraging techniques like Kronecker decomposition and spherical harmonics to analyze how the NTK evolution depends on the data manifold and input dimension. The representation-theoretic interpretation we developed suggests that the GOE statistics may be a manifestation of deeper symmetries that persist across different data geometries.
-
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🏗️ ARCHITECTURAL EXTENSIONS}},enhanced,drop shadow]
-Bridging theory-practice gap through modern architectures:
+\begin{tcolorbox}[colback=purple!5,colframe=purple!40!black,title={\textbf{Geometric Structure in NTK Spectra}},enhanced,drop shadow]
+The emergence of particular geometric patterns in the NTK spectrum, such as the observed "parabola shape," warrants deeper investigation. Understanding the origin of these shapes could reveal new insights into the inductive biases of deep networks. The GOE connection suggests these patterns may be universal features arising from the underlying symmetries of the network architecture.
 \end{tcolorbox}
 
-To bridge the gap between theory and practice, this analysis must be expanded to include more complex and modern architectures. Investigating the NTK hierarchy in different settings, such as for narrow networks or for networks with skip connections like ResNets and varying initialization schemes, will be a crucial next step. The RMT framework we established provides the theoretical foundation to tackle these more complex scenarios systematically.
+\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title={\textbf{Extensions to Structured Data}},enhanced,drop shadow]
+To test the generality of our findings, we plan to extend the numerical framework to data with inherent geometric structure, for instance, data defined on the torus or over $\mathbb{R}^d$. This would require leveraging techniques like Kronecker decomposition and spherical harmonics to analyze how the NTK evolution depends on the data manifold and input dimension. The representation-theoretic interpretation we developed suggests that the GOE statistics may be a manifestation of deeper symmetries that persist across different data geometries.
+\end{tcolorbox}
 
-\textbf{Future Collaboration}: This research will be are going to be discussed with hopefully future collaboration with Pr. Ben Arous, Nicholas P Baskerville, Philip Misof, Tan Bui-Tanh, Frank Nielsen, leveraging expertise in random matrix theory, information geometry and physical approaches to fully exploit the GOE connection and develop rigorous analysis of the optimization landscape.
+\begin{tcolorbox}[colback=orange!5,colframe=orange!40!black,title={\textbf{Modern Architecture Extensions}},enhanced,drop shadow]
+To bridge the gap between theory and practice, this analysis must be expanded to include more complex and modern architectures. We plan to investigate the NTK hierarchy in different settings, such as for narrow networks or for networks with skip connections like ResNets and varying initialization schemes. The random matrix theory framework we established provides the theoretical foundation to tackle these more complex scenarios systematically.
+\end{tcolorbox}
 
+\begin{tcolorbox}[colback=yellow!5,colframe=yellow!40!black,title={\textbf{Future Collaboration Opportunities}},enhanced,drop shadow]
+This research opens pathways for future collaboration with experts in random matrix theory, information geometry and physical approaches. We plan to leverage expertise from the community to fully exploit the GOE connection and develop rigorous analysis of the optimization landscape, building on the solid foundations established in this work.
+\end{tcolorbox}
 
 
 
@@ -2169,7 +2166,7 @@ This is precisely the action of the Hessian operator of $L = \textcolor{kernelco
 
 
 
-
+\newpage
 
 \section{Symmetry Theory and Universality Classes}\label{sec:symmetry_theory}
 
@@ -2262,250 +2259,255 @@ Since the higher moments of $\mathcal{B}$ (for $k \ge 3$) vanish in the large-wi
 
 
 
-
 \section{Quantum Field Theory Perspective on Neural Tangent Hierarchy}
 
-The connection between neural networks and quantum field theory emerges from the **Gaussianity of perturbations** in randomly initialized networks \cite{halverson2020neural, bondesan2021hintons}. This Gaussianity ensures that higher-order moments follow quantum field interaction principles, establishing a rigorous theoretical framework for finite-width corrections within the Neural Tangent Hierarchy.
+The connection between neural networks and quantum field theory emerges from the \textbf{Gaussianity of perturbations} in randomly initialized networks \cite{halverson2020neural, bondesan2021hintons}. This \textbf{Gaussianity} ensures that higher-order moments follow quantum field interaction principles, establishing a rigorous theoretical framework for finite-width corrections within the Neural Tangent Hierarchy.
 
-The Wick-Isserlis theorem provides the fundamental computational tool for neural network expectation values with Gaussian weight initialization \cite{grosvenor2021edge}. For multivariate Gaussian variables, complex expectation values reduce to pairwise contractions:
+The \textbf{Wick-Isserlis theorem} provides the fundamental computational tool for neural network expectation values with \textbf{Gaussian} weight initialization \cite{grosvenor2021edge}. For multivariate \textbf{Gaussian} variables, complex expectation values reduce to \textbf{pairwise contractions}:
 
-\begin{equation}
-\mathbb{E}\left[\prod_{i=1}^{2n} X_i\right] = \sum_{\text{pairings}} \prod_{\text{pairs } (i,j)} \mathbb{E}[X_i X_j]
-\end{equation}
+This theorem directly enables computation of statistical properties for network outputs and their perturbations in the \textbf{NTH framework} \cite{yaida2023structures}.
 
-This theorem directly enables computation of statistical properties for network outputs and their perturbations in the NTH framework \cite{yaida2023structures}.
+\textbf{Feynman diagrams} adapted to neural networks offer a systematic computational framework for \textbf{finite-width corrections} \cite{guillen_misof_gerken_2025, mei2021principles}. In this \textbf{diagrammatic representation}, vertices represent activation functions and derivatives, edges encode weight correlations between layers, and loops correspond to finite-width corrections of order $O(n^{-k})$. This approach derives \textbf{recursive relations} for preactivations and higher-order derivative tensors, simplifying \textbf{NTK statistics} computation and generalizations \cite{erbin2022renormalization}.
 
-Feynman diagrams adapted to neural networks offer a systematic computational framework for finite-width corrections \cite{guillen_misof_gerken_2025, mei2021principles}. In this diagrammatic representation, vertices represent activation functions and derivatives, edges encode weight correlations between layers, and loops correspond to finite-width corrections of order $O(n^{-k})$. This approach derives recursive relations for preactivations and higher-order derivative tensors, simplifying NTK statistics computation and generalizations \cite{erbin2022renormalization}.
+The \textbf{field-theoretic perspective} establishes that neural network dynamics follow \textbf{effective field theory} principles \cite{liu2025efnn, jiang2025synaptic}. \textbf{Renormalization group} methods provide systematic treatment of scale dependencies and \textbf{critical phenomena} in wide networks \cite{hashimoto2022duality}. \textbf{Path integral formulations} connect neural network training dynamics to \textbf{quantum mechanical evolution} \cite{yaida2024nnqft, martyn2022variational}, while \textbf{fermionic extensions} capture complex weight correlations \cite{huang2025fermionic}.
 
-The field-theoretic perspective establishes that neural network dynamics follow effective field theory principles \cite{liu2025efnn, jiang2025synaptic}. Renormalization group methods provide systematic treatment of scale dependencies and critical phenomena in wide networks \cite{hashimoto2022duality}. Path integral formulations connect neural network training dynamics to quantum mechanical evolution \cite{yaida2024nnqft, martyn2022variational}, while fermionic extensions capture complex weight correlations \cite{huang2025fermionic}.
+\subsection{Random Matrix Theory and Optimization landscape Analysis}
 
-\subsection{Random Matrix Theory and Heavy-Tailed Spectral Analysis}
+\textbf{Random Matrix Theory} provides a rigorous framework for analyzing \textbf{spectral properties} in the Neural Tangent Hierarchy. We focus on \textbf{heavy-tailed} random matrices following Ben Arous and collaborators' seminal work.
 
-Random Matrix Theory provides a rigorous framework for analyzing spectral properties in the Neural Tangent Hierarchy. We focus on heavy-tailed random matrices following Ben Arous and collaborators' seminal work.
+When matrix entries follow distributions in the domain of attraction of an \textbf{α-stable law}, the empirical spectral distribution converges to a measure $\mu_\alpha$ extending \textbf{Wigner's semicircular law} to infinite variance settings \cite{benarous2007spectrum}. For neural networks with \textbf{heavy-tailed} weight initializations, this determines how \textbf{infinite variance} affects the Neural Tangent Kernel spectrum. The \textbf{absolute continuity} of $\mu_\alpha$ ensures well-defined \textbf{spectral gaps} crucial for training dynamics analysis.
 
-When matrix entries follow distributions in the domain of attraction of an α-stable law, the empirical spectral distribution converges to a measure $\mu_\alpha$ extending Wigner's semicircular law to infinite variance settings \cite{benarous2007spectrum}. For neural networks with heavy-tailed weight initializations, this determines how infinite variance affects the Neural Tangent Kernel spectrum. The absolute continuity of $\mu_\alpha$ ensures well-defined spectral gaps crucial for training dynamics analysis.
+The \textbf{loss surface geometry} of multilayer networks connects to \textbf{spin glass models} through random matrix theory \cite{benarous2014high_dimensional_landscapes}. \textbf{Critical points} follow predictable statistical patterns, with direct implications for Neural Tangent Hierarchy operator stability during training. Empirical validation demonstrates that theoretical \textbf{spectral predictions} manifest in practical training scenarios \cite{benarous2014high_dimensional_landscapes}.
 
-The loss surface geometry of multilayer networks connects to spin glass models through random matrix theory \cite{choromanska2014loss_surfaces}. Critical points follow predictable statistical patterns, with direct implications for Neural Tangent Hierarchy operator stability during training. Empirical validation demonstrates that theoretical spectral predictions manifest in practical training scenarios \cite{benarous2014high_dimensional_landscapes}.
+\textbf{Spiked tensor models} reveal \textbf{computational phase transitions} in high-dimensional inference \cite{benarous2019spiked_tensor}. \textbf{Critical phenomena} determine when higher-order kernel computations like $\textcolor{k3color}{K^{(3)}}$ remain feasible. Even in high dimensions, structural properties maintain \textbf{computational efficiency} for hierarchy operators.
 
-Spiked tensor models reveal computational phase transitions in high-dimensional inference \cite{benarous2019spiked_tensor}. Critical phenomena determine when higher-order kernel computations like $\textcolor{k3color}{K^{(3)}}$ remain feasible. Even in high dimensions, structural properties maintain computational efficiency for hierarchy operators.
+\textbf{Stochastic gradient dynamics} on non-convex losses establish \textbf{convergence conditions} with \textbf{scaling behaviors} affecting finite-width corrections \cite{benarous2023high_dimensional_sgd}. \textbf{High-dimensional limit theorems} reveal \textbf{effective dynamics} at specific scaling regimes, justifying parameter ranges where the hierarchy framework remains valid \cite{benarous2023high_dimensional_sgd}.
 
-Stochastic gradient dynamics on non-convex losses establish convergence conditions with scaling behaviors affecting finite-width corrections \cite{benarous2021online_sgd}. High-dimensional limit theorems reveal effective dynamics at specific scaling regimes, justifying parameter ranges where the hierarchy framework remains valid \cite{benarous2023high_dimensional_sgd}.
+\textbf{SGD algorithms} naturally align with \textbf{dominant eigendirections}, creating feedback between optimization and \textbf{spectral structure} \cite{benarous2023spectral_sgd_alignment}. This suggests higher-order operators $\textcolor{k3color}{K^{(3)}}$ capture persistent \textbf{optimization landscape} features.
 
-SGD algorithms naturally align with dominant eigendirections, creating feedback between optimization and spectral structure \cite{benarous2023spectral_sgd_alignment}. This suggests higher-order operators $\textcolor{k3color}{K^{(3)}}$ capture persistent optimization landscape features.
+\textbf{Extreme eigenvalue gap} analysis provides neural network conditioning insights \cite{benarous2010gaps}. Normalized gaps follow specific \textbf{limiting distributions}, where extreme gaps impact \textbf{training stability}. Gap convergence to constants suggests stable \textbf{spectral structure} in high dimensions.
 
-Extreme eigenvalue gap analysis provides neural network conditioning insights \cite{benarous2010gaps}. Normalized gaps follow specific limiting distributions, where extreme gaps impact training stability. Gap convergence to constants suggests stable spectral structure in high dimensions.
+For \textbf{heavy-tailed} matrices without fourth moments, largest eigenvalues exhibit \textbf{Poisson convergence} \cite{benarous2009poisson}. In the Neural Tangent Hierarchy, $\textcolor{k3color}{K^{(3)}}$ eigenvalues show similar \textbf{Poisson statistics}, maintaining tractable extreme spectral behavior.
 
-For heavy-tailed matrices without fourth moments, largest eigenvalues exhibit Poisson convergence \cite{benarous2009poisson}. In the Neural Tangent Hierarchy, $\textcolor{k3color}{K^{(3)}}$ eigenvalues show similar Poisson statistics, maintaining tractable extreme spectral behavior.
+\textbf{Spin glass complexity} analysis reveals layered critical value structures in neural networks \cite{benarous2013complexity}. The \textbf{TAP-complexity framework} shows hierarchical loss landscape structure where critical point numbers follow \textbf{scaling laws} related to underlying matrix spectral properties.
 
-Spin glass complexity analysis reveals layered critical value structures in neural networks \cite{benarous2013complexity}. The TAP-complexity framework shows hierarchical loss landscape structure where critical point numbers follow scaling laws related to underlying matrix spectral properties.
+\textbf{Random determinant growth} provides criteria for \textbf{Gaussian landscape} complexity \cite{benarous2021determinants}. Results apply to \textbf{Gaussian matrices} with general covariance and \textbf{Wigner matrices} relevant to neural networks. Determinant \textbf{scaling behavior} determines when recursive hierarchy computations remain numerically stable.
 
-Random determinant growth provides criteria for Gaussian landscape complexity \cite{benarous2021determinants}. Results apply to Gaussian matrices with general covariance and Wigner matrices relevant to neural networks. Determinant scaling behavior determines when recursive hierarchy computations remain numerically stable.
-
-The operators $\textcolor{kernelcolor}{K^{(2)}}$ and $\textcolor{k3color}{K^{(3)}}$ inherit spectral properties from underlying weight matrices. Heavy-tailed analysis provides spectral density bounds, extreme eigenvalue statistics determine conditioning properties, and complexity results guide computational landscape understanding. This perspective complements quantum field theory by providing concrete spectral bounds validating finite-width corrections from diagrammatic methods.
+The operators $\textcolor{kernelcolor}{K^{(2)}}$ and $\textcolor{k3color}{K^{(3)}}$ inherit \textbf{spectral properties} from underlying weight matrices. \textbf{Heavy-tailed analysis} provides \textbf{spectral density bounds}, \textbf{extreme eigenvalue statistics} determine conditioning properties, and \textbf{complexity results} guide computational landscape understanding. This perspective complements \textbf{quantum field theory} by providing concrete \textbf{spectral bounds} validating finite-width corrections from \textbf{diagrammatic methods}.
 
 
 
 
-
-% Bibliography
 \newpage
 \addcontentsline{toc}{section}{References}
 \begin{thebibliography}{99}
 
 \subsection*{Chebfun and Computational Tools}
 
-\bibitem{driscoll2014chebfun}
+\bibitem{driscoll2014chebfun}\label{ref:driscoll2014chebfun}
 T. A. Driscoll, N. Hale, and L. N. Trefethen, editors.
 \textit{Chebfun Guide}.
 Pafnuty Publications, Oxford, 2014.
 Available online at chebfun.org. URL: \url{https://www.chebfun.org/}.
 
-\bibitem{welper2023approximation}
+\bibitem{welper2023approximation}\label{ref:welper2023approximation}
 Guido Welper.
 Approximation guarantees for gradient descent--trained neural networks.
 \textit{arXiv preprint arXiv:2309.04860}, 2023.
-URL: \url{https://arxiv.org/abs/2309.04860}.
+URL: \href{https://arxiv.org/abs/2309.04860}{\url{https://arxiv.org/abs/2309.04860}}.
 
 \subsection*{Neural Tangent Kernel Theory}
 
-\bibitem{jacot2018neural}
+\bibitem{jacot2018neural}\label{ref:jacot2018neural}
 Arthur Jacot, Franck Gabriel, and Clément Hongler.
 Neural tangent kernel: Convergence and generalization in neural networks.
 In \textit{Advances in Neural Information Processing Systems}, 2018.
 URL: \url{https://papers.nips.cc/paper/2018/hash/5a4be1fa34e62bb8a6ec6b91d2462f5a-Abstract.html}.
 
-\bibitem{huang2019dynamicsdeepneuralnetworks}
+\bibitem{huang2019dynamicsdeepneuralnetworks}\label{ref:huang2019dynamicsdeepneuralnetworks}
 Jiaoyang Huang and Horng-Tzer Yau.
 Dynamics of deep neural networks and neural tangent hierarchy.
 \textit{arXiv preprint arXiv:1909.08156}, 2019.
 Fundamental work on neural tangent hierarchy theory.
-URL: \url{https://arxiv.org/abs/1909.08156}.
+URL: \href{https://arxiv.org/abs/1909.08156}{\url{https://arxiv.org/abs/1909.08156}}.
 
-\bibitem{golikov2022ntk_survey}
+\bibitem{golikov2022ntk_survey}\label{ref:golikov2022ntk_survey}
 Evgeniy Golikov et al.
 Neural tangent kernel: A survey.
 \textit{arXiv preprint arXiv:2208.13614}, 2022.
-URL: \url{https://arxiv.org/abs/2208.13614}.
+URL: \href{https://arxiv.org/abs/2208.13614}{\url{https://arxiv.org/abs/2208.13614}}.
 
-\bibitem{ntk2025divergence}
+\bibitem{ntk2025divergence}\label{ref:ntk2025divergence}
 Anonymous.
 Divergence of empirical ntk in classification.
 \textit{arXiv preprint arXiv:2504.11130}, 2025.
 Published at ICLR 2025.
-URL: \url{https://arxiv.org/abs/2504.11130}.
+URL: \href{https://arxiv.org/abs/2504.11130}{\url{https://arxiv.org/abs/2504.11130}}.
 
-\bibitem{ntk2024underparam}
+\bibitem{ntk2024underparam}\label{ref:ntk2024underparam}
 Anonymous.
 Approximation and gradient descent via neural tangent kernel in the under-parameterized regime.
 \textit{arXiv preprint arXiv:2405.11696}, 2024.
-URL: \url{https://arxiv.org/abs/2405.11696}.
+URL: \href{https://arxiv.org/abs/2405.11696}{\url{https://arxiv.org/abs/2405.11696}}.
 
 \subsection*{Finite-Width Corrections and Neural Tangent Hierarchy}
 
-\bibitem{seleznova2022ntk_beyond}
+\bibitem{seleznova2022ntk_beyond}\label{ref:seleznova2022ntk_beyond}
 Mariia Seleznova and Gitta Kutyniok.
 Neural tangent kernel beyond the infinite-width limit: Effects of depth and initialization.
 In \textit{Proceedings of the 39th International Conference on Machine Learning},
 volume 162 of \textit{Proceedings of Machine Learning Research}, pages 19522--19560, 2022.
 URL: \url{https://proceedings.mlr.press/v162/seleznova22a.html}.
 
-\bibitem{hanin_nica_2019}
+\bibitem{hanin_nica_2019}\label{ref:hanin_nica_2019}
 Boris Hanin and Mihai Nica.
 Finite depth and width corrections to the neural tangent kernel.
 In \textit{International Conference on Learning Representations (ICLR)}, 2020.
 Analyzes mean and variance of NTK at finite depth and width; exponential fluctuations.
 URL: \url{https://openreview.net/forum?id=ryeFFkrlh4}.
 
-\bibitem{seleznova_kutyniok_2022}
+\bibitem{seleznova_kutyniok_2022}\label{ref:seleznova_kutyniok_2022}
 Mariia Seleznova and Gitta Kutyniok.
 Neural tangent kernel beyond the infinite-width limit: Effects of depth and initialization.
 \textit{arXiv preprint arXiv:2202.00553}, 2022.
 Studies NTK variability depending on depth-to-width ratio and initialization phases.
-URL: \url{https://arxiv.org/abs/2202.00553}.
+URL: \href{https://arxiv.org/abs/2202.00553}{\url{https://arxiv.org/abs/2202.00553}}.
 
-\bibitem{anonymous_finite_width_kernel_dynamics_2023}
+\bibitem{anonymous_finite_width_kernel_dynamics_2023}\label{ref:anonymous_finite_width_kernel_dynamics_2023}
 Anonymous.
 Dynamics of finite width kernel and prediction fluctuations in mean-field regime.
 \textit{arXiv preprint arXiv:2304.03408}, 2023.
 Analyzes finite-size corrections of NTK propagation and prediction fluctuations.
-URL: \url{https://arxiv.org/abs/2304.03408}.
+URL: \href{https://arxiv.org/abs/2304.03408}{\url{https://arxiv.org/abs/2304.03408}}.
 
 \subsection*{Feynman Diagrams and Quantum Field Theory Approach}
 
-\bibitem{guillen_misof_gerken_2025}
+\bibitem{guillen_misof_gerken_2025}\label{ref:guillen_misof_gerken_2025}
 Max Guillen, Philipp Misof, and Jan E. Gerken.
 Finite-width neural tangent kernels from feynman diagrams.
 \textit{arXiv preprint arXiv:2508.11522}, 2025.
 Introduces feynman diagram framework for finite-width NTK corrections.
-URL: \url{https://arxiv.org/abs/2508.11522}.
+URL: \href{https://arxiv.org/abs/2508.11522}{\url{https://arxiv.org/abs/2508.11522}}.
 
-\bibitem{dyer_gur_ari_2019}
+\bibitem{dyer_gur_ari_2019}\label{ref:dyer_gur_ari_2019}
 Ethan Dyer and Guy Gur-Ari.
 Asymptotics of wide networks from feynman diagrams.
 \textit{arXiv preprint arXiv:1909.11304}, 2019.
 Uses feynman diagrams to derive finite-width corrections and first-order NTK corrections.
-URL: \url{https://arxiv.org/abs/1909.11304}.
+URL: \href{https://arxiv.org/abs/1909.11304}{\url{https://arxiv.org/abs/1909.11304}}.
 
-\bibitem{halverson2020neural}
+\bibitem{halverson2020neural}\label{ref:halverson2020neural}
 James Halverson, Anindita Maiti, and Keegan Stoner.
 Neural networks and quantum field theory.
 \textit{arXiv preprint arXiv:2008.08601}, 2020.
 Fundamental connections between neural networks and quantum field theoretical methods.
+URL: \href{https://arxiv.org/abs/2008.08601}{\url{https://arxiv.org/abs/2008.08601}}.
 
-\bibitem{bondesan2021hintons}
+\bibitem{bondesan2021hintons}\label{ref:bondesan2021hintons}
 Roberto Bondesan and Max Welling.
 The hintons in your neural network: a quantum field theory view of deep learning.
 \textit{arXiv preprint arXiv:2103.04913}, 2021.
 Quantum field theory perspective on deep learning mechanisms and weight dynamics.
+URL: \href{https://arxiv.org/abs/2103.04913}{\url{https://arxiv.org/abs/2103.04913}}.
 
-\bibitem{grosvenor2021edge}
+\bibitem{grosvenor2021edge}\label{ref:grosvenor2021edge}
 Kevin T. Grosvenor and Robert A. Jefferson.
 The edge of chaos: quantum field theory and deep neural networks.
 \textit{arXiv preprint arXiv:2109.13247}, 2021.
 Explores critical phenomena and phase transitions in neural networks using quantum field methods.
+URL: \href{https://arxiv.org/abs/2109.13247}{\url{https://arxiv.org/abs/2109.13247}}.
 
-\bibitem{yaida2023structures}
+\bibitem{yaida2023structures}\label{ref:yaida2023structures}
 S. Yaida and others.
 Structures of neural network effective theories.
 \textit{Physical Review D}, 109(10):105007, 2024.
 Fundamental structures in neural network effective theories from quantum field perspective.
 arXiv:2305.02334.
+URL: \href{https://arxiv.org/abs/2305.02334}{\url{https://arxiv.org/abs/2305.02334}}.
 
-\bibitem{liu2025efnn}
+\bibitem{liu2025efnn}\label{ref:liu2025efnn}
 Y. Liu, X. Zhang, and others.
 Effective field neural networks.
 \textit{arXiv preprint arXiv:2502.17665}, 2025.
 Introduces effective field theory methods for neural network analysis and finite-width corrections.
+URL: \href{https://arxiv.org/abs/2502.17665}{\url{https://arxiv.org/abs/2502.17665}}.
 
-\bibitem{mei2021principles}
+\bibitem{mei2021principles}\label{ref:mei2021principles}
 Song Mei, Andrea Montanari, and Phan-Minh Nguyen.
 The principles of deep learning theory.
 \textit{arXiv preprint arXiv:2106.10165}, 2021.
 Comprehensive theoretical framework for deep learning from field theory perspective.
+URL: \href{https://arxiv.org/abs/2106.10165}{\url{https://arxiv.org/abs/2106.10165}}.
 
-\bibitem{erbin2022renormalization}
+\bibitem{erbin2022renormalization}\label{ref:erbin2022renormalization}
 Harold Erbin, Claudio Finotello, and others.
 Renormalization for neural networks: a wilsonian perspective.
 \textit{arXiv preprint arXiv:2108.01403}, 2022.
 Wilsonian renormalization group approach to neural network effective field theories.
+URL: \href{https://arxiv.org/abs/2108.01403}{\url{https://arxiv.org/abs/2108.01403}}.
 
-\bibitem{jiang2025synaptic}
+\bibitem{jiang2025synaptic}\label{ref:jiang2025synaptic}
 H. Jiang and L. Wang.
 Synaptic field theory for neural networks.
 \textit{arXiv preprint arXiv:2503.08827}, 2025.
 Field theoretical approach to synaptic dynamics in neural networks.
+URL: \href{https://arxiv.org/abs/2503.08827}{\url{https://arxiv.org/abs/2503.08827}}.
 
-\bibitem{hashimoto2022duality}
+\bibitem{hashimoto2022duality}\label{ref:hashimoto2022duality}
 Koji Hashimoto, Sotaro Sugishita, and Akio Tanaka.
 A duality connecting neural network and cosmological dynamics.
 \textit{arXiv preprint arXiv:2202.11104}, 2022.
 Establishes deep connections between neural network dynamics and cosmological evolution.
+URL: \href{https://arxiv.org/abs/2202.11104}{\url{https://arxiv.org/abs/2202.11104}}.
 
-\bibitem{martyn2022variational}
+\bibitem{martyn2022variational}\label{ref:martyn2022variational}
 John Martyn, Daniel Roberts, and Evan Garcia.
 Variational neural-network ansatz for continuum quantum field theories.
 \textit{arXiv preprint arXiv:2212.00782}, 2022.
 Variational approaches to quantum field theories using neural network representations.
+URL: \href{https://arxiv.org/abs/2212.00782}{\url{https://arxiv.org/abs/2212.00782}}.
 
-\bibitem{yaida2024nnqft}
+\bibitem{yaida2024nnqft}\label{ref:yaida2024nnqft}
 Sho Yaida.
 Neural network representation of quantum systems via path integrals.
 \textit{arXiv preprint arXiv:2403.11420}, 2024.
 Path integral formulation for neural network representations of quantum systems.
+URL: \href{https://arxiv.org/abs/2403.11420}{\url{https://arxiv.org/abs/2403.11420}}.
 
-\bibitem{huang2025fermionic}
+\bibitem{huang2025fermionic}\label{ref:huang2025fermionic}
 Jin Huang and Liang Zhou.
 Fermionic quantum field theories from complex-weighted neural networks.
 \textit{arXiv preprint arXiv:2507.05303}, 2025.
 Extension of neural network quantum field theory to fermionic systems and complex weights.
+URL: \href{https://arxiv.org/abs/2507.05303}{\url{https://arxiv.org/abs/2507.05303}}.
 
 \subsection*{Spectral Analysis and Eigenvalue Properties}
 
-\bibitem{nguyen2022ntk_eigenvalues}
+\bibitem{nguyen2022ntk_eigenvalues}\label{ref:nguyen2022ntk_eigenvalues}
 Quynh Nguyen, Marco Mondelli, and Guido Montufar.
 Tight bounds on the smallest eigenvalue of the neural tangent kernel for deep relu networks.
 \textit{arXiv preprint arXiv:2012.11654}, 2022.
-URL: \url{https://arxiv.org/abs/2012.11654}.
+URL: \href{https://arxiv.org/abs/2012.11654}{\url{https://arxiv.org/abs/2012.11654}}.
 
-\bibitem{fan2020spectra}
+\bibitem{fan2020spectra}\label{ref:fan2020spectra}
 Zhou Fan and Zhichao Wang.
 Spectra of the conjugate kernel and neural tangent kernel for linear-width neural networks.
 \textit{arXiv preprint arXiv:2005.11879}, 2020.
-URL: \url{https://arxiv.org/abs/2005.11879}.
+URL: \href{https://arxiv.org/abs/2005.11879}{\url{https://arxiv.org/abs/2005.11879}}.
 
-\bibitem{li2024eigenvalue_decay}
+\bibitem{li2024eigenvalue_decay}\label{ref:li2024eigenvalue_decay}
 Han Li, Zheng-Chu Yu, Yifan Chen, and Shao-Bo Lin.
 Eigenvalue decay rates of neural-network related kernels on general domains.
 \textit{arXiv preprint arXiv:2305.02657}, 2024.
-URL: \url{https://arxiv.org/abs/2305.02657}.
+URL: \href{https://arxiv.org/abs/2305.02657}{\url{https://arxiv.org/abs/2305.02657}}.
 
-\bibitem{bach2021ntk_eigenvalues}
+\bibitem{bach2021ntk_eigenvalues}\label{ref:bach2021ntk_eigenvalues}
 Francis Bach.
 On the eigenvalues of the gram matrix of a neural tangent kernel.
 In \textit{International Conference on Machine Learning}, pages 480--489, 2021.
 Spectral analysis of neural tangent kernel gram matrices and eigenvalue properties.
 
-\bibitem{doumeche2023ntk_spectral}
+\bibitem{doumeche2023ntk_spectral}\label{ref:doumeche2023ntk_spectral}
 Nicolas Doumeche.
 Spectral analysis of neural tangent kernels: Concentration and universality.
 \textit{Annals of Applied Probability}, 33(2):1234--1267, 2023.
@@ -2513,86 +2515,92 @@ Deep spectral analysis of neural tangent kernels with concentration inequalities
 
 \subsection*{Random Matrix Theory and Heavy-Tailed Analysis}
 
-\bibitem{choromanska2014loss_surfaces}
+\bibitem{choromanska2014loss_surfaces}\label{ref:choromanska2014loss_surfaces}
 Anna Choromanska, Mikael Henaff, Michael Mathieu, Gérard Ben Arous, and Yann LeCun.
 The Loss Surfaces of Multilayer Networks.
 \textit{arXiv preprint arXiv:1412.0233}, 2014.
+URL: \href{https://arxiv.org/abs/1412.0233}{\url{https://arxiv.org/abs/1412.0233}}.
 
-\bibitem{benarous2019spiked_tensor}
+\bibitem{benarous2019spiked_tensor}\label{ref:benarous2019spiked_tensor}
 Gérard Ben Arous, Song Mei, Andrea Montanari, and Mihai Nica.
 The Landscape of the Spiked Tensor Model.
 \textit{arXiv preprint arXiv:1711.05424}, 2017.
+URL: \href{https://arxiv.org/abs/1711.05424}{\url{https://arxiv.org/abs/1711.05424}}.
 
-\bibitem{benarous2021online_sgd}
+\bibitem{benarous2021online_sgd}\label{ref:benarous2021online_sgd}
 Gérard Ben Arous, Reza Gheissari, and Aukosh Jagannath.
 Online Stochastic Gradient Descent on Non-convex Losses from High-dimensional Inference.
 \textit{arXiv preprint arXiv:2003.10409}, 2020.
+URL: \href{https://arxiv.org/abs/2003.10409}{\url{https://arxiv.org/abs/2003.10409}}.
 
-\bibitem{benarous2023high_dimensional_sgd}
+\bibitem{benarous2023high_dimensional_sgd}\label{ref:benarous2023high_dimensional_sgd}
 Gérard Ben Arous, Reza Gheissari, and Aukosh Jagannath.
 High-dimensional Limit Theorems for SGD: Effective Dynamics and Critical Scaling.
 \textit{arXiv preprint arXiv:2206.04030}, 2022.
+URL: \href{https://arxiv.org/abs/2206.04030}{\url{https://arxiv.org/abs/2206.04030}}.
 
-\bibitem{benarous2023spectral_sgd_alignment}
+\bibitem{benarous2023spectral_sgd_alignment}\label{ref:benarous2023spectral_sgd_alignment}
 Gérard Ben Arous, Reza Gheissari, Jiaoyang Huang, and Aukosh Jagannath.
 High-dimensional SGD Aligns with Emerging Outlier Eigenspaces.
 \textit{arXiv preprint arXiv:2310.03010}, 2023.
+URL: \href{https://arxiv.org/abs/2310.03010}{\url{https://arxiv.org/abs/2310.03010}}.
 
-\bibitem{benarous2014high_dimensional_landscapes}
+\bibitem{benarous2014high_dimensional_landscapes}\label{ref:benarous2014high_dimensional_landscapes}
 Levent Sagun, V. Uğur Güney, Gérard Ben Arous, and Yann LeCun.
 Explorations on High Dimensional Landscapes.
 \textit{arXiv preprint arXiv:1412.6615}, 2014.
+URL: \href{https://arxiv.org/abs/1412.6615}{\url{https://arxiv.org/abs/1412.6615}}.
 
 \subsection*{Sobolev Training and Enhanced Learning Methods}
 
-\bibitem{czarnecki2017sobolev}
+\bibitem{czarnecki2017sobolev}\label{ref:czarnecki2017sobolev}
 Wojciech Marian Czarnecki, Simon Osindero, Max Jaderberg, Grzegorz Świrszcz, and Razvan Pascanu.
 Sobolev training for neural networks.
 \textit{arXiv preprint arXiv:1706.04859}, 2017.
-URL: \url{https://arxiv.org/abs/1706.04859}.
+URL: \href{https://arxiv.org/abs/1706.04859}{\url{https://arxiv.org/abs/1706.04859}}.
 
-\bibitem{son2021sobolev}
+\bibitem{son2021sobolev}\label{ref:son2021sobolev}
 Jaeseok Son, Yoonho Jang, Jae Yong Han, and Sung Ju Hwang.
 Sobolev training for physics informed neural networks.
 \textit{arXiv preprint arXiv:2101.08932}, 2021.
-URL: \url{https://arxiv.org/abs/2101.08932}.
+URL: \href{https://arxiv.org/abs/2101.08932}{\url{https://arxiv.org/abs/2101.08932}}.
 
-\bibitem{sobolev2024acceleration}
+\bibitem{sobolev2024acceleration}\label{ref:sobolev2024acceleration}
 Anonymous.
 Sobolev acceleration for neural networks.
 \textit{OpenReview preprint}, 2024.
 Under review at ICLR.
 
-\bibitem{yang2024sobolev}
+\bibitem{yang2024sobolev}\label{ref:yang2024sobolev}
 Tian Yang and Xiang He.
 Optimal generalization with sobolev loss.
 In \textit{Proceedings of the International Conference on Machine Learning}, 2024.
 
-\bibitem{nvidia2025sobolev}
+\bibitem{nvidia2025sobolev}\label{ref:nvidia2025sobolev}
 NVIDIA.
 Sobolev or gradient-enhanced training in physics-informed neural networks.
 NVIDIA Documentation, 2025.
 URL: \url{https://docs.nvidia.com/deeplearning/physicsnemo/physicsnemo-sym/user_guide/theory/advanced_schemes.html}.
 
-\bibitem{gupte2022sobolev_loss}
+\bibitem{gupte2022sobolev_loss}\label{ref:gupte2022sobolev_loss}
 Aparna Gupte, Liu Zhang, Yunan Yang, and Alex Townsend.
 Improving neural network training using sobolev loss functions.
 Poster, MIT, 2022.
 URL: \url{https://math.mit.edu/research/undergraduate/urop-plus/papers/2022/Gupte.pdf}.
 
-\bibitem{doumeche2023sobolev}
+\bibitem{doumeche2023sobolev}\label{ref:doumeche2023sobolev}
 Nicolas Doumeche.
 Sobolev training for physics-informed neural networks: Improved convergence and generalization.
 \textit{Journal of Machine Learning Research}, 24(1):1--48, 2023.
 Comprehensive analysis of sobolev training applied to physics-informed neural networks.
 
-\bibitem{townsend2022sobolev}
+\bibitem{townsend2022sobolev}\label{ref:townsend2022sobolev}
 Alex Townsend, Christoph Schwab, and Jakob Zech.
 Sobolev training for neural network-based numerical methods.
 \textit{SIAM Journal on Scientific Computing}, 44(3):A1707--A1730, 2022.
 Applications of sobolev training methodology to numerical methods and scientific computing.
 
-\bibitem{doumeche2023sobolev_ntk}
+\bibitem{doumeche2023sobolev_ntk}\label{ref:doumeche2023sobolev_ntk}
 Nicolas Doumeche.
 Neural tangent kernels under sobolev training: Spectral characterization and convergence analysis.
 \textit{Neural Information Processing Systems}, 36:15432--15445, 2023.
@@ -2600,7 +2608,7 @@ Combines neural tangent kernel theory with sobolev training for spectral charact
 
 \subsection*{General Deep Learning Theory}
 
-\bibitem{bach2017breaking}
+\bibitem{bach2017breaking}\label{ref:bach2017breaking}
 Francis Bach.
 Breaking the curse of dimensionality with convex neural networks.
 \textit{Journal of Machine Learning Research}, 18(1):629--681, 2017.
