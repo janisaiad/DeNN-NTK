@@ -358,7 +358,7 @@ $\langle \cdot,\cdot \rangle$ & Inner product & $\mathcal{O}(\cdot)$ and $\tilde
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
-$\ReLU$ & Activation function & $f(\mathbf{x}; \boldsymbol{\theta})$ & Neural network function \\
+$\ReLU$ & Activation function & $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})$ & Neural network function \\
 $\sigma_{\cdot}$ & General variance denomination & $L$ & Number of layers \\
 $decomposing_k$ (MMNN) & Width of layer $k$ & $n_k$ (FCNN) & Width of layer $k$ \\
 \bottomrule
@@ -465,7 +465,7 @@ $d$ & Input dimension & $s$ & Sobolev order \\
 
 \subsubsection{The Sobolev Training}
 
-Le's suppose that we are given a function $f^*$ and we want to find a function $f_\theta$ in a model class $\mathcal{F}$ that approximates $f^*$ in the Sobolev space $H^s(\Omega)$.
+Le's suppose that we are given a function $f^*$ and we want to find a function $f_{\textcolor{darkyellow}{\theta}}$ in a model class $\mathcal{F}$ that approximates $f^*$ in the Sobolev space $H^s(\Omega)$.
 
 \textit{Sobolev training} \cite{czarnecki2017sobolev,gupte2022sobolev_loss} 
 is an approach that incorporates derivative information into the learning process. 
@@ -678,11 +678,11 @@ The framework selection can be summarized by the following decision tree:
 
 \subsubsection{The Neural Tangent Kernel}
 
-For a neural network $f(\mathbf{x}; \boldsymbol{\theta})$ with parameters $\boldsymbol{\theta}$, the \textit{Neural Tangent Kernel} \cite{jacot2018neural} is defined by:
+For a neural network $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})$ with parameters $\boldsymbol{\textcolor{darkyellow}{\theta}}$, the \textit{Neural Tangent Kernel} \cite{jacot2018neural} is defined by:
 \begin{tcolorbox}[colback=yellow!10,colframe=blue!40!black,title=Definition : NTK]
 \begin{equation}
 \label{eq:ntk_definition}
-\textcolor{kernelcolor}{K^{L}}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}} \right\rangle = \sum_{k} \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta})}{\partial \theta_k} \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta})}{\partial \theta_k}
+\textcolor{kernelcolor}{K^{L}}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \boldsymbol{\textcolor{darkyellow}{\theta}}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \boldsymbol{\textcolor{darkyellow}{\theta}}} \right\rangle = \sum_{k} \frac{\partial f(\mathbf{x}_i; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \textcolor{darkyellow}{\theta}_k} \frac{\partial f(\mathbf{x}_j; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \textcolor{darkyellow}{\theta}_k}
 \end{equation}
 \end{tcolorbox}
 
@@ -698,7 +698,7 @@ For a neural network $f(\mathbf{x}; \boldsymbol{\theta})$ with parameters $\bold
 
 
 \begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018, convergence]
-For a multi layer perceptron $f(\mathbf{x};\boldsymbol{\theta})$ with hidden layer widths $N_1, \ldots, N_L$ randomly initialized with weights $W_1, \ldots, W_L$  following and trained by gradient descent with infinitesimal learning rate, 
+For a multi layer perceptron $f(\mathbf{x};\boldsymbol{\textcolor{darkyellow}{\theta}})$ with hidden layer widths $N_1, \ldots, N_L$ randomly initialized with weights $W_1, \ldots, W_L$  following and trained by gradient descent with infinitesimal learning rate, 
 as hidden layer widths tend to infinity,the network converges to a Gaussian process, with limite NTK kernel $K_L^{\infty}$ and dynamics given by $\frac{\partial f_t(\mathbf{x})}{\partial t}
     = -\eta \sum_{i=1}^n K_L^{\infty}(\mathbf{x},\mathbf{x}_i)\bigl(f_t(\mathbf{x}_i) - y_i\bigr)$.
 
@@ -1023,16 +1023,16 @@ where $K^{\infty}$ is the NTK operator and $(I + (-\Delta)^{1/2})^s$ is the frac
 \end{theorem}
 
 \begin{proof}
-Standard gradient descent on the $L^2$ loss $\mathcal{L}(\theta) = \frac{1}{2}\|f(\cdot; \theta) - y\|^2_{L^2}$ gives parameter dynamics $\frac{d\theta}{dt} = -\nabla_\theta \mathcal{L}(\theta)$. In the NTK regime, this translates to function dynamics $\frac{df}{dt} = -K^{\infty}(f - y)$.
+Standard gradient descent on the $L^2$ loss $\mathcal{L}(\textcolor{darkyellow}{\theta}) = \frac{1}{2}\|f(\cdot; \textcolor{darkyellow}{\theta}) - y\|^2_{L^2}$ gives parameter dynamics $\frac{d\textcolor{darkyellow}{\theta}}{dt} = -\nabla_{\textcolor{darkyellow}{\theta}} \mathcal{L}(\textcolor{darkyellow}{\theta})$. In the NTK regime, this translates to function dynamics $\frac{df}{dt} = -K^{\infty}(f - y)$.
 
-When we replace the $L^2$ loss with the Sobolev loss $\mathcal{L}_s(\theta) = \frac{1}{2}\|f(\cdot; \theta) - y\|^2_{H^s}$, the gradient computation changes fundamentally. Using our fractional Laplacian representation from Theorem 1, the Sobolev loss becomes:
-\[ \mathcal{L}_s(\theta) = \frac{1}{2}\int (f(x; \theta) - y(x)) (I + (-\Delta)^{1/2})^s (f(x; \theta) - y(x)) d\sigma(x) \]
+When we replace the $L^2$ loss with the Sobolev loss $\mathcal{L}_s(\textcolor{darkyellow}{\theta}) = \frac{1}{2}\|f(\cdot; \textcolor{darkyellow}{\theta}) - y\|^2_{H^s}$, the gradient computation changes fundamentally. Using our fractional Laplacian representation from Theorem 1, the Sobolev loss becomes:
+\[ \mathcal{L}_s(\textcolor{darkyellow}{\theta}) = \frac{1}{2}\int (f(x; \textcolor{darkyellow}{\theta}) - y(x)) (I + (-\Delta)^{1/2})^s (f(x; \textcolor{darkyellow}{\theta}) - y(x)) d\sigma(x) \]
 
 By boundedness of the fractionnal operator, and boundedness over a compact domain, we can intervete the integral and the gradient operator.
 The gradient with respect to parameters now involves the chain rule through the fractional operator:
-\[ \nabla_\theta \mathcal{L}_s(\theta) = \int \nabla_\theta f(x; \theta) \cdot (I + (-\Delta)^{1/2})^s (f(x; \theta) - y(x)) d\sigma(x) \]
+\[ \nabla_{\textcolor{darkyellow}{\theta}} \mathcal{L}_s(\textcolor{darkyellow}{\theta}) = \int \nabla_{\textcolor{darkyellow}{\theta}} f(x; \textcolor{darkyellow}{\theta}) \cdot (I + (-\Delta)^{1/2})^s (f(x; \textcolor{darkyellow}{\theta}) - y(x)) d\sigma(x) \]
 
-Since the NTK is defined as $K^{\infty}(x, x') = \langle \nabla_\theta f(x; \theta), \nabla_\theta f(x'; \theta) \rangle$, the function dynamics become:
+Since the NTK is defined as $K^{\infty}(x, x') = \langle \nabla_{\textcolor{darkyellow}{\theta}} f(x; \textcolor{darkyellow}{\theta}), \nabla_{\textcolor{darkyellow}{\theta}} f(x'; \textcolor{darkyellow}{\theta}) \rangle$, the function dynamics become:
 \[ \frac{df}{dt} = -\int K^{\infty}(x, x') (I + (-\Delta)^{1/2})^s (f(x') - y(x')) d\sigma(x') = -K^{\infty} \circ (I + (-\Delta)^{1/2})^s (f - y) \]
 
 Therefore, the learning operator is indeed $\mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s$. The rotational invariance of both operators ensures they share the same spherical harmonic eigenfunctions, making this composition well-defined and commutative.
