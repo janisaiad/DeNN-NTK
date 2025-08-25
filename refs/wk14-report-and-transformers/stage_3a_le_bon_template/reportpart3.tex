@@ -127,6 +127,75 @@
 \theoremstyle{remark}
 \newtheorem*{remark}{Remark}
 
+
+.
+
+
+% Color definitions
+\definecolor{kernelcolor}{RGB}{200,0,0}      % Red for K (kernels)
+\definecolor{sobolevcolor}{RGB}{0,0,200}     % Blue for P (Sobolev)
+\definecolor{theoremcolor}{RGB}{240,248,255} % Light blue for theorem boxes
+\definecolor{definitioncolor}{RGB}{255,248,240} % Light orange for definitions
+\definecolor{darkyellow}{RGB}{184,134,11}     % Dark yellow for highlights
+\definecolor{k3color}{RGB}{148,0,211}        % Purple for K^{(3)} specifically
+
+
+% Define custom colors for mathematical elements [[memory:6864771]]
+\definecolor{kernelcolor}{RGB}{220,20,60}    % Red for NTK/K symbols
+\definecolor{sobolevcolor}{RGB}{30,144,255}  % Blue for Sobolev/P symbols
+\definecolor{theoremcolor}{RGB}{70,130,180}  % Steel blue for theorems
+\definecolor{definitioncolor}{RGB}{0,128,0}  % Green for definitions
+\definecolor{weightcolor}{RGB}{101,67,33}    % Dark brown for weights W
+\definecolor{relucolor}{RGB}{64,64,64}       % Dark grey for ReLU
+\definecolor{k3color}{RGB}{148,0,211}        % Purple for K^{(3)} specifically
+
+
+% Color definitions
+\definecolor{kernelcolor}{RGB}{200,0,0}      % Red for K (kernels)
+\definecolor{sobolevcolor}{RGB}{0,0,200}     % Blue for P (Sobolev)
+\definecolor{theoremcolor}{RGB}{240,248,255} % Light blue for theorem boxes
+\definecolor{definitioncolor}{RGB}{255,248,240} % Light orange for definitions
+\definecolor{darkyellow}{RGB}{184,134,11}     % Dark yellow for highlights
+\definecolor{pinkcolor}{RGB}{255,192,203}     % Pink for rho
+\definecolor{yellowcolor}{RGB}{255,255,0}     % Yellow for d
+
+% Enhanced math commands
+\newcommand{\E}{\mathbb{E}}
+\DeclareMathOperator{\Var}{Var}
+\newcommand{\indic}{\mathbb{1}}
+\newcommand{\dd}{\,d}
+
+% Colored operators
+\newcommand{\Kop}{\textcolor{kernelcolor}{\mathbf{K}}}
+\newcommand{\Pop}{\textcolor{sobolevcolor}{\mathbf{P}}}
+\newcommand{\Kinf}{\textcolor{kernelcolor}{K^{\infty}}}
+\newcommand{\Ps}{\textcolor{sobolevcolor}{P_s}}
+\newcommand{\Ts}{\mathcal{T}_s}
+
+% New colored commands for K, NTK, rho, and d
+\newcommand{\K}{\textcolor{kernelcolor}{K}}
+\newcommand{\NTK}{\textcolor{kernelcolor}{\textbf{NTK}}}
+\newcommand{\rho}{\textcolor{pinkcolor}{\rho}}
+\newcommand{\d}{\textcolor{yellowcolor}{d}}
+
+
+% Beautiful theorem environments
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+
+
+
 % Colored theorem boxes using tcolorbox
 \tcolorboxenvironment{theorem}{
   colback=theoremcolor,
@@ -166,47 +235,184 @@
 
 \author{Janis AIAD}
 \date{\today}
-\title{Analysis of Deep Neural Network Learning Dynamics Through the NTK Lens}
-\subtitle{Deeper or Wider ? A 1st answer under the NTK perspective}
-% to change logo, add the image in PDF format
-% or image by dragging it to the right and replace typographix
-% with the image name, if you don't want a logo, 
-% delete the line. 
+\title{Deeper or wider ? A 1st answer under the NTK perspective}
 
-\begin{figure*}[b]
-    \includegraphics[width=0.4\linewidth]{figures/umdlogo.jpg}
-    \label{fig:enter-label}
-\end{figure}
 
 
 \fontsize{40pt}{48pt}
 
+
+
+
+
 \begin{document}
-	\maketitle 
+
+
+    
+    \begin{center}
+
+    \vspace{1cm}
+
+    {\Large \bfseries RAPPORT DE STAGE DE RECHERCHE \par}
+    \vspace{1cm}
+
+    \hrule
+    \vspace{0.3cm}
+    {\LARGE\bfseries Deeper or wider ? A first answer under the NTK perspective \par}
+    \vspace{0.2cm}
+    {\large An optimization perspective on Neural Network design \par}
+    \vspace{0.3cm}
+    \hrule
+    
+    \vspace{1cm}
+    
+    {\large RAPPORT NON CONFIDENTIEL \par}
+    
+    \vfill
+    
+    \begin{minipage}[t]{0.4\textwidth}
+        \begin{flushleft} \large
+            \textbf{Option :} \\
+            \textbf{Champ :} \\
+            \textbf{Enseignant référent :} \\
+            \textbf{Tuteur :} \\
+            \textbf{Dates du stage :} \\
+
+        \end{flushleft}
+    \end{minipage}%
+    \begin{minipage}[t]{0.6\textwidth}
+        \begin{flushright} \large
+            Département de mathématiques appliquées \\
+            Statistique et apprentissage \\
+            \vspace{0.3cm}
+            Aymeric Dieuleveut \\
+            Haizhao Yang \\
+            du 11 mai 2025 au 31 août 2025 \\
+            \vspace{0.3cm}
+        \end{flushright}
+    \end{minipage}
+    
+    \vspace{1.5cm}
+    
+    University of Maryland, College Park \\
+    Department of Mathematics \\
+    4176 Campus Drive \\
+    College Park, MD 20742, USA
+    
+    \includegraphics[width=0.3\linewidth]{umdlogo.png}
+
+    \end{center}
+
+\newpage
+\tableofcontents
+\newpage
+
+
+
+
+
+
+
 
 \addcontentsline{toc}{section}{Abstract}
 \section*{Abstract}
-This report presents the results of a research internship focused on studying the learning dynamics of deep neural networks. We explore the underlying mechanisms through the Neural Tangent Kernel (NTK) formalism \cite{jacot2018neural}, with particular attention to finite-width corrections \cite{seleznova2022ntk_beyond}. Our work revolves around the decomposition of the NTK via Sobolev training, the analysis of its reproducing kernel Hilbert space (RKHS), and the study of extreme eigenvalues. We present theoretical bounds for the smallest eigenvalue of the NTK using random matrix theory (RMT) techniques. These results are then applied to analyze different architectures, including feed-forward neural networks (FCNN), matrix memory neural networks (MMNN), and transformers. We also discuss the implications of our findings for scientific machine learning (SciML) applications and propose directions for future research.
 
+In the past few years, research has focused on understanding the fundamental mechanisms governing learning dynamics in deep neural networks. While significant progress has been made through the \textcolor{red}{\textbf{Neural Tangent Kernel (NTK)}} formalism, it remains unclear how
+to choose the right architecture for a given problem. In the tryptical approximation/generalization/optimization trilemma, we focus on the optimization aspect, the less understood one.
+This report presents a comprehensive answer to this question through the lens of \textcolor{red}{\textbf{NTK theory}} in the context of
+\textbf{Sobolev training}.
+
+We establish a novel theoretical framework and our key finding demonstrates that the effectiveness of learning depends critically on \textbf{sampling conditions}, specifically when using \textbf{Chebyshev points}.
+For general sampling schemes, optimal learning requires \textbf{explicit derivative information} for effective training.
+
+We derive \textbf{explicit theoretical and numerical bounds} for key neural network quantities establishing \textbf{precise eigenvalue bounds} for \textcolor{red}{\textbf{NTK}} matrices and ongoing \textbf{quantitative convergence rates}.
+
+Our \textbf{spectral analysis} covers \textcolor{gray}{\textbf{fully connected networks (FCNN)}}, \textcolor{orange}{\textbf{Multi-Layer Multi-component networks (MMNN)}}, and \textbf{transformers}, revealing architecture-specific scaling with depth, width, and input dimension. 
+Through \textbf{finite-width corrections}, we provide \textbf{explicit error bounds} and fundations for ongoing \textbf{convergence guarantees} for gradient descent.
+
+Experimental validation confirms our theoretical predictions across all architectures. Fully reproducible code is available at \href{https://github.com/janisaiad/DeNN-NTK}{github.com/janisaiad/DeNN-NTK} and \href{https://github.com/janisaiad/MMN}{github.com/janisaiad/MMN}.
+
+\vspace{0.5cm}
+
+\addcontentsline{toc}{section}{Résumé}
+\section*{Résumé}
+Au cours des dernières années, la recherche s'est concentrée sur la compréhension des mécanismes fondamentaux régissant la dynamique d'apprentissage dans les réseaux de neurones profonds. Bien que des progrès significatifs aient été réalisés grâce au formalisme du \textcolor{red}{\textbf{Neural Tangent Kernel (NTK)}}, il reste peu clair comment choisir la bonne architecture pour un problème donné. Dans le trilemme classique approximation/généralisation/optimisation, nous nous concentrons sur l'aspect optimisation, le moins bien compris. Ce rapport présente une réponse complète à cette question à travers le prisme de la \textcolor{red}{\textbf{théorie du NTK}} dans le contexte de \textbf{l'entraînement de Sobolev}.
+
+Nous établissons un nouveau cadre théorique et notre découverte clé démontre que l'efficacité de l'apprentissage dépend de manière critique des \textbf{conditions d'échantillonnage}, spécifiquement lors de l'utilisation de \textbf{points de Chebyshev}. Pour les schémas d'échantillonnage généraux, l'apprentissage optimal nécessite une \textbf{information explicite sur les dérivées} pour un entraînement efficace. 
+
+Nous dérivons des \textbf{bornes théoriques et numériques explicites} pour les quantités clés des réseaux de neurones, établissant des \textbf{bornes précises sur les valeurs propres} pour les matrices \textcolor{red}{\textbf{NTK}} et des \textbf{taux de convergence quantitatifs} en cours.
+
+Notre \textbf{analyse spectrale} couvre les \textcolor{gray}{\textbf{réseaux entièrement connectés (FCNN)}}, les \textcolor{orange}{\textbf{réseaux multi-couches multi-composants (MMNN)}}, et les \textbf{transformers}, révélant une mise à l'échelle spécifique à l'architecture avec la profondeur, la largeur et la dimension d'entrée. À travers les \textbf{corrections de largeur finie}, nous fournissons des \textbf{bornes d'erreur explicites} et des fondations pour les \textbf{garanties de convergence} en cours pour la descente de gradient.
+
+La validation expérimentale confirme nos prédictions théoriques à travers toutes les architectures. Un code entièrement reproductible est disponible sur \href{https://github.com/janisaiad/DeNN-NTK}{github.com/janisaiad/DeNN-NTK} et \href{https://github.com/janisaiad/MMN}{github.com/janisaiad/MMN}.
 \newpage
 
-% Table of Contents
-\tableofcontents
-\newpage
-\addcontentsline{toc}{section}{Executive summary}
-
-
-\newpage
 \addcontentsline{toc}{section}{Introduction}
 \section*{Introduction}
 The study of learning dynamics in deep neural networks constitutes a fundamental research area. Our approach focuses on the desingularization of Sobolev training by decomposing the problem into two distinct contributions: an independent neural tangent kernel (NTK) and a Sobolev contribution. This decomposition relies on the commutation between integral operators and the fractional Laplace operator.
 
-\textbf{Key Discovery}: We establish that this commutation property holds \textit{exactly} only when using \textcolor{red}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) for sampling. For general sampling points, commutation breaks, necessitating explicit derivative information for effective learning. This fundamental distinction explains the empirical success of Physics-Informed Neural Networks (PINNs) and derivative-augmented methods over standard regression in most practical settings.
+\textbf{Key Discovery}: We establish that this commutation property holds \textit{exactly} only when using \textcolor{red}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) for sampling. For general sampling points, commutation breaks, necessitating explicit derivative information for effective learning. 
 
 Our analysis continues with the study of NTK preconditioning through a freeze weights method, illustrated by neural networks factorizing low-rank weight matrices. This approach is supported by a rigorous approximation theorem. For classical feed-forward networks (FCNN), we develop a finite-width correction that proves particularly fruitful. Finally, we explore Transformers as an alternative solution, offering a new learning paradigm.
 
-Across these different architectures, we study feature learning regimes and their scaling with network width. Our results rely on statistical physics tools to characterize model convergence and asymptotic behavior. This analysis enables a better understanding of finite-width corrections \cite{seleznova2022ntk_beyond} and their implications for the practical optimization of deep neural networks.
+Across these different architectures, we study feature learning regimes and their scaling with network width. 
+Our results rely on statistical physics tools to characterize model convergence and asymptotic behavior. 
+This analysis enables a better understanding of finite-width corrections \cite{seleznova2022ntk_beyond} and their implications for the practical optimization of deep neural networks.
 
+The end of this research establishes fundamental connections between neural network dynamics and mathematical physics, advancing theoretical understanding of eigenvalue bounds for neural tangent kernels across multiple architectures. We bridge classical optimization theory with advanced mathematical physics frameworks, leveraging tools from quantum field theory and random matrix theory to provide new insights into neural network behavior.
+
+Our contribution to physics-informed deep learning theory applies techniques from statistical mechanics and random matrix ensembles, offering a mathematical physics perspective that complements existing approaches. This interdisciplinary methodology demonstrates how theoretical physics concepts illuminate fundamental machine learning questions, establishing new paradigms for understanding complex neural architectures.
+
+Extensive experimental validation across feed-forward networks, Multi-Layer Multi-component networks, and transformers confirms our theoretical predictions while revealing phenomena that merit further investigation at the intersection of deep learning and mathematical physics.
+
+
+
+
+\newpage
+
+
+
+
+
+
+\newpage
+\addcontentsline{toc}{section}{Acknowledgements and Scope}
+\section*{Acknowledgements and Scope}
+
+
+I would like to thank all those who have helped and guided me during this research work.
+
+First, I want to thank my family for their constant support, help, and understanding during my studies. Their patience during long hours of research and their trust in my work have been very important.
+
+I am very grateful to my supervisors, Professor \textbf{Haizhao Yang} and Professor \textbf{Shijun Zhang}, whose excellent guidance, mathematical knowledge, and teaching have shaped this work and my understanding of deep learning theory. Their knowledge in neural tangent kernel theory and random matrix analysis has been key in building the theoretical framework shown in this report.
+
+Special thanks go to \textbf{David Terjek} for his invaluable contributions to proof strategies and mathematical rigor throughout this research, and to \textbf{Tan Bui-Thanh} for his expertise in physics-based approaches and computational physics methodologies. Their combined insights have significantly enhanced both the theoretical foundations and practical applications of our results in physics-informed neural networks.
+
+I would also like to thank \textbf{Charles-Albert Lehalle} for his helpful talks about the practical uses of our work and his knowledge in mathematical finance applications of neural networks.
+
+I am deeply grateful to the \textbf{BRIN MRC Summer School in Physics Informed Machine Learning Theory} for providing an exceptional intensive program that facilitated invaluable exchanges with leading experts in the field. The collaborative discussions during this program have been instrumental in establishing research collaborations and developing the theoretical frameworks presented in this work.
+
+Special acknowledgment goes to \textbf{Professor Doron Levy}, Head of the Mathematics Department, for providing me with the necessary resources and institutional support to conduct this research effectively. His commitment to fostering advanced mathematical research has been crucial for the success of this project.
+
+I would also like to extend my sincere gratitude to \textbf{Ruth Yun} from Human Resources, whose exceptional assistance and guidance throughout the administrative aspects of this research have been invaluable. Her dedication and support have made this work possible in ways that extend far beyond the technical contributions.
+
+
+The working together and interesting discussions with other researchers have been important for developing the ideas shown here. This work shows the power of working together in research and the generous sharing of knowledge in the scientific community.
+
+
+\subsection*{Scope and Informal words}
+
+We have spent significant time to make sure this report can be understood by many readers while staying clear and complete about our results. We avoid unnecessary details or extra explanations that do not help understand our methods and findings. 
+Every statement is supported and our assumptions are clearly stated. The references are complete and honest about current research, 
+noting that this work is very recent with the latest advances from \textbf{August 2025}.
+To enhance readability and ensure readers have the most enjoyable experience possible, we have strategically 
+incorporated \textbf{\textcolor{red}{colors}}, I hope the reader will enjoy the reading experience.
+
+This work is still ongoing, supervised by the aforementioned professors. I have never been so happy to work on a subject,
+particularly because there exists a huge theoretical gap to fill in this emerging field that bridges physics and deep learning,
+especially \textbf{\textcolor{brown}{random matrix theory}}, \textbf{\textcolor{darkyellow}{statistical physics}} and \textbf{\textcolor{blue}{quantum field theory}}, this will be tackled in the oral presentation.
+
+This report required \textbf{1000 pdflatex compilations} - totally worth it!
 
 \newpage
 \addcontentsline{toc}{section}{Notations}
@@ -215,44 +421,44 @@ Across these different architectures, we study feature learning regimes and thei
 \begin{tcolorbox}[colback=blue!5,colframe=blue!50!black,title={\large \textbf{Mathematical Notation Reference}},enhanced,drop shadow]
 
 \subsection*{Basic Mathematical Symbols}
-\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\begin{longtable}{p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}}
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
 $\mathbb{R}$ & Set of real numbers & $\mathbb{N}$ & Set of natural numbers \\
 $\mathbb{C}$ & Set of complex numbers & $\mathbb{S}^{d-1}$ & Unit sphere of dimension $d-1$ \\
-$\E[\cdot]$ & Mathematical expectation & $\Var(\cdot)$ & Variance of a random variable \\
-$\Cov(\cdot,\cdot)$ & Covariance between two variables & $\Corr(\cdot,\cdot)$ & Correlation between two variables \\
-$\indic\{\cdot\}$ & Indicator function & $\dd x$ & Differential element \\
-$\|\cdot\|$ & Euclidean norm & $\langle \cdot,\cdot \rangle$ & Inner product \\
-$\mathcal{O}(\cdot)$ & Landau notation (big O) & $\tilde{\Omega}(\cdot)$ & Landau notation (big Omega tilde) \\
+$\E_{\cdot}[\cdot]$ & Mathematical expectation & $\Var(\cdot)$ & Variance of a random variable \\
+$\Cov(\cdot,\cdot)$ & Covariance between two variables & $\indic\{\cdot\}$ & Indicator function \\
+$\dd x$ & Differential element & $\|\cdot\|$ & Euclidean norm \\
+$\langle \cdot,\cdot \rangle$ & Inner product & $\mathcal{O}(\cdot)$ and $\tilde{\Omega}(\cdot)$  & Landau notation \\
 \bottomrule
 \end{longtable}
 
 \subsection*{Neural Network and Activation Functions}
-\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\begin{longtable}{p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}}
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
-$\sigma$ & \ReLU activation function & $f(\mathbf{x}; \boldsymbol{\theta})$ & Neural network function \\
-$\ReLU(\cdot)$ & General activation function & $\sigma^2$ & Activation variance parameter \\
-$L$ & Number of layers & $n_k$ & Width of layer $k$ \\
-$x^{(\ell)}$ & Output of layer $\ell$ & $\W^{(\ell)}$ & Weight matrix of layer $\ell$ \\
-$x^{(0)} = x$ & Network input & $a \in \mathbb{R}^m$ & Output layer weights \\
-$\theta$ & Set of all trainable parameters & $\sigma'_\ell(x)$ & Diagonal derivative matrix \\
-$G^{(\ell)}_\mu$ & Backpropagated gradient to layer $\ell$ & $m$ & Network width \\
-$H$ & Number of hidden layers & $\delta_\gamma(\cdot)$ & Directional derivative operator \\
+$\ReLU$ & Activation function & $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})$ & Neural network function \\
+$\sigma_{\cdot}$ & General variance denomination & $L$ & Number of layers \\
+$n_k$ & Width of layer $k$ & $x^{(\ell)}$ & Output of layer $\ell$ \\
+$\W^{(\ell)}$ & Weight matrix of layer $\ell$ & $x^{(0)} = x$ & Network input \\
+$a \in \mathbb{R}^m$ & Output layer weights & $\theta$ & Set of all trainable parameters \\
+$\sigma'_\ell(x)$ & Diagonal derivative matrix & $G^{(\ell)}_\mu$ & Backpropagated gradient to layer $\ell$ \\
+$m$ & Network width & $H$ & Number of hidden layers \\
+$\delta_\gamma(\cdot)$ & Directional derivative operator & & \\
 \bottomrule
 \end{longtable}
 
 \subsection*{Neural Tangent Kernel (NTK)}
-\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\begin{longtable}{p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}}
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
-$\textcolor{kernelcolor}{\mathbf{K}}$ & Discrete NTK matrix & $\textcolor{kernelcolor}{K^{\infty}}$ & Infinite-width NTK operator \\
-$\textcolor{kernelcolor}{K^{L}}(\mathbf{x}_i, \mathbf{x}_j)$ & NTK for $L$-layer network & $\textcolor{kernelcolor}{\mu_\ell^{(K)}}$ & NTK eigenvalues at degree $\ell$ \\
+$\textcolor{red}{\mathbf{K}}$ & Discrete NTK matrix & $\textcolor{red}{K^{\infty}}$ & Infinite-width NTK operator \\
+$K^{L}(\mathbf{x}_i, \mathbf{x}_j)$ & NTK for $L$-layer network & $\mu_\ell^{(\textcolor{red}{K})}$ & NTK eigenvalues at degree $\ell$ \\
 $\varrho(\rho)$ & Correlation propagation function & $\rho_1(\mathbf{x},\mathbf{x}')$ & Initial correlation \\
+$\textcolor{k3color}{K^{(3)}}$ & Third-order kernel & $\textcolor{kernelcolor}{K}^{(r)}_t$ & $r$-th order kernel \\
 \bottomrule
 \end{longtable}
 
@@ -262,7 +468,7 @@ $\varrho(\rho)$ & Correlation propagation function & $\rho_1(\mathbf{x},\mathbf{
 
 \newpage
 \subsection*{Sobolev Spaces and Training}
-\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\begin{longtable}{p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}}
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
@@ -274,31 +480,31 @@ $(I + (-\Delta)^{1/2})^s$ & Fractional Laplacian operator & $\Delta_{\mathbb{S}^
 \end{longtable}
 
 \subsection*{Spherical Harmonics and Fourier Analysis}
-\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\begin{longtable}{p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}}
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
 $Y_{\ell,p}$ & Spherical harmonics & $N(d,\ell)$ & Multiplicity of harmonics \\
 $\hat{f}(\xi)$ & Fourier transform of $f$ & $\xi$ & Frequency variable \\
-$\ReLU(x)$ & Surface measure on sphere & $\ell$ & Degree index \\
+$\sigma(x)$ & Surface measure on sphere & $\ell$ & Degree index \\
 $p$ & Order index & $\nabla$ & Gradient operator \\
 \bottomrule
 \end{longtable}
 
 \subsection*{Eigenvalues and Spectral Analysis}
-\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\begin{longtable}{p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}}
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
-$\textcolor{kernelcolor}{\lambda_\ell}$ & Eigenvalues at degree $\ell$ & $\textcolor{kernelcolor}{\lambda_{\min}}(A)$ & Minimum eigenvalue \\
-$\textcolor{kernelcolor}{\lambda_{\max}}(A)$ & Maximum eigenvalue & $\mu_\ell^{(P_s)}$ & Sobolev eigenvalues \\
+$\lambda_\ell$ & Eigenvalues at degree $\ell$ & $\lambda_{\min}(A)$ & Minimum eigenvalue \\
+$\lambda_{\max}(A)$ & Maximum eigenvalue & $\mu_\ell^{(P_s)}$ & Sobolev eigenvalues \\
 $C(d,L)$ & Constants depending on $d,L$ & $\Gamma(\cdot)$ & Gamma function \\
-$P_\ell^{(\alpha)}(t)$ & Gegenbauer polynomials & $\tilde{K}_L^{\infty}(t)$ & Normalized NTK function \\
+$P_\ell^{(\alpha)}(t)$ & Gegenbauer polynomials & $\tilde{\textcolor{red}{K}}_L^{\infty}(t)$ & Normalized NTK function \\
 \bottomrule
 \end{longtable}
 
 \subsection*{Matrix Operations and Training}
-\begin{longtable}{p{0.2\textwidth}p{0.15\textwidth}p{0.2\textwidth}p{0.15\textwidth}}
+\begin{longtable}{p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}}
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
@@ -306,17 +512,34 @@ $A^T$ & Matrix transpose & $\|A\|_{op}$ & Operator norm \\
 $\|A\|_F$ & Frobenius norm & $A \circ B$ & Hadamard product \\
 $\mathcal{T}_s$ & Composite learning operator & $a_{\ell,p}$ & Sampling vectors \\
 $\eta$ & Learning rate & $f_t(x)$ & Network at time $t$ \\
-$y_i$ & Target output & $n$ & Number of samples \\
+$y_i$ & Target output & $\textcolor{red}{n}$ & Number of samples \\
 $d$ & Input dimension & $s$ & Sobolev order \\
-$\textcolor{kernelcolor}{K}^{(r)}_t$ & $r$-th order kernel & $T_{H+1}$ & New layer contribution \\
-$C_{H+1}$ & Correction term & $a'_t$ & Effective output vector \\
-$\text{vec}(\cdot)$ & Vectorization operator & $\mathcal{P}_\ell$ & Propagation operator \\
+$T_{H+1}$ & New layer contribution & $C_{H+1}$ & Correction term \\
+$a'_t$ & Effective output vector & $\text{vec}(\cdot)$ & Vectorization operator \\
+$\mathcal{P}_\ell$ & Propagation operator & $\rho$ & Spectral radius \\
 \bottomrule
 \end{longtable}
 
 \end{tcolorbox}
 
 \newpage
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -84,8 +84,27 @@
 \definecolor{theoremcolor}{RGB}{240,248,255} % Light blue for theorem boxes
 \definecolor{definitioncolor}{RGB}{255,248,240} % Light orange for definitions
 \definecolor{darkyellow}{RGB}{184,134,11}     % Dark yellow for highlights
+\definecolor{k3color}{RGB}{148,0,211}        % Purple for K^{(3)} specifically
 
 
+% Define custom colors for mathematical elements [[memory:6864771]]
+\definecolor{kernelcolor}{RGB}{220,20,60}    % Red for NTK/K symbols
+\definecolor{sobolevcolor}{RGB}{30,144,255}  % Blue for Sobolev/P symbols
+\definecolor{theoremcolor}{RGB}{70,130,180}  % Steel blue for theorems
+\definecolor{definitioncolor}{RGB}{0,128,0}  % Green for definitions
+\definecolor{weightcolor}{RGB}{101,67,33}    % Dark brown for weights W
+\definecolor{relucolor}{RGB}{64,64,64}       % Dark grey for ReLU
+\definecolor{k3color}{RGB}{148,0,211}        % Purple for K^{(3)} specifically
+
+
+% Color definitions
+\definecolor{kernelcolor}{RGB}{200,0,0}      % Red for K (kernels)
+\definecolor{sobolevcolor}{RGB}{0,0,200}     % Blue for P (Sobolev)
+\definecolor{theoremcolor}{RGB}{240,248,255} % Light blue for theorem boxes
+\definecolor{definitioncolor}{RGB}{255,248,240} % Light orange for definitions
+\definecolor{darkyellow}{RGB}{184,134,11}     % Dark yellow for highlights
+\definecolor{pinkcolor}{RGB}{255,192,203}     % Pink for rho
+\definecolor{yellowcolor}{RGB}{255,255,0}     % Yellow for d
 
 % Enhanced math commands
 \newcommand{\E}{\mathbb{E}}
@@ -99,6 +118,13 @@
 \newcommand{\Kinf}{\textcolor{kernelcolor}{K^{\infty}}}
 \newcommand{\Ps}{\textcolor{sobolevcolor}{P_s}}
 \newcommand{\Ts}{\mathcal{T}_s}
+
+% New colored commands for K, NTK, rho, and d
+\newcommand{\K}{\textcolor{kernelcolor}{K}}
+\newcommand{\NTK}{\textcolor{kernelcolor}{\textbf{NTK}}}
+\newcommand{\rho}{\textcolor{pinkcolor}{\rho}}
+\newcommand{\d}{\textcolor{yellowcolor}{d}}
+
 
 % Beautiful theorem environments
 \theoremstyle{plain}
@@ -224,6 +250,12 @@
 	\newpage
 	\tableofcontents
 \newpage
+
+
+
+
+
+
 \addcontentsline{toc}{section}{Abstract}
 \section*{Abstract}
 
