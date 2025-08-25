@@ -537,17 +537,20 @@ This section establishes the \textbf{mathematical foundation} for our analysis o
 We consider a \textbf{Multi-Layer Perceptron} with:
 \begin{itemize}
 \item \textbf{Depth}: $H$ layers with uniform width $m$
-\item \textbf{Forward propagation}: $x^{(\ell)} = \frac{1}{\sqrt{\m}} \ReLU (\W^{(\ell)}x^{(\ell-1)})$ for $\ell \in \{1, \ldots, H\}$
-\item \textbf{Network output}: $f(x, \theta) = a^T x^{(H)}$ where $a \in \mathbb{R}^m$
-\item \textbf{Parameters}: $\theta = (\text{vec}(\W^{(1)}), \ldots, \text{vec}(\W^{(H)}), a)$
-\item \textbf{Weight initialization}: $\W^{(\ell)} \sim \mathcal{N}(0, c_W^2/m)$ with $c_W^2 = 2$ for ReLU
-\item \textbf{NTK scaling}: Output layer scaled by $1/\sqrt{\m}$
-\item \textbf{Proper initialization}: Ensures dynamical isometry at the edge of chaos
+\item \textbf{Forward propagation}: $x^{(\ell)} = \frac{1}{\sqrt{\textcolor{darkyellow}{m}}} \textcolor{relucolor}{\ReLU} (\textcolor{weightcolor}{\mathbf{W}}^{(\ell)}x^{(\ell-1)})$ for $\ell \in \{1, \ldots, H\}$
+\item \textbf{Network output}: $f(x, \theta) = \textcolor{blue}{a}^T x^{(H)}$ where $\textcolor{blue}{a} \in \mathbb{R}^{\textcolor{darkyellow}{m}}$
+\item \textbf{Parameters}: $\theta = (\text{vec}(\W^{(1)}), \ldots, \text{vec}(\W^{(H)}), \textcolor{blue}{a})$
+\item \textbf{Weight initialization}: $\W^{(\ell)} \sim \mathcal{N}(0, c_W^2)$ with $c_W^2 = 2$ for ReLU
+\item \textbf{NTK scaling}: Output layer scaled by $1/\sqrt{\textcolor{darkyellow}{m}}$
 \item \textbf{Activation derivatives}: $\ReLU'_\ell(x) = \text{diag}(\ReLU'(\W^{(\ell)}x^{(\ell-1)}))$
 \end{itemize}
 
-The \textit{NTK scaling} $1/\sqrt{\m}$ ensures proper initialization and infinite-width convergence, with order 1 weight and small update, contrary to [Greg Yang 2025] $\mu$P
+The \textit{NTK scaling} $1/\sqrt{\textcolor{darkyellow}{m}}$ ensures proper initialization and infinite-width convergence, with order 1 weight and small update, contrary to [Greg Yang 2025] $\mu$P
 \end{tcolorbox}
+
+
+
+
 
 
 
@@ -558,50 +561,59 @@ The \textbf{Neural Tangent Kernel} governs the continuous-time least squares reg
 
 \begin{equation}
 \label{eq:ntk_dynamics}
-\frac{d}{dt} f(x, \theta_t) = -\frac{1}{n}\sum_{\beta=1}^n \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x, x_\beta) (f(x_\beta, \theta_t) - y_\beta)
+\frac{d}{dt} f(x, \textcolor{weightcolor}{\theta}_t) = -\frac{1}{n}\sum_{\textcolor{blue}{\beta}=1}^n \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x, x_{\textcolor{blue}{\beta}}) (f(x_{\textcolor{blue}{\beta}}, \textcolor{weightcolor}{\theta}_t) - y_{\textcolor{blue}{\beta}})
 \end{equation}
 
-where $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x_\alpha, x_\beta) := \langle \nabla_\theta f(x_\alpha, \theta_t), \nabla_\theta f(x_\beta, \theta_t) \rangle$.
+where $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x_{\textcolor{blue}{\alpha}}, x_{\textcolor{blue}{\beta}}) := \langle \nabla_{\textcolor{weightcolor}{\theta}} f(x_{\textcolor{blue}{\alpha}}, \textcolor{weightcolor}{\theta}_t), \nabla_{\textcolor{weightcolor}{\theta}} f(x_{\textcolor{blue}{\beta}}, \textcolor{weightcolor}{\theta}_t) \rangle$.
 \end{tcolorbox}
 
 The kernel admits the \textbf{layer-wise decomposition}:
 \begin{equation}
 \label{eq:ntk_decomposition}
-\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x_\alpha, x_\beta) = \langle x^{(H)}_\alpha, x^{(H)}_\beta \rangle + \sum_{\ell=1}^{H} \langle G^{(\ell)}_\alpha, G^{(\ell)}_\beta \rangle \langle x^{(\ell-1)}_\alpha, x^{(\ell-1)}_\beta \rangle
+\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}_t(x_{\textcolor{blue}{\alpha}}, x_{\textcolor{blue}{\beta}}) = \langle x^{(H)}_{\textcolor{blue}{\alpha}}, x^{(H)}_{\textcolor{blue}{\beta}} \rangle + \sum_{\ell=1}^{H} \langle G^{(\ell)}_{\textcolor{blue}{\alpha}}, G^{(\ell)}_{\textcolor{blue}{\beta}} \rangle \langle x^{(\ell-1)}_{\textcolor{blue}{\alpha}}, x^{(\ell-1)}_{\textcolor{blue}{\beta}} \rangle
 \end{equation}
 
 where $G^{(\ell)}_\mu$ represents the \textit{backpropagated gradient}:
 \begin{equation}
 \label{eq:backprop_gradient}
-G^{(\ell)}_\mu = \frac{1}{\sqrt{\m}}\sigma'_\ell(x_\mu) (\W^{(\ell+1)})^T \cdots \frac{1}{\sqrt{\m}}\sigma'_H(x_\mu) a_t
+G^{(\ell)}_\mu = \frac{1}{\sqrt{\textcolor{darkyellow}{m}}}\sigma'_\ell(x_\mu) (\textcolor{weightcolor}{\mathbf{W}}^{(\ell+1)})^T \cdots \frac{1}{\sqrt{\textcolor{darkyellow}{m}}}\sigma'_H(x_\mu) \textcolor{blue}{a}_t
 \end{equation}
+
+
+
+
+
 
 \subsubsection{The Neural Tangent Hierarchy: Beyond Infinite Width}
 
 \begin{tcolorbox}[colback=purple!5,colframe=purple!50!black,title={\textbf{Neural Tangent Hierarchy (NTH)}},enhanced,drop shadow]
-For \textbf{finite-width networks} ($m < \infty$), the NTK evolves during training, governed by an \textit{infinite hierarchy} of coupled differential equations:
+For \textbf{finite-width networks} ($\textcolor{darkyellow}{m} < \infty$), the NTK evolves during training, governed by an \textit{infinite hierarchy} of coupled differential equations:
 
 \begin{equation}
 \label{eq:nth_hierarchy}
-\frac{d}{dt} \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(r)}}_t(x_{\alpha_1}, \ldots, x_{\alpha_r}) = -\frac{1}{n} \sum_{\gamma=1}^n \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(r+1)}}_t(x_{\alpha_1}, \ldots, x_{\alpha_r}, x_\gamma) (f_t(x_\gamma) - y_\gamma)
+\frac{d}{dt} \textcolor{kernelcolor}{\K^{(r)}}_t(x_{\textcolor{blue}{\alpha_1}}, \ldots, x_{\textcolor{blue}{\alpha_r}}) = -\frac{1}{n} \sum_{\textcolor{blue}{\gamma}=1}^n \textcolor{kernelcolor}{\K^{(r+1)}}_t(x_{\textcolor{blue}{\alpha_1}}, \ldots, x_{\textcolor{blue}{\alpha_r}}, x_{\textcolor{blue}{\gamma}}) (f_t(x_{\textcolor{blue}{\gamma}}) - y_{\textcolor{blue}{\gamma}})
 \end{equation}
 
 valid for all $r \geq 2$, where the \textbf{higher-order kernels} are defined recursively:
 
 \begin{equation}
 \label{eq:higher_order_definition}
-\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(r+1)}}_t(x_1, \ldots, x_{r+1}) := \langle \nabla_\theta \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(r)}}_t(x_1, \ldots, x_r), \nabla_\theta f_t(x_{r+1}) \rangle
+\textcolor{kernelcolor}{\K^{(r+1)}}_t(x_{\textcolor{blue}{1}}, \ldots, x_{\textcolor{blue}{r+1}}) := \langle \nabla_{\textcolor{weightcolor}{\theta}} \textcolor{kernelcolor}{\K^{(r)}}_t(x_{\textcolor{blue}{1}}, \ldots, x_{\textcolor{blue}{r}}), \nabla_{\textcolor{weightcolor}{\theta}} f_t(x_{\textcolor{blue}{r+1}}) \rangle
 \end{equation}
 \end{tcolorbox}
 
 This hierarchy shows a \textbf{key difference} from infinite-width theory. While infinite-width networks have \textit{fixed} 
-$\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$, finite-width networks show \textbf{changing behavior} where the first-order 
+$\textcolor{kernelcolor}{\K^{(2)}}$, finite-width networks show \textbf{changing behavior} where the first-order 
 correction $\textcolor{k3color}{K^{(3)}}$ controls how the NTK changes over time.
 
 \textbf{Simple View}: The hierarchy captures the \textit{feedback loop} between network outputs and kernel changes.
- Each higher-order kernel $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(r+1)}}$ shows how the $r$-th order kernel reacts to weight updates,
+ Each higher-order kernel $\textcolor{kernelcolor}{\K^{(r+1)}}$ shows how the $r$-th order kernel reacts to weight updates,
   creating a network of connections that controls finite-width training.
 
+
+
+
+  
 \subsubsection{Third-Order Kernel: Theory and Computation}
 
 This section develops the \textbf{theoretical framework} and \textit{computational methods} for the third-order kernel $\textcolor{k3color}{K^{(3)}}$, which governs finite-width corrections to neural network training dynamics.
@@ -633,23 +645,29 @@ The derivation proceeds by decomposing the third-order kernel into \textbf{three
 The detailed mathematical derivation involving \textit{directional derivatives}, \textit{recursive formulas}, and the complete expansion of all terms is presented in \hyperref[sec:appendix_k3_derivation]{Appendix B.1}. This derivation demonstrates how the hierarchical structure of the neural network naturally gives rise to the complex but well-organized form of $\textcolor{k3color}{K^{(3)}}$.
 
 
+
+
+
+
+
 \subsubsection{Personal Contribution: Extended Formula for $\textcolor{k3color}{K^{(3)}}$}
 
-To obtain a complete expression for $\textcolor{k3color}{K^{(3)}}_{\alpha\beta\gamma}$, we expand the terms $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$ using their recursive definitions. We assume a ReLU activation function, so $\sigma''=0$ almost everywhere.
+To obtain a complete expression for $\textcolor{k3color}{K^{(3)}}_{\alpha\beta\gamma}$, we expand the terms $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$ using their recursive definitions. We assume a \textcolor{relucolor}{\ReLU} activation function, so $\textcolor{relucolor}{\ReLU}''=0$ almost everywhere.
 
 
 The term $\delta_\gamma x^{(p)}_\mu$, which represents the variation of activation $x^{(p)}_\mu$ along the gradient of output $f_t(x_\gamma)$, can be expanded as a sum over previous layers:
 \begin{equation}
-\delta_\gamma x^{(p)}_\mu = \sum_{j=1}^{p} \left( \prod_{k=j+1}^{p} \frac{\sigma'_{k}(x_\mu) \W^{(k)}}{\sqrt{\m}} \right) \frac{\sigma'_{j}(x_\mu)}{\sqrt{\m}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\mu \rangle G^{(j)}_\gamma
+\delta_\gamma x^{(p)}_\mu = \sum_{j=1}^{p} \left( \prod_{k=j+1}^{p} \frac{\textcolor{relucolor}{\ReLU}'_{k}(x_\mu) \textcolor{weightcolor}{\mathbf{W}}^{(k)}}{\sqrt{\textcolor{darkyellow}{m}}} \right) \frac{\textcolor{relucolor}{\ReLU}'_{j}(x_\mu)}{\sqrt{\textcolor{darkyellow}{m}}} \langle x^{(j-1)}_\gamma, x^{(j-1)}_\mu \rangle G^{(j)}_\gamma
 \end{equation}
 where the product $\prod_{k=j+1}^{p}$ is an ordered product of Jacobian matrices.
 
 Similarly, the term $\delta_\gamma G^{(\ell)}_\mu$, the variation of the backpropagated gradient vector, decomposes into a sum over subsequent layers:
 \begin{align}
-\delta_\gamma G^{(\ell)}_\mu = & \sum_{p=\ell}^{H-1} \left( \prod_{k=\ell}^{p} \frac{(\W^{(k+1)})^T \sigma'_{k+1}(x_\mu)}{\sqrt{\m}} \right) \frac{1}{\m} G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\mu \rangle \\
-& + \left( \prod_{k=\ell}^{H-1} \frac{(\W^{(k+1)})^T \sigma'_{k+1}(x_\mu)}{\sqrt{\m}} \right) \frac{x^{(H)}_\gamma}{\sqrt{\m}}
+\delta_\gamma G^{(\ell)}_\mu = & \sum_{p=\ell}^{H-1} \left( \prod_{k=\ell}^{p} \frac{(\textcolor{weightcolor}{\mathbf{W}}^{(k+1)})^T \textcolor{relucolor}{\ReLU}'_{k+1}(x_\mu)}{\sqrt{\textcolor{darkyellow}{m}}} \right) \frac{1}{\textcolor{darkyellow}{m}} G^{(p+1)}_\gamma \langle x^{(p)}_\gamma, x^{(p)}_\mu \rangle \\
+& + \left( \prod_{k=\ell}^{H-1} \frac{(\textcolor{weightcolor}{\mathbf{W}}^{(k+1)})^T \textcolor{relucolor}{\ReLU}'_{k+1}(x_\mu)}{\sqrt{\textcolor{darkyellow}{m}}} \right) \frac{x^{(H)}_\gamma}{\sqrt{\textcolor{darkyellow}{m}}}
 \end{align}
-The first term captures the effect of varying weights $\W^{(\ell+1)}, \dots, \W^{(H)}$, and the second term that of varying the output vector $a_t$.
+The first term captures the effect of varying weights $\textcolor{weightcolor}{\mathbf{W}}^{(\ell+1)}, \dots, \textcolor{weightcolor}{\mathbf{W}}^{(H)}$, and the second term that of varying the output vector $\textcolor{blue}{a}_t$.
+
 
 
 
