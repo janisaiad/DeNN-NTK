@@ -1189,7 +1189,7 @@ where $\|\mathbf{A}\|_{HS} = \sqrt{\sum_{i,j} |a_{i,j}|^2}$ is the Hilbert-Schmi
 
 \begin{theorem}[Generalized Hanson-Wright for Random Tensors (Chang, 2022)]
 For random tensor vector $\overline{\mathcal{X}} \in \C^{(n \times I_1 \times \cdots \times I_M) \times (I_1 \times \cdots \times I_M)}$ and fixed tensor $\overline{\overline{\mathcal{A}}}$, the polynomial function:
-$$f_j(\overline{\mathcal{X}}) = \left(\sum_{i,k=1}^n \mathcal{A}_{i,k} \star_M (\mathcal{X}_i - \E[\mathcal{X}_i]) \star_M (\mathcal{X}_k - \E[\mathcal{X}_k])\right)^j$$
+$$f_j(\overline{\mathcal{X}}) = \left(\sum_{i,\textcolor{red}{k}=1}^{\textcolor{red}{n}} \mathcal{A}_{i,\textcolor{red}{k}} \star_M (\mathcal{X}_i - \E[\mathcal{X}_i]) \star_M (\mathcal{X}_{\textcolor{red}{k}} - \E[\mathcal{X}_{\textcolor{red}{k}}])\right)^j$$
 satisfies concentration bounds involving Ky Fan $k$-norms of tensor sums, extending classical matrix concentration to tensor settings.
 \end{theorem}
 
@@ -1199,7 +1199,7 @@ Matrix concentration inequalities provide direct control over eigenvalues of ran
 
 \begin{theorem}[Matrix Chernoff Bound (Tropp, 2012)]
 Let $X_1, \ldots, X_n$ be independent random Hermitian matrices with $X_i \preceq R \cdot I$ and $\E[X_i] \preceq \mu \cdot I$. Let $S = \sum_{i=1}^n X_i$. Then:
-$$\Pr(\lambda_{\max}(S) \geq (1+\delta)\mu n) \leq d \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^{\mu n / R}$$
+$$\Pr(\lambda_{\max}(S) \geq (1+\delta)\mu \textcolor{red}{n}) \leq d \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^{\mu \textcolor{red}{n} / R}$$
 \end{theorem}
 
 \begin{theorem}[Matrix Bernstein Inequality (Vershynin, 2018)]
@@ -1213,7 +1213,7 @@ $$\Pr\left(\left\|\sum_{i=1}^n X_i\right\| \geq t\right) \leq 2d \exp\left(-\fra
 
 \begin{lemma}[Weyl's Inequality]
 For Hermitian matrices $A, B$:
-$$\lambda_i(A) + \lambda_n(B) \leq \lambda_i(A + B) \leq \lambda_i(A) + \lambda_1(B)$$
+$$\lambda_i(A) + \lambda_{\textcolor{red}{n}}(B) \leq \lambda_i(A + B) \leq \lambda_i(A) + \lambda_1(B)$$
 \end{lemma}
 
 \begin{lemma}[Schur Product Theorem]
@@ -1223,7 +1223,7 @@ $$\evmin{P \circ Q} \geq \evmin{P} \min_i Q_{ii}$$
 
 \begin{lemma}[Gershgorin Circle Theorem]
 For matrix $A = (a_{ij})$, all eigenvalues lie in the union of discs:
-$$\bigcup_{i=1}^n \left\{z \in \C : |z - a_{ii}| \leq \sum_{j \neq i} |a_{ij}|\right\}$$
+$$\bigcup_{i=1}^{\textcolor{red}{n}} \left\{z \in \C : |z - a_{ii}| \leq \sum_{j \neq i} |a_{ij}|\right\}$$
 \end{lemma}
 
 \subsection{Specialized Neural Network Tools}
