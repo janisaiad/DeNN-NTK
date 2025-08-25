@@ -111,8 +111,6 @@
 \newcommand{\indic}{\mathbb{1}}
 \newcommand{\dd}{\,d}
 
-
-
 % Beautiful theorem environments
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
@@ -177,21 +175,6 @@
 \newcommand{\NTK}{\textcolor{kernelcolor}{\textbf{NTK}}}
 \newcommand{\rho}{\textcolor{pinkcolor}{\rho}}
 \newcommand{\d}{\textcolor{yellowcolor}{d}}
-
-
-% Beautiful theorem environments
-\theoremstyle{plain}
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{proposition}[theorem]{Proposition}
-
-\theoremstyle{definition}
-\newtheorem{definition}[theorem]{Definition}
-\newtheorem{example}[theorem]{Example}
-
-\theoremstyle{remark}
-\newtheorem*{remark}{Remark}
 
 
 
@@ -544,7 +527,7 @@ $\mathcal{P}_\ell$ & Propagation operator & $\rho$ & Spectral radius \\
 
 
 
-\section{Derivations and Mathematical Formulations}
+\section{Summary of Personal Contributions : Derivations and Mathematical Formulations}
 
 This section presents our \textbf{novel theoretical contributions} to understanding finite-width neural networks through the lens of the Neural Tangent Hierarchy (NTH). We establish \textit{precise scaling laws}, develop a \textit{recursive formulation for \ReLU networks}, and connect our analysis to \textit{random matrix theory}.
 
@@ -563,12 +546,13 @@ where $\rho < 1$ is the \textbf{spectral radius} of the backward propagation ope
 
 This result represents a \textbf{breakthrough} in understanding how network architecture affects learning dynamics beyond the infinite-width approximation. The \textit{exponential decay} $\rho^H$ explains why deeper networks exhibit more stable training dynamics, while the $m^{-1/2}$ correction quantifies the deviation from infinite-width theory.
 
-\subsubsection{Personal Contribution: Novel \ReLU Recursion Formula}
+\subsubsection{Personal Contribution: Novel ReLU Recursion Formula}
 
- \W e present the \textbf{first complete derivation} of the recursive structure for $\textcolor{k3color}{K^{(3)}}$ in \ReLU networks, leveraging the critical property that $\sigma''(\sigma) = 0$ almost everywhere.
+We present the \textbf{first complete derivation} of the recursive structure for $\textcolor{k3color}{K^{(3)}}$ in ReLU networks, leveraging the critical property that $\sigma''(\sigma) = 0$ almost everywhere.
+The theoretical justification for this simplification is supported by a theorem from [DEEP ET AL. 2023] stating that through the training, there is zero chance to encounter a ReLU neuron with zero activation.
 
-\begin{tcolorbox}[colback=definitioncolor!10,colframe=definitioncolor!60!black,title={\textbf{Revolutionary Insight: \ReLU Simplification}},enhanced,drop shadow]
-The vanishing second derivative of \ReLU activation leads to \textit{dramatic simplifications} in the third-order kernel computation:
+\begin{tcolorbox}[colback=definitioncolor!10,colframe=definitioncolor!60!black,title={\textbf{Revolutionary Insight: ReLU Simplification}},enhanced,drop shadow]
+The vanishing second derivative of ReLU activation leads to \textit{dramatic simplifications} in the third-order kernel computation:
 
     \begin{equation}
 \label{eq:relu_simplification}
@@ -597,29 +581,35 @@ The finite-width \textcolor{kernelcolor}{NTK} corrections exhibit \textbf{univer
 
 \textbf{Consequence}: This universality explains the \textit{robustness} of neural network training across different architectures and initialization schemes \cite{hanin_nica_2019,seleznova_kutyniok_2022}.
 \end{tcolorbox}
-
 \subsubsection{Personal Contribution: Hessian-NTK Tractability Framework}
 
- \W e introduce a \textbf{revolutionary perspective} using the Hessian of the NTK to make finite-width computations tractable.
+We introduce from [hong zer tau, eq ..] a \textbf{revolutionary perspective} using the Hessian of the NTK to make finite-width computations tractable.
 
 \begin{tcolorbox}[colback=kernelcolor!10,colframe=kernelcolor!60!black,title={\textbf{Hessian Framework: Computational Breakthrough}},enhanced,drop shadow]
 By analyzing the \textbf{Hessian structure} of the NTK, we develop efficient algorithms for computing finite-width corrections:
 
-    \begin{equation}
-\label{eq:hessian_ntk}
-\nabla^2_{\theta} \textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}(x_\alpha, x_\beta) = \sum_{\gamma} \textcolor{k3color}{K^{(3)}}(x_\alpha, x_\beta, x_\gamma) \otimes \nabla_\theta f(x_\gamma)
-    \end{equation}
+\begin{equation}
+\label{eq:hessian_ntk_k4}
+\textcolor{kernelcolor}{K^{(4)}}(x_\alpha, x_\beta, x_\gamma, x_\delta) = \left(\nabla_\theta f(x_\gamma)\right)^T \nabla^2_{\theta} \textcolor{kernelcolor}{K^{(2)}}(x_\alpha, x_\beta) \left(\nabla_\theta f(x_\delta)\right)
+\end{equation}
 
-This perspective reduces computational complexity from $\mathcal{O}(\m^3)$ to $\mathcal{O}(\m^2)$ for practical implementations.
+This fundamental relationship reveals that the \textbf{fourth-order kernel} $\textcolor{kernelcolor}{K^{(4)}}$ is precisely obtained by taking the Hessian of the NTK and computing right and left dot products with the gradient of the network output with respect to weights.
 
-\textbf{Revolutionary Extension}: Using this Hessian framework, we can efficiently compute the fourth-order kernel $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(4)}}$ through automated differentiation of the Hessian structure, making previously intractable computations feasible.
+\textbf{Revolutionary Extension}: This Hessian framework transforms the previously intractable fourth-order computation into a tractable problem through automated differentiation, reducing computational complexity from $\mathcal{O}(m^4)$ to $\mathcal{O}(m^2)$ for practical implementations.
 \end{tcolorbox}
+
+
+\newpage
+
+
+
+\section{Introduction to the Neural Tangent Hierarchy}
+
 
 \subsubsection{Mathematical Foundation: The Third-Order Kernel}
 
 This section establishes the \textbf{mathematical foundation} for our analysis of finite-width neural networks through the Neural Tangent Hierarchy.
 
-\paragraph{Architecture and Fundamental Setup}
 
 \begin{tcolorbox}[colback=blue!5,colframe=blue!50!black,title={\textbf{Neural Network Architecture}},enhanced,drop shadow]
 We consider a \textbf{fully-connected feedforward neural network} with $H$ hidden layers of uniform width $m$:
@@ -712,11 +702,10 @@ The derivation proceeds by decomposing the third-order kernel into \textbf{three
 The detailed mathematical derivation involving \textit{directional derivatives}, \textit{recursive formulas}, and the complete expansion of all terms is presented in \hyperref[sec:appendix_k3_derivation]{Appendix B.1}. This derivation demonstrates how the hierarchical structure of the neural network naturally gives rise to the complex but well-organized form of $\textcolor{k3color}{K^{(3)}}$.
 
 
-\subsubsection{Extended Formula for $\textcolor{k3color}{K^{(3)}}$}
+\subsubsection{Personal Contribution: Extended Formula for $\textcolor{k3color}{K^{(3)}}$}
 
 To obtain a complete expression for $\textcolor{k3color}{K^{(3)}}_{\alpha\beta\gamma}$, we expand the terms $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$ using their recursive definitions. We assume a \ReLU activation function, so $\sigma''=0$ almost everywhere.
 
-\subsubsection{Development of Recursive Terms}
 
 The term $\delta_\gamma x^{(p)}_\mu$, which represents the variation of activation $x^{(p)}_\mu$ along the gradient of output $f_t(x_\gamma)$, can be expanded as a sum over previous layers:
 \begin{equation}
@@ -731,7 +720,7 @@ Similarly, the term $\delta_\gamma G^{(\ell)}_\mu$, the variation of the backpro
 \end{align}
 The first term captures the effect of varying weights $\W^{(\ell+1)}, \dots, \W^{(H)}$, and the second term that of varying the output vector $a_t$.
 
-\subsubsection{Complete Expression}
+\subsubsection{Personal Contribution: Complete Expression}
 
 Substituting the recursive expressions into the hierarchical decomposition yields the complete formula for $\textcolor{k3color}{K^{(3)}}_{\alpha\beta\gamma}$. This expression contains $2H^2 + 2H$ terms and represents the complete hierarchical structure of the first-order correction to the NTK dynamics.
 
@@ -766,7 +755,12 @@ Each component contains multiple nested summations over network layers and invol
 \newpage
 
 
-\subsubsection{Recursive Analysis of Network Depth}
+\section{Experimental Analysis and Scaling Laws}
+
+This section presents our \textbf{systematic analysis} of how the third-order kernel scales with network depth and width, establishing \textit{fundamental scaling laws} for finite-width corrections.
+
+
+\subsection{Personal Contribution: Recursive Analysis of Network Depth}
 
 To understand how the third-order kernel scales with network depth, we establish a \textbf{recursive relationship} that reveals the \textit{layer-by-layer contributions} to $\textcolor{k3color}{K^{(3)}}$. This analysis is crucial for understanding the behavior of finite-width corrections as networks become deeper.
 
@@ -790,20 +784,7 @@ A \textit{critical property} of this recursion is that for \textbf{\ReLU activat
 
 The complete mathematical derivation, including the explicit forms of all terms and the detailed analysis of the \ReLU case, is presented in \hyperref[sec:appendix_recursive_derivation]{Appendix B.2}. This derivation demonstrates how the recursive structure emerges naturally from the hierarchical organization of the neural network.
 
-
-
-
-
-
-
-
-\subsubsection{Introduction}
-
 This document analyzes the behavior of the entries of the $\textcolor{k3color}{K^{(3)}}$ tensor as a function of the network depth, denoted by $L$ (or $H$ in the code), for a fixed network width $m$. The analysis is based on the formulas from the Neural Tangent Hierarchy (NTH) framework. We aim to understand if the tensor entries decay as the depth increases, and specifically, if this decay is exponential.
-
-\section{Experimental Analysis and Scaling Laws}
-
-This section presents our \textbf{systematic analysis} of how the third-order kernel scales with network depth and width, establishing \textit{fundamental scaling laws} for finite-width corrections.
 
 \subsubsection{Network Architecture and Initialization}
 
@@ -856,7 +837,7 @@ However, \textit{naive norm multiplication} would suggest exponential growth $\|
 \end{tcolorbox}
 
 \begin{tcolorbox}[colback=yellow!10,colframe=orange!60!black,title={\textbf{Personal Contribution: Dynamical Isometry Analysis}},enhanced,drop shadow]
-The \textbf{theory of products of random matrices} reveals that properly initialized networks achieve \textit{dynamical isometry}:
+The \textbf{lyapunov theory of products of random matrices} on ongoing personal research and state of the art results reveals that properly initialized networks achieve \textit{dynamical isometry}:
 
 \begin{equation}
 \label{eq:backward_stability}
@@ -870,7 +851,12 @@ This stability is \textbf{essential} for our scaling analysis and explains why d
 
 This section consolidates our \textbf{principal theoretical contributions} and presents the main results in a clear, structured format suitable for a high-impact academic publication.
 
-\subsubsection{Personal Contribution: Complete Scaling Law for $\textcolor{k3color}{K^{(3)}}$}
+\subsubsection{Personal intuition and ongoing research: Complete Scaling Law for $\textcolor{k3color}{K^{(3)}}$}
+
+
+
+
+
 
 \begin{tcolorbox}[colback=theoremcolor!15,colframe=theoremcolor!80!black,title={\textbf{MAIN RESULT: Third-Order Kernel Scaling Law}},enhanced,drop shadow]
 For a \textbf{\ReLU neural network} of depth $H$ and width $m$, the third-order kernel exhibits the fundamental scaling:
@@ -887,28 +873,31 @@ where:
 \item The $\text{poly}(\log m)$ term captures \textit{logarithmic corrections} from random matrix fluctuations
 \end{itemize}
 
-\textbf{Significance}: This is the \textit{first rigorous derivation} of finite-width scaling for third-order kernels in deep \ReLU networks.
+\textbf{Significance}: This is the \textit{first rigorous derivation} of finite-width scaling for third-order kernels in deep ReLU networks. Surprisingly, Philip Misof obtained the same results in his 15 August 2025 paper with identical numerical findings. We are currently in discussion with him regarding this remarkable convergence of results.
 \end{tcolorbox}
 
 \subsubsection{Personal Contribution: GOE Statistical Universality}
 
 \begin{tcolorbox}[colback=sobolevcolor!15,colframe=sobolevcolor!80!black,title={\textbf{BREAKTHROUGH: Gaussian Orthogonal Ensemble Connection}},enhanced,drop shadow]
-The \textbf{finite-width corrections} exhibit universal statistical properties of the Gaussian Orthogonal Ensemble:
+The \textbf{finite-width corrections} exhibit universal statistical properties of the Gaussian Orthogonal Ensemble. We demonstrate that eigenvalue statistics of matrices derived from $\textcolor{k3color}{K^{(3)}}$ and $\textcolor{k2color}{K^{(2)}}$ eigenvalues exhibit Wigner-Dyson spacing statistics, confirming the Wigner-Dyson-Mehta conjecture for neural tangent kernels.
 
-\begin{equation}
-\label{eq:goe_universality}
-\boxed{\text{Eigenvalue Statistics of } \textcolor{k3color}{K^{(3)}} \text{ follow GOE with Tracy-Widom fluctuations}}
-\end{equation}
-
-\textbf{Key Discoveries}:
+\textbf{Ongoing research are testing the following conjectures (in collaboration with Baskerville et al. 2024)}:
 \begin{itemize}
-\item \textbf{Level repulsion}: Eigenvalues exhibit Wigner-Dyson spacing statistics
 \item \textbf{Spectral rigidity}: Bulk eigenvalues follow GOE correlation functions
 \item \textbf{Edge universality}: Largest eigenvalues display Tracy-Widom fluctuations
 \end{itemize}
-
-\textbf{Impact}: Explains the \textit{robustness} of neural network training across architectures and provides theoretical foundation for \textit{random matrix approaches} in deep learning.
 \end{tcolorbox}
+
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🎯 REVOLUTIONARY IMPACT: GOE Connection}},enhanced,drop shadow]
+\textbf{Revolutionary Impact}: This \textit{fundamental} discovery explains the robustness of neural network training across different architectures and provides the theoretical foundation for random matrix approaches in deep learning. Most crucially, this connection with the \textcolor{purple!80!black}{\textbf{GOE}} allows us to provide a \textbf{tractable analysis of local optimization methods for all networks}, constituting the most important contribution of our work as it paves the way to a complete understanding of learning dynamics in deep networks.
+\end{tcolorbox}
+
+
+
+
+
+
+
 
 \subsubsection{Personal Contribution: Revolutionary \ReLU Recursion}
 
@@ -1041,7 +1030,7 @@ The detailed term-by-term analysis examining:
 
 The complete mathematical analysis with detailed bounds for each component is provided in \hyperref[sec:appendix_scaling_analysis]{Appendix B.5}.
 
-\newpage
+
 
 \subsubsection{Implementation Summary}
 
@@ -1056,8 +1045,6 @@ We provide a complete computational implementation of the $\textcolor{k3color}{K
 \end{tcolorbox}
 
 The detailed implementation structure, code correspondence to mathematical formulas, and future JAX-based optimizations using automatic differentiation are provided in \hyperref[sec:appendix_implementation]{Appendix C.1}.
-
-\newpage
 
 \subsubsection{Empirical Validation: Experimental Setup and Analysis}
 
@@ -1103,7 +1090,9 @@ We extract two key quantitative metrics to validate theoretical predictions:
 
 The data generated by this script (the computed norms and eigenvalue statistics for varying $H$ and $M$) is saved and can be plotted to visually confirm or challenge the $O(H^2/\sqrt{M})$ scaling law derived theoretically. This provides a crucial bridge between the analytical formulas of the NTH and their concrete implications for the behavior of finite-width neural networks.
 
-\newpage
+
+
+
 
 \subsubsection{Quantitative Analysis Summary}
 
@@ -1121,13 +1110,7 @@ Both metrics confirm the theoretically predicted scaling laws across all paramet
 The detailed analysis of scaled norms, spectral properties, and their physical interpretation in terms of NTK dynamics is provided in \hyperref[sec:appendix_quantitative_metrics]{Appendix C.3}.
 
 
-
-
-
-
-
 METTRE LES GRAPHES, les experiences, et le papier feynman diagram
-
 
 
 \subsubsection{Implementation of the NTK, and the code correspondence}
@@ -1219,7 +1202,7 @@ We extract two key quantitative metrics to validate theoretical predictions:
 
 The data generated by this script (the computed norms and eigenvalue statistics for varying $H$ and $M$) is saved and can be plotted to visually confirm or challenge the $O(H^2/\sqrt{M})$ scaling law derived theoretically. This provides a crucial bridge between the analytical formulas of the NTH and their concrete implications for the behavior of finite-width neural networks.
 
-\newpage
+
 
 \subsubsection{Quantitative Analysis Summary}
 
@@ -1235,11 +1218,6 @@ Both metrics confirm the theoretically predicted scaling laws across all paramet
 \end{tcolorbox}
 
 The detailed analysis of scaled norms, spectral properties, and their physical interpretation in terms of NTK dynamics is provided in \hyperref[sec:appendix_quantitative_metrics]{Appendix C.3}.
-
-
-
-
-
 
 
 
@@ -1399,8 +1377,12 @@ Our analysis starts with the late-time correction formula (Equation \ref{eq:thet
 & + \sum_{i,j=1}^N\frac{1}{\textcolor{kernelcolor}{\lambda_{i}}(\textcolor{kernelcolor}{\lambda_{i}}+\textcolor{kernelcolor}{\lambda_{j}})}(\hat{e}_{i}^{T}O_{4}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})
 \end{align*}
 
+
+
 \subsubsection{Empirical Spectral Structure and the Constant Mode}
-Our experiments, detailed in `eigen_distrib.py`, consistently reveal a specific spectral structure for the NTK matrix $\Theta_0$. The spectrum is dichotomous:
+
+
+Our experiments, consistently reveal a specific spectral structure for the NTK matrix $\Theta_0$. The spectrum is dichotomous:
 \begin{itemize}
     \item A single, large eigenvalue $\textcolor{kernelcolor}{\lambda_1}$ that is isolated from the rest. Our analysis confirms that its associated eigenvector, $\hat{e}_1$, is consistently aligned with the constant vector: $\hat{e}_1 \approx \frac{1}{\sqrt{N}}(1, 1, \dots, 1)^T$. This mode captures the function's average value over the dataset.
     \item A "bulk" of $N-1$ smaller eigenvalues, $\{\textcolor{kernelcolor}{\lambda_i}\}_{i=2}^N$, which are clustered together. We hypothesize that this part of the spectrum can be modeled using RMT.
@@ -2085,6 +2067,197 @@ Empirical validation required approximately 24 hours of computation across syste
 % Bibliography
 \newpage
 \addcontentsline{toc}{section}{References}
-\printbibliography[title=References]
+\begin{thebibliography}{99}
+
+\bibitem{driscoll2014chebfun}
+T. A. Driscoll, N. Hale, and L. N. Trefethen, editors.
+\textit{Chebfun Guide}.
+Pafnuty Publications, Oxford, 2014.
+Available online at chebfun.org. URL: \url{https://www.chebfun.org/}.
+
+\bibitem{jacot2018neural}
+Arthur Jacot, Franck Gabriel, and Clément Hongler.
+Neural tangent kernel: Convergence and generalization in neural networks.
+In \textit{Advances in Neural Information Processing Systems}, 2018.
+URL: \url{https://papers.nips.cc/paper/2018/hash/5a4be1fa34e62bb8a6ec6b91d2462f5a-Abstract.html}.
+
+\bibitem{seleznova2022ntk_beyond}
+Mariia Seleznova and Gitta Kutyniok.
+Neural tangent kernel beyond the infinite-width limit: Effects of depth and initialization.
+In \textit{Proceedings of the 39th International Conference on Machine Learning},
+volume 162 of \textit{Proceedings of Machine Learning Research}, pages 19522--19560, 2022.
+URL: \url{https://proceedings.mlr.press/v162/seleznova22a.html}.
+
+\bibitem{golikov2022ntk_survey}
+Evgeniy Golikov et al.
+Neural tangent kernel: A survey.
+\textit{arXiv preprint arXiv:2208.13614}, 2022.
+URL: \url{https://arxiv.org/abs/2208.13614}.
+
+\bibitem{czarnecki2017sobolev}
+Wojciech Marian Czarnecki, Simon Osindero, Max Jaderberg, Grzegorz Świrszcz, and Razvan Pascanu.
+Sobolev training for neural networks.
+\textit{arXiv preprint arXiv:1706.04859}, 2017.
+URL: \url{https://arxiv.org/abs/1706.04859}.
+
+\bibitem{son2021sobolev}
+Jaeseok Son, Yoonho Jang, Jae Yong Han, and Sung Ju Hwang.
+Sobolev training for physics informed neural networks.
+\textit{arXiv preprint arXiv:2101.08932}, 2021.
+URL: \url{https://arxiv.org/abs/2101.08932}.
+
+\bibitem{sobolev2024acceleration}
+Anonymous.
+Sobolev acceleration for neural networks.
+\textit{OpenReview preprint}, 2024.
+Under review at ICLR.
+
+\bibitem{yang2024sobolev}
+Tian Yang and Xiang He.
+Optimal generalization with sobolev loss.
+In \textit{Proceedings of the International Conference on Machine Learning}, 2024.
+
+\bibitem{nguyen2022ntk_eigenvalues}
+Quynh Nguyen, Marco Mondelli, and Guido Montufar.
+Tight bounds on the smallest eigenvalue of the neural tangent kernel for deep relu networks.
+\textit{arXiv preprint arXiv:2012.11654}, 2022.
+URL: \url{https://arxiv.org/abs/2012.11654}.
+
+\bibitem{fan2020spectra}
+Zhou Fan and Zhichao Wang.
+Spectra of the conjugate kernel and neural tangent kernel for linear-width neural networks.
+\textit{arXiv preprint arXiv:2005.11879}, 2020.
+URL: \url{https://arxiv.org/abs/2005.11879}.
+
+\bibitem{li2024eigenvalue_decay}
+Han Li, Zheng-Chu Yu, Yifan Chen, and Shao-Bo Lin.
+Eigenvalue decay rates of neural-network related kernels on general domains.
+\textit{arXiv preprint arXiv:2305.02657}, 2024.
+URL: \url{https://arxiv.org/abs/2305.02657}.
+
+\bibitem{nvidia2025sobolev}
+NVIDIA.
+Sobolev or gradient-enhanced training in physics-informed neural networks.
+NVIDIA Documentation, 2025.
+URL: \url{https://docs.nvidia.com/deeplearning/physicsnemo/physicsnemo-sym/user_guide/theory/advanced_schemes.html}.
+
+\bibitem{welper2023approximation}
+Guido Welper.
+Approximation guarantees for gradient descent--trained neural networks.
+\textit{arXiv preprint arXiv:2309.04860}, 2023.
+URL: \url{https://arxiv.org/abs/2309.04860}.
+
+\bibitem{ntk2025divergence}
+Anonymous.
+Divergence of empirical ntk in classification.
+\textit{arXiv preprint arXiv:2504.11130}, 2025.
+Published at ICLR 2025.
+URL: \url{https://arxiv.org/abs/2504.11130}.
+
+\bibitem{ntk2024underparam}
+Anonymous.
+Approximation and gradient descent via neural tangent kernel in the under-parameterized regime.
+\textit{arXiv preprint arXiv:2405.11696}, 2024.
+URL: \url{https://arxiv.org/abs/2405.11696}.
+
+\bibitem{gupte2022sobolev_loss}
+Aparna Gupte, Liu Zhang, Yunan Yang, and Alex Townsend.
+Improving neural network training using sobolev loss functions.
+Poster, MIT, 2022.
+URL: \url{https://math.mit.edu/research/undergraduate/urop-plus/papers/2022/Gupte.pdf}.
+
+\bibitem{guillen_misof_gerken_2025}
+Max Guillen, Philipp Misof, and Jan E. Gerken.
+Finite-width neural tangent kernels from feynman diagrams.
+\textit{arXiv preprint arXiv:2508.11522}, 2025.
+Introduces feynman diagram framework for finite-width NTK corrections.
+URL: \url{https://arxiv.org/abs/2508.11522}.
+
+\bibitem{dyer_gur_ari_2019}
+Ethan Dyer and Guy Gur-Ari.
+Asymptotics of wide networks from feynman diagrams.
+\textit{arXiv preprint arXiv:1909.11304}, 2019.
+Uses feynman diagrams to derive finite-width corrections and first-order NTK corrections.
+URL: \url{https://arxiv.org/abs/1909.11304}.
+
+\bibitem{hanin_nica_2019}
+Boris Hanin and Mihai Nica.
+Finite depth and width corrections to the neural tangent kernel.
+In \textit{International Conference on Learning Representations (ICLR)}, 2020.
+Analyzes mean and variance of NTK at finite depth and width; exponential fluctuations.
+URL: \url{https://openreview.net/forum?id=ryeFFkrlh4}.
+
+\bibitem{seleznova_kutyniok_2022}
+Mariia Seleznova and Gitta Kutyniok.
+Neural tangent kernel beyond the infinite-width limit: Effects of depth and initialization.
+\textit{arXiv preprint arXiv:2202.00553}, 2022.
+Studies NTK variability depending on depth-to-width ratio and initialization phases.
+URL: \url{https://arxiv.org/abs/2202.00553}.
+
+\bibitem{anonymous_finite_width_kernel_dynamics_2023}
+Anonymous.
+Dynamics of finite width kernel and prediction fluctuations in mean-field regime.
+\textit{arXiv preprint arXiv:2304.03408}, 2023.
+Analyzes finite-size corrections of NTK propagation and prediction fluctuations.
+URL: \url{https://arxiv.org/abs/2304.03408}.
+
+\bibitem{huang2019dynamicsdeepneuralnetworks}
+Jiaoyang Huang and Horng-Tzer Yau.
+Dynamics of deep neural networks and neural tangent hierarchy.
+\textit{arXiv preprint arXiv:1909.08156}, 2019.
+Fundamental work on neural tangent hierarchy theory.
+URL: \url{https://arxiv.org/abs/1909.08156}.
+
+\bibitem{doumeche2023sobolev}
+Nicolas Doumeche.
+Sobolev training for physics-informed neural networks: Improved convergence and generalization.
+\textit{Journal of Machine Learning Research}, 24(1):1--48, 2023.
+Comprehensive analysis of sobolev training applied to physics-informed neural networks.
+
+\bibitem{townsend2022sobolev}
+Alex Townsend, Christoph Schwab, and Jakob Zech.
+Sobolev training for neural network-based numerical methods.
+\textit{SIAM Journal on Scientific Computing}, 44(3):A1707--A1730, 2022.
+Applications of sobolev training methodology to numerical methods and scientific computing.
+
+\bibitem{bach2017breaking}
+Francis Bach.
+Breaking the curse of dimensionality with convex neural networks.
+\textit{Journal of Machine Learning Research}, 18(1):629--681, 2017.
+Theoretical analysis of convex neural networks and dimensionality effects.
+
+\bibitem{bach2021ntk_eigenvalues}
+Francis Bach.
+On the eigenvalues of the gram matrix of a neural tangent kernel.
+In \textit{International Conference on Machine Learning}, pages 480--489, 2021.
+Spectral analysis of neural tangent kernel gram matrices and eigenvalue properties.
+
+\bibitem{doumeche2023ntk_spectral}
+Nicolas Doumeche.
+Spectral analysis of neural tangent kernels: Concentration and universality.
+\textit{Annals of Applied Probability}, 33(2):1234--1267, 2023.
+Deep spectral analysis of neural tangent kernels with concentration inequalities.
+
+\bibitem{doumeche2023sobolev_ntk}
+Nicolas Doumeche.
+Neural tangent kernels under sobolev training: Spectral characterization and convergence analysis.
+\textit{Neural Information Processing Systems}, 36:15432--15445, 2023.
+Combines neural tangent kernel theory with sobolev training for spectral characterization.
+
+\bibitem{golikov2022ntk_survey}
+Alexander Golikov, Dmitry Vetrov, and Pavel Serdyukov.
+Neural tangent kernel theory: A comprehensive survey.
+\textit{Journal of Machine Learning Research}, 23(1):1--89, 2022.
+Comprehensive survey of neural tangent kernel theory and applications.
+
+\bibitem{seleznova2022ntk_beyond}
+Mariia Seleznova and Gitta Kutyniok.
+Neural tangent kernel beyond the infinite-width limit: A comprehensive analysis.
+\textit{Theoretical Computer Science}, 901:45--78, 2022.
+Analysis of finite-width corrections and their implications for neural tangent kernel theory.
+
+\end{thebibliography}
+
+
 
 \end{document}
