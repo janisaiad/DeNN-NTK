@@ -426,26 +426,25 @@ publicly available following the defense presentation.
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
-$\mathbb{R}$ & Set of real numbers & $\mathbb{N}$ & Set of natural numbers \\
-$\mathbb{C}$ & Set of complex numbers & $\mathbb{S}^{d-1}$ & Unit sphere of dimension $d-1$ \\
+$\textcolor{darkyellow}{\mathbb{R}}$ & Set of real numbers & $\textcolor{red}{\mathbb{N}}$ & Set of natural numbers \\
+$\textcolor{green}{\mathbb{C}}$ & Set of complex numbers & $\textcolor{darkyellow}{\mathbb{S}}^{d-1}$ & Unit sphere of dimension $d-1$ \\
 $\E_{\cdot}[\cdot]$ & Mathematical expectation & $\Var(\cdot)$ & Variance of a random variable \\
-$\Cov(\cdot,\cdot)$ & Covariance between two variables & $\indic\{\cdot\}$ & Indicator function \\
+${\Cov}(\cdot,\cdot)$ & Covariance between two variables & $\indic\{\cdot\}$ & Indicator function \\
 $\dd x$ & Differential element & $\|\cdot\|$ & Euclidean norm \\
 $\langle \cdot,\cdot \rangle$ & Inner product & $\mathcal{O}(\cdot)$ and $\tilde{\Omega}(\cdot)$  & Landau notation \\
 \bottomrule
 \end{longtable}
-
 \subsubsection*{Neural Network and Activation Functions}
 \begin{longtable}{p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}}
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
-$\ReLU$ & Activation function & $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})$ & Neural network function \\
-$\sigma_{\cdot}$ & General variance denomination & $L$ & Number of layers \\
+$\ReLU$ & Activation function & $f(\mathbf{x}; \boldsymbol{\textcolor{brown}{\theta}})$ & Neural network function \\
+$\textcolor{blue}{\sigma}_{\cdot}$ & General variance denomination & $L$ & Number of layers \\
 $n_k$ & Width of layer $k$ & $x^{(\ell)}$ & Output of layer $\ell$ \\
 $\W^{(\ell)}$ & Weight matrix of layer $\ell$ & $x^{(0)} = x$ & Network input \\
-$a \in \mathbb{R}^m$ & Output layer weights & $\theta$ & Set of all trainable parameters \\
-$\sigma'_\ell(x)$ & Diagonal derivative matrix & $G^{(\ell)}_\mu$ & Backpropagated gradient to layer $\ell$ \\
+$a \in \mathbb{R}^m$ & Output layer weights & $\textcolor{brown}{\theta}$ & Set of all trainable parameters \\
+$\ReLU'_\ell(x)$ & Diagonal derivative matrix & $G^{(\ell)}_\mu$ & Backpropagated gradient to layer $\ell$ \\
 $m$ & Network width & $H$ & Number of hidden layers \\
 $\delta_\gamma(\cdot)$ & Directional derivative operator & & \\
 \bottomrule
@@ -457,9 +456,9 @@ $\delta_\gamma(\cdot)$ & Directional derivative operator & & \\
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
 $\textcolor{red}{\mathbf{K}}$ & Discrete NTK matrix & $\textcolor{red}{K^{\infty}}$ & Infinite-width NTK operator \\
-$K^{L}(\mathbf{x}_i, \mathbf{x}_j)$ & NTK for $L$-layer network & $\mu_\ell^{(\textcolor{red}{K})}$ & NTK eigenvalues at degree $\ell$ \\
-$\varrho(\rho)$ & Correlation propagation function & $\rho_1(\mathbf{x},\mathbf{x}')$ & Initial correlation \\
-$\textcolor{k3color}{K^{(3)}}$ & Third-order kernel & $\textcolor{kernelcolor}{K}^{(r)}_t$ & $r$-th order kernel \\
+$\textcolor{red}{K}^{L}(\mathbf{x}_i, \mathbf{x}_j)$ & NTK for $L$-layer network & $\mu_\ell^{(\textcolor{red}{K})}$ & NTK eigenvalues at degree $\ell$ \\
+$\varrho(\textcolor{pink}{\rho})$ & Correlation propagation function & $\textcolor{pink}{\rho}_1(\mathbf{x},\mathbf{x}')$ & Initial correlation \\
+$\textcolor{red}{K^{(3)}}$ & Third-order kernel & $\textcolor{red}{K}^{(r)}_t$ & $r$-th order kernel time depending \\
 \bottomrule
 \end{longtable}
 
@@ -473,8 +472,8 @@ $\textcolor{k3color}{K^{(3)}}$ & Third-order kernel & $\textcolor{kernelcolor}{K
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
-$H^s(\Omega)$ & Sobolev space of order $s$ & $\textcolor{sobolevcolor}{\mathbf{P}}_s$ & Discrete Sobolev operator matrix \\
-$P_s$ & Continuous Sobolev operator & $\mathcal{L}_{\text{Sobolev}}(f)$ & Sobolev training loss function \\
+$H^s(\Omega)$ & Sobolev space of order $s$ & $\textcolor{blue}{\mathbf{P}}_s$ & Discrete Sobolev operator matrix \\
+$\textcolor{blue}{P}_s$ & Continuous Sobolev operator & $\mathcal{L}_{\text{Sobolev}}(f)$ & Sobolev training loss function \\
 $D^k$ & $k$-th derivative operator & $\|f\|_{H^s}$ & Sobolev norm of order $s$ \\
 $(I + (-\Delta)^{1/2})^s$ & Fractional Laplacian operator & $\Delta_{\mathbb{S}^{d-1}}$ & Laplace-Beltrami operator \\
 \bottomrule
@@ -500,7 +499,7 @@ $p$ & Order index & $\nabla$ & Gradient operator \\
 $\lambda_\ell$ & Eigenvalues at degree $\ell$ & $\lambda_{\min}(A)$ & Minimum eigenvalue \\
 $\lambda_{\max}(A)$ & Maximum eigenvalue & $\mu_\ell^{(P_s)}$ & Sobolev eigenvalues \\
 $C(d,L)$ & Constants depending on $d,L$ & $\Gamma(\cdot)$ & Gamma function \\
-$P_\ell^{(\alpha)}(t)$ & Gegenbauer polynomials & $\tilde{\textcolor{red}{K}}_L^{\infty}(t)$ & Normalized NTK function \\
+$P_\ell^{(\alpha)}(t)$ & Gegenbauer polynomials & $\tilde{\textcolor{red}{K}}_L^{\infty}(\textcolor{pink}{\rho})$ & Normalized NTK zonal function \\
 \bottomrule
 \end{longtable}
 
@@ -516,8 +515,8 @@ $\eta$ & Learning rate & $f_t(x)$ & Network at time $t$ \\
 $y_i$ & Target output & $\textcolor{red}{n}$ & Number of samples \\
 $d$ & Input dimension & $s$ & Sobolev order \\
 $T_{H+1}$ & New layer contribution & $C_{H+1}$ & Correction term \\
-$a'_t$ & Effective output vector & $\text{vec}(\cdot)$ & Vectorization operator \\
-$\mathcal{P}_\ell$ & Propagation operator & $\rho$ & Spectral radius \\
+$\textcolor{blue}{\mathbf{a}}'_t$ & Effective output vector & $\text{vec}(\cdot)$ & Vectorization operator \\
+$\mathcal{P}_\ell$ & Propagation operator & $\textcolor{orange}{\rho}$ & Spectral radius \\
 \bottomrule
 \end{longtable}
 
@@ -555,7 +554,7 @@ The \textit{NTK scaling} $1/\sqrt{\m}$ ensures proper initialization and infinit
 \subsubsection{The Neural Tangent Kernel Framework}
 
 \begin{tcolorbox}[colback=kernelcolor!5,colframe=kernelcolor!50!black,title={\textbf{Second-Order Kernel Definition}},enhanced,drop shadow]
-The \textbf{Neural Tangent Kernel} governs the continuous-time training dynamics:
+The \textbf{Neural Tangent Kernel} governs the continuous-time least squares regression dynamics:
 
 \begin{equation}
 \label{eq:ntk_dynamics}
