@@ -337,6 +337,23 @@ Notre \textbf{analyse spectrale} couvre les \textcolor{gray}{\textbf{réseaux en
 La validation expérimentale confirme nos prédictions théoriques à travers toutes les architectures. Un code entièrement reproductible est disponible sur \href{https://github.com/janisaiad/DeNN-NTK}{github.com/janisaiad/DeNN-NTK} et \href{https://github.com/janisaiad/MMN}{github.com/janisaiad/MMN}.
 \newpage
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \addcontentsline{toc}{section}{Introduction}
 \section*{Introduction}
 The study of learning dynamics in deep neural networks constitutes a fundamental research area. Our approach focuses on the desingularization of Sobolev training by decomposing the problem into two distinct contributions: an independent neural tangent kernel (NTK) and a Sobolev contribution. This decomposition relies on the commutation between integral operators and the fractional Laplace operator.
@@ -355,21 +372,88 @@ Our contribution to physics-informed deep learning theory applies techniques fro
 
 Extensive experimental validation across feed-forward networks, Multi-Layer Multi-component networks, and transformers confirms our theoretical predictions while revealing phenomena that merit further investigation at the intersection of deep learning and mathematical physics.
 
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[
+        node distance=1.7cm and 2.5cm,
+        every node/.style={font=\small, align=center},
+        main/.style={rectangle, rounded corners, draw=red!70!black, fill=red!10, thick, minimum width=3.5cm, minimum height=1.2cm},
+        block/.style={rectangle, rounded corners, draw=blue!70!black, fill=blue!10, thick, minimum width=3.2cm, minimum height=1.1cm},
+        subblock/.style={rectangle, rounded corners, draw=orange!80!black, fill=orange!10, thick, minimum width=2.7cm, minimum height=1cm},
+        precond/.style={rectangle, rounded corners, draw=purple!80!black, fill=purple!10, thick, minimum width=2.7cm, minimum height=1cm},
+        result/.style={rectangle, rounded corners, draw=green!60!black, fill=green!10, thick, minimum width=3.5cm, minimum height=1.2cm},
+        result2/.style={rectangle, rounded corners, draw=green!80!black, fill=green!15, thick, minimum width=3.5cm, minimum height=1.2cm},
+        arrow/.style={->, thick, >=latex}
+    ]
+    % Central Problem
+    \node[main] (problem) {\textbf{Central Problem:} \\ Understanding optimization and learning dynamics \\ in deep neural networks \\ via NTK theory for optimal architecture design};
 
+    % Methodology
+    \node[block, below=of problem] (method) {\textbf{Methodology:} \\ NTK/Sobolev decomposition \\ + Mathematical physics tools \\ (statistical physics, random matrices, QFT)};
 
+    % Optimal Sampling
+    \node[subblock, below left=1.2cm and 2.5cm of method] (sampling) {\textbf{Optimal Sampling} \\ (Chebyshev points) \\ $\rightarrow$ exact commutation};
 
-\newpage
+    % Finite-width Correction
+    \node[subblock, below right=1.2cm and 2.5cm of method] (correction) {\textbf{Finite-width Correction} \\ (NTK corrections, \\ tensor hierarchy, $K^{(3)}$, $K^{(4)}$)};
 
+    % Preconditioning
+    \node[precond, below=of method, yshift=-0.7cm, xshift=0cm] (precond) {\textbf{Preconditioning} \\ (MMNN, Transformers) \\ \textcolor{purple}{\textbf{Does MMNN/Transformer preconditioning work?}} \\ \textcolor{purple}{\textbf{See Section~\ref{sec:precond} and reportpart2.tex}}};
 
+    % Studied Architectures
+    \node[subblock, below=of precond, yshift=-0.7cm] (archi) {\textbf{Studied Architectures} \\ FCNN, MMNN, Transformers};
 
+    % Main Results - 1: Eigenvalue bounds and optimal design
+    \node[result, below=of archi, yshift=-1.2cm, xshift=-2.2cm] (results1) {\textbf{Main Results (1):} \\ \textbf{Explicit eigenvalue bounds for NTK} \\ \textbf{Answer to optimal architecture design}};
 
+    % Main Results - 2: Experimental validation
+    \node[result2, below=of archi, yshift=-1.2cm, xshift=2.2cm] (results2) {\textbf{Main Results (2):} \\ \textbf{Experimental validation} \\ (all architectures, predictions confirmed)};
 
+    % Conclusion
+    \node[main, below=of results1, yshift=-0.5cm, xshift=2.2cm] (conclu) {\textbf{Conclusion:} \\ New fundamental laws for deep network optimization, \\ bridge between deep learning and mathematical physics};
 
-\newpage
-\addcontentsline{toc}{section}{Acknowledgements and Scope}
-\section*{Acknowledgements and Scope}
+    % Spectral analysis and physics now go to main results
+    % Spectral analysis
+    \node[block, left=1.7cm of results1, yshift=0.7cm] (spectral) {\textbf{Spectral Analysis} \\ NTK eigenvalue bounds \\ Gradient descent convergence};
 
+    % Physics perspective
+    \node[subblock, right=1.7cm of results1, yshift=0.7cm] (physics) {\textbf{Physics Perspective} \\ (random matrices, QFT, \\ renormalization, Feynman diagrams)};
 
+    % Arrows
+    \draw[arrow] (problem) -- (method);
+    \draw[arrow] (method) -- (sampling);
+    \draw[arrow] (method) -- (correction);
+    \draw[arrow] (method) -- (precond);
+    \draw[arrow] (sampling) -- (archi);
+    \draw[arrow] (correction) -- (archi);
+    \draw[arrow] (precond) -- (archi);
+    \draw[arrow] (archi) -- (results1);
+    \draw[arrow] (archi) -- (results2);
+    \draw[arrow] (spectral) -- (results1);
+    \draw[arrow] (physics) -- (results1);
+    \draw[arrow] (spectral) -- (results2);
+    \draw[arrow] (physics) -- (results2);
+    \draw[arrow] (results1) -- (conclu);
+    \draw[arrow] (results2) -- (conclu);
+
+    % Highlights
+    \node[draw=none, fill=none, below=0.2cm of conclu, font=\footnotesize\color{gray}] (caption) {Figure~\ref{fig:strategy-report}: Schematic overview of the report's strategy. The preconditioning node (purple) highlights our investigation of MMNN and Transformer preconditioning, as detailed in Section~\ref{sec:precond} and reportpart2.tex.};
+    \end{tikzpicture}
+    \caption{Global strategy of the report: from the central problem to the conclusion, through methodology, optimal sampling, finite-width corrections, preconditioning, and the main results (eigenvalue bounds, optimal design, and experimental validation).}
+    \label{fig:strategy-report}
+\end{figure}
+    \draw[arrow] (spectral) -- (physics);
+    \draw[arrow] (archi) -- (results);
+    \draw[arrow] (physics) -- (results);
+    \draw[arrow] (results) -- (conclu);
+
+    % Highlights
+    \node[draw=none, fill=none, below=0.2cm of conclu, font=\footnotesize\color{gray}] (caption) {Figure~\ref{fig:strategy-report}: Schematic overview of the report's strategy. The preconditioning node (purple) highlights our investigation of MMNN and Transformer preconditioning, as detailed in Section~\ref{sec:precond} and reportpart2.tex.};
+    \end{tikzpicture}
+    \caption{Global strategy of the report: from the central problem to the conclusion, through methodology, optimal sampling, finite-width corrections, preconditioning, spectral analysis, physics perspective, and experimental validation.}
+    \label{fig:strategy-report}
+\end{figure}
+\end{figure}
 I would like to thank all those who have helped and guided me during this research work.
 
 First, I want to thank my family for their constant support, help, and understanding during my studies. Their patience during long hours of research and their trust in my work have been very important.
@@ -555,7 +639,13 @@ The relative importance of finite-width corrections depends critically on the sc
 
 Most practical networks operate in the feature learning or rich regimes, making finite-width analysis essential for understanding real-world network behavior. The Neural Tangent Hierarchy provides a systematic framework to connect theoretical insights with practical observations across multiple aspects of network design and training. For initialization schemes, the hierarchy helps us understand how different weight initialization strategies affect the kernel spectrum and subsequent training dynamics. In learning rate optimization, spectral properties derived from the hierarchy enable prediction of optimal learning rates that balance convergence speed with stability. The framework also guides architecture design by providing quantitative tools to evaluate trade-offs between different network configurations.
 
-Consider the fundamental design question of whether to use a wide shallow network or a narrow deep network for a given computational budget. The NTK hierarchy provides quantitative guidance for this choice. Wide shallow networks exhibit dynamics where $\textcolor{kernelcolor}{K^{(2)}}$ dominates, resulting in limited feature learning capacity but stable, predictable training. Conversely, narrow deep networks show significant contributions from $\textcolor{k3color}{K^{(3)}}$ and $\textcolor{purple}{K^{(4)}}$, enabling rich feature learning but with more complex dynamics. The hierarchy quantifies this trade-off through the relative magnitudes of kernel corrections, providing design principles grounded in rigorous theory rather than empirical heuristics alone.
+\begin{tcolorbox}[colback=red!10,colframe=red!80!black,title={\textbf{An Architect's Choice: Depth or Width?}},enhanced,drop shadow]
+Imagine yourself as a neural network architect. Faced with a problem, you must choose: a deep and narrow network, or a wide and shallow one? This fundamental choice has never had a truly satisfying theoretical answer. Until now.\\
+
+The NTK hierarchy finally brings quantitative clarity to this dilemma. A wide, shallow network evolves under the dominance of the kernel $\textcolor{kernelcolor}{K^{(2)}}$: feature learning is limited, but the dynamics are stable and predictable. In contrast, a deep, narrow network involves significant contributions from the corrections $\textcolor{k3color}{K^{(3)}}$ and $\textcolor{purple}{K^{(4)}}$, enabling rich feature learning at the cost of more complex dynamics.\\
+
+The hierarchy allows us to precisely measure this trade-off, quantifying the relative importance of kernel corrections. This provides design principles grounded in theory, rather than relying solely on empirical intuition.
+\end{tcolorbox}
 
 \subsubsection{Interpretability Through Spectral Analysis}
 
@@ -1479,7 +1569,7 @@ The limitations of the direct approach highlighted the need for a more principle
 
 
 \newpage
-\subsubsection{An Unexpected Discovery: The Gaussian Orthogonal Ensemble in the NTK Spectrum}
+\section{An Unexpected Discovery: The Gaussian Orthogonal Ensemble in the NTK Spectrum}
 
 \begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{🚀 BREAKTHROUGH DISCOVERY: NTK-GOE Connection}},enhanced,drop shadow]
 In our quest to build a more accurate statistical model of the \textcolor{kernelcolor}{NTK} eigenvectors and eigenvalues, we performed detailed spectral statistics analysis.
@@ -1489,7 +1579,7 @@ In our quest to build a more accurate statistical model of the \textcolor{kernel
 \textbf{Result}: \textit{Truly remarkable} connection between infinite-width \textcolor{kernelcolor}{NTK} and \textcolor{purple!80!black}{\textbf{Random Matrix Theory}} cornerstone \cite{guillen_misof_gerken_2025,dyer_gur_ari_2019}.
 \end{tcolorbox}
 
-\subsubsection{A Primer on Random Matrix Theory and Spectral Statistics}
+\subsection{A Primer on Random Matrix Theory and Spectral Statistics}
 
 \begin{tcolorbox}[colback=yellow!10,colframe=yellow!60!black,title={\textbf{📖 DEFINITION: Random Matrix Theory Fundamentals}},enhanced,drop shadow]
 \textcolor{purple!80!black}{\textbf{Random Matrix Theory}} (\textcolor{purple!80!black}{\textbf{RMT}}) studies matrices whose entries are random variables. It predicts that statistical properties of eigenvalues of large random matrices are \textbf{universal}, depending only on ensemble symmetries.
@@ -1525,10 +1615,17 @@ For the \textcolor{purple!80!black}{\textbf{GOE}}, this distribution has the hig
 This distribution provides an \textbf{extremely sensitive fingerprint} for \textcolor{purple!80!black}{\textbf{GOE}} statistics. Crucially, this test is \textit{independent} of the local density of states, allowing it to probe fine-grained correlations and intrinsic spectrum structure.
 \end{tcolorbox}
 
-\subsubsection{The NTK Bulk Spectrum Obeys GOE Statistics}
+\subsection{The NTK Bulk Spectrum Obeys GOE Statistics}
 
 \begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{🏆 MAIN RESULT: Perfect GOE Match}},enhanced,drop shadow]
 Our numerical experiments show, \textbf{astonishingly}, that the distribution of consecutive eigenvalue spacing ratios for the $\textcolor{blue!80!black}{N-1}$ eigenvalues forming the \textbf{bulk} of the \textcolor{kernelcolor}{NTK} spectrum \textit{perfectly matches} the theoretical \textcolor{purple!80!black}{\textbf{GOE}} prediction.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/consecutive_spacing_ratio_dist_N64_D10_M20_L2.png}
+    \caption{Empirical distribution of the ratio of consecutive eigenvalue spacings in the bulk of the NTK, for $N=64$ points, dimension $D=10$, $M=20$ samples, and $L=2$ layers. The blue curve shows the numerically obtained histogram, while the red curve corresponds to the theoretical GOE prediction (see Equation~\eqref{eq:goe_ratio_dist}). This result confirms that the NTK, in this configuration, exhibits spacing statistics characteristic of the GOE, illustrating the strong level repulsion expected for real symmetric random matrices.}
+    \label{fig:goe_spacing_ratio_empirical}
+\end{figure}
+% I insère ici la figure demandée, en précisant la configuration expérimentale (nombre de points, dimension, nombre d'échantillons, profondeur du réseau) et en explicitant la correspondance entre l'histogramme empirique et la loi théorique du GOE.
 
 \textbf{Method}: Analysis performed after separating the single large, isolated eigenvalue (constant mode) \cite{seleznova_kutyniok_2022}.
 \end{tcolorbox}
