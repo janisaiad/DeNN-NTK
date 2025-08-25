@@ -126,3 +126,28 @@ intro avec images très générales, et declaration
 option, champ, directeurs, d'option et de stage, dates, nom de l'organisme
 
 
+concise, explain also that this exlpain that we can't achieve to train very deep networks, because under an optimization perspective the problem is ill conditionned with huge alpha
+
+
+put that : 
+\begin{figure}[h!]
+    \centering
+    % Placeholder for image
+    \caption{Characterization of the largest eigenvalue, showing its isolation from the rest of the spectrum.}
+    \label{fig:wk7_eig1}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    % Placeholder for image
+    \caption{Uniformity test for the bulk eigenvectors, confirming their quasi-random nature.}
+    \label{fig:wk7_uniformity}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    % Placeholder for image
+    \caption{Empirical spectral distribution of the NTK, illustrating the clear separation between the dominant eigenvalue and the bulk.}
+    \label{fig:wk7_spectrum_dist}
+\end{figure}
+
