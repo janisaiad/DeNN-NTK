@@ -369,8 +369,8 @@ $decomposing_k$ (MMNN) & Width of layer $k$ & $n_k$ (FCNN) & Width of layer $k$ 
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
-$\textcolor{kernelcolor}{\mathbf{K}}$ & Discrete NTK matrix & $\textcolor{kernelcolor}{K^{\infty}}$ & Infinite-width NTK operator \\
-$K^{L}(\mathbf{x}_i, \mathbf{x}_j)$ & NTK for $L$-layer network & $\mu_\ell^{(K)}$ & NTK eigenvalues at degree $\ell$ \\
+$\textcolor{red}{\mathbf{K}}$ & Discrete NTK matrix & $\textcolor{red}{K^{\infty}}$ & Infinite-width NTK operator \\
+$K^{L}(\mathbf{x}_i, \mathbf{x}_j)$ & NTK for $L$-layer network & $\mu_\ell^{(\textcolor{red}{K})}$ & NTK eigenvalues at degree $\ell$ \\
 $\varrho(\rho)$ & Correlation propagation function & $\rho_1(\mathbf{x},\mathbf{x}')$ & Initial correlation \\
 \bottomrule
 \end{longtable}
@@ -412,7 +412,7 @@ $p$ & Order index & $\nabla$ & Gradient operator \\
 $\lambda_\ell$ & Eigenvalues at degree $\ell$ & $\lambda_{\min}(A)$ & Minimum eigenvalue \\
 $\lambda_{\max}(A)$ & Maximum eigenvalue & $\mu_\ell^{(P_s)}$ & Sobolev eigenvalues \\
 $C(d,L)$ & Constants depending on $d,L$ & $\Gamma(\cdot)$ & Gamma function \\
-$P_\ell^{(\alpha)}(t)$ & Gegenbauer polynomials & $\tilde{K}_L^{\infty}(t)$ & Normalized NTK function \\
+$P_\ell^{(\alpha)}(t)$ & Gegenbauer polynomials & $\tilde{\textcolor{red}{K}}_L^{\infty}(t)$ & Normalized NTK function \\
 \bottomrule
 \end{longtable}
 
@@ -425,7 +425,7 @@ $A^T$ & Matrix transpose & $\|A\|_{op}$ & Operator norm \\
 $\|A\|_F$ & Frobenius norm & $A \circ B$ & Hadamard product \\
 $\mathcal{T}_s$ & Composite learning operator & $a_{\ell,p}$ & Sampling vectors \\
 $\eta$ & Learning rate & $f_t(x)$ & Network at time $t$ \\
-$y_i$ & Target output & $n$ & Number of samples \\
+$y_i$ & Target output & $\textcolor{red}{n}$ & Number of samples \\
 $d$ & Input dimension & $s$ & Sobolev order \\
 \bottomrule
 \end{longtable}
@@ -488,7 +488,7 @@ The Sobolev training loss has the following properties:
 
 For neural networks, this translates to augmenting the training data with derivative information:
 
-$$\mathcal{L}_{\text{discrete}}(f) = \sum_{i=1}^n \sum_{k=0}^s |D^k f(x_i) - D^k f^*(x_i)|^2$$
+$$\mathcal{L}_{\text{discrete}}(f) = \sum_{i=1}^{\textcolor{red}{n}} \sum_{k=0}^s |D^k f(x_i) - D^k f^*(x_i)|^2$$
 
 This framework provides a natural connection between neural network training and classical function approximation theory in Sobolev spaces.
 It's important to note that Sobolev training is mainly used for very smooth functions in general. But the terminology "Sobolev" remains the same
@@ -567,12 +567,12 @@ connection to spectral properties and eigenvalue decay rates of the NTK operator
 In our analysis, we consider two distinct learning frameworks:
 
 1) \textbf{Standard Neural Network Regression}: Here we only observe a dataset of output values $y_i$ for inputs $x_i$ (as in Fourier Neural Operators for instance), leading to the classical mean squared error loss:
-$$\mathcal{L}_{\text{MSE}}(f) = \sum_{i=1}^n |f(x_i) - y_i|^2$$
+$$\mathcal{L}_{\text{MSE}}(f) = \sum_{i=1}^{\textcolor{red}{n}} |f(x_i) - y_i|^2$$
 The gradient descent dynamics follow:
-$$\frac{d}{dt}f_t(x) = -\eta \sum_{i=1}^n K^{\infty}(x,x_i)(f_t(x_i) - y_i)$$
+$$\frac{d}{dt}f_t(x) = -\eta \sum_{i=1}^{\textcolor{red}{n}} \textcolor{red}{K}^{\infty}(x,x_i)(f_t(x_i) - y_i)$$
 
 2) \textbf{Derivative-Augmented Learning}: We observe both outputs and derivatives in our dataset, as in Sobolev training and Physics-Informed Neural Networks (PINNs) or DeepONet architectures, with loss:
-$$\mathcal{L}_{\text{deriv}}(f) = \sum_{i=1}^n \left(|f(x_i) - y_i|^2 + \sum_{k=1}^s |D^k f(x_i) - D^k y_i|^2\right)$$
+$$\mathcal{L}_{\text{deriv}}(f) = \sum_{i=1}^{\textcolor{red}{n}} \left(|f(x_i) - y_i|^2 + \sum_{k=1}^s |D^k f(x_i) - D^k y_i|^2\right)$$
 Leading to modified gradient dynamics incorporating derivative information.
 
 These frameworks result in different gradient descent trajectories and convergence behaviors. 
@@ -682,7 +682,7 @@ For a neural network $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})
 \begin{tcolorbox}[colback=yellow!10,colframe=blue!40!black,title=Definition : NTK]
 \begin{equation}
 \label{eq:ntk_definition}
-\textcolor{kernelcolor}{K^{L}}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \boldsymbol{\textcolor{darkyellow}{\theta}}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \boldsymbol{\textcolor{darkyellow}{\theta}}} \right\rangle = \sum_{k} \frac{\partial f(\mathbf{x}_i; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \textcolor{darkyellow}{\theta}_k} \frac{\partial f(\mathbf{x}_j; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \textcolor{darkyellow}{\theta}_k}
+\textcolor{red}{\mathbf{K}^{L}}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \boldsymbol{\textcolor{darkyellow}{\theta}}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \boldsymbol{\textcolor{darkyellow}{\theta}}} \right\rangle = \sum_{k} \frac{\partial f(\mathbf{x}_i; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \textcolor{darkyellow}{\theta}_k} \frac{\partial f(\mathbf{x}_j; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \textcolor{darkyellow}{\theta}_k}
 \end{equation}
 \end{tcolorbox}
 
@@ -699,8 +699,8 @@ For a neural network $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})
 
 \begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018, convergence]
 For a multi layer perceptron $f(\mathbf{x};\boldsymbol{\textcolor{darkyellow}{\theta}})$ with hidden layer widths $N_1, \ldots, N_L$ randomly initialized with weights $W_1, \ldots, W_L$  following and trained by gradient descent with infinitesimal learning rate, 
-as hidden layer widths tend to infinity,the network converges to a Gaussian process, with limite NTK kernel $K_L^{\infty}$ and dynamics given by $\frac{\partial f_t(\mathbf{x})}{\partial t}
-    = -\eta \sum_{i=1}^n K_L^{\infty}(\mathbf{x},\mathbf{x}_i)\bigl(f_t(\mathbf{x}_i) - y_i\bigr)$.
+as hidden layer widths tend to infinity,the network converges to a Gaussian process, with limite NTK kernel $\textcolor{red}{K}_L^{\infty}$ and dynamics given by $\frac{\partial f_t(\mathbf{x})}{\partial t}
+    = -\eta \sum_{i=1}^{\textcolor{red}{n}} \textcolor{red}{K}_L^{\infty}(\mathbf{x},\mathbf{x}_i)\bigl(f_t(\mathbf{x}_i) - y_i\bigr)$.
 
 \end{theorem}
 
@@ -708,7 +708,7 @@ as hidden layer widths tend to infinity,the network converges to a Gaussian proc
 The recursive formula for depth $L$ in the infinite-width limit becomes:
 \begin{equation}
 \label{eq:ntk_recursive}
-K_L^{\infty}(\mathbf{x},\mathbf{x}') = \|\mathbf{x}\| \|\mathbf{x}'\| \left( \sum_{k=1}^{L} \varrho^{\circ (k-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \prod_{k'=k}^{L-1} \varrho'\left( \varrho^{\circ (k'-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \right) \right)
+\textcolor{red}{K}_L^{\infty}(\mathbf{x},\mathbf{x}') = \|\mathbf{x}\| \|\mathbf{x}'\| \left( \sum_{k=1}^{L} \varrho^{\circ (k-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \prod_{k'=k}^{L-1} \varrho'\left( \varrho^{\circ (k'-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \right) \right)
 \end{equation}
 where $\rho_1(\mathbf{x},\mathbf{x}') = \frac{\mathbf{x}^{\top}\mathbf{x}'}{\|\mathbf{x}\| \|\mathbf{x}'\|}$ is the initial correlation, $\varrho$ is the correlation propagation function defined by:
 \begin{equation}
@@ -726,7 +726,8 @@ where $\rho_1(\mathbf{x},\mathbf{x}') = \frac{\mathbf{x}^{\top}\mathbf{x}'}{\|\m
 
 \begin{tcolorbox}[colback=yellow!10,colframe=green!60!black,title={\textbf{[Townsend et al ]NTK's spectrum fundamentals}},enhanced,drop shadow]
 
-\textbf{Matrix Structure}: For dataset $\{x_i\}_{i=1}^n$, the infinite-width NTK matrix factorizes as $K_L^{\infty} = D \cdot R \cdot D$ where $D = \text{diag}(\|x_1\|, \ldots, \|x_n\|)$ and $R_{ij} = \tilde{K}_L^{\infty}(\rho_{ij})$ with $\rho_{ij} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$. // we factorize the infinite-width ntk matrix into diagonal and correlation parts
+\textbf{Matrix Structure}: For dataset $\{x_i\}_{i=1}^{\textcolor{red}{n}}$, the infinite-width NTK matrix factorizes as $\textcolor{red}{K}_L^{\infty} = D \cdot R \cdot D$ where $D = \text{diag}(\|x_1\|, \ldots, \|x_{\textcolor{red}{n}}\|)$ and $R_{ij} = \tilde{\textcolor{red}{K}}_L^{\infty}(\rho_{ij})$ with $\rho_{ij} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$. // we factorize the infinite-width ntk matrix into diagonal and correlation parts
+\textbf{Matrix Structure}: For dataset $\{x_i\}_{i=1}^{\textcolor{red}{n}}$, the infinite-width NTK matrix factorizes as $K_L^{\infty} = D \cdot R \cdot D$ where $D = \text{diag}(\|x_1\|, \ldots, \|x_{\textcolor{red}{n}}\|)$ and $R_{ij} = \tilde{K}_L^{\infty}(\rho_{ij})$ with $\rho_{ij} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$. // we factorize the infinite-width ntk matrix into diagonal and correlation parts
 
 \newline
 \textbf{Operator Form}: By rotational invariance, the infinite-width NTK can be seen as an operator acts zonally:
@@ -797,7 +798,7 @@ where $\boldsymbol{Y_{\ell,p}}$ are the spherical harmonics of degree $\ell$ and
 
 \begin{definition}[Discrete Sobolev Operator Matrix, [Townsend et al]]
 \label{def:sobolev_discrete}
-Given sample points $\{\boldsymbol{x_i}\}_{i=1}^n \subset \mathbb{S}^{d-1}$ with quadrature weights $\{\boldsymbol{c_i}\}_{i=1}^n$, the discrete Sobolev operator matrix is constructed as:
+Given sample points $\{\boldsymbol{x_i}\}_{i=1}^{\textcolor{red}{n}} \subset \mathbb{S}^{d-1}$ with quadrature weights $\{\boldsymbol{c_i}\}_{i=1}^{\textcolor{red}{n}}$, the discrete Sobolev operator matrix is constructed as:
 \begin{equation}
 \label{eq:sobolev_discrete}
 \boldsymbol{(P_s)_{ij}} = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} \boldsymbol{(1 + \ell(\ell + d - 2))^s} \, \boldsymbol{(a_{\ell,p})_i} \boldsymbol{(a_{\ell,p})_j}
@@ -891,14 +892,14 @@ The discrete NTK matrix $\Kop$ and Sobolev operator matrix $\Pop_s$ satisfy exac
 \Kop \Pop_s = \Pop_s \Kop
 \label{eq:chebyshev_commutation_condition}
 \end{equation}
-\textbf{if} the sampling points $\{x_i\}_{i=1}^n$ are \textcolor{red}{\textbf{Chebyshev points}} on $\mathbb{S}^{d-1}$.
+\textbf{if} the sampling points $\{x_i\}_{i=1}^{\textcolor{red}{n}}$ are \textcolor{red}{\textbf{Chebyshev points}} on $\mathbb{S}^{d-1}$.
 
 For arbitrary sampling points, this commutation \textit{fails}, requiring explicit derivative information for effective learning.
 \end{theorem}
 
 \begin{theorem}[NTK-Sobolev Matrix Commutation - Chebyshev Case]
 \label{thm:ntk_sobolev_commutation}
-Let $\Kop \in \mathbb{R}^{n \times n}$ be a discrete \textit{neural tangent kernel matrix} and $\Pop_s \in \mathbb{R}^{n \times n}$ be a discrete \textit{Sobolev operator matrix} of order $s > 0$, both constructed from the same sample set $\{x_i\}_{i=1}^n \subset \mathbb{S}^{d-1}$ with quadrature weights $\{c_i\}_{i=1}^n$. If both matrices are rotationally invariant, then:
+Let $\Kop \in \mathbb{R}^{\textcolor{red}{n} \times \textcolor{red}{n}}$ be a discrete \textit{neural tangent kernel matrix} and $\Pop_s \in \mathbb{R}^{\textcolor{red}{n} \times \textcolor{red}{n}}$ be a discrete \textit{Sobolev operator matrix} of order $s > 0$, both constructed from the same sample set $\{x_i\}_{i=1}^{\textcolor{red}{n}} \subset \mathbb{S}^{d-1}$ with quadrature weights $\{c_i\}_{i=1}^{\textcolor{red}{n}}$. If both matrices are rotationally invariant, then:
 \begin{enumerate}
     \item The matrices commute: $\Kop\Pop_s = \Pop_s\Kop$
     \item They are simultaneously diagonalizable with shared eigenvectors
@@ -1113,9 +1114,9 @@ We have $\mathbf{K}\mathbf{P}_s = \mathbf{P}_s\mathbf{K}$ only in the subspace c
 \subsection{A.6 Discrete Implementation and Matrix Construction}
 
 \begin{theorem}[Discrete Sobolev Loss and Matrix Form]
-Given dataset $\{x_i, y_i\}_{i=1}^n$ on $\mathbb{S}^{d-1}$, the discrete Sobolev loss becomes a quadratic form:
+Given dataset $\{x_i, y_i\}_{i=1}^{\textcolor{red}{n}}$ on $\mathbb{S}^{d-1}$, the discrete Sobolev loss becomes a quadratic form:
 \[ \mathcal{L}_s(\mathbf{f}) = \mathbf{f}^T \mathbf{P}_s \mathbf{f} \]
-where $\mathbf{f} = (f(x_1), \ldots, f(x_n))^T$ and $\mathbf{P}_s$ is the discrete Sobolev matrix.
+where $\mathbf{f} = (f(x_1), \ldots, f(x_{\textcolor{red}{n}}))^T$ and $\mathbf{P}_s$ is the discrete Sobolev matrix.
 \end{theorem}
 
 \begin{proof}[Construction of Discrete Matrices]
@@ -1130,12 +1131,12 @@ For positive semi-definiteness, we require $\ell_{\max}$ such that $(\ell_{\max}
 
 \textbf{Discrete Sobolev Loss}
 The continuous Sobolev loss discretizes to:
-\[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) P_s f(x) d\sigma(x) \rightarrow \frac{1}{n}\sum_{i=1}^n f(x_i) [P_s f](x_i) = \mathbf{f}^T \mathbf{P}_s \mathbf{f} \]
+\[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) P_s f(x) d\sigma(x) \rightarrow \frac{1}{n}\sum_{i=1}^{\textcolor{red}{n}} f(x_i) [P_s f](x_i) = \mathbf{f}^T \mathbf{P}_s \mathbf{f} \]
 
 \textbf{Learning Dynamics}
 Under discrete Sobolev training, the learning operator becomes:
 \[ \frac{d\mathbf{f}}{dt} = -\mathbf{K} \mathbf{P}_s (\mathbf{f} - \mathbf{y}) \]
-where $\mathbf{y} = (y_1, \ldots, y_n)^T$ are the target values.
+where $\mathbf{y} = (y_1, \ldots, y_{\textcolor{red}{n}})^T$ are the target values.
 \end{proof}
 
 \begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title=Remark: Computational Complexity]
