@@ -474,11 +474,11 @@ For a function $f$ and target function $f^*$, the Sobolev training loss is defin
 \begin{tcolorbox}[colback=sobolevcolor!5,colframe=sobolevcolor!60!black,title=Sobolev Training Loss]
 \begin{equation}
 \label{eq:sobolev_loss}
-\mathcal{L}_{\text{Sobolev}}(f) = \|f - f^*\|_{H^s}^2 = \sum_{k=0}^s \int_{\Omega} |D^k f(x) - D^k f^*(x)|^2 dx
+\mathcal{L}_{\text{Sobolev}}(f) = \|f - f^*\|_{H^s}^2 = \sum_{p=0}^s \int_{\Omega} |D^p f(x) - D^p f^*(x)|^2 dx
 \end{equation}
 \end{tcolorbox}
 
-where $D^k$ denotes the $k$-th derivative operator and $H^s$ is the Sobolev space of order $s$. This formulation leads to several key properties:
+where $D^p$ denotes the $p$-th derivative operator and $H^s$ is the Sobolev space of order $s$. This formulation leads to several key properties:
 
 The Sobolev training loss has the following properties:
 \begin{itemize}
@@ -488,7 +488,7 @@ The Sobolev training loss has the following properties:
 
 For neural networks, this translates to augmenting the training data with derivative information:
 
-$$\mathcal{L}_{\text{discrete}}(f) = \sum_{i=1}^{\textcolor{red}{n}} \sum_{k=0}^s |D^k f(x_i) - D^k f^*(x_i)|^2$$
+$$\mathcal{L}_{\text{discrete}}(f) = \sum_{i=1}^{\textcolor{red}{n}} \sum_{p=0}^s |D^p f(x_i) - D^p f^*(x_i)|^2$$
 
 This framework provides a natural connection between neural network training and classical function approximation theory in Sobolev spaces.
 It's important to note that Sobolev training is mainly used for very smooth functions in general. But the terminology "Sobolev" remains the same
@@ -546,9 +546,9 @@ The Sobolev space $H^s(\Omega)$ can be equipped with two equivalent norms:
 1) \textbf{Gradient-Based Norm}: Defined using derivatives up to order $s$:
 \begin{equation}
 \label{eq:sobolev_gradient_norm}
-\|f\|_{H^s}^2 = \sum_{k=0}^s \int_{\Omega} |D^k f(x)|^2 dx
+\|f\|_{H^s}^2 = \sum_{p=0}^s \int_{\Omega} |D^p f(x)|^2 dx
 \end{equation}
-where $D^k$ represents the $k$-th derivative operator.
+where $D^p$ represents the $p$-th derivative operator.
 
 2) \textbf{Fourier-Based Norm}: Defined using the Fourier transform $\hat{f}$:
 \begin{equation}
@@ -572,7 +572,7 @@ The gradient descent dynamics follow:
 $$\frac{d}{dt}f_t(x) = -\eta \sum_{i=1}^{\textcolor{red}{n}} \textcolor{red}{K}^{\infty}(x,x_i)(f_t(x_i) - y_i)$$
 
 2) \textbf{Derivative-Augmented Learning}: We observe both outputs and derivatives in our dataset, as in Sobolev training and Physics-Informed Neural Networks (PINNs) or DeepONet architectures, with loss:
-$$\mathcal{L}_{\text{deriv}}(f) = \sum_{i=1}^{\textcolor{red}{n}} \left(|f(x_i) - y_i|^2 + \sum_{k=1}^s |D^k f(x_i) - D^k y_i|^2\right)$$
+$$\mathcal{L}_{\text{deriv}}(f) = \sum_{i=1}^{\textcolor{red}{n}} \left(|f(x_i) - y_i|^2 + \sum_{p=1}^s |D^p f(x_i) - D^p y_i|^2\right)$$
 Leading to modified gradient dynamics incorporating derivative information.
 
 These frameworks result in different gradient descent trajectories and convergence behaviors. 
@@ -682,14 +682,14 @@ For a neural network $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})
 \begin{tcolorbox}[colback=yellow!10,colframe=blue!40!black,title=Definition : NTK]
 \begin{equation}
 \label{eq:ntk_definition}
-\textcolor{red}{\mathbf{K}^{L}}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \boldsymbol{\textcolor{darkyellow}{\theta}}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \boldsymbol{\textcolor{darkyellow}{\theta}}} \right\rangle = \sum_{k} \frac{\partial f(\mathbf{x}_i; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \textcolor{darkyellow}{\theta}_k} \frac{\partial f(\mathbf{x}_j; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \textcolor{darkyellow}{\theta}_k}
+\textcolor{red}{\mathbf{K}^{L}}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \boldsymbol{\textcolor{darkyellow}{\theta}}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \boldsymbol{\textcolor{darkyellow}{\theta}}} \right\rangle = \sum_{\textcolor{red}{p}} \frac{\partial f(\mathbf{x}_i; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \textcolor{darkyellow}{\theta}_{\textcolor{red}{p}}} \frac{\partial f(\mathbf{x}_j; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \textcolor{darkyellow}{\theta}_{\textcolor{red}{p}}}
 \end{equation}
 \end{tcolorbox}
 
 \begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Definition : Edge of Chaos}},enhanced,drop shadow]
     The Edge of Chaos (EOC) initialization for a layer with weights $\textcolor{blue}{\mathbf{W}_{ij}}$ and biases $\textcolor{red}{\mathbf{b}_j}$ is defined as:
     \begin{equation}
-    \textcolor{blue}{\mathbf{W}_{ij}} \sim \mathcal{N}\left(0, \frac{\sigma_w^2}{n}\right) \quad \text{and} \quad \textcolor{red}{\mathbf{b}_j} \sim \mathcal{N}\left(0, \frac{\sigma_b^2}{n}\right)
+    \textcolor{blue}{\mathbf{W}_{ij}} \sim \mathcal{N}\left(0, \frac{\sigma_w^2}{\textcolor{red}{n}}\right) \quad \text{and} \quad \textcolor{red}{\mathbf{b}_j} \sim \mathcal{N}\left(0, \frac{\sigma_b^2}{\textcolor{red}{n}}\right)
     \end{equation}
     where $\sigma_w^2+\sigma_b^2=2$ is the total variance.
     This initialization strategy maintains the variance of activations through layers and ensures that the network is in the chaotic regime.
@@ -708,7 +708,7 @@ as hidden layer widths tend to infinity,the network converges to a Gaussian proc
 The recursive formula for depth $L$ in the infinite-width limit becomes:
 \begin{equation}
 \label{eq:ntk_recursive}
-\textcolor{red}{K}_L^{\infty}(\mathbf{x},\mathbf{x}') = \|\mathbf{x}\| \|\mathbf{x}'\| \left( \sum_{k=1}^{L} \varrho^{\circ (k-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \prod_{k'=k}^{L-1} \varrho'\left( \varrho^{\circ (k'-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \right) \right)
+\textcolor{red}{K}_{\textcolor{red}{L}}^{\infty}(\mathbf{x},\mathbf{x}') = \|\mathbf{x}\| \|\mathbf{x}'\| \left( \sum_{\textcolor{red}{p}=1}^{\textcolor{red}{L}} \varrho^{\circ (\textcolor{red}{p}-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \prod_{\textcolor{red}{p}'=\textcolor{red}{p}}^{\textcolor{red}{L}-1} \varrho'\left( \varrho^{\circ (\textcolor{red}{p}'-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \right) \right)
 \end{equation}
 where $\rho_1(\mathbf{x},\mathbf{x}') = \frac{\mathbf{x}^{\top}\mathbf{x}'}{\|\mathbf{x}\| \|\mathbf{x}'\|}$ is the initial correlation, $\varrho$ is the correlation propagation function defined by:
 \begin{equation}
@@ -739,7 +739,7 @@ $$\mu_\ell^{L,\infty} = \frac{2\pi^{d/2}}{\Gamma(d/2)} \int_{-1}^1 \tilde{K}_L^{
 Eigenvalue decay follows 
 \begin{equation}
 \label{eq:ntk_eigenvalue_decay}
-\mu_\ell^{L,\infty} \sim \ell^{-d}
+\mu_\ell^{\textcolor{red}{L},\infty} \sim \ell^{-d}
 \end{equation}
 with multiplicity $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$.
 
@@ -861,7 +861,7 @@ Chebyshev points are uniformly distributed on the sphere, and are the points tha
 The \textcolor{red}{\textbf{Chebyshev points}} on the sphere $\mathbb{S}^{d-1}$ are defined as the projections of classical Chebyshev points onto the unit sphere. For $d = 2$ (unit circle), these points are given by:
 \begin{equation}
 \label{eq:chebyshev_circle}
-\boldsymbol{x_k} = \left(\cos\left(\frac{(2k-1)\pi}{2n}\right), \sin\left(\frac{(2k-1)\pi}{2n}\right)\right), \quad k = 1, 2, \ldots, n
+\boldsymbol{x_{\textcolor{red}{k}}} = \left(\cos\left(\frac{(2\textcolor{red}{k}-1)\pi}{2\textcolor{red}{n}}\right), \sin\left(\frac{(2\textcolor{red}{k}-1)\pi}{2\textcolor{red}{n}}\right)\right), \quad \textcolor{red}{k} = 1, 2, \ldots, \textcolor{red}{n}
 \end{equation}
 
 \end{tcolorbox}
@@ -1087,13 +1087,13 @@ Similarly, the Sobolev matrix has the expansion:
 
 \begin{tcolorbox}[colback=green!5,colframe=green!60!black,title=\textbf{Limited Orthogonality and Partial Commutation}]
 The key observation is that the discrete orthogonality $a_{\ell,p}^T a_{\ell',p'} = \delta_{\ell,\ell'} \delta_{p,p'} \|a_{\ell,p}\|^2$ holds exactly only for degrees $\ell$ such that the cumulative sum of spherical harmonic dimensions satisfies:
-\[ \sum_{k=0}^{\ell} N(d,k) \leq n \]
+\[ \sum_{p=0}^{\ell} N(d,p) \leq \textcolor{red}{n} \]
 This means the sampling measure is exact up to a particular dimension $\ell_{\text{exact}}$ determined by the number of sample points $n$.
 \end{tcolorbox}
 
 \begin{tcolorbox}[colback=orange!10,colframe=orange!60!black,title=\textbf{Remark: Non-Commutation in General}]
 The matrices $\mathbf{K}$ and $\mathbf{P}_s$ do \textbf{not commute} in general. We have partial commutation only for the subspace spanned by spherical harmonics of degree $\ell \leq \ell_{\text{exact}}$ where:
-\[ \ell_{\text{exact}} = \max\left\{\ell : \sum_{k=0}^{\ell} N(d,k) \leq n\right\} \]
+\[ \ell_{\text{exact}} = \max\left\{\ell : \sum_{p=0}^{\ell} N(d,p) \leq \textcolor{red}{n}\right\} \]
 For $\ell > \ell_{\text{exact}}$, the discrete orthogonality breaks down, and the commutation property fails. This limitation arises because the sampling measure cannot exactly represent all spherical harmonics beyond a certain degree with a finite number of points.
 \end{tcolorbox}
 
@@ -1189,7 +1189,7 @@ where $\|\mathbf{A}\|_{HS} = \sqrt{\sum_{i,j} |a_{i,j}|^2}$ is the Hilbert-Schmi
 
 \begin{theorem}[Generalized Hanson-Wright for Random Tensors (Chang, 2022)]
 For random tensor vector $\overline{\mathcal{X}} \in \C^{(n \times I_1 \times \cdots \times I_M) \times (I_1 \times \cdots \times I_M)}$ and fixed tensor $\overline{\overline{\mathcal{A}}}$, the polynomial function:
-$$f_j(\overline{\mathcal{X}}) = \left(\sum_{i,\textcolor{red}{k}=1}^{\textcolor{red}{n}} \mathcal{A}_{i,\textcolor{red}{k}} \star_M (\mathcal{X}_i - \E[\mathcal{X}_i]) \star_M (\mathcal{X}_{\textcolor{red}{k}} - \E[\mathcal{X}_{\textcolor{red}{k}}])\right)^j$$
+$$f_j(\overline{\mathcal{X}}) = \left(\sum_{i,\textcolor{red}{p}=1}^{\textcolor{red}{n}} \mathcal{A}_{i,\textcolor{red}{p}} \star_M (\mathcal{X}_i - \E[\mathcal{X}_i]) \star_M (\mathcal{X}_{\textcolor{red}{p}} - \E[\mathcal{X}_{\textcolor{red}{p}}])\right)^j$$
 satisfies concentration bounds involving Ky Fan $k$-norms of tensor sums, extending classical matrix concentration to tensor settings.
 \end{theorem}
 
@@ -1295,24 +1295,24 @@ All modern approaches to bounding $\lambdaMin(\KNTK)$ follow a common high-level
 The proof begins by decomposing the empirical NTK $\bar{K}^{(L)} = JJ^T$ where $J$ is the Jacobian matrix \eqref{eq:Jac}. Applying the chain rule and standard algebraic manipulations yields the fundamental decomposition:
 
 \begin{align}
-\bar{K}^{(L)} = JJ^T = \sum_{k=0}^{L-1} F_k F_k^T \circ B_{k+1} B_{k+1}^T
+\bar{K}^{(L)} = JJ^T = \sum_{p=0}^{L-1} F_p F_p^T \circ B_{p+1} B_{p+1}^T
 \end{align}
 
 where:
 \begin{itemize}
-    \item $F_k = [f_k(x_1), \ldots, f_k(x_N)]^T \in \R^{N \times n_k}$ are the \textbf{feature matrices} at layer $k$
-    \item $B_k \in \R^{N \times n_k}$ are the \textbf{derivative term matrices} with $i$-th row given by:
+    \item $F_p = [f_p(x_1), \ldots, f_p(x_N)]^T \in \R^{N \times n_p}$ are the \textbf{feature matrices} at layer $p$
+    \item $B_p \in \R^{N \times n_p}$ are the \textbf{derivative term matrices} with $i$-th row given by:
 \end{itemize}
 
 \begin{align}
-(B_k)_{i:} = \begin{cases}
-\Sigma_k(x_i) \left(\prod_{l=k+1}^{L-1} W_l \Sigma_l(x_i)\right) W_L, & k \in [L-2] \\
-\Sigma_{L-1}(x_i) W_L, & k = L-1 \\
-\frac{1}{\sqrt{N}} \mathbf{1}_N, & k = L
+(B_p)_{i:} = \begin{cases}
+\Sigma_p(x_i) \left(\prod_{l=p+1}^{L-1} W_l \Sigma_l(x_i)\right) W_L, & p \in [L-2] \\
+\Sigma_{L-1}(x_i) W_L, & p = L-1 \\
+\frac{1}{\sqrt{N}} \mathbf{1}_N, & p = L
 \end{cases}
 \end{align}
 
-where $\Sigma_k(x) = \text{diag}([\sigma'(g_{k,j}(x))]_{j=1}^{n_k})$ is the diagonal matrix of activation derivatives.
+where $\Sigma_p(x) = \text{diag}([\sigma'(g_{p,j}(x))]_{j=1}^{n_p})$ is the diagonal matrix of activation derivatives.
 
 \subsubsection{Step 2: Application of Schur Product Theorem and Weyl's Inequality}
 
@@ -1324,33 +1324,33 @@ For PSD matrices $P, Q \in \R^{n \times n}$, the Schur product theorem :
 Applying this to each term, then using Weyl's inequality for the sum:
 
 \begin{align}
-\evmin{JJ^T} &\geq \sum_{k=0}^{L-1} \evmin{F_k F_k^T \circ B_{k+1} B_{k+1}^T} \\
-&\geq \sum_{k=0}^{L-1} \evmin{F_k F_k^T} \min_{i \in [N]} \|(B_{k+1})_{i:}\|_2^2
+\evmin{JJ^T} &\geq \sum_{p=0}^{L-1} \evmin{F_p F_p^T \circ B_{p+1} B_{p+1}^T} \\
+&\geq \sum_{p=0}^{L-1} \evmin{F_p F_p^T} \min_{i \in [N]} \|(B_{p+1})_{i:}\|_2^2
 \end{align}
 
 This reduction separates the problem into:
 \begin{enumerate}
-    \item The \textbf{minimum eigenvalues of feature Gram matrices}: $\evmin{F_k F_k^T}$
-    \item The \textbf{minimum row norms of derivative matrices}: $\min_{i \in [N]} \|(B_{k+1})_{i:}\|_2^2$
+    \item The \textbf{minimum eigenvalues of feature Gram matrices}: $\evmin{F_p F_p^T}$
+    \item The \textbf{minimum row norms of derivative matrices}: $\min_{i \in [N]} \|(B_{p+1})_{i:}\|_2^2$
 \end{enumerate}
 
 \subsubsection{Step 3: Bounding Feature Matrix Eigenvalues}
 
-To bound $\evmin{F_k F_k^T}$, the strategy uses Chernoff-type matrix concentration. The fundamental bound is given by:
+To bound $\evmin{F_p F_p^T}$, the strategy uses Chernoff-type matrix concentration. The fundamental bound is given by:
 \begin{lemma}[Matrix Concentration for Features]
-Let $\lambda = \evmin{\E_{w \sim \mathcal{N}(0, \beta_k^2 \mathbf{I}_{n_{k-1}})}[\sigma(F_{k-1}w)\sigma(F_{k-1}w)^T]}$. If 
+Let $\lambda = \evmin{\E_{w \sim \mathcal{N}(0, \beta_p^2 \mathbf{I}_{n_{p-1}})}[\sigma(F_{p-1}w)\sigma(F_{p-1}w)^T]}$. If 
 \begin{align}
-n_k \geq \max\left(N, c Q \max(1, \log(4Q)) \log\frac{N}{\delta}\right)
+n_p \geq \max\left(N, c Q \max(1, \log(4Q)) \log\frac{N}{\delta}\right)
 \end{align}
-where $Q = \frac{\beta_k^2 \|F_{k-1}\|_F^2}{\lambda}$, then with probability at least $1-\delta$:
+where $Q = \frac{\beta_p^2 \|F_{p-1}\|_F^2}{\lambda}$, then with probability at least $1-\delta$:
 \begin{align}
-\svmin{F_k}^2 \geq \frac{n_k \lambda}{4}
+\svmin{F_p}^2 \geq \frac{n_p \lambda}{4}
 \end{align}
 
 This lemma assumes that:
 \begin{itemize}
-\item The width $n_k$ of layer $k$ is sufficiently large compared to the number of samples $N$
-\item The feature matrix $F_{k-1}$ from the previous layer has bounded Frobenius norm
+\item The width $n_p$ of layer $p$ is sufficiently large compared to the number of samples $N$
+\item The feature matrix $F_{p-1}$ from the previous layer has bounded Frobenius norm
 \end{itemize}
 These conditions ensure concentration of the minimum singular value of the feature matrix around its expected value.
 \end{lemma}
@@ -1360,61 +1360,61 @@ These conditions ensure concentration of the minimum singular value of the featu
 To bound $\lambda$, we use the Hermite expansion of the ReLU. and exploiting the homogeneity of $\sigma$ (unless, generalized hermite):
 
 \begin{align}
-\lambda &= \evmin{\E[\sigma(F_{k-1}w)\sigma(F_{k-1}w)^T]} \\
-&= \evmin{D \E[\sigma(\hat{F}_{k-1}w)\sigma(\hat{F}_{k-1}w)^T] D}
+\lambda &= \evmin{\E[\sigma(F_{p-1}w)\sigma(F_{p-1}w)^T]} \\
+&= \evmin{D \E[\sigma(\hat{F}_{p-1}w)\sigma(\hat{F}_{p-1}w)^T] D}
 \end{align}
 
-where $D = \text{diag}(\|\{F_{k-1}\}_{i:}\|_2)$ and $\hat{F}_{k-1} = D^{-1}F_{k-1}$.
+where $D = \text{diag}(\|\{F_{p-1}\}_{i:}\|_2)$ and $\hat{F}_{p-1} = D^{-1}F_{p-1}$.
 
 Applying the Hermite expansion $\sigma(x) = \sum_{r=0}^{\infty} \mu_r(\sigma) H_r(x)$:
 
 \begin{align}
-\E[\sigma(\hat{F}_{k-1}w)\sigma(\hat{F}_{k-1}w)^T] = \mu_0(\sigma)^2 \mathbf{1}_N \mathbf{1}_N^T + \sum_{s=1}^{\infty} \mu_s(\sigma)^2 (\hat{F}_{k-1}^{*s})(\hat{F}_{k-1}^{*s})^T
+\E[\sigma(\hat{F}_{p-1}w)\sigma(\hat{F}_{p-1}w)^T] = \mu_0(\sigma)^2 \mathbf{1}_N \mathbf{1}_N^T + \sum_{s=1}^{\infty} \mu_s(\sigma)^2 (\hat{F}_{p-1}^{*s})(\hat{F}_{p-1}^{*s})^T
 \end{align}
 
-where $\hat{F}_{k-1}^{*s}$ represents the $s$-th Khatri-Rao power of $\hat{F}_{k-1}$.
+where $\hat{F}_{p-1}^{*s}$ represents the $s$-th Khatri-Rao power of $\hat{F}_{p-1}$.
 
 \subsubsection{Step 5: Reduction to Khatri-Rao Powers}
 
 For an integer $r \geq 2$, we can lower bound:
 \begin{align}
-\lambda \geq \mu_r(\sigma)^2 \evmin{D(\hat{F}_{k-1}^{*r})(\hat{F}_{k-1}^{*r})^T D} = \mu_r(\sigma)^2 \frac{\evmin{(F_{k-1}^{*r})(F_{k-1}^{*r})^T}}{\max_{i \in [N]} \|(F_{k-1})_{i:}\|_2^{2(r-1)}}
+\lambda \geq \mu_r(\sigma)^2 \evmin{D(\hat{F}_{p-1}^{*r})(\hat{F}_{p-1}^{*r})^T D} = \mu_r(\sigma)^2 \frac{\evmin{(F_{p-1}^{*r})(F_{p-1}^{*r})^T}}{\max_{i \in [N]} \|(F_{p-1})_{i:}\|_2^{2(r-1)}}
 \end{align}
 
 \subsubsection{Step 6: Feature Centering and Hadamard Power Analysis}
 
-To analyze $(F_{k-1}^{*r})(F_{k-1}^{*r})^T = (F_{k-1}F_{k-1}^T)^{\circ r}$, we introduce centered features $\tilde{F}_{k-1} = F_{k-1} - \E_X[F_{k-1}]$. 
+To analyze $(F_{p-1}^{*r})(F_{p-1}^{*r})^T = (F_{p-1}F_{p-1}^T)^{\circ r}$, we introduce centered features $\tilde{F}_{p-1} = F_{p-1} - \E_X[F_{p-1}]$. 
 
-Let $\mu = \E_x[f_{k-1}(x)] \in \R^{n_{k-1}}$ and $\Lambda = \text{diag}(F_{k-1}\mu - \|\mu\|_2^2 \mathbf{1}_N)$. Then:
+Let $\mu = \E_x[f_{p-1}(x)] \in \R^{n_{p-1}}$ and $\Lambda = \text{diag}(F_{p-1}\mu - \|\mu\|_2^2 \mathbf{1}_N)$. Then:
 
 \begin{align}
-(F_{k-1}^{*r})(F_{k-1}^{*r})^T = (F_{k-1}F_{k-1}^T)^{\circ r} \succeq \left(\tilde{F}_{k-1}\tilde{F}_{k-1}^T - \frac{\Lambda \mathbf{1}_N \mathbf{1}_N^T \Lambda}{\|\mu\|_2^2}\right)^{\circ r}
+(F_{p-1}^{*r})(F_{p-1}^{*r})^T = (F_{p-1}F_{p-1}^T)^{\circ r} \succeq \left(\tilde{F}_{p-1}\tilde{F}_{p-1}^T - \frac{\Lambda \mathbf{1}_N \mathbf{1}_N^T \Lambda}{\|\mu\|_2^2}\right)^{\circ r}
 \end{align}
 
 \subsubsection{Step 7: Application of Gershgorin Circle Theorem}
 
-To bound the minimum eigenvalue of $(\tilde{F}_{k-1}\tilde{F}_{k-1}^T)^{\circ r}$, we apply the Gershgorin circle theorem:
+To bound the minimum eigenvalue of $(\tilde{F}_{p-1}\tilde{F}_{p-1}^T)^{\circ r}$, we apply the Gershgorin circle theorem:
 
 \begin{align}
-\evmin{(\tilde{F}_{k-1}^{*r})(\tilde{F}_{k-1}^{*r})^T} &\geq \min_{i \in [N]} \|(\tilde{F}_{k-1})_{i:}\|_2^{2r} - N \max_{i \neq j} |\langle (\tilde{F}_{k-1})_{i:}, (\tilde{F}_{k-1})_{j:} \rangle|^r
+\evmin{(\tilde{F}_{p-1}^{*r})(\tilde{F}_{p-1}^{*r})^T} &\geq \min_{i \in [N]} \|(\tilde{F}_{p-1})_{i:}\|_2^{2r} - N \max_{i \neq j} |\langle (\tilde{F}_{p-1})_{i:}, (\tilde{F}_{p-1})_{j:} \rangle|^r
 \end{align}
 
 Using concentration properties of centered features, we show:
 \begin{align}
-\|(\tilde{F}_{k-1})_{i:}\|_2^{2r} &= \Theta\left(\left(d \prod_{l=1}^{k-1} n_l \beta_l^2\right)^r\right) \\
-N \max_{i \neq j} |\langle (\tilde{F}_{k-1})_{i:}, (\tilde{F}_{k-1})_{j:} \rangle|^r &= o\left(\left(d \prod_{l=1}^{k-1} n_l \beta_l^2\right)^r\right)
+\|(\tilde{F}_{p-1})_{i:}\|_2^{2r} &= \Theta\left(\left(d \prod_{l=1}^{p-1} n_l \beta_l^2\right)^r\right) \\
+N \max_{i \neq j} |\langle (\tilde{F}_{p-1})_{i:}, (\tilde{F}_{p-1})_{j:} \rangle|^r &= o\left(\left(d \prod_{l=1}^{p-1} n_l \beta_l^2\right)^r\right)
 \end{align}
 
 with exponentially high probability.
 
 \subsubsection{Step 8: Bounding Derivative Term Norms, very technical}
 
-To bound $\min_{i \in [N]} \|(B_{k+1})_{i:}\|_2^2$, we analyze each case:
+To bound $\min_{i \in [N]} \|(B_{p+1})_{i:}\|_2^2$, we analyze each case:
 
-For $k \in [L-2]$:
+For $p \in [L-2]$:
 \begin{align}
-\|(B_{k+1})_{i:}\|_2^2 &= \|\Sigma_{k+1}(x_i) \left(\prod_{l=k+2}^{L-1} W_l \Sigma_l(x_i)\right) W_L\|_2^2 \\
-&= \Theta\left(\beta_L^2 n_{k+1} \prod_{l=k+2}^{L-1} n_l \beta_l^2\right)
+\|(B_{p+1})_{i:}\|_2^2 &= \|\Sigma_{p+1}(x_i) \left(\prod_{l=p+2}^{L-1} W_l \Sigma_l(x_i)\right) W_L\|_2^2 \\
+&= \Theta\left(\beta_L^2 n_{p+1} \prod_{l=p+2}^{L-1} n_l \beta_l^2\right)
 \end{align}
 
 This bound uses some very technical and important tools:
@@ -1429,29 +1429,29 @@ This bound uses some very technical and important tools:
 Combining all bounds via union bound yields:
 
 \begin{align}
-\evmin{\bar{K}^{(L)}} &\geq \sum_{k=0}^{L-1} \mu_r(\sigma)^2 \Theta\left(d \prod_{l=1}^k n_l \beta_l^2\right) \Theta\left(\beta_L^2 \prod_{l=k+1}^{L-1} n_l \beta_l^2\right) \\
-&= \mu_r(\sigma)^2 \Theta\left(d \beta_L^2 \sum_{k=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
+\evmin{\bar{K}^{(L)}} &\geq \sum_{p=0}^{L-1} \mu_r(\sigma)^2 \Theta\left(d \prod_{l=1}^p n_l \beta_l^2\right) \Theta\left(\beta_L^2 \prod_{l=p+1}^{L-1} n_l \beta_l^2\right) \\
+&= \mu_r(\sigma)^2 \Theta\left(d \beta_L^2 \sum_{p=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
 \end{align}
 
 The width condition requires at least one layer to satisfy:
 \begin{align}
-n_k = \tilde{\Omega}(N \log N), \quad \text{with } \xi_k = 1
+n_p = \tilde{\Omega}(N \log N), \quad \text{with } \xi_p = 1
 \end{align}
 
-where $\xi_k$ indicates layer $k$ is "wide".
+where $\xi_p$ indicates layer $p$ is "wide".
 
 \subsubsection{Upper Bound via Diagonal Analysis}
 
 For the upper bound, we use:
 \begin{align}
-\evmin{JJ^T} &\leq (JJ^T)_{11} = \sum_{k=0}^{L-1} \|(F_k)_{1:}\|_2^2 \|(B_{k+1})_{1:}\|_2^2 \\
-&= \sum_{k=0}^{L-1} \|f_k(x_1)\|_2^2 \|(B_{k+1})_{1:}\|_2^2 \\
-&= \mathcal{O}\left(d \beta_L^2 \sum_{k=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
+\evmin{JJ^T} &\leq (JJ^T)_{11} = \sum_{p=0}^{L-1} \|(F_p)_{1:}\|_2^2 \|(B_{p+1})_{1:}\|_2^2 \\
+&= \sum_{p=0}^{L-1} \|f_p(x_1)\|_2^2 \|(B_{p+1})_{1:}\|_2^2 \\
+&= \mathcal{O}\left(d \beta_L^2 \sum_{p=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
 \end{align}
 
 \subsubsection{Final Result}
 
-Assuming $\beta_l = 1$ for simplicity and that some layer $k^*$ satisfies $n_{k^*} = \tilde{\Omega}(N)$, the main theorem gives:
+Assuming $\beta_l = 1$ for simplicity and that some layer $p^*$ satisfies $n_{p^*} = \tilde{\Omega}(N)$, the main theorem gives:
 
 \begin{align}
 \mu_r(\sigma)^2 \Omega(d) \leq \evmin{\bar{K}^{(L)}} \leq \mathcal{O}(d L)
