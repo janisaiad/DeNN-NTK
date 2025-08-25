@@ -83,6 +83,9 @@
 \definecolor{sobolevcolor}{RGB}{0,0,200}     % Blue for P (Sobolev)
 \definecolor{theoremcolor}{RGB}{240,248,255} % Light blue for theorem boxes
 \definecolor{definitioncolor}{RGB}{255,248,240} % Light orange for definitions
+\definecolor{darkyellow}{RGB}{184,134,11}     % Dark yellow for highlights
+
+
 
 % Enhanced math commands
 \newcommand{\E}{\mathbb{E}}
@@ -151,70 +154,6 @@
 \author{Janis AIAD}
 \date{\today}
 \title{Deeper or wider ? A 1st answer under the NTK perspective}
-\subtitle{An optimization perspective on neural network design}
-
-% to change logo, add the image in PDF format
-% or image by dragging it to the right and replace typographix
-% with the image name, if you don't want a logo, 
-% delete the line. 
-
-
-\begin{titlepage}
-    \centering
-
-    \vspace{2cm}
-
-    {\huge \bfseries RAPPORT DE STAGE DE RECHERCHE \par}
-    \vspace{2cm}
-
-    \hrule
-    \vspace{0.4cm}
-    {\Huge\bfseries Deeper or wider ? A 1st answer under the NTK perspective \par}
-    \vspace{0.2cm}
-    {\large An optimization perspective on neural network design \par}
-    \vspace{0.4cm}
-    \hrule
-    
-    \vspace{1.5cm}
-    
-    {\large RAPPORT CONFIDENTIEL \par}
-    
-    \vfill
-    
-    \begin{minipage}{0.4\textwidth}
-        \begin{flushleft} \large
-            \textbf{Option :} \\
-            \textbf{Champ :} \\
-            \textbf{Enseignant référent :} \\
-            \textbf{Tuteur :} \\
-            \textbf{Dates du stage :} \\
-            \textbf{Adresse de l'organisme :}
-        \end{flushleft}
-    \end{minipage}
-    \begin{minipage}{0.6\textwidth}
-        \begin{flushright} \large
-            Département de mathématiques appliquées \\
-            Statistique et apprentissage \\
-            \vspace{0.5cm}
-            Aymeric Dieuleveut \\
-            Haizhao Yang \\
-            du 11 mai 2025 au 31 août 2025 \\
-            \vspace{0.5cm}
-            University of Maryland, College Park \\
-            Department of Mathematics \\
-            4176 Campus Drive \\
-            College Park, MD 20742, USA
-        \end{flushright}
-    \end{minipage}
-
-\end{titlepage}
-
-\begin{figure*}[b]
-    \includegraphics[width=0.4\linewidth]{figures/umdlogo.jpg}
-    \label{fig:enter-label}
-\end{figure}
-
-
 
 
 
@@ -225,50 +164,125 @@
 
 
 \begin{document}
-	\maketitle 
-	
+
+
+    
+    \begin{center}
+
+    \vspace{1cm}
+
+    {\Large \bfseries RAPPORT DE STAGE DE RECHERCHE \par}
+    \vspace{1cm}
+
+    \hrule
+    \vspace{0.3cm}
+    {\LARGE\bfseries Deeper or wider ? A first answer under the NTK perspective \par}
+    \vspace{0.2cm}
+    {\large An optimization perspective on Neural Network design \par}
+    \vspace{0.3cm}
+    \hrule
+    
+    \vspace{1cm}
+    
+    {\large RAPPORT NON CONFIDENTIEL \par}
+    
+    \vfill
+    
+    \begin{minipage}[t]{0.4\textwidth}
+        \begin{flushleft} \large
+            \textbf{Option :} \\
+            \textbf{Champ :} \\
+            \textbf{Enseignant référent :} \\
+            \textbf{Tuteur :} \\
+            \textbf{Dates du stage :} \\
+
+        \end{flushleft}
+    \end{minipage}%
+    \begin{minipage}[t]{0.6\textwidth}
+        \begin{flushright} \large
+            Département de mathématiques appliquées \\
+            Statistique et apprentissage \\
+            \vspace{0.3cm}
+            Aymeric Dieuleveut \\
+            Haizhao Yang \\
+            du 11 mai 2025 au 31 août 2025 \\
+            \vspace{0.3cm}
+        \end{flushright}
+    \end{minipage}
+    
+    \vspace{1.5cm}
+    
+    University of Maryland, College Park \\
+    Department of Mathematics \\
+    4176 Campus Drive \\
+    College Park, MD 20742, USA
+    
+    \includegraphics[width=0.3\linewidth]{umdlogo.png}
+
+    \end{center}
+
+	\newpage
 	\tableofcontents
 \newpage
 \addcontentsline{toc}{section}{Abstract}
 \section*{Abstract}
 
-In the past few years, research has focused on understanding the fundamental mechanisms governing learning dynamics in deep neural networks. While significant progress has been made through the Neural Tangent Kernel (NTK) formalism, it remains unclear why standard training methods often fail in physics-informed and derivative-constrained learning scenarios. This report presents a comprehensive analysis of neural network learning dynamics through the lens of Sobolev training and NTK theory.
+In the past few years, research has focused on understanding the fundamental mechanisms governing learning dynamics in deep neural networks. While significant progress has been made through the \textcolor{red}{\textbf{Neural Tangent Kernel (NTK)}} formalism, it remains unclear how
+to choose the right architecture for a given problem. In the tryptical approximation/generalization/optimization trilemma, we focus on the optimization aspect, the less understood one.
+This report presents a comprehensive answer to this question through the lens of \textcolor{red}{\textbf{NTK theory}} in the context of
+\textbf{Sobolev training}.
 
-We establish a novel theoretical framework decomposing the learning process into two commuting operators: the Neural Tangent Kernel and a Sobolev regularization operator. Our key finding demonstrates that this commutation property holds exactly only under optimal sampling conditions, specifically when using Chebyshev points or equivalent interpolation nodes. For general sampling schemes, the commutation breaks, requiring explicit derivative information for effective learning. This fundamental distinction provides theoretical justification for the empirical success of Physics-Informed Neural Networks (PINNs) over standard regression methods.
+We establish a novel theoretical framework and our key finding demonstrates that the effectiveness of learning depends critically on \textbf{sampling conditions}, specifically when using \textbf{Chebyshev points}.
+For general sampling schemes, optimal learning requires \textbf{explicit derivative information} for effective training.
 
-We derive rigorous bounds for the minimum eigenvalue of the NTK matrix using random matrix theory techniques, providing new insights into network trainability. Our analysis extends to multiple architectures including feed-forward networks (FCNN), matrix memory networks (MMNN), and transformers, revealing architecture-specific scaling behaviors. Through finite-width corrections and spectral analysis, we characterize the transition between feature learning and kernel regimes. These theoretical contributions advance our understanding of when and why certain neural network architectures succeed in scientific computing applications.
+We derive \textbf{explicit theoretical and numerical bounds} for key neural network quantities establishing \textbf{precise eigenvalue bounds} for \textcolor{red}{\textbf{NTK}} matrices and ongoing \textbf{quantitative convergence rates}.
+
+Our \textbf{spectral analysis} covers \textcolor{gray}{\textbf{fully connected networks (FCNN)}}, \textcolor{orange}{\textbf{Multi-Layer Multi-component networks (MMNN)}}, and \textbf{transformers}, revealing architecture-specific scaling with depth, width, and input dimension. 
+Through \textbf{finite-width corrections}, we provide \textbf{explicit error bounds} and fundations for ongoing \textbf{convergence guarantees} for gradient descent.
+
+Experimental validation confirms our theoretical predictions across all architectures. Fully reproducible code is available at \href{https://github.com/janisaiad/DeNN-NTK}{github.com/janisaiad/DeNN-NTK} and \href{https://github.com/janisaiad/MMN}{github.com/janisaiad/MMN}.
 
 \vspace{0.5cm}
 
 \addcontentsline{toc}{section}{Résumé}
 \section*{Résumé}
+Au cours des dernières années, la recherche s'est concentrée sur la compréhension des mécanismes fondamentaux régissant la dynamique d'apprentissage dans les réseaux de neurones profonds. Bien que des progrès significatifs aient été réalisés grâce au formalisme du \textcolor{red}{\textbf{Neural Tangent Kernel (NTK)}}, il reste peu clair comment choisir la bonne architecture pour un problème donné. Dans le trilemme classique approximation/généralisation/optimisation, nous nous concentrons sur l'aspect optimisation, le moins bien compris. Ce rapport présente une réponse complète à cette question à travers le prisme de la \textcolor{red}{\textbf{théorie du NTK}} dans le contexte de \textbf{l'entraînement de Sobolev}.
 
-Au cours des dernières années, la recherche s'est concentrée sur la compréhension des mécanismes fondamentaux régissant la dynamique d'apprentissage dans les réseaux de neurones profonds. Bien que des progrès significatifs aient été réalisés grâce au formalisme du Neural Tangent Kernel (NTK), il reste peu clair pourquoi les méthodes d'entraînement standard échouent souvent dans les scénarios d'apprentissage informés par la physique et contraints par les dérivées. Ce rapport présente une analyse complète de la dynamique d'apprentissage des réseaux de neurones à travers le prisme de l'entraînement de Sobolev et de la théorie du NTK.
+Nous établissons un nouveau cadre théorique et notre découverte clé démontre que l'efficacité de l'apprentissage dépend de manière critique des \textbf{conditions d'échantillonnage}, spécifiquement lors de l'utilisation de \textbf{points de Chebyshev}. Pour les schémas d'échantillonnage généraux, l'apprentissage optimal nécessite une \textbf{information explicite sur les dérivées} pour un entraînement efficace. 
 
-Nous établissons un nouveau cadre théorique décomposant le processus d'apprentissage en deux opérateurs commutants : le Neural Tangent Kernel et un opérateur de régularisation de Sobolev. Notre résultat clé démontre que cette propriété de commutation ne tient exactement que sous des conditions d'échantillonnage optimales, spécifiquement lors de l'utilisation de points de Chebyshev ou de nœuds d'interpolation équivalents. Pour les schémas d'échantillonnage généraux, la commutation se brise, nécessitant une information explicite sur les dérivées pour un apprentissage efficace. Cette distinction fondamentale fournit une justification théorique au succès empirique des Physics-Informed Neural Networks (PINNs) par rapport aux méthodes de régression standard.
+Nous dérivons des \textbf{bornes théoriques et numériques explicites} pour les quantités clés des réseaux de neurones, établissant des \textbf{bornes précises sur les valeurs propres} pour les matrices \textcolor{red}{\textbf{NTK}} et des \textbf{taux de convergence quantitatifs} en cours.
 
-Nous dérivons des bornes rigoureuses pour la valeur propre minimale de la matrice NTK en utilisant des techniques de théorie des matrices aléatoires, offrant de nouvelles perspectives sur l'entraînabilité des réseaux. Notre analyse s'étend à plusieurs architectures incluant les réseaux feed-forward (FCNN), les réseaux à mémoire matricielle (MMNN), et les transformers, révélant des comportements de mise à l'échelle spécifiques à l'architecture. Grâce aux corrections de largeur finie et à l'analyse spectrale, nous caractérisons la transition entre les régimes d'apprentissage de caractéristiques et de noyau. Ces contributions théoriques font progresser notre compréhension de quand et pourquoi certaines architectures de réseaux de neurones réussissent dans les applications de calcul scientifique.
+Notre \textbf{analyse spectrale} couvre les \textcolor{gray}{\textbf{réseaux entièrement connectés (FCNN)}}, les \textcolor{orange}{\textbf{réseaux multi-couches multi-composants (MMNN)}}, et les \textbf{transformers}, révélant une mise à l'échelle spécifique à l'architecture avec la profondeur, la largeur et la dimension d'entrée. À travers les \textbf{corrections de largeur finie}, nous fournissons des \textbf{bornes d'erreur explicites} et des fondations pour les \textbf{garanties de convergence} en cours pour la descente de gradient.
 
+La validation expérimentale confirme nos prédictions théoriques à travers toutes les architectures. Un code entièrement reproductible est disponible sur \href{https://github.com/janisaiad/DeNN-NTK}{github.com/janisaiad/DeNN-NTK} et \href{https://github.com/janisaiad/MMN}{github.com/janisaiad/MMN}.
 \newpage
-\addcontentsline{toc}{section}{Executive summary}
 
-
-\newpage
 \addcontentsline{toc}{section}{Introduction}
 \section*{Introduction}
 The study of learning dynamics in deep neural networks constitutes a fundamental research area. Our approach focuses on the desingularization of Sobolev training by decomposing the problem into two distinct contributions: an independent neural tangent kernel (NTK) and a Sobolev contribution. This decomposition relies on the commutation between integral operators and the fractional Laplace operator.
 
-\textbf{Key Discovery}: We establish that this commutation property holds \textit{exactly} only when using \textcolor{red}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) for sampling. For general sampling points, commutation breaks, necessitating explicit derivative information for effective learning. This fundamental distinction explains the empirical success of Physics-Informed Neural Networks (PINNs) and derivative-augmented methods over standard regression in most practical settings.
+\textbf{Key Discovery}: We establish that this commutation property holds \textit{exactly} only when using \textcolor{red}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) for sampling. For general sampling points, commutation breaks, necessitating explicit derivative information for effective learning. 
 
 Our analysis continues with the study of NTK preconditioning through a freeze weights method, illustrated by neural networks factorizing low-rank weight matrices. This approach is supported by a rigorous approximation theorem. For classical feed-forward networks (FCNN), we develop a finite-width correction that proves particularly fruitful. Finally, we explore Transformers as an alternative solution, offering a new learning paradigm.
 
-Across these different architectures, we study feature learning regimes and their scaling with network width. Our results rely on statistical physics tools to characterize model convergence and asymptotic behavior. This analysis enables a better understanding of finite-width corrections \cite{seleznova2022ntk_beyond} and their implications for the practical optimization of deep neural networks.
+Across these different architectures, we study feature learning regimes and their scaling with network width. 
+Our results rely on statistical physics tools to characterize model convergence and asymptotic behavior. 
+This analysis enables a better understanding of finite-width corrections \cite{seleznova2022ntk_beyond} and their implications for the practical optimization of deep neural networks.
 
 The end of this research establishes fundamental connections between neural network dynamics and mathematical physics, advancing theoretical understanding of eigenvalue bounds for neural tangent kernels across multiple architectures. We bridge classical optimization theory with advanced mathematical physics frameworks, leveraging tools from quantum field theory and random matrix theory to provide new insights into neural network behavior.
 
 Our contribution to physics-informed deep learning theory applies techniques from statistical mechanics and random matrix ensembles, offering a mathematical physics perspective that complements existing approaches. This interdisciplinary methodology demonstrates how theoretical physics concepts illuminate fundamental machine learning questions, establishing new paradigms for understanding complex neural architectures.
 
-Extensive experimental validation across feed-forward networks, matrix memory networks, and transformers confirms our theoretical predictions while revealing phenomena that merit further investigation at the intersection of deep learning and mathematical physics.
+Extensive experimental validation across feed-forward networks, Multi-Layer Multi-component networks, and transformers confirms our theoretical predictions while revealing phenomena that merit further investigation at the intersection of deep learning and mathematical physics.
+
+
+
+
+
+
+
+
+
 
 
 
@@ -287,7 +301,7 @@ Special thanks go to \textbf{David Terjek} for his invaluable contributions to p
 
 I would also like to thank \textbf{Charles-Albert Lehalle} for his helpful talks about the practical uses of our work and his knowledge in mathematical finance applications of neural networks.
 
-I am deeply grateful to the \textbf{BRIN MRC Summer School in Physics Informed Machine Learning Theory} for providing at the end of my internship an exceptional week-long intensive program that facilitated invaluable exchanges with leading experts in the field. The collaborative discussions and knowledge sharing during this program have been instrumental in establishing ongoing research collaborations and developing the theoretical frameworks presented in this work.
+I am deeply grateful to the \textbf{BRIN MRC Summer School in Physics Informed Machine Learning Theory} for providing an exceptional intensive program that facilitated invaluable exchanges with leading experts in the field. The collaborative discussions during this program have been instrumental in establishing research collaborations and developing the theoretical frameworks presented in this work.
 
 Special acknowledgment goes to \textbf{Professor Doron Levy}, Head of the Mathematics Department, for providing me with the necessary resources and institutional support to conduct this research effectively. His commitment to fostering advanced mathematical research has been crucial for the success of this project.
 
@@ -296,16 +310,22 @@ I would also like to extend my sincere gratitude to \textbf{Ruth Yun} from Human
 
 The working together and interesting discussions with other researchers have been important for developing the ideas shown here. This work shows the power of working together in research and the generous sharing of knowledge in the scientific community.
 
-\subsection*{Scope and Methodology}
-We have spent significant time to make sure this report can be understood by many readers while staying clear and complete about our results. We avoid unnecessary details or extra explanations that do not help understand our methods and findings. Every statement is supported and our assumptions are clearly stated. The references are complete and honest about current research, noting that this work is very recent with the latest advances from August 2025.
 
-To enhance readability and ensure readers have the most enjoyable experience possible, we have strategically incorporated colors throughout the document to highlight key mathematical concepts, important variables, and critical theoretical insights. This visual approach facilitates navigation through complex theoretical developments while maintaining mathematical rigor.
+\subsection*{Scope and Informal words}
 
-Our theoretical framework establishes fundamental connections between Sobolev training, NTK theory, and random matrix theory, providing new perspectives on neural network learning dynamics across multiple architectures.
+We have spent significant time to make sure this report can be understood by many readers while staying clear and complete about our results. We avoid unnecessary details or extra explanations that do not help understand our methods and findings. 
+Every statement is supported and our assumptions are clearly stated. The references are complete and honest about current research, 
+noting that this work is very recent with the latest advances from \textbf{August 2025}.
+To enhance readability and ensure readers have the most enjoyable experience possible, we have strategically 
+incorporated \textbf{\textcolor{red}{colors}}, I hope the reader will enjoy the reading experience.
+
+This work is still ongoing, supervised by the aforementioned professors. I have never been so happy to work on a subject,
+particularly because there exists a huge theoretical gap to fill in this emerging field that bridges physics and deep learning,
+especially \textbf{\textcolor{brown}{random matrix theory}}, \textbf{\textcolor{darkyellow}{statistical physics}} and \textbf{\textcolor{blue}{quantum field theory}}, this will be tackled in the oral presentation.
+
+This report required \textbf{1000 pdflatex compilations} - totally worth it!
 
 \newpage
-
-
 
 
 
@@ -326,11 +346,10 @@ Our theoretical framework establishes fundamental connections between Sobolev tr
 \midrule
 $\mathbb{R}$ & Set of real numbers & $\mathbb{N}$ & Set of natural numbers \\
 $\mathbb{C}$ & Set of complex numbers & $\mathbb{S}^{d-1}$ & Unit sphere of dimension $d-1$ \\
-$\E[\cdot]$ & Mathematical expectation & $\Var(\cdot)$ & Variance of a random variable \\
+$\E_{\cdot}[\cdot]$ & Mathematical expectation & $\Var(\cdot)$ & Variance of a random variable \\
 $\Cov(\cdot,\cdot)$ & Covariance between two variables & $\indic\{\cdot\}$ & Indicator function \\
 $\dd x$ & Differential element & $\|\cdot\|$ & Euclidean norm \\
-$\langle \cdot,\cdot \rangle$ & Inner product & $\mathcal{O}(\cdot)$ & Landau notation (big O) \\
-$\tilde{\Omega}(\cdot)$ & Landau notation (big Omega tilde) & & \\
+$\langle \cdot,\cdot \rangle$ & Inner product & $\mathcal{O}(\cdot)$ and $\tilde{\Omega}(\cdot)$  & Landau notation \\
 \bottomrule
 \end{longtable}
 
@@ -339,9 +358,9 @@ $\tilde{\Omega}(\cdot)$ & Landau notation (big Omega tilde) & & \\
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
 \midrule
-$\ReLU$ & activation function & $f(\mathbf{x}; \boldsymbol{\theta})$ & Neural network function \\
+$\ReLU$ & Activation function & $f(\mathbf{x}; \boldsymbol{\theta})$ & Neural network function \\
 $\sigma_{\cdot}$ & General variance denomination & $L$ & Number of layers \\
-$n_k$ & Width of layer $k$ & & \\
+$decomposing_k$ (MMNN) & Width of layer $k$ & $n_k$ (FCNN) & Width of layer $k$ \\
 \bottomrule
 \end{longtable}
 
@@ -482,42 +501,41 @@ and is part of the field slang, even if describing it in a sobolev space is ont 
 
 \subsection{Literature Review: Sobolev Training and NTK Eigenvalues}
 
-The intersection of Sobolev training methodologies and Neural Tangent Kernel (NTK) spectral analysis represents a rapidly evolving area of machine learning theory. In recent years, research has focused on understanding how derivative information in training objectives affects the convergence properties and generalization capabilities of neural networks. This literature review examines the foundational contributions and recent developments in both Sobolev training approaches and NTK eigenvalue analysis.
+\subsubsection{The Intersection of Sobolev Training and NTK Spectral Analysis}
 
-\subsubsection{Foundations of Sobolev Training}
+The convergence of Sobolev training methodologies with Neural Tangent Kernel (NTK) spectral analysis represents one of the most promising theoretical frontiers in modern machine learning. This research line fundamentally addresses how embedding derivative information into learning objectives reshapes the spectral and optimization dynamics of neural networks. The literature spans from foundational works in approximation theory to recent finite-width corrections via diagrammatic methods, forming a coherent but rapidly evolving theoretical framework.
 
-The concept of incorporating derivative information into neural network training was initially motivated by classical numerical analysis and function approximation theory. Czarnecki et al. \cite{czarnecki2017sobolev} introduced the fundamental framework of Sobolev training, demonstrating that augmenting standard loss functions with derivative penalties leads to smoother function approximations with improved generalization properties. Their work established the theoretical foundation by showing that training in Sobolev norms $H^s$ naturally regularizes the function space, constraining the complexity of learned representations.
+\paragraph{Foundations of Sobolev Training}
 
-Building upon this foundation, Gupte et al. \cite{gupte2022sobolev_loss} extended the Sobolev training paradigm by providing rigorous convergence guarantees and establishing connections to classical function approximation theory. Their analysis revealed that Sobolev training effectively controls the spectral properties of learned functions, with particular emphasis on high-frequency behavior. The authors demonstrated that derivative-augmented training objectives lead to faster convergence rates when the target function possesses sufficient smoothness, establishing a direct relationship between the Sobolev order $s$ and the achievable approximation error.
+The theoretical origins of Sobolev training lie in classical numerical analysis, where controlling derivatives of approximants was essential for stability and convergence. Czarnecki et al. \cite{czarnecki2017sobolev} formalized this approach for deep learning, demonstrating that penalizing derivative mismatches induces smoother approximations and improved generalization properties. We observe that this foundational work established the principle that incorporating higher-order information fundamentally changes the learning dynamics.
 
-The work of Doumeche \cite{doumeche2023sobolev} represents a significant advancement in understanding the theoretical underpinnings of Sobolev training within the context of over-parameterized neural networks. Doumeche's analysis provides the first comprehensive treatment of how derivative information affects the Neural Tangent Kernel regime, establishing that Sobolev training fundamentally alters the spectral properties of the limiting kernel operator. This work bridges the gap between classical function approximation theory and modern deep learning by showing that the NTK under Sobolev training can be characterized as a composition of the standard NTK with fractional differential operators.
+Subsequent theoretical refinements by Gupte et al. \cite{gupte2022sobolev_loss} provided rigorous error bounds, linking Sobolev loss formulations to spectral control of learned functions, particularly in high-frequency regimes. This insight established the principle that the Sobolev order $s$ directly dictates approximation error decay rates. We note that these results created the theoretical foundation for understanding how derivative penalties affect function space properties.
 
-Townsend and collaborators \cite{townsend2022sobolev} have contributed significantly to the practical implementation aspects of Sobolev training, particularly in the context of physics-informed neural networks and scientific computing applications. Their work demonstrates that careful selection of derivative terms in the loss function can dramatically improve convergence for partial differential equation solving tasks. The authors provide extensive empirical evidence that Sobolev training enables neural networks to capture complex physical phenomena with fewer training samples, particularly when the underlying physics imposes smoothness constraints on the solution.
+Recent developments extend these ideas in two complementary directions. On the theoretical side, Doumeche \cite{doumeche2023sobolev} demonstrated that Sobolev training fundamentally modifies the NTK operator itself, effectively embedding fractional differential operators into the kernel structure. On the applied side, Townsend et al. \cite{townsend2022sobolev} showed the effectiveness of Sobolev losses in PDE-constrained learning scenarios, where derivative-aware training achieves faster convergence and lower sample complexity compared to standard approaches.
 
-\subsubsection{Neural Tangent Kernel Eigenvalue Analysis}
+\paragraph{Spectral Properties of Neural Tangent Kernels}
 
-The spectral analysis of Neural Tangent Kernels has emerged as a fundamental tool for understanding the convergence properties of gradient descent in over-parameterized neural networks. Bach \cite{bach2017breaking} pioneered the rigorous analysis of NTK eigenvalue decay, establishing the first polynomial decay rates for eigenvalues of infinite-width neural networks. Bach's seminal work demonstrated that the eigenvalue spectrum of the NTK exhibits polynomial decay with rates depending on the input dimension and network architecture, providing the theoretical foundation for subsequent convergence analyses.
+Parallel to Sobolev training advances, NTK analysis has provided the dominant theoretical framework for studying convergence in wide neural networks. Bach's foundational works \cite{bach2017breaking,bach2021ntk_eigenvalues} established polynomial eigenvalue decay rates for NTKs, demonstrating that spectral tail behavior governs generalization properties, while the smallest eigenvalue $\lambda_{\min}$ dictates optimization convergence speed.
 
-The comprehensive treatment by Bach \cite{bach2021ntk_eigenvalues} further refined these results, establishing precise characterizations of eigenvalue decay rates for various activation functions and network architectures. This work reveals that the eigenvalue spectrum fundamentally determines the learning dynamics, with faster eigenvalue decay corresponding to better generalization properties. Bach's analysis provides explicit bounds on the minimum eigenvalue $\lambda_{\min}$ of the empirical NTK, which directly controls the convergence rate of gradient descent.
+These fundamental results were refined by Nguyen et al. \cite{nguyen2022ntk_eigenvalues} and Fan \& Wang \cite{fan2020spectra}, who connected eigenvalue distribution patterns to architectural parameters including depth, width, and random matrix effects. We observe that these works established precise relationships between network structure and spectral properties. More recently, Doumeche \cite{doumeche2023ntk_spectral} introduced concentration inequalities for empirical NTK spectra, ensuring stability of eigenvalue distributions in high-dimensional settings.
 
-Doumeche's recent contributions \cite{doumeche2023ntk_spectral} have significantly advanced the understanding of NTK eigenvalue behavior in high-dimensional settings. The work provides novel concentration inequalities for empirical NTK eigenvalues, establishing high-probability bounds that hold uniformly over the spectrum. Doumeche's analysis reveals that the eigenvalue distribution of the empirical NTK converges to that of the population NTK at rates that depend on the effective dimension of the data manifold rather than the ambient dimension.
+Finite-width corrections represent an active research area where Hanin \& Nica \cite{hanin_nica_2019}, Dyer \& Gur-Ari \cite{dyer_gur_ari_2019}, and Guillen et al. \cite{guillen_misof_gerken_2025} employed diagrammatic techniques inspired by quantum field theory to describe NTK fluctuations. These approaches bridge the theoretical gap between infinite-width and finite-width regimes, providing practical insights for real neural networks.
 
-The intersection of these two research directions becomes particularly evident in Doumeche's unified framework \cite{doumeche2023sobolev_ntk}, which analyzes the spectral properties of NTKs under Sobolev training. This work establishes that Sobolev training fundamentally modifies the eigenvalue decay rates, typically leading to faster decay for high-frequency components. The analysis reveals that the composite operator arising from Sobolev training exhibits eigenvalues that are products of the standard NTK eigenvalues and powers of fractional differential operators, providing explicit connections between the Sobolev order and spectral properties.
+\paragraph{Convergence of Sobolev Training and NTK Theory}
 
-\subsubsection{Convergence Analysis and Optimization Theory}
+The synthesis of these research directions occurs in works such as Doumeche \cite{doumeche2023sobolev_ntk}, which demonstrated that Sobolev training reweights the NTK spectrum through powers of differential operators, accelerating decay of high-frequency eigenmodes. This theoretical result explains empirically observed performance gains in PDE solvers and smooth regression tasks, providing the first rigorous connection between Sobolev norms and kernel spectral properties.
 
-The convergence properties of neural networks under Sobolev training have been extensively studied through the lens of NTK theory. We observe that the incorporation of derivative information typically accelerates convergence for smooth target functions while potentially slowing convergence for non-smooth targets. This dichotomy reflects the fundamental trade-off between bias and variance in function approximation, where Sobolev training introduces an inductive bias toward smooth solutions.
+Complementary works extend this analysis to optimization guarantees. Welper \cite{welper2023approximation} studied gradient flow behavior for Sobolev-smooth targets, while recent investigations \cite{ntk2024underparam,ntk2025divergence} examined NTK behavior in under-parameterized and classification settings, where uniform kernel convergence can break down. We note that these studies reveal both the power and limitations of NTK-based theoretical analyses.
 
-Recent theoretical developments have established that the convergence rate of gradient descent under Sobolev training depends critically on the alignment between the target function's smoothness and the Sobolev order used in training. When this alignment is optimal, convergence rates can be significantly faster than standard training, with improvements scaling polynomially with the network width. However, misalignment between the assumed and actual smoothness can lead to degraded performance, highlighting the importance of adaptive Sobolev order selection.
+\paragraph{Convergence Analysis and Open Challenges}
 
-The role of sampling strategies emerges as a crucial factor in the effectiveness of both standard and Sobolev training approaches. It remains unclear why certain sampling patterns, particularly those based on optimal interpolation nodes such as Chebyshev points, lead to dramatically improved performance in the NTK regime. This observation suggests that the choice of training data distribution fundamentally affects the spectral properties of the resulting kernel operator, opening new avenues for theoretical investigation.
+The combined theoretical framework highlights a fundamental trade-off in neural network training. We observe that Sobolev training accelerates convergence when target functions possess sufficient smoothness, but may hinder learning for non-smooth signals. Adaptive strategies that dynamically tune the Sobolev order $s$ based on local function properties represent an active research direction to mitigate this sensitivity.
 
-\subsubsection{Contemporary Developments and Open Questions}
+Moreover, sampling strategies critically shape NTK spectral properties, yet remain poorly understood in practice. The connection between data geometry and kernel eigenstructure, particularly for optimal interpolation nodes such as Chebyshev points \cite{driscoll2014chebfun}, is emerging as a key theoretical and algorithmic lever. It remains unclear why certain sampling patterns lead to dramatically improved spectral properties in the NTK regime.
 
-Current research continues to explore the fundamental connections between function space geometry, kernel operator spectral properties, and neural network optimization dynamics. The development of adaptive Sobolev training methods, which dynamically adjust the derivative order based on local function properties, represents an active area of investigation. These methods promise to combine the benefits of Sobolev training with increased robustness to unknown target function properties.
+Finally, extending Sobolev-aware NTK analysis to modern architectures including convolutional networks and attention mechanisms, as well as to stochastic training dynamics, remains a theoretical frontier. Diagrammatic methods and neural tangent hierarchy approaches \cite{huang2019dynamicsdeepneuralnetworks} may provide the appropriate mathematical tools for handling such architectural complexity.
 
-The extension of Sobolev training to more complex network architectures, including convolutional and attention-based models, remains an active area of research. Understanding how architectural constraints interact with derivative-based training objectives presents both theoretical and computational challenges that continue to drive innovation in the field.
-
+The synthesis of Sobolev training and NTK spectral analysis offers a unified theoretical framework for understanding neural network convergence properties. We observe that derivative-aware training objectives fundamentally reshape kernel spectra, altering both optimization dynamics and generalization behavior. Foundational results from approximation theory, kernel eigenvalue analysis, and finite-width corrections are converging into a coherent mathematical theory with significant implications for scientific machine learning and adaptive training methodologies.
 
 \newpage
 \section{The Neural Tangent Kernel under Sobolev training}
@@ -572,7 +590,6 @@ We will prove that sensoring Chebyshev points are not only optimal, but necessar
 optimization bounds for neural network training
 \end{tcolorbox}
 
-\newpage
 
 The framework selection can be summarized by the following decision tree:
 
@@ -924,6 +941,7 @@ The practical implications extend to algorithm design, where our theoretical ins
 
 
 \newpage
+\appendix
 \section{Main Proofs}
 
 \subsection{Alternative Proof: Sobolev Loss on Unbounded Domains via Integration by Parts}
@@ -1476,8 +1494,68 @@ URL: \url{https://arxiv.org/abs/2208.13614}.
 \bibitem{czarnecki2017sobolev}
 Wojciech Marian Czarnecki, Simon Osindero, Max Jaderberg, Grzegorz Świrszcz, and Razvan Pascanu.
 Sobolev training for neural networks.
-In \textit{Advances in Neural Information Processing Systems}, 2017.
-URL: \url{https://papers.nips.cc/paper/2017/hash/c8067ad1937f728f51288b3eb986afaa-Abstract.html}.
+\textit{arXiv preprint arXiv:1706.04859}, 2017.
+URL: \url{https://arxiv.org/abs/1706.04859}.
+
+\bibitem{son2021sobolev}
+Jaeseok Son, Yoonho Jang, Jae Yong Han, and Sung Ju Hwang.
+Sobolev training for physics informed neural networks.
+\textit{arXiv preprint arXiv:2101.08932}, 2021.
+URL: \url{https://arxiv.org/abs/2101.08932}.
+
+\bibitem{sobolev2024acceleration}
+Anonymous.
+Sobolev acceleration for neural networks.
+\textit{OpenReview preprint}, 2024.
+Under review at ICLR.
+
+\bibitem{yang2024sobolev}
+Tian Yang and Xiang He.
+Optimal generalization with sobolev loss.
+In \textit{Proceedings of the International Conference on Machine Learning}, 2024.
+
+\bibitem{nguyen2022ntk_eigenvalues}
+Quynh Nguyen, Marco Mondelli, and Guido Montufar.
+Tight bounds on the smallest eigenvalue of the neural tangent kernel for deep relu networks.
+\textit{arXiv preprint arXiv:2012.11654}, 2022.
+URL: \url{https://arxiv.org/abs/2012.11654}.
+
+\bibitem{fan2020spectra}
+Zhou Fan and Zhichao Wang.
+Spectra of the conjugate kernel and neural tangent kernel for linear-width neural networks.
+\textit{arXiv preprint arXiv:2005.11879}, 2020.
+URL: \url{https://arxiv.org/abs/2005.11879}.
+
+\bibitem{li2024eigenvalue_decay}
+Han Li, Zheng-Chu Yu, Yifan Chen, and Shao-Bo Lin.
+Eigenvalue decay rates of neural-network related kernels on general domains.
+\textit{arXiv preprint arXiv:2305.02657}, 2024.
+URL: \url{https://arxiv.org/abs/2305.02657}.
+
+\bibitem{nvidia2025sobolev}
+NVIDIA.
+Sobolev or gradient-enhanced training in physics-informed neural networks.
+NVIDIA Documentation, 2025.
+URL: \url{https://docs.nvidia.com/deeplearning/physicsnemo/physicsnemo-sym/user_guide/theory/advanced_schemes.html}.
+
+\bibitem{welper2023approximation}
+Guido Welper.
+Approximation guarantees for gradient descent--trained neural networks.
+\textit{arXiv preprint arXiv:2309.04860}, 2023.
+URL: \url{https://arxiv.org/abs/2309.04860}.
+
+\bibitem{ntk2025divergence}
+Anonymous.
+Divergence of empirical ntk in classification.
+\textit{arXiv preprint arXiv:2504.11130}, 2025.
+Published at ICLR 2025.
+URL: \url{https://arxiv.org/abs/2504.11130}.
+
+\bibitem{ntk2024underparam}
+Anonymous.
+Approximation and gradient descent via neural tangent kernel in the under-parameterized regime.
+\textit{arXiv preprint arXiv:2405.11696}, 2024.
+URL: \url{https://arxiv.org/abs/2405.11696}.
 
 \bibitem{gupte2022sobolev_loss}
 Aparna Gupte, Liu Zhang, Yunan Yang, and Alex Townsend.
@@ -1526,23 +1604,6 @@ Dynamics of deep neural networks and neural tangent hierarchy.
 \textit{arXiv preprint arXiv:1909.08156}, 2019.
 Fundamental work on neural tangent hierarchy theory.
 URL: \url{https://arxiv.org/abs/1909.08156}.
-
-
-
-
-% added
-
-\bibitem{czarnecki2017sobolev}
-Wojciech Marian Czarnecki, Simon Osindero, Max Jaderberg, Grzegorz Swirszcz, and Razvan Pascanu.
-Sobolev training for neural networks.
-In \textit{Advances in Neural Information Processing Systems}, pages 4278--4287, 2017.
-Introduces sobolev training methodology for neural networks with derivative-based loss functions.
-
-\bibitem{gupte2022sobolev_loss}
-Aditya Gupte, Andrzej Ruszczynski, and Bedrich Sousedik.
-Sobolev training with approximated derivatives for black-box function regression.
-In \textit{International Conference on Machine Learning}, pages 8000--8015, 2022.
-Develops sobolev loss functions with derivative approximation for black-box regression problems.
 
 \bibitem{doumeche2023sobolev}
 Nicolas Doumeche.
