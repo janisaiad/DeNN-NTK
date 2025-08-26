@@ -324,22 +324,12 @@
 
 
 
-
 \addcontentsline{toc}{section}{Abstract}
 \section*{Abstract}
 
-In the past few years, research has focused on understanding the fundamental mechanisms governing learning dynamics in deep neural networks. While significant progress has been made through the \textcolor{red}{\textbf{Neural Tangent Kernel (NTK)}} formalism, it remains unclear how
-to choose the right architecture for a given problem. In the tryptical approximation/generalization/optimization trilemma, we focus on the optimization aspect, the less understood one.
-This report presents a comprehensive answer to this question through the lens of \textcolor{red}{\textbf{NTK theory}} in the context of
-\textbf{Sobolev training}.
+While the \textcolor{red}{\textbf{Neural Tangent Kernel (NTK)}} has illuminated optimization in infinite-width networks, the behavior of practical, finite-width models remains a central challenge. This report addresses this gap by developing a framework that integrates NTK theory with advanced tools from mathematical physics. We analyze \textbf{finite-width corrections} by modeling network initializations with \textcolor{purple!80!black}{\textbf{Random Matrix Theory (RMT)}} and computing their effects using methods analogous to \textcolor{blue!60!black}{\textbf{Quantum Field Theory}}, such as \textcolor{orange!80!black}{\textbf{Weingarten calculus}}. This approach yields a systematic expansion beyond the infinite-width limit, providing precise scaling laws for higher-order kernel terms.
 
-We establish a novel theoretical framework and our key finding demonstrates that the effectiveness of learning depends critically on \textbf{sampling conditions}, specifically when using \textbf{Chebyshev points}.
-For general sampling schemes, optimal learning requires \textbf{explicit derivative information} for effective training.
-
-We derive \textbf{explicit theoretical and numerical bounds} for key neural network quantities establishing \textbf{precise eigenvalue bounds} for \textcolor{red}{\textbf{NTK}} matrices and ongoing \textbf{quantitative convergence rates}.
-
-Our \textbf{spectral analysis} covers \textcolor{gray}{\textbf{fully connected networks (FCNN)}}, \textcolor{orange}{\textbf{Multi-Layer Multi-component networks (MMNN)}}, and \textbf{transformers}, revealing architecture-specific scaling with depth, width, and input dimension. 
-Through \textbf{finite-width corrections}, we provide \textbf{explicit error bounds} and fundations for ongoing \textbf{convergence guarantees} for gradient descent.
+Our analysis begins within the \textbf{Sobolev training} context, where we demonstrate that ideal learning dynamics hinge on specific \textbf{sampling conditions}, such as \textbf{Chebyshev points}, without which explicit derivative information is required. We then apply our finite-width framework to \textcolor{gray}{\textbf{fully connected networks (FCNN)}}, \textcolor{orange}{\textbf{Multi-Layer Multi-component networks (MMNN)}}, and \textbf{transformers}. This yields \textbf{explicit eigenvalue bounds} for the NTK matrix and \textbf{quantitative convergence rates} for gradient descent, with clear dependencies on architecture depth, width, and input dimension. Our findings provide rigorous \textbf{error bounds} for the NTK approximation and a deeper understanding of the optimization landscape in realistic deep learning scenarios.
 
 Experimental validation confirms our theoretical predictions across all architectures. Fully reproducible code is available at \href{https://github.com/janisaiad/DeNN-NTK}{github.com/janisaiad/DeNN-NTK} and \href{https://github.com/janisaiad/MMN}{github.com/janisaiad/MMN}.
 
@@ -347,13 +337,9 @@ Experimental validation confirms our theoretical predictions across all architec
 
 \addcontentsline{toc}{section}{Résumé}
 \section*{Résumé}
-Au cours des dernières années, la recherche s'est concentrée sur la compréhension des mécanismes fondamentaux régissant la dynamique d'apprentissage dans les réseaux de neurones profonds. Bien que des progrès significatifs aient été réalisés grâce au formalisme du \textcolor{red}{\textbf{Neural Tangent Kernel (NTK)}}, il reste peu clair comment choisir la bonne architecture pour un problème donné. Dans le trilemme classique approximation/généralisation/optimisation, nous nous concentrons sur l'aspect optimisation, le moins bien compris. Ce rapport présente une réponse complète à cette question à travers le prisme de la \textcolor{red}{\textbf{théorie du NTK}} dans le contexte de \textbf{l'entraînement de Sobolev}.
+Alors que le \textcolor{red}{\textbf{Noyau Tangent Neuronal (NTK)}} a éclairci l'optimisation des réseaux de largeur infinie, le comportement des modèles pratiques de largeur finie demeure un défi central. Ce rapport comble cette lacune en développant un cadre qui intègre la théorie du NTK avec des outils avancés de la physique mathématique. Nous analysons les \textbf{corrections de largeur finie} en modélisant les initialisations des réseaux avec la \textcolor{purple!80!black}{\textbf{Théorie des Matrices Aléatoires (TMA)}} et en calculant leurs effets via des méthodes analogues à la \textcolor{blue!60!black}{\textbf{Théorie Quantique des Champs}}, comme le \textcolor{orange!80!black}{\textbf{calcul de Weingarten}}. Cette approche produit une expansion systématique au-delà de la limite de largeur infinie, fournissant des lois d'échelle précises pour les termes du noyau d'ordre supérieur.
 
-Nous établissons un nouveau cadre théorique et notre découverte clé démontre que l'efficacité de l'apprentissage dépend de manière critique des \textbf{conditions d'échantillonnage}, spécifiquement lors de l'utilisation de \textbf{points de Chebyshev}. Pour les schémas d'échantillonnage généraux, l'apprentissage optimal nécessite une \textbf{information explicite sur les dérivées} pour un entraînement efficace. 
-
-Nous dérivons des \textbf{bornes théoriques et numériques explicites} pour les quantités clés des réseaux de neurones, établissant des \textbf{bornes précises sur les valeurs propres} pour les matrices \textcolor{red}{\textbf{NTK}} et des \textbf{taux de convergence quantitatifs} en cours.
-
-Notre \textbf{analyse spectrale} couvre les \textcolor{gray}{\textbf{réseaux entièrement connectés (FCNN)}}, les \textcolor{orange}{\textbf{réseaux multi-couches multi-composants (MMNN)}}, et les \textbf{transformers}, révélant une mise à l'échelle spécifique à l'architecture avec la profondeur, la largeur et la dimension d'entrée. À travers les \textbf{corrections de largeur finie}, nous fournissons des \textbf{bornes d'erreur explicites} et des fondations pour les \textbf{garanties de convergence} en cours pour la descente de gradient.
+Notre analyse débute dans le contexte de \textbf{l'entraînement de Sobolev}, où nous démontrons que la dynamique d'apprentissage idéale dépend de \textbf{conditions d'échantillonnage} spécifiques, telles que les \textbf{points de Chebyshev}, sans lesquelles une information explicite sur les dérivées est requise. Nous appliquons ensuite notre cadre de largeur finie aux \textcolor{gray}{\textbf{réseaux entièrement connectés (FCNN)}}, aux \textcolor{orange}{\textbf{réseaux multi-couches multi-composants (MMNN)}} et aux \textbf{transformers}. Cela nous permet d'obtenir des \textbf{bornes explicites sur les valeurs propres} de la matrice NTK et des \textbf{taux de convergence quantitatifs} pour la descente de gradient, avec des dépendances claires vis-à-vis de la profondeur, de la largeur et de la dimension d'entrée. Nos résultats fournissent des \textbf{bornes d'erreur rigoureuses} pour l'approximation NTK et une compréhension plus profonde du paysage d'optimisation dans des scénarios d'apprentissage profond réalistes.
 
 La validation expérimentale confirme nos prédictions théoriques à travers toutes les architectures. Un code entièrement reproductible est disponible sur \href{https://github.com/janisaiad/DeNN-NTK}{github.com/janisaiad/DeNN-NTK} et \href{https://github.com/janisaiad/MMN}{github.com/janisaiad/MMN}.
 \newpage
@@ -4590,7 +4576,7 @@ The symmetry-theoretic approach thus unifies neural network analysis with fundam
 
 
 
-\section{The Hessian-NTK Correspondence: A Spectral Equivalence \cite{dyer2019asymptotics, jacot2020kernelhessian}}
+\section{The Hessian-NTK Correspondence: A Spectral Equivalence}
 
 A critical insight for understanding the loss landscape of wide neural networks is the profound connection between the Hessian of the loss and the NTK. As we will show, in the large-width limit, their spectra become nearly identical. This correspondence allows us to translate all our findings about the NTK spectrum—from the dominant eigenvalue corresponding to data norms to the GOE statistics of the bulk—directly into statements about the geometry of the loss function around the network's initialization.
 
