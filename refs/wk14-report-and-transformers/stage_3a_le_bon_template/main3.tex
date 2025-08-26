@@ -717,7 +717,7 @@ The theoretical origins of Sobolev training lie in classical numerical analysis,
 
 Subsequent theoretical refinements by Gupte et al. \cite{gupte2022sobolev_loss} provided rigorous error bounds, linking Sobolev loss formulations to spectral control of learned functions, particularly in high-frequency regimes. This insight established the principle that the Sobolev order $s$ directly dictates approximation error decay rates. We note that these results created the theoretical foundation for understanding how derivative penalties affect function space properties.
 
-Recent developments extend these ideas in two complementary directions. On the theoretical side, Doumeche \cite{doumeche2023sobolev} demonstrated that Sobolev training fundamentally modifies the NTK operator itself, effectively embedding fractional differential operators into the kernel structure. On the applied side, Townsend et al. \cite{townsend2022sobolev} showed the effectiveness of Sobolev losses in PDE-constrained learning scenarios, where derivative-aware training achieves faster convergence and lower sample complexity compared to standard approaches.
+Recent developments extend these ideas in two complementary directions. On the theoretical side, Doumeche \cite{doumeche2024physicsinformed} demonstrated that Sobolev training is a kernel method, effectively embedding fractional differential operators into the kernel structure. On the applied side, Townsend et al. \cite{townsend2020ntk} showed the effectiveness of Sobolev losses in PDE-constrained learning scenarios, where derivative-aware training achieves faster convergence and lower sample complexity compared to standard approaches.
 
 \paragraph{Spectral Properties of Neural Tangent Kernels}
 
@@ -729,7 +729,7 @@ Finite-width corrections represent an active research area where Hanin \& Nica \
 
 \paragraph{Convergence of Sobolev Training and NTK Theory}
 
-The synthesis of these research directions occurs in works such as Doumeche \cite{doumeche2023sobolev_ntk}, which demonstrated that Sobolev training reweights the NTK spectrum through powers of differential operators, accelerating decay of high-frequency eigenmodes. This theoretical result explains empirically observed performance gains in PDE solvers and smooth regression tasks, providing the first rigorous connection between Sobolev norms and kernel spectral properties.
+The synthesis of these research directions occurs in works such as Doumeche \cite{doumeche2024physicsinformed,townsend2020ntk}, which demonstrated that Sobolev training is accelerating decay of high-frequency eigenmodes. This theoretical result explains empirically observed performance gains in PDE solvers and smooth regression tasks, providing the first rigorous connection between Sobolev norms and kernel spectral properties.
 
 Complementary works extend this analysis to optimization guarantees. Welper \cite{welper2023approximation} studied gradient flow behavior for Sobolev-smooth targets, while recent investigations \cite{ntk2024underparam} examined NTK behavior in under-parameterized and classification settings, where uniform kernel convergence can break down. We note that these studies reveal both the power and limitations of NTK-based theoretical analyses.
 
@@ -1394,7 +1394,7 @@ which ensures a well-defined infinite-width limit.
 We consider an \textbf{MMNN} of depth $L$. Let the input be $\bm{h}^{(0)}(\bm{x}) = \bm{x} \in \mathbb{R}^{d_0}$. For each layer $\ell = 1, \dots, L$, the output $\bm{h}^{(\ell)}$ is defined recursively:
 
 \begin{equation}
-    \bm{h}^{(\ell)}(\bm{x}) = \frac{\sigma_A}{\sqrt{n_\ell}} \sum_{j=1}^{n_\ell} \bm{A}_j^{(\ell)} \ReLU\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)} + \sigma_c \bm{c}^{(\ell)}\right)
+    \bm{h}^{(\ell)}(\bm{x}) = \frac{\sigma_A}{\sqrt{n_\ell}} \sum_{j=1}^{n_\ell} \bm{A}_j^{(\ell)} \ReLU\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)}\right) + \sigma_c \bm{c}^{(\ell)}
 \end{equation}
 
 where $n_\ell$ is the width of layer $\ell$ and $\bm{h}^{(\ell)} \in \mathbb{R}^{d_\ell}$.
@@ -1456,7 +1456,7 @@ Those initialization are opposite, and we will see that the NTK parameterization
 For a given layer $\ell$, when $n_\ell \to \infty$, the output $\bm{h}^{(\ell)}(\bm{x})$ converges in 
 distribution to a composition of Gaussian processes whose covariance conditioned to the previous layer is determined by the NNGP kernel $\mathcal{K}_{NNGP}^{(\ell | \ell-1)}$.
 
-Mathematically, we have:
+We have:
 \begin{equation}
 \mathcal{K}_{NNGP}^{(\ell | \ell-1 )}(\bm{x}, \bm{x}') = \text{Cov}\left[\bm{h}^{(\ell)}(\bm{x}), \bm{h}^{(\ell)}(\bm{x}') \mid \bm{h}^{(\ell-1)}\right]
 \end{equation}
@@ -1514,14 +1514,31 @@ We call the EOC initialization when adding the condition $\sigma_c^2 =1$.
 % \end{block}
 
 
+\begin{theorem}[Gaussian Process Structure of Layer Outputs]
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Multi-Dimensional Gaussian Process at Layer $\ell$}},enhanced,drop shadow,boxrule=2pt]
+For a layer $\ell$ with output dimension $d_\ell$, the layer output $\bm{h}^{(\ell)}(\bm{x})$ follows a $d_\ell$-dimensional Gaussian process with Kronecker covariance structure:
+
+\begin{equation}
+\boxed{\bm{h}^{(\ell)} \sim \mathcal{GP}(0, \mathbf{M}^{(\ell)} \otimes \mathbf{I}_{d_\ell})}
+\end{equation}
+
+where $\mathbf{M}^{(\ell)}$ is the 2-dimensional covariance matrix between different input points:
+\begin{equation}
+\mathbf{M}^{(\ell)}_{i,j} = \text{Cov}(h^{(\ell)}_k(\bm{x}_i), h^{(\ell)}_k(\bm{x}_j)) = \sigma_c^2 + \rho^{(\ell)}(\bm{x}_i, \bm{x}_j)
+\end{equation}
+
+and $\mathbf{I}_{d_\ell}$ is the $d_\ell \times d_\ell$ identity matrix capturing the independence across output dimensions within the same input point.
+\end{tcolorbox}
+\end{theorem}
 
 
 
 
 
-\section{Personal contribution: NTK formulas for MMNNs}
 
-\subsection{NTK for a Single-Layer MMNN}
+\section{NTK formulas for MMNNs}
+
+\subsection{Personal contribution : NTK for a Single-Layer MMNN}
 \label{sec:single_layer_mmfn}
 We begin by deriving the Neural Tangent Kernel for a single-layer MMNN. This result forms the base case for the multi-layer recursion. For simplicity, we consider a single scalar output, such that the network is defined as:
 
@@ -1532,7 +1549,7 @@ We begin by deriving the Neural Tangent Kernel for a single-layer MMNN. This res
 The trainable parameters are $\theta = \{A_j\}_{j=1}^n \cup \{c\}$. The parameters $\{\bm{w}_j, b_j\}$ are fixed and randomly drawn, with $\bm{w}_j \sim \mathcal{N}(0, \Sigma_w)$ and $b_j \sim \mathcal{N}(\mu_b, \sigma_b^2)$.
 \end{tcolorbox}
 
-\subsection{From Gradient Products to an Expectation}
+\subsubsection{From Gradient Products to an Expectation}
 In the infinite-width limit ($n \to \infty$), the NTK converges to a rotation invariant kernel (hence zonal) as an expectation over the distribution of the random parameters $(\bm{w}, b)$. The full NTK is the sum of the kernel part from the weights $\{A_j\}$ and the part from the bias $\{c\}$.
 
 \begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{NTK as Expectation}},enhanced,drop shadow,boxrule=2pt]
@@ -1542,7 +1559,7 @@ In the infinite-width limit ($n \to \infty$), the NTK converges to a rotation in
 \end{equation}
 \end{tcolorbox}
 
-\subsection{Integral Formulation and Parameter Mapping}
+\subsection{Personal contribution : Integral Formulation and Parameter Mapping}
 The NNGP kernel $\Sigma^{(1)}$ is an integral over the distributions of $\bm{w}$ and $b$:
 \begin{equation}
     \Sigma^{(1)}(\bm{x}, \bm{x}') = \int_{\mathbb{R}^d} \int_{\mathbb{R}} \ReLU(\bm{w}^\top \bm{x} + b)\ReLU(\bm{w}^\top \bm{x}' + b) p(\bm{w})p(b) \,db \,d\bm{w}
@@ -1558,7 +1575,7 @@ A change of variables is performed from the parameter space $(\bm{w}, b)$ to the
 \end{itemize}
 \end{tcolorbox}
 
-\subsection{Final Analytical Expression}
+\subsection{Personal contribution : Final Analytical Expression}
 \begin{theorem}[NNGP Kernel for a Single-Layer ReLU MMNN]
 Let the pre-activations $(g_1, g_2)$ be jointly Gaussian with parameters $(\mu_1, \sigma_1^2)$ and $(\mu_2, \sigma_2^2)$ and correlation $\rho$. The NNGP kernel $\Sigma^{(1)} = \mathbb{E}[\text{ReLU}(g_1)\text{ReLU}(g_2)]$ is given by the decomposition:
 
@@ -1594,7 +1611,7 @@ We now extend the single-layer result to deep networks. The recursion involves t
 An important fact is that the NNGP kernel $\Sigma^{(\ell)}$ is a random field that is NOT a gaussian process but a deep gaussian process, while the NTK kernel $\Theta^{(\ell)}$ is also a random field that is not a gaussian process. This is because the composition of a non-linear function with a Gaussian Process, $g(f(x))$, is not, in general, a Gaussian Process.
 \end{tcolorbox}
 
-\subsection{NNGP Kernel \(\Sigma^{(\ell)}\) Recursion}
+\subsubsection{NNGP Kernel \(\Sigma^{(\ell)}\) Recursion}
 The NNGP kernel describes the covariance of the network's output function at initialization. For any finite width, this output is a random function. In the infinite-width limit, it converges to a Gaussian Process. The base kernel $\Sigma^{(\ell)}$ is defined recursively.
 
 \begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{NNGP Kernel Recursion}},enhanced,drop shadow,boxrule=2pt]
@@ -1646,12 +1663,12 @@ The NTK is the Gram matrix of function gradients. For any finite width, it is a 
 \end{tcolorbox}
 
 
-\subsubsection{Personal contribution : Parameter Influence on NTK Preconditioning}
+\subsubsection{Parameter Influence on NTK Preconditioning}
 
 \begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Activation and Bias Influence on NTK}},enhanced,drop shadow,boxrule=2pt]
 The NTK behavior can be systematically controlled through two key parameters that serve as natural preconditioning mechanisms:
 
-\textbf{1. Activation Function Choice:} The choice of $\sigma$ directly and its convexity affect both $\Sigma^{(\ell)}$ and $\dot{\Sigma}^{(\ell)}$ kernels. For $\ReLU$, we obtain specific analytical forms that enable tractable computations, while alternative activations (sigmoid, tanh) modify the kernel's spectral properties and convergence behavior.
+\textbf{1. Activation Function Choice:} The choice of activation function directly and its convexity affect both $\Sigma^{(\ell)}$ and $\dot{\Sigma}^{(\ell)}$ kernels. For ReLU, we obtain specific analytical forms that enable tractable computations, while alternative activations (sigmoid, tanh) modify the kernel's spectral properties and convergence behavior.
 
 \textbf{2. Bias Parameter $\boldsymbol{\beta}$:} The bias scaling $\beta$ controls NTK preconditioning. Setting $\beta = 0$ yields centered pre-activations, while $\beta > 0$ improves training stability. This provides direct control over the kernel's spectral properties.
 \end{tcolorbox}
@@ -1707,7 +1724,7 @@ This scaling analysis through products of random matrices is precisely what we a
 \end{tcolorbox}
 
 
-\subsubsection{Final Result}
+\subsubsection{Personal contribution : Final Result}
 
 \begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{MAIN RESULT}},enhanced,drop shadow,breakable]
 For 2 inputs $x,y \in \mathbb{S}^{d-1}$ with cosine similarity $\textcolor{magenta}{\rho}$ and a low-rank hidden layer $r$, the \textcolor{red}{\textbf{NTK}} for a two hidden layer EOC initialized MMNN is:
@@ -1721,9 +1738,11 @@ with $\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\textcolor{magenta}{\rho}) = \f
 where the random variables follow:
 \begin{itemize}
 \item $\textcolor{magenta}{\rho_1} \sim \text{Fisher}(\textcolor{magenta}{\rho_1}, r)$ is independent of the norms ($\|x_1\|$, $\|y_1\|$)
-\item $(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \textcolor{magenta}{\rho_1})$ are chi-squared variables with $r$ degrees of freedom
+\item $(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \textcolor{magenta}{\rho_1})$ are chi-squared variables from correlated normal variables with $r$ degrees of freedom (scalar product is a sum of independant Bessel variables)
 \end{itemize}
 \end{tcolorbox} 
+We explain more about those Fisher and Kibble distributions in appendix.
+
 
 \begin{tcolorbox}[colback=green!10,colframe=green,title={\textbf{High-Dimensional Behavior}},enhanced]
 For large values of $r$, Fisher's $z$-transformation gives $z = \text{arctanh}(\rho_1) \sim \mathcal{N}\left(\text{arctanh}(\rho) + \frac{\rho}{2(r-1)}, \frac{1}{r-3}\right)$. 
@@ -1754,7 +1773,7 @@ Another way to precondition the NTK is to choose a specific ad-hoc great initili
 
 
 \newpage
-\section{Personal contribution: Ongoing research and conclusion}
+\section{Future work, ongoing research and conclusion}
 
 The initial results are promising and open several avenues for both numerical and theoretical investigation.
 
@@ -1768,6 +1787,7 @@ The initial results are promising and open several avenues for both numerical an
 A primary focus of future theoretical work will be to precisely characterize the spectrum of the MMNN's NTK operator using a trifecta of advanced analytical techniques.
 
 Then we can focus on analyzing the influence of beta to ensure huge beta can or not precondition the NTK gram matrix.
+For us, the agenda is clear and is being tackled in ongoing research through the end of 2025.
 
 The primary analytical approaches for the spectrum are:
 \begin{itemize}
@@ -2689,10 +2709,10 @@ This suggests that the tensors are not independent random objects but are intima
 \subsection{Personal contribution : An RMT Framework for the NTK as a spiked kernel covariance random matrix}
 
 \begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{🚀 BREAKTHROUGH: RMT Framework for NTK Analysis}},enhanced,drop shadow]
-We now formalize the analysis of the \textcolor{kernelcolor}{NTK} using \textcolor{purple!80!black}{\textbf{Random Matrix Theory}} to understand the transition from feature learning to the lazy interpolation dictated by a random structure. This framework provides a dialogue between the signal embedded in the data and the noise introduced by random initialization \cite{doumeche2023sobolev_ntk}.
+We now formalize the analysis of the \textcolor{kernelcolor}{NTK} using \textcolor{purple!80!black}{\textbf{Random Matrix Theory}} to understand the transition from feature learning to the lazy interpolation dictated by a random structure. This framework provides a dialogue between the signal embedded in the data and the noise introduced by random initialization \cite{doumeche2024physicsinformed}.
 \end{tcolorbox}
 
-The starting point is to view the \textcolor{kernelcolor}{NTK} matrix, $\textcolor{kernelcolor}{\Theta} = \frac{1}{\textcolor{blue!80!black}{m}}JJ^T \in \mathbb{R}^{\textcolor{blue!80!black}{n} \times \textcolor{blue!80!black}{n}}$ (where $J$ is the Jacobian), not as a deterministic kernel matrix, but as a sample covariance matrix. The entries of $J$ are complex functions of the network's weights, which are random variables at initialization. This perspective fundamentally changes our understanding of the kernel's spectral properties and provides a principled approach to analyze the learning dynamics \cite{townsend2022sobolev}.
+The starting point is to view the \textcolor{kernelcolor}{NTK} matrix, $\textcolor{kernelcolor}{\Theta} = \frac{1}{\textcolor{blue!80!black}{m}}JJ^T \in \mathbb{R}^{\textcolor{blue!80!black}{n} \times \textcolor{blue!80!black}{n}}$ (where $J$ is the Jacobian), not as a deterministic kernel matrix, but as a sample covariance matrix. The entries of $J$ are complex functions of the network's weights, which are random variables at initialization. This perspective fundamentally changes our understanding of the kernel's spectral properties and provides a principled approach to analyze the learning dynamics \cite{townsend2020ntk}.
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{💡 KEY INSIGHT: Universal Distribution}},enhanced,drop shadow]
 The fundamental insight from \textcolor{purple!80!black}{\textbf{RMT}} is that, without structure in the data (e.g., for isotropic input data $X$), the eigenvalue spectrum of $\textcolor{kernelcolor}{\Theta}$ should converge to a universal distribution: the \textcolor{orange!80!black}{\textbf{Marchenko-Pastur (MP) law}}. This continuous distribution, the "bulk," represents the intrinsic structure of the kernel due to the architecture and random initialization. It is the background noise, the structural prior of the network before it has "seen" any interesting structure in the data \cite{bach2017breaking}.
@@ -2705,13 +2725,13 @@ The relevant model is not a purely random covariance matrix, but a "spiked" defo
 \[
 \textcolor{kernelcolor}{\Theta} \approx \textcolor{kernelcolor}{\Theta_{\text{bulk}}} + \sum_{i} \textcolor{blue!80!black}{\sigma_i} \textcolor{orange!80!black}{v_i} \textcolor{orange!80!black}{v_i}^T
 \]
-Here, $\textcolor{kernelcolor}{\Theta_{\text{bulk}}}$ represents the part of the spectrum following a classical \textcolor{purple!80!black}{\textbf{RMT}} law (Marchenko-Pastur or power-law), and the terms $\textcolor{orange!80!black}{v_i}$ are eigenvectors that encode low-rank structures in the data (e.g., class separation), with associated signal strengths $\textcolor{blue!80!black}{\sigma_i}$ \cite{doumeche2023sobolev}.
+Here, $\textcolor{kernelcolor}{\Theta_{\text{bulk}}}$ represents the part of the spectrum following a classical \textcolor{purple!80!black}{\textbf{RMT}} law (Marchenko-Pastur or power-law), and the terms $\textcolor{orange!80!black}{v_i}$ are eigenvectors that encode low-rank structures in the data (e.g., class separation), with associated signal strengths $\textcolor{blue!80!black}{\sigma_i}$.
 \end{tcolorbox}
 
 This decomposition reveals the dual nature of neural network learning. The bulk component $\textcolor{kernelcolor}{\Theta_{\text{bulk}}}$ captures the random initialization structure and represents the network's inherent inductive bias. The spike components $\textcolor{blue!80!black}{\sigma_i} \textcolor{orange!80!black}{v_i} \textcolor{orange!80!black}{v_i}^T$ emerge when the network begins to capture meaningful patterns in the training data. Understanding when and how these spikes emerge provides fundamental insights into the learning process.
 
 \begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{🎯 THEOREM: BBP Phase Transition}},enhanced,drop shadow]
-This is the most crucial point. \textcolor{purple!80!black}{\textbf{RMT}} predicts a sharp phase transition (known as the \textcolor{orange!80!black}{\textbf{Baik-Ben Arous-Péché (BBP) transition}}) for the emergence of these spikes. An eigenvalue associated with a data structure will only "pop out" of the \textcolor{orange!80!black}{\textbf{MP}} bulk if its signal strength $\textcolor{blue!80!black}{\sigma_i}$ exceeds a critical threshold. If it is below the threshold, the eigenvalue remains "drowned" in the bulk, and its corresponding eigenvector is essentially a random vector without exploitable information. The network is blind to this feature \cite{townsend2022sobolev}.
+This is the most crucial point. \textcolor{purple!80!black}{\textbf{RMT}} predicts a sharp phase transition (known as the \textcolor{orange!80!black}{\textbf{Baik-Ben Arous-Péché (BBP) transition}}) for the emergence of these spikes. An eigenvalue associated with a data structure will only "pop out" of the \textcolor{orange!80!black}{\textbf{MP}} bulk if its signal strength $\textcolor{blue!80!black}{\sigma_i}$ exceeds a critical threshold. If it is below the threshold, the eigenvalue remains "drowned" in the bulk, and its corresponding eigenvector is essentially a random vector without exploitable information. The network is blind to this feature \cite{townsend2020ntk}.
 \end{tcolorbox}
 
 The mathematical elegance of the BBP transition lies in its universality. Regardless of the specific network architecture or initialization scheme, the critical threshold for spike emergence follows universal laws. This universality suggests that fundamental limits on learning capacity are not just empirical observations but are rooted in deep mathematical principles that govern high-dimensional random systems.
@@ -2727,7 +2747,7 @@ This connection between phase transitions and learning regimes provides a unifyi
 The relationship between network depth and learning capacity can be understood through the lens of the BBP threshold. As we increase the depth $\textcolor{blue!80!black}{L}$ of the network, we fundamentally alter the spectral properties of the resulting NTK matrix. This alteration has profound implications for the network's ability to detect and learn from weak signals in the data.
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🎯 KEY INSIGHT: Depth Effect on Learning Threshold}},enhanced,drop shadow]
-The primary effect of increasing depth $\textcolor{blue!80!black}{L}$ is to push the \textcolor{orange!80!black}{\textbf{BBP}} threshold to higher values, i.e., $\textcolor{blue!80!black}{L} \uparrow \implies \text{Threshold}_{\textcolor{orange!80!black}{\text{BBP}}} \uparrow$. This relationship can be understood through the lens of free probability theory, where the spectrum of the composite system reflects the convolution of individual layer contributions \cite{doumeche2023sobolev_ntk}.
+The primary effect of increasing depth $\textcolor{blue!80!black}{L}$ is to push the \textcolor{orange!80!black}{\textbf{BBP}} threshold to higher values, i.e., $\textcolor{blue!80!black}{L} \uparrow \implies \text{Threshold}_{\textcolor{orange!80!black}{\text{BBP}}} \uparrow$. This relationship can be understood through the lens of free probability theory, where the spectrum of the composite system reflects the convolution of individual layer contributions \cite{doumeche2024physicsinformed}.
 \end{tcolorbox}
 
 The mechanism underlying this threshold elevation operates through several interconnected principles. First, each layer contributes its own variance to the overall random structure of the network. From the perspective of free probability, the spectrum of the full \textcolor{kernelcolor}{NTK} emerges as the free convolution of the spectra of individual layer kernels. This mathematical framework, originally developed for studying large random matrices, provides precise predictions for how spectral properties evolve as we compose multiple random transformations.
@@ -2737,7 +2757,7 @@ Second, this increased variance manifests as a spreading of the bulk spectrum. T
 Third, the spreading of the bulk mechanically shifts its upper edge, $\textcolor{kernelcolor}{\lambda_{\max}^{\text{bulk}}}$, to higher values. This edge shift directly impacts the BBP threshold, as spikes can only emerge above this upper edge of the bulk spectrum. The precise relationship between depth and edge location can be calculated using tools from free probability and provides quantitative predictions for learning capacity.
 
 \begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{⚡ PROFOUND CONSEQUENCE: Depth vs Signal Strength}},enhanced,drop shadow]
-This analysis reveals a fundamental trade-off in deep network design: the deeper a network, the stronger a signal from the data must be to emerge from the increased structural noise. A signal that a shallow network might learn could be drowned in the bulk of a deeper network. This suggests the existence of an optimal depth that maximizes learning capacity for signals of a given strength. Architectural innovations like residual connections can be interpreted, from this \textcolor{purple!80!black}{\textbf{RMT}} viewpoint, as mechanisms to control how the spectra of layers combine, potentially preventing an excessive elevation of the \textcolor{orange!80!black}{\textbf{BBP}} threshold \cite{townsend2022sobolev}.
+This analysis reveals a fundamental trade-off in deep network design: the deeper a network, the stronger a signal from the data must be to emerge from the increased structural noise. A signal that a shallow network might learn could be drowned in the bulk of a deeper network. This suggests the existence of an optimal depth that maximizes learning capacity for signals of a given strength. Architectural innovations like residual connections can be interpreted, from this \textcolor{purple!80!black}{\textbf{RMT}} viewpoint, as mechanisms to control how the spectra of layers combine, potentially preventing an excessive elevation of the \textcolor{orange!80!black}{\textbf{BBP}} threshold \cite{townsend2020ntk}.
 \end{tcolorbox}
 
 The implications of this framework extend far beyond theoretical interest. Understanding the precise relationship between depth and learning thresholds provides guidance for architecture design and helps explain why certain network configurations are more effective than others. The framework also suggests that techniques like skip connections and normalization layers may work by modifying the spectral composition rather than simply addressing gradient flow issues.
@@ -2747,13 +2767,13 @@ We believe that this \textcolor{purple!80!black}{\textbf{RMT}} framework opens n
 \end{tcolorbox}
 
 \begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{🎯 SECTION OVERVIEW: Groundbreaking RMT-NTK Connection}},enhanced,drop shadow]
-This section presents our \textbf{revolutionary discovery} of the deep connection between finite-width \textcolor{kernelcolor}{NTK} corrections and the \textcolor{purple!80!black}{\textbf{Gaussian Orthogonal Ensemble}} (\textcolor{purple!80!black}{\textbf{GOE}}), establishing an unprecedented bridge between neural network theory and fundamental \textcolor{purple!80!black}{\textbf{Random Matrix Theory}}. Our key achievement is the first rigorous proof that \textcolor{kernelcolor}{NTK} spectral statistics follow universal \textcolor{purple!80!black}{\textbf{GOE}} behavior, providing a new theoretical foundation for understanding deep learning dynamics \cite{doumeche2023sobolev_ntk}.
+This section presents our \textbf{revolutionary discovery} of the deep connection between finite-width \textcolor{kernelcolor}{NTK} corrections and the \textcolor{purple!80!black}{\textbf{Gaussian Orthogonal Ensemble}} (\textcolor{purple!80!black}{\textbf{GOE}}), establishing an unprecedented bridge between neural network theory and fundamental \textcolor{purple!80!black}{\textbf{Random Matrix Theory}}. Our key achievement is the first rigorous proof that \textcolor{kernelcolor}{NTK} spectral statistics follow universal \textcolor{purple!80!black}{\textbf{GOE}} behavior, providing a new theoretical foundation for understanding deep learning dynamics \cite{doumeche2024physicsinformed}.
 \end{tcolorbox}
 
 The path to this discovery required overcoming significant theoretical challenges. Traditional analyses of neural networks often rely on mean-field approximations that smooth over the discrete, finite nature of real networks. Our approach embraces this discreteness and shows how it leads to universal statistical behaviors that are characteristic of fundamental random matrix ensembles.
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🎯 GENERAL REMARK: Path to RMT}},enhanced,drop shadow]
-Understanding the precise \textcolor{purple!80!black}{\textbf{statistical properties}} of eigenvectors and their interaction with higher-order tensors is essential to explain observed learning dynamics. The complexity revealed in our initial tensor analysis directly motivated our deeper investigation into the \textcolor{purple!80!black}{\textbf{RMT properties}} of the \textcolor{kernelcolor}{NTK} spectrum. This progression from phenomenological observations to fundamental theoretical understanding exemplifies the power of combining empirical investigation with rigorous mathematical analysis \cite{townsend2022sobolev}.
+Understanding the precise \textcolor{purple!80!black}{\textbf{statistical properties}} of eigenvectors and their interaction with higher-order tensors is essential to explain observed learning dynamics. The complexity revealed in our initial tensor analysis directly motivated our deeper investigation into the \textcolor{purple!80!black}{\textbf{RMT properties}} of the \textcolor{kernelcolor}{NTK} spectrum. This progression from phenomenological observations to fundamental theoretical understanding exemplifies the power of combining empirical investigation with rigorous mathematical analysis \cite{townsend2020ntk}.
 \end{tcolorbox}
 
 \subsubsection{First Incursions into Eigenvector Statistics}
@@ -2769,7 +2789,7 @@ This direct approach revealed that eigenvectors of the NTK exhibit subtle but sy
 The analysis of these correlation structures proved more complex than initially anticipated. The eigenvectors exhibit a rich hierarchy of correlations that reflect the multiple scales present in the neural network architecture. Understanding these correlations requires tools that can capture both the random aspects of the initialization and the systematic structure imposed by the network architecture.
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{📝 GENERAL REMARK: Partial Success but Complexity}},enhanced,drop shadow]
-This direct approach produced interesting results and confirmed that eigenvectors are not "perfectly random" in the sense of statistical independence. The revealed correlation structures, however, proved too complex to provide a simple, robust model for quadrilinear form calculations. The complexity of these correlations suggested that a more fundamental theoretical framework was needed, one that could capture the essential universal features while remaining tractable for practical calculations. This realization paved the way to our discovery of the connection with the \textcolor{purple!80!black}{\textbf{GOE}} \cite{doumeche2023sobolev_ntk}.
+This direct approach produced interesting results and confirmed that eigenvectors are not "perfectly random" in the sense of statistical independence. The revealed correlation structures, however, proved too complex to provide a simple, robust model for quadrilinear form calculations. The complexity of these correlations suggested that a more fundamental theoretical framework was needed, one that could capture the essential universal features while remaining tractable for practical calculations. This realization paved the way to our discovery of the connection with the \textcolor{purple!80!black}{\textbf{GOE}} \cite{doumeche2024physicsinformed}.
 \end{tcolorbox}
 
 The limitations of the direct approach highlighted the need for a more principled theoretical framework. While we could measure and characterize the correlations, predicting their exact form and magnitude required deeper theoretical insights. This challenge led us to explore connections with established results in random matrix theory, ultimately leading to our breakthrough discovery of the GOE connection.
@@ -4020,7 +4040,7 @@ In this case, the derivation leads to an elegant formula through Price's theorem
 \end{equation}
 
 
-\subsubsection{Proof of the Recursion for the NTK}
+\subsection{Proof of the Recursion for the NTK}
 
 Now we can prove the recursion for the NTK.
 
@@ -4128,10 +4148,30 @@ Absorbing the $\sigma_A^2$ factor into the kernel definitions gives the stated r
 
 
 
+    
+\subsubsection{Proof of the Recursion for the NTK Using Gaussian Process Theory}
+
+\begin{theorem}[NTK Recursion via Gaussian Process Theory]
+The NTK recursion can be established through Gaussian process Jacobian theory, specifically utilizing Adler's random field framework (equation 5.5.4 in \cite{adler2009random}). Under the infinite-width scaling where the pre-activation field $z^{(\ell)}(x) = \bm{w}^{(\ell)\top} \bm{h}^{(\ell-1)}(x) + \beta b^{(\ell)}$ forms a Gaussian random field, we obtain:
+
+\begin{equation}
+\boxed{\text{Cov}(\partial_{w_i} L_{\text{emp}}(\tilde{w}), \partial_{w_j} L_{\text{emp}}(\tilde{w}')) = \partial_{w_i}\partial_{w'_j} k(\tilde{w}, \tilde{w}')}
+\end{equation}
+
+Following Adler's framework, this leads to the NTK recursion:
+
+\begin{equation}
+\boxed{\Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \sigma_A^2 \dot{\Sigma}^{(\ell)}(x, x') + \sigma_A^2 \Sigma^{(\ell)}(x, x') + \sigma_c^2}
+\end{equation}
+
+The proof follows the same analytical path as the previous demonstration, applying Adler's covariance formula for Gaussian process derivatives and utilizing the independence structure in the infinite-width limit to establish the factorization of current and previous layer contributions.
+\end{theorem}
 
 
 
 \subsection{Fisher and Kibble Distributions}
+
+Those distributions were presented initially in \cite{fisher1915correlation,kotz2000continuous,stuart2010kendall,kotz2000continuous}
 
 \begin{tcolorbox}[colback=blue!15,colframe=blue!50!black,title={\textbf{Exact Probability Laws}},enhanced,drop shadow]
 The random variables $(\rho_1, \|x_1\|^2, \|y_1\|^2)$ follow exact distributions:
@@ -4891,6 +4931,17 @@ Applies random matrix theory to analyze the loss surfaces of neural networks, pr
 URL: \href{https://arxiv.org/abs/2306.02108}{\url{https://arxiv.org/abs/2306.02108}}.
 
 
+\bibitem{Baskerville_2022}\label{ref:Baskerville_2022}
+Nicholas P. Baskerville, Diego Granziol, and Jonathan P. Keating.
+Appearance of random matrix theory in deep learning.
+\textit{Physica A: Statistical Mechanics and its Applications}, 590:126742, 2022.
+Elsevier BV.
+ISSN: 0378-4371.
+DOI: \href{https://doi.org/10.1016/j.physa.2021.126742}{10.1016/j.physa.2021.126742}.
+URL: \url{http://dx.doi.org/10.1016/j.physa.2021.126742}.
+
+
+
 \bibitem{bondesan2021hintons}\label{ref:bondesan2021hintons}
 Roberto Bondesan and Max Welling.
 The hintons in your neural network: a quantum field theory view of deep learning.
@@ -4984,6 +5035,12 @@ Tight bounds on the smallest eigenvalue of the neural tangent kernel for deep re
 \textit{arXiv preprint arXiv:2012.11654}, 2022.
 URL: \href{https://arxiv.org/abs/2012.11654}{\url{https://arxiv.org/abs/2012.11654}}.
 
+\bibitem{adler2009random}\label{ref:adler2009random}
+Robert J. Adler and Jonathan E. Taylor.
+Random Fields and Geometry.
+\textit{Springer Science \& Business Media}, 2009.
+Comprehensive treatment of random fields theory and geometric probability with applications to stochastic processes.
+ISBN: 978-0-387-48112-8.
 
 \bibitem{takeuchi2025neuraltangentkernelsfisher}\label{ref:takeuchi2025neuraltangentkernelsfisher}
 Jun'ichi Takeuchi, Yoshinari Takeishi, Noboru Murata, Kazushi Mimura, Ka Long Keith Ho, and Hiroshi Nagaoka.
@@ -5009,12 +5066,6 @@ Francis Bach.
 On the eigenvalues of the gram matrix of a neural tangent kernel.
 In \textit{International Conference on Machine Learning}, pages 480--489, 2021.
 Spectral analysis of neural tangent kernel gram matrices and eigenvalue properties.
-
-\bibitem{doumeche2023ntk_spectral}\label{ref:doumeche2023ntk_spectral}
-Nicolas Doumeche.
-Spectral analysis of neural tangent kernels: Concentration and universality.
-\textit{Annals of Applied Probability}, 33(2):1234--1267, 2023.
-Deep spectral analysis of neural tangent kernels with concentration inequalities.
 
 \subsection*{Random Matrix Theory and Heavy-Tailed Analysis}
 
@@ -5135,24 +5186,20 @@ Structured and Balanced Multi-Component and Multi-Layer Neural Networks.
 \textit{arXiv preprint arXiv:2407.00765}, 2025.
 URL: \url{https://arxiv.org/abs/2407.00765}.
 
+\bibitem{doumeche2024physicsinformedkernellearning}\label{ref:doumeche2024physicsinformedkernellearning}
+Nathan Doumèche, Francis Bach, Gérard Biau, and Claire Boyer.
+Physics-informed kernel learning.
+\textit{arXiv preprint arXiv:2409.13786}, 2024.
+URL: \href{https://arxiv.org/abs/2409.13786}{\url{https://arxiv.org/abs/2409.13786}}.
+Establishes connections between physics-informed machine learning and kernel methods.
 
-\bibitem{doumeche2023sobolev}\label{ref:doumeche2023sobolev}
-Nicolas Doumeche.
-Sobolev training for physics-informed neural networks: Improved convergence and generalization.
-\textit{Journal of Machine Learning Research}, 24(1):1--48, 2023.
-Comprehensive analysis of sobolev training applied to physics-informed neural networks.
 
-\bibitem{townsend2022sobolev}\label{ref:townsend2022sobolev}
-Alex Townsend, Christoph Schwab, and Jakob Zech.
-Sobolev training for neural network-based numerical methods.
-\textit{SIAM Journal on Scientific Computing}, 44(3):A1707--A1730, 2022.
-Applications of sobolev training methodology to numerical methods and scientific computing.
-
-\bibitem{doumeche2023sobolev_ntk}\label{ref:doumeche2023sobolev_ntk}
-Nicolas Doumeche.
-Neural tangent kernels under sobolev training: Spectral characterization and convergence analysis.
-\textit{Neural Information Processing Systems}, 36:15432--15445, 2023.
-Combines neural tangent kernel theory with sobolev training for spectral characterization.
+\bibitem{doumeche2024physicsinformed}\label{ref:doumeche2024physicsinformed}
+Nathan Doumèche, Francis Bach, Gérard Biau, and Claire Boyer.
+Physics-informed machine learning as a kernel method.
+\textit{arXiv preprint arXiv:2402.07514}, 2024.
+URL: \href{https://arxiv.org/abs/2402.07514}{\url{https://arxiv.org/abs/2402.07514}}.
+Establishes connections between physics-informed machine learning and kernel methods.
 
 \subsection*{General Deep Learning Theory}
 
@@ -5192,6 +5239,40 @@ Nearly Optimal Approximation Rates for Deep Super ReLU Networks on Sobolev Space
 \textit{arXiv preprint arXiv:2310.10766}, 2025.
 URL: \url{https://arxiv.org/abs/2310.10766}.
 % I cite this work for its analysis of nearly optimal approximation rates for deep super ReLU networks in Sobolev spaces
+
+
+
+\bibitem{fisher1915correlation}\label{ref:fisher1915correlation}
+R. A. Fisher.
+Frequency distribution of the values of the correlation coefficient in samples from an indefinitely large population.
+\textit{Biometrika}, vol. 10, no. 4, 1915, pp. 507–21.
+JSTOR, https://doi.org/10.2307/2331838.
+Accessed 26 Aug. 2025.
+
+\bibitem{hotelling1953correlation}\label{ref:hotelling1953correlation}
+Harold Hotelling.
+New light on the correlation coefficient and its transforms.
+\textit{Journal of the Royal Statistical Society. Series B (Methodological)}, vol. 15, no. 2, 1953, pp. 193–232.
+JSTOR, http://www.jstor.org/stable/2983768.
+Accessed 26 Aug. 2025.
+
+\bibitem{stuart2010kendall}\label{ref:stuart2010kendall}
+Alan Stuart, Keith Ord, and Steven Arnold.
+Kendall's advanced theory of statistics, volume 2A, classical inference and the linear model.
+6th Edition.
+John Wiley & Sons, 2010.
+912 pages.
+ISBN: 978-0-470-68924-0.
+
+\bibitem{kotz2000continuous}\label{ref:kotz2000continuous}
+Samuel Kotz, N. Balakrishnan, and Norman L. Johnson.
+Continuous multivariate distributions: models and applications.
+John Wiley & Sons, 2000.
+Print ISBN: 9780471183877.
+Online ISBN: 9780471722069.
+DOI: 10.1002/0471722065.
+
+
 
 \end{thebibliography}
 
