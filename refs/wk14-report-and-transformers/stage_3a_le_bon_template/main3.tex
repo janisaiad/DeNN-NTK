@@ -769,7 +769,7 @@ where $\xi$ represents the frequency variable.
 
 These norms are equivalent but not used in the same way. 
 The gradient-based norm is more intuitive for implementation in neural network training, while the Fourier-based norm provides a natural 
-connection to spectral properties and eigenvalue decay rates of the NTK operator.
+connection to spectral properties and functions smoothness.
 
 
 \subsection{The NN regression framework}
@@ -779,7 +779,7 @@ In our analysis, we consider two distinct learning frameworks:
 1) \textbf{Standard Neural Network Regression}: Here we only observe a dataset of output values $y_i$ for inputs $x_i$ (as in Fourier Neural Operators for instance), leading to the classical mean squared error loss:
 $$\mathcal{L}_{\text{MSE}}(f) = \sum_{i=1}^{\textcolor{red}{n}} |f(x_i) - y_i|^2$$
 The gradient descent dynamics follow:
-$$\frac{d}{dt}f_t(x) = -\eta \sum_{i=1}^{\textcolor{red}{n}} \textcolor{red}{K}^{\infty}(x,x_i)(f_t(x_i) - y_i)$$
+$$\frac{d}{dt}f_t(x) = -\eta \sum_{i=1}^{\textcolor{red}{n}} \textcolor{red}{K}_L^{n_1, n_2 \cdots n_L}(x,x_i)(f_t(x_i) - y_i)$$
 
 2) \textbf{Derivative-Augmented Learning}: We observe both outputs and derivatives in our dataset, as in Sobolev training and Physics-Informed Neural Networks (PINNs) or DeepONet architectures, with loss:
 $$\mathcal{L}_{\text{deriv}}(f) = \sum_{i=1}^{\textcolor{red}{n}} \left(|f(x_i) - y_i|^2 + \sum_{p=1}^s |D^p f(x_i) - D^p y_i|^2\right)$$
@@ -788,17 +788,6 @@ Leading to modified gradient dynamics incorporating derivative information.
 These frameworks result in different gradient descent trajectories and convergence behaviors. 
 The choice between them depends crucially on the \textbf{type of sampling points} used and whether explicit derivative 
 information is available, mainly through sensors that are disposed on a solution domain.
-
-\begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Informal Key Insight : Chebyshev Points vs General Sampling in numerical analysis}},enhanced,drop shadow]
-\textbf{Chebyshev points} (or optimal interpolation nodes) \cite{driscoll2014chebfun} enable accurate derivative approximation from function values alone, making standard regression sufficient. For spherical domains $\mathbb{S}^{d-1}$, with a azimuthal parameterization $\phi^{1},...,\phi^{d-1}$, the Chebyshev nodes are given by:
-$$\phi_k^{i} = \pi \cos\left(\frac{k\pi}{N}\right), \quad k = 0, 1, \ldots, N$$
-This optimal sampling eliminates the need for explicit derivative data in effective learning.
-\end{tcolorbox}
-
-\begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Personal contribution : Chebyshev Points}},enhanced,drop shadow]
-We will prove that sensoring Chebyshev points are not only optimal, but necessary for the standard regression framework to prove
-optimization bounds for neural network training
-\end{tcolorbox}
 
 
 The framework selection can be summarized by the following decision tree:
@@ -886,6 +875,12 @@ The framework selection can be summarized by the following decision tree:
 
 \subsection{Theoretical Framework of the Neural Tangent Kernel}
 
+
+
+From now, we focus on dataset of normalized inputs, that lies over $\mathbb{S}^{d-1}$ for some dimension $d$. It'll remain implicit until
+we explicitly specify $|x_i|$ in some equations or results, that are true not only over the sphere because of NTK bi-homogeneity.
+
+
 \subsubsection{The Neural Tangent Kernel}
 
 For a neural network $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})$ with parameters $\boldsymbol{\textcolor{darkyellow}{\theta}}$, the \textit{Neural Tangent Kernel} \cite{jacot2018ntk} is defined by:
@@ -908,7 +903,7 @@ For a neural network $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})
 
 
 \begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018, convergence]
-For a multi layer perceptron $f(\mathbf{x};\boldsymbol{\textcolor{darkyellow}{\theta}})$ with hidden layer widths $N_1, \ldots, N_L$ randomly initialized with weights $W_1, \ldots, W_L$  following and trained by gradient descent with infinitesimal learning rate, 
+For a multi layer perceptron $f(\mathbf{x};\boldsymbol{\textcolor{darkyellow}{\theta}})$ with hidden layer widths $N_1, \ldots, N_L$ randomly EOC initialized with weights $W_1, \ldots, W_L$ and trained by gradient descent with infinitesimal learning rate, 
 as hidden layer widths tend to infinity,the network converges to a Gaussian process, with limit NTK kernel $\textcolor{red}{K}_L^{\infty}$ and dynamics given by $\frac{\partial f_t(\mathbf{x})}{\partial t}
     = -\eta \sum_{i=1}^{\textcolor{red}{n}} \textcolor{red}{K}_L^{\infty}(\mathbf{x},\mathbf{x}_i)\bigl(f_t(\mathbf{x}_i) - y_i\bigr)$.
 
@@ -918,7 +913,7 @@ as hidden layer widths tend to infinity,the network converges to a Gaussian proc
 The recursive formula for depth $L$ in the infinite-width limit becomes:
 \begin{equation}
 \label{eq:ntk_recursive}
-\textcolor{red}{K}_{\textcolor{red}{L}}^{\infty}(\mathbf{x},\mathbf{x}') = \|\mathbf{x}\| \|\mathbf{x}'\| \left( \sum_{\textcolor{red}{p}=1}^{\textcolor{red}{L}} \varrho^{\circ (\textcolor{red}{p}-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \prod_{\textcolor{red}{p}'=\textcolor{red}{p}}^{\textcolor{red}{L}-1} \varrho'\left( \varrho^{\circ (\textcolor{red}{p}'-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \right) \right)
+\textcolor{red}{K}_{\textcolor{red}{L}}^{\infty}(\mathbf{x},\mathbf{x}') = \|\mathbf{x}\| \|\mathbf{x}'\| \left( \sum_{\textcolor{red}{p}=1}^{\textcolor{red}{L}} \varrho^{\circ (\textcolor{red}{p}-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \prod_{\textcolor{red}{p}'=\textcolor{red}{p}}^{\textcolor{red}{L}-1} \varrho'\left( \varrho^{\circ (\textcolor{red}{p}')}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \right) \right)
 \end{equation}
 where $\rho_1(\mathbf{x},\mathbf{x}') = \frac{\mathbf{x}^{\top}\mathbf{x}'}{\|\mathbf{x}\| \|\mathbf{x}'\|}$ is the initial correlation, $\varrho$ is the correlation propagation function defined by:
 \begin{equation}
@@ -937,23 +932,39 @@ where $\rho_1(\mathbf{x},\mathbf{x}') = \frac{\mathbf{x}^{\top}\mathbf{x}'}{\|\m
 \begin{tcolorbox}[colback=yellow!10,colframe=green!60!black,title={\textbf{[Townsend et al ]NTK's spectrum fundamentals}},enhanced,drop shadow]
 
 \textbf{Matrix Structure}: For dataset $\{x_i\}_{i=1}^{\textcolor{red}{n}}$, the infinite-width NTK matrix factorizes as $\textcolor{red}{K}_L^{\infty} = D \cdot R \cdot D$ where $D = \text{diag}(\|x_1\|, \ldots, \|x_{\textcolor{red}{n}}\|)$ and $R_{ij} = \tilde{\textcolor{red}{K}}_L^{\infty}(\rho_{ij})$ with $\rho_{ij} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$. // we factorize the infinite-width ntk matrix into diagonal and correlation parts
-\textbf{Matrix Structure}: For dataset $\{x_i\}_{i=1}^{\textcolor{red}{n}}$, the infinite-width NTK matrix factorizes as $K_L^{\infty} = D \cdot R \cdot D$ where $D = \text{diag}(\|x_1\|, \ldots, \|x_{\textcolor{red}{n}}\|)$ and $R_{ij} = \tilde{K}_L^{\infty}(\rho_{ij})$ with $\rho_{ij} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$. // we factorize the infinite-width ntk matrix into diagonal and correlation parts
+
 
 \newline
+
+
 \textbf{Operator Form}: By rotational invariance, the infinite-width NTK can be seen as an operator acts zonally:
-$$(K_L^{\infty} f)(x) = \int_{\mathbb{S}^{d-1}} \int_{\mathbb{S}^{d-1}} \tilde{K}_L^{\infty}(\langle x, y \rangle) f(y) \delta(\langle x, z \rangle - \langle x, y \rangle) d\sigma(y) d\sigma(z)$$
+\begin{equation}
+\label{eq:ntk_operator_form}
+(K_L^{\infty} f)(x) = \frac{2\pi^{d/2}}{\Gamma(d/2)} \int_{-1}^1 \tilde{K}_L^{\infty}(t)f(t)(1-t^2)^{(d-3)/2}dt
+\end{equation}
 where $\sigma$ denotes the uniform surface measure on $\mathbb{S}^{d-1}$.
 
 \textbf{Spectral Properties}: The spherical harmonics $Y_{\ell,p}$ are eigenfunctions with eigenvalues:
-$$\mu_\ell^{L,\infty} = \frac{2\pi^{d/2}}{\Gamma(d/2)} \int_{-1}^1 \tilde{K}_L^{\infty}(t)P_\ell^{((d-2)/2)}(t)(1-t^2)^{(d-3)/2}dt$$
-Eigenvalue decay follows 
+\begin{equation}
+\label{eq:ntk_eigenvalue_operator}
+\mu_\ell^{L,\infty} = \frac{2\pi^{d/2}}{\Gamma(d/2)} \int_{-1}^1 \tilde{K}_L^{\infty}(t)P_\ell^{((d-2)/2)}(t)(1-t^2)^{(d-3)/2}dt
+\end{equation}
+The eigenvalues decay following the power law:
 \begin{equation}
 \label{eq:ntk_eigenvalue_decay}
 \mu_\ell^{\textcolor{red}{L},\infty} \sim \ell^{-d}
 \end{equation}
 with multiplicity $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$.
 
+A major insight is that this decay is similar to that of a Laplace kernel $K(x,y) = \exp(-\|x-y\|)$, and tells us that SGD for 1 input points affects other points at a rate inversely exponential to the distance.
+See \cite{jacot2018ntk} for more details.
+
 \end{tcolorbox}
+
+
+
+
+
 
 
 \begin{figure}[htbp]
@@ -1095,22 +1106,24 @@ For general $\boldsymbol{s \geq 1}$, repeated integration by parts yields the fr
 \end{theorem}
 
 
-
-
-
 \subsection{Personal contribution : Sobolev Gradient Descent in Fourier Domain}
 
-Chebyshev points are uniformly distributed on the sphere, and are the points that maximize the minimum separation between adjacent samples.
+\begin{tcolorbox}[colback=yellow!10,colframe=orange!60!black,title={\textbf{Definition: Chebyshev points and Exact Spherical Quadrature}},enhanced,drop shadow]
+    For our analysis, we require a specific type of numerical integration on the sphere, known as an exact spherical quadrature. We use the term \textbf{Chebyshev points} as a simple name for any set of points that allows for such a quadrature, generalizing the notion of optimal nodes from one dimension.
 
-\begin{tcolorbox}[colback=yellow!10,colframe=orange!60!black,title=Definition: Chebyshev Points on the Sphere]
-The \textcolor{red}{\textbf{Chebyshev points}} on the sphere $\mathbb{S}^{d-1}$ are defined as the projections of classical Chebyshev points onto the unit sphere. For $d = 2$ (unit circle), these points are given by:
-\begin{equation}
-\label{eq:chebyshev_circle}
-\boldsymbol{x_{\textcolor{red}{k}}} = \left(\cos\left(\frac{(2\textcolor{red}{k}-1)\pi}{2\textcolor{red}{n}}\right), \sin\left(\frac{(2\textcolor{red}{k}-1)\pi}{2\textcolor{red}{n}}\right)\right), \quad \textcolor{red}{k} = 1, 2, \ldots, \textcolor{red}{n}
-\end{equation}
+    A weighted quadrature rule, given by points $\{x_i\}_{i=1}^N$ and weights $\{w_i\}_{i=1}^N$, is exact for all spherical polynomials of total degree up to $T$ if it perfectly integrates them. For our purposes, it is sufficient that the quadrature is exact for all spherical polynomials of degree up to $T \ge 2L$, where $L$ is the maximum harmonic degree we consider.
 
+    The number of points $N$ needed for this is bounded by the dimension of the polynomial space. The dimension of the space of spherical polynomials up to degree $T$ on $\mathbb{S}^{d-1}$ is:
+    \[
+        M(d, T) = \sum_{\ell=0}^{T} Z(d, \ell)
+    \]
+    where $Z(d, \ell)$ is the dimension of the space of spherical harmonics of degree $\ell$. A necessary lower bound on the number of points is therefore:
+    \begin{equation}
+        \label{eq:quadrature_point_bound}
+        N \gtrsim M(d, 2L)
+    \end{equation}
+    Any set of $N$ points that admits weights for such an exact quadrature is what we refer to as \textbf{Chebyshev points of order at least $L$}. This specific property, rather than a particular geometric arrangement, is the crucial condition that enables our standard regression framework and ensures the commutation properties we will establish. This definition is functional and should not be confused with constructions based on tensored 1D Chebyshev points.
 \end{tcolorbox}
-
 
 \begin{theorem}[NTK-Sobolev Composition]
 \label{thm:ntk_sobolev_composition}
@@ -1137,7 +1150,7 @@ The discrete NTK matrix $\Kop$ and Sobolev operator matrix $\Pop_s$ satisfy exac
 \Kop \Pop_s = \Pop_s \Kop
 \label{eq:chebyshev_commutation_condition}
 \end{equation}
-\textbf{if} the sampling points $\{x_i\}_{i=1}^{\textcolor{red}{n}}$ are \textcolor{red}{\textbf{Chebyshev points}} on $\mathbb{S}^{d-1}$.
+\textbf{if} the sampling points $\{x_i\}_{i=1}^{\textcolor{red}{n}}$ are \textcolor{red}{\textbf{Chebyshev points}} of order at least $l_{max}$.	
 
 For arbitrary sampling points, this commutation \textit{fails}, requiring explicit derivative information for effective learning.
 \end{theorem}
@@ -1200,10 +1213,19 @@ The practical implications extend to algorithm design, where our theoretical ins
 
 
 
-
-
-
 \section{Preconditioning strategies for the NTK}
+
+\subsection{Introduction to Preconditioning in Deep Neural Networks}
+
+In the field of deep learning, the central task is to optimize a highly non-convex and high-dimensional loss function to find model parameters that generalize well to unseen data. Gradient-based optimization methods, such as Stochastic Gradient Descent (SGD), are the cornerstone of this process. However, the efficiency and stability of these methods are deeply connected to the geometry of the loss landscape, which is often poorly conditioned. \textbf{Preconditioning} is a classical technique from numerical optimization designed to address this challenge. It involves transforming the original optimization problem into an equivalent one that is easier to solve, typically by improving the condition number of the Hessian matrix, which leads to faster and more reliable convergence.
+
+Many widely-used techniques in modern deep learning can be interpreted as implicit forms of preconditioning. For instance, \textbf{Batch Normalization} standardizes the inputs to each layer, which has a profound regularizing effect and significantly smooths the loss landscape, allowing for higher learning rates. \textbf{Residual Connections}, the innovation behind ResNets, combat the vanishing and exploding gradient problems by providing shortcut paths for the gradient to flow through the network. This mechanism effectively improves the conditioning of the underlying weight matrices and ensures that deeper models can be trained effectively. Similarly, regularization methods like \textbf{Dropout} prevent complex co-adaptations of neurons, simplifying the optimization problem. Even adaptive optimization algorithms like \textbf{Adam} or \textbf{RMSprop} can be viewed as a form of diagonal preconditioning, as they maintain a per-parameter learning rate that adapts to the geometry of the loss function.
+
+While these component-level strategies are essential, the overall \textbf{architecture} of a neural network plays a fundamental role in preconditioning the learning problem. The specific arrangement of layers, the nature of the connections, and the choice of non-linear activation functions collectively determine the intrinsic structure of the model's function space and the associated optimization landscape. A well-designed architecture can inherently possess favorable properties that make training more efficient, stable, and scalable.
+
+This report focuses on analyzing the preconditioning properties of two particularly significant and powerful modern architectures: \textbf{Multi-Component Multi-layer Neural Networks (MMNN)} and \textbf{Transformers}. The motivation for this focus stems from recent theoretical and empirical evidence demonstrating that these models can achieve remarkable \textbf{super-convergence} properties. This behavior suggests that their designs incorporate powerful implicit preconditioning mechanisms that are not yet fully understood. Our goal is to dissect these architectures through the lens of the Neural Tangent Kernel (NTK), a theoretical tool that connects an infinitely wide neural network to a linear model with a fixed kernel. By studying the spectral properties of the NTK for these models, we can gain deep insights into how their architectural choices influence the optimization dynamics and lead to such exceptional performance.
+
+
 
 \subsection{Multi-Component Multi-layer Neural Networks (MMNN) and Transformers}
 
@@ -1233,12 +1255,14 @@ The full statement and proof of this theorem are presented in a dedicated blue b
 
 
 \begin{tcolorbox}[colback=green!15,colframe=green!80!black,title={\textbf{Conjecture from Pr Haizhao Yang: Global Minima Stability}},enhanced,drop shadow,boxrule=2pt]
-For sufficiently wide MMNN and Transformer networks, global minima exhibit a high local stability propertiy ensuring convergence from neighborhoods around optimal solutions. The Hessian and NTK eigenvalues near global minima satisfy regularity conditions guaranteeing stable optimization dynamics.
+For sufficiently wide MMNN and Transformer networks, global minima exhibit a high local stability property ensuring convergence from neighborhoods around optimal solutions. The Hessian and NTK eigenvalues near global minima satisfy regularity conditions guaranteeing stable optimization dynamics.
 \end{tcolorbox}
 
 
 This conjecture is supported by numerical experiments \cite{zhang2024superconvergence} demonstrating super-convergence behavior in practical training scenarios.
-By means of local analysis. Our goal now is to develop all the theoretical framework to have the tool to prove this conjecture. What we should prove is that the NTK is not moving too much near a global optima.
+By means of local analysis. Our goal now is to develop all the theoretical framework to have the tool to prove this conjecture. 
+What we should prove is that the NTK is not moving too much near a global optima. We made a huge path towards this goal and are currently
+holding stealth proofs for more general and smallest eigenvalue bounds that will be revealed in future works.
 
 
 
@@ -1951,7 +1975,7 @@ correction $\textcolor{k3color}{K^{(3)}}$ controls how the NTK changes over time
 
 This section develops the \textbf{theoretical framework} and \textit{computational methods} for the third-order kernel $\textcolor{k3color}{K^{(3)}}$, which governs finite-width corrections to neural network training dynamics.
 
-\subsubsection{Fundamental Evolution Equation \cite{hong2024neural}}
+\subsubsection{Fundamental Evolution Equation \cite{huang2019dynamicsdeepneuralnetworks}}
 
 \begin{tcolorbox}[colback=orange!10,colframe=orange!60!black,title={\textbf{Key Insight: NTK Evolution Dynamics}},enhanced,drop shadow]
 The \textbf{time evolution} of the Neural Tangent Kernel is governed by the fundamental equation:
@@ -2039,8 +2063,8 @@ This section presents our \textbf{systematic analysis} of how the third-order ke
 
 To understand how the third-order kernel scales with network depth, we establish a \textbf{recursive relationship} that reveals the \textit{layer-by-layer contributions} to $\textcolor{k3color}{K^{(3)}}$. This analysis is crucial for understanding the behavior of finite-width corrections as networks become deeper.
 
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{Scaling Results \cite{hong2024neural}}},enhanced,drop shadow]
-According to Hong Tzer Tau's analysis, the third-order kernel $\textcolor{k3color}{K^{(3)}}$ exhibits zero mean with standard deviation scaling as $\mathcal{O}(1/m)$, while the fourth-order kernel $\textcolor{kernelcolor}{K^{(4)}}$ has standard deviation scaling as $\mathcal{O}(\frac{1}{m \sqrt{m}})$, where $m$ is the network width.
+\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{Scaling Results \cite{huang2019dynamicsdeepneuralnetworks}}},enhanced,drop shadow]
+According to \cite{huang2019dynamicsdeepneuralnetworks} analysis, the third-order kernel $\textcolor{k3color}{K^{(3)}}$ exhibits zero mean with standard deviation scaling as $\mathcal{O}(1/m)$, while the fourth-order kernel $\textcolor{kernelcolor}{K^{(4)}}$ has standard deviation scaling as $\mathcal{O}(\frac{1}{m \sqrt{m}})$, where $m$ is the network width.
 More generally, the mean and standard deviation of the $r$-th order kernel scales respectively as $\mathcal{O}(1/m^{r/2})$,$\mathcal{O}(1/m^{(r-1)/2})$ for $r$ even and $0$,$\mathcal{O}(1/m^{r/2-1})$ for $r$ odd.
 \end{tcolorbox}
 
@@ -2206,11 +2230,15 @@ The detailed implementation structure, code correspondence to mathematical formu
 
 The experiment is structured as a systematic grid search over a range of network configurations. The main loop iterates through different values for:
 \begin{itemize}
-    \item \texttt{N\_VALUES}: The number of data points.
-    \item \texttt{D\_IN\_VALUES}: The input feature dimension.
-    \item \texttt{M\_VALUES}: The network width.
-    \item \texttt{L\_VALUES}: The network depth (referred to as $H$ in our formulas).
+    \item \texttt{N\_VALUES}: The number of data points, $N \in \{8, 10, 16, 25, 32, 40, 64\}$
+    \item \texttt{D\_IN\_VALUES}: The input dimension, $D_{\text{in}} \in \{20, 50, 100, 200, 500, 1000, 2000, 5000\}$ 
+    \item \texttt{M\_VALUES}: The network width, $\textcolor{darkyellow}{m} \in \{10, 20, 30, 40, 50, 60, 70, 80, 100, 200, 500\}$
+    \item \texttt{L\_VALUES}: The network depth (referred to as $H$ in our formulas), $H \in \{2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 70, 90\}$
 \end{itemize}
+
+The specific results for slope of finite width corrections with respect to L and N for each of these parameters are detailed in our public repository, available at \url{https://github.com/janisaiad/DeNN-NTK/experiments/data/experimentsresume/R2.txt}.
+
+
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Two-Metric Validation Strategy}},enhanced,drop shadow]
 We extract two key quantitative metrics to validate theoretical predictions:
@@ -2948,7 +2976,7 @@ The \textbf{finite-width corrections} exhibit universal statistical properties o
 
 \subsubsection{Personal Contribution: Hessian-NTK Tractability Framework}
 
-We introduce from [hong zer tau, eq ..] a \textbf{revolutionary perspective} using the Hessian of the NTK to make finite-width computations tractable.
+We introduce from \cite{huang2019dynamicsdeepneuralnetworks} a \textbf{revolutionary perspective} using the Hessian of the NTK to make finite-width computations tractable.
 
 \begin{tcolorbox}[colback=kernelcolor!10,colframe=kernelcolor!60!black,title={\textbf{Hessian Framework: Computational Breakthrough}},enhanced,drop shadow]
 By analyzing the \textbf{Hessian structure} of the NTK, we develop efficient algorithms for computing finite-width corrections:
