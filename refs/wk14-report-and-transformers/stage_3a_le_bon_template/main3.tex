@@ -276,7 +276,7 @@
     \hrule
     
     \vspace{1cm}
-    
+    {\large JANIS AIAD \par}
     {\large RAPPORT NON CONFIDENTIEL \par}
     
     \vfill
@@ -294,7 +294,7 @@
     \begin{minipage}[t]{0.6\textwidth}
         \begin{flushright} \large
             Département de mathématiques appliquées \\
-            Statistique et apprentissage \\
+            MAP594 : Statistique et apprentissage \\
             \vspace{0.3cm}
             Aymeric Dieuleveut \\
             Haizhao Yang \\
@@ -338,7 +338,7 @@ For general sampling schemes, optimal learning requires \textbf{explicit derivat
 Through \textbf{finite-width corrections}, we provide \textbf{explicit error bounds} and foundations for ongoing \textbf{convergence guarantees} for gradient descent. We provide also insights in the
 new fields of mathematical physics (QFT, RMT, StatMech) applied to deep learning
 
-Experimental validation confirms our theoretical predictions across all architectures. Fully reproducible code is available at \href{https://github.com/janisaiad/DeNN-NTK}{github.com/janisaiad/DeNN-NTK} and \href{https://github.com/janisaiad/MMN}{github.com/janisaiad/MMN}.
+Experimental validation confirms our theoretical predictions across all architectures. Fully reproducible code is available at \href{https://github.com/janisaiad/DeNN-NTK}{here} and \href{https://github.com/janisaiad/MMN}{here}.
 
 \vspace{0.5cm}
 
@@ -407,15 +407,25 @@ I would like to thank all those who have helped and guided me during this resear
 
 First, I want to thank my family for their constant support, help, and understanding during my studies. Their patience during long hours of research and their trust in my work have been very important.
 
-I am very grateful to my supervisors, Professor \textbf{Haizhao Yang} and Professor \textbf{Shijun Zhang}, whose excellent guidance, mathematical knowledge, and teaching have shaped this work and my understanding of deep learning theory. Their knowledge in neural tangent kernel theory and random matrix analysis has been key in building the theoretical framework shown in this report.
+I am very grateful to my supervisors, Professor \textbf{Haizhao Yang} and Professor \textbf{Shijun Zhang}, whose excellent guidance, mathematical knowledge, and teaching have shaped this work and my 
+understanding of deep learning theory. Their knowledge in neural tangent kernel theory and practice has been key in building the theoretical framework shown in this report.
 
-Special thanks go to \textbf{David Terjek} for his invaluable contributions to proof strategies and mathematical rigor throughout this research, and to \textbf{Tan Bui-Thanh} for his expertise in physics-based approaches and computational physics methodologies. Their combined insights have significantly enhanced both the theoretical foundations and practical applications of our results in physics-informed neural networks.
+Special thanks go to \textbf{David Terjek} for his invaluable contributions to proof strategies and mathematical rigor throughout this research,
+ and to \textbf{Tan Bui-Thanh} for his expertise in computational physics methodologies and insights about Hessian's spectrum and links to active subspace methods in CFD.
+ Their combined insights have significantly enhanced both the theoretical foundations and practical applications of our
+  results in physics-informed neural networks.
 
-I would also like to thank \textbf{Charles-Albert Lehalle} for his helpful talks about the practical uses of our work and his knowledge in mathematical finance applications of neural networks.
+I would also like to thank \textbf{Charles-Albert Lehalle} for his helpful talks about random matrix theory referencesand his knowledge 
+in mathematical finance applications of neural networks.
 
-I am deeply grateful to the \textbf{BRIN MRC Summer School in Physics Informed Machine Learning Theory} for providing an exceptional intensive program that facilitated invaluable exchanges with leading experts in the field. The collaborative discussions during this program have been instrumental in establishing research collaborations and developing the theoretical frameworks presented in this work.
+I am deeply grateful to the \textbf{BRIN MRC Summer School in Physics Informed Machine Learning Theory} for providing an 
+exceptional intensive program that facilitated invaluable exchanges with leading experts in the field. The collaborative 
+discussions during this program have been instrumental in establishing research collaborations and developing the theoretical
+ frameworks presented in this work.
 
-Special acknowledgment goes to \textbf{Professor Doron Levy}, Head of the Mathematics Department, for providing me with the necessary resources and institutional support to conduct this research effectively. His commitment to fostering advanced mathematical research has been crucial for the success of this project.
+Special acknowledgment goes to \textbf{Professor Doron Levy}, Head of the Mathematics Department, for providing me with 
+the necessary resources and institutional support to conduct this research effectively. His commitment to fostering advanced 
+mathematical research has been crucial for the success of this project.
 
 I would also like to extend my sincere gratitude to \textbf{Ruth Yun} from Human Resources, whose exceptional assistance and guidance throughout the administrative aspects of this research have been invaluable. Her dedication and support have made this work possible in ways that extend far beyond the technical contributions.
 
@@ -438,10 +448,10 @@ especially \textbf{\textcolor{brown}{random matrix theory}}, \textbf{\textcolor{
 
 
 A google drive is also available containing all the content (beamers, pdfs, papers, notes, scans) accumulated through the weeks.
-\href{https://drive.google.com/drive/folders/1-00000000000000000000000000000000000000000}{Google Drive}
+\href{https://drive.google.com/drive/folders/1LFZ4euJO-KIWSFljtm5P4ebUBkkH_YPn}{Google Drive}
 
-Those results required 500 pages of handcalculations all scanned and pushed on google drive, 10k python lines, 10k latex lines,  and  \textbf{1000 pdflatex compilations} - totally worth it!
-In an era where artificial intelligence capabilities are rapidly expanding, we wanted to ensure the authenticity and 
+Those results required 500 pages of handcalculations scanned and pushed on google drive, 10k python lines, 10k latex lines,  and  \textbf{1000 pdflatex compilations} - totally worth it!
+In an era where AI capabilities are rapidly expanding, we wanted to ensure the authenticity and 
 originality of this research work remains uncompromised. Given that the intellectual property of this work is 
 in the public domain, we mention that substantial portions of this research, including our theoretical insights 
 and discoveries (particularly the GOE finding), as well as coding sessions and literature review activities, have 
@@ -660,7 +670,7 @@ $\mathcal{P}_\ell$ & Propagation operator & $\textcolor{orange}{\rho}$ & Spectra
 
 \subsubsection{The Sobolev Training}
 
-Let's suppose that we are given a function $f^*$ and we want to find a function $f_{\textcolor{darkyellow}{\theta}}$ in a model class $\mathcal{F}$ that approximates $f^*$ in the Sobolev space $H^s(\Omega)$.
+Let's suppose that we are given a function $f^*$ and we want to find a function $f_{\textcolor{darkyellow}{\theta}}$ in a model class $\mathcal{F}$ that approximates $f^*$ in the Sobolev space $H^s(\Omega)$ for s integer
 
 \textit{Sobolev training} \cite{czarnecki2017sobolev,gupte2022sobolev_loss} 
 is an approach that incorporates derivative information into the learning process. 
@@ -687,7 +697,7 @@ $$\mathcal{L}_{\text{discrete}}(f) = \sum_{i=1}^{\textcolor{red}{n}} \sum_{p=0}^
 
 This framework provides a natural connection between neural network training and classical function approximation theory in Sobolev spaces.
 It's important to note that Sobolev training is mainly used for very smooth functions in general. But the terminology "Sobolev" remains the same
-and is part of the field slang, even if describing it in a sobolev space is ont fully informative.
+and is part of the field slang, even if describing it in a sobolev space is not fully informative.
 
 \begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Central Research Question}},enhanced,drop shadow,boxrule=2pt]
 Under what conditions does optimizing the Sobolev training loss behave well? Specifically, we seek to understand when the condition number of key optimization matrices (such as the Gauss-Newton, Hessian, Fisher, and NTK matrices) remains small, ensuring stable and efficient convergence.
@@ -713,7 +723,7 @@ Recent developments extend these ideas in two complementary directions. On the t
 
 Parallel to Sobolev training advances, NTK analysis has provided the dominant theoretical framework for studying convergence in wide neural networks. Bach's foundational works \cite{bach2017breaking,bach2021ntk_eigenvalues} established polynomial eigenvalue decay rates for NTKs, demonstrating that spectral tail behavior governs generalization properties, while the smallest eigenvalue $\lambda_{\min}$ dictates optimization convergence speed.
 
-These fundamental results were refined by Nguyen et al. \cite{nguyen2022ntk_eigenvalues} and Fan \& Wang \cite{fan2020spectra}, who connected eigenvalue distribution patterns to architectural parameters including depth, width, and random matrix effects. We observe that these works established precise relationships between network structure and spectral properties. More recently, Doumeche \cite{doumeche2023ntk_spectral} introduced concentration inequalities for empirical NTK spectra, ensuring stability of eigenvalue distributions in high-dimensional settings.
+These fundamental results were refined by Nguyen et al. \cite{nguyen2022ntk_eigenvalues} and Fan \& Wang \cite{fan2020spectra}, who connected eigenvalue distribution patterns to architectural parameters including depth, width, and random matrix effects. We observe that these works established precise relationships between network structure and spectral properties. More recently, Terjek et al. \cite{terjek2025mlpseocconcentrationntk} introduced concentration inequalities for empirical NTK spectra, ensuring stability of eigenvalue distributions in high-dimensional settings.
 
 Finite-width corrections represent an active research area where Hanin \& Nica \cite{hanin_nica_2019}, Dyer \& Gur-Ari \cite{dyer2019asymptotics}, and Guillen et al. \cite{guillen_misof_gerken_2025} employed diagrammatic techniques inspired by quantum field theory to describe NTK fluctuations. These approaches bridge the theoretical gap between infinite-width and finite-width regimes, providing practical insights for real neural networks.
 
@@ -892,14 +902,14 @@ For a neural network $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})
     \textcolor{blue}{\mathbf{W}_{ij}} \sim \mathcal{N}\left(0, \frac{\sigma_w^2}{\textcolor{red}{n}}\right) \quad \text{and} \quad \textcolor{red}{\mathbf{b}_j} \sim \mathcal{N}\left(0, \frac{\sigma_b^2}{\textcolor{red}{n}}\right)
     \end{equation}
     where $\sigma_w^2+\sigma_b^2=2$ is the total variance.
-    This initialization strategy maintains the variance of activations through layers and ensures that the network is in the chaotic regime.
+    This initialization strategy maintains the variance of activations through layers and ensures that the network is at the EOC.
 \end{tcolorbox}
 
 
 
 \begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018, convergence]
 For a multi layer perceptron $f(\mathbf{x};\boldsymbol{\textcolor{darkyellow}{\theta}})$ with hidden layer widths $N_1, \ldots, N_L$ randomly initialized with weights $W_1, \ldots, W_L$  following and trained by gradient descent with infinitesimal learning rate, 
-as hidden layer widths tend to infinity,the network converges to a Gaussian process, with limite NTK kernel $\textcolor{red}{K}_L^{\infty}$ and dynamics given by $\frac{\partial f_t(\mathbf{x})}{\partial t}
+as hidden layer widths tend to infinity,the network converges to a Gaussian process, with limit NTK kernel $\textcolor{red}{K}_L^{\infty}$ and dynamics given by $\frac{\partial f_t(\mathbf{x})}{\partial t}
     = -\eta \sum_{i=1}^{\textcolor{red}{n}} \textcolor{red}{K}_L^{\infty}(\mathbf{x},\mathbf{x}_i)\bigl(f_t(\mathbf{x}_i) - y_i\bigr)$.
 
 \end{theorem}
@@ -1941,7 +1951,7 @@ correction $\textcolor{k3color}{K^{(3)}}$ controls how the NTK changes over time
 
 This section develops the \textbf{theoretical framework} and \textit{computational methods} for the third-order kernel $\textcolor{k3color}{K^{(3)}}$, which governs finite-width corrections to neural network training dynamics.
 
-\subsubsection{Fundamental Evolution Equation [hong tzer]}
+\subsubsection{Fundamental Evolution Equation \cite{hong2024neural}}
 
 \begin{tcolorbox}[colback=orange!10,colframe=orange!60!black,title={\textbf{Key Insight: NTK Evolution Dynamics}},enhanced,drop shadow]
 The \textbf{time evolution} of the Neural Tangent Kernel is governed by the fundamental equation:
@@ -2029,8 +2039,9 @@ This section presents our \textbf{systematic analysis} of how the third-order ke
 
 To understand how the third-order kernel scales with network depth, we establish a \textbf{recursive relationship} that reveals the \textit{layer-by-layer contributions} to $\textcolor{k3color}{K^{(3)}}$. This analysis is crucial for understanding the behavior of finite-width corrections as networks become deeper.
 
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{Hong Tzer Tau Scaling Results}},enhanced,drop shadow]
+\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{Scaling Results \cite{hong2024neural}}},enhanced,drop shadow]
 According to Hong Tzer Tau's analysis, the third-order kernel $\textcolor{k3color}{K^{(3)}}$ exhibits zero mean with standard deviation scaling as $\mathcal{O}(1/m)$, while the fourth-order kernel $\textcolor{kernelcolor}{K^{(4)}}$ has standard deviation scaling as $\mathcal{O}(\frac{1}{m \sqrt{m}})$, where $m$ is the network width.
+More generally, the mean and standard deviation of the $r$-th order kernel scales respectively as $\mathcal{O}(1/m^{r/2})$,$\mathcal{O}(1/m^{(r-1)/2})$ for $r$ even and $0$,$\mathcal{O}(1/m^{r/2-1})$ for $r$ odd.
 \end{tcolorbox}
 
 \begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Theorem (Recursive Depth Formula for $\textcolor{k3color}{K^{(3)}}$)}},enhanced,drop shadow]\label{thm:recursive_depth}
