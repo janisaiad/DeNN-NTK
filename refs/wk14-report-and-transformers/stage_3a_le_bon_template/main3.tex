@@ -250,7 +250,7 @@
     \vspace{0.3cm}
     {\LARGE\bfseries Deeper or wider ? A first answer under the NTK perspective \par}
     \vspace{0.2cm}
-    {\large An optimization perspective on Neural Network design \par}
+    {\large Pushing the boundaries of optimization bounds in deep learning \par}
     \vspace{0.3cm}
     \hrule
     
@@ -954,10 +954,10 @@ with multiplicity $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$.
 
 \subsection{Building definitions for the Sobolev operator}
 
-We rigorously present the Sobolev operator informally introduced in [Townsend et al ] which plays a central role in our analysis of regularized neural network training.
+We rigorously present the Sobolev operator informally introduced in \cite{townsend2020ntk} which plays a central role in our analysis of regularized neural network training.
 
 
-\begin{definition}[Continuous Sobolev Operator, [Townsend et al]]
+\begin{definition}[Continuous Sobolev Operator, \cite{townsend2020ntk}]
 \label{def:sobolev_continuous}
 For $s > 0$ and the sphere $\mathbb{S}^{d-1}$, the Sobolev operator of order $s$ is defined as:
 \begin{equation}
@@ -967,7 +967,7 @@ For $s > 0$ and the sphere $\mathbb{S}^{d-1}$, the Sobolev operator of order $s$
 where $\boldsymbol{Y_{\ell,p}}$ are the spherical harmonics of degree $\ell$ and order $p$, and $\boldsymbol{N(d,\ell)} = \binom{\ell+d-1}{\ell} - \binom{\ell+d-3}{\ell-2}$ is the multiplicity.
 \end{definition}
 
-\begin{definition}[Discrete Sobolev Operator Matrix, [Townsend et al]]
+\begin{definition}[Discrete Sobolev Operator Matrix, \cite{townsend2020ntk}]
 \label{def:sobolev_discrete}
 Given sample points $\{\boldsymbol{x_i}\}_{i=1}^{\textcolor{red}{n}} \subset \mathbb{S}^{d-1}$ with quadrature weights $\{\boldsymbol{c_i}\}_{i=1}^{\textcolor{red}{n}}$, the discrete Sobolev operator matrix is constructed as:
 \begin{equation}
@@ -977,7 +977,7 @@ Given sample points $\{\boldsymbol{x_i}\}_{i=1}^{\textcolor{red}{n}} \subset \ma
 where $\boldsymbol{(a_{\ell,p})_i} = \boldsymbol{c_i} \boldsymbol{Y_{\ell,p}(x_i)}$ are the weighted sampling coefficients.
 \end{definition}
 
-\begin{definition}[Fractional Laplacian Formulation, [Townsend et al]]
+\begin{definition}[Fractional Laplacian Formulation, \cite{townsend2020ntk}]
 \label{def:fractional_laplacian}
 The Sobolev operator can be expressed through the fractional Laplacian on the sphere. For a function $\boldsymbol{f \in H^s(\mathbb{S}^{d-1})}$ with $\boldsymbol{s > 0}$, the Sobolev loss functional admits the representation:
 \begin{equation}
@@ -1160,7 +1160,7 @@ For sufficiently wide MMNN and Transformer networks, global minima exhibit a hig
 
 
 
-This conjecture is supported by numerical experiments [Zhang et al, 2024] demonstrating super-convergence behavior in practical training scenarios.
+This conjecture is supported by numerical experiments \cite{zhang2024superconvergence} demonstrating super-convergence behavior in practical training scenarios.
 By means of local analysis
 Our goal now is to develop all the theoretical framework to have the tool to prove this conjecture.
 
@@ -1313,7 +1313,7 @@ The parameters for each layer are divided into two groups:
 
 
 \begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Insight : Architectural Philosophy}},enhanced,drop shadow,boxrule=2pt]
-This random basis initialization is chosen on purpose, supported by approximation theorems [Zhang et al, 2024], with intuition from localizing high frequency variations.
+This random basis initialization is chosen on purpose, supported by approximation theorems \cite{zhang2024superconvergence}, with intuition from localizing high frequency variations.
 With this method, we reduce the number of parameters from $n_\ell^2$ to $n_\ell * d_\ell$.
 
 The NTK parameterization is chosen to ensure a well-defined infinite-width limit. The $\mu$ parameterization do not have this property.
@@ -1335,7 +1335,7 @@ The choice of scaling for the trainable parameters critically determines the net
 \item Network dynamics converge to linear model behavior characterized by the Neural Tangent Kernel
 \end{itemize}
 
-\textbf{2. Mean-Field ($\mu$) Parameterization [Greg Yang et al., 2020]:} Alternative $\frac{1}{n_\ell}$ scaling.
+\textbf{2. Mean-Field ($\mu$) Parameterization \cite{yang2020meanfield}:} Alternative $\frac{1}{n_\ell}$ scaling.
 In this parameterization, function outputs are of order $\mathcal{O}(\frac{1}{\sqrt{n_\ell}})$ while gradients remain of order $\mathcal{O}(1)$, enabling unit-scale parameter updates. This scaling is termed "mean-field" because each neuron's contribution is of order $\mathcal{O}(1)$, allowing collective influence of all neurons. This configuration promotes feature learning and non-linear dynamics.
 
 Those initialization are opposite, and we will see that the NTK parameterization is the best for the MMNN architecture to have order one gaussianity in low rank layers.
@@ -1376,7 +1376,7 @@ The recursion captures the evolution of these kernel distributions through the l
 
 
 \subsection{Personal contribution : Asymptotic Regime}
-The entire NTK and NNGP formalism relies on the infinite-width limit giving gaussianity. Following the framework established by Jacot et al., we analyze the network in a specific asymptotic regime:
+The entire NTK and NNGP formalism relies on the infinite-width limit giving gaussianity. Following the framework established by \cite{jacot2018ntk}, we analyze the network in a specific asymptotic regime:
 \begin{itemize}
     \item The dimensions of the hidden layers, or widths, $n_1, n_2, \dots, n_L$ are taken to infinity.
     \item The input and output dimensions of each layer ($d_0, d_1, \dots, d_L$) are kept fixed and finite.
@@ -1637,7 +1637,7 @@ Ongoing research is doing a taylor expansion of the NTK near $\rho =1$ on that p
 \end{tcolorbox}
 
 \begin{tcolorbox}[colback=green!10,colframe=green!80!black,title={\textbf{Computational Insight: Linear Programming Formulation}},enhanced,drop shadow,boxrule=2pt]
-Following Zhang et al.'s approach, uniform distributions for random weights $\bm{w}_j^{(\ell)} \sim \text{Uniform}(\mathcal{S}^{d_{\ell-1}})$ and biases $b_j^{(\ell)} \sim \text{Uniform}[-1,1]$ transform MMNN optimization into a \textbf{linear programming problem}.
+Following \cite{zhang2024superconvergence} approach, uniform distributions for random weights $\bm{w}_j^{(\ell)} \sim \text{Uniform}(\mathcal{S}^{d_{\ell-1}})$ and biases $b_j^{(\ell)} \sim \text{Uniform}[-1,1]$ transform MMNN optimization into a \textbf{linear programming problem}.
 
 Since the random basis functions $\sigma(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)})$ are fixed and the network output is linear in trainable weights $\{\bm{A}_j^{(\ell)}\}$, the optimization becomes convex and exactly solvable.
 Another way to precondition the NTK is to choose a specific ad-hoc great initilization that we are trying to find in ongoing research.
@@ -1721,7 +1721,7 @@ A powerful analogy connects MMNNs to wavelet transforms, particularly in high di
 
 Networks perform automatic, adaptive directional domain decomposition. While neuron-partitioned regions grow exponentially, parameters scale linearly with width. This expressive power and parameter efficiency combination makes MMNNs powerful, tractable tools for high-dimensional PINN applications where classical wavelets fail.
 
-Concrete progress requires network regularity. Many PDEs involve second-order derivatives (Laplacians). Applying rigorous optimization and approximation theorems requires twice-differentiable networks ($C^2$). Future directions include developing "Deep Suuper ReLU Network" [Yang et al., 2024] MMNN versions using smoother activations, guaranteeing necessary regularity and unlocking broader theoretical tools for PINN analysis.
+Concrete progress requires network regularity. Many PDEs involve second-order derivatives (Laplacians). Applying rigorous optimization and approximation theorems requires twice-differentiable networks ($C^2$). Future directions include developing "Deep Suuper ReLU Network" \cite{yang2024deepsuperreul} MMNN versions using smoother activations, guaranteeing necessary regularity and unlocking broader theoretical tools for PINN analysis.
 
 
 
@@ -1983,7 +1983,7 @@ The key insight of this recursive structure is that adding a new layer to the ne
 \end{itemize}
 
 A \textit{critical property} of this recursion is that for \textbf{ReLU activation functions}, the second derivatives $\ReLU ''$ vanish almost everywhere, which significantly simplifies the expansion of the directional derivatives $\delta_\gamma$.
-This results is critical provided that during training, there is a probability 0 that any activation encounter 0. [Deep et al]
+This results is critical provided that during training, there is a probability 0 that any activation encounter 0. \cite{lee2022ntk}
 
 The complete mathematical derivation, including the explicit forms of all terms and the detailed analysis of the ReLU case, is presented in \hyperref[sec:appendix_recursive_derivation]{Appendix B.2}. This derivation demonstrates how the recursive structure emerges naturally from the hierarchical organization of the neural network.
 We give bounds we found for the behavior of the entries of the $\textcolor{k3color}{K^{(3)}}$ tensor as a function of the network depth, denoted by $L$ (or $H$ in the code), for a fixed network width $m$. The analysis is based on the formulas from the Neural Tangent Hierarchy (NTH) framework. We aim to understand if the tensor entries decay as the depth increases, and specifically, if this decay is exponential.
@@ -2318,7 +2318,7 @@ For a fixed pair of inputs $(x_1, x_2)$, we consider the third-order kernel deri
 \]
 where $\theta_{\mu}$ has multi-index $\mu=(p,i,j)$ belonging to the weight matrix $A_p$. Thus, for fixed $(x_1,x_2)$, we obtain a vector $\textcolor{k3color}{O_3}^{x_1,x_2} \in \mathbb{R}^{|D_{\text{tr}}|}$ with components given by the third derivative of the kernel at each training point.
 
-\subsubsection{Explicit Formulas for the Corrections [Dyer et al]}
+\subsubsection{Explicit Formulas for the Corrections \cite{dyer2024ntk}}
 
 Having established the theoretical foundation, we now present the explicit formulas for the first-order corrections $\textcolor{k3color}{O_3}$ and $O_4$.
 
@@ -2839,7 +2839,7 @@ This result represents a \textbf{breakthrough} in understanding how network arch
 \subsubsection{Personal Contribution: Novel ReLU Recursion Formula}
 
 We present the \textbf{first complete derivation} of the recursive structure for $\textcolor{k3color}{K^{(3)}}$ in ReLU networks, leveraging the critical property that $\sigma''(\sigma) = 0$ almost everywhere.
-The theoretical justification for this simplification is supported by a theorem from [DEEP ET AL. 2023] stating that through the training, there is zero chance to encounter a ReLU neuron with zero activation.
+The theoretical justification for this simplification is supported by a theorem from \cite{lee2022ntk} stating that through the training, there is zero chance to encounter a ReLU neuron with zero activation.
 
 \begin{tcolorbox}[colback=definitioncolor!10,colframe=definitioncolor!60!black,title={\textbf{Revolutionary Insight: ReLU Simplification}},enhanced,drop shadow]
 The vanishing second derivative of ReLU activation leads to \textit{dramatic simplifications} in the third-order kernel computation:
@@ -2857,7 +2857,7 @@ This eliminates all \textbf{second-order terms} that plague general activation f
 \begin{tcolorbox}[colback=sobolevcolor!15,colframe=sobolevcolor!80!black,title={\textbf{Breakthrough : Gaussian Orthogonal Ensemble Connection}},enhanced,drop shadow]
 The \textbf{finite-width corrections} exhibit universal statistical properties of the Gaussian Orthogonal Ensemble. We demonstrate that eigenvalue statistics of matrices derived from $\textcolor{k3color}{K^{(3)}}$ and $\textcolor{k2color}{K^{(2)}}$ eigenvalues exhibit Wigner-Dyson spacing statistics, confirming the Wigner-Dyson-Mehta conjecture for neural tangent kernels.
 
-\textbf{Ongoing research are testing the following conjectures (in collaboration with Baskerville et al. 2024)}:
+\textbf{Ongoing research are testing the following conjectures (in collaboration with \cite{baskerville2024ntk})}:
 \begin{itemize}
 \item \textbf{Spectral rigidity}: Bulk eigenvalues follow GOE correlation functions
 \item \textbf{Edge universality}: Largest eigenvalues display Tracy-Widom fluctuations
@@ -3133,8 +3133,6 @@ Future work should aim to leverage this Random Matrix Theory connection to deriv
 
 \appendix
 
-
-
 \section{Main Proofs for Sobolev training}
 
 \subsection{Alternative Proof: Sobolev Loss on Unbounded Domains via Integration by Parts}
@@ -3369,7 +3367,7 @@ Matrix construction requires:
 
 
 
-\section{Mathematical Foundation: Concentration Inequalities from Nguyen et al.}
+\section{Mathematical Foundation: Concentration Inequalities from \cite{nguyen2024concentration}}
 
 \subsection{Scalar Concentration Inequalities}
 
@@ -3497,7 +3495,7 @@ All modern approaches to bounding $\lambdaMin(\KNTK)$ follow a common high-level
 \end{figure}
 
 
-\subsection{Proof Scheme 1: Empirical NTK Decomposition (Nguyen et al.)}
+\subsection{Proof Scheme 1: Empirical NTK Decomposition (\cite{nguyen2024concentration})}
 
 \textbf{High-Level Strategy}: Direct decomposition of empirical NTK $\bar{K}^{(L)} = JJ^T$ using feature matrices and chain rule to obtain precise bounds on $\lambdaMin$.
 
@@ -3687,7 +3685,7 @@ We focus here on understanding NTK for other architectures and handcomputations 
 \subsection{Detailed approach for Transformers and Softmax Analysis}
 \label{app:transformers}
 
-We present here our approach to the analysis of the softmax function and the Gaussian measure integrals that appear in Transformers NTK analysis following the work of Hron et al.
+We present here our approach to the analysis of the softmax function and the Gaussian measure integrals that appear in Transformers NTK analysis following the work of \cite{hron2020infiniteattentionnngpntk}.
 
 \begin{tcolorbox}[colback=personalcontribcolor!15,colframe=personalcontribcolor!80!black,title={\textbf{Major Personal Contribution}},enhanced,drop shadow,boxrule=2pt]
 This appendix presents the detailed calculations for the theoretical analysis of \textcolor{insightcolor}{\textbf{Gaussian measure integrals}} and \textcolor{methodcolor}{\textbf{softmax functions}}, specifically developed for \textcolor{kernelcolor}{\textbf{Transformer}} models. These results constitute an original contribution to the mathematical understanding of \textcolor{k3color}{\textbf{attention mechanisms}}.
@@ -4526,7 +4524,7 @@ By Schur's lemma, $\textcolor{kernelcolor}{K}_\infty$ acts as a scalar on each i
 The symmetry-theoretic approach thus unifies neural network analysis with fundamental principles from quantum chaos and statistical mechanics, establishing deep connections between machine learning and mathematical physics.
 
 
-\section{The Hessian-NTK Correspondence: A Spectral Equivalence [Dyer et al, Jacot et al]}
+\section{The Hessian-NTK Correspondence: A Spectral Equivalence \cite{dyer2019asymptotics, jacot2020kernelhessian}}
 
 A critical insight for understanding the loss landscape of wide neural networks is the profound connection between the Hessian of the loss and the NTK. As we will show, in the large-width limit, their spectra become nearly identical. This correspondence allows us to translate all our findings about the NTK spectrum—from the dominant eigenvalue corresponding to data norms to the GOE statistics of the bulk—directly into statements about the geometry of the loss function around the network's initialization.
 
@@ -4650,6 +4648,22 @@ Divergence of empirical ntk in classification.
 \textit{arXiv preprint arXiv:2504.11130}, 2025.
 Published at ICLR 2025.
 URL: \href{https://arxiv.org/abs/2504.11130}{\url{https://arxiv.org/abs/2504.11130}}.
+
+\bibitem{lee2022ntk}\label{ref:lee2022ntk}
+Jongmin Lee, Joo Young Choi, Ernest K. Ryu, and Albert No.
+Neural tangent kernel analysis of deep narrow neural networks.
+In \textit{Proceedings of the 39th International Conference on Machine Learning},
+volume 162 of \textit{Proceedings of Machine Learning Research}, pages 12282--12351, 2022.
+Editors: Kamalika Chaudhuri, Stefanie Jegelka, Le Song, Csaba Szepesvari, Gang Niu, Sivan Sabato.
+PMLR, 17--23 July 2022.
+PDF: \url{https://proceedings.mlr.press/v162/lee22a/lee22a.pdf}.
+URL: \url{https://proceedings.mlr.press/v162/lee22a.html}.
+
+\bibitem{hron2020infiniteattentionnngpntk}\label{ref:hron2020infiniteattentionnngpntk}
+Jiri Hron, Yasaman Bahri, Jascha Sohl-Dickstein, and Roman Novak.
+Infinite attention: NNGP and NTK for deep attention networks.
+\textit{arXiv preprint arXiv:2006.10540}, 2020.
+URL: \url{https://arxiv.org/abs/2006.10540}.
 
 \bibitem{ntk2024underparam}\label{ref:ntk2024underparam}
 Anonymous.
