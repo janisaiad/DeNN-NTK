@@ -686,8 +686,9 @@ This framework provides a natural connection between neural network training and
 It's important to note that Sobolev training is mainly used for very smooth functions in general. But the terminology "Sobolev" remains the same
 and is part of the field slang, even if describing it in a sobolev space is ont fully informative.
 
-
-
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Central Research Question}},enhanced,drop shadow,boxrule=2pt]
+Under what conditions does optimizing the Sobolev training loss behave well? Specifically, we seek to understand when the condition number of key optimization matrices (such as the Gauss-Newton, Hessian, Fisher, and NTK matrices) remains small, ensuring stable and efficient convergence.
+\end{tcolorbox}
 
 
 
@@ -942,15 +943,50 @@ with multiplicity $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$.
 \end{tcolorbox}
 
 
-\newpage
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.1, every node/.style={font=\small}]
+        % we define the axes for our plot, representing parameter space and loss
+        \draw[->, thick] (-0.5,0) -- (9,0) node[right] {Parameter space $w$};
+        \draw[->, thick] (0,-0.5) -- (0,4) node[above] {Loss $\mathcal{L}(w)$};
 
+        % we draw a custom non-convex loss landscape with multiple minima using bezier curves
+        \draw[thick, blue!70!black] (0,3.5) 
+            .. controls (1,3) and (1.5,0.5) .. (2.5, 0.8) % we create the first global minimum
+            .. controls (3.5,1.1) and (4,2.5) .. (4.5, 2.6) % we create a local maximum
+            .. controls (5,2.7) and (5.5,1) .. (6.5, 0.8) % we create a second global minimum at the same level
+            .. controls (7.5,0.6) and (8,2) .. (8.5, 2.2); % we end the curve
 
+        % we define coordinates for key points of interest on the landscape
+        \coordinate (start) at (0.5, 3.3);
+        \coordinate (globalmin1) at (2.5, 0.8);
+        \coordinate (globalmin2) at (6.5, 0.8);
+        
+        % we mark the initial parameters and the global minima on the plot
+        \fill[black] (start) circle (2pt) node[above] {$w_0$};
+        \fill[orange!90!black] (globalmin1) circle (2.5pt);
+        \fill[orange!90!black] (globalmin2) circle (2.5pt);
 
+        % we draw the optimization path from the start to one of the global minima
+        \draw[->, thick, orange!80!black, dashed] (start) 
+            .. controls (1,2.5) and (1.5,1.5) .. (globalmin1);
 
+        % we add an annotation box explaining the ntk theorem's guarantee
+        \node[align=left, anchor=north east, text width=4.5cm, draw, rounded corners, fill=gray!10, inner sep=2mm] at (8.8, 3.8) {
+            \textbf{NTK Regime Guarantee:}\\
+            For a sufficiently wide network, gradient descent is guaranteed to converge to a \textbf{global minimum} of the loss function $\mathcal{L}(w)$.
+        };
 
-
-
-
+        % we use a brace to highlight that multiple global minima can exist
+        \draw [decorate,decoration={brace,amplitude=8pt,mirror,raise=4pt},thick]
+            (globalmin1 |- 0,-0.2) -- (globalmin2 |- 0,-0.2)
+            node[midway, below=8pt, align=center] 
+            {\textbf{Set of global minima} \\ (convergence to any is possible)};
+            
+    \end{tikzpicture}
+    \caption{Illustration of the NTK theorem on a complex, non-convex loss landscape. The theory guarantees that for sufficiently wide networks, gradient descent (dashed orange path) converges to a global minimum. However, the global minimum is not necessarily unique; the optimization may converge to any point within the set of global optima.}
+    \label{fig:ntk-global-minima-landscape}
+\end{figure}
 
 
 
@@ -1155,52 +1191,6 @@ The practical implications extend to algorithm design, where our theoretical ins
 
 
 \section{Preconditioning strategies for the NTK}
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[scale=1.1, every node/.style={font=\small}]
-        % we define the axes for our plot, representing parameter space and loss
-        \draw[->, thick] (-0.5,0) -- (9,0) node[right] {Parameter space $w$};
-        \draw[->, thick] (0,-0.5) -- (0,4) node[above] {Loss $\mathcal{L}(w)$};
-
-        % we draw a custom non-convex loss landscape with multiple minima using bezier curves
-        \draw[thick, blue!70!black] (0,3.5) 
-            .. controls (1,3) and (1.5,0.5) .. (2.5, 0.8) % we create the first global minimum
-            .. controls (3.5,1.1) and (4,2.5) .. (4.5, 2.6) % we create a local maximum
-            .. controls (5,2.7) and (5.5,1) .. (6.5, 0.8) % we create a second global minimum at the same level
-            .. controls (7.5,0.6) and (8,2) .. (8.5, 2.2); % we end the curve
-
-        % we define coordinates for key points of interest on the landscape
-        \coordinate (start) at (0.5, 3.3);
-        \coordinate (globalmin1) at (2.5, 0.8);
-        \coordinate (globalmin2) at (6.5, 0.8);
-        
-        % we mark the initial parameters and the global minima on the plot
-        \fill[black] (start) circle (2pt) node[above] {$w_0$};
-        \fill[orange!90!black] (globalmin1) circle (2.5pt);
-        \fill[orange!90!black] (globalmin2) circle (2.5pt);
-
-        % we draw the optimization path from the start to one of the global minima
-        \draw[->, thick, orange!80!black, dashed] (start) 
-            .. controls (1,2.5) and (1.5,1.5) .. (globalmin1);
-
-        % we add an annotation box explaining the ntk theorem's guarantee
-        \node[align=left, anchor=north east, text width=4.5cm, draw, rounded corners, fill=gray!10, inner sep=2mm] at (8.8, 3.8) {
-            \textbf{NTK Regime Guarantee:}\\
-            For a sufficiently wide network, gradient descent is guaranteed to converge to a \textbf{global minimum} of the loss function $\mathcal{L}(w)$.
-        };
-
-        % we use a brace to highlight that multiple global minima can exist
-        \draw [decorate,decoration={brace,amplitude=8pt,mirror,raise=4pt},thick]
-            (globalmin1 |- 0,-0.2) -- (globalmin2 |- 0,-0.2)
-            node[midway, below=8pt, align=center] 
-            {\textbf{Set of global minima} \\ (convergence to any is possible)};
-            
-    \end{tikzpicture}
-    \caption{Illustration of the NTK theorem on a complex, non-convex loss landscape. The theory guarantees that for sufficiently wide networks, gradient descent (dashed orange path) converges to a global minimum. However, the global minimum is not necessarily unique; the optimization may converge to any point within the set of global optima.}
-    \label{fig:ntk-global-minima-landscape}
-\end{figure}
-
-\newpage
 
 \subsection{Multi-Component Multi-layer Neural Networks (MMNN) and Transformers}
 
@@ -1222,16 +1212,22 @@ The transition between feature learning and kernel regimes represents a fundamen
 
 The NTK spectrum, particularly its smallest eigenvalue $\lambda_{\min}$, determines convergence rates and optimization strategy. An ill-conditioned NTK suggests second-order methods are appropriate, while a well-conditioned NTK indicates first-order methods can achieve faster convergence. For MMNN architectures, different network components may operate in different regimes simultaneously, requiring careful analysis of heterogeneous optimization dynamics.
 
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Theorem: NTK-Hessian Correspondence}},enhanced,drop shadow,boxrule=2pt]
+A fundamental but very niche theorem in deep learning theory establishes that for sufficiently wide neural networks, the spectrum of the Neural Tangent Kernel (NTK) and the spectrum of the Hessian of the loss function are asymptotically equivalent. This powerful result connects the geometry of the loss landscape to the kernel function, providing a bridge between optimization dynamics and representation learning.
+
+The full statement and proof of this theorem are presented in a dedicated blue box in the Appendix. This result builds upon the foundational works of \cite{dyer2019asymptotics} and \cite{jacot2018neural}.
+\end{tcolorbox}
+
+
 \begin{tcolorbox}[colback=green!15,colframe=green!80!black,title={\textbf{Conjecture from Pr Haizhao Yang: Global Minima Stability}},enhanced,drop shadow,boxrule=2pt]
 For sufficiently wide MMNN and Transformer networks, global minima exhibit a high local stability propertiy ensuring convergence from neighborhoods around optimal solutions. The Hessian and NTK eigenvalues near global minima satisfy regularity conditions guaranteeing stable optimization dynamics.
 \end{tcolorbox}
 
 
-
-
 This conjecture is supported by numerical experiments \cite{zhang2024superconvergence} demonstrating super-convergence behavior in practical training scenarios.
-By means of local analysis
-Our goal now is to develop all the theoretical framework to have the tool to prove this conjecture.
+By means of local analysis. Our goal now is to develop all the theoretical framework to have the tool to prove this conjecture. What we should prove is that the NTK is not moving too much near a global optima.
+
+
 
 
 \section{MMNN Model Definition and Asymptotic Regime}
@@ -4592,6 +4588,8 @@ By Schur's lemma, $\textcolor{kernelcolor}{K}_\infty$ acts as a scalar on each i
 The symmetry-theoretic approach thus unifies neural network analysis with fundamental principles from quantum chaos and statistical mechanics, establishing deep connections between machine learning and mathematical physics.
 
 
+
+
 \section{The Hessian-NTK Correspondence: A Spectral Equivalence \cite{dyer2019asymptotics, jacot2020kernelhessian}}
 
 A critical insight for understanding the loss landscape of wide neural networks is the profound connection between the Hessian of the loss and the NTK. As we will show, in the large-width limit, their spectra become nearly identical. This correspondence allows us to translate all our findings about the NTK spectrum—from the dominant eigenvalue corresponding to data norms to the GOE statistics of the bulk—directly into statements about the geometry of the loss function around the network's initialization.
@@ -4621,6 +4619,12 @@ This result is formalized and strengthened by the work of \cite{jacot2020kernelh
 \mathrm{Tr}(H^k) \approx \mathrm{Tr}(\mathcal{A}^k) + \mathrm{Tr}(\mathcal{B}^k)
 \end{equation}
 Since the higher moments of $\mathcal{B}$ (for $k \ge 3$) vanish in the large-width limit, its spectrum consists of a sea of eigenvalues that shrink to zero. The stable, large eigenvalues of the Hessian are therefore entirely determined by $\mathcal{A}$, and thus by the NTK. This provides a solid theoretical foundation for the claim that the NTK spectrum governs the geometry of the loss landscape for wide networks.
+
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Ongoing Research: Towards a Unified Spectral Theory}},enhanced,drop shadow,boxrule=2pt]
+    My current research focuses on establishing a unified theory demonstrating that the spectra of several fundamental matrices in deep learning behave similarly. Indeed, the spectra of the \textbf{Fisher} Information Matrix, the \textbf{Neural Tangent Kernel (NTK)}, the \textbf{Hessian}, and the \textbf{Gauss-Newton} matrix are closely related.
+
+    Under certain conditions, the differences between their eigenvalues are bounded, nearly zero, or even identical. This work, conducted by accumulating knowledge and collaborating with researchers in the field, aims to consolidate these findings into a coherent, unifying theory to be released soon. The objective is to clarify the deep connections between these key operators in high-dimensional optimization.
+\end{tcolorbox}
 
 
 
