@@ -115,7 +115,7 @@
 
     \DeclareRobustCommand{\ReLU}{\mathrel{\text{%
     \begin{tikzpicture}[baseline=(current bounding box.south)]
-        \draw[thick] (0,-0.25) -- (0.25,0) -- (0.4,0.25);
+        \draw[thick] (0,0) -- (0.25,0) -- (0.4,0.25);
     \end{tikzpicture}}}\!\!}
 
 
@@ -328,30 +328,32 @@
 \addcontentsline{toc}{section}{Abstract}
 \section*{Abstract}
 
-In the past few years, research has focused on understanding the fundamental mechanisms governing learning dynamics in deep neural networks. While significant progress has been made through the \textcolor{red}{\textbf{Neural Tangent Kernel (NTK)}} formalism, it remains unclear how
+In the past few years, research has focused on understanding the fundamental mechanisms governing learning dynamics in deep neural networks. While significant progress has been made through the \textbf{Neural Tangent Kernel (NTK)} formalism, it remains unclear how
 to choose the right architecture for a given problem. In the triple approximation/generalization/optimization trilemma, we focus on the optimization aspect, the less understood one.
-This report presents a comprehensive answer to this question through the lens of \textcolor{red}{\textbf{NTK theory}} in the context of
+This report presents a comprehensive answer to this question through the lens of \textbf{NTK theory} in the context of
 \textbf{Sobolev training}.
 
 We establish a novel theoretical framework and our key finding demonstrates that the effectiveness of learning depends critically on \textbf{sampling conditions}, specifically when using \textbf{Chebyshev points}.
-For general sampling schemes, optimal learning requires \textbf{explicit derivative information} for effective training. We derive \textbf{explicit theoretical and numerical bounds} for key neural network quantities establishing \textbf{precise eigenvalue bounds} for \textcolor{red}{\textbf{NTK}} matrices and ongoing \textbf{quantitative convergence rates}. Our \textbf{spectral analysis} covers \textcolor{gray}{\textbf{fully connected networks (FCNN)}}, \textcolor{orange}{\textbf{Multi-Layer Multi-component networks (MMNN)}}, and \textbf{transformers}, revealing architecture-specific scaling with depth, width, and input dimension. 
+For general sampling schemes, optimal learning requires \textbf{explicit derivative information} for effective training. We derive \textbf{explicit theoretical and numerical bounds} for key neural network quantities establishing \textbf{precise eigenvalue bounds} for \textbf{NTK} matrices and ongoing \textbf{quantitative convergence rates}. Our \textbf{spectral analysis} covers \textbf{fully connected networks (FCNN)}, \textbf{Multi-Layer Multi-component networks (MMNN)}, and \textbf{transformers}, revealing architecture-specific scaling with depth, width, and input dimension. 
 Through \textbf{finite-width corrections}, we provide \textbf{explicit error bounds} and foundations for ongoing \textbf{convergence guarantees} for gradient descent. We provide also insights in the
 new fields of mathematical physics (QFT, RMT, StatMech) applied to deep learning
 
-Experimental validation confirms our theoretical predictions across all architectures. Fully reproducible code is available at \href{https://github.com/janisaiad/DeNN-NTK}{here} and \href{https://github.com/janisaiad/MMN}{here}.
+Experimental validation confirms our theoretical predictions across several architectures. Fully reproducible code is available at \href{https://github.com/janisaiad/DeNN-NTK}{here} and \href{https://github.com/janisaiad/MMN}{here}.
+
+
+
 
 \vspace{0.5cm}
 
 \addcontentsline{toc}{section}{Résumé}
 \section*{Résumé}
-Au cours des dernières années, la recherche s'est concentrée sur la compréhension des mécanismes fondamentaux régissant la dynamique d'apprentissage dans les réseaux de neurones profonds. Bien que des progrès significatifs aient été réalisés grâce au formalisme du \textcolor{red}{\textbf{Neural Tangent Kernel (NTK)}}, il reste peu clair comment choisir la bonne architecture pour un problème donné. Dans le trilemme classique approximation/généralisation/optimisation, nous nous concentrons sur l'aspect optimisation, le moins bien compris. Ce rapport présente une réponse complète à cette question à travers le prisme de la \textcolor{red}{\textbf{théorie du NTK}} dans le contexte de \textbf{l'entraînement de Sobolev}.
+Au cours des dernières années, la recherche s'est concentrée sur la compréhension des mécanismes fondamentaux régissant la dynamique d'apprentissage dans les réseaux de neurones profonds. Bien que des progrès significatifs aient été réalisés grâce au formalisme du \textbf{Neural Tangent Kernel (NTK)}, il reste peu clair comment choisir la bonne architecture pour un problème donné. Dans le trilemme classique approximation/généralisation/optimisation, nous nous concentrons sur l'aspect optimisation, le moins bien compris. Ce rapport présente une réponse complète à cette question à travers le prisme de la \textbf{théorie du NTK} dans le contexte de \textbf{l'entraînement de Sobolev}.
 
-Nous établissons un nouveau cadre théorique et notre découverte clé démontre que l'efficacité de l'apprentissage dépend de manière critique des \textbf{conditions d'échantillonnage}, spécifiquement lors de l'utilisation de \textbf{points de Chebyshev}. Pour les schémas d'échantillonnage généraux, l'apprentissage optimal nécessite une \textbf{information explicite sur les dérivées} pour un entraînement efficace. Nous dérivons des \textbf{bornes théoriques et numériques explicites} pour les quantités clés des réseaux de neurones, établissant des \textbf{bornes précises sur les valeurs propres} pour les matrices \textcolor{red}{\textbf{NTK}} et des \textbf{taux de convergence quantitatifs} en cours. Notre \textbf{analyse spectrale} couvre les \textcolor{gray}{\textbf{réseaux entièrement connectés (FCNN)}}, les \textcolor{orange}{\textbf{réseaux multi-couches multi-composants (MMNN)}}, et les \textbf{transformers}, révélant une mise à l'échelle spécifique à l'architecture avec la profondeur, la largeur et la dimension d'entrée. À travers les \textbf{corrections de largeur finie}, nous fournissons des \textbf{bornes d'erreur explicites} et des fondations pour les \textbf{garanties de convergence} en cours pour la descente de gradient.
-Nous donnons également des insights dans les nouveaux champs de la physique mathématique (QFT, RMT, StatMech) appliqués au deep learning.
+Nous établissons un nouveau cadre théorique et notre découverte clé démontre que l'efficacité de l'apprentissage dépend de manière critique des \textbf{conditions d'échantillonnage}, spécifiquement lors de l'utilisation de \textbf{points de Chebyshev}. Pour les schémas d'échantillonnage généraux, l'apprentissage optimal nécessite une \textbf{information explicite sur les dérivées} pour un entraînement efficace. Nous dérivons des \textbf{bornes théoriques et numériques explicites} pour les quantités clés des réseaux de neurones, établissant des \textbf{bornes précises sur les valeurs propres} pour les matrices \textbf{NTK} et des \textbf{taux de convergence quantitatifs} en cours. Notre \textbf{analyse spectrale} couvre les \textbf{réseaux entièrement connectés (FCNN)}, les \textbf{réseaux multi-couches multi-composants (MMNN)}, et les \textbf{transformers}, révélant une mise à l'échelle spécifique à l'architecture avec la profondeur, la largeur et la dimension d'entrée. À travers les \textbf{corrections de largeur finie}, nous fournissons des \textbf{bornes d'erreur explicites} et des fondations pour les \textbf{garanties de convergence} en cours pour la descente de gradient.
+Nous donnons également des points de vue dans les nouveaux champs de la physique mathématique (QFT, RMT, StatMech) appliqués au deep learning.
 
-La validation expérimentale confirme nos prédictions théoriques à travers toutes les architectures. Un code entièrement reproductible est disponible sur \href{https://github.com/janisaiad/DeNN-NTK}{github.com/janisaiad/DeNN-NTK} et \href{https://github.com/janisaiad/MMN}{github.com/janisaiad/MMN}.
+La validation expérimentale confirme nos prédictions théoriques à travers plusieurs architectures. Un code entièrement reproductible est disponible sur \href{https://github.com/janisaiad/DeNN-NTK}{ici} et \href{https://github.com/janisaiad/MMN}{ici}.
 \newpage
-
 
 
 
@@ -371,22 +373,21 @@ La validation expérimentale confirme nos prédictions théoriques à travers to
 
 \addcontentsline{toc}{section}{Introduction}
 \section*{Introduction}
-The study of \textbf{learning dynamics} in \textbf{deep neural networks} constitutes a fundamental research area. Our approach focuses on the desingularizing \textbf{Sobolev training} by decomposing the problem into two distinct contributions: an independent \textbf{neural tangent kernel (NTK)} and a \textbf{Sobolev contribution}. This decomposition relies on the \textbf{commutation} between \textbf{integral operators} and the \textbf{fractional Laplace operator}.
+The study of learning dynamics in deep neural networks constitutes a fundamental research area. Our approach focuses on the desingularizing \textbf{Sobolev training} by decomposing the problem into two distinct contributions: an independent \textbf{neural tangent kernel (NTK)} and a Sobolev contribution. This decomposition relies on the \textbf{commutation} between integral operators and the fractional Laplace operator.
 
-\textbf{Key Discovery}: We establish that this \textbf{commutation property} holds \textit{exactly} only when using \textcolor{red}{\textbf{Chebyshev points}} (or equivalent \textbf{optimal interpolation nodes}) for sampling. For \textbf{general sampling points}, commutation breaks, necessitating \textbf{explicit derivative information} for effective learning. 
+\textbf{Key Discovery}: We establish that this commutation property holds \textit{exactly} only when using \textcolor{red}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) for sampling. For general sampling points, commutation breaks, necessitating \textbf{explicit derivative information} for effective learning. 
 
-Our analysis continues with the study of \textbf{NTK preconditioning} through a \textbf{freeze weights method}, illustrated by neural networks factorizing \textbf{low-rank weight matrices}. This approach is supported by a rigorous \textbf{approximation theorem}. For classical \textbf{feed-forward networks (FCNN)}, we develop a \textbf{finite-width correction} that proves particularly fruitful. Finally, we explore \textbf{Transformers} as an alternative solution, offering a new learning paradigm.
+Our analysis continues with the study of \textbf{NTK preconditioning} through a \textbf{freeze weights method}, illustrated by neural networks factorizing low-rank weight matrices. This approach is supported by a rigorous approximation theorem. For classical feed-forward networks (FCNN), we develop a \textbf{finite-width correction} that proves particularly fruitful. Finally, we explore \textbf{Transformers} as an alternative solution, offering a new learning paradigm.
 
-Across these different architectures, we study \textbf{feature learning regimes} and their \textbf{scaling with network width}. 
-Our results and discoveries rely partly on \textbf{statistical physics tools} to characterize \textbf{model convergence} and \textbf{asymptotic behavior}. 
-This analysis enables a better understanding of \textbf{finite-width corrections} and their implications for the \textbf{practical optimization} of deep neural networks.
+Across these different architectures, we study \textbf{feature learning regimes} and their scaling with network width. 
+Our results and discoveries rely partly on \textbf{statistical physics tools} to characterize model convergence and asymptotic behavior. 
+This analysis enables a better understanding of finite-width corrections and their implications for the practical optimization of deep neural networks.
 
-The end of this research establishes fundamental connections between \textbf{neural network dynamics} and \textbf{mathematical physics}, advancing theoretical understanding of \textbf{eigenvalue bounds} for \textbf{neural tangent kernels} across multiple architectures. We bridge \textbf{classical optimization theory} with advanced \textbf{mathematical physics frameworks}, leveraging tools from \textbf{quantum field theory} and \textbf{random matrix theory} to provide new insights into neural network behavior.
+The end of this research establishes fundamental connections between neural network dynamics and \textbf{mathematical physics}, advancing theoretical understanding of \textbf{eigenvalue bounds} for neural tangent kernels across multiple architectures. We bridge classical optimization theory with advanced mathematical physics frameworks, leveraging tools from \textbf{quantum field theory} and \textbf{random matrix theory} to provide new insights into neural network behavior.
 
-Our contribution to \textbf{physics-informed deep learning theory} applies techniques from \textbf{statistical mechanics} and \textbf{random matrix ensembles}, offering a \textbf{mathematical physics perspective} that complements existing approaches. This \textbf{interdisciplinary methodology} demonstrates how \textbf{theoretical physics concepts} illuminate fundamental machine learning questions, establishing new paradigms for understanding \textbf{complex neural architectures}.
+Our contribution to \textbf{physics-informed deep learning theory} applies techniques from statistical mechanics and random matrix ensembles, offering a mathematical physics perspective that complements existing approaches. This interdisciplinary methodology demonstrates how theoretical physics concepts illuminate fundamental machine learning questions, establishing new paradigms for understanding complex neural architectures.
 
-Extensive \textbf{experimental validation} across \textbf{feed-forward networks}, \textbf{Multi-Layer Multi-component networks}, and \textbf{transformers} confirms our \textbf{theoretical predictions} while revealing phenomena that merit further investigation at the intersection of \textbf{deep learning and mathematical physics}.
-
+Extensive experimental validation across feed-forward networks, \textbf{Multi-Layer Multi-component networks}, and transformers confirms our theoretical predictions while revealing phenomena that merit further investigation at the intersection of deep learning and mathematical physics.
 
 
 \newpage
@@ -415,7 +416,7 @@ Special thanks go to \textbf{David Terjek} for his invaluable contributions to p
  Their combined insights have significantly enhanced both the theoretical foundations and practical applications of our
   results in physics-informed neural networks.
 
-I would also like to thank \textbf{Charles-Albert Lehalle} for his helpful talks about random matrix theory referencesand his knowledge 
+I would also like to thank \textbf{Charles-Albert Lehalle} for his helpful talks about random matrix theory references and his knowledge 
 in mathematical finance applications of neural networks.
 
 I am deeply grateful to the \textbf{BRIN MRC Summer School in Physics Informed Machine Learning Theory} for providing an 
@@ -450,9 +451,9 @@ especially \textbf{\textcolor{brown}{random matrix theory}}, \textbf{\textcolor{
 A google drive is also available containing all the content (beamers, pdfs, papers, notes, scans) accumulated through the weeks.
 \href{https://drive.google.com/drive/folders/1LFZ4euJO-KIWSFljtm5P4ebUBkkH_YPn}{Google Drive}
 
-Those results required 500 pages of handcalculations scanned and pushed on google drive, 10k python lines, 10k latex lines,  and  \textbf{1000 pdflatex compilations} - totally worth it!
+Those results required 500 pages of hand-calculations scanned and pushed on google drive, 10k python lines, 10k latex lines,  and  \textbf{1000 pdflatex compilations}.
 In an era where AI capabilities are rapidly expanding, we wanted to ensure the authenticity and 
-originality of this research work remains uncompromised. Given that the intellectual property of this work is 
+originality of this mathematical research work remains uncompromised. Given that the intellectual property of this work is 
 in the public domain, we mention that substantial portions of this research, including our theoretical insights 
 and discoveries (particularly the GOE finding), as well as coding sessions and literature review activities, have 
 been documented and shared through unlisted YouTube livestreams. This comprehensive documentation will be made 
@@ -697,7 +698,7 @@ $$\mathcal{L}_{\text{discrete}}(f) = \sum_{i=1}^{\textcolor{red}{n}} \sum_{p=0}^
 
 This framework provides a natural connection between neural network training and classical function approximation theory in Sobolev spaces.
 It's important to note that Sobolev training is mainly used for very smooth functions in general. But the terminology "Sobolev" remains the same
-and is part of the field slang, even if describing it in a sobolev space is not fully informative.
+and is part of the field slang, even if describing it in a Sobolev space is not fully informative.
 
 \begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Central Research Question}},enhanced,drop shadow,boxrule=2pt]
 Under what conditions does optimizing the Sobolev training loss behave well? Specifically, we seek to understand when the condition number of key optimization matrices (such as the Gauss-Newton, Hessian, Fisher, and NTK matrices) remains small, ensuring stable and efficient convergence.
@@ -1184,7 +1185,7 @@ The proof is provided in \hyperref[sec:appendix_commutation]{Appendix A.4}.
 
 
 \newpage
-\section*{Partial conclusion for Sobolev training and future works}
+\section{Partial conclusion for Sobolev training and future works}
 In this work, we have established a comprehensive theoretical framework connecting Sobolev regularization theory with Neural Tangent Kernel analysis. Our personal contributions constitute three fundamental advances: (1) the factorization $\Ts = \Kinf \circ \Ps$ separating spectral filtering from kernel dynamics, (2) the commutation property $\Kop \Pop_s = \Pop_s \Kop$ for Chebyshev sampling points enabling frequency-by-frequency analysis, and (3) the rigorous connection between continuous Sobolev theory and discrete implementations.
 
 These theoretical advances enable profound analysis of Neural Tangent Kernel behavior through spectral decomposition. The commutation property allows us to disentangle dimensionality effects from network architecture effects, providing unprecedented analytical precision for understanding frequency component interactions with network capacity and training dynamics. The eigenvalue structure of the composite operator $\Kop\Pop_s$ directly determines convergence rates across the spectrum, enabling quantitative predictions for learning efficiency.
@@ -1227,14 +1228,21 @@ Many widely-used techniques in modern deep learning can be interpreted as implic
 
 While these component-level strategies are essential, the overall \textbf{architecture} of a neural network plays a fundamental role in preconditioning the learning problem. The specific arrangement of layers, the nature of the connections, and the choice of non-linear activation functions collectively determine the intrinsic structure of the model's function space and the associated optimization landscape. A well-designed architecture can inherently possess favorable properties that make training more efficient, stable, and scalable.
 
-This report focuses on analyzing the preconditioning properties of two particularly significant and powerful modern architectures: \textbf{Multi-Component Multi-layer Neural Networks (MMNN)} and \textbf{Transformers}. The motivation for this focus stems from recent theoretical and empirical evidence demonstrating that these models can achieve remarkable \textbf{super-convergence} properties. This behavior suggests that their designs incorporate powerful implicit preconditioning mechanisms that are not yet fully understood. Our goal is to dissect these architectures through the lens of the Neural Tangent Kernel (NTK), a theoretical tool that connects an infinitely wide neural network to a linear model with a fixed kernel. By studying the spectral properties of the NTK for these models, we can gain deep insights into how their architectural choices influence the optimization dynamics and lead to such exceptional performance.
+This report focuses on analyzing the preconditioning properties of two particularly significant and powerful modern architectures: 
+\textbf{Multi-Component Multi-layer Neural Networks (MMNN)} and \textbf{Transformers}. 
+The motivation for this focus stems from recent theoretical and empirical evidence demonstrating that these models can achieve
+ remarkable \textbf{super-convergence} properties. This behavior suggests that their designs incorporate powerful implicit 
+ preconditioning mechanisms that are not yet fully understood. Our goal is to dissect these architectures through the lens 
+ of the Neural Tangent Kernel (NTK), a theoretical tool that connects an infinitely wide neural network to a linear model
+  with a fixed kernel. By studying the spectral properties of the NTK for these models, we can gain deep insights into how
+   their architectural choices influence the optimization dynamics and lead to such exceptional performance.
 
 
 
 \subsection{Multi-Component Multi-layer Neural Networks (MMNN) and Transformers}
 
 We examine Multi-Component Multi-layer Neural Networks (MMNN) and Transformer architectures, focusing on NTK preconditioning techniques. This means we investigate how to change our architectural
-and training meta-parameters (activation function, residual connections, message passing).At the time this report is written, most of the research is currently in progress.
+and training higher parameters (activation function, residual connections, message passing). At the time this report is written, most of the research is currently in progress.
 
 For MMNN architectures, the kernel structure exhibits exhibits more stability. The preconditioning strategy decomposes the weight matrix into trainable/frozen weights,
 and make the loss landscape less dimensionnal, and hopefully more convex. We present all the mathematical results and proofs
@@ -1658,7 +1666,7 @@ The NTK is the Gram matrix of function gradients. For any finite width, it is a 
     \begin{equation}
         \dot{\Sigma}^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \dot{\ReLU}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \dot{\ReLU}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \bm{w}^\top\bm{w} \right]
     \end{equation}
-    with $\dot{\ReLU}$ being the derivative of the activation function. Both $\Sigma^{(\ell)}$ and $\dot{\Sigma}^{(\ell)}$ are random kernels for $\ell > 1$.
+    with $\dot{\ReLU}$  being the derivative of the activation function. Both $\Sigma^{(\ell)}$ and $\dot{\Sigma}^{(\ell)}$ are random kernels for $\ell > 1$.
 \end{itemize}
 \end{tcolorbox}
 
@@ -1738,7 +1746,7 @@ with $\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\textcolor{magenta}{\rho}) = \f
 where the random variables follow:
 \begin{itemize}
 \item $\textcolor{magenta}{\rho_1} \sim \text{Fisher}(\textcolor{magenta}{\rho_1}, r)$ is independent of the norms ($\|x_1\|$, $\|y_1\|$)
-\item $(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \textcolor{magenta}{\rho_1})$ are chi-squared variables from correlated normal variables with $r$ degrees of freedom (scalar product is a sum of independant Bessel variables)
+\item $(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \textcolor{magenta}{\rho_1})$ are chi-squared variables from correlated normal variables with $r$ degrees of freedom (scalar product is a sum of independent Bessel variables)
 \end{itemize}
 \end{tcolorbox} 
 We explain more about those Fisher and Kibble distributions in appendix.
@@ -1765,7 +1773,7 @@ Ongoing research is doing a taylor expansion of the NTK near $\rho =1$ on that p
 Following \cite{zhang2024superconvergence} approach, uniform distributions for random weights $\bm{w}_j^{(\ell)} \sim \text{Uniform}(\mathcal{S}^{d_{\ell-1}})$ and biases $b_j^{(\ell)} \sim \text{Uniform}[-1,1]$ transform MMNN optimization into a \textbf{linear programming problem}.
 
 Since the random basis functions $\sigma(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)})$ are fixed and the network output is linear in trainable weights $\{\bm{A}_j^{(\ell)}\}$, the optimization becomes convex and exactly solvable.
-Another way to precondition the NTK is to choose a specific ad-hoc great initilization that we are trying to find in ongoing research.
+Another way to precondition the NTK is to choose a specific ad-hoc great initialization that we are trying to find in ongoing research.
 \end{tcolorbox}
 
 
@@ -1777,11 +1785,6 @@ Another way to precondition the NTK is to choose a specific ad-hoc great initili
 
 The initial results are promising and open several avenues for both numerical and theoretical investigation.
 
-\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Numerical Investigations}},enhanced,drop shadow,boxrule=2pt]
-\begin{itemize}
-    \item \textbf{Integration Accuracy:} Increase the network width/rank used for numerical integration to confirm that the observed phenomena are stable as we better approach the infinite-width limit.
-\end{itemize}
-\end{tcolorbox}
 
 \begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Mathematical Investigations: Spectrum Analysis}},enhanced,drop shadow,boxrule=2pt]
 A primary focus of future theoretical work will be to precisely characterize the spectrum of the MMNN's NTK operator using a trifecta of advanced analytical techniques.
@@ -1794,16 +1797,36 @@ The primary analytical approaches for the spectrum are:
     \item \textbf{Spectrum via Puiseux Series Expansion:} Following the work of Bietti and Bach~\cite{bietti2021deepequalsshallowrelu}, we can analyze the Puiseux series expansion of the kernel function in the limits $\rho \to 1^-$ and $\rho \to -1^+$. The first non-integer exponent in this series expansion directly characterizes the asymptotic scaling of the NTK operator's eigenvalues.
     \item \textbf{Spectrum as a Zonal Operator:} A powerful approach is to analyze the NTK as a zonal kernel operator on the sphere. Following the methodology of Murray et al.~\cite{murray2023characterizingspectrumntkpower}, we can seek a power series expansion of the kernel in terms of the Gram matrix ($K = \bm{x}^\top\bm{x}'$). This would allow for a direct characterization of its eigenvalues in terms of Gegenbauer polynomials.
     \item \textbf{Spectrum vs. Depth Analysis:} Adapt the proof methodology from Terj\'{e}k and Gonz\'{a}lez-S\'{a}nchez~\cite{terjek2025mlpseocspectrumntk} to analyze how the NTK spectrum scales with depth $L$. This involves performing a power expansion of the kernel function with respect to the correlation $\rho$.
-    \item \textbf{Spectrum for Alternative Activations and Architectures:} Extend the proof methodology from Terj\'{e}k and Gonz\'{a}lez-S\'{a}nchez~\cite{terjek2025mlpseocspectrumntk} to analyze spectrum scaling for diverse activation functions and architectural variants. This comprehensive investigation includes:
+    \item \textbf{NTK Matrix Structure via Derivatives at Zero:} We will compute the derivatives of the kernel function at $\rho=0$. These derivatives provide the coefficients for a Taylor expansion around orthogonality, which directly defines the structure of the infinite-width NTK matrix.
+    \item \textbf{Eigenvalue Scaling via Taylor Decomposition at Zero:} To complement the depth analysis, we will perform a Taylor decomposition of the kernel's recursive map around the fixed point at $\rho=0$. The derivatives of this map will precisely determine the scaling of the eigenvalues with respect to the network depth $L$.
+    \item \textbf{Smallest Eigenvalue Bound via Hermite Decomposition:} We will use the decomposition of the kernel function into the basis of Hermite polynomials to establish a rigorous lower bound on the smallest eigenvalue, which is crucial for understanding the conditioning of the NTK.
+    \item \textbf{RKHS Characterization via Puiseux Series:} We will further analyze the Puiseux series expansions of the kernel in the limits $\rho \to \pm 1$ to determine the smoothness properties of the functions in the corresponding Reproducing Kernel Hilbert Space (RKHS), connecting the kernel's local behavior to the function space.
+\end{itemize}
+
+
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Numerical Investigations}},enhanced,drop shadow,boxrule=2pt]
     \begin{itemize}
+        \item \textbf{Integration Accuracy:} Increase the network width/rank used for numerical integration to confirm that the observed phenomena are stable as we better approach the infinite-width limit.
+    \end{itemize}
+    \end{tcolorbox}
+
+
+
+\end{tcolorbox}
+
+    \begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Mathematical Investigations: Spectrum Analysis}},enhanced,drop shadow,boxrule=2pt]    
+    \begin{itemize}
+        \item \textbf{Spectrum for Alternative Activations and Architectures:} Extend the proof methodology from Terj\'{e}k and Gonz\'{a}lez-S\'{a}nchez~\cite{terjek2025mlpseocspectrumntk} to analyze spectrum scaling for diverse activation functions and architectural variants. This comprehensive investigation includes:
+        \begin{itemize}
         \item \textbf{ResNet Architectures:} Analyze skip-connection effects on NTK eigenvalue distribution through residual operator formulation $\boldsymbol{\mathcal{K}_{\text{ResNet}} = \mathcal{K}_{\text{direct}} + \mathcal{K}_{\text{residual}}}$, deriving analytical spectrum bounds for various residual depths.
         \item \textbf{Sinusoidal Activations:} Investigate periodic activation functions $\boldsymbol{\sigma(x) = \sin(\omega x + \phi)}$ with frequency parameter $\boldsymbol{\omega}$ and phase $\boldsymbol{\phi}$, computing exact kernel expansions using Bessel function representations and analyzing spectral concentration around dominant frequencies.
         \item \textbf{Squared ReLU Networks:} Derive closed-form expressions for $\boldsymbol{\sigma(x) = \max(0,x)^2}$ activation kernels, leveraging polynomial properties to obtain explicit eigenvalue formulas through Hermite polynomial decomposition on Gaussian measures.
         \item \textbf{Polynomial Activation Families:} Systematically analyze $\boldsymbol{\sigma(x) = x^p}$ for integer powers $\boldsymbol{p \geq 2}$, establishing general spectral scaling laws $\boldsymbol{\lambda_k \sim k^{-\alpha(p)}}$ with explicit decay exponents $\boldsymbol{\alpha(p)}$.
-    \end{itemize}
+        \end{itemize}
     For each architecture-activation pair, we will derive theoretical spectrum statistics including eigenvalue decay rates, effective rank bounds, and numerical validation through high-precision Monte Carlo eigenvalue computation with convergence guarantees.
 \end{itemize}
 \end{tcolorbox}
+
 
 \begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Mathematical Investigations: Extended Goals}},enhanced,drop shadow,boxrule=2pt]
 Further mathematical goals include:
@@ -1842,7 +1865,7 @@ the all ones matrix, simplifying spectral analysis along with standard deviation
 
 
 
-
+\newpage
 \section{Partial conclusion for preconditioning through architecture's paradigms}
 MMNN analysis through NTK theory reveals a fundamental trade-off and framework generalization. Standard NTK theory for MLPs requires quadratic overparameterization to guarantee static kernels and lazy training. MMNNs offer an alternative: entering analyzable, NTK-like regimes with linear parameter scaling.
 
@@ -2020,7 +2043,7 @@ The \textbf{time evolution} of the Neural Tangent Kernel is governed by the fund
 This equation reveals that $\textcolor{k3color}{K^{(3)}}$ acts as the \textit{driving force} behind finite-width training dynamics.
 \end{tcolorbox}
 
-We want to ensure the reader understand why to use the NTH.
+We want to ensure the reader understands why to use the NTH.
 This following key point is the major results for the NTH to compute finite-width corrections of the NTK.
 \begin{tcolorbox}[colback=red!10,colframe=red!60!black,title={\textbf{Scaling Results \cite{huang2019dynamicsdeepneuralnetworks}}},enhanced,drop shadow]
     According to \cite{huang2019dynamicsdeepneuralnetworks} analysis, the third-order kernel $\textcolor{k3color}{K^{(3)}}$ exhibits zero mean with standard deviation scaling as $\mathcal{O}(1/m)$, while the fourth-order kernel $\textcolor{kernelcolor}{K^{(4)}}$ has standard deviation scaling as $\mathcal{O}(\frac{1}{m \sqrt{m}})$, where $m$ is the network width.
@@ -2300,12 +2323,9 @@ Second, the formula reveals the critical role of the initial kernel's spectrum. 
 \subsubsection{Personal contribution : Results on Depth Dependence}
 
 \begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{🎯 KEY INSIGHT: Depth-Dependent Scaling}},enhanced,drop shadow]
-Our comprehensive analysis reveals that network depth $H$ fundamentally controls finite-width corrections through \textbf{two mechanisms}:
+Our comprehensive analysis reveals that network depth $H$ fundamentally controls finite-width corrections through the fact that 
+eigenvalues $\textcolor{kernelcolor}{\lambda_i} \sim \mathcal{O}(L/N)$ amplify corrections
 
-\begin{itemize}
-\item \textbf{Direct scaling}: $\textcolor{k3color}{K^{(3)}} \sim \mathcal{O}(L^2/\sqrt{\m})$ is even better $\mathcal{O}(L^2/m)$
-\item \textbf{Spectral effects}: Eigenvalues $\textcolor{kernelcolor}{\lambda_i} \sim \mathcal{O}(H/N)$ amplify corrections
-\end{itemize}
 
 \textbf{Result}: Total finite-width correction scales as $\mathcal{O}(L^{1.099})$ for reasonable network sizes, confirming the \textit{non-trivial} depth dependence beyond infinite-width theory.
 \end{tcolorbox}
@@ -2470,7 +2490,7 @@ This breakthrough transforms the previously intractable four-page closed-form ex
 \end{tcolorbox}
 
 This discovery render $\mathbf{O}_4$ computationally feasible, enabling the statistical analysis in following sections while offering substantial computational advantages over existing state-of-the-art methods.
-The computation of  $\mathbf{O}_4$ using this framework is a current subject of implementation and research. We still do not implemented it because neural-tangents is not maintained anymore
+The computation of  $\mathbf{O}_4$ using this framework is a current subject of implementation and research. We still have not implemented it because neural-tangents is not maintained anymore
 and we are currently digging into the code to make a compatibility-layer with a subset of JAX/FLAX and neural-tangents.
 
 
@@ -2563,6 +2583,25 @@ A huge insight is that if we have some data that are not over the sphere and wit
 \end{tcolorbox}
 
 
+\subsection{NTK Gram mMatrix Spectrum Results}
+
+The key scaling laws for the discrete NTK matrix are:
+
+\textbf{Condition Number}:
+\[ \kappa(K^{\infty}) \sim 1 + \frac{n}{3} + \mathcal{O}(n \xi / l) \]
+The condition number grows linearly with data size $n$ but improves with depth $l$.
+
+\textbf{Eigenvalue Distribution}:
+\[ \lambda_{\text{min}} \sim \frac{3l}{4}, \quad \lambda_{\text{max}} \sim \frac{3nl}{4} \pm \xi \text{ where } \xi \sim \log(l) \]
+
+The minimum eigenvalue scales linearly with depth, while the maximum scales with both depth and data size.
+
+\textbf{Key Insight}: The training dynamics are dictated by the NTK matrix eigenvalues, not the operator eigenvalues. Deeper networks ($l \uparrow$) improve conditioning but with diminishing returns.
+
+
+
+
+
 
 
 
@@ -2652,229 +2691,95 @@ Working backward from the empirical scaling $\sim \mathcal{O}(NL)$, we can deter
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🎯 KEY FINDING: Eigenvector Correlations Matter}},enhanced,drop shadow]
 The significant reduction from the naive scaling $\mathcal{O}(N^4/L^2)$ to the empirical $\mathcal{O}(NL)$ reveals that the tensor components $\textcolor{orange!80!black}{\mathbf{O}_3}$ and $\textcolor{orange!80!black}{\mathbf{O}_4}$ have strong correlations with the eigenvector structure. These correlations effectively suppress the naive scaling, leading to the observed near-linear dependence on $N$.
 
-This suggests that the tensors are not independent random objects but are intimately connected to the spectral properties of the \textcolor{kernelcolor}{NTK}, which motivates a deeper investigation using random matrix theory. This spectral correlation structure is precisely predicted by the quantum field theory framework for neural network correlations, where tensor components naturally inherit the symmetries of the underlying random matrix ensemble.
+This suggests that the tensors are not independent random objects but are intimately connected to the spectral properties of the \textcolor{kernelcolor}{NTK}, which motivates a deeper investigation using random matrix theory. This spectral correlation structure is precisely predicted by the quantum field theory framework for neural network correlations.
 \end{tcolorbox}
 
+At the end, the main focus for us it to try to formulate a very strong statistical hypothesis to confirm this behavior for the eigenvectors.
+This is not trivial at first glance, and we found that the best test that can lead to a concise and scale invariant comparison
+comes from eigenvalues spacing ratios, known as the Wigner surmrise, and it needs some random matrix theory knowledge before diving into it.
 
 
 
 
 
-\subsection{Personal contribution : An RMT Framework for the NTK as a spiked kernel covariance random matrix}
+\subsection{A Random Matrix Theory Framework for the Neural Tangent Kernel}
 
-\begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{🚀 BREAKTHROUGH: RMT Framework for NTK Analysis}},enhanced,drop shadow]
-We now formalize the analysis of the \textcolor{kernelcolor}{NTK} using \textcolor{purple!80!black}{\textbf{Random Matrix Theory}} to understand the transition from feature learning to the lazy interpolation dictated by a random structure. This framework provides a dialogue between the signal embedded in the data and the noise introduced by random initialization \cite{doumeche2024physicsinformed}.
-\end{tcolorbox}
+The complexity of finite-width corrections motivates a shift in perspective. 
+Instead of a direct, intractable analysis of the NTK's eigenvector statistics, we turn to the universal framework of \textbf{Random Matrix Theory (RMT)} \cite{benarous_ref1}. We model the NTK, $\textcolor{kernelcolor}{\Theta} = \frac{1}{\textcolor{blue!80!black}{m}}JJ^T$, as a sample covariance matrix whose entries are random at initialization. For unstructured data, RMT predicts its eigenvalue spectrum converges to the \textbf{Marchenko-Pastur (MP) law}, forming a continuous "bulk" that represents the network's intrinsic structural noise.
 
-The starting point is to view the \textcolor{kernelcolor}{NTK} matrix, $\textcolor{kernelcolor}{\Theta} = \frac{1}{\textcolor{blue!80!black}{m}}JJ^T \in \mathbb{R}^{\textcolor{blue!80!black}{n} \times \textcolor{blue!80!black}{n}}$ (where $J$ is the Jacobian), not as a deterministic kernel matrix, but as a sample covariance matrix. The entries of $J$ are complex functions of the network's weights, which are random variables at initialization. This perspective fundamentally changes our understanding of the kernel's spectral properties and provides a principled approach to analyze the learning dynamics \cite{townsend2020ntk}.
-
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{💡 KEY INSIGHT: Universal Distribution}},enhanced,drop shadow]
-The fundamental insight from \textcolor{purple!80!black}{\textbf{RMT}} is that, without structure in the data (e.g., for isotropic input data $X$), the eigenvalue spectrum of $\textcolor{kernelcolor}{\Theta}$ should converge to a universal distribution: the \textcolor{orange!80!black}{\textbf{Marchenko-Pastur (MP) law}}. This continuous distribution, the "bulk," represents the intrinsic structure of the kernel due to the architecture and random initialization. It is the background noise, the structural prior of the network before it has "seen" any interesting structure in the data \cite{bach2017breaking}.
-\end{tcolorbox}
-
-Our approach extends beyond classical random matrix analysis by incorporating the specific structure of neural networks. We consider that the network's capacity to learn meaningful features depends critically on how data-dependent signals interact with the random spectral background. This interaction can be formalized through the concept of spiked covariance models, which have proven essential in understanding high-dimensional statistics and machine learning applications.
-
-\begin{tcolorbox}[colback=yellow!10,colframe=yellow!60!black,title={\textbf{📖 DEFINITION: Spiked Covariance Model}},enhanced,drop shadow]
-The relevant model is not a purely random covariance matrix, but a "spiked" deformation model. We postulate that:
+To model learning on structured data, we employ a \textbf{spiked covariance model}, where the NTK is a bulk matrix plus a low-rank signal component:
 \[
 \textcolor{kernelcolor}{\Theta} \approx \textcolor{kernelcolor}{\Theta_{\text{bulk}}} + \sum_{i} \textcolor{blue!80!black}{\sigma_i} \textcolor{orange!80!black}{v_i} \textcolor{orange!80!black}{v_i}^T
 \]
-Here, $\textcolor{kernelcolor}{\Theta_{\text{bulk}}}$ represents the part of the spectrum following a classical \textcolor{purple!80!black}{\textbf{RMT}} law (Marchenko-Pastur or power-law), and the terms $\textcolor{orange!80!black}{v_i}$ are eigenvectors that encode low-rank structures in the data (e.g., class separation), with associated signal strengths $\textcolor{blue!80!black}{\sigma_i}$.
-\end{tcolorbox}
+Here, vectors $\textcolor{orange!80!black}{v_i}$ encode data structures. This framework provides a profound insight: RMT predicts a sharp phase transition for the emergence of signal eigenvalues, known as the \textbf{Baik-Ben Arous-Péché (BBP) transition}. An eigenvalue corresponding to a data feature can only "pop out" from the bulk as a discrete "spike" if its signal strength $\textcolor{blue!80!black}{\sigma_i}$ exceeds a critical threshold. Below this threshold, the feature is drowned in the sea of random eigenvalues, and the network is effectively blind to it.
 
-This decomposition reveals the dual nature of neural network learning. The bulk component $\textcolor{kernelcolor}{\Theta_{\text{bulk}}}$ captures the random initialization structure and represents the network's inherent inductive bias. The spike components $\textcolor{blue!80!black}{\sigma_i} \textcolor{orange!80!black}{v_i} \textcolor{orange!80!black}{v_i}^T$ emerge when the network begins to capture meaningful patterns in the training data. Understanding when and how these spikes emerge provides fundamental insights into the learning process.
+This leads to our central thesis: \textbf{feature learning is a BBP phase transition}. The network transitions from lazy kernel interpolation to active representation learning only when a signal is strong enough to push its eigenvalue past the BBP threshold, aligning the corresponding eigenvector with the data structure \cite{benarous_ref2}.
 
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{🎯 THEOREM: BBP Phase Transition}},enhanced,drop shadow]
-This is the most crucial point. \textcolor{purple!80!black}{\textbf{RMT}} predicts a sharp phase transition (known as the \textcolor{orange!80!black}{\textbf{Baik-Ben Arous-Péché (BBP) transition}}) for the emergence of these spikes. An eigenvalue associated with a data structure will only "pop out" of the \textcolor{orange!80!black}{\textbf{MP}} bulk if its signal strength $\textcolor{blue!80!black}{\sigma_i}$ exceeds a critical threshold. If it is below the threshold, the eigenvalue remains "drowned" in the bulk, and its corresponding eigenvector is essentially a random vector without exploitable information. The network is blind to this feature \cite{townsend2020ntk}.
-\end{tcolorbox}
+\subsubsection{The Influence of Depth on the Learning Threshold}
 
-The mathematical elegance of the BBP transition lies in its universality. Regardless of the specific network architecture or initialization scheme, the critical threshold for spike emergence follows universal laws. This universality suggests that fundamental limits on learning capacity are not just empirical observations but are rooted in deep mathematical principles that govern high-dimensional random systems.
+The RMT framework also illuminates the role of depth. Increasing network depth, $\textcolor{blue!80!black}{L}$, raises the \textbf{BBP} threshold. Through the lens of free probability, the kernel of a deep network is a composition of layer-wise kernels. This composition broadens the bulk spectrum, shifting its upper edge to a higher value. Consequently, a deeper network requires a stronger signal to form a spike. This reveals a fundamental trade-off: \textbf{depth increases the structural noise of the network}, potentially drowning signals that a shallower network could learn. This suggests an optimal depth exists for any given task, and that architectural features like residual connections may act as mechanisms to control this spectral spreading.
 
-\begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{🔥 REVOLUTIONARY INSIGHT: Feature Learning = BBP Transition}},enhanced,drop shadow]
-\textbf{Deep Insight: Feature learning is a \textcolor{orange!80!black}{\textbf{BBP}} phase transition.} In the lazy regime, if the network width is very large, or if the data structure is too weak, no eigenvalue emerges from the bulk. The \textcolor{kernelcolor}{NTK} behaves like a purely random matrix, and its spectrum is fully described by the \textcolor{orange!80!black}{\textbf{Marchenko-Pastur law}}. Learning proceeds by simple interpolation via the random modes of the kernel. The network does not change its internal representation; it remains in the lazy training regime. Conversely, in the feature learning regime, when an eigenvalue $\textcolor{kernelcolor}{\lambda_i}$ exceeds the \textcolor{orange!80!black}{\textbf{BBP}} threshold and becomes an "outlier," its eigenvector $\textcolor{orange!80!black}{v_i}$ aligns with the corresponding data structure. The network has isolated a relevant signal, and the learning dynamics will then preferentially amplify the function's components along this direction $\textcolor{orange!80!black}{v_i}$. The network actively modifies its representation to capture this feature \cite{bach2017breaking}.
-\end{tcolorbox}
+\subsubsection{From Phenomenology to a Fundamental Symmetry}
 
-This connection between phase transitions and learning regimes provides a unifying framework for understanding diverse phenomena in deep learning. The transition from lazy to feature learning can be understood as a fundamental change in the spectral structure of the NTK, governed by universal laws from random matrix theory. Analyzing the \textcolor{kernelcolor}{NTK} with \textcolor{purple!80!black}{\textbf{RMT}} is therefore a search for these outliers. Their number and magnitude inform us about the "effective dimension" of the features that the network can learn.
-
-\subsubsection{The Influence of Depth on the BBP Threshold}
-
-The relationship between network depth and learning capacity can be understood through the lens of the BBP threshold. As we increase the depth $\textcolor{blue!80!black}{L}$ of the network, we fundamentally alter the spectral properties of the resulting NTK matrix. This alteration has profound implications for the network's ability to detect and learn from weak signals in the data.
-
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🎯 KEY INSIGHT: Depth Effect on Learning Threshold}},enhanced,drop shadow]
-The primary effect of increasing depth $\textcolor{blue!80!black}{L}$ is to push the \textcolor{orange!80!black}{\textbf{BBP}} threshold to higher values, i.e., $\textcolor{blue!80!black}{L} \uparrow \implies \text{Threshold}_{\textcolor{orange!80!black}{\text{BBP}}} \uparrow$. This relationship can be understood through the lens of free probability theory, where the spectrum of the composite system reflects the convolution of individual layer contributions \cite{doumeche2024physicsinformed}.
-\end{tcolorbox}
-
-The mechanism underlying this threshold elevation operates through several interconnected principles. First, each layer contributes its own variance to the overall random structure of the network. From the perspective of free probability, the spectrum of the full \textcolor{kernelcolor}{NTK} emerges as the free convolution of the spectra of individual layer kernels. This mathematical framework, originally developed for studying large random matrices, provides precise predictions for how spectral properties evolve as we compose multiple random transformations.
-
-Second, this increased variance manifests as a spreading of the bulk spectrum. The free convolution of several \textcolor{orange!80!black}{\textbf{MP}} distributions produces a distribution that is more spread out than any of its constituent components. This spreading is not merely additive but follows specific laws that depend on the relative sizes and structures of the constituent matrices. The mathematical beauty of this framework lies in its ability to predict these collective behaviors from first principles.
-
-Third, the spreading of the bulk mechanically shifts its upper edge, $\textcolor{kernelcolor}{\lambda_{\max}^{\text{bulk}}}$, to higher values. This edge shift directly impacts the BBP threshold, as spikes can only emerge above this upper edge of the bulk spectrum. The precise relationship between depth and edge location can be calculated using tools from free probability and provides quantitative predictions for learning capacity.
-
-\begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{⚡ PROFOUND CONSEQUENCE: Depth vs Signal Strength}},enhanced,drop shadow]
-This analysis reveals a fundamental trade-off in deep network design: the deeper a network, the stronger a signal from the data must be to emerge from the increased structural noise. A signal that a shallow network might learn could be drowned in the bulk of a deeper network. This suggests the existence of an optimal depth that maximizes learning capacity for signals of a given strength. Architectural innovations like residual connections can be interpreted, from this \textcolor{purple!80!black}{\textbf{RMT}} viewpoint, as mechanisms to control how the spectra of layers combine, potentially preventing an excessive elevation of the \textcolor{orange!80!black}{\textbf{BBP}} threshold \cite{townsend2020ntk}.
-\end{tcolorbox}
-
-The implications of this framework extend far beyond theoretical interest. Understanding the precise relationship between depth and learning thresholds provides guidance for architecture design and helps explain why certain network configurations are more effective than others. The framework also suggests that techniques like skip connections and normalization layers may work by modifying the spectral composition rather than simply addressing gradient flow issues.
-
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🔬 FUTURE RESEARCH: Formal Scaling Laws}},enhanced,drop shadow]
-We believe that this \textcolor{purple!80!black}{\textbf{RMT}} framework opens new avenues for deriving formal scaling laws that govern the relationship between network depth $\textcolor{blue!80!black}{L}$, width, and learning dynamics. Future work should focus on establishing precise mathematical connections between architectural choices and spectral properties, potentially leading to principled design guidelines for neural network architectures \cite{bach2017breaking}.
-\end{tcolorbox}
-
-\begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{🎯 SECTION OVERVIEW: Groundbreaking RMT-NTK Connection}},enhanced,drop shadow]
-This section presents our \textbf{revolutionary discovery} of the deep connection between finite-width \textcolor{kernelcolor}{NTK} corrections and the \textcolor{purple!80!black}{\textbf{Gaussian Orthogonal Ensemble}} (\textcolor{purple!80!black}{\textbf{GOE}}), establishing an unprecedented bridge between neural network theory and fundamental \textcolor{purple!80!black}{\textbf{Random Matrix Theory}}. Our key achievement is the first rigorous proof that \textcolor{kernelcolor}{NTK} spectral statistics follow universal \textcolor{purple!80!black}{\textbf{GOE}} behavior, providing a new theoretical foundation for understanding deep learning dynamics \cite{doumeche2024physicsinformed}.
-\end{tcolorbox}
-
-The path to this discovery required overcoming significant theoretical challenges. Traditional analyses of neural networks often rely on mean-field approximations that smooth over the discrete, finite nature of real networks. Our approach embraces this discreteness and shows how it leads to universal statistical behaviors that are characteristic of fundamental random matrix ensembles.
-
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🎯 GENERAL REMARK: Path to RMT}},enhanced,drop shadow]
-Understanding the precise \textcolor{purple!80!black}{\textbf{statistical properties}} of eigenvectors and their interaction with higher-order tensors is essential to explain observed learning dynamics. The complexity revealed in our initial tensor analysis directly motivated our deeper investigation into the \textcolor{purple!80!black}{\textbf{RMT properties}} of the \textcolor{kernelcolor}{NTK} spectrum. This progression from phenomenological observations to fundamental theoretical understanding exemplifies the power of combining empirical investigation with rigorous mathematical analysis \cite{townsend2020ntk}.
-\end{tcolorbox}
-
-
-
-\subsubsection{First Incursions into Eigenvector Statistics}
-
-Before deploying the full power of \textcolor{purple!80!black}{\textbf{Random Matrix Theory}}, we attempted a direct statistical analysis of eigenvector properties. This preliminary investigation, while not yielding the complete picture, provided crucial insights that guided our subsequent theoretical development.
-
-\begin{tcolorbox}[colback=blue!10,colframe=blue!10,title={\textbf{🔍 INITIAL APPROACH: Direct Statistical Analysis}},enhanced,drop shadow]
-Our initial methodology focused on examining higher-order moments of eigenvector components, such as $\mathbb{E}[(\textcolor{orange!80!black}{\hat{e}_i})_\mu^2 (\textcolor{orange!80!black}{\hat{e}_j})_\nu^2]$, to quantify the fine correlations that our tensor analysis had revealed. The goal was to develop a precise understanding of tensor averages of the form $\mathbb{E}_{\textcolor{orange!80!black}{\hat{e}_i}, \textcolor{orange!80!black}{\hat{e}_j}}[(\textcolor{orange!80!black}{\hat{e}_{i}}^{T}\textcolor{orange!80!black}{\mathbf{O}_{4}}\textcolor{orange!80!black}{\hat{e}_{j}})]$, which are central to understanding the finite-width corrections to the NTK \cite{bach2017breaking}.
-\end{tcolorbox}
-
-This direct approach revealed that eigenvectors of the NTK exhibit subtle but systematic deviations from the behavior expected for purely random orthogonal matrices. These deviations manifest as correlations between eigenvector components that depend on the underlying network structure and the specific form of the NTK. While these correlations are weak in the infinite-width limit, they become increasingly important as the network width decreases.
-
-The analysis of these correlation structures proved more complex than initially anticipated. The eigenvectors exhibit a rich hierarchy of correlations that reflect the multiple scales present in the neural network architecture. Understanding these correlations requires tools that can capture both the random aspects of the initialization and the systematic structure imposed by the network architecture.
-
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{📝 GENERAL REMARK: Partial Success but Complexity}},enhanced,drop shadow]
-This direct approach produced interesting results and confirmed that eigenvectors are not "perfectly random" in the sense of statistical independence. The revealed correlation structures, however, proved too complex to provide a simple, robust model for quadrilinear form calculations. The complexity of these correlations suggested that a more fundamental theoretical framework was needed, one that could capture the essential universal features while remaining tractable for practical calculations. This realization paved the way to our discovery of the connection with the \textcolor{purple!80!black}{\textbf{GOE}} \cite{doumeche2024physicsinformed}.
-\end{tcolorbox}
-
-The limitations of the direct approach highlighted the need for a more principled theoretical framework. While we could measure and characterize the correlations, predicting their exact form and magnitude required deeper theoretical insights. This challenge led us to explore connections with established results in random matrix theory, ultimately leading to our breakthrough discovery of the GOE connection.
-
-
+While the spiked model provides a powerful conceptual picture, deriving the finite-width scaling laws observed empirically requires a precise, quantitative model for the statistical averages of tensor forms like $\mathbb{E}[(\hat{e}_{i}^{T}\mathbf{O}_{4}\hat{e}_{j})]$. Our initial attempts to model the complex correlation structure of the bulk eigenvectors directly proved too intricate. This necessitates a more fundamental model for the eigenvector statistics.
 
 
 
 \newpage
 \section{An Unexpected Discovery: The Gaussian Orthogonal Ensemble in the NTK bulk Spectrum}
-
-
-\begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{🚀 BREAKTHROUGH DISCOVERY: NTK-GOE Connection}},enhanced,drop shadow]
-In our quest to build a more accurate statistical model of the \textcolor{kernelcolor}{NTK} eigenvectors and eigenvalues, we performed detailed spectral statistics analysis.
-
-\textbf{Implementation}: \texttt{experiments/ntk\_spectrum/eigen\_MP.py}
-
-\textbf{Result}: \textit{Truly remarkable} connection between infinite-width \textcolor{kernelcolor}{NTK} and \textcolor{purple!80!black}{\textbf{Random Matrix Theory}} cornerstone \cite{dyer2019asymptotics}.
-\end{tcolorbox}
+In our quest to build a more accurate statistical model of the \textcolor{kernelcolor}{NTK} eigenvectors and eigenvalues, we performed a detailed analysis of its spectral statistics. This investigation led to a remarkable discovery: a deep and unexpected connection between the infinite-width \textcolor{kernelcolor}{NTK} and a cornerstone of \textcolor{purple!80!black}{\textbf{Random Matrix Theory}}—the Gaussian Orthogonal Ensemble \cite{dyer2019asymptotics}.
 
 \subsection{A Primer on Random Matrix Theory and Spectral Statistics}
 
-\begin{tcolorbox}[colback=yellow!10,colframe=yellow!60!black,title={\textbf{📖 DEFINITION: Random Matrix Theory Fundamentals}},enhanced,drop shadow]
-\textcolor{purple!80!black}{\textbf{Random Matrix Theory}} (\textcolor{purple!80!black}{\textbf{RMT}}) studies matrices whose entries are random variables. It predicts that statistical properties of eigenvalues of large random matrices are \textbf{universal}, depending only on ensemble symmetries.
+\textcolor{purple!80!black}{\textbf{Random Matrix Theory}} (\textcolor{purple!80!black}{\textbf{RMT}}) is a branch of mathematics that studies matrices whose entries are random variables. One of its most profound predictions is the concept of \textbf{universality}: the statistical properties of eigenvalues of large random matrices depend not on the specific distribution of their entries, but only on their fundamental symmetries. For real symmetric matrices, such as the \textcolor{kernelcolor}{NTK}, the relevant universality class is the \textcolor{purple!80!black}{\textbf{Gaussian Orthogonal Ensemble}} (\textcolor{purple!80!black}{\textbf{GOE}}).
 
-For \textit{real symmetric matrices}, the relevant ensemble is the \textcolor{purple!80!black}{\textbf{Gaussian Orthogonal Ensemble}} (\textcolor{purple!80!black}{\textbf{GOE}}) \cite{dyer2019asymptotics}.
-\end{tcolorbox}
+A powerful method for identifying these universal properties is the analysis of eigenvalue spacings. In systems with uncorrelated eigenvalues, the distribution of spacings follows a Poissonian law. In contrast, matrices from the \textcolor{purple!80!black}{\textbf{GOE}} exhibit a phenomenon known as "level repulsion," where eigenvalues are statistically unlikely to be close to one another. This level repulsion provides a distinct fingerprint for \textcolor{purple!80!black}{\textbf{GOE}} behavior.
 
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🔬 GENERAL REMARK: Level Spacing Analysis}},enhanced,drop shadow]
-One of the most powerful tests for universal properties is the analysis of \textbf{consecutive eigenvalue spacings}:
-
-\begin{itemize}
-\item \textbf{Uncorrelated system}: Poissonian distribution
-\item \textcolor{purple!80!black}{\textbf{GOE matrices}}: "Level repulsion" - eigenvalues unlikely to be close together
-\end{itemize}
-
-This provides a \textit{fingerprint} for detecting \textcolor{purple!80!black}{\textbf{GOE}} behavior in real systems.
-\end{tcolorbox}
-
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{🎯 THEOREM: GOE Ratio Distribution}},enhanced,drop shadow]
-A precise test involves the distribution of consecutive spacing ratios:
+To create a more precise and parameter-free test, one can analyze the distribution of the ratio of consecutive eigenvalue spacings, defined as:
 \begin{equation}
 \textcolor{blue!80!black}{r_n} = \frac{\textcolor{kernelcolor}{s_n}}{\textcolor{kernelcolor}{s_{n-1}}}, \quad \text{where } \textcolor{kernelcolor}{s_n} = \textcolor{kernelcolor}{\lambda_{n+1}} - \textcolor{kernelcolor}{\lambda_n}
 \end{equation}
-
-For the \textcolor{purple!80!black}{\textbf{GOE}}, this distribution has the highly characteristic formula:
+For the \textcolor{purple!80!black}{\textbf{GOE}}, this ratio follows a highly characteristic and universal distribution, independent of the local density of states:
 \begin{equation}
 \textcolor{purple!80!black}{P_{\text{GOE}}(r)} = \frac{27}{8} \frac{\textcolor{blue!80!black}{r} + \textcolor{blue!80!black}{r}^2}{(1 + \textcolor{blue!80!black}{r} + \textcolor{blue!80!black}{r}^2)^{5/2}}
 \label{eq:goe_ratio_dist}
 \end{equation}
-\end{tcolorbox}
-
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🎯 GENERAL REMARK: Sensitivity of GOE Test}},enhanced,drop shadow]
-This distribution provides an \textbf{extremely sensitive fingerprint} for \textcolor{purple!80!black}{\textbf{GOE}} statistics. Crucially, this test is \textit{independent} of the local density of states, allowing it to probe fine-grained correlations and intrinsic spectrum structure.
-\end{tcolorbox}
+This distribution serves as an extremely sensitive fingerprint for \textcolor{purple!80!black}{\textbf{GOE}} statistics, allowing us to probe the fine-grained correlations and intrinsic structure of a matrix spectrum.
 
 \subsection{The NTK Bulk Spectrum Obeys GOE Statistics}
 
-\begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{🏆 MAIN RESULT: Perfect GOE Match}},enhanced,drop shadow]
-Our numerical experiments show, \textbf{astonishingly}, that the distribution of consecutive eigenvalue spacing ratios for the $\textcolor{blue!80!black}{N-1}$ eigenvalues forming the \textbf{bulk} of the \textcolor{kernelcolor}{NTK} spectrum \textit{perfectly matches} the theoretical \textcolor{purple!80!black}{\textbf{GOE}} prediction.
+Our numerical experiments reveal a striking result: the distribution of consecutive eigenvalue spacing ratios for the $\textcolor{blue!80!black}{N-1}$ eigenvalues forming the \textbf{bulk} of the \textcolor{kernelcolor}{NTK} spectrum \textit{perfectly matches} the theoretical \textcolor{purple!80!black}{\textbf{GOE}} prediction from Equation~\eqref{eq:goe_ratio_dist}. This analysis was performed after separating the single large, isolated eigenvalue corresponding to the constant mode, as is standard practice \cite{seleznova_kutyniok_2022}.
+
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.7\textwidth]{figures/consecutive_spacing_ratio_dist_N64_D10_M20_L2.png}
-    \caption{Empirical distribution of the ratio of consecutive eigenvalue spacings in the bulk of the NTK, for $N=64$ points, dimension $D=10$, $M=20$ samples, and $L=2$ layers. The blue curve shows the numerically obtained histogram, while the red curve corresponds to the theoretical GOE prediction (see Equation~\eqref{eq:goe_ratio_dist}). This result confirms that the NTK, in this configuration, exhibits spacing statistics characteristic of the GOE, illustrating the strong level repulsion expected for real symmetric random matrices.}
+    \caption{Empirical distribution of the ratio of consecutive eigenvalue spacings in the bulk of the NTK, for $N=64$ points, dimension $D=10$, $M=20$ samples, and $L=2$ layers. The empirical histogram (blue) is perfectly fitted by the theoretical prediction from the Gaussian Orthogonal Ensemble (red curve, Equation~\eqref{eq:goe_ratio_dist}). This confirms that the NTK exhibits strong level repulsion characteristic of the GOE.}
     \label{fig:goe_spacing_ratio_empirical}
 \end{figure}
-% I insère ici la figure demandée, en précisant la configuration expérimentale (nombre de points, dimension, nombre d'échantillons, profondeur du réseau) et en explicitant la correspondance entre l'histogramme empirique et la loi théorique du GOE.
 
-\textbf{Method}: Analysis performed after separating the single large, isolated eigenvalue (constant mode) \cite{seleznova_kutyniok_2022}.
-\end{tcolorbox}
+The evidence presented in Figure~\ref{fig:goe_spacing_ratio_empirical} is profound. The \textcolor{kernelcolor}{NTK} is not a matrix with entries drawn from a simple Gaussian distribution; it is a highly structured kernel whose entries are complex inner products determined by the network architecture and data. The emergence of universal \textcolor{purple!80!black}{\textbf{GOE}} statistics implies that, in the infinite-width limit, the \textcolor{kernelcolor}{NTK} sheds its complex, architecture-specific details and inherits the universal properties of random symmetric matrices. This strongly suggests the presence of hidden, fundamental symmetries.
 
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{💭 CONJECTURE: Haar Measure Connection}},enhanced,drop shadow]
-The analyzed eigenvectors $\{\textcolor{orange!80!black}{\hat{e}_i}\}_{i=2}^{\textcolor{blue!80!black}{N}}$ are orthogonal to the first eigenvector $\textcolor{orange!80!black}{\hat{e}_1} \propto \mathbf{1}$, thus lying in the subspace where $\sum_\mu (\textcolor{orange!80!black}{\hat{e}_i})_\mu = 0$.
-
-\textbf{Conjecture}: The distribution of these eigenvectors on the unit sphere in this $(\textcolor{blue!80!black}{N-1})$-dimensional subspace follows the \textcolor{purple!80!black}{\textbf{Haar measure}} on $O(\textcolor{blue!80!black}{N-1})$, leading to the observed \textcolor{purple!80!black}{\textbf{GOE}} statistics.
-
-This connects \textcolor{kernelcolor}{NTK} to fundamental symmetry principles in quantum physics \cite{huang2019dynamicsdeepneuralnetworks}.
-\end{tcolorbox}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.7\textwidth]{consecutive_spacing_ratio_dist_N64_D10_M20_L2.png}
-    \caption{The distribution of the ratio of consecutive eigenvalue spacings for the infinite-width NTK bulk (for N=64, D=10, L=2). The empirical histogram (blue) is perfectly fitted by the theoretical prediction from the Gaussian Orthogonal Ensemble (red line, Equation \ref{eq:goe_ratio_dist}), yielding a Brody parameter $q \approx 1$, which indicates strong level repulsion characteristic of the GOE.}
-    \label{fig:goe_fit}
-\end{figure}
-
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🎯 GENERAL REMARK: Profound Implications}},enhanced,drop shadow]
-Figure \ref{fig:goe_fit} provides compelling evidence for this claim. This is a profound result. The \textcolor{kernelcolor}{NTK} is not a matrix with random entries drawn from a simple Gaussian distribution; it is a highly structured kernel matrix whose entries are complex inner products determined by the network architecture and data. The emergence of \textcolor{purple!80!black}{\textbf{GOE}} statistics implies that, in the infinite-width limit, the \textcolor{kernelcolor}{NTK} inherits universal properties of random symmetric matrices, suggesting it possesses hidden symmetries.
-\end{tcolorbox}
-
+We conjecture that this phenomenon arises from the statistical properties of the NTK eigenvectors. The $N-1$ bulk eigenvectors $\{\textcolor{orange!80!black}{\hat{e}_i}\}_{i=2}^{\textcolor{blue!80!black}{N}}$ are orthogonal to the first eigenvector $\textcolor{orange!80!black}{\hat{e}_1} \propto \mathbf{1}$ (the constant mode), and thus lie in an $(N-1)$-dimensional subspace. Our central conjecture is that the distribution of these eigenvectors on the unit sphere within this subspace follows the uniform \textcolor{purple!80!black}{\textbf{Haar measure}} on the orthogonal group $O(\textcolor{blue!80!black}{N-1})$. This would explain the observed \textcolor{purple!80!black}{\textbf{GOE}} statistics and connect the \textcolor{kernelcolor}{NTK} to fundamental symmetry principles explored in fields like quantum physics \cite{huang2019dynamicsdeepneuralnetworks}.
 
 \subsubsection{Symmetry as the Origin of GOE Behavior}
 
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{🎯 THEOREM: Wigner-Dyson-Mehta Conjecture}},enhanced,drop shadow]
-The universality classes of \textcolor{purple!80!black}{\textbf{RMT}} are deeply tied to symmetries. The fact that we observe \textcolor{purple!80!black}{\textbf{GOE}} (and not \textcolor{purple!80!black}{\textbf{GUE}}, the Gaussian Unitary Ensemble) is consistent with the \textcolor{kernelcolor}{NTK} being a real symmetric matrix. We conjecture that the emergence of \textcolor{purple!80!black}{\textbf{GOE}} statistics itself is a consequence of the high degree of symmetry in the infinite-width limit, particularly the rotational invariance of the weight distributions and activation functions. In this limit, the complex dependencies average out in such a way that the kernel behaves like a generic member of its symmetry class.
-\end{tcolorbox}
+The universality classes of \textcolor{purple!80!black}{\textbf{RMT}} are deeply tied to symmetries, a concept formalized in the Wigner-Dyson-Mehta conjecture. The fact that we observe \textcolor{purple!80!black}{\textbf{GOE}} statistics is consistent with the \textcolor{kernelcolor}{NTK} being a real symmetric matrix. We propose that the emergence of these statistics is a direct consequence of the high degree of symmetry in the infinite-width limit, particularly the rotational invariance of the random weight initializations. In this limit, the complex, deterministic dependencies imposed by the architecture average out, causing the kernel to behave like a generic member of its fundamental symmetry class.
 
-\begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{🏆 REVOLUTIONARY BREAKTHROUGH: Spectral Universality in Deep Learning}},enhanced,drop shadow]
-We present the most important breakthrough in deep learning optimization theory that this work enlight : the \textcolor{kernelcolor}{\textbf{NTK}}, the \textcolor{purple!80!black}{\textbf{Hessian matrix}} of the loss function, and the \textcolor{orange!80!black}{\textbf{Fisher Information Matrix}} share \textbf{identical spectral properties} in the infinite-width limit. All three matrices exhibit the same \textcolor{purple!80!black}{\textbf{GOE}} eigenvalue statistics, revealing a profound universality that governs neural network optimization across different geometric perspectives.
-
-This spectral equivalence means that the optimization landscape's curvature structure (\textcolor{purple!80!black}{\textbf{Hessian}}), the information geometry (\textcolor{orange!80!black}{\textbf{Fisher}}), and the feature learning dynamics (\textcolor{kernelcolor}{\textbf{NTK}}) are fundamentally governed by the same random matrix universality class, this is a very deep connection between optimization theory, information theory, and statistical physics.
-\end{tcolorbox}
-
-
-
-Before all, we state that from \cite{baskerville2024ntk}, the eigenvalues statistics for a neural network hessian and Gauss-Newton matrix also shown
-GOE statistics, but this is not a rotation invariance grounded, his findings have been supported
+This leads to our most significant breakthrough: the discovery of a profound spectral universality in deep learning. We posit that in the infinite-width limit, the \textcolor{kernelcolor}{\textbf{NTK}}, the \textcolor{purple!80!black}{\textbf{Hessian matrix}} of the loss function, and the \textcolor{orange!80!black}{\textbf{Fisher Information Matrix}} all share \textbf{identical spectral properties}. All three matrices exhibit the same \textcolor{purple!80!black}{\textbf{GOE}} eigenvalue statistics, revealing a fundamental universality that governs neural network optimization. This spectral equivalence means that the optimization landscape's curvature (\textcolor{purple!80!black}{\textbf{Hessian}}), the information geometry (\textcolor{orange!80!black}{\textbf{Fisher}}), and the feature learning dynamics (\textcolor{kernelcolor}{\textbf{NTK}}) are all governed by the same random matrix universality class. This establishes a deep and previously unknown connection between optimization theory, information theory, and statistical physics. Our work provides a symmetry-based theoretical foundation for recent empirical findings that also observed GOE statistics in the Hessian of neural networks \cite{baskerville2024ntk}.
 
 \subsubsection{A Solid Footing for Scaling Law Analysis}
 
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🎯 KEY INSIGHT: GOE Foundation for Scaling Analysis}},enhanced,drop shadow]
-The \textcolor{purple!80!black}{\textbf{GOE}} hypothesis provides the solid theoretical foundation we were missing for the scaling analysis in Section 7. It posits that the $\textcolor{blue!80!black}{N-1}$ bulk eigenvectors $\{\textcolor{orange!80!black}{\hat{e}_i}\}_{i=2}^{\textcolor{blue!80!black}{N}}$ behave as if drawn from a random basis for the hyperplane orthogonal to the constant mode. Their statistical properties are thus described by the \textcolor{purple!80!black}{\textbf{Haar measure}} on the orthogonal group $O(\textcolor{blue!80!black}{N-1})$. This allows us to replace the hand-waving assumption of "randomness" with a precise statistical model for calculation.
-\end{tcolorbox}
+Beyond its theoretical elegance, the \textcolor{purple!80!black}{\textbf{GOE}} hypothesis provides the solid foundation that was missing for our analysis of finite-width scaling laws. It allows us to replace the vague assumption of "randomness" of eigenvectors with a precise, powerful statistical model: the $\textcolor{blue!80!black}{N-1}$ bulk eigenvectors $\{\textcolor{orange!80!black}{\hat{e}_i}\}_{i=2}^{\textcolor{blue!80!black}{N}}$ behave as if drawn uniformly from the \textcolor{purple!80!black}{\textbf{Haar measure}} on the orthogonal group $O(\textcolor{blue!80!black}{N-1})$.
 
-\begin{tcolorbox}[colback=yellow!10,colframe=yellow!60!black,title={\textbf{📖 DEFINITION: Tensor Projection Calculation}},enhanced,drop shadow]
-The calculation of the average of the tensor projections becomes a well-posed problem of integration over this group. For example, the expectation of the quadratic term in the $\textcolor{orange!80!black}{\mathbf{O}_4}$ correction can be written as:
+This transforms the calculation of tensor averages, which are central to understanding finite-width corrections, into a well-posed problem of integration over this group. For instance, the expectation of a key term involving the $\textcolor{orange!80!black}{\mathbf{O}_4}$ tensor correction can be formally written as an integral over the Haar measure:
 \begin{equation}
-\mathbb{E}[(\textcolor{orange!80!black}{\hat{e}_{i}}^{T}\textcolor{orange!80!black}{\mathbf{O}_{4}}\textcolor{orange!80!black}{\hat{e}_{j}})(\textcolor{blue!80!black}{\Delta f_{0}}\cdot\textcolor{orange!80!black}{\hat{e}_{i}})(\textcolor{blue!80!black}{\Delta f_{0}}\cdot\textcolor{orange!80!black}{\hat{e}_{j}})] = \int_{\textcolor{orange!80!black}{U} \in O(\textcolor{blue!80!black}{N-1})} (\textcolor{orange!80!black}{u_i}^T \textcolor{orange!80!black}{\mathbf{O}_4} \textcolor{orange!80!black}{u_j}) (\textcolor{blue!80!black}{v}^T \textcolor{orange!80!black}{u_i}) (\textcolor{blue!80!black}{v}^T \textcolor{orange!80!black}{u_j}) d\mu(\textcolor{orange!80!black}{U})
+\mathbb{E}[\dots] = \int_{\textcolor{orange!80!black}{U} \in O(\textcolor{blue!80!black}{N-1})} (\textcolor{orange!80!black}{u_i}^T \textcolor{orange!80!black}{\mathbf{O}_4} \textcolor{orange!80!black}{u_j}) (\textcolor{blue!80!black}{v}^T \textcolor{orange!80!black}{u_i}) (\textcolor{blue!80!black}{v}^T \textcolor{orange!80!black}{u_j}) d\mu(\textcolor{orange!80!black}{U})
 \end{equation}
-where $\textcolor{orange!80!black}{u_i}$ and $\textcolor{orange!80!black}{u_j}$ are columns of the random matrix $\textcolor{orange!80!black}{U}$, $\textcolor{blue!80!black}{v}$ represents the vector $\textcolor{blue!80!black}{\Delta f_0}$, and $d\mu(\textcolor{orange!80!black}{U})$ is the \textcolor{purple!80!black}{\textbf{Haar measure}}.
-\end{tcolorbox}
+where $\textcolor{orange!80!black}{u_i}, \textcolor{orange!80!black}{u_j}$ are columns of a random matrix $\textcolor{orange!80!black}{U}$ from $O(\textcolor{blue!80!black}{N-1})$, $\textcolor{blue!80!black}{v}$ represents the vector $\textcolor{blue!80!black}{\Delta f_0}$, and $d\mu(\textcolor{orange!80!black}{U})$ is the \textcolor{purple!80!black}{\textbf{Haar measure}}.
 
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{🎯 THEOREM: Weingarten Calculus}},enhanced,drop shadow]
-Such integrals can be computed systematically using powerful tools from \textcolor{purple!80!black}{\textbf{RMT}}, most notably \textcolor{orange!80!black}{\textbf{Weingarten calculus}} \cite{collins2022weingarten}. This calculus provides explicit formulas for polynomial integrals over compact groups. For an integral of polynomial degree $2\textcolor{blue!80!black}{k}$ (in our case, $\textcolor{blue!80!black}{k}=2$), the result is a sum over pairings of the indices, weighted by the \textcolor{orange!80!black}{\textbf{Weingarten function}}, which has a well-known asymptotic expansion in $1/\textcolor{blue!80!black}{N}$. The leading order terms of this expansion yield the precise scaling of the expectation value with $\textcolor{blue!80!black}{N}$ that is needed to resolve the scaling puzzle.
-\end{tcolorbox}
+Such integrals can be computed systematically using powerful tools from \textcolor{purple!80!black}{\textbf{RMT}}, most notably \textcolor{orange!80!black}{\textbf{Weingarten calculus}} \cite{collins2022weingarten}. This calculus provides explicit formulas for polynomial integrals over compact groups. The result is expressed as a sum over pairings of indices, weighted by the \textcolor{orange!80!black}{\textbf{Weingarten function}}, which has a well-known asymptotic expansion in powers of $1/\textcolor{blue!80!black}{N}$. The leading-order terms of this expansion yield the precise scaling with $\textcolor{blue!80!black}{N}$ required to resolve the finite-width scaling puzzle.
 
-\begin{tcolorbox}[colback=red!15,colframe=red!70!black,title={\textbf{🚀 BREAKTHROUGH: Feynman Diagram Connection}},enhanced,drop shadow]
-Furthermore, the sum over pairings in the \textcolor{orange!80!black}{\textbf{Weingarten formula}} can be represented graphically, creating a direct analogy with the Feynman diagrams used in quantum field theory. In this picture, the higher-order tensors like $\textcolor{orange!80!black}{\mathbf{O}_4}$ and the vector $\textcolor{blue!80!black}{\Delta f_0}$ act as vertices, while the pairings of indices form propagators whose values are given by the \textcolor{orange!80!black}{\textbf{Weingarten function}}. The \textcolor{purple!80!black}{\textbf{GOE}} structure of the underlying "field" of eigenvectors dictates the rules and values of these diagrams. This connection solidifies the entire program of analyzing the \textcolor{kernelcolor}{NTK} correction via its statistical moments and opens up a rich toolbox for future calculations.
-\end{tcolorbox}
+Remarkably, the sum over pairings in the \textcolor{orange!80!black}{\textbf{Weingarten formula}} can be represented graphically, creating a direct analogy with the Feynman diagrams of quantum field theory. In this framework, tensors like $\textcolor{orange!80!black}{\mathbf{O}_4}$ act as interaction vertices, while the pairings of indices form propagators whose values are determined by the \textcolor{orange!80!black}{\textbf{Weingarten function}}. The underlying \textcolor{purple!80!black}{\textbf{GOE}} structure of the eigenvector "field" dictates the rules of these diagrams. This connection solidifies our entire program of analyzing \textcolor{kernelcolor}{NTK} corrections via statistical moments and opens up a rich mathematical toolbox for future investigations.
 
 
 
@@ -2910,7 +2815,7 @@ This result represents a \textbf{breakthrough} in understanding how network arch
 \subsubsection{Personal Contribution: Novel ReLU Recursion Formula}
 
 We present the \textbf{first complete derivation} of the recursive structure for $\textcolor{k3color}{K^{(3)}}$ in ReLU networks, leveraging the critical property that $\sigma''(\sigma) = 0$ almost everywhere.
-The theoretical justification for this simplification is supported by a theorem from \cite{lee2022ntk} stating that through the training, there is zero chance to encounter a ReLU neuron with zero activation.
+The theoretical justification for this simplification is supported by a theorem from \cite{lee2022ntk} stating that through the training, there is zero chance to encounter a ReLU neuron with zero pre-activation.
 
 \begin{tcolorbox}[colback=definitioncolor!10,colframe=definitioncolor!60!black,title={\textbf{Revolutionary Insight: ReLU Simplification}},enhanced,drop shadow]
 The vanishing second derivative of ReLU activation leads to \textit{dramatic simplifications} in the third-order kernel computation:
@@ -3231,7 +3136,7 @@ Therefore:
 \end{proof}
 
 \subsection{Case of Limited Regularity: Fourier-Based Proof}
-\begin{tcolorbox}[colback=green!10,colframe=green!50!black,title=Remark: Non sufficient regularity]
+\begin{tcolorbox}[colback=green!10,colframe=green!50!black,title=Remark: Insufficient regularity]
 When functions are not twice differentiable, for example ReLU MLPs the integration by parts approach fails due to insufficient regularity. 
 In such cases, the \textbf{Fourier-based proof becomes the master approach}.
 
@@ -3251,7 +3156,7 @@ The operator $(I + (-\Delta)^{1/2})^s$ acts in Fourier space as multiplication b
 
 
 
-\subsection{A.1 Proof 1: Sobolev Loss as Fractional Laplacian}
+\subsection{Proof 1: Sobolev Loss as Fractional Laplacian}
 
 \begin{theorem}[Fractional Laplacian Representation of Sobolev Loss]
 For a function $f \in L^s(\mathbb{S}^{d-1})$ with $s > 0$, the Sobolev loss can be written as:
@@ -3275,7 +3180,7 @@ The standard Sobolev norm is defined as $\|f\|_{L^s}^2 = \sum_{\ell,p} (1 + \ell
 
 
 \newpage
-\subsection{A.2 Proof 2: NTK Operator Multiplication by Sobolev Operator}
+\subsection{Proof 2: NTK Operator Multiplication by Sobolev Operator}
 \label{sec:appendix_composition}
 
 \begin{theorem}[NTK-Sobolev Composition]
@@ -3290,7 +3195,7 @@ Standard gradient descent on the $L^2$ loss $\mathcal{L}(\textcolor{darkyellow}{
 When we replace the $L^2$ loss with the Sobolev loss $\mathcal{L}_s(\textcolor{darkyellow}{\theta}) = \frac{1}{2}\|f(\cdot; \textcolor{darkyellow}{\theta}) - y\|^2_{L^s}$, the gradient computation changes fundamentally. Using our fractional Laplacian representation from Theorem 1, the Sobolev loss becomes:
 \[ \mathcal{L}_s(\textcolor{darkyellow}{\theta}) = \frac{1}{2}\int (f(x; \textcolor{darkyellow}{\theta}) - y(x)) (I + (-\Delta)^{1/2})^s (f(x; \textcolor{darkyellow}{\theta}) - y(x)) d\sigma(x) \]
 
-By boundedness of the fractionnal operator, and boundedness over a compact domain, we can intervete the integral and the gradient operator.
+By boundedness of the fractional operator, and boundedness over a compact domain, we can intervert the integral and the gradient operator.
 The gradient with respect to parameters now involves the chain rule through the fractional operator:
 \[ \nabla_{\textcolor{darkyellow}{\theta}} \mathcal{L}_s(\textcolor{darkyellow}{\theta}) = \int \nabla_{\textcolor{darkyellow}{\theta}} f(x; \textcolor{darkyellow}{\theta}) \cdot (I + (-\Delta)^{1/2})^s (f(x; \textcolor{darkyellow}{\theta}) - y(x)) d\sigma(x) \]
 
@@ -3329,7 +3234,7 @@ Thus, $\mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + 
 
 
 \newpage
-\subsection{A.4 Proof 4: Conditional Commutation of Discrete Matrix Operators}
+\subsection{Proof 4: Conditional Commutation of Discrete Matrix Operators}
 \label{sec:appendix_commutation}
 
 \begin{proof}[Proof of Theorem~\ref{thm:ntk_sobolev_commutation}]
@@ -3371,7 +3276,7 @@ Therefore, if the sampling points provide an exact quadrature up to degree $2\el
 
 
 
-\subsection{A.6 Discrete Implementation and Matrix Construction}
+\subsection{Discrete Implementation and Matrix Construction}
 
 \begin{theorem}[Discrete Sobolev Loss and Matrix Form]
 Given dataset $\{x_i, y_i\}_{i=1}^{\textcolor{red}{n}}$ on $\mathbb{S}^{d-1}$, the discrete Sobolev loss becomes a quadratic form:
@@ -3440,7 +3345,7 @@ Matrix construction requires:
 \section{Mathematical Foundation: Concentration Inequalities}
 
 The goal of this section is to expose our strategy for our current research, with current research discussions with Pr Terjek.
-We are currently working on the following according to mixing strategies from high dimensionnal statistics, from \cite{nguyen2024concentration} and from{terjek2025mlpseocconcentrationntk,terjek2025mlpseocspectrumntk}
+We are currently working on the following according to mixing strategies from high dimensional statistics, from \cite{nguyen2024concentration} and from{terjek2025mlpseocconcentrationntk,terjek2025mlpseocspectrumntk}
 
 
 
@@ -3456,7 +3361,7 @@ $$\Pr(S \leq (1-\delta)\mu) \leq e^{-\frac{\delta^2 \mu}{2}}$$
 for $\delta > 0$.
 \end{theorem}
 
-3\begin{theorem}[Bernstein's Inequality]
+\begin{theorem}[Bernstein's Inequality]
 Let $X_1, \ldots, X_n$ be independent random variables with $\E[X_i] = 0$, $|X_i| \leq M$, and $\E[X_i^2] \leq \sigma_i^2$. Let $S = \sum_{i=1}^n X_i$ and $\sigma^2 = \sum_{i=1}^n \sigma_i^2$. Then:
 $$\Pr(|S| \geq t) \leq 2\exp\left(-\frac{t^2/2}{\sigma^2 + Mt/3}\right)$$
 \end{theorem}
@@ -3601,7 +3506,7 @@ where:
 
 where $\Sigma_p(x) = \text{diag}([\sigma'(g_{p,j}(x))]_{j=1}^{n_p})$ is the diagonal matrix of activation derivatives.
 
-Then we apply Schur Product Theorem and Weyl's Inequality}
+Then we apply Schur Product Theorem and Weyl's Inequality
 
 For PSD matrices $P, Q \in \R^{n \times n}$, the Schur product theorem :
 \begin{align}
@@ -4652,17 +4557,25 @@ The three classical Dyson ensembles correspond to:
 Each class is characterized by the Dyson index $\beta \in \{1, 2, 4\}$ respectively.
 \end{tcolorbox}
 
-\subsubsection{Wigner-Dyson Statistics and Level Repulsion}
+\subsubsection{Wigner-Dyson Statistics and Spectral Properties}
 
-The universality principle states that local eigenvalue statistics depend only on the symmetry class, not on specific matrix elements. For NTK matrices, we observe:
+The universality principle in RMT states that local eigenvalue statistics depend only on the fundamental symmetries of the ensemble, not on the specific details of the matrix element distributions. For the NTK matrix, we observe properties consistent with these universal laws, both at a global and local scale.
 
-\begin{equation}
-P(s) = \begin{cases}
-\frac{\pi s}{2} e^{-\frac{\pi s^2}{4}} & \text{GOE (orthogonal class)} \\
-\frac{32s^2}{\pi^2} e^{-\frac{4s^2}{\pi}} & \text{GUE (unitary class)} \\
-\frac{2^{18} s^4}{3^6 \pi^3} e^{-\frac{64s^2}{9\pi}} & \text{GSE (symplectic class)}
-\end{cases}
-\end{equation}
+\paragraph{Global Eigenvalue Density}
+For large random matrices, the macroscopic spectral density $\rho(\lambda)$ of eigenvalues follows the celebrated Wigner's semicircle law. For a properly normalized matrix from the GOE or GUE ensembles, the density is given by:
+\[
+\rho(\lambda) = \frac{1}{2\pi} \sqrt{4 - \lambda^2}, \quad \text{for } \lambda \in [-2, 2]
+\]
+This distribution describes the overall shape of the eigenvalue spectrum.
+
+\paragraph{Local Level Repulsion}
+On a microscopic scale, the distribution of spacings $s$ between adjacent eigenvalues exhibits "level repulsion," a phenomenon where eigenvalues tend to avoid being close to each other. The probability density $P(s)$ for the normalized spacing is accurately approximated by Wigner's surmise. This approximation, which Wigner derived by considering the simple case of $2 \times 2$ matrices, provides an excellent fit to the true distributions for large matrices. The surmises and the corresponding mean adjacent gap ratios $\langle r \rangle$ are:
+
+\begin{align}
+\text{GOE (orthogonal): } & P(s) \approx \frac{\pi s}{2} e^{-\frac{\pi s^2}{4}}, && \langle r \rangle \approx 0.5307 \\
+\text{GUE (unitary): } & P(s) \approx \frac{32s^2}{\pi^2} e^{-\frac{4s^2}{\pi}}, && \langle r \rangle \approx 0.5996 \\
+\text{GSE (symplectic): } & P(s) \approx \frac{2^{18} s^4}{3^6 \pi^3} e^{-\frac{64s^2}{9\pi}}, && \langle r \rangle \approx 0.6762
+\end{align}
 
 where $P(s)$ represents the nearest-neighbor spacing distribution.
 
@@ -4727,9 +4640,9 @@ Since the higher moments of $\mathcal{B}$ (for $k \ge 3$) vanish in the large-wi
 
 
 
-\section{A Quantum Field Theory Perspective on the Neural Tangent Hierarchy}
+\section{A dual RMT and Field Theory Perspective on the Neural Tangent Hierarchy}
 
-A significant recent advance has established a formal bridge between the Neural Tangent Hierarchy (NTH) and quantum field theory (QFT). Building upon the pioneering work of \cite{dyer2019asymptotics}, which first suggested such a connection through a graph-theoretic approach, very recent research by \cite{guillen_misof_gerken_2025} has demonstrated that computations within the NTH are structurally analogous to perturbative calculations of Gaussian fields in QFT.
+A significant recent from 15th August 2025 advance has established a formal bridge between the Neural Tangent Hierarchy (NTH) and quantum field theory (QFT). Building upon the pioneering work of \cite{dyer2019asymptotics}, which first suggested such a connection through a graph-theoretic approach, very recent research by \cite{guillen_misof_gerken_2025} has demonstrated that computations within the NTH are structurally analogous to perturbative calculations of Gaussian fields in QFT.
 
 This correspondence is made possible by leveraging Wick's theorem, a fundamental tool in QFT for computing moments of Gaussian variables. This insight allows for the development of a Feynman diagram formalism for the NTH, providing a rigorous and systematic framework for analyzing finite-width corrections. The results derived from this perspective are in perfect agreement with our own conclusions and provide strong theoretical support for our observations.
 
@@ -4752,33 +4665,23 @@ Second, a remarkable finding is that finite-width corrections to the NTK for ide
 These results significantly advance our understanding of the NTH. We are currently collaborating with the authors of \cite{guillen_misof_gerken_2025} to extend this work and obtain rigorous theoretical bounds without relying on numerical assumptions. The broader \textbf{field-theoretic perspective} further enriches this connection, showing that neural network dynamics adhere to principles of \textbf{effective field theory} \cite{hashimoto2022duality}. Methods from the \textbf{renormalization group} can provide a systematic treatment of scale dependencies and \textbf{critical phenomena} in wide networks \cite{hashimoto2022duality}, while \textbf{path integral formulations} connect training dynamics to \textbf{quantum mechanical evolution} \cite{yaida2024nnqft, martyn2022variational}.
 
 
+\subsection{Random Matrix Theory and Optimization Landscape Analysis}
+
+Random Matrix Theory (RMT) provides a rigorous framework for analyzing the spectral properties of operators within the Neural Tangent Hierarchy, particularly for networks with heavy-tailed weight initializations, following the seminal work of Ben Arous and collaborators. When matrix entries are drawn from distributions in the domain of attraction of an $\alpha$-stable law, the empirical spectral distribution converges to a measure $\mu_\alpha$, which extends Wigner's semicircular law to infinite variance settings \cite{benarous2007spectrum}. The absolute continuity of this limiting measure is crucial, as it ensures the existence of well-defined spectral gaps that are fundamental to analyzing training dynamics.
+
+The insights from RMT connect these spectral properties to the geometry of the optimization landscape. The loss surface of multilayer networks is deeply related to spin glass models, which allows for a statistical characterization of its critical points \cite{benarous2014high_dimensional_landscapes}. This analysis reveals a hierarchical structure where the number of critical points follows scaling laws determined by the underlying spectral properties, directly impacting the stability of NTH operators during training \cite{benarous2013complexity}.
+
+Furthermore, this framework clarifies the behavior of stochastic gradient dynamics on non-convex losses, establishing convergence conditions and scaling behaviors that affect finite-width corrections \cite{benarous2023high_dimensional_sgd}. A key finding is that SGD naturally aligns with the dominant eigendirections of the spectral structure, creating a feedback loop between optimization and the landscape \cite{benarous2023spectral_sgd_alignment}. This suggests that higher-order operators like $\textcolor{k3color}{K^{(3)}}$ capture persistent features of this landscape. The computational feasibility of such higher-order kernels is itself governed by critical phenomena, which can be understood through tools like spiked tensor models \cite{benarous2019spiked_tensor}.
+
+The analysis of extreme eigenvalues offers further insights into network conditioning and training stability. For heavy-tailed matrices, the largest eigenvalues exhibit Poisson convergence, a property that extends to the eigenvalues of $\textcolor{k3color}{K^{(3)}}$, ensuring their extreme spectral behavior remains tractable \cite{benarous2009poisson}. Similarly, the convergence of normalized eigenvalue gaps to specific limiting distributions suggests a stable spectral structure in high dimensions \cite{benarous2010gaps}. In summary, the operators $\textcolor{kernelcolor}{K^{(2)}}$ and $\textcolor{k3color}{K^{(3)}}$ inherit their spectral properties from the underlying weight matrices. The RMT perspective provides concrete spectral bounds and statistics that complement the quantum field theory approach by rigorously validating the finite-width corrections derived from diagrammatic methods.
 
 
-\subsection{Random Matrix Theory and Optimization landscape Analysis}
 
-from 
 
-\textbf{Random Matrix Theory} provides a rigorous framework for analyzing \textbf{spectral properties} in the Neural Tangent Hierarchy. We focus on \textbf{heavy-tailed} random matrices following Ben Arous and collaborators' seminal work.
 
-When matrix entries follow distributions in the domain of attraction of an \textbf{$\alpha$-stable law}, the empirical spectral distribution converges to a measure $\mu_\alpha$ extending \textbf{Wigner's semicircular law} to infinite variance settings \cite{benarous2007spectrum}. For neural networks with \textbf{heavy-tailed} weight initializations, this determines how \textbf{infinite variance} affects the Neural Tangent Kernel spectrum. The \textbf{absolute continuity} of $\mu_\alpha$ ensures well-defined \textbf{spectral gaps} crucial for training dynamics analysis.
 
-The \textbf{loss surface geometry} of multilayer networks connects to \textbf{spin glass models} through random matrix theory \cite{benarous2014high_dimensional_landscapes}. \textbf{Critical points} follow predictable statistical patterns, with direct implications for Neural Tangent Hierarchy operator stability during training. Empirical validation demonstrates that theoretical \textbf{spectral predictions} manifest in practical training scenarios \cite{benarous2014high_dimensional_landscapes}.
 
-\textbf{Spiked tensor models} reveal \textbf{computational phase transitions} in high-dimensional inference \cite{benarous2019spiked_tensor}. \textbf{Critical phenomena} determine when higher-order kernel computations like $\textcolor{k3color}{K^{(3)}}$ remain feasible. Even in high dimensions, structural properties maintain \textbf{computational efficiency} for hierarchy operators.
 
-\textbf{Stochastic gradient dynamics} on non-convex losses establish \textbf{convergence conditions} with \textbf{scaling behaviors} affecting finite-width corrections \cite{benarous2023high_dimensional_sgd}. \textbf{High-dimensional limit theorems} reveal \textbf{effective dynamics} at specific scaling regimes, justifying parameter ranges where the hierarchy framework remains valid \cite{benarous2023high_dimensional_sgd}.
-
-\textbf{SGD algorithms} naturally align with \textbf{dominant eigendirections}, creating feedback between optimization and \textbf{spectral structure} \cite{benarous2023spectral_sgd_alignment}. This suggests higher-order operators $\textcolor{k3color}{K^{(3)}}$ capture persistent \textbf{optimization landscape} features.
-
-\textbf{Extreme eigenvalue gap} analysis provides neural network conditioning insights \cite{benarous2010gaps}. Normalized gaps follow specific \textbf{limiting distributions}, where extreme gaps impact \textbf{training stability}. Gap convergence to constants suggests stable \textbf{spectral structure} in high dimensions.
-
-For \textbf{heavy-tailed} matrices without fourth moments, largest eigenvalues exhibit \textbf{Poisson convergence} \cite{benarous2009poisson}. In the Neural Tangent Hierarchy, $\textcolor{k3color}{K^{(3)}}$ eigenvalues show similar \textbf{Poisson statistics}, maintaining tractable extreme spectral behavior.
-
-\textbf{Spin glass complexity} analysis reveals layered critical value structures in neural networks \cite{benarous2013complexity}. The \textbf{TAP-complexity framework} shows hierarchical loss landscape structure where critical point numbers follow \textbf{scaling laws} related to underlying matrix spectral properties.
-
-\textbf{Random determinant growth} provides criteria for \textbf{Gaussian landscape} complexity \cite{benarous2021determinants}. Results apply to \textbf{Gaussian matrices} with general covariance and \textbf{Wigner matrices} relevant to neural networks. Determinant \textbf{scaling behavior} determines when recursive hierarchy computations remain numerically stable.
-
-The operators $\textcolor{kernelcolor}{K^{(2)}}$ and $\textcolor{k3color}{K^{(3)}}$ inherit \textbf{spectral properties} from underlying weight matrices. \textbf{Heavy-tailed analysis} provides \textbf{spectral density bounds}, \textbf{extreme eigenvalue statistics} determine conditioning properties, and \textbf{complexity results} guide computational landscape understanding. This perspective complements \textbf{quantum field theory} by providing concrete \textbf{spectral bounds} validating finite-width corrections from \textbf{diagrammatic methods}.
 
 
 \newpage
