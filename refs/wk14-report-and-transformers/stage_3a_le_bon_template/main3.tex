@@ -1251,10 +1251,10 @@ The transition between feature learning and kernel regimes represents a fundamen
 
 The NTK spectrum, particularly its smallest eigenvalue $\lambda_{\min}$, determines convergence rates and optimization strategy. An ill-conditioned NTK suggests second-order methods are appropriate, while a well-conditioned NTK indicates first-order methods can achieve faster convergence. For MMNN architectures, different network components may operate in different regimes simultaneously, requiring careful analysis of heterogeneous optimization dynamics.
 
-\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Theorem: NTK-Hessian Correspondence}},enhanced,drop shadow,boxrule=2pt]
-A fundamental but very niche theorem in deep learning theory establishes that for sufficiently wide neural networks, the spectrum of the Neural Tangent Kernel (NTK) and the spectrum of the Hessian of the loss function are asymptotically equivalent. This powerful result connects the geometry of the loss landscape to the kernel function, providing a bridge between optimization dynamics and representation learning.
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Theorem: Spectral Equivalence of NTK, Hessian, and Fisher Matrix}},enhanced,drop shadow,boxrule=2pt]
+A fundamental result in deep learning theory establishes that for sufficiently wide neural networks (width $m \to \infty$), the spectra of the Hessian, the Fisher Information Matrix, and the Neural Tangent Kernel (NTK) are asymptotically equivalent.
 
-The full statement and proof of this theorem are presented in a dedicated blue box in the Appendix. This result builds upon the foundational works of \cite{dyer2019asymptotics} and \cite{jacot2018neural}.
+More precisely, the top $d$ eigenvalues of these matrices, where $d$ is the input data dimension, are proven to converge to the same limiting values determined by the NTK. The remainder of the spectrum, the "bulk," is concentrated around zero. It is provably shown that the spectral radius of this bulk decays as $\mathcal{O}(1/\sqrt{m})$. Furthermore, experimental results in \cite{takeuchi2025neuraltangentkernelsfisher} and \cite{dyer2019asymptotics} indicate that the individual non-top eigenvalues decay even faster, scaling as $\mathcal{O}(1/m)$. This powerful result connects the geometry of the loss landscape (Hessian) and information geometry (Fisher) to the kernel function, providing a unified view on optimization dynamics.
 \end{tcolorbox}
 
 
@@ -3368,43 +3368,41 @@ Thus, $\mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + 
 
 
 \newpage
-\subsection{A.4 Proof 4: Limited Commutation of Discrete Matrix Operators}
+\subsection{A.4 Proof 4: Conditional Commutation of Discrete Matrix Operators}
 \label{sec:appendix_commutation}
 
 \begin{proof}[Proof of Theorem~\ref{thm:ntk_sobolev_commutation}]
-Nous établissons les propriétés de commutation en développant les deux matrices en termes de projecteurs harmoniques sphériques avec des poids de quadrature.
+We establish the commutation properties of the discrete operators by analyzing their spectral decompositions. Commutation is not guaranteed in general, but holds under specific conditions on the sampling points $\{x_i\}$.
 
-\begin{tcolorbox}[colback=blue!5,colframe=blue!60!black,title=\textbf{Décomposition Spectrale NTK}]
-La matrice NTK peut s'écrire en utilisant sa décomposition spectrale :
-\[ \mathbf{K}_{ij} = K^{\infty}(x_i, x_j) = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} (a_{\ell,p})_i (a_{\ell,p})_j \]
-où $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$ avec des poids de quadrature $c_i$ et $\ell_{\max}$ satisfait $(\ell_{\max}+1)^2 > n$ pour assurer la semi-définie positivité.
+\begin{tcolorbox}[colback=blue!5,colframe=blue!60!black,title=\textbf{NTK Spectral Decomposition}]
+The discrete NTK matrix is constructed from its continuous counterpart, yielding the spectral decomposition:
+\[ \mathbf{K} = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T \]
+where $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$ are vectors formed from weighted evaluations of spherical harmonics at the sample points $x_i$. The truncation $\ell_{\max}$ is chosen to ensure the matrix is positive semi-definite, typically $(\ell_{\max}+1)^2 > n$.
 \end{tcolorbox}
 
-\begin{tcolorbox}[colback=red!5,colframe=red!60!black,title=\textbf{Décomposition Spectrale Sobolev}]
-De manière similaire, la matrice Sobolev a le développement :
+\begin{tcolorbox}[colback=red!5,colframe=red!60!black,title=\textbf{Sobolev Spectral Decomposition}]
+Similarly, the discrete Sobolev matrix has the expansion:
 \[ \mathbf{P}_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1 + \ell(\ell + d - 2))^s a_{\ell,p} a_{\ell,p}^T \]
+Both matrices are built upon the same basis vectors $\{a_{\ell,p}\}$.
 \end{tcolorbox}
 
-\begin{tcolorbox}[colback=green!5,colframe=green!60!black,title=\textbf{Orthogonalité Limitée et Commutation Partielle}]
-L'observation clé est que l'orthogonalité discrète $a_{\ell,p}^T a_{\ell',p'} = \delta_{\ell,\ell'} \delta_{p,p'} \|a_{\ell,p}\|^2$ est exacte seulement pour les degrés $\ell$ tels que la somme cumulative des dimensions harmoniques sphériques satisfait :
-\[ \sum_{p=0}^{\ell} N(d,p) \leq \textcolor{red}{n} \]
-Cela signifie que la mesure d'échantillonnage est exacte jusqu'à une dimension particulière $\ell_{\text{exact}}$ déterminée par le nombre de points d'échantillon $n$.
+\begin{tcolorbox}[colback=green!5,colframe=green!60!black,title=\textbf{Condition for Commutation: Exact Quadrature}]
+The key insight is that the discrete matrices $\mathbf{K}$ and $\mathbf{P}_s$ commute if and only if the basis vectors $\{a_{\ell,p}\}$ are orthogonal. This condition is met if the sampling points $\{x_i\}$ and weights $\{c_i\}$ form an exact quadrature rule for all products of spherical harmonics up to degree $\ell_{\max}$, i.e., for polynomials of degree up to $2\ell_{\max}$.
+This requires:
+\[ a_{\ell,p}^T a_{\ell',p'} = \sum_{i=1}^n c_i^2 Y_{\ell,p}(x_i) Y_{\ell',p'}(x_i) = \int_{\mathbb{S}^{d-1}} Y_{\ell,p}(x) Y_{\ell',p'}(x) d\sigma(x) = \delta_{\ell,\ell'} \delta_{p,p'} \]
+When this condition holds, the discrete basis perfectly mirrors the orthogonality of the continuous basis.
 \end{tcolorbox}
 
-\begin{tcolorbox}[colback=yellow!10,colframe=orange!60!black,title=\textbf{Insight Personnel : Commutation Conditionnelle}]
-\begin{tcolorbox}[colback=orange!10,colframe=orange!60!black,title=\textbf{Remark: Non-Commutation in General}]
-The matrices $\mathbf{K}$ and $\mathbf{P}_s$ do \textbf{not commute} in general. We have partial commutation only for the subspace spanned by spherical harmonics of degree $\ell \leq \ell_{\text{exact}}$ where:
-\[ \ell_{\text{exact}} = \max\left\{\ell : \sum_{p=0}^{\ell} N(d,p) \leq \textcolor{red}{n}\right\} \]
-For $\ell > \ell_{\text{exact}}$, the discrete orthogonality breaks down, and the commutation property fails. This limitation arises because the sampling measure cannot exactly represent all spherical harmonics beyond a certain degree with a finite number of points.
-\end{tcolorbox}
-
-\begin{tcolorbox}[colback=purple!5,colframe=purple!60!black,title=\textbf{Partial Commutation Result}]
-For the exactly representable subspace, we have:
-\begin{align}
-[\mathbf{K}\mathbf{P}_s]_{\ell \leq \ell_{\text{exact}}} &= \sum_{\ell=0}^{\ell_{\text{exact}}} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} (1 + \ell(\ell + d - 2))^s a_{\ell,p} a_{\ell,p}^T \\
-[\mathbf{P}_s\mathbf{K}]_{\ell \leq \ell_{\text{exact}}} &= \sum_{\ell=0}^{\ell_{\text{exact}}} \sum_{p=1}^{N(d,\ell)} (1 + \ell(\ell + d - 2))^s \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T
-\end{align}
-We have $\mathbf{K}\mathbf{P}_s = \mathbf{P}_s\mathbf{K}$ only in the subspace corresponding to $\ell \leq \ell_{\text{exact}}$.
+\begin{tcolorbox}[colback=orange!10,colframe=orange!60!black,title=\textbf{Commutation Result}]
+Under the exact quadrature condition, the orthogonality of $\{a_{\ell,p}\}$ allows for a direct proof of commutation. Let $\lambda_\ell^{(s)} = (1 + \ell(\ell + d - 2))^s$.
+\begin{align*}
+\mathbf{K}\mathbf{P}_s &= \left( \sum_{\ell,p} \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T \right) \left( \sum_{\ell',p'} \lambda_{\ell'}^{(s)} a_{\ell',p'} a_{\ell',p'}^T \right) \\
+&= \sum_{\ell,p,\ell',p'} \mu_\ell^{(K)} \lambda_{\ell'}^{(s)} a_{\ell,p} (a_{\ell,p}^T a_{\ell',p'}) a_{\ell',p'}^T \\
+&= \sum_{\ell,p} \mu_\ell^{(K)} \lambda_{\ell}^{(s)} a_{\ell,p} a_{\ell,p}^T \quad (\text{using } a_{\ell,p}^T a_{\ell',p'} = \delta_{\ell\ell'}\delta_{pp'})
+\end{align*}
+Since the eigenvalues $\mu_\ell^{(K)}$ and $\lambda_\ell^{(s)}$ are scalars, they commute. The calculation for $\mathbf{P}_s\mathbf{K}$ is symmetric and yields the identical result:
+\[ \mathbf{P}_s\mathbf{K} = \sum_{\ell,p} \lambda_{\ell}^{(s)} \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T \]
+Therefore, if the sampling points provide an exact quadrature up to degree $2\ell_{\max}$, we have full commutation: $\mathbf{K}\mathbf{P}_s = \mathbf{P}_s\mathbf{K}$. If this condition is not met, commutation fails because the basis vectors $\{a_{\ell,p}\}$ are no longer orthogonal.
 \end{tcolorbox}
 \end{proof}
 
@@ -4985,6 +4983,14 @@ Quynh Nguyen, Marco Mondelli, and Guido Montufar.
 Tight bounds on the smallest eigenvalue of the neural tangent kernel for deep relu networks.
 \textit{arXiv preprint arXiv:2012.11654}, 2022.
 URL: \href{https://arxiv.org/abs/2012.11654}{\url{https://arxiv.org/abs/2012.11654}}.
+
+
+\bibitem{takeuchi2025neuraltangentkernelsfisher}\label{ref:takeuchi2025neuraltangentkernelsfisher}
+Jun'ichi Takeuchi, Yoshinari Takeishi, Noboru Murata, Kazushi Mimura, Ka Long Keith Ho, and Hiroshi Nagaoka.
+Neural Tangent Kernels and Fisher Information Matrices for Simple ReLU Networks with Random Hidden Weights.
+\textit{arXiv preprint arXiv:2507.18555}, 2025.
+Analysis of neural tangent kernels and Fisher information matrices for ReLU networks with random hidden weights.
+URL: \href{https://arxiv.org/abs/2507.18555}{\url{https://arxiv.org/abs/2507.18555}}.
 
 \bibitem{fan2020spectra}\label{ref:fan2020spectra}
 Zhou Fan and Zhichao Wang.
