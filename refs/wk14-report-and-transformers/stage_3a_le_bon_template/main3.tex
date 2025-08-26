@@ -624,6 +624,1122 @@ $\mathcal{P}_\ell$ & Propagation operator & $\textcolor{orange}{\rho}$ & Spectra
 
 
 
+
+
+
+
+
+
+
+
+\section{Statement of the problem}
+
+\subsubsection{The Sobolev Training}
+
+Le's suppose that we are given a function $f^*$ and we want to find a function $f_{\textcolor{darkyellow}{\theta}}$ in a model class $\mathcal{F}$ that approximates $f^*$ in the Sobolev space $H^s(\Omega)$.
+
+\textit{Sobolev training} \cite{czarnecki2017sobolev,gupte2022sobolev_loss} 
+is an approach that incorporates derivative information into the learning process. 
+For a function $f$ and target function $f^*$, the Sobolev training loss is defined as:
+
+\begin{tcolorbox}[colback=sobolevcolor!5,colframe=sobolevcolor!60!black,title=Sobolev Training Loss]
+\begin{equation}
+\label{eq:sobolev_loss}
+\mathcal{L}_{\text{Sobolev}}(f) = \|f - f^*\|_{H^s}^2 = \sum_{p=0}^s \int_{\Omega} |D^p f(x) - D^p f^*(x)|^2 dx
+\end{equation}
+\end{tcolorbox}
+
+where $D^p$ denotes the $p$-th derivative operator and $H^s$ is the Sobolev space of order $s$. This formulation leads to several key properties:
+
+The Sobolev training loss has the following properties:
+\begin{itemize}
+    \item The loss incorporates both function values and derivatives up to order $s$
+    \item Training in $H^s$ norm induces smoother function approximation
+\end{itemize}
+
+For neural networks, this translates to augmenting the training data with derivative information:
+
+$$\mathcal{L}_{\text{discrete}}(f) = \sum_{i=1}^{\textcolor{red}{n}} \sum_{p=0}^s |D^p f(x_i) - D^p f^*(x_i)|^2$$
+
+This framework provides a natural connection between neural network training and classical function approximation theory in Sobolev spaces.
+It's important to note that Sobolev training is mainly used for very smooth functions in general. But the terminology "Sobolev" remains the same
+and is part of the field slang, even if describing it in a sobolev space is ont fully informative.
+
+
+
+
+
+
+\subsection{Literature Review: Sobolev Training and NTK Eigenvalues}
+
+\subsubsection{The Intersection of Sobolev Training and NTK Spectral Analysis}
+
+The convergence of Sobolev training methodologies with Neural Tangent Kernel (NTK) spectral analysis represents one of the most promising theoretical frontiers in modern machine learning. This research line fundamentally addresses how embedding derivative information into learning objectives reshapes the spectral and optimization dynamics of neural networks. The literature spans from foundational works in approximation theory to recent finite-width corrections via diagrammatic methods, forming a coherent but rapidly evolving theoretical framework.
+
+\paragraph{Foundations of Sobolev Training}
+
+The theoretical origins of Sobolev training lie in classical numerical analysis, where controlling derivatives of approximants was essential for stability and convergence. Czarnecki et al. \cite{czarnecki2017sobolev} formalized this approach for deep learning, demonstrating that penalizing derivative mismatches induces smoother approximations and improved generalization properties. We observe that this foundational work established the principle that incorporating higher-order information fundamentally changes the learning dynamics.
+
+Subsequent theoretical refinements by Gupte et al. \cite{gupte2022sobolev_loss} provided rigorous error bounds, linking Sobolev loss formulations to spectral control of learned functions, particularly in high-frequency regimes. This insight established the principle that the Sobolev order $s$ directly dictates approximation error decay rates. We note that these results created the theoretical foundation for understanding how derivative penalties affect function space properties.
+
+Recent developments extend these ideas in two complementary directions. On the theoretical side, Doumeche \cite{doumeche2023sobolev} demonstrated that Sobolev training fundamentally modifies the NTK operator itself, effectively embedding fractional differential operators into the kernel structure. On the applied side, Townsend et al. \cite{townsend2022sobolev} showed the effectiveness of Sobolev losses in PDE-constrained learning scenarios, where derivative-aware training achieves faster convergence and lower sample complexity compared to standard approaches.
+
+\paragraph{Spectral Properties of Neural Tangent Kernels}
+
+Parallel to Sobolev training advances, NTK analysis has provided the dominant theoretical framework for studying convergence in wide neural networks. Bach's foundational works \cite{bach2017breaking,bach2021ntk_eigenvalues} established polynomial eigenvalue decay rates for NTKs, demonstrating that spectral tail behavior governs generalization properties, while the smallest eigenvalue $\lambda_{\min}$ dictates optimization convergence speed.
+
+These fundamental results were refined by Nguyen et al. \cite{nguyen2022ntk_eigenvalues} and Fan \& Wang \cite{fan2020spectra}, who connected eigenvalue distribution patterns to architectural parameters including depth, width, and random matrix effects. We observe that these works established precise relationships between network structure and spectral properties. More recently, Doumeche \cite{doumeche2023ntk_spectral} introduced concentration inequalities for empirical NTK spectra, ensuring stability of eigenvalue distributions in high-dimensional settings.
+
+Finite-width corrections represent an active research area where Hanin \& Nica \cite{hanin_nica_2019}, Dyer \& Gur-Ari \cite{dyer_gur_ari_2019}, and Guillen et al. \cite{guillen_misof_gerken_2025} employed diagrammatic techniques inspired by quantum field theory to describe NTK fluctuations. These approaches bridge the theoretical gap between infinite-width and finite-width regimes, providing practical insights for real neural networks.
+
+\paragraph{Convergence of Sobolev Training and NTK Theory}
+
+The synthesis of these research directions occurs in works such as Doumeche \cite{doumeche2023sobolev_ntk}, which demonstrated that Sobolev training reweights the NTK spectrum through powers of differential operators, accelerating decay of high-frequency eigenmodes. This theoretical result explains empirically observed performance gains in PDE solvers and smooth regression tasks, providing the first rigorous connection between Sobolev norms and kernel spectral properties.
+
+Complementary works extend this analysis to optimization guarantees. Welper \cite{welper2023approximation} studied gradient flow behavior for Sobolev-smooth targets, while recent investigations \cite{ntk2024underparam,ntk2025divergence} examined NTK behavior in under-parameterized and classification settings, where uniform kernel convergence can break down. We note that these studies reveal both the power and limitations of NTK-based theoretical analyses.
+
+\paragraph{Convergence Analysis and Open Challenges}
+
+The combined theoretical framework highlights a fundamental trade-off in neural network training. We observe that Sobolev training accelerates convergence when target functions possess sufficient smoothness, but may hinder learning for non-smooth signals. Adaptive strategies that dynamically tune the Sobolev order $s$ based on local function properties represent an active research direction to mitigate this sensitivity.
+
+Moreover, sampling strategies critically shape NTK spectral properties, yet remain poorly understood in practice. The connection between data geometry and kernel eigenstructure, particularly for optimal interpolation nodes such as Chebyshev points \cite{driscoll2014chebfun}, is emerging as a key theoretical and algorithmic lever. It remains unclear why certain sampling patterns lead to dramatically improved spectral properties in the NTK regime.
+
+Finally, extending Sobolev-aware NTK analysis to modern architectures including convolutional networks and attention mechanisms, as well as to stochastic training dynamics, remains a theoretical frontier. Diagrammatic methods and neural tangent hierarchy approaches \cite{huang2019dynamicsdeepneuralnetworks} may provide the appropriate mathematical tools for handling such architectural complexity.
+
+The synthesis of Sobolev training and NTK spectral analysis offers a unified theoretical framework for understanding neural network convergence properties. We observe that derivative-aware training objectives fundamentally reshape kernel spectra, altering both optimization dynamics and generalization behavior. Foundational results from approximation theory, kernel eigenvalue analysis, and finite-width corrections are converging into a coherent mathematical theory with significant implications for scientific machine learning and adaptive training methodologies.
+
+\newpage
+\section{The Neural Tangent Kernel under Sobolev training}
+\subsubsection{Two Equivalent Sobolev Norms}
+
+The Sobolev space $H^s(\Omega)$ can be equipped with two equivalent norms:
+
+1) \textbf{Gradient-Based Norm}: Defined using derivatives up to order $s$:
+\begin{equation}
+\label{eq:sobolev_gradient_norm}
+\|f\|_{H^s}^2 = \sum_{p=0}^s \int_{\Omega} |D^p f(x)|^2 dx
+\end{equation}
+where $D^p$ represents the $p$-th derivative operator.
+
+2) \textbf{Fourier-Based Norm}: Defined using the Fourier transform $\hat{f}$:
+\begin{equation}
+\label{eq:sobolev_fourier_norm}
+\|f\|_{H^s}^2 = \int_{\mathbb{R}^d} (1 + |\xi|^2)^s |\hat{f}(\xi)|^2 d\xi
+\end{equation}
+where $\xi$ represents the frequency variable.
+
+These norms are equivalent but not used in the same way. 
+The gradient-based norm is more intuitive for implementation in neural network training, while the Fourier-based norm provides a natural 
+connection to spectral properties and eigenvalue decay rates of the NTK operator.
+
+
+\subsection{The NN regression framework}
+
+In our analysis, we consider two distinct learning frameworks:
+
+1) \textbf{Standard Neural Network Regression}: Here we only observe a dataset of output values $y_i$ for inputs $x_i$ (as in Fourier Neural Operators for instance), leading to the classical mean squared error loss:
+$$\mathcal{L}_{\text{MSE}}(f) = \sum_{i=1}^{\textcolor{red}{n}} |f(x_i) - y_i|^2$$
+The gradient descent dynamics follow:
+$$\frac{d}{dt}f_t(x) = -\eta \sum_{i=1}^{\textcolor{red}{n}} \textcolor{red}{K}^{\infty}(x,x_i)(f_t(x_i) - y_i)$$
+
+2) \textbf{Derivative-Augmented Learning}: We observe both outputs and derivatives in our dataset, as in Sobolev training and Physics-Informed Neural Networks (PINNs) or DeepONet architectures, with loss:
+$$\mathcal{L}_{\text{deriv}}(f) = \sum_{i=1}^{\textcolor{red}{n}} \left(|f(x_i) - y_i|^2 + \sum_{p=1}^s |D^p f(x_i) - D^p y_i|^2\right)$$
+Leading to modified gradient dynamics incorporating derivative information.
+
+These frameworks result in different gradient descent trajectories and convergence behaviors. 
+The choice between them depends crucially on the \textbf{type of sampling points} used and whether explicit derivative 
+information is available, mainly through sensors that are disposed on a solution domain.
+
+\begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Informal Key Insight : Chebyshev Points vs General Sampling in numerical analysis}},enhanced,drop shadow]
+\textbf{Chebyshev points} (or optimal interpolation nodes) \cite{driscoll2014chebfun} enable accurate derivative approximation from function values alone, making standard regression sufficient. For spherical domains $\mathbb{S}^{d-1}$, with a azimuthal parameterization $\phi^{1},...,\phi^{d-1}$, the Chebyshev nodes are given by:
+$$\phi_k^{i} = \pi \cos\left(\frac{k\pi}{N}\right), \quad k = 0, 1, \ldots, N$$
+This optimal sampling eliminates the need for explicit derivative data in effective learning.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Personal contribution : Chebyshev Points}},enhanced,drop shadow]
+We will prove that sensoring Chebyshev points are not only optimal, but necessary for the standard regression framework to prove
+optimization bounds for neural network training
+\end{tcolorbox}
+
+
+The framework selection can be summarized by the following decision tree:
+
+\begin{center}
+\begin{tcolorbox}[colback=gray!5,colframe=gray!50!black,title={\textbf{Framework Selection Decision Tree}},enhanced,drop shadow,width=0.9\textwidth]
+\begin{tikzpicture}[
+    node distance=1.0cm and 1.8cm,
+    decision/.style={
+        rectangle, 
+        draw=blue!60!black, 
+        fill=blue!10, 
+        thick, 
+        minimum width=2.1cm, 
+        minimum height=0.8cm,
+        text centered,
+        rounded corners=3pt,
+        font=\scriptsize\bfseries,
+        drop shadow
+    },
+    process/.style={
+        rectangle, 
+        draw=green!60!black, 
+        fill=green!10, 
+        thick, 
+        minimum width=2.0cm, 
+        minimum height=0.7cm,
+        text centered,
+        rounded corners=2pt,
+        font=\scriptsize,
+        drop shadow
+    },
+    outcome/.style={
+        rectangle, 
+        draw=orange!60!black, 
+        fill=orange!10, 
+        thick, 
+        minimum width=2.1cm, 
+        minimum height=0.8cm,
+        text centered,
+        rounded corners=3pt,
+        font=\scriptsize\bfseries,
+        drop shadow
+    },
+    arrow/.style={
+        thick,
+        ->,
+        >=stealth,
+        color=black!70
+    }
+]
+
+% Root node
+\node[decision] (root) {\textcolor{blue!80!black}{Sampling Points}};
+
+% Level 1 nodes
+\node[process, below left=of root] (chebyshev) {Chebyshev\\Points};
+\node[process, below right=of root] (general) {General\\Points};
+
+% Level 2 nodes (outcomes)
+\node[outcome, below=of chebyshev] (standard_learning) {\textcolor{green!70!black}{Standard\\Regression}};
+\node[outcome, below=of general] (deriv_learning) {\textcolor{orange!70!black}{Derivative-\\Augmented}};
+
+% Arrows
+\draw[arrow] (root) -- (chebyshev) node[midway, above left, font=\tiny] {Optimal};
+\draw[arrow] (root) -- (general) node[midway, above right, font=\tiny] {Arbitrary};
+\draw[arrow] (chebyshev) -- (standard_learning);
+\draw[arrow] (general) -- (deriv_learning);
+
+% Add some decorative elements
+\node[above=0.2cm of root, font=\tiny, color=gray] {Point Selection};
+\node[below=0.2cm of standard_learning, font=\tiny, color=green!70!black] {FNO, \href{https://papers.nips.cc/paper/2018/hash/5a4be1fa34e62bb8a6ec6b91d2462f5a-Abstract.html}{\textcolor{green!70!black}{Standard NTK}}};
+\node[below=0.2cm of deriv_learning, font=\tiny, color=orange!70!black] {\href{https://papers.nips.cc/paper/2017/hash/c8067ad1937f728f51288b3eb986afaa-Abstract.html}{\textcolor{orange!70!black}{PINNs}}, DeepONet};
+
+% Add explanation boxes
+\node[right=0.5cm of chebyshev, font=\tiny, color=red!70!black, text width=1.8cm] {Matrix\\Commutation\\Preserved};
+\node[right=0.5cm of general, font=\tiny, color=red!70!black, text width=1.8cm] {Commutation\\Broken};
+
+\end{tikzpicture}
+\end{tcolorbox}
+\end{center}
+
+
+
+
+\subsection{Theoretical Framework of the Neural Tangent Kernel}
+
+\subsubsection{The Neural Tangent Kernel}
+
+For a neural network $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})$ with parameters $\boldsymbol{\textcolor{darkyellow}{\theta}}$, the \textit{Neural Tangent Kernel} \cite{jacot2018neural} is defined by:
+\begin{tcolorbox}[colback=yellow!10,colframe=blue!40!black,title=Definition : NTK]
+\begin{equation}
+\label{eq:ntk_definition}
+\textcolor{red}{\mathbf{K}^{L}}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \boldsymbol{\textcolor{darkyellow}{\theta}}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \boldsymbol{\textcolor{darkyellow}{\theta}}} \right\rangle = \sum_{\textcolor{red}{p}} \frac{\partial f(\mathbf{x}_i; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \textcolor{darkyellow}{\theta}_{\textcolor{red}{p}}} \frac{\partial f(\mathbf{x}_j; \boldsymbol{\textcolor{darkyellow}{\theta}})}{\partial \textcolor{darkyellow}{\theta}_{\textcolor{red}{p}}}
+\end{equation}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Definition : Edge of Chaos}},enhanced,drop shadow]
+    The Edge of Chaos (EOC) initialization for a layer with weights $\textcolor{blue}{\mathbf{W}_{ij}}$ and biases $\textcolor{red}{\mathbf{b}_j}$ is defined as:
+    \begin{equation}
+    \textcolor{blue}{\mathbf{W}_{ij}} \sim \mathcal{N}\left(0, \frac{\sigma_w^2}{\textcolor{red}{n}}\right) \quad \text{and} \quad \textcolor{red}{\mathbf{b}_j} \sim \mathcal{N}\left(0, \frac{\sigma_b^2}{\textcolor{red}{n}}\right)
+    \end{equation}
+    where $\sigma_w^2+\sigma_b^2=2$ is the total variance.
+    This initialization strategy maintains the variance of activations through layers and ensures that the network is in the chaotic regime.
+\end{tcolorbox}
+
+
+
+\begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018, convergence]
+For a multi layer perceptron $f(\mathbf{x};\boldsymbol{\textcolor{darkyellow}{\theta}})$ with hidden layer widths $N_1, \ldots, N_L$ randomly initialized with weights $W_1, \ldots, W_L$  following and trained by gradient descent with infinitesimal learning rate, 
+as hidden layer widths tend to infinity,the network converges to a Gaussian process, with limite NTK kernel $\textcolor{red}{K}_L^{\infty}$ and dynamics given by $\frac{\partial f_t(\mathbf{x})}{\partial t}
+    = -\eta \sum_{i=1}^{\textcolor{red}{n}} \textcolor{red}{K}_L^{\infty}(\mathbf{x},\mathbf{x}_i)\bigl(f_t(\mathbf{x}_i) - y_i\bigr)$.
+
+\end{theorem}
+
+\begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018, recursive formula]
+The recursive formula for depth $L$ in the infinite-width limit becomes:
+\begin{equation}
+\label{eq:ntk_recursive}
+\textcolor{red}{K}_{\textcolor{red}{L}}^{\infty}(\mathbf{x},\mathbf{x}') = \|\mathbf{x}\| \|\mathbf{x}'\| \left( \sum_{\textcolor{red}{p}=1}^{\textcolor{red}{L}} \varrho^{\circ (\textcolor{red}{p}-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \prod_{\textcolor{red}{p}'=\textcolor{red}{p}}^{\textcolor{red}{L}-1} \varrho'\left( \varrho^{\circ (\textcolor{red}{p}'-1)}\left( \rho_1(\mathbf{x},\mathbf{x}') \right) \right) \right)
+\end{equation}
+where $\rho_1(\mathbf{x},\mathbf{x}') = \frac{\mathbf{x}^{\top}\mathbf{x}'}{\|\mathbf{x}\| \|\mathbf{x}'\|}$ is the initial correlation, $\varrho$ is the correlation propagation function defined by:
+\begin{equation}
+\label{eq:correlation_propagation}
+\varrho(\rho) = \sigma^2 \int \ReLU(u_1) \ReLU(u_2) d\mathcal{N}\left( [u_1,u_2] \left| 0,\left[ \begin{smallmatrix} 1 & \rho \\ \rho & 1 \end{smallmatrix} \right] \right. \right)
+\end{equation}
+\end{theorem}
+
+
+
+\begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Remark : Infinite-width}},enhanced,drop shadow]
+    The limit is taken in the sense of the infinite-width limit : $N_1$ goes to infinity first, then $N_2$ goes to infinity, and so forth until $N_L$ goes to infinity.
+\end{tcolorbox}
+
+
+\begin{tcolorbox}[colback=yellow!10,colframe=green!60!black,title={\textbf{[Townsend et al ]NTK's spectrum fundamentals}},enhanced,drop shadow]
+
+\textbf{Matrix Structure}: For dataset $\{x_i\}_{i=1}^{\textcolor{red}{n}}$, the infinite-width NTK matrix factorizes as $\textcolor{red}{K}_L^{\infty} = D \cdot R \cdot D$ where $D = \text{diag}(\|x_1\|, \ldots, \|x_{\textcolor{red}{n}}\|)$ and $R_{ij} = \tilde{\textcolor{red}{K}}_L^{\infty}(\rho_{ij})$ with $\rho_{ij} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$. // we factorize the infinite-width ntk matrix into diagonal and correlation parts
+\textbf{Matrix Structure}: For dataset $\{x_i\}_{i=1}^{\textcolor{red}{n}}$, the infinite-width NTK matrix factorizes as $K_L^{\infty} = D \cdot R \cdot D$ where $D = \text{diag}(\|x_1\|, \ldots, \|x_{\textcolor{red}{n}}\|)$ and $R_{ij} = \tilde{K}_L^{\infty}(\rho_{ij})$ with $\rho_{ij} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$. // we factorize the infinite-width ntk matrix into diagonal and correlation parts
+
+\newline
+\textbf{Operator Form}: By rotational invariance, the infinite-width NTK can be seen as an operator acts zonally:
+$$(K_L^{\infty} f)(x) = \int_{\mathbb{S}^{d-1}} \int_{\mathbb{S}^{d-1}} \tilde{K}_L^{\infty}(\langle x, y \rangle) f(y) \delta(\langle x, z \rangle - \langle x, y \rangle) d\sigma(y) d\sigma(z)$$
+where $\sigma$ denotes the uniform surface measure on $\mathbb{S}^{d-1}$.
+
+\textbf{Spectral Properties}: The spherical harmonics $Y_{\ell,p}$ are eigenfunctions with eigenvalues:
+$$\mu_\ell^{L,\infty} = \frac{2\pi^{d/2}}{\Gamma(d/2)} \int_{-1}^1 \tilde{K}_L^{\infty}(t)P_\ell^{((d-2)/2)}(t)(1-t^2)^{(d-3)/2}dt$$
+Eigenvalue decay follows 
+\begin{equation}
+\label{eq:ntk_eigenvalue_decay}
+\mu_\ell^{\textcolor{red}{L},\infty} \sim \ell^{-d}
+\end{equation}
+with multiplicity $N(d,\ell) \sim \frac{2\ell^{d-2}}{(d-2)!}$.
+
+\end{tcolorbox}
+
+
+\newpage
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Building definitions for the Sobolev operator}
+
+We rigorously present the Sobolev operator informally introduced in [Townsend et al ] which plays a central role in our analysis of regularized neural network training.
+
+
+\begin{definition}[Continuous Sobolev Operator, [Townsend et al]]
+\label{def:sobolev_continuous}
+For $s > 0$ and the sphere $\mathbb{S}^{d-1}$, the Sobolev operator of order $s$ is defined as:
+\begin{equation}
+\label{eq:sobolev_continuous}
+\mathcal{P}_s = \sum_{\ell=0}^{\infty} \boldsymbol{(1 + \ell(\ell + d - 2))^s} \sum_{p=1}^{N(d,\ell)} \langle \cdot, \boldsymbol{Y_{\ell,p}} \rangle \boldsymbol{Y_{\ell,p}}
+\end{equation}
+where $\boldsymbol{Y_{\ell,p}}$ are the spherical harmonics of degree $\ell$ and order $p$, and $\boldsymbol{N(d,\ell)} = \binom{\ell+d-1}{\ell} - \binom{\ell+d-3}{\ell-2}$ is the multiplicity.
+\end{definition}
+
+\begin{definition}[Discrete Sobolev Operator Matrix, [Townsend et al]]
+\label{def:sobolev_discrete}
+Given sample points $\{\boldsymbol{x_i}\}_{i=1}^{\textcolor{red}{n}} \subset \mathbb{S}^{d-1}$ with quadrature weights $\{\boldsymbol{c_i}\}_{i=1}^{\textcolor{red}{n}}$, the discrete Sobolev operator matrix is constructed as:
+\begin{equation}
+\label{eq:sobolev_discrete}
+\boldsymbol{(P_s)_{ij}} = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} \boldsymbol{(1 + \ell(\ell + d - 2))^s} \, \boldsymbol{(a_{\ell,p})_i} \boldsymbol{(a_{\ell,p})_j}
+\end{equation}
+where $\boldsymbol{(a_{\ell,p})_i} = \boldsymbol{c_i} \boldsymbol{Y_{\ell,p}(x_i)}$ are the weighted sampling coefficients.
+\end{definition}
+
+\begin{definition}[Fractional Laplacian Formulation, [Townsend et al]]
+\label{def:fractional_laplacian}
+The Sobolev operator can be expressed through the fractional Laplacian on the sphere. For a function $\boldsymbol{f \in H^s(\mathbb{S}^{d-1})}$ with $\boldsymbol{s > 0}$, the Sobolev loss functional admits the representation:
+\begin{equation}
+\label{eq:fractional_laplacian}
+\boldsymbol{\mathcal{L}_s[f]} = \int_{\mathbb{S}^{d-1}} \boldsymbol{f(x)} \boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s} \boldsymbol{f(x)} \, d\sigma(x)
+\end{equation}
+where $\boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s}$ is the fractional Laplacian operator of order $\boldsymbol{s}$ on the sphere, and $\boldsymbol{\Delta_{\mathbb{S}^{d-1}}}$ denotes the spherical Laplacian.
+\end{definition}
+
+\begin{theorem}[Fractional Laplacian Representation of Sobolev Loss, Personal contribution]
+\label{thm:fractional_sobolev}
+For a function $f \in H^s(\mathbb{S}^{d-1})$ with $s > 0$, the Sobolev loss can be written as:
+\begin{equation}
+\label{eq:sobolev_fractional_rep}
+\mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s f(x) \, d\sigma(x)
+\end{equation}
+where $(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s$ is the fractional Laplacian operator of order $s$. The proof is provided in Appendix A.1.
+\end{theorem}
+
+\begin{tcolorbox}[colback=green!5,colframe=blue!60!black,title=Spectral Action]
+The fractional operator $\boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s}$ is defined through its spectral action on spherical harmonics:
+\begin{equation}
+\label{eq:fractional_spectral}
+\boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^s Y_{\ell,p}(x)} = \boldsymbol{(1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p}(x)}
+\end{equation}
+\end{tcolorbox}
+
+\begin{theorem}[Personal contribution : Sobolev Loss on Unbounded Domains]
+\label{thm:sobolev_unbounded}
+For functions $\boldsymbol{f \in H^s(\mathbb{S}^{d-1})}$ with $\boldsymbol{s \geq 1}$ , the Sobolev loss can be expressed via integration by parts as:
+\begin{equation}
+\label{eq:sobolev_unbounded}
+\boldsymbol{\mathcal{L}_s[f]} = \int_{\mathbb{R}^d} \boldsymbol{(1 + |\xi|^2)^s} \boldsymbol{|\hat{f}(\xi)|^2} \, d\xi
+\end{equation}
+
+For general $\boldsymbol{s \geq 1}$, repeated integration by parts yields the fractional representation:
+\begin{equation}
+\label{eq:sobolev_general}
+\boldsymbol{\|f\|_{H^s}^2} = \int_{\mathbb{S}^{d-1}} \boldsymbol{f(x)} \boldsymbol{(I + (-\Delta_{\mathbb{S}^{d-1}})^{1/2})^{2s}} \boldsymbol{f(x)} \, d\sigma(x)
+\end{equation}
+\end{theorem}
+
+
+
+
+
+\subsection{Personal contribution : Sobolev Gradient Descent in Fourier Domain}
+
+Chebyshev points are uniformly distributed on the sphere, and are the points that maximize the minimum separation between adjacent samples.
+
+\begin{tcolorbox}[colback=yellow!10,colframe=orange!60!black,title=Definition: Chebyshev Points on the Sphere]
+The \textcolor{red}{\textbf{Chebyshev points}} on the sphere $\mathbb{S}^{d-1}$ are defined as the projections of classical Chebyshev points onto the unit sphere. For $d = 2$ (unit circle), these points are given by:
+\begin{equation}
+\label{eq:chebyshev_circle}
+\boldsymbol{x_{\textcolor{red}{k}}} = \left(\cos\left(\frac{(2\textcolor{red}{k}-1)\pi}{2\textcolor{red}{n}}\right), \sin\left(\frac{(2\textcolor{red}{k}-1)\pi}{2\textcolor{red}{n}}\right)\right), \quad \textcolor{red}{k} = 1, 2, \ldots, \textcolor{red}{n}
+\end{equation}
+
+\end{tcolorbox}
+
+
+\begin{theorem}[NTK-Sobolev Composition]
+\label{thm:ntk_sobolev_composition}
+Under \textit{Sobolev training}, the learning operator is given by the composition:
+\begin{tcolorbox}[colback=purple!5,colframe=purple!60!black,title=Learning Operator Composition]
+\begin{equation}
+\label{eq:learning_operator}
+\Ts = \Kinf \circ \Ps
+\end{equation}
+\end{tcolorbox}
+where $\Kinf$ is the \textcolor{kernelcolor}{\textbf{NTK operator}} and $\Ps = (I + (-\Delta)^{1/2})^s$ is the \textcolor{sobolevcolor}{\textbf{Sobolev operator}} of order $s$.
+\end{theorem}
+
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Insight : Factorization of Learning Dynamics}},enhanced,drop shadow]
+    The key insight is that \textit{Sobolev gradient descent} in the Fourier domain naturally factorizes into two components: first, the application of the \textcolor{sobolevcolor}{\textbf{Sobolev operator}} $\Ps$ which modifies the frequency content of the gradient signal, followed by the \textcolor{kernelcolor}{\textbf{NTK operator}} $\Kinf$ which propagates this modified gradient through the network. This factorization emerges from the quadratic form structure of the Sobolev loss, which allows us to separate the spectral filtering effects of Sobolev regularization from the kernel dynamics of the neural network.
+\end{tcolorbox}
+
+\subsection{Personal contribution : NTK-Sobolev Spectral Commutation property}
+
+\begin{theorem}[Chebyshev Points and Matrix Commutation - Fundamental Condition]
+\label{thm:chebyshev_commutation}
+The discrete NTK matrix $\Kop$ and Sobolev operator matrix $\Pop_s$ satisfy exact commutation:
+\begin{equation}
+\Kop \Pop_s = \Pop_s \Kop
+\label{eq:chebyshev_commutation_condition}
+\end{equation}
+\textbf{if} the sampling points $\{x_i\}_{i=1}^{\textcolor{red}{n}}$ are \textcolor{red}{\textbf{Chebyshev points}} on $\mathbb{S}^{d-1}$.
+
+For arbitrary sampling points, this commutation \textit{fails}, requiring explicit derivative information for effective learning.
+\end{theorem}
+
+\begin{theorem}[NTK-Sobolev Matrix Commutation - Chebyshev Case]
+\label{thm:ntk_sobolev_commutation}
+Let $\Kop \in \mathbb{R}^{\textcolor{red}{n} \times \textcolor{red}{n}}$ be a discrete \textit{neural tangent kernel matrix} and $\Pop_s \in \mathbb{R}^{\textcolor{red}{n} \times \textcolor{red}{n}}$ be a discrete \textit{Sobolev operator matrix} of order $s > 0$, both constructed from the same sample set $\{x_i\}_{i=1}^{\textcolor{red}{n}} \subset \mathbb{S}^{d-1}$ with quadrature weights $\{c_i\}_{i=1}^{\textcolor{red}{n}}$. If both matrices are rotationally invariant, then:
+\begin{enumerate}
+    \item The matrices commute: $\Kop\Pop_s = \Pop_s\Kop$
+    \item They are simultaneously diagonalizable with shared eigenvectors
+    \item Their eigenspaces are separated according to spherical harmonic degrees
+\end{enumerate}
+The proof is provided in \hyperref[sec:appendix_commutation]{Appendix A.4}.
+\end{theorem}
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Personal Contribution : Fundamental Algebraic Structure of NTK-Sobolev Commutation}},enhanced,drop shadow]
+    This commutation property establishes a \textit{fundamental algebraic structure} that underlies the compatibility between neural tangent kernel theory and Sobolev regularized training. For comprehensive studies of NTK theory, see \cite{golikov2022ntk_survey}. The key insight is that both operators inherit their spectral properties from the underlying \textit{rotational symmetry} of the sphere, leading to a shared eigenbasis of spherical harmonics.
+
+    In the discrete setting, this translates to exact matrix commutation when the \textcolor{kernelcolor}{\textbf{NTK}} and \textcolor{sobolevcolor}{\textbf{Sobolev}} matrices are constructed consistently from the same sampling points and quadrature scheme. The separation of eigenspaces by harmonic degree means that learning dynamics can be analyzed \textit{frequency by frequency}, with each degree $\ell$ evolving independently under the composite operator $\Kop\Pop_s$.
+    This spectral decomposition enables us to completely \textbf{disentangle} the analysis of:
+\begin{itemize}
+\item \textcolor{sobolevcolor}{\textbf{Dimensionality}} (encoded in $\Pop_s$ via harmonic degrees $\ell$)
+\item \textcolor{kernelcolor}{\textbf{Network architecture}} (encoded in $\Kop$ via NTK properties)
+\end{itemize}
+\end{tcolorbox}
+
+
+\newpage
+\section*{Partial conclusion for Sobolev training}
+In this work, we have established a comprehensive theoretical framework that bridges Sobolev regularization theory with Neural Tangent Kernel analysis through rigorous mathematical foundations. Our personal contributions constitute three fundamental advances that significantly extend the current understanding of optimization dynamics in deep learning.
+
+The primary theoretical contribution lies in the demonstration that the learning operator in Sobolev-regularized neural networks admits a natural factorization $\Ts = \Kinf \circ \Ps$, where the spectral filtering effects of Sobolev regularization are explicitly separated from the kernel dynamics of the neural network architecture. This factorization provides the mathematical foundation for understanding how Sobolev regularization transcends conventional smoothness constraints to fundamentally alter the spectral properties of the learning process.
+
+Our second major contribution establishes the commutation property $\Kop \Pop_s = \Pop_s \Kop$ for discrete matrices constructed from Chebyshev sampling points on the sphere. This algebraic structure reveals that both the Neural Tangent Kernel and Sobolev operators share a common eigenbasis of spherical harmonics, enabling frequency-by-frequency analysis of learning dynamics. The theoretical significance of this result extends beyond computational convenience, as it demonstrates that each spherical harmonic degree evolves independently under the composite operator, thereby enabling complete spectral decomposition of the learning process.
+
+The third contribution provides a rigorous connection between continuous Sobolev theory and discrete neural network implementations through our fractional Laplacian formulation. This bridge ensures theoretical consistency across scales while maintaining the spectral properties essential for practical algorithm development.
+
+These theoretical advances enable profound analysis of Neural Tangent Kernel behavior through spectral decomposition. The commutation property allows us to disentangle the analysis of dimensionality effects, encoded in the Sobolev operator through harmonic degrees, from network architecture effects, encoded in the NTK operator. This separation provides unprecedented analytical precision for understanding how different frequency components of the target function interact with network capacity and training dynamics.
+
+Furthermore, our framework establishes the theoretical foundation for addressing fundamental questions in deep learning theory: the relationship between network width, regularization strength, and generalization performance can now be analyzed through the lens of spectral properties of the composite operator $\Kop\Pop_s$. The eigenvalue structure of this operator directly determines convergence rates for different frequency components, providing quantitative predictions for learning efficiency across the spectrum.
+
+The practical implications extend to algorithm design, where our theoretical insights enable the development of spectrally-aware optimization methods that leverage the commutation structure for enhanced computational efficiency and improved generalization properties. The theoretical framework presented here thus provides both deep mathematical understanding and practical algorithmic advances for the field of neural network optimization.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\newpage
+
+
+
+
+
+
+
+
+\section{Preconditioning strategies for the NTK}
+
+\subsection{Multi-Component Multi-layer Neural Networks (MMNN) and Transformers}
+
+We examine Multi-Component Multi-layer Neural Networks (MMNN) and Transformer architectures, focusing on NTK preconditioning techniques. This means we investigate how to change our architectural
+and training meta-parameters (activation function, residual connections, message passing).
+
+At the time this report is written, most of the research is currently in progress.
+
+For MMNN architectures, the kernel structure exhibits exhibits more stability. The preconditioning strategy decomposes the weight matrix into trainable/frozen weights,
+and make the loss landscape less dimensionnal, and hopefully more convex. We present all the mathematical results and proofs
+that are necessary to answer this question.
+
+For Transformer models, the attention mechanism introduces non-linearities complicating kernel analysis. 
+We introduce specialized techniques to handle softmax normalization within attention heads, in order to perform fast numerical experiments to compute
+intractable quantities appearing. We provide also physical approximations strategies that will be used to perform the final step, and an agenda
+to answer the question for this architecture.
+
+\subsubsection{Feature Learning vs Kernel Regimes}
+
+The transition between feature learning and kernel regimes represents a fundamental dichotomy in deep learning theory. In the kernel regime, network parameters remain close to initialization and the model behaves as a linear predictor in the NTK-defined feature space. Conversely, the feature learning regime allows significant parameter evolution, enabling adaptation of internal representations.
+
+The NTK spectrum, particularly its smallest eigenvalue $\lambda_{\min}$, determines convergence rates and optimization strategy. An ill-conditioned NTK suggests second-order methods are appropriate, while a well-conditioned NTK indicates first-order methods can achieve faster convergence. For MMNN architectures, different network components may operate in different regimes simultaneously, requiring careful analysis of heterogeneous optimization dynamics.
+
+\begin{tcolorbox}[colback=green!15,colframe=green!80!black,title={\textbf{Conjecture from Pr Haizhao Yang: Global Minima Stability}},enhanced,drop shadow,boxrule=2pt]
+For sufficiently wide MMNN and Transformer networks, global minima exhibit a high local stability propertiy ensuring convergence from neighborhoods around optimal solutions. The Hessian and NTK eigenvalues near global minima satisfy regularity conditions guaranteeing stable optimization dynamics.
+\end{tcolorbox}
+
+
+
+
+This conjecture is supported by numerical experiments [Zhang et al, 2024] demonstrating super-convergence behavior in practical training scenarios.
+By means of local analysis
+Our goal now is to develop all the theoretical framework to have the tool to prove this conjecture.
+
+
+\section{MMNN Model Definition and Asymptotic Regime}
+
+\begin{tcolorbox}[colback=green!15,colframe=green!80!black,title={\textbf{Objective and Scope}},enhanced,drop shadow,boxrule=2pt]
+This work derives the NTK $\boldsymbol{\Theta}$ operator of a Multi-layer Mean-field Matrix-Normal Network \textbf{(MMNN)}. 
+The kernel is computed with respect to a specific set of trainable parameters, under the standard \textbf{"NTK parameterization"} 
+which ensures a well-defined infinite-width limit.
+\end{tcolorbox}
+
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[
+        node distance=2cm and 3cm,
+        neuron/.style={circle, draw, fill=blue!20, minimum size=15pt},
+        input/.style={circle, draw, fill=green!20, minimum size=15pt},
+        output/.style={circle, draw, fill=red!20, minimum size=15pt},
+        hidden/.style={circle, draw, fill=yellow!20, minimum size=15pt},
+        bottleneck/.style={circle, draw, fill=orange!30, minimum size=15pt},
+        thick
+    ]
+    
+    % Input layer
+    \node[input] (x1) at (0,2) {$x_1$};
+    \node[input] (x2) at (0,1) {$x_2$};
+    \node[input] (x3) at (0,0) {$x_3$};
+    \node[input] (xd) at (0,-1) {$x_d$};
+    \node at (0,-1.5) {$\vdots$};
+    
+    % First hidden layer
+    \node[hidden] (h11) at (3,2.5) {$h_1^{(1)}$};
+    \node[hidden] (h12) at (3,1.5) {$h_2^{(1)}$};
+    \node[hidden] (h13) at (3,0.5) {$h_3^{(1)}$};
+    \node[hidden] (h14) at (3,-0.5) {$h_4^{(1)}$};
+    \node[hidden] (h15) at (3,-1.5) {$h_5^{(1)}$};
+    \node at (3,-2) {$\vdots$};
+    
+    % Bottleneck layer (low rank)
+    \node[bottleneck] (b1) at (6,1) {$b_1$};
+    \node[bottleneck] (b2) at (6,0) {$b_2$};
+    \node at (6,-0.5) {$\vdots$};
+    
+    % Second hidden layer
+    \node[hidden] (h21) at (9,2.5) {$h_1^{(2)}$};
+    \node[hidden] (h22) at (9,1.5) {$h_2^{(2)}$};
+    \node[hidden] (h23) at (9,0.5) {$h_3^{(2)}$};
+    \node[hidden] (h24) at (9,-0.5) {$h_4^{(2)}$};
+    \node[hidden] (h25) at (9,-1.5) {$h_5^{(2)}$};
+    \node at (9,-2) {$\vdots$};
+    
+    % Output layer
+    \node[output] (y1) at (12,1.5) {$y_1$};
+    \node[output] (y2) at (12,0.5) {$y_2$};
+    \node[output] (yk) at (12,-0.5) {$y_k$};
+    \node at (12,-1) {$\vdots$};
+    
+    % Connections input to first hidden
+    \foreach \i in {1,2,3,d} {
+        \foreach \j in {11,12,13,14,15} {
+            \draw[->] (x\i) -- (h\j);
+        }
+    }
+    
+    % Connections first hidden to bottleneck
+    \foreach \i in {11,12,13,14,15} {
+        \foreach \j in {1,2} {
+            \draw[->] (h\i) -- (b\j);
+        }
+    }
+    
+    % Connections bottleneck to second hidden
+    \foreach \i in {1,2} {
+        \foreach \j in {21,22,23,24,25} {
+            \draw[->] (b\i) -- (h\j);
+        }
+    }
+    
+    % Connections second hidden to output
+    \foreach \i in {21,22,23,24,25} {
+        \foreach \j in {1,2,k} {
+            \draw[->] (h\i) -- (y\j);
+        }
+    }
+    
+    % Layer labels
+    \node at (0,-2.5) {\textbf{Input}};
+    \node at (0,-3) {$d_0 = d$};
+    
+    \node at (3,-2.5) {\textbf{Hidden 1}};
+    \node at (3,-3) {$n_1$ neurons};
+    
+    \node at (6,-1) {\textbf{Bottleneck}};
+    \node at (6,-1.5) {$r \ll n_1$ neurons};
+    
+    \node at (9,-2.5) {\textbf{Hidden 2}};
+    \node at (9,-3) {$n_2$ neurons};
+    
+    \node at (12,-1.5) {\textbf{Output}};
+    \node at (12,-2) {$d_L = k$};
+    
+    % Mathematical notation
+    \node at (1.5,3) {$\bm{W}^{(1)}$};
+    \node at (4.5,2) {$\bm{A}^{(1)}$};
+    \node at (7.5,2) {$\bm{W}^{(2)}$};
+    \node at (10.5,1.5) {$\bm{A}^{(2)}$};
+    
+    % Highlight low rank structure
+    \draw[red, thick, dashed] (5.5,1.5) rectangle (6.5,-0.75);
+    \node[red] at (6,-2.5) {\textbf{Low Rank}};
+    \node[red] at (6,-2.8) {\textbf{Component}};
+    
+    \end{tikzpicture}
+    \caption{Architecture of a Multi-component Multi-layer Neural Network (MMNN) with a low-rank intermediate layer. The red dashed connections indicate the low-rank component that reduces dimensionality from $n_1$ to $r \ll n_1$ neurons.
+    We only train the output weights $\bm{A}^{(1)}$ and $\bm{A}^{(2)}$.}
+    \label{fig:mmnn_architecture}
+\end{figure}
+
+
+\subsection{Personal contribution : NTK initialization for MMNN Architecture}
+
+\begin{tcolorbox}[colback=yellow!15,colframe=yellow!80!black,title={\textbf{Definition: MMNN Architecture}},enhanced,drop shadow,boxrule=2pt]
+We consider an \textbf{MMNN} of depth $L$. Let the input be $\bm{h}^{(0)}(\bm{x}) = \bm{x} \in \mathbb{R}^{d_0}$. For each layer $\ell = 1, \dots, L$, the output $\bm{h}^{(\ell)}$ is defined recursively:
+
+\begin{equation}
+    \bm{h}^{(\ell)}(\bm{x}) = \frac{\sigma_A}{\sqrt{n_\ell}} \sum_{j=1}^{n_\ell} \bm{A}_j^{(\ell)} \ReLU\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)} + \sigma_c \bm{c}^{(\ell)}\right)
+\end{equation}
+
+where $n_\ell$ is the width of layer $\ell$ and $\bm{h}^{(\ell)} \in \mathbb{R}^{d_\ell}$.
+\end{tcolorbox}
+
+
+
+\begin{tcolorbox}[colback=blue!15,colframe=blue!80!black,title={\textbf{Remark : Parameter Classification}},enhanced,drop shadow,boxrule=2pt]
+The parameters for each layer are divided into two groups:
+
+\textbf{1. Trainable Parameters:} The output weights $\{\bm{A}_j^{(\ell)}\}_{j=1}^{n_\ell}$ and biases $\bm{c}^{(\ell)}$ are optimized during training. The NTK $\Kop $ is computed with respect to these parameters.
+
+\textbf{Initialization:}
+\begin{itemize}
+\item The weights $\bm{A}_j^{(\ell)} \sim \mathcal{N}(0, 1)$. The term $\frac{\sigma_A}{\sqrt{n_\ell}}$ is the \textbf{NTK parameterization}, ensuring kernel convergence as $n_\ell \to \infty$.
+\item The bias $\bm{c}^{(\ell)} \sim \mathcal{N}(0, 1)$ is initialized at zero with scaling $\sigma_c$.
+\end{itemize}
+
+\textbf{2. Random Parameters:} The input weights $\bm{w}_j^{(\ell)}$ and biases $b_j^{(\ell)}$ are randomly initialized and \textbf{fixed} throughout training.
+\end{tcolorbox}
+
+
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Insight : Architectural Philosophy}},enhanced,drop shadow,boxrule=2pt]
+This random basis initialization is chosen on purpose, supported by approximation theorems [Zhang et al, 2024], with intuition from localizing high frequency variations.
+With this method, we reduce the number of parameters from $n_\ell^2$ to $n_\ell * d_\ell$.
+
+The NTK parameterization is chosen to ensure a well-defined infinite-width limit. The $\mu$ parameterization do not have this property.
+\end{tcolorbox}
+
+
+
+\subsection{Personal contribution : Parameterization and Training Regime}
+
+The choice of parameterization fundamentally determines the network's behavior in the infinite-width limit. We distinguish two main regimes that correspond to distinct learning philosophies. The first, NTK parameterization, favors stability and convergence toward a linear model, while the second, mean-field parameterization, promotes feature learning and non-linear dynamics.
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Critical Parameterization Choice}},enhanced,drop shadow,boxrule=2pt]
+The choice of scaling for the trainable parameters critically determines the network's behavior in the infinite-width limit. 
+
+\textbf{1. NTK Parameterization (Our approach):} We use the $\frac{1}{\sqrt{n_\ell}}$ scaling for output weights.
+\begin{itemize}
+\item Output function $h^{(\ell)}(x)$ maintains variance $\mathcal{O}(\sigma_A^2)$ → \textbf{stable magnitude preservation}
+\item Gradient with respect to weights remains small: $\mathcal{O}(\frac{1}{\sqrt{n_\ell}})$ → \textbf{"lazy training" regime}
+\item Network dynamics converge to linear model behavior characterized by the Neural Tangent Kernel
+\end{itemize}
+
+\textbf{2. Mean-Field ($\mu$) Parameterization [Greg Yang et al., 2020]:} Alternative $\frac{1}{n_\ell}$ scaling.
+In this parameterization, function outputs are of order $\mathcal{O}(\frac{1}{\sqrt{n_\ell}})$ while gradients remain of order $\mathcal{O}(1)$, enabling unit-scale parameter updates. This scaling is termed "mean-field" because each neuron's contribution is of order $\mathcal{O}(1)$, allowing collective influence of all neurons. This configuration promotes feature learning and non-linear dynamics.
+
+Those initialization are opposite, and we will see that the NTK parameterization is the best for the MMNN architecture to have order one gaussianity in low rank layers.
+\end{tcolorbox}
+
+
+
+
+
+
+\begin{tcolorbox}[colback=yellow!5,colframe=yellow!80!black,title={\textbf{Definition: Neural Network Gaussian Process (NNGP)}},enhanced,drop shadow,boxrule=2pt]
+For a given layer $\ell$, when $n_\ell \to \infty$, the output $\bm{h}^{(\ell)}(\bm{x})$ converges in 
+distribution to a composition of Gaussian processes whose covariance conditioned to the previous layer is determined by the NNGP kernel $\mathcal{K}_{NNGP}^{(\ell | \ell-1)}$.
+
+Mathematically, we have:
+\begin{equation}
+\mathcal{K}_{NNGP}^{(\ell | \ell-1 )}(\bm{x}, \bm{x}') = \text{Cov}\left[\bm{h}^{(\ell)}(\bm{x}), \bm{h}^{(\ell)}(\bm{x}') \mid \bm{h}^{(\ell-1)}\right]
+\end{equation}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=red!10,colframe=red!80!black,title={\textbf{Crucial Remark: Composition of Gaussian Processes}},enhanced,drop shadow,boxrule=2pt]
+\textbf{Fundamental point:} In this limit, the output of each layer $\bm{h}^{(\ell)}$ converges in distribution to a \textbf{composition of Gaussian Processes (GP)} which is \textbf{not} itself a Gaussian process!
+
+Consequently, the NNGP and NTK kernels for layers $\ell > 1$, which are functions of the output of the previous layer, 
+remain \textbf{random quantities} (random fields). This is different from FCNNs but we use the same terminology on purpose.
+The recursive formulas describe the relationship between these random kernels.
+
+This distinction is crucial because:
+\begin{itemize}
+\item For $\ell = 1$: $\bm{h}^{(1)}$ is Gaussian → $\mathcal{K}_{NNGP}^{(1)}$ and $\Theta^{(1)}$ are deterministic
+\item For $\ell > 1$: $\bm{h}^{(\ell)}$ is composition of GP → $\mathcal{K}_{NNGP}^{(\ell)}$ and $\Theta^{(\ell)}$ are random
+\end{itemize}
+
+The recursion captures the evolution of these kernel distributions through the layers.
+\end{tcolorbox}
+
+
+
+
+\subsection{Personal contribution : Asymptotic Regime}
+The entire NTK and NNGP formalism relies on the infinite-width limit giving gaussianity. Following the framework established by Jacot et al., we analyze the network in a specific asymptotic regime:
+\begin{itemize}
+    \item The dimensions of the hidden layers, or widths, $n_1, n_2, \dots, n_L$ are taken to infinity.
+    \item The input and output dimensions of each layer ($d_0, d_1, \dots, d_L$) are kept fixed and finite.
+    \item Critically, the limits are taken sequentially: first we let $n_1 \to \infty$, then $n_2 \to \infty$, and so on up to $n_L \to \infty$.
+    \item 
+\end{itemize}
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Sequential Limit as Key Theoretical Tool}},enhanced,drop shadow,boxrule=2pt]
+This sequential limit is the key theoretical tool. When analyzing layer $\ell$ in the limit $n_\ell \to \infty$, the output of the previous layer, $\bm{h}^{(\ell-1)}$, is a sum of an infinite number of i.i.d. random variables (by construction of layer $\ell-1$). By the Central Limit Theorem, $\bm{h}^{(\ell-1)}$ converges in distribution to a Gaussian Process. This allows us to replace the complex, random function $\bm{h}^{(\ell-1)}$ with a GP whose covariance structure is precisely the NNGP kernel $\Sigma^{(\ell-1)}$. This is the foundation of the recursive calculation.
+\end{tcolorbox}
+
+\subsection{Personal contribution : Signal Propagation and the Edge of Chaos (EOC)}
+Before analyzing the kernel, we study the propagation of the signal's magnitude through the network at initialization. We are interested in the evolution of the variance of the layer outputs, defined as $q^{(\ell)} = \mathbb{E}[\|\bm{h}^{(\ell)}\|^2]/d_\ell$.
+
+For a ReLU activation and assuming centered parameters, the variance evolves according to the following recurrence relation (see Appendix for proof):
+\begin{equation}
+    q^{(\ell)} = \sigma_c^2 + \frac{\sigma_A^2}{2} \left( q^{(\ell-1)}\text{Tr}(\Sigma_w) + \beta^2 \right)
+\end{equation}
+This is an affine map $q^{(\ell)} = M \cdot q^{(\ell-1)} + C$. For the signal to propagate stably without vanishing ($M<1$) or exploding ($M>1$), the dynamics must be at the "Edge of Chaos", where the factor is exactly 1.
+
+% \begin{block}
+\begin{tcolorbox}[colback=red!15,colframe=red!80!black,title={\textbf{Edge of Chaos Condition}},enhanced,drop shadow,boxrule=2pt]
+
+The condition for stable signal propagation is:
+\begin{equation}
+    \frac{\sigma_A^2}{2} \text{Tr}(\Sigma_w) = 1 \quad \implies \quad \sigma_A \sqrt{\text{Tr}(\Sigma_w)} = \sqrt{2}
+\end{equation}
+We call the EOC initialization when adding the condition $\sigma_c^2 =1$.
+\end{tcolorbox}
+% \end{block}
+
+
+
+
+
+
+
+\section{Personal contribution: NTK formulas for MMNNs}
+
+\subsection{NTK for a Single-Layer MMNN}
+\label{sec:single_layer_mmfn}
+We begin by deriving the Neural Tangent Kernel for a single-layer MMNN. This result forms the base case for the multi-layer recursion. For simplicity, we consider a single scalar output, such that the network is defined as:
+
+\begin{tcolorbox}[colback=yellow!10,colframe=yellow!80!black,title={\textbf{Single-Layer MMNN Definition}},enhanced,drop shadow,boxrule=2pt]
+\begin{equation}
+    \boxed{h(\bm{x}) = \frac{1}{\sqrt{n}} \sum_{j=1}^n A_j \ReLU(\bm{w}_j^\top \bm{x} + b_j) + c}
+\end{equation}
+The trainable parameters are $\theta = \{A_j\}_{j=1}^n \cup \{c\}$. The parameters $\{\bm{w}_j, b_j\}$ are fixed and randomly drawn, with $\bm{w}_j \sim \mathcal{N}(0, \Sigma_w)$ and $b_j \sim \mathcal{N}(\mu_b, \sigma_b^2)$.
+\end{tcolorbox}
+
+\subsection{From Gradient Products to an Expectation}
+In the infinite-width limit ($n \to \infty$), the NTK converges to a rotation invariant kernel (hence zonal) as an expectation over the distribution of the random parameters $(\bm{w}, b)$. The full NTK is the sum of the kernel part from the weights $\{A_j\}$ and the part from the bias $\{c\}$.
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{NTK as Expectation}},enhanced,drop shadow,boxrule=2pt]
+\begin{equation}
+\label{eq:ntk_expectation}
+    \boxed{\Theta^{(1)}(\bm{x}, \bm{x}') = \underbrace{\mathbb{E}_{\bm{w},b} \left[ \ReLU(\bm{w}^\top \bm{x} + b)\ReLU(\bm{w}^\top \bm{x}' + b) \right]}_{\text{NNGP Kernel } \Sigma^{(1)}(\bm{x}, \bm{x}')} + \underbrace{\sigma_c^2}_{\text{from bias } c}}
+\end{equation}
+\end{tcolorbox}
+
+\subsection{Integral Formulation and Parameter Mapping}
+The NNGP kernel $\Sigma^{(1)}$ is an integral over the distributions of $\bm{w}$ and $b$:
+\begin{equation}
+    \Sigma^{(1)}(\bm{x}, \bm{x}') = \int_{\mathbb{R}^d} \int_{\mathbb{R}} \ReLU(\bm{w}^\top \bm{x} + b)\ReLU(\bm{w}^\top \bm{x}' + b) p(\bm{w})p(b) \,db \,d\bm{w}
+\end{equation}
+
+A change of variables is performed from the parameter space $(\bm{w}, b)$ to the pre-activation space $(g_1, g_2)$, where $g_1 = \bm{w}^\top \bm{x} + b$ and $g_2 = \bm{w}^\top \bm{x}' + b$. This transforms the high-dimensional integral into an expectation over a 2D bivariate Gaussian distribution. The parameters of this distribution are:
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Bivariate Gaussian Parameters}},enhanced,drop shadow,boxrule=2pt]
+\begin{itemize}
+    \item \textbf{Means:} $\mu_1 = \mathbb{E}[g_1] = \mathbb{E}[\bm{w}^\top\bm{x} + b] = \mu_b$. By symmetry, $\mu_2 = \mu_b$.
+    \item \textbf{Variances:} $\sigma_1^2 = \text{Var}(g_1) = \text{Var}(\bm{w}^\top\bm{x}) + \text{Var}(b) = \bm{x}^\top \Sigma_w \bm{x} + \sigma_b^2$. Similarly, $\sigma_2^2 = {\bm{x}'}^\top \Sigma_w \bm{x}' + \sigma_b^2$.
+    \item \textbf{Covariance:} $\text{Cov}(g_1, g_2) = \mathbb{E}[(\bm{w}^\top\bm{x})(\bm{w}^\top\bm{x}')] + \text{Var}(b) = \bm{x}^\top \Sigma_w \bm{x}' + \sigma_b^2$.
+\end{itemize}
+\end{tcolorbox}
+
+\subsection{Final Analytical Expression}
+\begin{theorem}[NNGP Kernel for a Single-Layer ReLU MMNN]
+Let the pre-activations $(g_1, g_2)$ be jointly Gaussian with parameters $(\mu_1, \sigma_1^2)$ and $(\mu_2, \sigma_2^2)$ and correlation $\rho$. The NNGP kernel $\Sigma^{(1)} = \mathbb{E}[\text{ReLU}(g_1)\text{ReLU}(g_2)]$ is given by the decomposition:
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{NNGP Kernel Decomposition}},enhanced,drop shadow,boxrule=2pt]
+\begin{equation}
+\label{eq:final_ntk_decomp}
+\boxed{
+\Sigma^{(1)} = \sigma_1\sigma_2 \cdot I_{12} + \mu_1\sigma_2 \cdot I_{01} + \mu_2\sigma_1 \cdot I_{10} + \mu_1\mu_2 \cdot I_{00}
+}
+\end{equation}
+where the terms $I_{ij}$ are moments of standardized bivariate normal variables $(Z_1, Z_2)$ with thresholds $a_1 = -\mu_1/\sigma_1$ and $a_2 = -\mu_2/\sigma_2$.
+\end{tcolorbox}
+\end{theorem}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Personal contribution : Recursion for Multi-Layer MMNNs}
+We now extend the single-layer result to deep networks. The recursion involves two distinct but intertwined random fields: the NNGP kernel $\Sigma^{(\ell)}$ and the NTK kernel $\Theta^{(\ell)}$.
+
+\begin{tcolorbox}[colback=red!10,colframe=red!80!black,title={\textbf{Crucial Remark: Random Kernels in Deep Networks}},enhanced,drop shadow,boxrule=2pt]
+An important fact is that the NNGP kernel $\Sigma^{(\ell)}$ is a random field that is NOT a gaussian process but a deep gaussian process, while the NTK kernel $\Theta^{(\ell)}$ is also a random field that is not a gaussian process. This is because the composition of a non-linear function with a Gaussian Process, $g(f(x))$, is not, in general, a Gaussian Process.
+\end{tcolorbox}
+
+\subsection{NNGP Kernel \(\Sigma^{(\ell)}\) Recursion}
+The NNGP kernel describes the covariance of the network's output function at initialization. For any finite width, this output is a random function. In the infinite-width limit, it converges to a Gaussian Process. The base kernel $\Sigma^{(\ell)}$ is defined recursively.
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{NNGP Kernel Recursion}},enhanced,drop shadow,boxrule=2pt]
+\begin{itemize}
+    \item \textbf{Base Case (\(\ell=1\)):} The NNGP kernel for the first layer:
+    \begin{equation}
+        \boxed{\Sigma^{(1)}(x, x') = \mathbb{E}_{\bm{w},b}\left[\ReLU(\bm{w}^\top x + b)\ReLU(\bm{w}^\top x' + b)\right]}
+    \end{equation}
+    \item \textbf{Recursive Step (\(\ell > 1\)):} For subsequent layers:
+    \begin{equation}
+        \boxed{\Sigma^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \ReLU\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \ReLU\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \right]}
+    \end{equation}
+\end{itemize}
+\end{tcolorbox}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Personal contribution: NTK Kernel \(\Theta^{(\ell)}\) Recursion}
+The NTK is the Gram matrix of function gradients. For any finite width, it is a random matrix. The following recursion describes the relationship between these random kernels in the infinite-width limit.
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{NTK Recursion Formula}},enhanced,drop shadow,boxrule=2pt]
+\begin{itemize}
+    \item \textbf{Initialization (\(\ell=0\)):} $\Theta^{(0)} = 0$.
+    
+    \item \textbf{Recursive Step (\(\ell \ge 1\)):} The NTK for layer $\ell$ combines the NTK from previous layers with the contributions from the trainable parameters $A^{(\ell)}$ and $c^{(\ell)}$:
+    \begin{equation}
+        \boxed{
+        \Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \left(\sigma_A^2\dot{\Sigma}^{(\ell)}(x, x')\right) + \sigma_A^2 \Sigma^{(\ell)}(x, x') + 1
+        }
+    \end{equation}
+    where $\sigma_c^2=1$ is the contribution from the trainable bias. $\Sigma^{(\ell)}$ is the base NNGP kernel defined above. $\dot{\Sigma}^{(\ell)}$ is the base derivative kernel:
+    \begin{equation}
+        \dot{\Sigma}^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \dot{\ReLU}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \dot{\ReLU}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \bm{w}^\top\bm{w} \right]
+    \end{equation}
+    with $\dot{\ReLU}$ being the derivative of the activation function. Both $\Sigma^{(\ell)}$ and $\dot{\Sigma}^{(\ell)}$ are random kernels for $\ell > 1$.
+\end{itemize}
+\end{tcolorbox}
+
+
+\subsubsection{Personal contribution : Parameter Influence on NTK Preconditioning}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Activation and Bias Influence on NTK}},enhanced,drop shadow,boxrule=2pt]
+The NTK behavior can be systematically controlled through two key parameters that serve as natural preconditioning mechanisms:
+
+\textbf{1. Activation Function Choice:} The choice of $\sigma$ directly and its convexity affect both $\Sigma^{(\ell)}$ and $\dot{\Sigma}^{(\ell)}$ kernels. For $\ReLU$, we obtain specific analytical forms that enable tractable computations, while alternative activations (sigmoid, tanh) modify the kernel's spectral properties and convergence behavior.
+
+\textbf{2. Bias Parameter $\boldsymbol{\beta}$:} The bias scaling $\beta$ controls NTK preconditioning. Setting $\beta = 0$ yields centered pre-activations, while $\beta > 0$ improves training stability. This provides direct control over the kernel's spectral properties.
+\end{tcolorbox}
+
+
+
+
+
+
+
+
+\subsection{Personal contribution: Two Hidden Layer MMNN Architecture NTK analysis}
+\begin{tcolorbox}[colback=green!15,colframe=green!80!black,title={\textbf{Objective: Comparative Analysis of MMNN vs Standard MLP}},enhanced,drop shadow,boxrule=2pt]
+The purpose of this analysis is to expose what the NTK should be when compared in the minimal setup against standard multi-layer perceptron. We consider a configuration with 2 hidden layers, where the low-rank structure is incorporated for MMNNs to demonstrate the fundamental differences in kernel behavior between these architectures.
+\end{tcolorbox}
+
+The considered architecture is:
+\begin{center}
+\begin{tikzpicture}[scale=0.6]
+    \node (x) at (0,0) {$(x,y)$};
+    \node (h1) at (3,0) {$\bm{h}_1$};
+    \node (r) at (6,0) {$\textcolor{k3color}{\bm{r}}$};
+    \node (h2) at (9,0) {$\bm{h}_2$};
+    \node (y) at (12,0) {$(x_2,y_2)$};
+    
+    \draw[-latex,thick,blue] (x) -- node[above] {$\sigma W_1$} (h1);
+    \draw[-latex,thick,red] (h1) -- node[above] {$A_1 \cdot+c_1$} (r);
+    \draw[-latex,thick,blue] (r) -- node[above] {$\sigma W_2$} (h2);
+    \draw[-latex,thick,red] (h2) -- node[above] {$A_2 \cdot +c_2$} (y);
+    
+    \node[below] at (3,-0.5) {$N$};
+    \node[below] at (6,-0.5) {\textcolor{k3color}{$(x_1,y_1)$ in $\mathbb{R}^r$}};
+    \node[below] at (9,-0.5) {$N$};
+\end{tikzpicture}
+\end{center}
+\begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{Main Formula: Two Layer MMNN NTK}},enhanced,drop shadow]
+For $\beta = 0$, the \textcolor{red}{\textbf{NTK}} for two hidden layers is written as:
+\begin{align}
+\textcolor{red}{\boldsymbol{\Theta}}^{(1)} &= \mathbb{E}_{\bm{w}} \left[ \sigma(\bm{w}^\top x) \sigma(\bm{w}^\top x') \right] + 1 \\
+\textcolor{red}{\boldsymbol{\Theta}}^{(2)} &= \textcolor{red}{\boldsymbol{\Theta}}^{(1)} \cdot \left(\sigma_A^2 \mathbb{E}_{\bm{w}} \left[ \dot{\sigma}(\bm{w}^\top \bm{h}^{(1)}(x)) \dot{\sigma}(\bm{w}^\top \bm{h}^{(1)}(x')) \bm{w}^\top\bm{w} \right]\right) \nonumber\\
+&\quad + \mathbb{E}_{\bm{w}} \left[ \sigma(\bm{w}^\top \bm{h}^{(1)}(x)) \sigma(\bm{w}^\top \bm{h}^{(1)}(x')) \right] + 1
+\end{align}
+\end{tcolorbox}
+
+
+
+
+
+\begin{tcolorbox}[colback=green!15,colframe=green!80!black,title={\textbf{Ongoing Research: Deep Network Scaling via Lyapunov Analysis}},enhanced,drop shadow,boxrule=2pt]
+The MMNN structure presented above is \textbf{particularly interesting} for analyzing deep networks with growing number of layers $L$. We can employ \textbf{Lyapunov analysis} to study the products of independent random variables that emerge through the layer-wise recursions. This approach allows us to derive the expected \textbf{scaling behavior with respect to depth $L$}, which is crucial for understanding the dynamics of very deep networks.
+
+This scaling analysis through products of random matrices is precisely what we are pursuing in our \textbf{current investigations}, extending the two-layer results to arbitrary depth and characterizing the geometric properties of the resulting kernel evolution.
+\end{tcolorbox}
+
+
+\subsubsection{Final Result}
+
+\begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{MAIN RESULT}},enhanced,drop shadow,breakable]
+For 2 inputs $x,y \in \mathbb{S}^{d-1}$ with cosine similarity $\textcolor{magenta}{\rho}$ and a low-rank hidden layer $r$, the \textcolor{red}{\textbf{NTK}} for a two hidden layer EOC initialized MMNN is:
+
+\begin{equation}
+\boxed{\textcolor{red}{\boldsymbol{\Theta}}^{(2)}(x,y) = \boldsymbol{\tilde{\Theta}}^{(2)}(\textcolor{magenta}{\rho}) = \textcolor{red}{\boldsymbol{\Theta}}^{(1)}(\textcolor{magenta}{\rho_1}) \cdot \left(1 - \frac{\arccos(\textcolor{magenta}{\rho_1})}{\pi}\right)\frac{2}{r} + \frac{2}{r}\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\textcolor{magenta}{\rho_1})\|x_1\| \|y_1\| + 1}
+\end{equation}
+
+with $\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\textcolor{magenta}{\rho}) = \frac{1}{\pi}\left(\sqrt{1-\textcolor{magenta}{\rho}^2} + \textcolor{magenta}{\rho}(1-\arccos(\textcolor{magenta}{\rho}))\right)$
+
+where the random variables follow:
+\begin{itemize}
+\item $\textcolor{magenta}{\rho_1} \sim \text{Fisher}(\textcolor{magenta}{\rho_1}, r)$ is independent of the norms ($\|x_1\|$, $\|y_1\|$)
+\item $(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \textcolor{magenta}{\rho_1})$ are chi-squared variables with $r$ degrees of freedom
+\end{itemize}
+\end{tcolorbox} 
+
+\begin{tcolorbox}[colback=green!10,colframe=green,title={\textbf{High-Dimensional Behavior}},enhanced]
+For large values of $r$, Fisher's $z$-transformation gives $z = \text{arctanh}(\rho_1) \sim \mathcal{N}\left(\text{arctanh}(\rho) + \frac{\rho}{2(r-1)}, \frac{1}{r-3}\right)$. 
+
+The variance of $\rho_1$ decreases as $O(1/r)$. When $\rho \sim O(1/\sqrt{r})$, geometric noise masks the correlation.
+
+For the normalized product $S/r = \|\textcolor{red}{\mathbf{X}}\|\|\textcolor{red}{\mathbf{Y}}\|/r$, we have:
+\begin{equation}
+\boxed{\frac{S}{r} \xrightarrow{r \to \infty} 1}
+\end{equation}
+This convergence occurs with fluctuations of order $O(1/\sqrt{r})$.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=green!10,colframe=green!80!black,title={\textbf{Remark: Fast Decay of NTK Fluctuations}},enhanced,drop shadow,boxrule=2pt]
+The NTK fluctuations decay rapidly with rate $O(1/r)$, which implies that we obtain \textbf{trivial eigenvalue bounds} provided we can compute the deterministic zonal function $\boldsymbol{\tilde{\Theta}}(\rho)$. This fast convergence rate ensures that the random components of the kernel become negligible for moderate values of $r$, allowing us to approximate the spectral properties using the deterministic part of the kernel. The theoretical challenge thus reduces to analyzing the spectrum of the limiting zonal kernel operator.
+Ongoing research is doing a taylor expansion of the NTK near $\rho =1$ on that purpose.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=green!10,colframe=green!80!black,title={\textbf{Computational Insight: Linear Programming Formulation}},enhanced,drop shadow,boxrule=2pt]
+Following Zhang et al.'s approach, uniform distributions for random weights $\bm{w}_j^{(\ell)} \sim \text{Uniform}(\mathcal{S}^{d_{\ell-1}})$ and biases $b_j^{(\ell)} \sim \text{Uniform}[-1,1]$ transform MMNN optimization into a \textbf{linear programming problem}.
+
+Since the random basis functions $\sigma(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)})$ are fixed and the network output is linear in trainable weights $\{\bm{A}_j^{(\ell)}\}$, the optimization becomes convex and exactly solvable.
+Another way to precondition the NTK is to choose a specific ad-hoc great initilization that we are trying to find in ongoing research.
+\end{tcolorbox}
+
+
+
+
+
+\newpage
+\section{Personal contribution: Ongoing research and conclusion}
+
+The initial results are promising and open several avenues for both numerical and theoretical investigation.
+
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Numerical Investigations}},enhanced,drop shadow,boxrule=2pt]
+\begin{itemize}
+    \item \textbf{Integration Accuracy:} Increase the network width/rank used for numerical integration to confirm that the observed phenomena are stable as we better approach the infinite-width limit.
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Mathematical Investigations: Spectrum Analysis}},enhanced,drop shadow,boxrule=2pt]
+A primary focus of future theoretical work will be to precisely characterize the spectrum of the MMNN's NTK operator using a trifecta of advanced analytical techniques.
+
+Then we can focus on analyzing the influence of beta to ensure huge beta can or not precondition the NTK gram matrix.
+
+The primary analytical approaches for the spectrum are:
+\begin{itemize}
+    \item \textbf{Spectrum via Puiseux Series Expansion:} Following the work of Bietti and Bach~\cite{bietti2021deepequalsshallowrelu}, we can analyze the Puiseux series expansion of the kernel function in the limits $\rho \to 1^-$ and $\rho \to -1^+$. The first non-integer exponent in this series expansion directly characterizes the asymptotic scaling of the NTK operator's eigenvalues.
+    \item \textbf{Spectrum as a Zonal Operator:} A powerful approach is to analyze the NTK as a zonal kernel operator on the sphere. Following the methodology of Murray et al.~\cite{murray2023characterizingspectrumntkpower}, we can seek a power series expansion of the kernel in terms of the Gram matrix ($K = \bm{x}^\top\bm{x}'$). This would allow for a direct characterization of its eigenvalues in terms of Gegenbauer polynomials.
+    \item \textbf{Spectrum vs. Depth Analysis:} Adapt the proof methodology from Terj\'{e}k and Gonz\'{a}lez-S\'{a}nchez~\cite{terjek2025mlpseocspectrumntk} to analyze how the NTK spectrum scales with depth $L$. This involves performing a power expansion of the kernel function with respect to the correlation $\rho$.
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Mathematical Investigations: Extended Goals}},enhanced,drop shadow,boxrule=2pt]
+Further mathematical goals include:
+\begin{itemize}
+    \item \textbf{Connect to Function Decomposition:} Investigate using a uniform distribution for the random weights $\bm{w}$. This choice may align better with the function approximation theory that originally motivated the MMNN architecture. The intuition is that pairs of weights with opposite signs (e.g., $\bm{w}$ and $-\bm{w}$) could create basis functions that compensate for each other, effectively building localized basis functions over intervals defined by the pre-activations—a cornerstone of function decomposition.
+    \item \textbf{Scaling Law Coefficient:} Derive the analytical form of the scaling law coefficient $C_{\text{scaling}}$ from Experiment 2 and determine its dependency on hyperparameters like $\sigma_A$ and $\beta$.
+    \item \textbf{Rank-Magnitude Relationship:} Provide a rigorous theoretical explanation for the inverse relationship between layer rank and NTK magnitude, possibly leveraging Gaussian concentration of measure principles.
+    \item \textbf{Constant Sine Kernel:} Investigate the analytical formulas for the Sine NTK to explain why it becomes nearly constant in our experimental setup, likely by analyzing the behavior of the correlation term $\rho$.
+    \item \textbf{Theory of Evolving Kernels:} Develop a formal framework for analyzing the dynamics of the low-rank NTK, proving that it remains well-conditioned throughout training under certain assumptions.
+    \item \textbf{Analysis of Trainable Activations (PSinTU):} A further avenue is to explore more expressive, trainable activation functions like Parametrized Sinusoidal Transform Unit (PSinTU). While this offers greater flexibility, the NTK analysis becomes significantly more complex as the basis functions themselves are no longer fixed. This will be tackled in a later phase of the research.
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Conclusion: A New Paradigm for NTK Analysis}},enhanced,drop shadow,boxrule=2pt]
+MMNN analysis through NTK theory reveals a fundamental trade-off and framework generalization. Standard NTK theory for MLPs requires quadratic overparameterization to guarantee static kernels and lazy training. MMNNs offer an alternative: entering analyzable, NTK-like regimes with linear parameter scaling.
+
+The cost is kernel evolution: no longer deterministic and static, but a random field evolving during training. This randomness is manageable through high-dimensional probability tools. Deriving concentration bounds (Bernstein-type inequalities) on spectrum and kernel evolution provides robust, probabilistic optimization guarantees. This framework rigorously analyzes MMNN structural priors beyond idealized lazy training.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Outlook: PINNs Application and Wavelet Analogy}},enhanced,drop shadow,boxrule=2pt]
+Major applications target Physics-Informed Neural Networks (PINNs) solving PDEs through neural network training satisfying governing equations. Since MMNNs derive from function decomposition theorems, their architecture naturally suits this purpose.
+
+A powerful analogy connects MMNNs to wavelet transforms, particularly in high dimensions. Wavelets decompose functions onto fixed localized bases; MMNNs learn optimal combinations of rich, random function bases. Classical wavelets suffer dimensionality curses, becoming intractable for high-dimensional problems.
+
+Networks perform automatic, adaptive directional domain decomposition. While neuron-partitioned regions grow exponentially, parameters scale linearly with width. This expressive power and parameter efficiency combination makes MMNNs powerful, tractable tools for high-dimensional PINN applications where classical wavelets fail.
+
+Concrete progress requires network regularity. Many PDEs involve second-order derivatives (Laplacians). Applying rigorous optimization and approximation theorems requires twice-differentiable networks ($C^2$). Future directions include developing "Deep Smooth ReLU Network" (DSRN) MMNN versions using smoother activations, guaranteeing necessary regularity and unlocking broader theoretical tools for PINN analysis.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: High-Dimensional Advantages}},enhanced,drop shadow,boxrule=2pt]
+MMNNs overcome dimensionality curses through several mechanisms. 
+In high dimensions, random vectors are nearly orthogonal, meaning correlation $\rho$ between pre-activations concentrates around zero. 
+The Funk-Hecke theorem analyzes kernel operators in this setting, showing $\rho$-dependent kernels have structured spectra. 
+This $\rho$ concentration implies NTK matrices become quasi-diagonal or take $(a-b)\mathbf{I} + b\mathbf{J}$ with $\mathbf{J} = \frac{1}{d}\mathbf{\mathds{1}}\mathbf{\mathds{1}}^\top$ 
+the all ones matrix, simplifying spectral analysis along with standard deviation decay.
+\end{tcolorbox}
+
+
+
+
+\section{Partial conclusion for preconditioning through architecture's paradigms}
+MMNN analysis through NTK theory reveals a fundamental trade-off and framework generalization. Standard NTK theory for MLPs requires quadratic overparameterization to guarantee static kernels and lazy training. MMNNs offer an alternative: entering analyzable, NTK-like regimes with linear parameter scaling.
+
+The cost is kernel evolution: no longer deterministic and static, but a random field evolving during training. This randomness is manageable through high-dimensional probability tools. Deriving concentration bounds (Bernstein-type inequalities) on spectrum and kernel evolution provides robust, probabilistic optimization guarantees. This framework rigorously analyzes MMNN structural priors beyond idealized lazy training.
+
+Major applications target Physics-Informed Neural Networks (PINNs) solving PDEs through neural network training satisfying governing equations. Since MMNNs derive from function decomposition theorems, their architecture naturally suits this purpose.
+
+A powerful analogy connects MMNNs to wavelet transforms, particularly in high dimensions. Wavelets decompose functions onto fixed localized bases; MMNNs learn optimal combinations of rich, random function bases. Classical wavelets suffer dimensionality curses, becoming intractable for high-dimensional problems.
+
+Networks perform automatic, adaptive directional domain decomposition. While neuron-partitioned regions grow exponentially, parameters scale linearly with width. This expressive power and parameter efficiency combination makes MMNNs powerful, tractable tools for high-dimensional PINN applications where classical wavelets fail.
+
+Concrete progress requires network regularity. Many PDEs involve second-order derivatives (Laplacians). Applying rigorous optimization and approximation theorems requires twice-differentiable networks ($C^2$). Future directions include developing "Deep Suuper ReLU Network" [Yang et al., 2024] MMNN versions using smoother activations, guaranteeing necessary regularity and unlocking broader theoretical tools for PINN analysis.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\newpage
+
 \section{Introduction to the Neural Tangent Hierarchy}
 
 
@@ -1992,8 +3108,997 @@ Future work should aim to leverage this Random Matrix Theory connection to deriv
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \appendix
-\section{Detailed Proofs}
+
+
+
+\section{Main Proofs for Sobolev training}
+
+\subsection{Alternative Proof: Sobolev Loss on Unbounded Domains via Integration by Parts}
+
+\begin{theorem}[Sobolev Loss on Unbounded Domains]
+For functions $f \in H^s(\mathbb{R}^d)$ with $s \geq 1$ and sufficient decay at infinity, the Sobolev loss can be expressed via integration by parts as:
+\[ \mathcal{L}_s[f] = \int_{\mathbb{R}^d} f(x)^2 dx + \int_{\mathbb{R}^d} \|\nabla f(x)\|^2 dx + \text{higher order terms} \]
+\end{theorem}
+
+\begin{proof}
+\textbf{Starting Point}
+For $s = 1$, the $H^1$ Sobolev norm is:
+\[ \|f\|_{H^1}^2 = \|f\|_{L^2}^2 + \|\nabla f\|_{L^2}^2 = \int_{\mathbb{R}^d} f(x)^2 dx + \int_{\mathbb{R}^d} \|\nabla f(x)\|^2 dx \]
+
+The key insight is that from the Stoke's theorem we can relate the gradient term to the Laplacian using integration by parts with no boundary terms over the sphere. For functions with sufficient decay at infinity (so boundary terms vanish):
+\begin{align}
+\int_{\mathbb{R}^d} \|\nabla f(x)\|^2 dx &= \int_{\mathbb{R}^d} \nabla f(x) \cdot \nabla f(x) dx \\
+&= -\int_{\mathbb{R}^d} f(x) \Delta f(x) dx \quad \text{(by integration by parts)} \\
+&= \int_{\mathbb{R}^d} f(x) (-\Delta) f(x) dx
+\end{align}
+
+Therefore:
+\[ \|f\|_{H^1}^2 = \int_{\mathbb{R}^d} f(x) (I + (-\Delta)^{1/2})^2 f(x) dx \]
+
+\end{proof}
+
+\subsection{Case of Limited Regularity: Fourier-Based Proof}
+\begin{tcolorbox}[colback=green!10,colframe=green!50!black,title=Remark: Non sufficient regularity]
+When functions are not twice differentiable, for example ReLU MLPs the integration by parts approach fails due to insufficient regularity. 
+In such cases, the \textbf{Fourier-based proof becomes the master approach}.
+
+For $f \in L^2(\mathbb{R}^d)$ with Fourier transform $\hat{f}(\xi)$, the fractional Sobolev norm is defined directly in frequency space:
+\[ \|f\|_{H^s}^2 = \int_{\mathbb{R}^d} (1 + |\xi|^2)^s |\hat{f}(\xi)|^2 d\xi \]
+
+This definition:
+\begin{itemize}
+\item Requires no differentiability assumptions on $f$
+\item Extends naturally to negative Sobolev indices $s < 0$
+\item Provides the most general framework for Sobolev spaces
+\item Reduces to classical definitions when sufficient regularity exists
+\end{itemize}
+
+The operator $(I + (-\Delta)^{1/2})^s$ acts in Fourier space as multiplication by $(1 + |\xi|^2)^s$, making this the fundamental definition from which all other formulations are derived.
+\end{tcolorbox}
+
+
+
+\subsection{A.1 Proof 1: Sobolev Loss as Fractional Laplacian}
+
+\begin{theorem}[Fractional Laplacian Representation of Sobolev Loss]
+For a function $f \in H^s(\mathbb{S}^{d-1})$ with $s > 0$, the Sobolev loss can be written as:
+\[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\sigma(x) \]
+where $(I + (-\Delta)^{1/2})^s$ is the fractional Laplacian operator of order $s$.
+\end{theorem}
+
+\begin{proof}
+Consider the spherical harmonic expansion $f(x) = \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} \hat{f}_{\ell,p} Y_{\ell,p}(x)$. The spherical Laplacian acts on these harmonics as eigenvalue operators: $(-\Delta)^{1/2}_{\mathbb{S}^{d-1}} Y_{\ell,p}(x) = \sqrt{\ell(\ell + d - 2)} Y_{\ell,p}(x)$.
+
+The fractional operator $(I + (-\Delta)^{1/2})^s$ is naturally defined through its spectral action: $(I + (-\Delta)^{1/2})^s Y_{\ell,p}(x) = (1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p}(x)$. For the unit sphere where $d = 2$, this simplifies to $(1 + \ell)^s Y_{\ell,p}(x)$.
+
+Computing the bilinear form using orthonormality of spherical harmonics:
+\begin{align}
+\int_{\mathbb{S}^{d-1}} f(x) (I + (-\Delta)^{1/2})^s f(x) d\sigma(x) &= \sum_{\ell=0}^{\infty} \sum_{p=1}^{N(d,\ell)} (1 + \sqrt{\ell(\ell + d - 2)})^s |\hat{f}_{\ell,p}|^2
+\end{align}
+
+The standard Sobolev norm is defined as $\|f\|_{H^s}^2 = \sum_{\ell,p} (1 + \ell)^{2s} |\hat{f}_{\ell,p}|^2$. The connection becomes clear when we observe that for large $\ell$, the expressions $(1 + \ell)^{2s}$ and $(1 + \sqrt{\ell(\ell + d - 2)})^s$ are asymptotically equivalent up to normalization constants. The precise relationship depends on the specific Sobolev space convention, but the essential spectral structure remains identical.
+\end{proof}
+
+
+
+\newpage
+\subsection{A.2 Proof 2: NTK Operator Multiplication by Sobolev Operator}
+\label{sec:appendix_composition}
+
+\begin{theorem}[NTK-Sobolev Composition]
+Under Sobolev training, the learning operator is given by the composition:
+\[ \mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s \]
+where $K^{\infty}$ is the NTK operator and $(I + (-\Delta)^{1/2})^s$ is the fractional Laplacian.
+\end{theorem}
+
+\begin{proof}
+Standard gradient descent on the $L^2$ loss $\mathcal{L}(\textcolor{darkyellow}{\theta}) = \frac{1}{2}\|f(\cdot; \textcolor{darkyellow}{\theta}) - y\|^2_{L^2}$ gives parameter dynamics $\frac{d\textcolor{darkyellow}{\theta}}{dt} = -\nabla_{\textcolor{darkyellow}{\theta}} \mathcal{L}(\textcolor{darkyellow}{\theta})$. In the NTK regime, this translates to function dynamics $\frac{df}{dt} = -K^{\infty}(f - y)$.
+
+When we replace the $L^2$ loss with the Sobolev loss $\mathcal{L}_s(\textcolor{darkyellow}{\theta}) = \frac{1}{2}\|f(\cdot; \textcolor{darkyellow}{\theta}) - y\|^2_{H^s}$, the gradient computation changes fundamentally. Using our fractional Laplacian representation from Theorem 1, the Sobolev loss becomes:
+\[ \mathcal{L}_s(\textcolor{darkyellow}{\theta}) = \frac{1}{2}\int (f(x; \textcolor{darkyellow}{\theta}) - y(x)) (I + (-\Delta)^{1/2})^s (f(x; \textcolor{darkyellow}{\theta}) - y(x)) d\sigma(x) \]
+
+By boundedness of the fractionnal operator, and boundedness over a compact domain, we can intervete the integral and the gradient operator.
+The gradient with respect to parameters now involves the chain rule through the fractional operator:
+\[ \nabla_{\textcolor{darkyellow}{\theta}} \mathcal{L}_s(\textcolor{darkyellow}{\theta}) = \int \nabla_{\textcolor{darkyellow}{\theta}} f(x; \textcolor{darkyellow}{\theta}) \cdot (I + (-\Delta)^{1/2})^s (f(x; \textcolor{darkyellow}{\theta}) - y(x)) d\sigma(x) \]
+
+Since the NTK is defined as $K^{\infty}(x, x') = \langle \nabla_{\textcolor{darkyellow}{\theta}} f(x; \textcolor{darkyellow}{\theta}), \nabla_{\textcolor{darkyellow}{\theta}} f(x'; \textcolor{darkyellow}{\theta}) \rangle$, the function dynamics become:
+\[ \frac{df}{dt} = -\int K^{\infty}(x, x') (I + (-\Delta)^{1/2})^s (f(x') - y(x')) d\sigma(x') = -K^{\infty} \circ (I + (-\Delta)^{1/2})^s (f - y) \]
+
+Therefore, the learning operator is indeed $\mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s$. The rotational invariance of both operators ensures they share the same spherical harmonic eigenfunctions, making this composition well-defined and commutative.
+\end{proof}
+
+\subsection{Proof 3: Spectral Properties of the Composite Operator}
+\begin{theorem}[Spectrum of NTK-Sobolev Operator]
+The eigenvalues of the composite operator $\mathcal{T}_s = K^{\infty} \circ (I + (-\Delta)^{1/2})^s$ are given by the product of individual eigenvalues: $\mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s$.
+\end{theorem}
+
+\begin{proof}
+Since both operators $K^{\infty}$ and $(I + (-\Delta)^{1/2})^s$ share the same eigenfunctions (spherical harmonics $Y_{\ell,p}$), we can analyze their composition through eigenvalues:
+
+1) For the NTK operator $K^{\infty}$:
+   \[ K^{\infty} Y_{\ell,p} = \mu_\ell^{(K)} Y_{\ell,p} \]
+
+2) For the Sobolev operator $(I + (-\Delta)^{1/2})^s$:
+   \[ (I + (-\Delta)^{1/2})^s Y_{\ell,p} = (1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p} \]
+
+3) Therefore, for their composition:
+   \begin{align*}
+   \mathcal{T}_s Y_{\ell,p} &= K^{\infty} \circ (I + (-\Delta)^{1/2})^s Y_{\ell,p} \\
+   &= K^{\infty}((1 + \sqrt{\ell(\ell + d - 2)})^s Y_{\ell,p}) \\
+   &= (1 + \sqrt{\ell(\ell + d - 2)})^s \cdot \mu_\ell^{(K)} Y_{\ell,p}
+   \end{align*}
+
+Thus, $\mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + d - 2)})^s$ are indeed the eigenvalues of the composite operator.
+\end{proof}
+
+
+
+
+
+\newpage
+\subsection{A.4 Proof 4: Limited Commutation of Discrete Matrix Operators}
+\label{sec:appendix_commutation}
+
+\begin{proof}[Proof of Theorem~\ref{thm:ntk_sobolev_commutation}]
+We establish the commutation properties by expanding both matrices in terms of spherical harmonic projectors with quadrature weights.
+
+\begin{tcolorbox}[colback=blue!5,colframe=blue!60!black,title=\textbf{NTK Spectral Decomposition}]
+The NTK matrix can be written using its spectral decomposition:
+\[ \mathbf{K}_{ij} = K^{\infty}(x_i, x_j) = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} (a_{\ell,p})_i (a_{\ell,p})_j \]
+where $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$ with quadrature weights $c_i$ and $\ell_{\max}$ satisfies $(\ell_{\max}+1)^2 > n$ to ensure positive semi-definiteness.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=red!5,colframe=red!60!black,title=\textbf{Sobolev Spectral Decomposition}]
+Similarly, the Sobolev matrix has the expansion:
+\[ \mathbf{P}_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1 + \ell(\ell + d - 2))^s a_{\ell,p} a_{\ell,p}^T \]
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!60!black,title=\textbf{Limited Orthogonality and Partial Commutation}]
+The key observation is that the discrete orthogonality $a_{\ell,p}^T a_{\ell',p'} = \delta_{\ell,\ell'} \delta_{p,p'} \|a_{\ell,p}\|^2$ holds exactly only for degrees $\ell$ such that the cumulative sum of spherical harmonic dimensions satisfies:
+\[ \sum_{p=0}^{\ell} N(d,p) \leq \textcolor{red}{n} \]
+This means the sampling measure is exact up to a particular dimension $\ell_{\text{exact}}$ determined by the number of sample points $n$.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=orange!10,colframe=orange!60!black,title=\textbf{Remark: Non-Commutation in General}]
+The matrices $\mathbf{K}$ and $\mathbf{P}_s$ do \textbf{not commute} in general. We have partial commutation only for the subspace spanned by spherical harmonics of degree $\ell \leq \ell_{\text{exact}}$ where:
+\[ \ell_{\text{exact}} = \max\left\{\ell : \sum_{p=0}^{\ell} N(d,p) \leq \textcolor{red}{n}\right\} \]
+For $\ell > \ell_{\text{exact}}$, the discrete orthogonality breaks down, and the commutation property fails. This limitation arises because the sampling measure cannot exactly represent all spherical harmonics beyond a certain degree with a finite number of points.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=purple!5,colframe=purple!60!black,title=\textbf{Partial Commutation Result}]
+For the exactly representable subspace, we have:
+\begin{align}
+[\mathbf{K}\mathbf{P}_s]_{\ell \leq \ell_{\text{exact}}} &= \sum_{\ell=0}^{\ell_{\text{exact}}} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} (1 + \ell(\ell + d - 2))^s a_{\ell,p} a_{\ell,p}^T \\
+[\mathbf{P}_s\mathbf{K}]_{\ell \leq \ell_{\text{exact}}} &= \sum_{\ell=0}^{\ell_{\text{exact}}} \sum_{p=1}^{N(d,\ell)} (1 + \ell(\ell + d - 2))^s \mu_\ell^{(K)} a_{\ell,p} a_{\ell,p}^T
+\end{align}
+We have $\mathbf{K}\mathbf{P}_s = \mathbf{P}_s\mathbf{K}$ only in the subspace corresponding to $\ell \leq \ell_{\text{exact}}$.
+\end{tcolorbox}
+\end{proof}
+
+
+
+
+
+\subsection{A.6 Discrete Implementation and Matrix Construction}
+
+\begin{theorem}[Discrete Sobolev Loss and Matrix Form]
+Given dataset $\{x_i, y_i\}_{i=1}^{\textcolor{red}{n}}$ on $\mathbb{S}^{d-1}$, the discrete Sobolev loss becomes a quadratic form:
+\[ \mathcal{L}_s(\mathbf{f}) = \mathbf{f}^T \mathbf{P}_s \mathbf{f} \]
+where $\mathbf{f} = (f(x_1), \ldots, f(x_{\textcolor{red}{n}}))^T$ and $\mathbf{P}_s$ is the discrete Sobolev matrix.
+\end{theorem}
+
+\begin{proof}[Construction of Discrete Matrices]
+\textbf{Truncation Condition}
+For positive semi-definiteness, we require $\ell_{\max}$ such that $(\ell_{\max}+1)^2 > n$.
+
+\textbf{Discrete NTK Matrix}
+\[ (\mathbf{K})_{ij} = K^{\infty}(x_i, x_j) = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} Y_{\ell,p}(x_i) Y_{\ell,p}(x_j) \]
+
+\textbf{Discrete Sobolev Matrix}
+\[ (\mathbf{P}_s)_{ij} = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1 + \ell(\ell + d - 2))^s Y_{\ell,p}(x_i) Y_{\ell,p}(x_j) \]
+
+\textbf{Discrete Sobolev Loss}
+The continuous Sobolev loss discretizes to:
+\[ \mathcal{L}_s[f] = \int_{\mathbb{S}^{d-1}} f(x) P_s f(x) d\sigma(x) \rightarrow \frac{1}{n}\sum_{i=1}^{\textcolor{red}{n}} f(x_i) [P_s f](x_i) = \mathbf{f}^T \mathbf{P}_s \mathbf{f} \]
+
+\textbf{Learning Dynamics}
+Under discrete Sobolev training, the learning operator becomes:
+\[ \frac{d\mathbf{f}}{dt} = -\mathbf{K} \mathbf{P}_s (\mathbf{f} - \mathbf{y}) \]
+where $\mathbf{y} = (y_1, \ldots, y_{\textcolor{red}{n}})^T$ are the target values.
+\end{proof}
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title=Remark: Computational Complexity]
+Matrix construction requires:
+\begin{itemize}
+\item Evaluation of $\mathcal{O}(\ell_{\max}^{d-1})$ spherical harmonics
+\item Total complexity: $\mathcal{O}(n^2 \ell_{\max}^{d-1})$ for matrix construction
+\item Storage: $\mathcal{O}(n^2)$ for both $\mathbf{K}$ and $\mathbf{P}_s$
+\end{itemize}
+\end{tcolorbox}
+
+
+\newpage
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Mathematical Foundation: Concentration Inequalities from Nguyen et al.}
+
+\subsection{Scalar Concentration Inequalities}
+
+The foundation of modern NTK analysis rests on powerful concentration inequalities that control the deviation of random variables from their expectations.
+
+\begin{theorem}[Chernoff Bound for Bounded Random Variables]
+Let $X_1, \ldots, X_n$ be independent random variables with $X_i \in [0,1]$ and $\E[X_i] = \mu_i$. Let $S = \sum_{i=1}^n X_i$ and $\mu = \E[S] = \sum_{i=1}^n \mu_i$. Then:
+$$\Pr(S \geq (1+\delta)\mu) \leq e^{-\frac{\delta^2 \mu}{2+\delta}}$$
+$$\Pr(S \leq (1-\delta)\mu) \leq e^{-\frac{\delta^2 \mu}{2}}$$
+for $\delta > 0$.
+\end{theorem}
+
+3\begin{theorem}[Bernstein's Inequality]
+Let $X_1, \ldots, X_n$ be independent random variables with $\E[X_i] = 0$, $|X_i| \leq M$, and $\E[X_i^2] \leq \sigma_i^2$. Let $S = \sum_{i=1}^n X_i$ and $\sigma^2 = \sum_{i=1}^n \sigma_i^2$. Then:
+$$\Pr(|S| \geq t) \leq 2\exp\left(-\frac{t^2/2}{\sigma^2 + Mt/3}\right)$$
+\end{theorem}
+
+\subsection{Quadratic Forms and Hanson-Wright Inequalities}
+
+For neural networks, we frequently encounter quadratic forms in random variables, necessitating more sophisticated concentration tools.
+
+\begin{theorem}[Classical Hanson-Wright Inequality]
+Let $Y_1, \ldots, Y_n$ be independent mean-zero $\alpha$-subgaussian random variables, and $\mathbf{A} = (a_{i,j})$ be a symmetric matrix. Then:
+$$\Pr\left(\left|\sum_{i,j=1}^n a_{i,j}(Y_i Y_j - \E[Y_i Y_j])\right| \geq t\right) \leq 2\exp\left(-\frac{1}{C}\min\left\{\frac{t^2}{\beta^4\|\mathbf{A}\|_{HS}^2}, \frac{t}{\beta^2\|\mathbf{A}\|_{op}}\right\}\right)$$
+\end{theorem}
+
+where $\|\mathbf{A}\|_{HS} = \sqrt{\sum_{i,j} |a_{i,j}|^2}$ is the Hilbert-Schmidt norm and $\|\mathbf{A}\|_{op}$ is the operator norm.
+
+\begin{theorem}[Generalized Hanson-Wright for Random Tensors (Chang, 2022)]
+For random tensor vector $\overline{\mathcal{X}} \in \C^{(n \times I_1 \times \cdots \times I_M) \times (I_1 \times \cdots \times I_M)}$ and fixed tensor $\overline{\overline{\mathcal{A}}}$, the polynomial function:
+$$f_j(\overline{\mathcal{X}}) = \left(\sum_{i,\textcolor{red}{p}=1}^{\textcolor{red}{n}} \mathcal{A}_{i,\textcolor{red}{p}} \star_M (\mathcal{X}_i - \E[\mathcal{X}_i]) \star_M (\mathcal{X}_{\textcolor{red}{p}} - \E[\mathcal{X}_{\textcolor{red}{p}}])\right)^j$$
+satisfies concentration bounds involving Ky Fan $k$-norms of tensor sums, extending classical matrix concentration to tensor settings.
+\end{theorem}
+
+\subsection{Matrix Concentration Inequalities}
+
+Matrix concentration inequalities provide direct control over eigenvalues of random matrix sums, which is essential for NTK analysis.
+
+\begin{theorem}[Matrix Chernoff Bound (Tropp, 2012)]
+Let $X_1, \ldots, X_n$ be independent random Hermitian matrices with $X_i \preceq R \cdot I$ and $\E[X_i] \preceq \mu \cdot I$. Let $S = \sum_{i=1}^n X_i$. Then:
+$$\Pr(\lambda_{\max}(S) \geq (1+\delta)\mu \textcolor{red}{n}) \leq d \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^{\mu \textcolor{red}{n} / R}$$
+\end{theorem}
+
+\begin{theorem}[Matrix Bernstein Inequality (Vershynin, 2018)]
+Let $X_1, \ldots, X_n$ be independent random matrices with $\E[X_i] = 0$, $\|X_i\| \leq L$, and $\left\|\sum_{i=1}^n \E[X_i X_i^*]\right\| \leq \sigma^2$. Then:
+$$\Pr\left(\left\|\sum_{i=1}^n X_i\right\| \geq t\right) \leq 2d \exp\left(-\frac{t^2/2}{\sigma^2 + Lt/3}\right)$$
+\end{theorem}
+
+\section{Fundamental Mathematical Tools}
+
+\subsection{Matrix Analysis Techniques}
+
+\begin{lemma}[Weyl's Inequality]
+For Hermitian matrices $A, B$:
+$$\lambda_i(A) + \lambda_{\textcolor{red}{n}}(B) \leq \lambda_i(A + B) \leq \lambda_i(A) + \lambda_1(B)$$
+\end{lemma}
+
+\begin{lemma}[Schur Product Theorem]
+For PSD matrices $P, Q$:
+$$\evmin{P \circ Q} \geq \evmin{P} \min_i Q_{ii}$$
+\end{lemma}
+
+\begin{lemma}[Gershgorin Circle Theorem]
+For matrix $A = (a_{ij})$, all eigenvalues lie in the union of discs:
+$$\bigcup_{i=1}^{\textcolor{red}{n}} \left\{z \in \C : |z - a_{ii}| \leq \sum_{j \neq i} |a_{ij}|\right\}$$
+\end{lemma}
+
+\subsection{Specialized Neural Network Tools}
+
+\begin{definition}[Khatri-Rao Product]
+For matrices $A \in \R^{m \times k}$ and $B \in \R^{n \times k}$, the Khatri-Rao product $A \star B \in \R^{mn \times k}$ is the column-wise Kronecker product.
+\end{definition}
+
+\begin{definition}[Hadamard Power]
+For matrix $A$ and positive integer $r$, the $r$-th Hadamard power $A^{\odot r}$ is the element-wise $r$-th power.
+\end{definition}
+
+\newpage
+
+\section{Proof Schemes and High-Level Strategies}
+
+\subsection{General Framework for Eigenvalue Bounds}
+
+All modern approaches to bounding $\lambdaMin(\KNTK)$ follow a common high-level structure, though they differ in technical details and specific tools employed.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+    % Define styles
+    \tikzset{
+        box/.style={rectangle, draw, thick, minimum width=3cm, minimum height=1.2cm, text centered, fill=blue!15},
+        arrow/.style={->, thick, blue!70}
+    }
+
+    % Main boxes
+    \node[box] (step1) at (0,4) {\textbf{Step 1} \\ Problem Decomposition};
+    \node[box] (step2) at (0,2) {\textbf{Step 2} \\ Concentration Analysis};
+    \node[box] (step3) at (0,0) {\textbf{Step 3} \\ Spectral Analysis};
+
+    % Arrows
+    \draw[arrow] (step1) -- (step2);
+    \draw[arrow] (step2) -- (step3);
+
+    % Annotations
+    \node[align=left, text width=4cm] at (4.5,4) {
+        $\bullet$ Decompose NTK \\
+        $\bullet$ Identify key terms \\
+        $\bullet$ Separate components
+    };
+    
+    \node[align=left, text width=4cm] at (4.5,2) {
+        $\bullet$ Apply matrix bounds \\
+        $\bullet$ Control randomness \\
+        $\bullet$ High-probability results
+    };
+    
+    \node[align=left, text width=4cm] at (4.5,0) {
+        $\bullet$ Matrix inequalities \\
+        $\bullet$ Combine bounds \\
+        $\bullet$ Final $\lambda_{\min}$ result
+    };
+
+\end{tikzpicture}
+\caption{General Framework for NTK Eigenvalue Bounds}
+\end{figure}
+
+
+\subsection{Proof Scheme 1: Empirical NTK Decomposition (Nguyen et al.)}
+
+\textbf{High-Level Strategy}: Direct decomposition of empirical NTK $\bar{K}^{(L)} = JJ^T$ using feature matrices and chain rule to obtain precise bounds on $\lambdaMin$.
+
+\subsubsection{Step 1: Fundamental Chain Rule Decomposition}
+
+The proof begins by decomposing the empirical NTK $\bar{K}^{(L)} = JJ^T$ where $J$ is the Jacobian matrix \eqref{eq:Jac}. Applying the chain rule and standard algebraic manipulations yields the fundamental decomposition:
+
+\begin{align}
+\bar{K}^{(L)} = JJ^T = \sum_{p=0}^{L-1} F_p F_p^T \circ B_{p+1} B_{p+1}^T
+\end{align}
+
+where:
+\begin{itemize}
+    \item $F_p = [f_p(x_1), \ldots, f_p(x_N)]^T \in \R^{N \times n_p}$ are the \textbf{feature matrices} at layer $p$
+    \item $B_p \in \R^{N \times n_p}$ are the \textbf{derivative term matrices} with $i$-th row given by:
+\end{itemize}
+
+\begin{align}
+(B_p)_{i:} = \begin{cases}
+\Sigma_p(x_i) \left(\prod_{l=p+1}^{L-1} W_l \Sigma_l(x_i)\right) W_L, & p \in [L-2] \\
+\Sigma_{L-1}(x_i) W_L, & p = L-1 \\
+\frac{1}{\sqrt{N}} \mathbf{1}_N, & p = L
+\end{cases}
+\end{align}
+
+where $\Sigma_p(x) = \text{diag}([\sigma'(g_{p,j}(x))]_{j=1}^{n_p})$ is the diagonal matrix of activation derivatives.
+
+\subsubsection{Step 2: Application of Schur Product Theorem and Weyl's Inequality}
+
+For PSD matrices $P, Q \in \R^{n \times n}$, the Schur product theorem :
+\begin{align}
+\evmin{P \circ Q} \geq \evmin{P} \min_{i \in [n]} Q_{ii}
+\end{align}
+
+Applying this to each term, then using Weyl's inequality for the sum:
+
+\begin{align}
+\evmin{JJ^T} &\geq \sum_{p=0}^{L-1} \evmin{F_p F_p^T \circ B_{p+1} B_{p+1}^T} \\
+&\geq \sum_{p=0}^{L-1} \evmin{F_p F_p^T} \min_{i \in [N]} \|(B_{p+1})_{i:}\|_2^2
+\end{align}
+
+This reduction separates the problem into:
+\begin{enumerate}
+    \item The \textbf{minimum eigenvalues of feature Gram matrices}: $\evmin{F_p F_p^T}$
+    \item The \textbf{minimum row norms of derivative matrices}: $\min_{i \in [N]} \|(B_{p+1})_{i:}\|_2^2$
+\end{enumerate}
+
+\subsubsection{Step 3: Bounding Feature Matrix Eigenvalues}
+
+To bound $\evmin{F_p F_p^T}$, the strategy uses Chernoff-type matrix concentration. The fundamental bound is given by:
+\begin{lemma}[Matrix Concentration for Features]
+Let $\lambda = \evmin{\E_{w \sim \mathcal{N}(0, \beta_p^2 \mathbf{I}_{n_{p-1}})}[\sigma(F_{p-1}w)\sigma(F_{p-1}w)^T]}$. If 
+\begin{align}
+n_p \geq \max\left(N, c Q \max(1, \log(4Q)) \log\frac{N}{\delta}\right)
+\end{align}
+where $Q = \frac{\beta_p^2 \|F_{p-1}\|_F^2}{\lambda}$, then with probability at least $1-\delta$:
+\begin{align}
+\svmin{F_p}^2 \geq \frac{n_p \lambda}{4}
+\end{align}
+
+This lemma assumes that:
+\begin{itemize}
+\item The width $n_p$ of layer $p$ is sufficiently large compared to the number of samples $N$
+\item The feature matrix $F_{p-1}$ from the previous layer has bounded Frobenius norm
+\end{itemize}
+These conditions ensure concentration of the minimum singular value of the feature matrix around its expected value.
+\end{lemma}
+
+\subsubsection{Step 4: Spectral Analysis via Hermite Expansion}
+
+To bound $\lambda$, we use the Hermite expansion of the ReLU. and exploiting the homogeneity of $\sigma$ (unless, generalized hermite):
+
+\begin{align}
+\lambda &= \evmin{\E[\sigma(F_{p-1}w)\sigma(F_{p-1}w)^T]} \\
+&= \evmin{D \E[\sigma(\hat{F}_{p-1}w)\sigma(\hat{F}_{p-1}w)^T] D}
+\end{align}
+
+where $D = \text{diag}(\|\{F_{p-1}\}_{i:}\|_2)$ and $\hat{F}_{p-1} = D^{-1}F_{p-1}$.
+
+Applying the Hermite expansion $\sigma(x) = \sum_{r=0}^{\infty} \mu_r(\sigma) H_r(x)$:
+
+\begin{align}
+\E[\sigma(\hat{F}_{p-1}w)\sigma(\hat{F}_{p-1}w)^T] = \mu_0(\sigma)^2 \mathbf{1}_N \mathbf{1}_N^T + \sum_{s=1}^{\infty} \mu_s(\sigma)^2 (\hat{F}_{p-1}^{*s})(\hat{F}_{p-1}^{*s})^T
+\end{align}
+
+where $\hat{F}_{p-1}^{*s}$ represents the $s$-th Khatri-Rao power of $\hat{F}_{p-1}$.
+
+\subsubsection{Step 5: Reduction to Khatri-Rao Powers}
+
+For an integer $r \geq 2$, we can lower bound:
+\begin{align}
+\lambda \geq \mu_r(\sigma)^2 \evmin{D(\hat{F}_{p-1}^{*r})(\hat{F}_{p-1}^{*r})^T D} = \mu_r(\sigma)^2 \frac{\evmin{(F_{p-1}^{*r})(F_{p-1}^{*r})^T}}{\max_{i \in [N]} \|(F_{p-1})_{i:}\|_2^{2(r-1)}}
+\end{align}
+
+\subsubsection{Step 6: Feature Centering and Hadamard Power Analysis}
+
+To analyze $(F_{p-1}^{*r})(F_{p-1}^{*r})^T = (F_{p-1}F_{p-1}^T)^{\circ r}$, we introduce centered features $\tilde{F}_{p-1} = F_{p-1} - \E_X[F_{p-1}]$. 
+
+Let $\mu = \E_x[f_{p-1}(x)] \in \R^{n_{p-1}}$ and $\Lambda = \text{diag}(F_{p-1}\mu - \|\mu\|_2^2 \mathbf{1}_N)$. Then:
+
+\begin{align}
+(F_{p-1}^{*r})(F_{p-1}^{*r})^T = (F_{p-1}F_{p-1}^T)^{\circ r} \succeq \left(\tilde{F}_{p-1}\tilde{F}_{p-1}^T - \frac{\Lambda \mathbf{1}_N \mathbf{1}_N^T \Lambda}{\|\mu\|_2^2}\right)^{\circ r}
+\end{align}
+
+\subsubsection{Step 7: Application of Gershgorin Circle Theorem}
+
+To bound the minimum eigenvalue of $(\tilde{F}_{p-1}\tilde{F}_{p-1}^T)^{\circ r}$, we apply the Gershgorin circle theorem:
+
+\begin{align}
+\evmin{(\tilde{F}_{p-1}^{*r})(\tilde{F}_{p-1}^{*r})^T} &\geq \min_{i \in [N]} \|(\tilde{F}_{p-1})_{i:}\|_2^{2r} - N \max_{i \neq j} |\langle (\tilde{F}_{p-1})_{i:}, (\tilde{F}_{p-1})_{j:} \rangle|^r
+\end{align}
+
+Using concentration properties of centered features, we show:
+\begin{align}
+\|(\tilde{F}_{p-1})_{i:}\|_2^{2r} &= \Theta\left(\left(d \prod_{l=1}^{p-1} n_l \beta_l^2\right)^r\right) \\
+N \max_{i \neq j} |\langle (\tilde{F}_{p-1})_{i:}, (\tilde{F}_{p-1})_{j:} \rangle|^r &= o\left(\left(d \prod_{l=1}^{p-1} n_l \beta_l^2\right)^r\right)
+\end{align}
+
+with exponentially high probability.
+
+\subsubsection{Step 8: Bounding Derivative Term Norms, very technical}
+
+To bound $\min_{i \in [N]} \|(B_{p+1})_{i:}\|_2^2$, we analyze each case:
+
+For $p \in [L-2]$:
+\begin{align}
+\|(B_{p+1})_{i:}\|_2^2 &= \|\Sigma_{p+1}(x_i) \left(\prod_{l=p+2}^{L-1} W_l \Sigma_l(x_i)\right) W_L\|_2^2 \\
+&= \Theta\left(\beta_L^2 n_{p+1} \prod_{l=p+2}^{L-1} n_l \beta_l^2\right)
+\end{align}
+
+This bound uses some very technical and important tools:
+\begin{itemize}
+    \item \textbf{Operator norm for  concentration of Gaussian matrices}
+    \item \textbf{Inductive analysis of random matrix products for every layer}
+    \item \textbf{Properties of derivative matrices $\Sigma_l(x)$ for every layer}
+\end{itemize}
+
+\subsubsection{Step 9: Final Assembly and Width Optimization}
+
+Combining all bounds via union bound yields:
+
+\begin{align}
+\evmin{\bar{K}^{(L)}} &\geq \sum_{p=0}^{L-1} \mu_r(\sigma)^2 \Theta\left(d \prod_{l=1}^p n_l \beta_l^2\right) \Theta\left(\beta_L^2 \prod_{l=p+1}^{L-1} n_l \beta_l^2\right) \\
+&= \mu_r(\sigma)^2 \Theta\left(d \beta_L^2 \sum_{p=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
+\end{align}
+
+The width condition requires at least one layer to satisfy:
+\begin{align}
+n_p = \tilde{\Omega}(N \log N), \quad \text{with } \xi_p = 1
+\end{align}
+
+where $\xi_p$ indicates layer $p$ is "wide".
+
+\subsubsection{Upper Bound via Diagonal Analysis}
+
+For the upper bound, we use:
+\begin{align}
+\evmin{JJ^T} &\leq (JJ^T)_{11} = \sum_{p=0}^{L-1} \|(F_p)_{1:}\|_2^2 \|(B_{p+1})_{1:}\|_2^2 \\
+&= \sum_{p=0}^{L-1} \|f_p(x_1)\|_2^2 \|(B_{p+1})_{1:}\|_2^2 \\
+&= \mathcal{O}\left(d \beta_L^2 \sum_{p=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
+\end{align}
+
+\subsubsection{Final Result}
+
+Assuming $\beta_l = 1$ for simplicity and that some layer $p^*$ satisfies $n_{p^*} = \tilde{\Omega}(N)$, the main theorem gives:
+
+\begin{align}
+\mu_r(\sigma)^2 \Omega(d) \leq \evmin{\bar{K}^{(L)}} \leq \mathcal{O}(d L)
+\end{align}
+
+with probability at least $1 - \text{poly}(N) \exp(-\Omega(\min_l n_l))$.
+
+This approach significantly reduces width requirements compared to classical methods, requiring only one wide layer rather than all layers.
+
+
+
+
+
+
+
+\newpage
+
+\section{Detailed appendix for architecture's paradigms}
+We focus here on understanding NTK for other architectures and handcomputations made through this comparison.
+
+
+\subsection{Detailed approach for Transformers and Softmax Analysis}
+\label{app:transformers}
+
+We present here our approach to the analysis of the softmax function and the Gaussian measure integrals that appear in Transformers NTK analysis following the work of Hron et al.
+
+\begin{tcolorbox}[colback=personalcontribcolor!15,colframe=personalcontribcolor!80!black,title={\textbf{Major Personal Contribution}},enhanced,drop shadow,boxrule=2pt]
+This appendix presents the detailed calculations for the theoretical analysis of \textcolor{insightcolor}{\textbf{Gaussian measure integrals}} and \textcolor{methodcolor}{\textbf{softmax functions}}, specifically developed for \textcolor{kernelcolor}{\textbf{Transformer}} models. These results constitute an original contribution to the mathematical understanding of \textcolor{k3color}{\textbf{attention mechanisms}}.
+\end{tcolorbox}
+
+
+
+\subsubsection{Problem Statement: Moments of the Softmax Function}
+
+The concrete problem is to calculate the moments of the output of a softmax function applied row-wise to an $N \times P$ Gaussian matrix $\mathbf{X}$ with a correlated covariance structure. The softmax output $\mathbf{S}$ is given by:
+\begin{equation}
+\boxed{ \textcolor{red}{S_{ik}} = \frac{e^{\textcolor{insightcolor}{\mathbf{X_{ik}}}}}{\textcolor{blue}{Z_i}}, \quad \text{where } \textcolor{blue}{Z_i} = \sum_{l=1}^{P} e^{\textcolor{insightcolor}{\mathbf{X_{il}}}}}
+\end{equation}
+
+The objective is to calculate $\mathbb{E}[P(S_{ik})]$ over the distribution of $\mathbf{X}$. We note that the softmax structure is intrinsically linked to the logarithm of the partition function $Z_i$:
+\begin{equation}
+\textcolor{red}{S_{ik}} = \frac{\boldsymbol{\partial} \log(\textcolor{blue}{Z_i})}{\boldsymbol{\partial} \textcolor{insightcolor}{X_{ik}}}
+\end{equation}
+
+Thus, $\mathbb{E}[P( \textcolor{red}{S_{ik}})] = \mathbb{E}[P( \frac{e^{\textcolor{insightcolor}{\mathbf{X_{ik}}}}}{\textcolor{blue}{Z_i}})] = \mathbb{E}[P( \frac{e^{\textcolor{insightcolor}{\mathbf{X_{ik}}}}}{\sum_{l=1}^{P} e^{\textcolor{insightcolor}{\mathbf{X_{il}}}}})]$ is the expectation of a polynomial of the derivatives of $\log Z_i$, making exact analytical calculation \textbf{intractable}.
+
+
+
+\subsubsection{Personal contribution currently in progress : Approximation Strategy: Saddle-Point Method}
+
+We introduce a parameter $\beta$ (inverse temperature) to obtain $\textcolor{red}{S_{ik}}(\beta) = e^{\beta \textcolor{insightcolor}{X_{ik}}} / \sum_l e^{\beta \textcolor{insightcolor}{X_{il}}}$. Following the asymptotic approach, we factorize the partition function $\textcolor{blue}{Z_a}$:
+
+\begin{equation}
+\boxed{\textcolor{blue}{Z_a} = \sum_{k=1}^{P} e^{\beta \textcolor{greencolor}{G_{ak}}} = e^{\textcolor{red}{\beta \textcolor{greencolor}{G_{a, \text{max}}}}} \left( 1 + \sum_{k \neq \text{max}} e^{\textcolor{methodcolor}{\beta (\textcolor{greencolor}{G_{ak}} - \textcolor{greencolor}{G_{a, \text{max}}})}} \right)}
+\end{equation}
+
+We define $\textcolor{orange}{\delta_k} = e^{\beta (\textcolor{greencolor}{G_{ak}} - \textcolor{greencolor}{G_{a, \text{max}}})}$ for $k \neq \text{max}$.
+
+\begin{equation}
+\textcolor{red}{S_{ik}}(\beta) = \frac{e^{\beta \textcolor{insightcolor}{X_{ik}}}}{\sum_{l=1}^{P} e^{\beta \textcolor{insightcolor}{X_{il}}}}, \quad \text{where } \beta = \frac{1}{T}
+\end{equation}
+
+\begin{tcolorbox}[colback=green!10,colframe=green!80!black,title={\textbf{High Temperature Regime in Production Models}},enhanced,drop shadow,boxrule=2pt]
+Current state-of-the-art transformer models operate predominantly in the \textcolor{green}{\textbf{high temperature regime}} with $T \in [3.3, \infty)$ corresponding to $\beta \in (0, 0.3]$ for non-creative applications. This regime is characterized by:
+
+\begin{equation}
+\boxed{T_{\text{typical}} \geq 3.3 \implies \beta_{\text{typical}} \leq 0.3}
+\end{equation}
+
+In this high temperature setting, the softmax distribution approaches uniform behavior, leading to more diverse and less confident predictions. This contrasts with creative applications where lower temperatures ($T < 1$, $\beta > 1$) are used to produce more deterministic outputs.
+\end{tcolorbox}
+
+
+
+\subsubsection{Personal contribution currently in progress : Cumulant Expansion Framework}
+
+We employ the cumulant expansion approach, which is more physically motivated. First, we expand the logarithm:
+
+\begin{align}
+\log(\textcolor{blue}{Z_a}) &= \log\left(e^{\beta \textcolor{greencolor}{G_{a, \text{max}}}}\right) + \log\left( 1 + \sum_{k \neq \text{max}} \textcolor{orange}{\delta_k} \right) \\
+&\approx \beta \textcolor{greencolor}{G_{a, \text{max}}} + \textcolor{insightcolor}{\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)} - \textcolor{k3color}{\frac{1}{2}\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)^2} + \dots \label{eq:log_expansion}
+\end{align}
+
+For the dominant output ($l=\text{max}$):
+
+\begin{align}
+\textcolor{red}{S_{a, \text{max}}} &= \exp\left(\beta \textcolor{greencolor}{G_{a, \text{max}}} - \log(\textcolor{blue}{Z_a})\right) \\
+&\approx \exp\left( - \textcolor{insightcolor}{\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}} + \textcolor{k3color}{\frac{1}{2}\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)^2} - \dots \right) \\
+&\approx 1 - \textcolor{insightcolor}{\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}} + \textcolor{methodcolor}{\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)^2} + \dots \label{eq:dominant_softmax}
+\end{align}
+
+For a perturbative output ($l \neq \text{max}$):
+
+\begin{equation}
+\boxed{\textcolor{red}{S_{al}} = \exp(\beta \textcolor{greencolor}{G_{al}} - \log(\textcolor{blue}{Z_a})) \approx \textcolor{orange}{\delta_l} \left(1 - \textcolor{methodcolor}{\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}} + \dots \right)} \label{eq:perturbative_softmax}
+\end{equation}
+
+
+
+
+
+\subsubsection{High-Dimensional Analysis through Word Embedding Characterization}
+
+We analyze dot products between word embeddings in transformer architectures. Consider two independent word embedding vectors $\mathbf{e}_i$ and $\mathbf{e}_j$ from an embedding matrix $\mathbf{E} \in \mathbb{R}^{V \times d}$, where $V$ is vocabulary size and $d$ is embedding dimension.
+
+Each component is initialized as i.i.d. $\mathcal{N}(0, \sigma_{\text{emb}}^2)$ with $\sigma_{\text{emb}} = 1/\sqrt{d}$ for unit variance. For two independent embeddings $\mathbf{e}_i, \mathbf{e}_j \in \mathbb{R}^d$, their dot product follows $Z = \mathbf{e}_i \cdot \mathbf{e}_j \sim \mathcal{N}(0, 1/d)$.
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{High-Dimensional Embedding Concentration}},enhanced,drop shadow,boxrule=2pt]
+For the absolute value $|Z|$ following folded normal distribution with standard initialization:
+
+\begin{equation}
+\boxed{\mathbb{E}[|Z|] = \sqrt{\frac{2}{\pi d}}, \quad \text{Var}(|Z|) = \frac{0.36338}{d}} \label{eq:high_dim_concentration_embeddings}
+\end{equation}
+
+The concentration property becomes pronounced as embedding dimension increases:
+
+\begin{equation}
+\boxed{\lim_{d \to \infty} \mathbb{E}[|Z|] = 0, \quad \lim_{d \to \infty} \text{Var}(|Z|) = 0} \label{eq:embedding_concentration_limit}
+\end{equation}
+\end{tcolorbox}
+
+Under isotropy assumption, embeddings are uniformly distributed on the unit sphere. For unit vectors $\mathbf{u}_i$ and $\mathbf{u}_j$, the dot product satisfies the cosine law:
+
+\begin{equation}
+\boxed{\mathbf{u}_i \cdot \mathbf{u}_j = \cos(\theta_{ij})} \label{eq:cosine_law_embeddings}
+\end{equation}
+
+where $\theta_{ij}$ is the angular distance. Under isotropy, the angle follows:
+
+\begin{equation}
+\boxed{\theta_{ij} \approx \frac{\pi}{2} + \frac{\mathbf{u}_i \cdot \mathbf{u}_j}{\sqrt{d}} + O(d^{-3/2})} \label{eq:angular_concentration}
+\end{equation}
+
+This concentration justifies that dot products between independent embeddings remain small and concentrated around zero as $d \to \infty$. This property ensures we can go through an expansion with small $\rho$
+
+
+
+\subsubsection{Correlated Gaussian Matrix Generation}
+
+We adopt the generative framework from the analytical calculations using a \textcolor{kernelcolor}{global variable} and \textcolor{sobolevcolor}{row-specific components}. Let $\textcolor{weightcolor}{Z_0} \sim \mathcal{N}(0,1)$ be a \textcolor{kernelcolor}{global random variable}. For each row $\textcolor{k3color}{i} \in \{1, \ldots, \textcolor{methodcolor}{n}\}$, let $\textcolor{sobolevcolor}{Z_i} = (\textcolor{sobolevcolor}{Z_{i1}}, \textcolor{sobolevcolor}{Z_{i2}}, \ldots, \textcolor{sobolevcolor}{Z_{iP}})$ be a vector of $\textcolor{insightcolor}{P}$ independent standard normal variables.
+
+The entries of the correlated Gaussian matrix $\textcolor{kernelcolor}{\mathbf{G}}$ are constructed as:
+
+\begin{equation}
+\boxed{\textcolor{kernelcolor}{G_{ij}} = \textcolor{weightcolor}{Z_0} \cdot \textcolor{breakthroughcolor}{\rho_{ij}} + \textcolor{sobolevcolor}{Z_{ij}} \sqrt{1 - \textcolor{breakthroughcolor}{\rho_{ij}^2}}} \label{eq:generative_construction}
+\end{equation}
+
+This construction ensures the desired \textcolor{resultcolor}{covariance structure}:
+
+\begin{equation}
+\textcolor{insightcolor}{\text{Cov}(\textcolor{kernelcolor}{G_{ik}}, \textcolor{kernelcolor}{G_{jl}})} = \mathbb{E}[\textcolor{kernelcolor}{G_{ik}} \textcolor{kernelcolor}{G_{jl}}] = \textcolor{breakthroughcolor}{\rho_{ik}} \textcolor{methodcolor}{\rho_{jl}} \label{eq:separable_covariance}
+\end{equation}
+
+The verification follows directly from the independence of the constituent random variables:
+
+\begin{align}
+\mathbb{E}[\textcolor{kernelcolor}{G_{ik}} \textcolor{kernelcolor}{G_{jl}}] &= \mathbb{E}[(\textcolor{weightcolor}{Z_0} \textcolor{breakthroughcolor}{\rho_{ik}} + \textcolor{sobolevcolor}{Z_{ik}}\sqrt{1-\textcolor{breakthroughcolor}{\rho_{ik}^2}})(\textcolor{weightcolor}{Z_0} \textcolor{breakthroughcolor}{\rho_{jl}} + \textcolor{sobolevcolor}{Z_{jl}}\sqrt{1-\textcolor{breakthroughcolor}{\rho_{jl}^2}})] \\
+&= \textcolor{breakthroughcolor}{\rho_{ik}} \textcolor{breakthroughcolor}{\rho_{jl}} \mathbb{E}[\textcolor{weightcolor}{Z_0^2}] + \textcolor{k3color}{\delta_{i,j}\delta_{k,l}}\sqrt{1-\textcolor{breakthroughcolor}{\rho_{ik}^2}}\sqrt{1-\textcolor{breakthroughcolor}{\rho_{jl}^2}}\mathbb{E}[\textcolor{sobolevcolor}{Z_{ik}}\textcolor{sobolevcolor}{Z_{jl}}] \\
+&= \textcolor{breakthroughcolor}{\rho_{ik}} \textcolor{breakthroughcolor}{\rho_{jl}} + \textcolor{k3color}{\delta_{i,j}\delta_{k,l}}(1-\textcolor{breakthroughcolor}{\rho_{ik}^2}) \\
+&= \textcolor{breakthroughcolor}{\rho_{ik}} \textcolor{breakthroughcolor}{\rho_{jl}} \label{eq:covariance_verification}
+\end{align}
+
+where we used $\textcolor{breakthroughcolor}{\rho_{ii}} = 1$ for the diagonal terms. This generative model requires only $\textcolor{methodcolor}{n}\textcolor{insightcolor}{P} + 1$ independent random variables instead of the full $\textcolor{methodcolor}{n^2}\textcolor{insightcolor}{P}$ variables needed for direct sampling.
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Generative Model}},enhanced,drop shadow,boxrule=2pt]
+This generative model requires $\textcolor{methodcolor}{n^2} + 1$ independent random variables instead of the strictly necessary $\textcolor{methodcolor}{n^2}\textcolor{insightcolor}{P}$ variables needed for direct sampling. We have slightly more variables than $\textcolor{methodcolor}{n^2} - 1$, but we preserve a crucial property: the symmetry with respect to $\textcolor{breakthroughcolor}{\rho}$ in the definition, which is essential for integrating over a numerically coherent domain.
+\end{tcolorbox}
+
+
+\subsubsection{Multidimensional Hermite Polynomials and Isserlis-Wick Theorem}
+
+We present our main tools to make this integration tractable at least numerically
+
+\begin{theorem}[Multidimensional Hermite Polynomials and Orthogonality - Mehler (1866)]
+\label{thm:multidim_hermite}
+For a $d$-dimensional Gaussian vector $\mathbf{X} = (X_1, \ldots, X_d)^T$ with mean $\boldsymbol{\mu}$ and covariance matrix $\boldsymbol{\Sigma}$, the probability density function is:
+
+\begin{equation}
+\boxed{p(\mathbf{x}) = \frac{1}{(2\pi)^{d/2}|\boldsymbol{\Sigma}|^{1/2}} \exp\left(-\frac{1}{2}(\mathbf{x}-\boldsymbol{\mu})^T\boldsymbol{\Sigma}^{-1}(\mathbf{x}-\boldsymbol{\mu})\right)} \label{eq:multivariate_gaussian_pdf}
+\end{equation}
+
+The multidimensional Hermite polynomials $H_{\boldsymbol{\alpha}}(\mathbf{x})$ for multi-index $\boldsymbol{\alpha} = (\alpha_1, \ldots, \alpha_d)$ satisfy the orthogonality relation:
+
+\begin{equation}
+\boxed{\int_{\mathbb{R}^d} H_{\boldsymbol{\alpha}}(\mathbf{x}) H_{\boldsymbol{\beta}}(\mathbf{x}) p(\mathbf{x}) d\mathbf{x} = \boldsymbol{\alpha}! \delta_{\boldsymbol{\alpha}\boldsymbol{\beta}}} \label{eq:orthogonality_multidim}
+\end{equation}
+
+where $\boldsymbol{\alpha}! = \alpha_1! \cdots \alpha_d!$ and $\delta_{\boldsymbol{\alpha}\boldsymbol{\beta}}$ is the Kronecker delta.
+\end{theorem}
+
+\begin{theorem}[Isserlis-Wick Theorem for Gaussian Moments]
+\label{thm:isserlis_wick}
+For a centered multivariate Gaussian random vector $\mathbf{X} \sim \mathcal{N}(\mathbf{0}, \boldsymbol{\Sigma})$, the moments satisfy:
+
+\begin{equation}
+\boxed{\mathbb{E}[X_{i_1} X_{i_2} \cdots X_{i_{2n}}] = \sum_{\text{pairings}} \prod_{\text{pairs } (j,k)} \Sigma_{i_j, i_k}} \label{eq:isserlis_wick_formula}
+\end{equation}
+
+where the sum is over all possible pairings of the $2n$ indices into $n$ pairs. For odd moments:
+
+\begin{equation}
+\boxed{\mathbb{E}[X_{i_1} X_{i_2} \cdots X_{i_{2n+1}}] = 0} \label{eq:odd_moments_zero}
+\end{equation}
+
+The generating function for multidimensional Hermite polynomials is:
+
+\begin{equation}
+\boxed{\exp\left(\mathbf{t}^T \mathbf{x} - \frac{1}{2}\mathbf{t}^T \boldsymbol{\Sigma} \mathbf{t}\right) = \sum_{\boldsymbol{\alpha}} \frac{H_{\boldsymbol{\alpha}}(\mathbf{x})}{\boldsymbol{\alpha}!} \mathbf{t}^{\boldsymbol{\alpha}}} \label{eq:multidim_generating_function}
+\end{equation}
+
+where $\mathbf{t}^{\boldsymbol{\alpha}} = t_1^{\alpha_1} \cdots t_d^{\alpha_d}$.
+\end{theorem}
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Ongoing research: Numerical Implementation Strategy}},enhanced,drop shadow,boxrule=2pt]
+From a numerical perspective, the key insight is to leverage these two fundamental properties—the orthogonality of multidimensional Hermite 
+polynomials and the Isserlis-Wick theorem for Gaussian moments—to develop efficient computational strategies. Rather than hardcoding 
+a Monte-Carlo integration specific formula for each individual moment calculation, we can implement robust quadrature rules that systematically evaluate these 
+expectations. This approach transforms the computational burden from deriving explicit closed-form expressions for every moment to designing 
+appropriate numerical integration schemes that exploit the underlying mathematical structure, making the analysis both more general and 
+computationally tractable.
+\end{tcolorbox}
+
+
+
+
+
+
+
+\newpage
+\subsection{Personal contribution: Detailed Calculations for Two Hidden Layer MMNN}
+\label{app:mmnn}
+
+This section presents the complete development of calculations for two hidden layer MMNN (Matrix Memory Neural Networks), including exact derivations of the NTK and analysis of Fisher and Kibble distributions.
+
+\subsubsection{Calculation of activation's correlations}
+
+Once we calculate the NTK of MMNN for 1 layer, we must solve the problem of calculating the expectation $\E[\text{ReLU}(X_1)\text{ReLU}(X_2)]$ for a pair of random variables $(X_1, X_2)$ following a bivariate normal distribution. The approach consists of standardizing the variables and decomposing the integral into four terms corresponding to different moments of the standardized variables.
+
+\subsubsection{Calculation of $\mathbf{I}_{11}$ (Probability)}
+
+The term $\mathbf{I}_{11}$ represents the probability $P(Z_1 > a, Z_2 > b)$ where $Z_i$ are the standardized variables. It is calculated via the cumulative distribution function of the standard bivariate normal distribution, providing the foundational probability measure for our subsequent calculations.
+
+\subsubsection{Special Case: Zero Means ($\mu_1=\mu_2=0$)}
+
+In this case, the derivation leads to an elegant formula through Price's theorem, which was a central tool in our analysis. By integrating from $0$ to $\rho$ and adding the appropriate normalization constant, we obtain the final expression for the zero-mean case. This result forms the backbone of our theoretical understanding of ReLU interactions in the infinite-width limit.
+
+\begin{equation}
+\boxed{\E[\text{ReLU}(Z_1)\text{ReLU}(Z_2)] = \frac{1}{2\pi}(\sqrt{1-\rho^2} + \rho\arccos(-\rho))}
+\end{equation}
+
+
+\subsubsection{Proof of the Recursion for the NTK}
+
+Now we can prove the recursion for the NTK.
+
+
+\begin{proof}[Outline of Proof Structure]
+We establish this recursion by decomposing the total NTK at layer $\ell$ into contributions from different parameter groups:
+
+\textbf{Goal:} We aim to show that the NTK at layer $\ell$ can be written as a sum of contributions from previous layers and the current layer.
+
+\textbf{Intuition:} We use the chain rule to decompose gradients with respect to parameters at different layers, then apply the Law of Large Numbers in the infinite-width limit.
+
+\begin{center}
+\begin{tikzpicture}[node distance=2cm, auto, scale=0.6]
+    % Define styles
+    \tikzstyle{property} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=blue!80, fill=blue!20, font=\footnotesize]
+    \tikzstyle{arrow} = [thick,->,>=stealth,blue!80]
+    
+    % Nodes
+    \node [property] (chain) {Chain rule for gradients across layers};
+    \node [property, below of=chain] (lln) {Law of Large Numbers for infinite-width convergence};
+    \node [property, below of=lln] (indep) {Independence of random parameters across neurons};
+    
+    % Arrows
+    \draw [arrow] (chain) -- (lln);
+    \draw [arrow] (lln) -- (indep);
+    
+\end{tikzpicture}
+\end{center}
+
+The total NTK at layer $\ell$ is the sum of contributions from all trainable parameters up to that layer:
+\begin{equation}
+\label{eq:ntk_decomposition}
+\Theta^{(\ell)}_{rand}(x, x') = \underbrace{(\nabla_{\theta^{(\ell-1)}} f^{(\ell)}(x))^\top (\nabla_{\theta^{(\ell-1)}} f^{(\ell)}(x'))}_{\text{Term 1}} + \underbrace{\sum_{j=1}^{n_\ell} \frac{\partial f^{(\ell)}(x)}{\partial A_j^{(\ell)}} \frac{\partial f^{(\ell)}(x')}{\partial A_j^{(\ell)}}}_{\text{Term 2}} + \underbrace{\frac{\partial f^{(\ell)}(x)}{\partial c^{(\ell)}} \frac{\partial f^{(\ell)}(x')}{\partial c^{(\ell)}}}_{\text{Term 3}}
+\end{equation}
+
+\textbf{Term 3 (Bias contribution):} This term is deterministic and equals $\sigma_c^2$ from the bias parameter.
+
+\textbf{Term 2 (Layer $\ell$ weights contribution):} The gradient with respect to a weight $A_j^{(\ell)}$ is:
+\begin{equation}
+\frac{\partial f^{(\ell)}(x)}{\partial A_j^{(\ell)}} = \frac{\sigma_A}{\sqrt{n_\ell}} \sigma(w_j^\top h^{(\ell-1)}(x) + \beta b_j)
+\end{equation}
+
+Term 2 becomes:
+\begin{equation}
+\frac{\sigma_A^2}{n_\ell} \sum_{j=1}^{n_\ell} \sigma(w_j^\top h^{(\ell-1)}(x) + \beta b_j) \sigma(w_j^\top h^{(\ell-1)}(x') + \beta b_j)
+\end{equation}
+
+For a fixed realization of the previous layer's output $h^{(\ell-1)}$, this is a sum of i.i.d. random variables over $(w_j, b_j)$. By the Law of Large Numbers, as $n_\ell \to \infty$:
+\begin{equation}
+\text{Term 2} \xrightarrow{p} \sigma_A^2 \mathbb{E}_{w,b} \left[ \sigma(\cdot) \sigma(\cdot) \right] = \sigma_A^2 \Sigma^{(\ell)}(x, x')
+\end{equation}
+
+\textbf{Term 1 (Previous layers contribution):} Using the chain rule:
+\begin{equation}
+\nabla_{\theta^{(\ell-1)}} f^{(\ell)}(x) = \frac{\partial f^{(\ell)}(x)}{\partial h^{(\ell-1)}(x)} \nabla_{\theta^{(\ell-1)}} h^{(\ell-1)}(x)
+\end{equation}
+
+Term 1 becomes:
+\begin{equation}
+(\nabla_{\theta^{(\ell-1)}} h^{(\ell-1)}(x))^\top \left(\frac{\partial f^{(\ell)}}{\partial h^{(\ell-1)}}(x)\right)^\top \left(\frac{\partial f^{(\ell)}}{\partial h^{(\ell-1)}}(x')\right) (\nabla_{\theta^{(\ell-1)}} h^{(\ell-1)}(x'))
+\end{equation}
+
+The first and last parts form the NTK of the previous layers, $\Theta^{(\ell-1)}(x, x')$. The middle part is a product of Jacobians that, as $n_\ell \to \infty$, converges to:
+\begin{equation}
+\left(\frac{\partial f^{(\ell)}}{\partial h^{(\ell-1)}}\right)^\top \left(\frac{\partial f^{(\ell)}}{\partial h^{(\ell-1)}}\right) \xrightarrow{p} \sigma_A^2 \dot{\Sigma}^{(\ell)}(x, x')
+\end{equation}
+
+Thus:
+\begin{equation}
+\text{Term 1} \xrightarrow{p} \Theta^{(\ell-1)}(x, x') \cdot \sigma_A^2 \dot{\Sigma}^{(\ell)}(x, x')
+\end{equation}
+
+\textbf{Combining terms:} In the infinite-width limit, we obtain:
+\begin{equation}
+\Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \sigma_A^2 \dot{\Sigma}^{(\ell)}(x, x') + \sigma_A^2 \Sigma^{(\ell)}(x, x') + \sigma_c^2
+\end{equation}
+
+Absorbing the $\sigma_A^2$ factor into the kernel definitions gives the stated recursion.
+\end{proof}
+
+
+
+\begin{tcolorbox}[colback=blue!15,colframe=blue!80!black,title={\textbf{Summary of Formulas}},enhanced,drop shadow,boxrule=2pt]
+    \begin{itemize}
+        \item \textbf{Layer Output:}
+        \[ \boxed{\bm{h}^{(\ell)}(\bm{x}) = \bm{c}^{(\ell)} + \frac{\sigma_A}{\sqrt{n_\ell}} \sum_{j=1}^{n_\ell} \bm{A}_j^{(\ell)} \sigma\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)}\right)} \]
+    
+        \item \textbf{NNGP Kernel Recursion:}
+        \begin{itemize}
+            \item \textit{Base Kernel:} Expectation over current layer's random parameters, conditioned on the previous layer's output GP $\bm{h}^{(\ell-1)}$.
+            \[ \boxed{\Sigma^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \sigma\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \right]} \]
+            \item \textit{Full Kernel:}
+            \[ \boxed{\mathcal{K}_{\text{NNGP}}^{(\ell)}(x, x') = \sigma_A^2 \Sigma^{(\ell)}(x, x') + \sigma_c^2} \]
+        \end{itemize}
+    
+        \item \textbf{NTK Kernel Recursion:}
+        \begin{itemize}
+            \item \textit{Base Derivative Kernel:}
+            \[ \boxed{\dot{\Sigma}^{(\ell)}(x, x') = \mathbb{E}_{\bm{w}, b} \left[ \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x) + \beta b\right) \dot{\sigma}\left(\bm{w}^\top \bm{h}^{(\ell-1)}(x') + \beta b\right) \bm{w}^\top\bm{w} \right]} \]
+            \item \textit{Full Kernel:}
+            \[ \boxed{\Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \sigma_A^2  \dot{\Sigma}^{(\ell)}(x, x') + \sigma_A^2 \Sigma^{(\ell)}(x, x') + \sigma_c^2} \]
+        \end{itemize}
+    \end{itemize}
+    \end{tcolorbox}
+
+
+
+
+
+
+\subsection{Fisher and Kibble Distributions}
+
+\begin{tcolorbox}[colback=blue!15,colframe=blue!50!black,title={\textbf{Exact Probability Laws}},enhanced,drop shadow]
+The random variables $(\rho_1, \|x_1\|^2, \|y_1\|^2)$ follow exact distributions:
+
+\textbf{Fisher Distribution} for correlation:
+\begin{equation}
+\boxed{\rho_1 \sim \text{Fisher}(\rho, r) = \frac{(r-2)\Gamma(r-1)(1-\rho^2)^{\frac{r-1}{2}}(1-\theta^2)^{\frac{r-4}{2}}}{\sqrt{2\pi}\Gamma(r-\frac{1}{2})(1-\rho \theta)^{r-\frac{3}{2}}} \times {}_2F_1\left(\frac{1}{2}, \frac{1}{2}; r-\frac{1}{2}; \frac{1+\rho \theta}{2}\right)}
+\end{equation}
+
+\textbf{Kibble Distribution} for squared norms:
+\begin{equation}
+\boxed{(\|x_1\|^2, \|y_1\|^2) \sim \text{Kibble}(r, \rho) = \frac{(uv)^{\frac{r/2-1}{2}} e^{-\frac{u+v}{2(1-\rho^2)}}}{\Gamma(r/2) (2(1-\rho^2))^{r/2+1} \rho^{\frac{r/2-1}{2}}} \cdot I_{r/2-1}\left(\frac{\rho\sqrt{uv}}{1-\rho^2}\right)}
+\end{equation}
+\end{tcolorbox}
+
+
+
+\newpage
+
+
+\section{Deep Narrow Neural Networks}
+
+\subsection{Scaled NTK at Initialization}
+
+\begin{theorem}[Theorem 1: Scaled NTK at Initialization]
+For $f^L_\theta$ initialized appropriately, as $L \to \infty$:
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Deep Narrow NTK Limit}},enhanced,drop shadow,boxrule=2pt]
+\begin{equation}
+\boxed{\tilde{\Theta}^L_0(x, x') \xrightarrow{p} \tilde{\Theta}^\infty(x, x') = (x^T x' + 1 + \E_g[\sigma(g(x))\sigma(g(x'))]) I_{d_{out}}}
+\end{equation}
+where $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random field).
+\end{tcolorbox}
+\end{theorem}
+
+\textbf{Alternative formulation}: $\kappa_1(\cos(u) \cdot v)$ where:
+\begin{itemize}
+\item $v = \frac{1}{1 + \beta^2/\alpha^2}$, where $\beta$ is the bias variance
+\item $\alpha = \frac{\|x\| \|x'\| \rho}{d_{in}}$, where $\cos(u)$ is the cosine distance between $x, x'$
+\end{itemize}
+
+This framework provides a promising direction for analyzing deep narrow networks through limited expansion analysis.
+
+\subsection{Research Perspectives for Deep Narrow Networks}
+
+\textbf{Architectural modifications}:
+\begin{itemize}
+\item \textbf{Unit concatenation}: Combine multiple narrow networks to increase expressivity
+\item \textbf{Skip connections}: Investigate ResNet-style connections:
+  \[ \tilde{\Theta}^\infty_{\text{skip}}(x, x') = \tilde{\Theta}^\infty(x, x') + \text{skip terms} \]
+\end{itemize}
+
+\textbf{Initialization studies}:
+\begin{itemize}
+\item \textbf{Alternative initializations}: Explore different schemes beyond current setup
+\item \textbf{$\beta \to 0$ limit}: Analyze behavior when bias variance vanishes:
+  \[ v = \frac{1}{1 + \beta^2/\alpha^2} \to 1 \text{ as } \beta \to 0 \]
+\item \textbf{Complex kernel structures}: Find initializations that yield more intricate kernel forms
+\end{itemize}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Theoretical Extensions}},enhanced,drop shadow,boxrule=2pt]
+\textbf{Theoretical extensions}:
+\begin{itemize}
+\item Extension of Hayou \& Yang's work on ResNets showing "wide and deep limits commute"
+\item Mean field analysis for deep narrow frameworks
+\item Careful analysis of stochasticity in initialization (not dropout)
+\item Experimental validation on practical tasks
+\end{itemize}
+\end{tcolorbox}
+
+
+\newpage
+
+\section{Detailed Proofs for the NTK hierarchy}
 
 
 
