@@ -80,8 +80,8 @@
 \abx@aux@segm{0}{0}{doumeche2023ntk_spectral}
 \abx@aux@cite{0}{hanin_nica_2019}
 \abx@aux@segm{0}{0}{hanin_nica_2019}
-\abx@aux@cite{0}{dyer_gur_ari_2019}
-\abx@aux@segm{0}{0}{dyer_gur_ari_2019}
+\abx@aux@cite{0}{dyer2019asymptotics}
+\abx@aux@segm{0}{0}{dyer2019asymptotics}
 \abx@aux@cite{0}{guillen_misof_gerken_2025}
 \abx@aux@segm{0}{0}{guillen_misof_gerken_2025}
 \abx@aux@cite{0}{doumeche2023sobolev_ntk}
@@ -90,8 +90,6 @@
 \abx@aux@segm{0}{0}{welper2023approximation}
 \abx@aux@cite{0}{ntk2024underparam}
 \abx@aux@segm{0}{0}{ntk2024underparam}
-\abx@aux@cite{0}{ntk2025divergence}
-\abx@aux@segm{0}{0}{ntk2025divergence}
 \@writefile{toc}{\contentsline {paragraph}{Foundations of Sobolev Training}{15}{subsubsection.1.1.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Spectral Properties of Neural Tangent Kernels}{15}{subsubsection.1.1.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Convergence of Sobolev Training and NTK Theory}{15}{subsubsection.1.1.1}\protected@file@percent }
@@ -107,8 +105,8 @@
 \newlabel{eq:sobolev_gradient_norm}{{2}{17}{Two Equivalent Sobolev Norms}{equation.2.2}{}}
 \newlabel{eq:sobolev_fourier_norm}{{3}{17}{Two Equivalent Sobolev Norms}{equation.2.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1}The NN regression framework}{17}{subsection.2.1}\protected@file@percent }
-\abx@aux@cite{0}{jacot2018neural}
-\abx@aux@segm{0}{0}{jacot2018neural}
+\abx@aux@cite{0}{jacot2018ntk}
+\abx@aux@segm{0}{0}{jacot2018ntk}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Theoretical Framework of the Neural Tangent Kernel}{18}{subsection.2.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}The Neural Tangent Kernel}{18}{subsubsection.2.2.1}\protected@file@percent }
 \newlabel{eq:ntk_definition}{{4}{18}{The Neural Tangent Kernel}{equation.2.4}{}}
@@ -146,130 +144,132 @@
 \newlabel{thm:chebyshev_commutation}{{2.9}{23}{Chebyshev Points and Matrix Commutation - Fundamental Condition}{theorem.2.9}{}}
 \newlabel{eq:chebyshev_commutation_condition}{{18}{23}{Chebyshev Points and Matrix Commutation - Fundamental Condition}{equation.2.18}{}}
 \newlabel{thm:ntk_sobolev_commutation}{{2.10}{23}{NTK-Sobolev Matrix Commutation - Chebyshev Case}{theorem.2.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Preconditioning strategies for the NTK}{25}{section.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Illustration of the NTK theorem on a complex, non-convex loss landscape. The theory guarantees that for sufficiently wide networks, gradient descent (dashed orange path) converges to a global minimum. However, the global minimum is not necessarily unique; the optimization may converge to any point within the set of global optima.}}{25}{figure.caption.2}\protected@file@percent }
+\newlabel{fig:ntk-global-minima-landscape}{{2}{25}{Illustration of the NTK theorem on a complex, non-convex loss landscape. The theory guarantees that for sufficiently wide networks, gradient descent (dashed orange path) converges to a global minimum. However, the global minimum is not necessarily unique; the optimization may converge to any point within the set of global optima}{figure.caption.2}{}}
 \abx@aux@cite{0}{zhang2024superconvergence}
 \abx@aux@segm{0}{0}{zhang2024superconvergence}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Preconditioning strategies for the NTK}{25}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Multi-Component Multi-layer Neural Networks (MMNN) and Transformers}{25}{subsection.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.1}Feature Learning vs Kernel Regimes}{25}{subsubsection.3.1.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}MMNN Model Definition and Asymptotic Regime}{26}{section.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Architecture of a Multi-component Multi-layer Neural Network (MMNN) with a low-rank intermediate layer. The red dashed connections indicate the low-rank component that reduces dimensionality from $n_1$ to $r \ll n_1$ neurons. We only train the output weights ${A}^{(1)}$ and ${A}^{(2)}$.}}{26}{figure.caption.2}\protected@file@percent }
-\newlabel{fig:mmnn_architecture}{{2}{26}{Architecture of a Multi-component Multi-layer Neural Network (MMNN) with a low-rank intermediate layer. The red dashed connections indicate the low-rank component that reduces dimensionality from $n_1$ to $r \ll n_1$ neurons. We only train the output weights $\bm {A}^{(1)}$ and $\bm {A}^{(2)}$}{figure.caption.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Personal contribution : NTK initialization for MMNN Architecture}{26}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Multi-Component Multi-layer Neural Networks (MMNN) and Transformers}{26}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.1}Feature Learning vs Kernel Regimes}{26}{subsubsection.3.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}MMNN Model Definition and Asymptotic Regime}{27}{section.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Architecture of a Multi-component Multi-layer Neural Network (MMNN) with a low-rank intermediate layer. The red dashed connections indicate the low-rank component that reduces dimensionality from $n_1$ to $r \ll n_1$ neurons. We only train the output weights ${A}^{(1)}$ and ${A}^{(2)}$.}}{27}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:mmnn_architecture}{{3}{27}{Architecture of a Multi-component Multi-layer Neural Network (MMNN) with a low-rank intermediate layer. The red dashed connections indicate the low-rank component that reduces dimensionality from $n_1$ to $r \ll n_1$ neurons. We only train the output weights $\bm {A}^{(1)}$ and $\bm {A}^{(2)}$}{figure.caption.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Personal contribution : NTK initialization for MMNN Architecture}{27}{subsection.4.1}\protected@file@percent }
 \abx@aux@cite{0}{zhang2024superconvergence}
 \abx@aux@segm{0}{0}{zhang2024superconvergence}
 \abx@aux@cite{0}{yang2020meanfield}
 \abx@aux@segm{0}{0}{yang2020meanfield}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Personal contribution : Parameterization and Training Regime}{27}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Personal contribution : Parameterization and Training Regime}{28}{subsection.4.2}\protected@file@percent }
 \abx@aux@cite{0}{jacot2018ntk}
 \abx@aux@segm{0}{0}{jacot2018ntk}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Personal contribution : Asymptotic Regime}{28}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Personal contribution : Signal Propagation and the Edge of Chaos (EOC)}{28}{subsection.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Personal contribution: NTK formulas for MMNNs}{29}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}NTK for a Single-Layer MMNN}{29}{subsection.5.1}\protected@file@percent }
-\newlabel{sec:single_layer_mmfn}{{5.1}{29}{NTK for a Single-Layer MMNN}{subsection.5.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}From Gradient Products to an Expectation}{29}{subsection.5.2}\protected@file@percent }
-\newlabel{eq:ntk_expectation}{{24}{30}{From Gradient Products to an Expectation}{equation.5.24}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Integral Formulation and Parameter Mapping}{30}{subsection.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Final Analytical Expression}{30}{subsection.5.4}\protected@file@percent }
-\newlabel{eq:final_ntk_decomp}{{26}{30}{NNGP Kernel for a Single-Layer ReLU MMNN}{equation.5.26}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Personal contribution : Recursion for Multi-Layer MMNNs}{30}{subsection.5.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}NNGP Kernel \(\Sigma ^{(\ell )}\) Recursion}{31}{subsection.5.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Personal contribution: NTK Kernel \(\Theta ^{(\ell )}\) Recursion}{31}{subsection.5.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.7.1}Personal contribution : Parameter Influence on NTK Preconditioning}{32}{subsubsection.5.7.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Personal contribution: Two Hidden Layer MMNN Architecture NTK analysis}{32}{subsection.5.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Personal contribution : Asymptotic Regime}{29}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Personal contribution : Signal Propagation and the Edge of Chaos (EOC)}{29}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Personal contribution: NTK formulas for MMNNs}{30}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}NTK for a Single-Layer MMNN}{30}{subsection.5.1}\protected@file@percent }
+\newlabel{sec:single_layer_mmfn}{{5.1}{30}{NTK for a Single-Layer MMNN}{subsection.5.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}From Gradient Products to an Expectation}{30}{subsection.5.2}\protected@file@percent }
+\newlabel{eq:ntk_expectation}{{24}{31}{From Gradient Products to an Expectation}{equation.5.24}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Integral Formulation and Parameter Mapping}{31}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Final Analytical Expression}{31}{subsection.5.4}\protected@file@percent }
+\newlabel{eq:final_ntk_decomp}{{26}{31}{NNGP Kernel for a Single-Layer ReLU MMNN}{equation.5.26}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Personal contribution : Recursion for Multi-Layer MMNNs}{31}{subsection.5.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}NNGP Kernel \(\Sigma ^{(\ell )}\) Recursion}{32}{subsection.5.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Personal contribution: NTK Kernel \(\Theta ^{(\ell )}\) Recursion}{32}{subsection.5.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.7.1}Personal contribution : Parameter Influence on NTK Preconditioning}{33}{subsubsection.5.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.8}Personal contribution: Two Hidden Layer MMNN Architecture NTK analysis}{33}{subsection.5.8}\protected@file@percent }
 \abx@aux@cite{0}{zhang2024superconvergence}
 \abx@aux@segm{0}{0}{zhang2024superconvergence}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.8.1}Final Result}{33}{subsubsection.5.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.8.1}Final Result}{34}{subsubsection.5.8.1}\protected@file@percent }
 \abx@aux@cite{0}{bietti2021deepequalsshallowrelu}
 \abx@aux@segm{0}{0}{bietti2021deepequalsshallowrelu}
 \abx@aux@cite{0}{murray2023characterizingspectrumntkpower}
 \abx@aux@segm{0}{0}{murray2023characterizingspectrumntkpower}
 \abx@aux@cite{0}{terjek2025mlpseocspectrumntk}
 \abx@aux@segm{0}{0}{terjek2025mlpseocspectrumntk}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Personal contribution: Ongoing research and conclusion}{34}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7}Partial conclusion for preconditioning through architecture's paradigms}{36}{section.7}\protected@file@percent }
-\abx@aux@cite{0}{yang2024deepsuperreul}
-\abx@aux@segm{0}{0}{yang2024deepsuperreul}
-\@writefile{toc}{\contentsline {section}{\numberline {8}Introduction to the Neural Tangent Hierarchy}{38}{section.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Conceptual Clarity: Geometric Intuition and Practical Motivations}{38}{subsection.8.1}\protected@file@percent }
-\newlabel{eq:physical_analogy}{{35}{38}{Conceptual Clarity: Geometric Intuition and Practical Motivations}{equation.8.35}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.1.1}Scaling Regimes and Practical Implications}{38}{subsubsection.8.1.1}\protected@file@percent }
-\newlabel{eq:scaling_regimes}{{36}{39}{Scaling Regimes and Practical Implications}{equation.8.36}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.1.2}Interpretability Through Spectral Analysis}{39}{subsubsection.8.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Mathematical Foundation: The Third-Order Kernel}{40}{subsection.8.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.1}The Neural Tangent Kernel Framework}{40}{subsubsection.8.2.1}\protected@file@percent }
-\newlabel{eq:ntk_dynamics}{{37}{40}{The Neural Tangent Kernel Framework}{equation.8.37}{}}
-\newlabel{eq:ntk_decomposition}{{38}{40}{The Neural Tangent Kernel Framework}{equation.8.38}{}}
-\newlabel{eq:backprop_gradient}{{39}{40}{The Neural Tangent Kernel Framework}{equation.8.39}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.2}The Neural Tangent Hierarchy: Beyond Infinite Width}{41}{subsubsection.8.2.2}\protected@file@percent }
-\newlabel{eq:nth_hierarchy}{{40}{41}{The Neural Tangent Hierarchy: Beyond Infinite Width}{equation.8.40}{}}
-\newlabel{eq:higher_order_definition}{{41}{41}{The Neural Tangent Hierarchy: Beyond Infinite Width}{equation.8.41}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.3}Third-Order Kernel: Theory and Computation}{41}{subsubsection.8.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.4}Fundamental Evolution Equation [hong tzer]}{41}{subsubsection.8.2.4}\protected@file@percent }
-\newlabel{eq:ntk_evolution}{{42}{41}{Fundamental Evolution Equation [hong tzer]}{equation.8.42}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.5}Personal Contribution : Tensor Hierarchical Decomposition}{41}{subsubsection.8.2.5}\protected@file@percent }
-\newlabel{eq:k3_decomposition}{{43}{41}{Personal Contribution : Tensor Hierarchical Decomposition}{equation.8.43}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.6}Personal Contribution: Extended Formula for $\textcolor {k3color}{K^{(3)}}$}{42}{subsubsection.8.2.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.7}Personal Contribution: $K^{(3)}$ Complete Expression}{42}{subsubsection.8.2.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Personal contribution: Ongoing research and conclusion}{35}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Partial conclusion for preconditioning through architecture's paradigms}{37}{section.7}\protected@file@percent }
+\abx@aux@cite{0}{yang2024deepsuperelu}
+\abx@aux@segm{0}{0}{yang2024deepsuperelu}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Introduction to the Neural Tangent Hierarchy}{39}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Conceptual Clarity: Geometric Intuition and Practical Motivations}{39}{subsection.8.1}\protected@file@percent }
+\newlabel{eq:physical_analogy}{{35}{39}{Conceptual Clarity: Geometric Intuition and Practical Motivations}{equation.8.35}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.1.1}Scaling Regimes and Practical Implications}{39}{subsubsection.8.1.1}\protected@file@percent }
+\newlabel{eq:scaling_regimes}{{36}{40}{Scaling Regimes and Practical Implications}{equation.8.36}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.1.2}Interpretability Through Spectral Analysis}{40}{subsubsection.8.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Mathematical Foundation: The Third-Order Kernel}{41}{subsection.8.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.1}The Neural Tangent Kernel Framework}{41}{subsubsection.8.2.1}\protected@file@percent }
+\newlabel{eq:ntk_dynamics}{{37}{41}{The Neural Tangent Kernel Framework}{equation.8.37}{}}
+\newlabel{eq:ntk_decomposition}{{38}{41}{The Neural Tangent Kernel Framework}{equation.8.38}{}}
+\newlabel{eq:backprop_gradient}{{39}{41}{The Neural Tangent Kernel Framework}{equation.8.39}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.2}The Neural Tangent Hierarchy: Beyond Infinite Width}{42}{subsubsection.8.2.2}\protected@file@percent }
+\newlabel{eq:nth_hierarchy}{{40}{42}{The Neural Tangent Hierarchy: Beyond Infinite Width}{equation.8.40}{}}
+\newlabel{eq:higher_order_definition}{{41}{42}{The Neural Tangent Hierarchy: Beyond Infinite Width}{equation.8.41}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.3}Third-Order Kernel: Theory and Computation}{42}{subsubsection.8.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.4}Fundamental Evolution Equation [hong tzer]}{42}{subsubsection.8.2.4}\protected@file@percent }
+\newlabel{eq:ntk_evolution}{{42}{42}{Fundamental Evolution Equation [hong tzer]}{equation.8.42}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.5}Personal Contribution : Tensor Hierarchical Decomposition}{42}{subsubsection.8.2.5}\protected@file@percent }
+\newlabel{eq:k3_decomposition}{{43}{42}{Personal Contribution : Tensor Hierarchical Decomposition}{equation.8.43}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.6}Personal Contribution: Extended Formula for $\textcolor {k3color}{K^{(3)}}$}{43}{subsubsection.8.2.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {8.2.7}Personal Contribution: $K^{(3)}$ Complete Expression}{43}{subsubsection.8.2.7}\protected@file@percent }
 \abx@aux@cite{0}{lee2022ntk}
 \abx@aux@segm{0}{0}{lee2022ntk}
-\@writefile{toc}{\contentsline {section}{\numberline {9}NTH Scaling Laws w.r.t depth}{43}{section.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Personal Contribution: Recursive Analysis of Network Depth}{43}{subsection.9.1}\protected@file@percent }
-\newlabel{thm:recursive_depth}{{9.1}{43}{Personal Contribution: Recursive Analysis of Network Depth}{subsection.9.1}{}}
-\newlabel{eq:recursive_k3}{{47}{43}{Personal Contribution: Recursive Analysis of Network Depth}{equation.9.47}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.1.1}Personal Contribution: Activation Stability Analysis}{44}{subsubsection.9.1.1}\protected@file@percent }
-\newlabel{eq:activation_stability}{{48}{44}{Personal Contribution: Activation Stability Analysis}{equation.9.48}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.1.2}Backward Propagation Stability}{44}{subsubsection.9.1.2}\protected@file@percent }
-\newlabel{eq:backward_stability}{{52}{44}{Backward Propagation Stability}{equation.9.52}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.1.3}Personal Contribution: ReLU Recursion}{45}{subsubsection.9.1.3}\protected@file@percent }
-\newlabel{eq:relu_recursion_main}{{53}{45}{Personal Contribution: ReLU Recursion}{equation.9.53}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Personal contribution : Final bounds on Depth Dependence}{45}{subsection.9.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.2.1}Main Results}{45}{subsubsection.9.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.2.2}Towards numerical validation}{45}{subsubsection.9.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {10}Numerical bounds confirmation for NTH scaling laws}{46}{section.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}Implementation}{46}{subsection.10.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.2}Empirical Validation: Experimental Setup and Analysis}{46}{subsection.10.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.3}Experimental Design}{46}{subsection.10.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.4}Personal contribution : Finite-Width Correction numerical results and answer to deeper or wider}{47}{subsection.10.4}\protected@file@percent }
-\newlabel{eq:scaling_law}{{55}{47}{Personal contribution : Finite-Width Correction numerical results and answer to deeper or wider}{equation.10.55}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {10.4.1}Personal contribution : Results on Depth Dependence}{47}{subsubsection.10.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {10.5}Personal contribution : K3 implementation and K4 formula}{49}{subsection.10.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {10.5.1}Personal Contribution: On the Fourth-Order Kernel $O_4$ and its Computation}{50}{subsubsection.10.5.1}\protected@file@percent }
-\newlabel{eq:hessian_ntk_k4}{{57}{50}{$O_4$ as the NTK Hessian}{equation.10.57}{}}
-\abx@aux@cite{0}{dyer2024ntk}
-\abx@aux@segm{0}{0}{dyer2024ntk}
-\@writefile{toc}{\contentsline {section}{\numberline {11}NTH scaling from NTK local statistics using random matrix theory}{51}{section.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.0.1}Explicit Indexed Formula for $\textcolor {k3color}{O_3}$}{51}{subsubsection.11.0.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.0.2}Explicit Formulas for the Corrections \blx@tocontentsinit {0}\cite {dyer2024ntk}}{51}{subsubsection.11.0.2}\protected@file@percent }
-\newlabel{thm:corrections}{{11.0.2}{51}{Explicit Formulas for the Corrections \cite {dyer2024ntk}}{subsubsection.11.0.2}{}}
-\newlabel{eq:theta_expansion}{{58}{51}{Explicit Formulas for the Corrections \cite {dyer2024ntk}}{equation.11.58}{}}
-\newlabel{eq:theta_correction}{{59}{51}{Explicit Formulas for the Corrections \cite {dyer2024ntk}}{equation.11.59}{}}
-\newlabel{thm:eigen_corrections}{{11.0.2}{51}{Explicit Formulas for the Corrections \cite {dyer2024ntk}}{equation.11.59}{}}
-\newlabel{eq:eigen_expansion}{{60}{51}{Explicit Formulas for the Corrections \cite {dyer2024ntk}}{equation.11.60}{}}
-\newlabel{cor:network_evolution}{{11.1}{52}{Network evolution with corrections}{theorem.11.1}{}}
-\newlabel{eq:evolution_ode}{{61}{52}{Network evolution with corrections}{equation.11.61}{}}
-\newlabel{eq:evolution_solution}{{62}{52}{Network evolution with corrections}{equation.11.62}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {11.1}Spectral decomposition and NTK Gram matrix structure}{52}{subsection.11.1}\protected@file@percent }
-\newlabel{eq:k_decomposition}{{63}{52}{Spectral decomposition and NTK Gram matrix structure}{equation.11.63}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The largest eigenvalue of the infinite-width NTK remains approximately constant with depth $L$.}}{53}{figure.caption.3}\protected@file@percent }
-\newlabel{fig:largest_eigenvalue}{{3}{53}{The largest eigenvalue of the infinite-width NTK remains approximately constant with depth $L$}{figure.caption.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces The $k$-th smallest eigenvalues of the infinite-width NTK scale linearly with depth $L$.}}{53}{figure.caption.4}\protected@file@percent }
-\newlabel{fig:k_eigenvalue}{{4}{53}{The $k$-th smallest eigenvalues of the infinite-width NTK scale linearly with depth $L$}{figure.caption.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {11.2}Personal contribution : A Random Matrix Perspective on the NTK Correction}{54}{subsection.11.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.2.1}Personal Contribution: Scaling Analysis of Correction Terms}{54}{subsubsection.11.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.2.2}Personal contribution : Scaling derived from experimental insights}{55}{subsubsection.11.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.2.3}Results and Discussion}{56}{subsubsection.11.2.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Infinity norm of the empirical $\textcolor {k3color}{K^{(3)}}$ tensor versus network depth $L$, plotted on a log-log scale. The width is fixed at $M=100$. The observed trend confirms that the magnitude of the correction kernel decreases with depth.}}{56}{figure.caption.5}\protected@file@percent }
-\newlabel{fig:k3_norm_vs_l}{{5}{56}{Infinity norm of the empirical $\textcolor {k3color}{K^{(3)}}$ tensor versus network depth $L$, plotted on a log-log scale. The width is fixed at $M=100$. The observed trend confirms that the magnitude of the correction kernel decreases with depth}{figure.caption.5}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.2.4}Determining the Scaling of $\textcolor {orange!80!black}{\mathbf  {O}_4}$ from Empirical Results}{56}{subsubsection.11.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.2.5}From Empirical Scaling to Theoretical Understanding}{56}{subsubsection.11.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}NTH Scaling Laws w.r.t depth}{44}{section.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}Personal Contribution: Recursive Analysis of Network Depth}{44}{subsection.9.1}\protected@file@percent }
+\newlabel{thm:recursive_depth}{{9.1}{44}{Personal Contribution: Recursive Analysis of Network Depth}{subsection.9.1}{}}
+\newlabel{eq:recursive_k3}{{47}{44}{Personal Contribution: Recursive Analysis of Network Depth}{equation.9.47}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.1.1}Personal Contribution: Activation Stability Analysis}{45}{subsubsection.9.1.1}\protected@file@percent }
+\newlabel{eq:activation_stability}{{48}{45}{Personal Contribution: Activation Stability Analysis}{equation.9.48}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.1.2}Backward Propagation Stability}{45}{subsubsection.9.1.2}\protected@file@percent }
+\newlabel{eq:backward_stability}{{52}{45}{Backward Propagation Stability}{equation.9.52}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.1.3}Personal Contribution: ReLU Recursion}{46}{subsubsection.9.1.3}\protected@file@percent }
+\newlabel{eq:relu_recursion_main}{{53}{46}{Personal Contribution: ReLU Recursion}{equation.9.53}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Personal contribution : Final bounds on Depth Dependence}{46}{subsection.9.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.2.1}Main Results}{46}{subsubsection.9.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {9.2.2}Towards numerical validation}{46}{subsubsection.9.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {10}Numerical bounds confirmation for NTH scaling laws}{47}{section.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.1}Implementation}{47}{subsection.10.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.2}Empirical Validation: Experimental Setup and Analysis}{47}{subsection.10.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.3}Experimental Design}{47}{subsection.10.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.4}Personal contribution : Finite-Width Correction numerical results and answer to deeper or wider}{48}{subsection.10.4}\protected@file@percent }
+\newlabel{eq:scaling_law}{{55}{48}{Personal contribution : Finite-Width Correction numerical results and answer to deeper or wider}{equation.10.55}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {10.4.1}Personal contribution : Results on Depth Dependence}{48}{subsubsection.10.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {10.5}Personal contribution : K3 implementation and K4 formula}{50}{subsection.10.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {10.5.1}Personal Contribution: On the Fourth-Order Kernel $O_4$ and its Computation}{51}{subsubsection.10.5.1}\protected@file@percent }
+\newlabel{eq:hessian_ntk_k4}{{57}{51}{$O_4$ as the NTK Hessian}{equation.10.57}{}}
+\abx@aux@cite{0}{dyer2019asymptotics}
+\abx@aux@segm{0}{0}{dyer2019asymptotics}
+\@writefile{toc}{\contentsline {section}{\numberline {11}NTH scaling from NTK local statistics using random matrix theory}{52}{section.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.0.1}Explicit Indexed Formula for $\textcolor {k3color}{O_3}$}{52}{subsubsection.11.0.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.0.2}Explicit Formulas for the Corrections \blx@tocontentsinit {0}\cite {dyer2019asymptotics}}{52}{subsubsection.11.0.2}\protected@file@percent }
+\newlabel{thm:corrections}{{11.0.2}{52}{Explicit Formulas for the Corrections \cite {dyer2019asymptotics}}{subsubsection.11.0.2}{}}
+\newlabel{eq:theta_expansion}{{58}{52}{Explicit Formulas for the Corrections \cite {dyer2019asymptotics}}{equation.11.58}{}}
+\newlabel{eq:theta_correction}{{59}{52}{Explicit Formulas for the Corrections \cite {dyer2019asymptotics}}{equation.11.59}{}}
+\newlabel{thm:eigen_corrections}{{11.0.2}{52}{Explicit Formulas for the Corrections \cite {dyer2019asymptotics}}{equation.11.59}{}}
+\newlabel{eq:eigen_expansion}{{60}{52}{Explicit Formulas for the Corrections \cite {dyer2019asymptotics}}{equation.11.60}{}}
+\newlabel{cor:network_evolution}{{11.1}{53}{Network evolution with corrections}{theorem.11.1}{}}
+\newlabel{eq:evolution_ode}{{61}{53}{Network evolution with corrections}{equation.11.61}{}}
+\newlabel{eq:evolution_solution}{{62}{53}{Network evolution with corrections}{equation.11.62}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {11.1}Spectral decomposition and NTK Gram matrix structure}{53}{subsection.11.1}\protected@file@percent }
+\newlabel{eq:k_decomposition}{{63}{53}{Spectral decomposition and NTK Gram matrix structure}{equation.11.63}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces The largest eigenvalue of the infinite-width NTK remains approximately constant with depth $L$.}}{54}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:largest_eigenvalue}{{4}{54}{The largest eigenvalue of the infinite-width NTK remains approximately constant with depth $L$}{figure.caption.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces The $k$-th smallest eigenvalues of the infinite-width NTK scale linearly with depth $L$.}}{54}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:k_eigenvalue}{{5}{54}{The $k$-th smallest eigenvalues of the infinite-width NTK scale linearly with depth $L$}{figure.caption.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {11.2}Personal contribution : A Random Matrix Perspective on the NTK Correction}{55}{subsection.11.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.2.1}Personal Contribution: Scaling Analysis of Correction Terms}{55}{subsubsection.11.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.2.2}Personal contribution : Scaling derived from experimental insights}{56}{subsubsection.11.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.2.3}Results and Discussion}{57}{subsubsection.11.2.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Infinity norm of the empirical $\textcolor {k3color}{K^{(3)}}$ tensor versus network depth $L$, plotted on a log-log scale. The width is fixed at $M=100$. The observed trend confirms that the magnitude of the correction kernel decreases with depth.}}{57}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:k3_norm_vs_l}{{6}{57}{Infinity norm of the empirical $\textcolor {k3color}{K^{(3)}}$ tensor versus network depth $L$, plotted on a log-log scale. The width is fixed at $M=100$. The observed trend confirms that the magnitude of the correction kernel decreases with depth}{figure.caption.6}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.2.4}Determining the Scaling of $\textcolor {orange!80!black}{\mathbf  {O}_4}$ from Empirical Results}{57}{subsubsection.11.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.2.5}From Empirical Scaling to Theoretical Understanding}{57}{subsubsection.11.2.5}\protected@file@percent }
 \abx@aux@cite{0}{hanin_nica_2019}
 \abx@aux@segm{0}{0}{hanin_nica_2019}
-\newlabel{eq:T3_decomposition}{{72}{57}{From Empirical Scaling to Theoretical Understanding}{equation.11.72}{}}
-\newlabel{eq:T4_decomposition}{{73}{57}{From Empirical Scaling to Theoretical Understanding}{equation.11.73}{}}
-\newlabel{eq:T3_naive_scaling}{{74}{57}{From Empirical Scaling to Theoretical Understanding}{equation.11.74}{}}
-\newlabel{eq:T4_naive_scaling}{{75}{57}{From Empirical Scaling to Theoretical Understanding}{equation.11.75}{}}
-\newlabel{eq:required_scaling}{{76}{57}{From Empirical Scaling to Theoretical Understanding}{equation.11.76}{}}
+\newlabel{eq:T3_decomposition}{{72}{58}{From Empirical Scaling to Theoretical Understanding}{equation.11.72}{}}
+\newlabel{eq:T4_decomposition}{{73}{58}{From Empirical Scaling to Theoretical Understanding}{equation.11.73}{}}
+\newlabel{eq:T3_naive_scaling}{{74}{58}{From Empirical Scaling to Theoretical Understanding}{equation.11.74}{}}
+\newlabel{eq:T4_naive_scaling}{{75}{58}{From Empirical Scaling to Theoretical Understanding}{equation.11.75}{}}
+\newlabel{eq:required_scaling}{{76}{58}{From Empirical Scaling to Theoretical Understanding}{equation.11.76}{}}
 \abx@aux@cite{0}{doumeche2023sobolev_ntk}
 \abx@aux@segm{0}{0}{doumeche2023sobolev_ntk}
 \abx@aux@cite{0}{townsend2022sobolev}
@@ -278,14 +278,14 @@
 \abx@aux@segm{0}{0}{bach2017breaking}
 \abx@aux@cite{0}{doumeche2023sobolev}
 \abx@aux@segm{0}{0}{doumeche2023sobolev}
-\@writefile{toc}{\contentsline {subsection}{\numberline {11.3}Personal contribution : An RMT Framework for the NTK as a spiked kernel covariance random matrix}{58}{subsection.11.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {11.3}Personal contribution : An RMT Framework for the NTK as a spiked kernel covariance random matrix}{59}{subsection.11.3}\protected@file@percent }
 \abx@aux@cite{0}{townsend2022sobolev}
 \abx@aux@segm{0}{0}{townsend2022sobolev}
 \abx@aux@cite{0}{bach2017breaking}
 \abx@aux@segm{0}{0}{bach2017breaking}
 \abx@aux@cite{0}{doumeche2023sobolev_ntk}
 \abx@aux@segm{0}{0}{doumeche2023sobolev_ntk}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.3.1}The Influence of Depth on the BBP Threshold}{59}{subsubsection.11.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.3.1}The Influence of Depth on the BBP Threshold}{60}{subsubsection.11.3.1}\protected@file@percent }
 \abx@aux@cite{0}{townsend2022sobolev}
 \abx@aux@segm{0}{0}{townsend2022sobolev}
 \abx@aux@cite{0}{bach2017breaking}
@@ -298,168 +298,166 @@
 \abx@aux@segm{0}{0}{bach2017breaking}
 \abx@aux@cite{0}{doumeche2023sobolev_ntk}
 \abx@aux@segm{0}{0}{doumeche2023sobolev_ntk}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.3.2}First Incursions into Eigenvector Statistics}{61}{subsubsection.11.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {11.3.2}First Incursions into Eigenvector Statistics}{62}{subsubsection.11.3.2}\protected@file@percent }
 \abx@aux@cite{0}{guillen_misof_gerken_2025}
 \abx@aux@segm{0}{0}{guillen_misof_gerken_2025}
-\abx@aux@cite{0}{dyer_gur_ari_2019}
-\abx@aux@segm{0}{0}{dyer_gur_ari_2019}
-\abx@aux@cite{0}{dyer_gur_ari_2019}
-\abx@aux@segm{0}{0}{dyer_gur_ari_2019}
-\@writefile{toc}{\contentsline {section}{\numberline {12}An Unexpected Discovery: The Gaussian Orthogonal Ensemble in the NTK Spectrum}{63}{section.12}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {12.1}A Primer on Random Matrix Theory and Spectral Statistics}{63}{subsection.12.1}\protected@file@percent }
-\newlabel{eq:goe_ratio_dist}{{78}{63}{A Primer on Random Matrix Theory and Spectral Statistics}{equation.12.78}{}}
+\abx@aux@cite{0}{dyer2019asymptotics}
+\abx@aux@segm{0}{0}{dyer2019asymptotics}
+\abx@aux@cite{0}{dyer2019asymptotics}
+\abx@aux@segm{0}{0}{dyer2019asymptotics}
+\@writefile{toc}{\contentsline {section}{\numberline {12}An Unexpected Discovery: The Gaussian Orthogonal Ensemble in the NTK Spectrum}{64}{section.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {12.1}A Primer on Random Matrix Theory and Spectral Statistics}{64}{subsection.12.1}\protected@file@percent }
+\newlabel{eq:goe_ratio_dist}{{78}{64}{A Primer on Random Matrix Theory and Spectral Statistics}{equation.12.78}{}}
 \abx@aux@cite{0}{seleznova_kutyniok_2022}
 \abx@aux@segm{0}{0}{seleznova_kutyniok_2022}
 \abx@aux@cite{0}{huang2019dynamicsdeepneuralnetworks}
 \abx@aux@segm{0}{0}{huang2019dynamicsdeepneuralnetworks}
-\@writefile{toc}{\contentsline {subsection}{\numberline {12.2}The NTK Bulk Spectrum Obeys GOE Statistics}{64}{subsection.12.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {12.2.1}Symmetry as the Origin of GOE Behavior}{64}{subsubsection.12.2.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Empirical distribution of the ratio of consecutive eigenvalue spacings in the bulk of the NTK, for $N=64$ points, dimension $D=10$, $M=20$ samples, and $L=2$ layers. The blue curve shows the numerically obtained histogram, while the red curve corresponds to the theoretical GOE prediction (see Equation~\eqref  {eq:goe_ratio_dist}). This result confirms that the NTK, in this configuration, exhibits spacing statistics characteristic of the GOE, illustrating the strong level repulsion expected for real symmetric random matrices.}}{65}{figure.caption.6}\protected@file@percent }
-\newlabel{fig:goe_spacing_ratio_empirical}{{6}{65}{Empirical distribution of the ratio of consecutive eigenvalue spacings in the bulk of the NTK, for $N=64$ points, dimension $D=10$, $M=20$ samples, and $L=2$ layers. The blue curve shows the numerically obtained histogram, while the red curve corresponds to the theoretical GOE prediction (see Equation~\eqref {eq:goe_ratio_dist}). This result confirms that the NTK, in this configuration, exhibits spacing statistics characteristic of the GOE, illustrating the strong level repulsion expected for real symmetric random matrices}{figure.caption.6}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {12.2.2}A Solid Footing for Scaling Law Analysis}{65}{subsubsection.12.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {12.2}The NTK Bulk Spectrum Obeys GOE Statistics}{65}{subsection.12.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {12.2.1}Symmetry as the Origin of GOE Behavior}{65}{subsubsection.12.2.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Empirical distribution of the ratio of consecutive eigenvalue spacings in the bulk of the NTK, for $N=64$ points, dimension $D=10$, $M=20$ samples, and $L=2$ layers. The blue curve shows the numerically obtained histogram, while the red curve corresponds to the theoretical GOE prediction (see Equation~\eqref  {eq:goe_ratio_dist}). This result confirms that the NTK, in this configuration, exhibits spacing statistics characteristic of the GOE, illustrating the strong level repulsion expected for real symmetric random matrices.}}{66}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:goe_spacing_ratio_empirical}{{7}{66}{Empirical distribution of the ratio of consecutive eigenvalue spacings in the bulk of the NTK, for $N=64$ points, dimension $D=10$, $M=20$ samples, and $L=2$ layers. The blue curve shows the numerically obtained histogram, while the red curve corresponds to the theoretical GOE prediction (see Equation~\eqref {eq:goe_ratio_dist}). This result confirms that the NTK, in this configuration, exhibits spacing statistics characteristic of the GOE, illustrating the strong level repulsion expected for real symmetric random matrices}{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {12.2.2}A Solid Footing for Scaling Law Analysis}{66}{subsubsection.12.2.2}\protected@file@percent }
 \abx@aux@cite{0}{collins2022weingarten}
 \abx@aux@segm{0}{0}{collins2022weingarten}
 \abx@aux@cite{0}{lee2022ntk}
 \abx@aux@segm{0}{0}{lee2022ntk}
 \abx@aux@cite{0}{baskerville2024ntk}
 \abx@aux@segm{0}{0}{baskerville2024ntk}
-\@writefile{toc}{\contentsline {section}{\numberline {13}Summary of Personal Contributions : Derivations and Mathematical Formulations}{67}{section.13}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.1}Personal Contribution: Scaling Laws for Third-Order Corrections}{67}{subsubsection.13.0.1}\protected@file@percent }
-\newlabel{eq:main_scaling_result}{{80}{67}{Personal Contribution: Scaling Laws for Third-Order Corrections}{equation.13.80}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.2}Personal Contribution: Novel ReLU Recursion Formula}{67}{subsubsection.13.0.2}\protected@file@percent }
-\newlabel{eq:relu_simplification}{{81}{67}{Personal Contribution: Novel ReLU Recursion Formula}{equation.13.81}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.3}Personal Contribution: Gaussian Orthogonal Ensemble Connection}{68}{subsubsection.13.0.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.4}Personal Contribution: Hessian-NTK Tractability Framework}{68}{subsubsection.13.0.4}\protected@file@percent }
-\newlabel{eq:hessian_ntk_k4}{{82}{68}{Personal Contribution: Hessian-NTK Tractability Framework}{equation.13.82}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.5}Personal Contribution: Conjectures and Numerical Validation}{68}{subsubsection.13.0.5}\protected@file@percent }
-\newlabel{eq:goe_mean_conjecture}{{83}{69}{Personal Contribution: Conjectures and Numerical Validation}{equation.13.83}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.6}Personal Contribution: Information-Propagation Interpretation of NTH terms}{69}{subsubsection.13.0.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {13}Summary of Personal Contributions : Derivations and Mathematical Formulations}{68}{section.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.1}Personal Contribution: Scaling Laws for Third-Order Corrections}{68}{subsubsection.13.0.1}\protected@file@percent }
+\newlabel{eq:main_scaling_result}{{80}{68}{Personal Contribution: Scaling Laws for Third-Order Corrections}{equation.13.80}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.2}Personal Contribution: Novel ReLU Recursion Formula}{68}{subsubsection.13.0.2}\protected@file@percent }
+\newlabel{eq:relu_simplification}{{81}{68}{Personal Contribution: Novel ReLU Recursion Formula}{equation.13.81}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.3}Personal Contribution: Gaussian Orthogonal Ensemble Connection}{69}{subsubsection.13.0.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.4}Personal Contribution: Hessian-NTK Tractability Framework}{69}{subsubsection.13.0.4}\protected@file@percent }
+\newlabel{eq:hessian_ntk_k4}{{82}{69}{Personal Contribution: Hessian-NTK Tractability Framework}{equation.13.82}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.5}Personal Contribution: Conjectures and Numerical Validation}{69}{subsubsection.13.0.5}\protected@file@percent }
+\newlabel{eq:goe_mean_conjecture}{{83}{70}{Personal Contribution: Conjectures and Numerical Validation}{equation.13.83}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.6}Personal Contribution: Information-Propagation Interpretation of NTH terms}{70}{subsubsection.13.0.6}\protected@file@percent }
 \abx@aux@cite{0}{vaswani2017attention}
 \abx@aux@segm{0}{0}{vaswani2017attention}
-\abx@aux@cite{0}{he2016deep}
-\abx@aux@segm{0}{0}{he2016deep}
 \abx@aux@cite{0}{cohen2021gradient}
 \abx@aux@segm{0}{0}{cohen2021gradient}
 \abx@aux@cite{0}{mandt2017stochastic}
 \abx@aux@segm{0}{0}{mandt2017stochastic}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.7}Personal Contribution: Empirical Verification of Theoretical Predictions}{70}{subsubsection.13.0.7}\protected@file@percent }
-\newlabel{eq:empirical_scaling_validation}{{84}{70}{Personal Contribution: Empirical Verification of Theoretical Predictions}{equation.13.84}{}}
-\newlabel{eq:optimal_allocation_formula}{{85}{70}{Personal Contribution: Empirical Verification of Theoretical Predictions}{equation.13.85}{}}
-\newlabel{eq:practical_width_scaling}{{86}{70}{Personal Contribution: Empirical Verification of Theoretical Predictions}{equation.13.86}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.8}Limitations and Future Work}{71}{subsubsection.13.0.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {14}Limitations, Future Work and Open Questions}{72}{section.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {14.1}Conclusion}{74}{subsection.14.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {A}Main Proofs for Sobolev training}{76}{appendix.A}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Alternative Proof: Sobolev Loss on Unbounded Domains via Integration by Parts}{76}{subsection.A.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Case of Limited Regularity: Fourier-Based Proof}{77}{subsection.A.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.3}A.1 Proof 1: Sobolev Loss as Fractional Laplacian}{77}{subsection.A.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.4}A.2 Proof 2: NTK Operator Multiplication by Sobolev Operator}{78}{subsection.A.4}\protected@file@percent }
-\newlabel{sec:appendix_composition}{{A.4}{78}{A.2 Proof 2: NTK Operator Multiplication by Sobolev Operator}{subsection.A.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.5}Proof 3: Spectral Properties of the Composite Operator}{78}{subsection.A.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.6}A.4 Proof 4: Limited Commutation of Discrete Matrix Operators}{80}{subsection.A.6}\protected@file@percent }
-\newlabel{sec:appendix_commutation}{{A.6}{80}{A.4 Proof 4: Limited Commutation of Discrete Matrix Operators}{subsection.A.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.7}A.6 Discrete Implementation and Matrix Construction}{81}{subsection.A.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.7}Personal Contribution: Empirical Verification of Theoretical Predictions}{71}{subsubsection.13.0.7}\protected@file@percent }
+\newlabel{eq:empirical_scaling_validation}{{84}{71}{Personal Contribution: Empirical Verification of Theoretical Predictions}{equation.13.84}{}}
+\newlabel{eq:optimal_allocation_formula}{{85}{71}{Personal Contribution: Empirical Verification of Theoretical Predictions}{equation.13.85}{}}
+\newlabel{eq:practical_width_scaling}{{86}{71}{Personal Contribution: Empirical Verification of Theoretical Predictions}{equation.13.86}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {13.0.8}Limitations and Future Work}{72}{subsubsection.13.0.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {14}Limitations, Future Work and Open Questions}{73}{section.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {14.1}Conclusion}{75}{subsection.14.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}Main Proofs for Sobolev training}{77}{appendix.A}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Alternative Proof: Sobolev Loss on Unbounded Domains via Integration by Parts}{77}{subsection.A.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Case of Limited Regularity: Fourier-Based Proof}{78}{subsection.A.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.3}A.1 Proof 1: Sobolev Loss as Fractional Laplacian}{78}{subsection.A.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.4}A.2 Proof 2: NTK Operator Multiplication by Sobolev Operator}{79}{subsection.A.4}\protected@file@percent }
+\newlabel{sec:appendix_composition}{{A.4}{79}{A.2 Proof 2: NTK Operator Multiplication by Sobolev Operator}{subsection.A.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.5}Proof 3: Spectral Properties of the Composite Operator}{79}{subsection.A.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.6}A.4 Proof 4: Limited Commutation of Discrete Matrix Operators}{81}{subsection.A.6}\protected@file@percent }
+\newlabel{sec:appendix_commutation}{{A.6}{81}{A.4 Proof 4: Limited Commutation of Discrete Matrix Operators}{subsection.A.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.7}A.6 Discrete Implementation and Matrix Construction}{82}{subsection.A.7}\protected@file@percent }
 \abx@aux@cite{0}{nguyen2024concentration}
 \abx@aux@segm{0}{0}{nguyen2024concentration}
-\@writefile{toc}{\contentsline {section}{\numberline {B}Mathematical Foundation: Concentration Inequalities from \blx@tocontentsinit {0}\cite {nguyen2024concentration}}{83}{appendix.B}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {B.1}Scalar Concentration Inequalities}{83}{subsection.B.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {B.2}Quadratic Forms and Hanson-Wright Inequalities}{83}{subsection.B.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {B.3}Matrix Concentration Inequalities}{84}{subsection.B.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {C}Fundamental Mathematical Tools}{84}{appendix.C}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {C.1}Matrix Analysis Techniques}{84}{subsection.C.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {C.2}Specialized Neural Network Tools}{85}{subsection.C.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {B}Mathematical Foundation: Concentration Inequalities from \blx@tocontentsinit {0}\cite {nguyen2024concentration}}{84}{appendix.B}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.1}Scalar Concentration Inequalities}{84}{subsection.B.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.2}Quadratic Forms and Hanson-Wright Inequalities}{84}{subsection.B.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {B.3}Matrix Concentration Inequalities}{85}{subsection.B.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {C}Fundamental Mathematical Tools}{85}{appendix.C}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {C.1}Matrix Analysis Techniques}{85}{subsection.C.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {C.2}Specialized Neural Network Tools}{86}{subsection.C.2}\protected@file@percent }
 \abx@aux@cite{0}{nguyen2024concentration}
 \abx@aux@segm{0}{0}{nguyen2024concentration}
-\@writefile{toc}{\contentsline {section}{\numberline {D}Proof Schemes and High-Level Strategies}{86}{appendix.D}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {D.1}General Framework for Eigenvalue Bounds}{86}{subsection.D.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces The distribution of the ratio of consecutive eigenvalue spacings for the infinite-width NTK bulk (for N=64, D=10, L=2). The empirical histogram (blue) is perfectly fitted by the theoretical prediction from the Gaussian Orthogonal Ensemble (red line, Equation \ref {eq:goe_ratio_dist}), yielding a Brody parameter $q \approx 1$, which indicates strong level repulsion characteristic of the GOE.}}{86}{figure.caption.7}\protected@file@percent }
-\newlabel{fig:goe_fit}{{7}{86}{The distribution of the ratio of consecutive eigenvalue spacings for the infinite-width NTK bulk (for N=64, D=10, L=2). The empirical histogram (blue) is perfectly fitted by the theoretical prediction from the Gaussian Orthogonal Ensemble (red line, Equation \ref {eq:goe_ratio_dist}), yielding a Brody parameter $q \approx 1$, which indicates strong level repulsion characteristic of the GOE}{figure.caption.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {D.2}Proof Scheme 1: Empirical NTK Decomposition (\blx@tocontentsinit {0}\cite {nguyen2024concentration})}{87}{subsection.D.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.1}Step 1: Fundamental Chain Rule Decomposition}{87}{subsubsection.D.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.2}Step 2: Application of Schur Product Theorem and Weyl's Inequality}{87}{subsubsection.D.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.3}Step 3: Bounding Feature Matrix Eigenvalues}{88}{subsubsection.D.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.4}Step 4: Spectral Analysis via Hermite Expansion}{88}{subsubsection.D.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.5}Step 5: Reduction to Khatri-Rao Powers}{88}{subsubsection.D.2.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.6}Step 6: Feature Centering and Hadamard Power Analysis}{88}{subsubsection.D.2.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.7}Step 7: Application of Gershgorin Circle Theorem}{89}{subsubsection.D.2.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.8}Step 8: Bounding Derivative Term Norms, very technical}{89}{subsubsection.D.2.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.9}Step 9: Final Assembly and Width Optimization}{89}{subsubsection.D.2.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.10}Upper Bound via Diagonal Analysis}{90}{subsubsection.D.2.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.11}Final Result}{90}{subsubsection.D.2.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {D}Proof Schemes and High-Level Strategies}{87}{appendix.D}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {D.1}General Framework for Eigenvalue Bounds}{87}{subsection.D.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces The distribution of the ratio of consecutive eigenvalue spacings for the infinite-width NTK bulk (for N=64, D=10, L=2). The empirical histogram (blue) is perfectly fitted by the theoretical prediction from the Gaussian Orthogonal Ensemble (red line, Equation \ref {eq:goe_ratio_dist}), yielding a Brody parameter $q \approx 1$, which indicates strong level repulsion characteristic of the GOE.}}{87}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:goe_fit}{{8}{87}{The distribution of the ratio of consecutive eigenvalue spacings for the infinite-width NTK bulk (for N=64, D=10, L=2). The empirical histogram (blue) is perfectly fitted by the theoretical prediction from the Gaussian Orthogonal Ensemble (red line, Equation \ref {eq:goe_ratio_dist}), yielding a Brody parameter $q \approx 1$, which indicates strong level repulsion characteristic of the GOE}{figure.caption.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {D.2}Proof Scheme 1: Empirical NTK Decomposition (\blx@tocontentsinit {0}\cite {nguyen2024concentration})}{88}{subsection.D.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.1}Step 1: Fundamental Chain Rule Decomposition}{88}{subsubsection.D.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.2}Step 2: Application of Schur Product Theorem and Weyl's Inequality}{88}{subsubsection.D.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.3}Step 3: Bounding Feature Matrix Eigenvalues}{89}{subsubsection.D.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.4}Step 4: Spectral Analysis via Hermite Expansion}{89}{subsubsection.D.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.5}Step 5: Reduction to Khatri-Rao Powers}{89}{subsubsection.D.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.6}Step 6: Feature Centering and Hadamard Power Analysis}{89}{subsubsection.D.2.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.7}Step 7: Application of Gershgorin Circle Theorem}{90}{subsubsection.D.2.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.8}Step 8: Bounding Derivative Term Norms, very technical}{90}{subsubsection.D.2.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.9}Step 9: Final Assembly and Width Optimization}{90}{subsubsection.D.2.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.10}Upper Bound via Diagonal Analysis}{91}{subsubsection.D.2.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {D.2.11}Final Result}{91}{subsubsection.D.2.11}\protected@file@percent }
 \abx@aux@cite{0}{hron2020infiniteattentionnngpntk}
 \abx@aux@segm{0}{0}{hron2020infiniteattentionnngpntk}
-\@writefile{toc}{\contentsline {section}{\numberline {E}Detailed appendix for architecture's paradigms}{91}{appendix.E}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {E.1}Detailed approach for Transformers and Softmax Analysis}{91}{subsection.E.1}\protected@file@percent }
-\newlabel{app:transformers}{{E.1}{91}{Detailed approach for Transformers and Softmax Analysis}{subsection.E.1}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.1.1}Problem Statement: Moments of the Softmax Function}{91}{subsubsection.E.1.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.1.2}Personal contribution currently in progress : Approximation Strategy: Saddle-Point Method}{91}{subsubsection.E.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.1.3}Personal contribution currently in progress : Cumulant Expansion Framework}{92}{subsubsection.E.1.3}\protected@file@percent }
-\newlabel{eq:log_expansion}{{123}{92}{Personal contribution currently in progress : Cumulant Expansion Framework}{equation.E.123}{}}
-\newlabel{eq:dominant_softmax}{{126}{92}{Personal contribution currently in progress : Cumulant Expansion Framework}{equation.E.126}{}}
-\newlabel{eq:perturbative_softmax}{{127}{92}{Personal contribution currently in progress : Cumulant Expansion Framework}{equation.E.127}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.1.4}High-Dimensional Analysis through Word Embedding Characterization}{93}{subsubsection.E.1.4}\protected@file@percent }
-\newlabel{eq:high_dim_concentration_embeddings}{{128}{93}{High-Dimensional Analysis through Word Embedding Characterization}{equation.E.128}{}}
-\newlabel{eq:embedding_concentration_limit}{{129}{93}{High-Dimensional Analysis through Word Embedding Characterization}{equation.E.129}{}}
-\newlabel{eq:cosine_law_embeddings}{{130}{93}{High-Dimensional Analysis through Word Embedding Characterization}{equation.E.130}{}}
-\newlabel{eq:angular_concentration}{{131}{93}{High-Dimensional Analysis through Word Embedding Characterization}{equation.E.131}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.1.5}Correlated Gaussian Matrix Generation}{93}{subsubsection.E.1.5}\protected@file@percent }
-\newlabel{eq:generative_construction}{{132}{93}{Correlated Gaussian Matrix Generation}{equation.E.132}{}}
-\newlabel{eq:separable_covariance}{{133}{93}{Correlated Gaussian Matrix Generation}{equation.E.133}{}}
-\newlabel{eq:covariance_verification}{{137}{94}{Correlated Gaussian Matrix Generation}{equation.E.137}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.1.6}Multidimensional Hermite Polynomials and Isserlis-Wick Theorem}{94}{subsubsection.E.1.6}\protected@file@percent }
-\newlabel{thm:multidim_hermite}{{E.1}{94}{Multidimensional Hermite Polynomials and Orthogonality - Mehler (1866)}{theorem.E.1}{}}
-\newlabel{eq:multivariate_gaussian_pdf}{{138}{94}{Multidimensional Hermite Polynomials and Orthogonality - Mehler (1866)}{equation.E.138}{}}
-\newlabel{eq:orthogonality_multidim}{{139}{94}{Multidimensional Hermite Polynomials and Orthogonality - Mehler (1866)}{equation.E.139}{}}
-\newlabel{thm:isserlis_wick}{{E.2}{95}{Isserlis-Wick Theorem for Gaussian Moments}{theorem.E.2}{}}
-\newlabel{eq:isserlis_wick_formula}{{140}{95}{Isserlis-Wick Theorem for Gaussian Moments}{equation.E.140}{}}
-\newlabel{eq:odd_moments_zero}{{141}{95}{Isserlis-Wick Theorem for Gaussian Moments}{equation.E.141}{}}
-\newlabel{eq:multidim_generating_function}{{142}{95}{Isserlis-Wick Theorem for Gaussian Moments}{equation.E.142}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {E.2}Personal contribution: Detailed Calculations for Two Hidden Layer MMNN}{96}{subsection.E.2}\protected@file@percent }
-\newlabel{app:mmnn}{{E.2}{96}{Personal contribution: Detailed Calculations for Two Hidden Layer MMNN}{subsection.E.2}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.2.1}Calculation of activation's correlations}{96}{subsubsection.E.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.2.2}Calculation of $\mathbf  {I}_{11}$ (Probability)}{96}{subsubsection.E.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.2.3}Special Case: Zero Means ($\mu _1=\mu _2=0$)}{96}{subsubsection.E.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.2.4}Proof of the Recursion for the NTK}{96}{subsubsection.E.2.4}\protected@file@percent }
-\newlabel{eq:ntk_decomposition}{{144}{97}{Proof of the Recursion for the NTK}{equation.E.144}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {E.3}Fisher and Kibble Distributions}{99}{subsection.E.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {F}Deep Narrow Neural Networks}{100}{appendix.F}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {F.1}Scaled NTK at Initialization}{100}{subsection.F.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {F.2}Research Perspectives for Deep Narrow Networks}{100}{subsection.F.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {G}Detailed Proofs for the NTK hierarchy}{102}{appendix.G}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.1}Complete Derivation of the Third-Order Kernel}{102}{subsection.G.1}\protected@file@percent }
-\newlabel{sec:appendix_k3_derivation}{{G.1}{102}{Complete Derivation of the Third-Order Kernel}{subsection.G.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.2}Foundation and Definition}{102}{subsection.G.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.3}Directional Derivative Calculation}{102}{subsection.G.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.4}Recursive Formulas}{102}{subsection.G.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.5}Final Decomposition}{103}{subsection.G.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {G.5.1}Unified Fully Expanded Formula for $\textcolor {k3color}{K^{(3)}}$}{103}{subsubsection.G.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.6}Complete Expression for $\textcolor {kernelcolor}{K}^{(3)}$}{104}{subsection.G.6}\protected@file@percent }
-\newlabel{sec:appendix_complete_expression}{{G.6}{104}{Complete Expression for $\textcolor {kernelcolor}{K}^{(3)}$}{subsection.G.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.7}Recursive Depth Analysis}{104}{subsection.G.7}\protected@file@percent }
-\newlabel{sec:appendix_recursive_derivation}{{G.7}{104}{Recursive Depth Analysis}{subsection.G.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.8}Decomposition of the $(H+1)$-Layer NTK}{105}{subsection.G.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.9}Application of Directional Derivatives}{105}{subsection.G.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.10}Expansion of Terms}{105}{subsection.G.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.11}ReLU Simplification}{106}{subsection.G.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.12}Complete Mathematical Proof for term by term scaling analysis}{106}{subsection.G.12}\protected@file@percent }
-\newlabel{eq:combined_scaling}{{175}{107}{Complete Mathematical Proof for term by term scaling analysis}{equation.G.175}{}}
-\newlabel{eq:k3_final_scaling}{{176}{107}{Complete Mathematical Proof for term by term scaling analysis}{equation.G.176}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.13}Experimental Validation complements}{107}{subsection.G.13}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.14}Implementation Details and Code Correspondence}{107}{subsection.G.14}\protected@file@percent }
-\newlabel{sec:appendix_implementation}{{G.14}{107}{Implementation Details and Code Correspondence}{subsection.G.14}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {G.14.1}Code Structure and Mathematical Correspondence}{107}{subsubsection.G.14.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {G.14.2}Personal contribution : Automatic Differentiation Optimization}{108}{subsubsection.G.14.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {G.15}Experimental Validation and Quantitative Analysis}{108}{subsection.G.15}\protected@file@percent }
-\newlabel{sec:appendix_experimental_validation}{{G.15}{108}{Experimental Validation and Quantitative Analysis}{subsection.G.15}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {G.15.1}Comprehensive Experimental Setup}{108}{subsubsection.G.15.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {G.15.2}Methodology and Results}{108}{subsubsection.G.15.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {G.15.3}Quantitative Metrics Analysis}{109}{subsubsection.G.15.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {H}Symmetry Theory and Universality Classes}{111}{appendix.H}\protected@file@percent }
-\newlabel{sec:symmetry_theory}{{H}{111}{Symmetry Theory and Universality Classes}{appendix.H}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {H.1}Lie Groups and Representations in Random Matrix Theory}{111}{subsection.H.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {H.1.1}Classical Symmetry Classes}{111}{subsubsection.H.1.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {H.1.2}Wigner-Dyson Statistics and Level Repulsion}{111}{subsubsection.H.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {H.1.3}Representation Theory and Eigenspace Structure}{111}{subsubsection.H.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {E}Detailed appendix for architecture's paradigms}{92}{appendix.E}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {E.1}Detailed approach for Transformers and Softmax Analysis}{92}{subsection.E.1}\protected@file@percent }
+\newlabel{app:transformers}{{E.1}{92}{Detailed approach for Transformers and Softmax Analysis}{subsection.E.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.1.1}Problem Statement: Moments of the Softmax Function}{92}{subsubsection.E.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.1.2}Personal contribution currently in progress : Approximation Strategy: Saddle-Point Method}{92}{subsubsection.E.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.1.3}Personal contribution currently in progress : Cumulant Expansion Framework}{93}{subsubsection.E.1.3}\protected@file@percent }
+\newlabel{eq:log_expansion}{{123}{93}{Personal contribution currently in progress : Cumulant Expansion Framework}{equation.E.123}{}}
+\newlabel{eq:dominant_softmax}{{126}{93}{Personal contribution currently in progress : Cumulant Expansion Framework}{equation.E.126}{}}
+\newlabel{eq:perturbative_softmax}{{127}{93}{Personal contribution currently in progress : Cumulant Expansion Framework}{equation.E.127}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.1.4}High-Dimensional Analysis through Word Embedding Characterization}{94}{subsubsection.E.1.4}\protected@file@percent }
+\newlabel{eq:high_dim_concentration_embeddings}{{128}{94}{High-Dimensional Analysis through Word Embedding Characterization}{equation.E.128}{}}
+\newlabel{eq:embedding_concentration_limit}{{129}{94}{High-Dimensional Analysis through Word Embedding Characterization}{equation.E.129}{}}
+\newlabel{eq:cosine_law_embeddings}{{130}{94}{High-Dimensional Analysis through Word Embedding Characterization}{equation.E.130}{}}
+\newlabel{eq:angular_concentration}{{131}{94}{High-Dimensional Analysis through Word Embedding Characterization}{equation.E.131}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.1.5}Correlated Gaussian Matrix Generation}{94}{subsubsection.E.1.5}\protected@file@percent }
+\newlabel{eq:generative_construction}{{132}{94}{Correlated Gaussian Matrix Generation}{equation.E.132}{}}
+\newlabel{eq:separable_covariance}{{133}{94}{Correlated Gaussian Matrix Generation}{equation.E.133}{}}
+\newlabel{eq:covariance_verification}{{137}{95}{Correlated Gaussian Matrix Generation}{equation.E.137}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.1.6}Multidimensional Hermite Polynomials and Isserlis-Wick Theorem}{95}{subsubsection.E.1.6}\protected@file@percent }
+\newlabel{thm:multidim_hermite}{{E.1}{95}{Multidimensional Hermite Polynomials and Orthogonality - Mehler (1866)}{theorem.E.1}{}}
+\newlabel{eq:multivariate_gaussian_pdf}{{138}{95}{Multidimensional Hermite Polynomials and Orthogonality - Mehler (1866)}{equation.E.138}{}}
+\newlabel{eq:orthogonality_multidim}{{139}{95}{Multidimensional Hermite Polynomials and Orthogonality - Mehler (1866)}{equation.E.139}{}}
+\newlabel{thm:isserlis_wick}{{E.2}{96}{Isserlis-Wick Theorem for Gaussian Moments}{theorem.E.2}{}}
+\newlabel{eq:isserlis_wick_formula}{{140}{96}{Isserlis-Wick Theorem for Gaussian Moments}{equation.E.140}{}}
+\newlabel{eq:odd_moments_zero}{{141}{96}{Isserlis-Wick Theorem for Gaussian Moments}{equation.E.141}{}}
+\newlabel{eq:multidim_generating_function}{{142}{96}{Isserlis-Wick Theorem for Gaussian Moments}{equation.E.142}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {E.2}Personal contribution: Detailed Calculations for Two Hidden Layer MMNN}{97}{subsection.E.2}\protected@file@percent }
+\newlabel{app:mmnn}{{E.2}{97}{Personal contribution: Detailed Calculations for Two Hidden Layer MMNN}{subsection.E.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.2.1}Calculation of activation's correlations}{97}{subsubsection.E.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.2.2}Calculation of $\mathbf  {I}_{11}$ (Probability)}{97}{subsubsection.E.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.2.3}Special Case: Zero Means ($\mu _1=\mu _2=0$)}{97}{subsubsection.E.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {E.2.4}Proof of the Recursion for the NTK}{97}{subsubsection.E.2.4}\protected@file@percent }
+\newlabel{eq:ntk_decomposition}{{144}{98}{Proof of the Recursion for the NTK}{equation.E.144}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {E.3}Fisher and Kibble Distributions}{100}{subsection.E.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {F}Deep Narrow Neural Networks}{101}{appendix.F}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.1}Scaled NTK at Initialization}{101}{subsection.F.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {F.2}Research Perspectives for Deep Narrow Networks}{101}{subsection.F.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {G}Detailed Proofs for the NTK hierarchy}{103}{appendix.G}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.1}Complete Derivation of the Third-Order Kernel}{103}{subsection.G.1}\protected@file@percent }
+\newlabel{sec:appendix_k3_derivation}{{G.1}{103}{Complete Derivation of the Third-Order Kernel}{subsection.G.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.2}Foundation and Definition}{103}{subsection.G.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.3}Directional Derivative Calculation}{103}{subsection.G.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.4}Recursive Formulas}{103}{subsection.G.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.5}Final Decomposition}{104}{subsection.G.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {G.5.1}Unified Fully Expanded Formula for $\textcolor {k3color}{K^{(3)}}$}{104}{subsubsection.G.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.6}Complete Expression for $\textcolor {kernelcolor}{K}^{(3)}$}{105}{subsection.G.6}\protected@file@percent }
+\newlabel{sec:appendix_complete_expression}{{G.6}{105}{Complete Expression for $\textcolor {kernelcolor}{K}^{(3)}$}{subsection.G.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.7}Recursive Depth Analysis}{105}{subsection.G.7}\protected@file@percent }
+\newlabel{sec:appendix_recursive_derivation}{{G.7}{105}{Recursive Depth Analysis}{subsection.G.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.8}Decomposition of the $(H+1)$-Layer NTK}{106}{subsection.G.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.9}Application of Directional Derivatives}{106}{subsection.G.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.10}Expansion of Terms}{106}{subsection.G.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.11}ReLU Simplification}{107}{subsection.G.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.12}Complete Mathematical Proof for term by term scaling analysis}{107}{subsection.G.12}\protected@file@percent }
+\newlabel{eq:combined_scaling}{{175}{108}{Complete Mathematical Proof for term by term scaling analysis}{equation.G.175}{}}
+\newlabel{eq:k3_final_scaling}{{176}{108}{Complete Mathematical Proof for term by term scaling analysis}{equation.G.176}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.13}Experimental Validation complements}{108}{subsection.G.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.14}Implementation Details and Code Correspondence}{108}{subsection.G.14}\protected@file@percent }
+\newlabel{sec:appendix_implementation}{{G.14}{108}{Implementation Details and Code Correspondence}{subsection.G.14}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {G.14.1}Code Structure and Mathematical Correspondence}{108}{subsubsection.G.14.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {G.14.2}Personal contribution : Automatic Differentiation Optimization}{109}{subsubsection.G.14.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {G.15}Experimental Validation and Quantitative Analysis}{109}{subsection.G.15}\protected@file@percent }
+\newlabel{sec:appendix_experimental_validation}{{G.15}{109}{Experimental Validation and Quantitative Analysis}{subsection.G.15}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {G.15.1}Comprehensive Experimental Setup}{109}{subsubsection.G.15.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {G.15.2}Methodology and Results}{109}{subsubsection.G.15.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {G.15.3}Quantitative Metrics Analysis}{110}{subsubsection.G.15.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {H}Symmetry Theory and Universality Classes}{112}{appendix.H}\protected@file@percent }
+\newlabel{sec:symmetry_theory}{{H}{112}{Symmetry Theory and Universality Classes}{appendix.H}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {H.1}Lie Groups and Representations in Random Matrix Theory}{112}{subsection.H.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {H.1.1}Classical Symmetry Classes}{112}{subsubsection.H.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {H.1.2}Wigner-Dyson Statistics and Level Repulsion}{112}{subsubsection.H.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {H.1.3}Representation Theory and Eigenspace Structure}{112}{subsubsection.H.1.3}\protected@file@percent }
 \abx@aux@cite{0}{dyer2019asymptotics}
 \abx@aux@segm{0}{0}{dyer2019asymptotics}
 \abx@aux@cite{0}{jacot2020kernelhessian}
@@ -472,9 +470,9 @@
 \abx@aux@segm{0}{0}{dyer2019asymptotics}
 \abx@aux@cite{0}{jacot2020kernelhessian}
 \abx@aux@segm{0}{0}{jacot2020kernelhessian}
-\@writefile{toc}{\contentsline {section}{\numberline {I}The Hessian-NTK Correspondence: A Spectral Equivalence \blx@tocontentsinit {0}\cite {dyer2019asymptotics, jacot2020kernelhessian}}{112}{appendix.I}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {I.0.1}Decomposition of the Hessian}{112}{subsubsection.I.0.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {I.0.2}Moment Analysis and Asymptotic Orthogonality}{112}{subsubsection.I.0.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {I}The Hessian-NTK Correspondence: A Spectral Equivalence \blx@tocontentsinit {0}\cite {dyer2019asymptotics, jacot2020kernelhessian}}{113}{appendix.I}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {I.0.1}Decomposition of the Hessian}{113}{subsubsection.I.0.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {I.0.2}Moment Analysis and Asymptotic Orthogonality}{113}{subsubsection.I.0.2}\protected@file@percent }
 \abx@aux@cite{0}{halverson2020neural}
 \abx@aux@segm{0}{0}{halverson2020neural}
 \abx@aux@cite{0}{bondesan2021hintons}
@@ -483,32 +481,28 @@
 \abx@aux@segm{0}{0}{grosvenor2021edge}
 \abx@aux@cite{0}{yaida2023structures}
 \abx@aux@segm{0}{0}{yaida2023structures}
-\abx@aux@cite{0}{guillen_misof_gerken_2025}
-\abx@aux@segm{0}{0}{guillen_misof_gerken_2025}
+\abx@aux@cite{0}{dyer2019asymptotics}
+\abx@aux@segm{0}{0}{dyer2019asymptotics}
 \abx@aux@cite{0}{mei2021principles}
 \abx@aux@segm{0}{0}{mei2021principles}
 \abx@aux@cite{0}{erbin2022renormalization}
 \abx@aux@segm{0}{0}{erbin2022renormalization}
-\abx@aux@cite{0}{liu2025efnn}
-\abx@aux@segm{0}{0}{liu2025efnn}
-\abx@aux@cite{0}{jiang2025synaptic}
-\abx@aux@segm{0}{0}{jiang2025synaptic}
+\abx@aux@cite{0}{hashimoto2022duality}
+\abx@aux@segm{0}{0}{hashimoto2022duality}
 \abx@aux@cite{0}{hashimoto2022duality}
 \abx@aux@segm{0}{0}{hashimoto2022duality}
 \abx@aux@cite{0}{yaida2024nnqft}
 \abx@aux@segm{0}{0}{yaida2024nnqft}
 \abx@aux@cite{0}{martyn2022variational}
 \abx@aux@segm{0}{0}{martyn2022variational}
-\abx@aux@cite{0}{huang2025fermionic}
-\abx@aux@segm{0}{0}{huang2025fermionic}
 \abx@aux@cite{0}{benarous2007spectrum}
 \abx@aux@segm{0}{0}{benarous2007spectrum}
 \abx@aux@cite{0}{benarous2014high_dimensional_landscapes}
 \abx@aux@segm{0}{0}{benarous2014high_dimensional_landscapes}
 \abx@aux@cite{0}{benarous2014high_dimensional_landscapes}
 \abx@aux@segm{0}{0}{benarous2014high_dimensional_landscapes}
-\@writefile{toc}{\contentsline {section}{\numberline {J}Quantum Field Theory Perspective on Neural Tangent Hierarchy}{113}{appendix.J}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {J.1}Random Matrix Theory and Optimization landscape Analysis}{113}{subsection.J.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {J}Quantum Field Theory Perspective on Neural Tangent Hierarchy}{114}{appendix.J}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {J.1}Random Matrix Theory and Optimization landscape Analysis}{114}{subsection.J.1}\protected@file@percent }
 \abx@aux@cite{0}{benarous2019spiked_tensor}
 \abx@aux@segm{0}{0}{benarous2019spiked_tensor}
 \abx@aux@cite{0}{benarous2023high_dimensional_sgd}
@@ -527,101 +521,139 @@
 \abx@aux@segm{0}{0}{benarous2021determinants}
 \bibcite{driscoll2014chebfun}{1}
 \bibcite{welper2023approximation}{2}
-\bibcite{jacot2018neural}{3}
-\bibcite{huang2019dynamicsdeepneuralnetworks}{4}
-\bibcite{golikov2022ntk_survey}{5}
-\bibcite{ntk2025divergence}{6}
-\bibcite{lee2022ntk}{7}
-\bibcite{hron2020infiniteattentionnngpntk}{8}
-\bibcite{ntk2024underparam}{9}
-\bibcite{seleznova2022ntk_beyond}{10}
-\bibcite{hanin_nica_2019}{11}
-\@writefile{toc}{\contentsline {section}{References}{115}{subsection.J.1}\protected@file@percent }
-\newlabel{ref:driscoll2014chebfun}{{1}{115}{}{Item.15}{}}
-\newlabel{ref:welper2023approximation}{{2}{115}{}{Item.16}{}}
-\newlabel{ref:jacot2018neural}{{3}{115}{}{Item.17}{}}
-\newlabel{ref:huang2019dynamicsdeepneuralnetworks}{{4}{115}{}{Item.18}{}}
-\newlabel{ref:golikov2022ntk_survey}{{5}{115}{}{Item.19}{}}
-\newlabel{ref:ntk2025divergence}{{6}{115}{}{Item.20}{}}
-\newlabel{ref:lee2022ntk}{{7}{115}{}{Item.21}{}}
-\newlabel{ref:hron2020infiniteattentionnngpntk}{{8}{115}{}{Item.22}{}}
-\newlabel{ref:ntk2024underparam}{{9}{115}{}{Item.23}{}}
-\newlabel{ref:seleznova2022ntk_beyond}{{10}{115}{}{Item.24}{}}
-\bibcite{seleznova_kutyniok_2022}{12}
-\bibcite{anonymous_finite_width_kernel_dynamics_2023}{13}
-\bibcite{guillen_misof_gerken_2025}{14}
-\bibcite{dyer_gur_ari_2019}{15}
-\bibcite{halverson2020neural}{16}
-\bibcite{bondesan2021hintons}{17}
-\bibcite{grosvenor2021edge}{18}
-\bibcite{yaida2023structures}{19}
-\bibcite{liu2025efnn}{20}
-\bibcite{mei2021principles}{21}
-\bibcite{erbin2022renormalization}{22}
-\bibcite{jiang2025synaptic}{23}
-\bibcite{hashimoto2022duality}{24}
-\newlabel{ref:hanin_nica_2019}{{11}{116}{}{Item.25}{}}
-\newlabel{ref:seleznova_kutyniok_2022}{{12}{116}{}{Item.26}{}}
-\newlabel{ref:anonymous_finite_width_kernel_dynamics_2023}{{13}{116}{}{Item.27}{}}
-\newlabel{ref:guillen_misof_gerken_2025}{{14}{116}{}{Item.28}{}}
-\newlabel{ref:dyer_gur_ari_2019}{{15}{116}{}{Item.29}{}}
-\newlabel{ref:halverson2020neural}{{16}{116}{}{Item.30}{}}
-\newlabel{ref:bondesan2021hintons}{{17}{116}{}{Item.31}{}}
-\newlabel{ref:grosvenor2021edge}{{18}{116}{}{Item.32}{}}
-\newlabel{ref:yaida2023structures}{{19}{116}{}{Item.33}{}}
-\newlabel{ref:liu2025efnn}{{20}{116}{}{Item.34}{}}
-\newlabel{ref:mei2021principles}{{21}{116}{}{Item.35}{}}
-\newlabel{ref:erbin2022renormalization}{{22}{116}{}{Item.36}{}}
-\newlabel{ref:jiang2025synaptic}{{23}{116}{}{Item.37}{}}
-\bibcite{martyn2022variational}{25}
-\bibcite{yaida2024nnqft}{26}
-\bibcite{huang2025fermionic}{27}
-\bibcite{nguyen2022ntk_eigenvalues}{28}
-\bibcite{fan2020spectra}{29}
-\bibcite{li2024eigenvalue_decay}{30}
-\bibcite{bach2021ntk_eigenvalues}{31}
-\bibcite{doumeche2023ntk_spectral}{32}
-\bibcite{choromanska2014loss_surfaces}{33}
-\bibcite{benarous2019spiked_tensor}{34}
-\bibcite{benarous2021online_sgd}{35}
-\bibcite{benarous2023high_dimensional_sgd}{36}
-\bibcite{benarous2023spectral_sgd_alignment}{37}
-\newlabel{ref:hashimoto2022duality}{{24}{117}{}{Item.38}{}}
-\newlabel{ref:martyn2022variational}{{25}{117}{}{Item.39}{}}
-\newlabel{ref:yaida2024nnqft}{{26}{117}{}{Item.40}{}}
-\newlabel{ref:huang2025fermionic}{{27}{117}{}{Item.41}{}}
-\newlabel{ref:nguyen2022ntk_eigenvalues}{{28}{117}{}{Item.42}{}}
-\newlabel{ref:fan2020spectra}{{29}{117}{}{Item.43}{}}
-\newlabel{ref:li2024eigenvalue_decay}{{30}{117}{}{Item.44}{}}
-\newlabel{ref:bach2021ntk_eigenvalues}{{31}{117}{}{Item.45}{}}
-\newlabel{ref:doumeche2023ntk_spectral}{{32}{117}{}{Item.46}{}}
-\newlabel{ref:choromanska2014loss_surfaces}{{33}{117}{}{Item.47}{}}
-\newlabel{ref:benarous2019spiked_tensor}{{34}{117}{}{Item.48}{}}
-\newlabel{ref:benarous2021online_sgd}{{35}{117}{}{Item.49}{}}
-\newlabel{ref:benarous2023high_dimensional_sgd}{{36}{117}{}{Item.50}{}}
-\bibcite{benarous2014high_dimensional_landscapes}{38}
-\bibcite{czarnecki2017sobolev}{39}
-\bibcite{son2021sobolev}{40}
-\bibcite{sobolev2024acceleration}{41}
-\bibcite{yang2024sobolev}{42}
-\bibcite{nvidia2025sobolev}{43}
-\bibcite{gupte2022sobolev_loss}{44}
-\bibcite{doumeche2023sobolev}{45}
-\bibcite{townsend2022sobolev}{46}
-\bibcite{doumeche2023sobolev_ntk}{47}
-\bibcite{bach2017breaking}{48}
-\newlabel{ref:benarous2023spectral_sgd_alignment}{{37}{118}{}{Item.51}{}}
-\newlabel{ref:benarous2014high_dimensional_landscapes}{{38}{118}{}{Item.52}{}}
-\newlabel{ref:czarnecki2017sobolev}{{39}{118}{}{Item.53}{}}
-\newlabel{ref:son2021sobolev}{{40}{118}{}{Item.54}{}}
-\newlabel{ref:sobolev2024acceleration}{{41}{118}{}{Item.55}{}}
-\newlabel{ref:yang2024sobolev}{{42}{118}{}{Item.56}{}}
-\newlabel{ref:nvidia2025sobolev}{{43}{118}{}{Item.57}{}}
-\newlabel{ref:gupte2022sobolev_loss}{{44}{118}{}{Item.58}{}}
-\newlabel{ref:doumeche2023sobolev}{{45}{118}{}{Item.59}{}}
-\newlabel{ref:townsend2022sobolev}{{46}{118}{}{Item.60}{}}
-\newlabel{ref:doumeche2023sobolev_ntk}{{47}{118}{}{Item.61}{}}
-\newlabel{ref:bach2017breaking}{{48}{118}{}{Item.62}{}}
+\bibcite{jacot2018ntk}{3}
+\bibcite{jacot2020kernelhessian}{4}
+\bibcite{huang2019dynamicsdeepneuralnetworks}{5}
+\bibcite{golikov2022ntk_survey}{6}
+\bibcite{nguyen2024concentration}{7}
+\bibcite{yu2025divergenceempiricalneuraltangent}{0}
+\bibcite{lee2022ntk}{0}
+\bibcite{hron2020infiniteattentionnngpntk}{0}
+\bibcite{welper2024approximationgradientdescenttraining}{0}
+\bibcite{terjek2025mlpseocspectrumntk}{0}
+\bibcite{terjek2025mlpseocconcentrationntk}{0}
+\bibcite{seleznova2022ntk_beyond}{0}
+\@writefile{toc}{\contentsline {section}{References}{116}{subsection.J.1}\protected@file@percent }
+\newlabel{ref:driscoll2014chebfun}{{1}{116}{}{Item.15}{}}
+\newlabel{ref:welper2023approximation}{{2}{116}{}{Item.16}{}}
+\newlabel{ref:jacot2018ntk}{{3}{116}{}{Item.17}{}}
+\newlabel{ref:jacot2020kernelhessian}{{4}{116}{}{Item.18}{}}
+\newlabel{ref:huang2019dynamicsdeepneuralnetworks}{{5}{116}{}{Item.19}{}}
+\newlabel{ref:golikov2022ntk_survey}{{6}{116}{}{Item.20}{}}
+\newlabel{ref:nguyen2024concentration}{{7}{116}{}{Item.21}{}}
+\newlabel{ref:yu2025divergenceempiricalneuraltangent}{{J.1}{116}{Random Matrix Theory and Optimization landscape Analysis}{Item.21}{}}
+\newlabel{ref:lee2022ntk}{{J.1}{116}{Random Matrix Theory and Optimization landscape Analysis}{Item.21}{}}
+\newlabel{ref:hron2020infiniteattentionnngpntk}{{J.1}{116}{Random Matrix Theory and Optimization landscape Analysis}{Item.21}{}}
+\newlabel{ref:welper2024approximationgradientdescenttraining}{{J.1}{116}{Random Matrix Theory and Optimization landscape Analysis}{Item.21}{}}
+\newlabel{ref:terjek2025mlpseocspectrumntk}{{J.1}{116}{Random Matrix Theory and Optimization landscape Analysis}{Item.21}{}}
+\newlabel{ref:terjek2025mlpseocconcentrationntk}{{J.1}{116}{Random Matrix Theory and Optimization landscape Analysis}{Item.21}{}}
+\bibcite{hanin_nica_2019}{0}
+\bibcite{seleznova_kutyniok_2022}{0}
+\bibcite{anonymous_finite_width_kernel_dynamics_2023}{0}
+\bibcite{guillen_misof_gerken_2025}{0}
+\bibcite{dyer2019asymptotics}{0}
+\bibcite{halverson2020neural}{0}
+\bibcite{vaswani2017attention}{0}
+\bibcite{collins2022weingarten}{0}
+\bibcite{baskerville2024ntk}{0}
+\bibcite{bondesan2021hintons}{0}
+\bibcite{grosvenor2021edge}{0}
+\bibcite{yaida2023structures}{0}
+\newlabel{ref:seleznova2022ntk_beyond}{{J.1}{117}{}{Item.21}{}}
+\newlabel{ref:hanin_nica_2019}{{J.1}{117}{}{Item.21}{}}
+\newlabel{ref:seleznova_kutyniok_2022}{{J.1}{117}{}{Item.21}{}}
+\newlabel{ref:anonymous_finite_width_kernel_dynamics_2023}{{J.1}{117}{}{Item.21}{}}
+\newlabel{ref:guillen_misof_gerken_2025}{{J.1}{117}{}{Item.21}{}}
+\newlabel{ref:dyer2019asymptotics}{{J.1}{117}{}{Item.21}{}}
+\newlabel{ref:halverson2020neural}{{J.1}{117}{}{Item.21}{}}
+\newlabel{ref:vaswani2017attention}{{J.1}{117}{}{Item.21}{}}
+\newlabel{ref:collins2022weingarten}{{J.1}{117}{}{Item.21}{}}
+\newlabel{ref:baskerville2024ntk}{{J.1}{117}{}{Item.21}{}}
+\newlabel{ref:bondesan2021hintons}{{J.1}{117}{}{Item.21}{}}
+\newlabel{ref:grosvenor2021edge}{{J.1}{117}{}{Item.21}{}}
+\bibcite{liu2025efnn}{0}
+\bibcite{mei2021principles}{0}
+\bibcite{erbin2022renormalization}{0}
+\bibcite{lee2025synapticfieldtheoryneural}{0}
+\bibcite{hashimoto2022duality}{0}
+\bibcite{martyn2022variational}{0}
+\bibcite{yaida2024nnqft}{0}
+\bibcite{huang2025neuralnetworkstensorweights}{0}
+\bibcite{bietti2021deepequalsshallowrelu}{0}
+\bibcite{nguyen2022ntk_eigenvalues}{0}
+\bibcite{fan2020spectra}{0}
+\bibcite{li2024eigenvalue_decay}{0}
+\bibcite{bach2021ntk_eigenvalues}{0}
+\bibcite{doumeche2023ntk_spectral}{0}
+\newlabel{ref:yaida2023structures}{{J.1}{118}{}{Item.21}{}}
+\newlabel{ref:liu2025efnn}{{J.1}{118}{}{Item.21}{}}
+\newlabel{ref:mei2021principles}{{J.1}{118}{}{Item.21}{}}
+\newlabel{ref:erbin2022renormalization}{{J.1}{118}{}{Item.21}{}}
+\newlabel{ref:lee2025synapticfieldtheoryneural}{{J.1}{118}{}{Item.21}{}}
+\newlabel{ref:hashimoto2022duality}{{J.1}{118}{}{Item.21}{}}
+\newlabel{ref:martyn2022variational}{{J.1}{118}{}{Item.21}{}}
+\newlabel{ref:yaida2024nnqft}{{J.1}{118}{}{Item.21}{}}
+\newlabel{ref:huang2025neuralnetworkstensorweights}{{J.1}{118}{}{Item.21}{}}
+\newlabel{ref:bietti2021deepequalsshallowrelu}{{J.1}{118}{}{Item.21}{}}
+\newlabel{ref:nguyen2022ntk_eigenvalues}{{J.1}{118}{}{Item.21}{}}
+\newlabel{ref:fan2020spectra}{{J.1}{118}{}{Item.21}{}}
+\newlabel{ref:li2024eigenvalue_decay}{{J.1}{118}{}{Item.21}{}}
+\newlabel{ref:bach2021ntk_eigenvalues}{{J.1}{118}{}{Item.21}{}}
+\bibcite{choromanska2014loss_surfaces}{0}
+\bibcite{benarous2007spectrum}{0}
+\bibcite{benarous2010gaps}{0}
+\bibcite{benarous2009poisson}{0}
+\bibcite{benarous2013complexity}{0}
+\bibcite{benarous2021determinants}{0}
+\bibcite{benarous2019spiked_tensor}{0}
+\bibcite{benarous2021online_sgd}{0}
+\bibcite{benarous2023high_dimensional_sgd}{0}
+\bibcite{benarous2023spectral_sgd_alignment}{0}
+\bibcite{benarous2014high_dimensional_landscapes}{0}
+\bibcite{czarnecki2017sobolev}{0}
+\bibcite{son2021sobolev}{0}
+\bibcite{sobolev2024acceleration}{0}
+\bibcite{yang2024sobolev}{0}
+\bibcite{nvidia2025sobolev}{0}
+\newlabel{ref:doumeche2023ntk_spectral}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:choromanska2014loss_surfaces}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:benarous2007spectrum}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:benarous2010gaps}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:benarous2009poisson}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:benarous2013complexity}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:benarous2021determinants}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:benarous2019spiked_tensor}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:benarous2021online_sgd}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:benarous2023high_dimensional_sgd}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:benarous2023spectral_sgd_alignment}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:benarous2014high_dimensional_landscapes}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:czarnecki2017sobolev}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:son2021sobolev}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:sobolev2024acceleration}{{J.1}{119}{}{Item.21}{}}
+\newlabel{ref:yang2024sobolev}{{J.1}{119}{}{Item.21}{}}
+\bibcite{gupte2022sobolev_loss}{0}
+\bibcite{townsend2020ntk}{0}
+\bibcite{zhang2024superconvergence}{0}
+\bibcite{doumeche2023sobolev}{0}
+\bibcite{townsend2022sobolev}{0}
+\bibcite{doumeche2023sobolev_ntk}{0}
+\bibcite{yang2020meanfield}{0}
+\bibcite{mandt2017stochastic}{0}
+\bibcite{bach2017breaking}{0}
+\bibcite{murray2023characterizingspectrumntkpower}{0}
+\bibcite{yang2024deepsuperreul}{0}
+\newlabel{ref:nvidia2025sobolev}{{J.1}{120}{}{Item.21}{}}
+\newlabel{ref:gupte2022sobolev_loss}{{J.1}{120}{}{Item.21}{}}
+\newlabel{ref:townsend2020ntk}{{J.1}{120}{}{Item.21}{}}
+\newlabel{ref:zhang2024superconvergence}{{J.1}{120}{}{Item.21}{}}
+\newlabel{ref:doumeche2023sobolev}{{J.1}{120}{}{Item.21}{}}
+\newlabel{ref:townsend2022sobolev}{{J.1}{120}{}{Item.21}{}}
+\newlabel{ref:doumeche2023sobolev_ntk}{{J.1}{120}{}{Item.21}{}}
+\newlabel{ref:yang2020meanfield}{{J.1}{120}{}{Item.21}{}}
+\newlabel{ref:mandt2017stochastic}{{J.1}{120}{}{Item.21}{}}
+\newlabel{ref:bach2017breaking}{{J.1}{120}{}{Item.21}{}}
+\newlabel{ref:murray2023characterizingspectrumntkpower}{{J.1}{120}{}{Item.21}{}}
+\newlabel{ref:yang2024deepsuperrelu}{{J.1}{120}{}{Item.21}{}}
 \abx@aux@read@bbl@mdfivesum{nobblfile}
 \abx@aux@read@bblrerun
-\gdef \@abspage@last{118}
+\gdef \@abspage@last{120}

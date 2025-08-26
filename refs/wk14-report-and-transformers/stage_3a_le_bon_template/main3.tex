@@ -42,6 +42,27 @@
 
 
 \usepackage{hyperref}
+\usepackage[colorlinks=true,
+            linkcolor=blue,
+            citecolor=red,
+            urlcolor=blue,
+            backref=true,
+            hyperindex=true,
+            bookmarks=true,
+            bookmarksopen=true]{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=red,
+    urlcolor=blue,
+    pdftitle={Deeper or Wider ? A first answer under the NTK perspective},
+    pdfauthor={Janis AIAD},
+    backref=true,
+    hyperindex=true,
+    bookmarks=true,
+    bookmarksopen=true
+}
 
 % You can change the parameters: here are the available options:
 % - a4paper
@@ -396,7 +417,7 @@ Special acknowledgment goes to \textbf{Professor Doron Levy}, Head of the Mathem
 I would also like to extend my sincere gratitude to \textbf{Ruth Yun} from Human Resources, whose exceptional assistance and guidance throughout the administrative aspects of this research have been invaluable. Her dedication and support have made this work possible in ways that extend far beyond the technical contributions.
 
 
-The working together and interesting discussions with other researchers have been important for developing the ideas shown here. This work shows the power of working together in research and the generous sharing of knowledge in the scientific community.
+We are deeply grateful for the open-source spirit and the vibrant exchanges with the research community, which have shaped this work. The generosity and passion of fellow researchers have made this journey both meaningful and inspiring.
 
 
 \subsection*{Scope and Informal words}
@@ -690,13 +711,13 @@ Parallel to Sobolev training advances, NTK analysis has provided the dominant th
 
 These fundamental results were refined by Nguyen et al. \cite{nguyen2022ntk_eigenvalues} and Fan \& Wang \cite{fan2020spectra}, who connected eigenvalue distribution patterns to architectural parameters including depth, width, and random matrix effects. We observe that these works established precise relationships between network structure and spectral properties. More recently, Doumeche \cite{doumeche2023ntk_spectral} introduced concentration inequalities for empirical NTK spectra, ensuring stability of eigenvalue distributions in high-dimensional settings.
 
-Finite-width corrections represent an active research area where Hanin \& Nica \cite{hanin_nica_2019}, Dyer \& Gur-Ari \cite{dyer_gur_ari_2019}, and Guillen et al. \cite{guillen_misof_gerken_2025} employed diagrammatic techniques inspired by quantum field theory to describe NTK fluctuations. These approaches bridge the theoretical gap between infinite-width and finite-width regimes, providing practical insights for real neural networks.
+Finite-width corrections represent an active research area where Hanin \& Nica \cite{hanin_nica_2019}, Dyer \& Gur-Ari \cite{dyer2019asymptotics}, and Guillen et al. \cite{guillen_misof_gerken_2025} employed diagrammatic techniques inspired by quantum field theory to describe NTK fluctuations. These approaches bridge the theoretical gap between infinite-width and finite-width regimes, providing practical insights for real neural networks.
 
 \paragraph{Convergence of Sobolev Training and NTK Theory}
 
 The synthesis of these research directions occurs in works such as Doumeche \cite{doumeche2023sobolev_ntk}, which demonstrated that Sobolev training reweights the NTK spectrum through powers of differential operators, accelerating decay of high-frequency eigenmodes. This theoretical result explains empirically observed performance gains in PDE solvers and smooth regression tasks, providing the first rigorous connection between Sobolev norms and kernel spectral properties.
 
-Complementary works extend this analysis to optimization guarantees. Welper \cite{welper2023approximation} studied gradient flow behavior for Sobolev-smooth targets, while recent investigations \cite{ntk2024underparam,ntk2025divergence} examined NTK behavior in under-parameterized and classification settings, where uniform kernel convergence can break down. We note that these studies reveal both the power and limitations of NTK-based theoretical analyses.
+Complementary works extend this analysis to optimization guarantees. Welper \cite{welper2023approximation} studied gradient flow behavior for Sobolev-smooth targets, while recent investigations \cite{ntk2024underparam} examined NTK behavior in under-parameterized and classification settings, where uniform kernel convergence can break down. We note that these studies reveal both the power and limitations of NTK-based theoretical analyses.
 
 \paragraph{Convergence Analysis and Open Challenges}
 
@@ -707,6 +728,10 @@ Moreover, sampling strategies critically shape NTK spectral properties, yet rema
 Finally, extending Sobolev-aware NTK analysis to modern architectures including convolutional networks and attention mechanisms, as well as to stochastic training dynamics, remains a theoretical frontier. Diagrammatic methods and neural tangent hierarchy approaches \cite{huang2019dynamicsdeepneuralnetworks} may provide the appropriate mathematical tools for handling such architectural complexity.
 
 The synthesis of Sobolev training and NTK spectral analysis offers a unified theoretical framework for understanding neural network convergence properties. We observe that derivative-aware training objectives fundamentally reshape kernel spectra, altering both optimization dynamics and generalization behavior. Foundational results from approximation theory, kernel eigenvalue analysis, and finite-width corrections are converging into a coherent mathematical theory with significant implications for scientific machine learning and adaptive training methodologies.
+
+
+
+
 
 \newpage
 \section{The Neural Tangent Kernel under Sobolev training}
@@ -849,7 +874,7 @@ The framework selection can be summarized by the following decision tree:
 
 \subsubsection{The Neural Tangent Kernel}
 
-For a neural network $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})$ with parameters $\boldsymbol{\textcolor{darkyellow}{\theta}}$, the \textit{Neural Tangent Kernel} \cite{jacot2018neural} is defined by:
+For a neural network $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})$ with parameters $\boldsymbol{\textcolor{darkyellow}{\theta}}$, the \textit{Neural Tangent Kernel} \cite{jacot2018ntk} is defined by:
 \begin{tcolorbox}[colback=yellow!10,colframe=blue!40!black,title=Definition : NTK]
 \begin{equation}
 \label{eq:ntk_definition}
@@ -1130,13 +1155,57 @@ The practical implications extend to algorithm design, where our theoretical ins
 
 
 \section{Preconditioning strategies for the NTK}
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[scale=1.1, every node/.style={font=\small}]
+        % we define the axes for our plot, representing parameter space and loss
+        \draw[->, thick] (-0.5,0) -- (9,0) node[right] {Parameter space $w$};
+        \draw[->, thick] (0,-0.5) -- (0,4) node[above] {Loss $\mathcal{L}(w)$};
+
+        % we draw a custom non-convex loss landscape with multiple minima using bezier curves
+        \draw[thick, blue!70!black] (0,3.5) 
+            .. controls (1,3) and (1.5,0.5) .. (2.5, 0.8) % we create the first global minimum
+            .. controls (3.5,1.1) and (4,2.5) .. (4.5, 2.6) % we create a local maximum
+            .. controls (5,2.7) and (5.5,1) .. (6.5, 0.8) % we create a second global minimum at the same level
+            .. controls (7.5,0.6) and (8,2) .. (8.5, 2.2); % we end the curve
+
+        % we define coordinates for key points of interest on the landscape
+        \coordinate (start) at (0.5, 3.3);
+        \coordinate (globalmin1) at (2.5, 0.8);
+        \coordinate (globalmin2) at (6.5, 0.8);
+        
+        % we mark the initial parameters and the global minima on the plot
+        \fill[black] (start) circle (2pt) node[above] {$w_0$};
+        \fill[orange!90!black] (globalmin1) circle (2.5pt);
+        \fill[orange!90!black] (globalmin2) circle (2.5pt);
+
+        % we draw the optimization path from the start to one of the global minima
+        \draw[->, thick, orange!80!black, dashed] (start) 
+            .. controls (1,2.5) and (1.5,1.5) .. (globalmin1);
+
+        % we add an annotation box explaining the ntk theorem's guarantee
+        \node[align=left, anchor=north east, text width=4.5cm, draw, rounded corners, fill=gray!10, inner sep=2mm] at (8.8, 3.8) {
+            \textbf{NTK Regime Guarantee:}\\
+            For a sufficiently wide network, gradient descent is guaranteed to converge to a \textbf{global minimum} of the loss function $\mathcal{L}(w)$.
+        };
+
+        % we use a brace to highlight that multiple global minima can exist
+        \draw [decorate,decoration={brace,amplitude=8pt,mirror,raise=4pt},thick]
+            (globalmin1 |- 0,-0.2) -- (globalmin2 |- 0,-0.2)
+            node[midway, below=8pt, align=center] 
+            {\textbf{Set of global minima} \\ (convergence to any is possible)};
+            
+    \end{tikzpicture}
+    \caption{Illustration of the NTK theorem on a complex, non-convex loss landscape. The theory guarantees that for sufficiently wide networks, gradient descent (dashed orange path) converges to a global minimum. However, the global minimum is not necessarily unique; the optimization may converge to any point within the set of global optima.}
+    \label{fig:ntk-global-minima-landscape}
+\end{figure}
+
+\newpage
 
 \subsection{Multi-Component Multi-layer Neural Networks (MMNN) and Transformers}
 
 We examine Multi-Component Multi-layer Neural Networks (MMNN) and Transformer architectures, focusing on NTK preconditioning techniques. This means we investigate how to change our architectural
-and training meta-parameters (activation function, residual connections, message passing).
-
-At the time this report is written, most of the research is currently in progress.
+and training meta-parameters (activation function, residual connections, message passing).At the time this report is written, most of the research is currently in progress.
 
 For MMNN architectures, the kernel structure exhibits exhibits more stability. The preconditioning strategy decomposes the weight matrix into trainable/frozen weights,
 and make the loss landscape less dimensionnal, and hopefully more convex. We present all the mathematical results and proofs
@@ -1693,10 +1762,9 @@ The cost is kernel evolution: no longer deterministic and static, but a random f
 Major applications target Physics-Informed Neural Networks (PINNs) solving PDEs through neural network training satisfying governing equations. Since MMNNs derive from function decomposition theorems, their architecture naturally suits this purpose.
 
 A powerful analogy connects MMNNs to wavelet transforms, particularly in high dimensions. Wavelets decompose functions onto fixed localized bases; MMNNs learn optimal combinations of rich, random function bases. Classical wavelets suffer dimensionality curses, becoming intractable for high-dimensional problems.
-
 Networks perform automatic, adaptive directional domain decomposition. While neuron-partitioned regions grow exponentially, parameters scale linearly with width. This expressive power and parameter efficiency combination makes MMNNs powerful, tractable tools for high-dimensional PINN applications where classical wavelets fail.
 
-Concrete progress requires network regularity. Many PDEs involve second-order derivatives (Laplacians). Applying rigorous optimization and approximation theorems requires twice-differentiable networks ($C^2$). Future directions include developing "Deep Smooth ReLU Network" (DSRN) MMNN versions using smoother activations, guaranteeing necessary regularity and unlocking broader theoretical tools for PINN analysis.
+Concrete progress requires network regularity. Many PDEs involve second-order derivatives (Laplacians). Applying rigorous optimization and approximation theorems requires twice-differentiable networks ($C^2$). Future directions include developing "Deep Super ReLU Network" (DSRN) MMNN versions using smoother activations, guaranteeing necessary regularity and unlocking broader theoretical tools for PINN analysis.
 \end{tcolorbox}
 
 \begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: High-Dimensional Advantages}},enhanced,drop shadow,boxrule=2pt]
@@ -1721,7 +1789,7 @@ A powerful analogy connects MMNNs to wavelet transforms, particularly in high di
 
 Networks perform automatic, adaptive directional domain decomposition. While neuron-partitioned regions grow exponentially, parameters scale linearly with width. This expressive power and parameter efficiency combination makes MMNNs powerful, tractable tools for high-dimensional PINN applications where classical wavelets fail.
 
-Concrete progress requires network regularity. Many PDEs involve second-order derivatives (Laplacians). Applying rigorous optimization and approximation theorems requires twice-differentiable networks ($C^2$). Future directions include developing "Deep Suuper ReLU Network" \cite{yang2024deepsuperreul} MMNN versions using smoother activations, guaranteeing necessary regularity and unlocking broader theoretical tools for PINN analysis.
+Concrete progress requires network regularity. Many PDEs involve second-order derivatives (Laplacians). Applying rigorous optimization and approximation theorems requires twice-differentiable networks ($C^2$). Future directions include developing "Deep Suuper ReLU Network" \cite{yang2024deepsuperelu} MMNN versions using smoother activations, guaranteeing necessary regularity and unlocking broader theoretical tools for PINN analysis.
 
 
 
@@ -2318,7 +2386,7 @@ For a fixed pair of inputs $(x_1, x_2)$, we consider the third-order kernel deri
 \]
 where $\theta_{\mu}$ has multi-index $\mu=(p,i,j)$ belonging to the weight matrix $A_p$. Thus, for fixed $(x_1,x_2)$, we obtain a vector $\textcolor{k3color}{O_3}^{x_1,x_2} \in \mathbb{R}^{|D_{\text{tr}}|}$ with components given by the third derivative of the kernel at each training point.
 
-\subsubsection{Explicit Formulas for the Corrections \cite{dyer2024ntk}}
+\subsubsection{Explicit Formulas for the Corrections \cite{dyer2019asymptotics}}
 
 Having established the theoretical foundation, we now present the explicit formulas for the first-order corrections $\textcolor{k3color}{O_3}$ and $O_4$.
 
@@ -2694,7 +2762,7 @@ In our quest to build a more accurate statistical model of the \textcolor{kernel
 
 \textbf{Implementation}: \texttt{experiments/ntk\_spectrum/eigen\_MP.py}
 
-\textbf{Result}: \textit{Truly remarkable} connection between infinite-width \textcolor{kernelcolor}{NTK} and \textcolor{purple!80!black}{\textbf{Random Matrix Theory}} cornerstone \cite{guillen_misof_gerken_2025,dyer_gur_ari_2019}.
+\textbf{Result}: \textit{Truly remarkable} connection between infinite-width \textcolor{kernelcolor}{NTK} and \textcolor{purple!80!black}{\textbf{Random Matrix Theory}} cornerstone \cite{guillen_misof_gerken_2025,dyer2019asymptotics}.
 \end{tcolorbox}
 
 \subsection{A Primer on Random Matrix Theory and Spectral Statistics}
@@ -2702,7 +2770,7 @@ In our quest to build a more accurate statistical model of the \textcolor{kernel
 \begin{tcolorbox}[colback=yellow!10,colframe=yellow!60!black,title={\textbf{📖 DEFINITION: Random Matrix Theory Fundamentals}},enhanced,drop shadow]
 \textcolor{purple!80!black}{\textbf{Random Matrix Theory}} (\textcolor{purple!80!black}{\textbf{RMT}}) studies matrices whose entries are random variables. It predicts that statistical properties of eigenvalues of large random matrices are \textbf{universal}, depending only on ensemble symmetries.
 
-For \textit{real symmetric matrices}, the relevant ensemble is the \textcolor{purple!80!black}{\textbf{Gaussian Orthogonal Ensemble}} (\textcolor{purple!80!black}{\textbf{GOE}}) \cite{dyer_gur_ari_2019}.
+For \textit{real symmetric matrices}, the relevant ensemble is the \textcolor{purple!80!black}{\textbf{Gaussian Orthogonal Ensemble}} (\textcolor{purple!80!black}{\textbf{GOE}}) \cite{dyer2019asymptotics}.
 \end{tcolorbox}
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🔬 GENERAL REMARK: Level Spacing Analysis}},enhanced,drop shadow]
@@ -2970,7 +3038,7 @@ These empirical contributions strengthen the validity of our theoretical framewo
 
 \textbf{Computational complexity}: While our Hessian-based approach is more efficient than explicit tensor computation, computing $O_4$ remains expensive for very large networks. \textbf{Memory constraints} limit the maximum network size we can analyze.
 
-\textbf{Architectural assumptions}: Our analysis assumes feedforward ReLU networks. \textbf{Extensions to attention mechanisms} \cite{vaswani2017attention}, \textbf{residual connections} \cite{he2016deep}, and \textbf{other activation functions} require separate analysis.
+\textbf{Architectural assumptions}: Our analysis assumes feedforward ReLU networks. \textbf{Extensions to attention mechanisms} \cite{vaswani2017attention}, \textbf{residual connections}, and \textbf{other activation functions} require separate analysis.
 
 \textbf{Training dynamics}: We focus on gradient flow (continuous-time). \textbf{Discrete-time effects} \cite{cohen2021gradient} and \textbf{stochastic gradient noise} \cite{mandt2017stochastic} may introduce additional corrections.
 
@@ -4406,7 +4474,7 @@ Benefits include GPU/TPU optimization, reduced implementation errors, and extens
 
 \subsubsection{Comprehensive Experimental Setup}
 We have chosen JAX among all the autodiff framworks in order to have a layer compatibility with neural-tangents.
-The experiments leverage JAX and the Neural Tangents library for efficient computation of finite-width neural networks, complemented by our custom implementation of the infinite-width limit. We use standard feedforward Multi-Layer Perceptrons (MLPs) with \ReLU activation functions, input dimension $D_{\text{in}}$, uniform hidden layer width $M$, scalar output, and standard normal weight initialization scaled by $1/\sqrt{M}$.
+The experiments leverage JAX and the Neural Tangents library for efficient computation of finite-width neural networks, complemented by our custom implementation of the infinite-width limit. We use standard feedforward Multi-Layer Perceptrons (MLPs) with ReLU activation functions, input dimension $D_{\text{in}}$, uniform hidden layer width $M$, scalar output, and standard normal weight initialization scaled by $1/\sqrt{M}$.
 
 Data generation involves $N$ input samples from standard normal distribution, normalized to unit norm for stable signal propagation. Parameter space exploration covers network depth $H \in [2, 1000]$ to probe $H^{1.171}$ scaling, width $M \in [10, 5000]$ to verify $M^{-1.009}$ decay, input dimension $D_{\text{in}} \in [20, 5000]$ to confirm weak dependence, and sample size $N \in [8, 256]$ to test $N^{0.900}$ scaling.
 
@@ -4514,7 +4582,7 @@ Consider a neural network with rotational symmetry under group $G$. The NTK oper
 \begin{equation}
 [\textcolor{kernelcolor}{K}_\infty, \textcolor{orange!80!black}{R_g}] = 0, \quad \forall g \in G
 \end{equation}
-By Schur's lemma, $\textcolor{kernelcolor}{K}_\infty$ acts as a scalar on each irreducible representation $V_\lambda$:
+By Schur's lemma, $\textcolor{kernelcolor}{K}_\infty$ acts as a scalar on each irreducible representation that are spherical harmonics gradued spaces $V_\lambda$:
 \begin{equation}
 \textcolor{kernelcolor}{K}_\infty|_{V_\lambda} = c_\lambda \mathbf{I}_{V_\lambda}
 \end{equation}
@@ -4561,9 +4629,6 @@ Since the higher moments of $\mathcal{B}$ (for $k \ge 3$) vanish in the large-wi
 
 
 
-
-
-
 \section{Quantum Field Theory Perspective on Neural Tangent Hierarchy}
 
 The connection between neural networks and quantum field theory emerges from the \textbf{Gaussianity of perturbations} in randomly initialized networks \cite{halverson2020neural, bondesan2021hintons}. This \textbf{Gaussianity} ensures that higher-order moments follow quantum field interaction principles, establishing a rigorous theoretical framework for finite-width corrections within the Neural Tangent Hierarchy.
@@ -4572,15 +4637,15 @@ The \textbf{Wick-Isserlis theorem} provides the fundamental computational tool f
 
 This theorem directly enables computation of statistical properties for network outputs and their perturbations in the \textbf{NTH framework} \cite{yaida2023structures}.
 
-\textbf{Feynman diagrams} adapted to neural networks offer a systematic computational framework for \textbf{finite-width corrections} \cite{guillen_misof_gerken_2025, mei2021principles}. In this \textbf{diagrammatic representation}, vertices represent activation functions and derivatives, edges encode weight correlations between layers, and loops correspond to finite-width corrections of order $O(n^{-k})$. This approach derives \textbf{recursive relations} for preactivations and higher-order derivative tensors, simplifying \textbf{NTK statistics} computation and generalizations \cite{erbin2022renormalization}.
+\textbf{Feynman diagrams} adapted to neural networks offer a systematic computational framework for \textbf{finite-width corrections} \cite{dyer2019asymptotics, mei2021principles}. In this \textbf{diagrammatic representation}, vertices represent activation functions and derivatives, edges encode weight correlations between layers, and loops correspond to finite-width corrections of order $O(n^{-k})$. This approach derives \textbf{recursive relations} for preactivations and higher-order derivative tensors, simplifying \textbf{NTK statistics} computation and generalizations \cite{erbin2022renormalization}.
 
-The \textbf{field-theoretic perspective} establishes that neural network dynamics follow \textbf{effective field theory} principles \cite{liu2025efnn, jiang2025synaptic}. \textbf{Renormalization group} methods provide systematic treatment of scale dependencies and \textbf{critical phenomena} in wide networks \cite{hashimoto2022duality}. \textbf{Path integral formulations} connect neural network training dynamics to \textbf{quantum mechanical evolution} \cite{yaida2024nnqft, martyn2022variational}, while \textbf{fermionic extensions} capture complex weight correlations \cite{huang2025fermionic}.
+The \textbf{field-theoretic perspective} establishes that neural network dynamics follow \textbf{effective field theory} principles \cite{hashimoto2022duality}. \textbf{Renormalization group} methods provide systematic treatment of scale dependencies and \textbf{critical phenomena} in wide networks \cite{hashimoto2022duality}. \textbf{Path integral formulations} connect neural network training dynamics to \textbf{quantum mechanical evolution} \cite{yaida2024nnqft, martyn2022variational}.
 
 \subsection{Random Matrix Theory and Optimization landscape Analysis}
 
 \textbf{Random Matrix Theory} provides a rigorous framework for analyzing \textbf{spectral properties} in the Neural Tangent Hierarchy. We focus on \textbf{heavy-tailed} random matrices following Ben Arous and collaborators' seminal work.
 
-When matrix entries follow distributions in the domain of attraction of an \textbf{α-stable law}, the empirical spectral distribution converges to a measure $\mu_\alpha$ extending \textbf{Wigner's semicircular law} to infinite variance settings \cite{benarous2007spectrum}. For neural networks with \textbf{heavy-tailed} weight initializations, this determines how \textbf{infinite variance} affects the Neural Tangent Kernel spectrum. The \textbf{absolute continuity} of $\mu_\alpha$ ensures well-defined \textbf{spectral gaps} crucial for training dynamics analysis.
+When matrix entries follow distributions in the domain of attraction of an \textbf{$\alpha$-stable law}, the empirical spectral distribution converges to a measure $\mu_\alpha$ extending \textbf{Wigner's semicircular law} to infinite variance settings \cite{benarous2007spectrum}. For neural networks with \textbf{heavy-tailed} weight initializations, this determines how \textbf{infinite variance} affects the Neural Tangent Kernel spectrum. The \textbf{absolute continuity} of $\mu_\alpha$ ensures well-defined \textbf{spectral gaps} crucial for training dynamics analysis.
 
 The \textbf{loss surface geometry} of multilayer networks connects to \textbf{spin glass models} through random matrix theory \cite{benarous2014high_dimensional_landscapes}. \textbf{Critical points} follow predictable statistical patterns, with direct implications for Neural Tangent Hierarchy operator stability during training. Empirical validation demonstrates that theoretical \textbf{spectral predictions} manifest in practical training scenarios \cite{benarous2014high_dimensional_landscapes}.
 
@@ -4599,8 +4664,6 @@ For \textbf{heavy-tailed} matrices without fourth moments, largest eigenvalues e
 \textbf{Random determinant growth} provides criteria for \textbf{Gaussian landscape} complexity \cite{benarous2021determinants}. Results apply to \textbf{Gaussian matrices} with general covariance and \textbf{Wigner matrices} relevant to neural networks. Determinant \textbf{scaling behavior} determines when recursive hierarchy computations remain numerically stable.
 
 The operators $\textcolor{kernelcolor}{K^{(2)}}$ and $\textcolor{k3color}{K^{(3)}}$ inherit \textbf{spectral properties} from underlying weight matrices. \textbf{Heavy-tailed analysis} provides \textbf{spectral density bounds}, \textbf{extreme eigenvalue statistics} determine conditioning properties, and \textbf{complexity results} guide computational landscape understanding. This perspective complements \textbf{quantum field theory} by providing concrete \textbf{spectral bounds} validating finite-width corrections from \textbf{diagrammatic methods}.
-
-
 
 
 \newpage
@@ -4623,11 +4686,19 @@ URL: \href{https://arxiv.org/abs/2309.04860}{\url{https://arxiv.org/abs/2309.048
 
 \subsection*{Neural Tangent Kernel Theory}
 
-\bibitem{jacot2018neural}\label{ref:jacot2018neural}
+\bibitem{jacot2018ntk}\label{ref:jacot2018ntk}
 Arthur Jacot, Franck Gabriel, and Clément Hongler.
 Neural tangent kernel: Convergence and generalization in neural networks.
 In \textit{Advances in Neural Information Processing Systems}, 2018.
 URL: \url{https://papers.nips.cc/paper/2018/hash/5a4be1fa34e62bb8a6ec6b91d2462f5a-Abstract.html}.
+
+
+\bibitem{jacot2020kernelhessian}\label{ref:jacot2020kernelhessian}
+Arthur Jacot, Franck Gabriel, and Clément Hongler.
+The asymptotic spectrum of the Hessian of DNN throughout training.
+\textit{arXiv preprint arXiv:1910.02875}, 2020.
+URL: \url{https://arxiv.org/abs/1910.02875}.
+% I cite the foundational work on the spectrum of the Hessian in deep neural networks
 
 \bibitem{huang2019dynamicsdeepneuralnetworks}\label{ref:huang2019dynamicsdeepneuralnetworks}
 Jiaoyang Huang and Horng-Tzer Yau.
@@ -4642,11 +4713,18 @@ Neural tangent kernel: A survey.
 \textit{arXiv preprint arXiv:2208.13614}, 2022.
 URL: \href{https://arxiv.org/abs/2208.13614}{\url{https://arxiv.org/abs/2208.13614}}.
 
-\bibitem{ntk2025divergence}\label{ref:ntk2025divergence}
-Anonymous.
-Divergence of empirical ntk in classification.
+\bibitem{nguyen2024concentration}\label{ref:nguyen2024concentration}
+Quynh Nguyen, Marco Mondelli, and Guido Montufar.
+Tight Bounds on the Smallest Eigenvalue of the Neural Tangent Kernel for Deep \ReLU\ Networks.
+\textit{arXiv preprint arXiv:2012.11654}, 2022.
+URL: \url{https://arxiv.org/abs/2012.11654}.
+% I cite this work for its sharp analysis of the smallest eigenvalue of the NTK in deep \ReLU\ networks
+
+
+\bibitem{yu2025divergenceempiricalneuraltangent}\label{ref:yu2025divergenceempiricalneuraltangent}
+Zixiong Yu, Songtao Tian, and Guhan Chen.
+Divergence of Empirical Neural Tangent Kernel in Classification Problems.
 \textit{arXiv preprint arXiv:2504.11130}, 2025.
-Published at ICLR 2025.
 URL: \href{https://arxiv.org/abs/2504.11130}{\url{https://arxiv.org/abs/2504.11130}}.
 
 \bibitem{lee2022ntk}\label{ref:lee2022ntk}
@@ -4665,11 +4743,25 @@ Infinite attention: NNGP and NTK for deep attention networks.
 \textit{arXiv preprint arXiv:2006.10540}, 2020.
 URL: \url{https://arxiv.org/abs/2006.10540}.
 
-\bibitem{ntk2024underparam}\label{ref:ntk2024underparam}
-Anonymous.
-Approximation and gradient descent via neural tangent kernel in the under-parameterized regime.
+\bibitem{welper2024approximationgradientdescenttraining}\label{ref:welper2024approximationgradientdescenttraining}
+G. Welper.
+Approximation and Gradient Descent Training with Neural Networks.
 \textit{arXiv preprint arXiv:2405.11696}, 2024.
 URL: \href{https://arxiv.org/abs/2405.11696}{\url{https://arxiv.org/abs/2405.11696}}.
+
+\bibitem{terjek2025mlpseocspectrumntk}\label{ref:terjek2025mlpseocspectrumntk}
+Dávid Terjék and Diego González-Sánchez.
+MLPs at the EOC: Spectrum of the NTK.
+\textit{arXiv preprint arXiv:2501.13225}, 2025.
+URL: \url{https://arxiv.org/abs/2501.13225}.
+
+\bibitem{terjek2025mlpseocconcentrationntk}\label{ref:terjek2025mlpseocconcentrationntk}
+Dávid Terjék and Diego González-Sánchez.
+MLPs at the EOC: Concentration of the NTK.
+\textit{arXiv preprint arXiv:2501.14724}, 2025.
+URL: \url{https://arxiv.org/abs/2501.14724}.
+
+
 
 \subsection*{Finite-Width Corrections and Neural Tangent Hierarchy}
 
@@ -4710,7 +4802,7 @@ Finite-width neural tangent kernels from feynman diagrams.
 Introduces feynman diagram framework for finite-width NTK corrections.
 URL: \href{https://arxiv.org/abs/2508.11522}{\url{https://arxiv.org/abs/2508.11522}}.
 
-\bibitem{dyer_gur_ari_2019}\label{ref:dyer_gur_ari_2019}
+\bibitem{dyer2019asymptotics}\label{ref:dyer2019asymptotics}
 Ethan Dyer and Guy Gur-Ari.
 Asymptotics of wide networks from feynman diagrams.
 \textit{arXiv preprint arXiv:1909.11304}, 2019.
@@ -4723,6 +4815,32 @@ Neural networks and quantum field theory.
 \textit{arXiv preprint arXiv:2008.08601}, 2020.
 Fundamental connections between neural networks and quantum field theoretical methods.
 URL: \href{https://arxiv.org/abs/2008.08601}{\url{https://arxiv.org/abs/2008.08601}}.
+
+
+\bibitem{vaswani2017attention}\label{ref:vaswani2017attention}
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia Polosukhin.
+Attention is all you need.
+\textit{arXiv preprint arXiv:1706.03762}, 2017.
+Introduces the transformer architecture based solely on attention mechanisms, eliminating recurrence and convolutions.
+URL: \href{https://arxiv.org/abs/1706.03762}{\url{https://arxiv.org/abs/1706.03762}}.
+
+
+\bibitem{collins2022weingarten}\label{ref:collins2022weingarten}
+Benoit Collins, Sho Matsumoto, and Jonathan Novak.
+The weingarten calculus.
+\textit{Notices of the American Mathematical Society}, 69(05):1, 2022.
+American Mathematical Society (AMS).
+ISSN: 1088-9477.
+DOI: \href{https://doi.org/10.1090/noti2474}{10.1090/noti2474}.
+URL: \url{http://dx.doi.org/10.1090/noti2474}.
+
+\bibitem{baskerville2024ntk}\label{ref:baskerville2024ntk}
+Nicholas P. Baskerville.
+Random matrix theory and the loss surfaces of neural networks.
+\textit{arXiv preprint arXiv:2306.02108}, 2023.
+Applies random matrix theory to analyze the loss surfaces of neural networks, providing insights into critical points and landscape structure.
+URL: \href{https://arxiv.org/abs/2306.02108}{\url{https://arxiv.org/abs/2306.02108}}.
+
 
 \bibitem{bondesan2021hintons}\label{ref:bondesan2021hintons}
 Roberto Bondesan and Max Welling.
@@ -4767,11 +4885,11 @@ Renormalization for neural networks: a wilsonian perspective.
 Wilsonian renormalization group approach to neural network effective field theories.
 URL: \href{https://arxiv.org/abs/2108.01403}{\url{https://arxiv.org/abs/2108.01403}}.
 
-\bibitem{jiang2025synaptic}\label{ref:jiang2025synaptic}
-H. Jiang and L. Wang.
-Synaptic field theory for neural networks.
+\bibitem{lee2025synapticfieldtheoryneural}\label{ref:lee2025synapticfieldtheoryneural}
+Donghee Lee, Hye-Sung Lee, and Jaeok Yi.
+Synaptic Field Theory for Neural Networks.
 \textit{arXiv preprint arXiv:2503.08827}, 2025.
-Field theoretical approach to synaptic dynamics in neural networks.
+A field theoretical approach to synaptic dynamics in neural networks.
 URL: \href{https://arxiv.org/abs/2503.08827}{\url{https://arxiv.org/abs/2503.08827}}.
 
 \bibitem{hashimoto2022duality}\label{ref:hashimoto2022duality}
@@ -4795,14 +4913,21 @@ Neural network representation of quantum systems via path integrals.
 Path integral formulation for neural network representations of quantum systems.
 URL: \href{https://arxiv.org/abs/2403.11420}{\url{https://arxiv.org/abs/2403.11420}}.
 
-\bibitem{huang2025fermionic}\label{ref:huang2025fermionic}
-Jin Huang and Liang Zhou.
-Fermionic quantum field theories from complex-weighted neural networks.
+\bibitem{huang2025neuralnetworkstensorweights}\label{ref:huang2025neuralnetworkstensorweights}
+Guojun Huang and Kai Zhou.
+The neural networks with tensor weights and the corresponding fermionic quantum field theory.
 \textit{arXiv preprint arXiv:2507.05303}, 2025.
-Extension of neural network quantum field theory to fermionic systems and complex weights.
+We present a study of neural networks with tensor weights and their connection to fermionic quantum field theory.
 URL: \href{https://arxiv.org/abs/2507.05303}{\url{https://arxiv.org/abs/2507.05303}}.
 
 \subsection*{Spectral Analysis and Eigenvalue Properties}
+
+
+\bibitem{bietti2021deepequalsshallowrelu}\label{ref:bietti2021deepequalsshallowrelu}
+Alberto Bietti and Francis Bach.
+Deep Equals Shallow for ReLU Networks in Kernel Regimes.
+\textit{arXiv preprint arXiv:2009.14397}, 2021.
+URL: \url{https://arxiv.org/abs/2009.14397}.
 
 \bibitem{nguyen2022ntk_eigenvalues}\label{ref:nguyen2022ntk_eigenvalues}
 Quynh Nguyen, Marco Mondelli, and Guido Montufar.
@@ -4841,6 +4966,38 @@ Anna Choromanska, Mikael Henaff, Michael Mathieu, Gérard Ben Arous, and Yann Le
 The Loss Surfaces of Multilayer Networks.
 \textit{arXiv preprint arXiv:1412.0233}, 2014.
 URL: \href{https://arxiv.org/abs/1412.0233}{\url{https://arxiv.org/abs/1412.0233}}.
+
+
+
+\bibitem{benarous2007spectrum}\label{ref:benarous2007spectrum}
+Gérard Ben Arous and Alice Guionnet.
+The spectrum of heavy-tailed random matrices.
+\textit{Communications in Mathematical Physics}, 278(3):715--751, 2008.
+URL: \href{https://arxiv.org/abs/0707.2159}{\url{https://arxiv.org/abs/0707.2159}}.
+
+\bibitem{benarous2010gaps}\label{ref:benarous2010gaps}
+Gérard Ben Arous and Paul Bourgade.
+Extreme gaps between eigenvalues of random matrices.
+\textit{Annals of Probability}, 41(4):2648--2681, 2013.
+URL: \href{https://arxiv.org/abs/1010.1294}{\url{https://arxiv.org/abs/1010.1294}}.
+
+\bibitem{benarous2009poisson}\label{ref:benarous2009poisson}
+Antonio Auffinger, Gérard Ben Arous, and Jiří Černý.
+Random matrices and complexity of spin glasses.
+\textit{Communications on Pure and Applied Mathematics}, 66(2):165--201, 2013.
+URL: \href{https://arxiv.org/abs/1003.1129}{\url{https://arxiv.org/abs/1003.1129}}.
+
+\bibitem{benarous2013complexity}\label{ref:benarous2013complexity}
+Antonio Auffinger and Gérard Ben Arous.
+Complexity of random smooth functions on the high-dimensional sphere.
+\textit{Annals of Probability}, 41(6):4214--4247, 2013.
+URL: \href{https://arxiv.org/abs/1110.5872}{\url{https://arxiv.org/abs/1110.5872}}.
+
+\bibitem{benarous2021determinants}\label{ref:benarous2021determinants}
+Gérard Ben Arous, Paul Bourgade, and Benjamin McKenna.
+Exponential growth of random determinants beyond invariance.
+\textit{arXiv preprint arXiv:2105.05000}, 2021.
+URL: \href{https://arxiv.org/abs/2105.05000}{\url{https://arxiv.org/abs/2105.05000}}.
 
 \bibitem{benarous2019spiked_tensor}\label{ref:benarous2019spiked_tensor}
 Gérard Ben Arous, Song Mei, Andrea Montanari, and Mihai Nica.
@@ -4901,13 +5058,26 @@ In \textit{Proceedings of the International Conference on Machine Learning}, 202
 NVIDIA.
 Sobolev or gradient-enhanced training in physics-informed neural networks.
 NVIDIA Documentation, 2025.
-URL: \url{https://docs.nvidia.com/deeplearning/physicsnemo/physicsnemo-sym/user_guide/theory/advanced_schemes.html}.
+URL: \href{https://docs.nvidia.com/deeplearning/physicsnemo/physicsnemo-sym/user_guide/theory/advanced_schemes.html}{\url{https://docs.nvidia.com/deeplearning/physicsnemo/physicsnemo-sym/user_guide/theory/advanced_schemes.html}}.
 
 \bibitem{gupte2022sobolev_loss}\label{ref:gupte2022sobolev_loss}
 Aparna Gupte, Liu Zhang, Yunan Yang, and Alex Townsend.
 Improving neural network training using sobolev loss functions.
 Poster, MIT, 2022.
 URL: \url{https://math.mit.edu/research/undergraduate/urop-plus/papers/2022/Gupte.pdf}.
+
+\bibitem{townsend2020ntk}\label{ref:townsend2020ntk}
+Annan Yu, Yunan Yang, and Alex Townsend.
+Tuning Frequency Bias in Neural Network Training with Nonuniform Data.
+\textit{arXiv preprint arXiv:2205.14300}, 2022.
+URL: \url{https://arxiv.org/abs/2205.14300}.
+
+\bibitem{zhang2024superconvergence}\label{ref:zhang2024superconvergence}
+Shijun Zhang, Hongkai Zhao, Yimin Zhong, and Haomin Zhou.
+Structured and Balanced Multi-Component and Multi-Layer Neural Networks.
+\textit{arXiv preprint arXiv:2407.00765}, 2025.
+URL: \url{https://arxiv.org/abs/2407.00765}.
+
 
 \bibitem{doumeche2023sobolev}\label{ref:doumeche2023sobolev}
 Nicolas Doumeche.
@@ -4929,11 +5099,42 @@ Combines neural tangent kernel theory with sobolev training for spectral charact
 
 \subsection*{General Deep Learning Theory}
 
+
+\bibitem{yang2020meanfield}\label{ref:yang2020meanfield}
+Greg Yang.
+Tensor Programs I to VI and Neural Networks: A Mathematical Framework.
+\textit{The Greg Yang Website}, 2020.
+URL: \url{https://thegregyang.com}.
+% I cite the foundational tensor programs framework for mean field analysis in deep learning
+
+\bibitem{mandt2017stochastic}\label{ref:mandt2017stochastic}
+Stephan Mandt, Matthew D. Hoffman, and David M. Blei.
+Stochastic Gradient Descent as Approximate Bayesian Inference.
+\textit{Journal of Machine Learning Research}, 18(1):1--35, 2017.
+URL: \url{https://jmlr.org/papers/v18/17-214.html}.
+% I cite the foundational work connecting stochastic gradient descent to approximate Bayesian inference
+
 \bibitem{bach2017breaking}\label{ref:bach2017breaking}
 Francis Bach.
 Breaking the curse of dimensionality with convex neural networks.
 \textit{Journal of Machine Learning Research}, 18(1):629--681, 2017.
 Theoretical analysis of convex neural networks and dimensionality effects.
+
+
+\bibitem{murray2023characterizingspectrumntkpower}\label{ref:murray2023characterizingspectrumntkpower}
+Michael Murray, Hui Jin, Benjamin Bowman, and Guido Montufar.
+Characterizing the Spectrum of the NTK via a Power Series Expansion.
+\textit{arXiv preprint arXiv:2211.07844}, 2023.
+URL: \url{https://arxiv.org/abs/2211.07844}.
+% I cite the work for its analysis of the NTK spectrum using power series expansion
+
+
+\bibitem{yang2024deepsuperreul}\label{ref:yang2024deepsuperrelu}
+Yahong Yang, Yue Wu, Haizhao Yang, and Yang Xiang.
+Nearly Optimal Approximation Rates for Deep Super ReLU Networks on Sobolev Spaces.
+\textit{arXiv preprint arXiv:2310.10766}, 2025.
+URL: \url{https://arxiv.org/abs/2310.10766}.
+% I cite this work for its analysis of nearly optimal approximation rates for deep super ReLU networks in Sobolev spaces
 
 \end{thebibliography}
 
