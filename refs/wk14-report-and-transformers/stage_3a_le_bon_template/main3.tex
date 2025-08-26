@@ -1141,7 +1141,13 @@ where $\Kinf$ is the \textcolor{kernelcolor}{\textbf{NTK operator}} and $\Ps = (
     The key insight is that \textit{Sobolev gradient descent} in the Fourier domain naturally factorizes into two components: first, the application of the \textcolor{sobolevcolor}{\textbf{Sobolev operator}} $\Ps$ which modifies the frequency content of the gradient signal, followed by the \textcolor{kernelcolor}{\textbf{NTK operator}} $\Kinf$ which propagates this modified gradient through the network. This factorization emerges from the quadratic form structure of the Sobolev loss, which allows us to separate the spectral filtering effects of Sobolev regularization from the kernel dynamics of the neural network.
 \end{tcolorbox}
 
-\subsection{Personal contribution : NTK-Sobolev Spectral Commutation property}
+
+
+
+
+
+
+\subsection{Personal major contribution : NTK-Sobolev Spectral Commutation property}
 
 \begin{theorem}[Chebyshev Points and Matrix Commutation - Fundamental Condition]
 \label{thm:chebyshev_commutation}
@@ -1178,22 +1184,20 @@ The proof is provided in \hyperref[sec:appendix_commutation]{Appendix A.4}.
 
 
 \newpage
-\section*{Partial conclusion for Sobolev training}
-In this work, we have established a comprehensive theoretical framework that bridges Sobolev regularization theory with Neural Tangent Kernel analysis through rigorous mathematical foundations. Our personal contributions constitute three fundamental advances that significantly extend the current understanding of optimization dynamics in deep learning.
+\section*{Partial conclusion for Sobolev training and future works}
+In this work, we have established a comprehensive theoretical framework connecting Sobolev regularization theory with Neural Tangent Kernel analysis. Our personal contributions constitute three fundamental advances: (1) the factorization $\Ts = \Kinf \circ \Ps$ separating spectral filtering from kernel dynamics, (2) the commutation property $\Kop \Pop_s = \Pop_s \Kop$ for Chebyshev sampling points enabling frequency-by-frequency analysis, and (3) the rigorous connection between continuous Sobolev theory and discrete implementations.
 
-The primary theoretical contribution lies in the demonstration that the learning operator in Sobolev-regularized neural networks admits a natural factorization $\Ts = \Kinf \circ \Ps$, where the spectral filtering effects of Sobolev regularization are explicitly separated from the kernel dynamics of the neural network architecture. This factorization provides the mathematical foundation for understanding how Sobolev regularization transcends conventional smoothness constraints to fundamentally alter the spectral properties of the learning process.
+These theoretical advances enable profound analysis of Neural Tangent Kernel behavior through spectral decomposition. The commutation property allows us to disentangle dimensionality effects from network architecture effects, providing unprecedented analytical precision for understanding frequency component interactions with network capacity and training dynamics. The eigenvalue structure of the composite operator $\Kop\Pop_s$ directly determines convergence rates across the spectrum, enabling quantitative predictions for learning efficiency.
 
-Our second major contribution establishes the commutation property $\Kop \Pop_s = \Pop_s \Kop$ for discrete matrices constructed from Chebyshev sampling points on the sphere. This algebraic structure reveals that both the Neural Tangent Kernel and Sobolev operators share a common eigenbasis of spherical harmonics, enabling frequency-by-frequency analysis of learning dynamics. The theoretical significance of this result extends beyond computational convenience, as it demonstrates that each spherical harmonic degree evolves independently under the composite operator, thereby enabling complete spectral decomposition of the learning process.
+Future work and ongoing research will focus on extending these results to more general sampling schemes beyond Chebyshev points, including Fekete points and other quadrature-compatible point distributions. The goal is to develop commutation properties not limited to spherical harmonics but applicable to any data distribution, thereby broadening the theoretical framework to encompass arbitrary geometric settings and sampling strategies commonly encountered in scientific machine learning applications.
 
-The third contribution provides a rigorous connection between continuous Sobolev theory and discrete neural network implementations through our fractional Laplacian formulation. This bridge ensures theoretical consistency across scales while maintaining the spectral properties essential for practical algorithm development.
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Practical Insights for Scientific Machine Learning Applications}},enhanced,drop shadow]
+For practitioners in aerospace engineering, meteorology, and climate research who routinely work with SciML datasets, our theoretical framework provides critical algorithmic guidance. While classical numerical analysis emphasizes well-chosen quadrature points such as \textit{Fekete points} that maximize distance functionals for optimal interpolation, our results demonstrate that \textcolor{red}{\textbf{Chebyshev points}} offer superior properties specifically for neural network optimization.
 
-These theoretical advances enable profound analysis of Neural Tangent Kernel behavior through spectral decomposition. The commutation property allows us to disentangle the analysis of dimensionality effects, encoded in the Sobolev operator through harmonic degrees, from network architecture effects, encoded in the NTK operator. This separation provides unprecedented analytical precision for understanding how different frequency components of the target function interact with network capacity and training dynamics.
+The key insight is that Chebyshev sampling ensures the \textit{feature learning regime} and the \textit{rich/lazy regime} exhibit identical convergence behavior with rigorous theoretical bounds. This unification means that practitioners can leverage kernel-based intuition even when training neural networks in the feature learning regime, providing predictable optimization dynamics across different network scales.
 
-Furthermore, our framework establishes the theoretical foundation for addressing fundamental questions in deep learning theory: the relationship between network width, regularization strength, and generalization performance can now be analyzed through the lens of spectral properties of the composite operator $\Kop\Pop_s$. The eigenvalue structure of this operator directly determines convergence rates for different frequency components, providing quantitative predictions for learning efficiency across the spectrum.
-
-The practical implications extend to algorithm design, where our theoretical insights enable the development of spectrally-aware optimization methods that leverage the commutation structure for enhanced computational efficiency and improved generalization properties. The theoretical framework presented here thus provides both deep mathematical understanding and practical algorithmic advances for the field of neural network optimization.
-
-
+This theoretical guarantee will be quantitatively validated in the next section through analysis of the NTK Gram matrix's smallest eigenvalue, establishing concrete bounds for when this regime equivalence holds in practical applications.
+\end{tcolorbox}
 
 
 
@@ -3368,25 +3372,26 @@ Thus, $\mu_\ell^{(\mathcal{T}_s)} = \mu_\ell^{(K)} \cdot (1 + \sqrt{\ell(\ell + 
 \label{sec:appendix_commutation}
 
 \begin{proof}[Proof of Theorem~\ref{thm:ntk_sobolev_commutation}]
-We establish the commutation properties by expanding both matrices in terms of spherical harmonic projectors with quadrature weights.
+Nous établissons les propriétés de commutation en développant les deux matrices en termes de projecteurs harmoniques sphériques avec des poids de quadrature.
 
-\begin{tcolorbox}[colback=blue!5,colframe=blue!60!black,title=\textbf{NTK Spectral Decomposition}]
-The NTK matrix can be written using its spectral decomposition:
+\begin{tcolorbox}[colback=blue!5,colframe=blue!60!black,title=\textbf{Décomposition Spectrale NTK}]
+La matrice NTK peut s'écrire en utilisant sa décomposition spectrale :
 \[ \mathbf{K}_{ij} = K^{\infty}(x_i, x_j) = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} \mu_\ell^{(K)} (a_{\ell,p})_i (a_{\ell,p})_j \]
-where $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$ with quadrature weights $c_i$ and $\ell_{\max}$ satisfies $(\ell_{\max}+1)^2 > n$ to ensure positive semi-definiteness.
+où $(a_{\ell,p})_i = c_i Y_{\ell,p}(x_i)$ avec des poids de quadrature $c_i$ et $\ell_{\max}$ satisfait $(\ell_{\max}+1)^2 > n$ pour assurer la semi-définie positivité.
 \end{tcolorbox}
 
-\begin{tcolorbox}[colback=red!5,colframe=red!60!black,title=\textbf{Sobolev Spectral Decomposition}]
-Similarly, the Sobolev matrix has the expansion:
+\begin{tcolorbox}[colback=red!5,colframe=red!60!black,title=\textbf{Décomposition Spectrale Sobolev}]
+De manière similaire, la matrice Sobolev a le développement :
 \[ \mathbf{P}_s = \sum_{\ell=0}^{\ell_{\max}} \sum_{p=1}^{N(d,\ell)} (1 + \ell(\ell + d - 2))^s a_{\ell,p} a_{\ell,p}^T \]
 \end{tcolorbox}
 
-\begin{tcolorbox}[colback=green!5,colframe=green!60!black,title=\textbf{Limited Orthogonality and Partial Commutation}]
-The key observation is that the discrete orthogonality $a_{\ell,p}^T a_{\ell',p'} = \delta_{\ell,\ell'} \delta_{p,p'} \|a_{\ell,p}\|^2$ holds exactly only for degrees $\ell$ such that the cumulative sum of spherical harmonic dimensions satisfies:
+\begin{tcolorbox}[colback=green!5,colframe=green!60!black,title=\textbf{Orthogonalité Limitée et Commutation Partielle}]
+L'observation clé est que l'orthogonalité discrète $a_{\ell,p}^T a_{\ell',p'} = \delta_{\ell,\ell'} \delta_{p,p'} \|a_{\ell,p}\|^2$ est exacte seulement pour les degrés $\ell$ tels que la somme cumulative des dimensions harmoniques sphériques satisfait :
 \[ \sum_{p=0}^{\ell} N(d,p) \leq \textcolor{red}{n} \]
-This means the sampling measure is exact up to a particular dimension $\ell_{\text{exact}}$ determined by the number of sample points $n$.
+Cela signifie que la mesure d'échantillonnage est exacte jusqu'à une dimension particulière $\ell_{\text{exact}}$ déterminée par le nombre de points d'échantillon $n$.
 \end{tcolorbox}
 
+\begin{tcolorbox}[colback=yellow!10,colframe=orange!60!black,title=\textbf{Insight Personnel : Commutation Conditionnelle}]
 \begin{tcolorbox}[colback=orange!10,colframe=orange!60!black,title=\textbf{Remark: Non-Commutation in General}]
 The matrices $\mathbf{K}$ and $\mathbf{P}_s$ do \textbf{not commute} in general. We have partial commutation only for the subspace spanned by spherical harmonics of degree $\ell \leq \ell_{\text{exact}}$ where:
 \[ \ell_{\text{exact}} = \max\left\{\ell : \sum_{p=0}^{\ell} N(d,p) \leq \textcolor{red}{n}\right\} \]
