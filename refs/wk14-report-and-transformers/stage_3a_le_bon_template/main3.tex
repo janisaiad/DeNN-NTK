@@ -2182,7 +2182,7 @@ the all ones matrix, simplifying spectral analysis along with standard deviation
 
 
 \newpage
-\section{Conclusionfor preconditioning through architecture's paradigms}
+\section{Conclusion for preconditioning through architecture's paradigms}
 MMNN analysis through NTK theory reveals a fundamental trade-off and framework generalization. Standard NTK theory for MLPs requires quadratic overparameterization to guarantee static kernels and lazy training. MMNNs offer an alternative: entering analyzable, NTK-like regimes with linear parameter scaling.
 
 The cost is kernel evolution: no longer deterministic and static, but a random field evolving during training. This randomness is manageable through high-dimensional probability tools. Deriving concentration bounds (Bernstein-type inequalities) on spectrum and kernel evolution provides robust, probabilistic optimization guarantees. This framework rigorously analyzes MMNN structural priors beyond idealized lazy training.
@@ -2579,12 +2579,12 @@ Having established the theoretical framework and scaling laws for the third-orde
 
 \section{Numerical bounds confirmation for NTH scaling laws}
 
-\subsection{Implementation}
+\subsection{Personal contribution : Implementation}
 We provide a complete computational implementation of the $\textcolor{k3color}{K^{(3)}}$ tensor through several key approaches. First, we implement \textbf{direct empirical computation} using Python implementation of all analytical formulas. Second, we develop a \textbf{recursive algorithm structure} that follows the mathematical hierarchy exactly. Third, we use \textbf{hierarchical decomposition} for modular computation of output, gradient, and activation terms. This comprehensive implementation enables computational verification of all theoretical scaling laws.
 
 The detailed implementation structure, code correspondence to mathematical formulas, and JAX-based optimizations using automatic differentiation are provided in \hyperref[sec:appendix_implementation]{Appendix C.1}.
 
-\subsection{Empirical Validation: Experimental Setup and Analysis}
+\subsection{Personal contribution : Empirical Validation: Experimental Setup and Analysis}
 \begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{Empirical Validation Objective}},enhanced,drop shadow]
 \textbf{Primary Goal}: Validate theoretical scaling laws for the finite-width correction $\|\textcolor{red}{K}_{\text{emp}} - \textcolor{red}{K}_{\infty}\|_\infty \sim \mathcal{O}(L^{\alpha} \cdot \textcolor{darkyellow}{m}^{-\beta})$ through systematic experimentation and validate the scaling law for $\textcolor{k3color}{\textcolor{red}{K}^{(3)}}$.
 
@@ -2594,7 +2594,7 @@ The detailed implementation structure, code correspondence to mathematical formu
 
 
 
-\subsection{Experimental Design}
+\subsection{Personal contribution : Experimental Design}
 
 The experiment is structured as a systematic grid search over a range of network configurations. The main loop iterates through different values for:
 \begin{itemize}
@@ -2829,10 +2829,10 @@ and we are currently digging into the code to make a compatibility-layer with a 
 \newpage
 \section{NTH scaling from NTK local statistics using random matrix theory}
 
-\subsubsection{Explicit Formulas for the Corrections []~\ref{dyer2019asymptotics}}
+\subsection{Explicit Formulas for the Corrections }
 
 Having established the theoretical foundation, we now present the explicit formulas for the first-order corrections $\textcolor{k3color}{O_3}$ and $O_4$.
-
+This formula is extracted from []~\ref{dyer2019asymptotics}
 \begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Theorem (First-order correction to the NTK)}},enhanced,drop shadow]\label{thm:corrections}
 The first-order correction to the NTK admits the decomposition:
 \begin{align}
@@ -2905,7 +2905,7 @@ A huge insight is that if we have some data that are not over the sphere and wit
 \end{tcolorbox}
 
 
-\subsection{NTK Gram mMatrix Spectrum Results}
+\subsection{NTK Gram Matrix Spectrum Results}
 
 The key scaling laws for the discrete NTK matrix are:
 
@@ -2976,7 +2976,7 @@ This observation justifies separating the sums in $\Theta^{(1)}_\infty$ into the
     & + \underbrace{\sum_{i,j=1}^N\frac{1}{\textcolor{kernelcolor}{\lambda_{i}}(\textcolor{kernelcolor}{\lambda_{i}}+\textcolor{kernelcolor}{\lambda_{j}})}(\hat{e}_{i}^{T}\textcolor{orange!80!black}{\mathbf{O}_{4}}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})}_{\textcolor{purple!80!black}{T_4}} \label{eq:T4_decomposition}
 \end{align}
     
-\subsubsection{Naive Scaling vs. Empirical Observation}
+\subsubsection{Personal contribution : Naive Scaling vs. Empirical Observation}
 We first perform a naive scaling analysis of the correction terms by separating the contributions from the top eigenvector and the bulk, assuming the tensor components are statistically independent of the eigenvectors.
 
 The dominant contribution to the $T_3$ term comes from the sum over the $N-1$ bulk modes. Using the eigenvalue scaling $\textcolor{kernelcolor}{\lambda_{\text{bulk}}} \sim \mathcal{O}(L/N)$, we get:
@@ -3000,7 +3000,7 @@ This near-linear scaling in $N$ provides a strong constraint on the behavior of 
 
 The discrepancy between the naive scaling $\mathcal{O}(N^4/L^2)$ and the empirical scaling $\mathcal{O}(NL)$ implies that our initial assumption of statistical independence is incorrect. The tensor components $O_3$ and $O_4$ must have a specific scaling with $N$ and $L$ when projected onto the random bulk eigenvectors.
 
-\subsubsection{From Empirical Scaling to Theoretical Understanding}
+\subsubsection{Personal contribution : From Empirical Scaling to Theoretical Understanding}
 
 \begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{💡 BACKWARD CALCULATION: Deriving $\textcolor{orange!80!black}{\mathbf{O}_4}$ Scaling}},enhanced,drop shadow]
 Working backward from the empirical scaling $\sim \mathcal{O}(NL)$, we can determine the required scaling of the tensor components when averaged over random eigenvectors:
@@ -3024,7 +3024,7 @@ comes from eigenvalues spacing ratios, known as the Wigner surmrise, and it need
 
 
 
-\subsection{A Random Matrix Theory Framework for the Neural Tangent Kernel}
+\subsection{Personal contribution : A Random Matrix Theory Framework for the Neural Tangent Kernel}
 
 The complexity of finite-width corrections motivates a shift in perspective. 
 Instead of a direct, intractable analysis of the NTK's eigenvector statistics, we turn to the universal framework of \textbf{Random Matrix Theory (RMT)}. We model the NTK, $\textcolor{kernelcolor}{\Theta} = \frac{1}{\textcolor{blue!80!black}{m}}JJ^T$, as a sample covariance matrix whose entries are random at initialization. For unstructured data, RMT predicts its eigenvalue spectrum converges to the \textbf{Marchenko-Pastur (MP) law}, forming a continuous "bulk" that represents the network's intrinsic structural noise.
@@ -3037,18 +3037,14 @@ Here, vectors $\textcolor{orange!80!black}{v_i}$ encode data structures. This fr
 
 This leads to our central thesis: \textbf{feature learning is a BBP phase transition}. The network transitions from lazy kernel interpolation to active representation learning only when a signal is strong enough to push its eigenvalue past the BBP threshold, aligning the corresponding eigenvector with the data structure []~\ref{benarous2007spectrum}.
 
-\subsubsection{The Influence of Depth on the Learning Threshold}
-
 The RMT framework also illuminates the role of depth. Increasing network depth, $\textcolor{blue!80!black}{L}$, raises the \textbf{BBP} threshold. Through the lens of free probability, the kernel of a deep network is a composition of layer-wise kernels. This composition broadens the bulk spectrum, shifting its upper edge to a higher value. Consequently, a deeper network requires a stronger signal to form a spike. This reveals a fundamental trade-off: \textbf{depth increases the structural noise of the network}, potentially drowning signals that a shallower network could learn. This suggests an optimal depth exists for any given task, and that architectural features like residual connections may act as mechanisms to control this spectral spreading.
-
-\subsubsection{From Phenomenology to a Fundamental Symmetry}
 
 While the spiked model provides a powerful conceptual picture, deriving the finite-width scaling laws observed empirically requires a precise, quantitative model for the statistical averages of tensor forms like $\mathbb{E}[(\hat{e}_{i}^{T}\mathbf{O}_{4}\hat{e}_{j})]$. Our initial attempts to model the complex correlation structure of the bulk eigenvectors directly proved too intricate. This necessitates a more fundamental model for the eigenvector statistics.
 
 
 
 \newpage
-\section{An Unexpected Discovery: The Gaussian Orthogonal Ensemble in the NTK bulk Spectrum}
+\section{Major contribution : An Unexpected Discovery: The Gaussian Orthogonal Ensemble in the NTK bulk Spectrum}
 In our quest to build a more accurate statistical model of the \textcolor{kernelcolor}{NTK} eigenvectors and eigenvalues, we performed a detailed analysis of its spectral statistics. This investigation led to a remarkable discovery: a deep and unexpected connection between the infinite-width \textcolor{kernelcolor}{NTK} and a cornerstone of \textcolor{purple!80!black}{\textbf{Random Matrix Theory}}—the Gaussian Orthogonal Ensemble []~\ref{dyer2019asymptotics}.
 
 \subsection{A Primer on Random Matrix Theory and Spectral Statistics}
