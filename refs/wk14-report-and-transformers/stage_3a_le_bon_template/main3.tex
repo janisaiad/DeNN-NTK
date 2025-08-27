@@ -791,7 +791,7 @@ The choice between them depends crucially on the \textbf{type of sampling points
 information is available, mainly through sensors that are disposed on a solution domain.
 
 
-The framework selection can be summarized by the following decision tree:
+The framework selection can be summarized by the following decision tree we propose:
 
 \begin{center}
 \begin{tcolorbox}[colback=gray!5,colframe=gray!50!black,title={\textbf{Framework Selection Decision Tree}},enhanced,drop shadow,width=0.9\textwidth]
@@ -932,7 +932,7 @@ where $\rho_0(\mathbf{x},\mathbf{x}') = \frac{\mathbf{x}^{\top}\mathbf{x}'}{\|\m
 
 \begin{tcolorbox}[colback=yellow!10,colframe=green!60!black,title={\textbf{[Townsend et al ]NTK's spectrum fundamentals}},enhanced,drop shadow]
 
-\textbf{Matrix Structure}: For dataset $\{x_i\}_{i=1}^{\textcolor{red}{n}}$, the infinite-width NTK matrix factorizes as $\textcolor{red}{K}_L^{\infty} = D \cdot R \cdot D$ where $D = \text{diag}(\|x_1\|, \ldots, \|x_{\textcolor{red}{n}}\|)$ and $R_{ij} = \tilde{\textcolor{red}{K}}_L^{\infty}(\rho_{ij})$ with $\rho_{ij} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$. // we factorize the infinite-width ntk matrix into diagonal and correlation parts
+\textbf{Matrix Structure}: For dataset $\{x_i\}_{i=1}^{\textcolor{red}{n}}$, the infinite-width NTK matrix factorizes as $\textcolor{red}{K}_L^{\infty} = D \cdot R \cdot D$ where $D = \text{diag}(\|x_1\|, \ldots, \|x_{\textcolor{red}{n}}\|)$ and $R_{ij} = \tilde{\textcolor{red}{K}}_L^{\infty}(\rho_{ij})$ with $\rho_{ij} = \frac{x_i^T x_j}{\|x_i\| \|x_j\|}$. // we factorize the infinite-width NTK Gram matrix into diagonal and correlation parts
 
 
 \newline
@@ -1038,7 +1038,7 @@ See []~\ref{jacot2018ntk} for more details.
 
 
 
-\subsection{Building definitions for the Sobolev operator}
+\subsection{Personal contribution : Building definitions for the Sobolev operator}
 
 We rigorously present the Sobolev operator informally introduced in []~\ref{townsend2020ntk} which plays a central role in our analysis of regularized neural network training.
 
@@ -1185,7 +1185,7 @@ The proof is provided in \hyperref[sec:appendix_commutation]{Appendix A.4}.
 
 
 \newpage
-\section{Partial conclusion for Sobolev training and future works}
+\section{Conclusion for Sobolev training and future works}
 In this work, we have established a comprehensive theoretical framework connecting Sobolev regularization theory with Neural Tangent Kernel analysis. Our personal contributions constitute three fundamental advances: (1) the factorization $\Ts = \Kinf \circ \Ps$ separating spectral filtering from kernel dynamics, (2) the commutation property $\Kop \Pop_s = \Pop_s \Kop$ for Chebyshev sampling points enabling frequency-by-frequency analysis, and (3) the rigorous connection between continuous Sobolev theory and discrete implementations.
 
 These theoretical advances enable profound analysis of Neural Tangent Kernel behavior through spectral decomposition. The commutation property allows us to disentangle dimensionality effects from network architecture effects, providing unprecedented analytical precision for understanding frequency component interactions with network capacity and training dynamics. The eigenvalue structure of the composite operator $\Kop\Pop_s$ directly determines convergence rates across the spectrum, enabling quantitative predictions for learning efficiency.
@@ -1280,7 +1280,7 @@ What we should prove is that the NTK is not moving too much near a global optima
 holding stealth proofs for more general and smallest eigenvalue bounds that will be revealed in future works.
 
 
-
+\newpage
 
 \section{MMNN Model Definition and Asymptotic Regime}
 
@@ -1545,7 +1545,7 @@ and $\mathbf{I}_{d_\ell}$ is the $d_\ell \times d_\ell$ identity matrix capturin
 
 
 
-
+\newpage
 
 \section{NTK formulas for MMNNs}
 
@@ -1735,6 +1735,7 @@ This scaling analysis through products of random matrices is precisely what we a
 \end{tcolorbox}
 
 
+\newpage
 \subsubsection{Personal contribution : Final Result}
 
 \begin{tcolorbox}[colback=personalcontribcolor!10,colframe=personalcontribcolor,title={\textbf{MAIN RESULT}},enhanced,drop shadow,breakable]
@@ -1800,17 +1801,23 @@ Another way to precondition the NTK is to choose a specific ad-hoc great initial
 
 
 
-\subsection{Detailed approach for Transformers and Softmax Analysis}
+\subsection{Personal contribution : Detailed approach for Transformers and Softmax Analysis}
 \label{app:transformers}
 
-We present here our approach to the analysis of the softmax function and the Gaussian measure integrals that appear in Transformers NTK analysis following the work of []~\ref{hron20020infiniteattentionnngpntk}.
+We present here our approach to the analysis of the softmax function and the Gaussian measure integrals that appear in Transformers NTK analysis.
 
 \begin{tcolorbox}[colback=personalcontribcolor!15,colframe=personalcontribcolor!80!black,title={\textbf{Major Personal Contribution}},enhanced,drop shadow,boxrule=2pt]
 This appendix presents the detailed calculations for the theoretical analysis of \textcolor{blue}{\textbf{Gaussian measure integrals}} and \textcolor{orange}{\textbf{softmax functions}}, specifically developed for \textcolor{red}{\textbf{Transformer}} models. These results constitute an original contribution to the mathematical understanding of \textcolor{magenta}{\textbf{attention mechanisms}}.
 \end{tcolorbox}
 
-\subsection{Derivation of the NTK for Transformers}
-Following the work of \cite{hron2020infiniteattentionnngpntk}, we provide a derivation for the Neural Tangent Kernel (NTK) of a multi-head attention layer. This section outlines the model definition, weight initialization, and the resulting kernel expression in the infinite-width limit.
+\subsection{Personal contribution : Derivation of the NTK for Transformers}
+Following the work of \cite{hron2020infiniteattentionnngpntk}, we provide a derivation for the Neural Tangent Kernel (NTK) of a multi-head attention layer in a very simple setting. 
+The work has given us the intuition to have the good hypothesis in order to derive a NTK for the attention layer.
+But the notations in its are very cryptic and not well explained, so we have to rewrite it in a more readable way,
+and also rederive it with basic Central Limit Theorem and gradient covariance computations in random fields.
+
+
+This section outlines the model definition, weight initialization, and the resulting kernel expression in the infinite-width limit.
 
 \subsubsection{Model Definition}
 Let the input be $\textcolor{darkyellow}{x} \in \mathbb{R}^{d_s \times d_{model}}$, where $d_s$ is the number of tokens and $d_{model}$ is the embedding dimension.
@@ -1844,17 +1851,59 @@ where the term $\textcolor{magenta}{S}$ captures the effect of the attention mat
 \begin{equation}
 \textcolor{magenta}{S} = \sum_{c_1, c_2=1}^{d_s} (\textcolor{darkyellow}{x_{c_1}} \cdot \textcolor{darkyellow}{x'_{c_1}})(\textcolor{darkyellow}{x_{c_2}} \cdot \textcolor{darkyellow}{x'_{c_2}}) \mathbb{E}\left[ \frac{\partial \textcolor{orange}{\tilde{G}_{ac_1}}}{\partial g_{ad_1}} \frac{\partial \textcolor{orange}{\tilde{G}_{ac_2}}}{\partial g_{ad_2}} \right]
 \end{equation}
-
 Here, $\textcolor{orange}{\tilde{G}}$ represents the attention matrix after applying the softmax function, and $g$ is the matrix before softmax (the "logits"):
 \begin{align}
     g_{ac} &= \frac{(\textcolor{darkyellow}{x_a} \textcolor{blue}{W_q^h})(\textcolor{darkyellow}{x_c} \textcolor{blue}{W_k^h})^T}{\sqrt{d_k}} \\
     \textcolor{orange}{\tilde{G}} &= \text{softmax}(g)
 \end{align}
+In the infinite-width limit, the pre-softmax matrix $g$ converges in distribution to a random matrix whose entries are jointly Gaussian. The covariance structure of this limiting process exhibits a Kronecker-type correlation that is exposed further in this section, capturing dependencies between tokens.
+
 The derivative of the softmax output with respect to its input is a well-known property of the softmax function:
 \begin{equation}
 \frac{\partial \textcolor{orange}{\tilde{G}_{ac_1}}}{\partial g_{ad_1}} = \textcolor{orange}{\tilde{G}_{ac_1}}(\delta_{c_1 d_1} - \textcolor{orange}{\tilde{G}_{ad_1}})
 \end{equation}
 where $\delta$ denotes the Kronecker delta.
+\subsubsection{Personal contribution: Derivation of the NTK from the Gaussian Process}
+
+In the infinite-width limit, the network output $f(x)$ converges in distribution to a Gaussian Process (GP). This Gaussian Process is characterized by its covariance function, called the Neural Network Gaussian Process (NNGP) kernel.
+
+
+\begin{tcolorbox}[colback=blue!5,colframe=blue!80!black,title={\textbf{Definition: Neural Network Gaussian Process (NNGP) for Attention}},enhanced,drop shadow,boxrule=2pt]
+\label{def:nngp_attention}
+The network output $\boldsymbol{f(x)}$ converges to a Gaussian Process with covariance given by:
+\begin{equation}
+\label{eq:nngp_covariance}
+\boldsymbol{K_{ab}^{\text{NNGP}}(x, x')} = \mathbb{E}\left[\boldsymbol{f_a(x)} \boldsymbol{f_b(x')}\right] = \sigma_H^2 \sum_{h=1}^{d_H} \mathbb{E}\left[\boldsymbol{(\tilde{G}^h V^h)_a} \boldsymbol{(\tilde{G}^h V^h)_b}\right]
+\end{equation}
+where $\boldsymbol{\tilde{G}^h}$ is the softmax attention matrix for head $h$ and $\boldsymbol{V^h = x W_v^h}$ are the value vectors.
+
+\textbf{Theorem (Personal contribution): NNGP Covariance Structure}
+\label{thm:nngp_structure}
+The NNGP covariance can be expressed in terms of the covariance of the attention matrices:
+\begin{equation}
+\label{eq:nngp_attention_covariance}
+\boldsymbol{K_{ab}^{\text{NNGP}}(x, x')} = \sigma_H^2 \sum_{c,d=1}^{d_s} \mathbb{E}[\tilde{G}_{ac} \tilde{G}'_{bd}] \boldsymbol{(x_c \cdot x'_d)}
+\end{equation}
+\end{tcolorbox}
+
+We then use []~\ref{adler2009random} to compute the covariance of gradients for this random field. So 
+the calculation requires computing the covariance structure of the softmax-transformed attention matrices $\boldsymbol{\tilde{G}}$,
+ which form a correlated Gaussian process in the infinite-width limit.
+
+\begin{equation}
+\textcolor{red}{\Theta_{ab}(x, x')} = \frac{\partial^2}{\partial \theta \partial \theta'} \boldsymbol{K_{ab}^{\text{NNGP}}(x, x')} = 2 \sigma_w^2 (\textcolor{darkyellow}{x_a} \cdot \textcolor{darkyellow}{x'_b}) \left(1 + \sigma_H^2 \sigma_w^2 \textcolor{magenta}{S} \right)
+\end{equation}
+where the term $\textcolor{magenta}{S}$ captures the effect of the attention matrix dynamics:
+\begin{equation}
+\textcolor{magenta}{S} = \sum_{c_1, c_2=1}^{d_s} (\textcolor{darkyellow}{x_{c_1}} \cdot \textcolor{darkyellow}{x'_{c_1}})(\textcolor{darkyellow}{x_{c_2}} \cdot \textcolor{darkyellow}{x'_{c_2}}) \mathbb{E}\left[ \frac{\partial \textcolor{orange}{\tilde{G}_{ac_1}}}{\partial g_{ad_1}} \frac{\partial \textcolor{orange}{\tilde{G}_{ac_2}}}{\partial g_{ad_2}} \right]
+\end{equation}
+
+
+
+
+
+
+
 
 
 \subsubsection{Problem Statement: Moments of the Softmax Function}
@@ -1891,7 +1940,7 @@ We define $\textcolor{orange}{\delta_k} = e^{\beta (\textcolor{greencolor}{G_{ak
 Current state-of-the-art transformer models operate predominantly in the \textcolor{green}{\textbf{high temperature regime}} with $\beta \in [3.3, \infty)$ corresponding to $\T \in (0, 0.3]$ for non-creative applications. This regime is characterized by:
 
 \begin{equation}
-\boxed{  \T_{\text{typical}} \leq 0.3  \implies \beta_{\text{typical}} \geq 3.3  }
+\boxed{  T_{\text{typical}} \leq 0.3  \implies \beta_{\text{typical}} \geq 3.3  }
 \end{equation}
 
 In this high temperature setting, the softmax distribution approaches uniform behavior, leading to more diverse and less confident predictions. This contrasts with creative applications where lower temperatures ($T < 1$, $\beta > 1$) are used to produce more deterministic outputs.
@@ -2136,7 +2185,7 @@ the all ones matrix, simplifying spectral analysis along with standard deviation
 
 
 \newpage
-\section{Partial conclusion for preconditioning through architecture's paradigms}
+\section{Conclusionfor preconditioning through architecture's paradigms}
 MMNN analysis through NTK theory reveals a fundamental trade-off and framework generalization. Standard NTK theory for MLPs requires quadratic overparameterization to guarantee static kernels and lazy training. MMNNs offer an alternative: entering analyzable, NTK-like regimes with linear parameter scaling.
 
 The cost is kernel evolution: no longer deterministic and static, but a random field evolving during training. This randomness is manageable through high-dimensional probability tools. Deriving concentration bounds (Bernstein-type inequalities) on spectrum and kernel evolution provides robust, probabilistic optimization guarantees. This framework rigorously analyzes MMNN structural priors beyond idealized lazy training.
@@ -3218,69 +3267,85 @@ These empirical contributions strengthen the validity of our theoretical framewo
 
 \subsubsection{Limitations and Future Work}
 
-\begin{tcolorbox}[colback=red!10,colframe=red!60!black,title={\textbf{Current Limitations and Research Directions}},enhanced,drop shadow]
-
-\textbf{Computational complexity}: While our Hessian-based approach is more efficient than explicit tensor computation, computing $O_4$ remains expensive for very large networks. \textbf{Memory constraints} limit the maximum network size we can analyze.
-
-\textbf{Architectural assumptions}: Our analysis assumes feedforward ReLU networks. \textbf{Extensions to attention mechanisms} []~\ref{vaswani2017attention}, \textbf{residual connections}, and \textbf{other activation functions} require separate analysis.
-
-\textbf{Training dynamics}: We focus on gradient flow (continuous-time). \textbf{Discrete-time effects}and \textbf{stochastic gradient noise} []~\ref{mandt2017stochastic} may introduce additional corrections.
-
-\textbf{Future directions}: Several promising research avenues emerge from our work. First, extending our hierarchy framework to transformer architectures with attention mechanisms represents a critical next step for modern deep learning applications. Second, analyzing different optimization algorithms beyond gradient flow, including SGD and Adam optimizers, would provide insights into discrete-time training dynamics. Third, deriving finite-width generalization bounds using our hierarchical framework could bridge the gap between training dynamics and test performance. Finally, leveraging our theoretical insights to guide neural architecture design and search algorithms could transform how we approach network construction in practice.
-\end{tcolorbox}
 
 \newpage
 \section{Limitations, Future Work and Open Questions}
 
-Our investigation into the scaling laws and spectral properties of the NTK has opened up several promising avenues for future research. The discovery of GOE statistics provides a new lens through which to analyze feature learning and generalization in deep networks.
+Our investigation into the scaling laws and spectral properties of the Neural Tangent Kernel has yielded significant insights, but it also presents several limitations that define clear directions for future research. The discovery of GOE statistics, in particular, provides a new lens through which to analyze feature learning and generalization in deep networks, opening up numerous promising avenues for exploration.
 
-\begin{tcolorbox}[colback=red!5,colframe=red!40!black,title={\textbf{Critical Open Question: The Scaling Puzzle}},enhanced,drop shadow]
-We revealed a fundamental scaling property in 3th and 4th order moments computations for finite-width corrections. Future work should leverage quantum field theory techniques, specifically applying Wick's theorem to systematically compute four-point correlation functions that arise in the expectation values. The combinatorial analysis of all pairwise contractions in these four-term correlations will provide the exact suppression factors, revealing how the naive $N^4$ scaling is reduced to the observed near-linear behavior through intricate cancellations in the tensor structure.
-\end{tcolorbox}
+\subsection{Current Limitations}
 
-\begin{tcolorbox}[colback=blue!5,colframe=blue!40!black,title={\textbf{Neural Tangent Hierarchy Dynamics}},enhanced,drop shadow]
-We aim to further clarify the hierarchical coefficients, particularly $\textcolor{kernelcolor}{\lambda_L}$, and empirically verify its predicted linear scaling with depth. Since the $\textcolor{orange!80!black}{\mathbf{O}_4}$ kernel appears to be a critical component of the NTK correction, a detailed study of its properties, including its eigendecomposition, is necessary. Should a full implementation not be available in existing literature, developing one will be essential to fully analyze its structure and contribution to feature learning.
-\end{tcolorbox}
+Our current framework is subject to several constraints that must be addressed in future work.
 
-\begin{tcolorbox}[colback=purple!5,colframe=purple!40!black,title={\textbf{Geometric Structure in NTK Spectra}},enhanced,drop shadow]
-The emergence of particular geometric patterns in the NTK spectrum, such as the observed "parabola shape," warrants deeper investigation. Understanding the origin of these shapes could reveal new insights into the inductive biases of deep networks. The GOE connection suggests these patterns may be universal features arising from the underlying symmetries of the network architecture.
-\end{tcolorbox}
+\paragraph{Computational Complexity}
+While our Hessian-based approach for computing the NTK hierarchy is more efficient than explicit tensor manipulation, the computation of the fourth-order operator, $\mathbf{O}_4$, remains computationally expensive. Memory constraints currently limit the maximum size of networks we can analyze, making it challenging to scale our experiments to very large, industrial-scale models.
 
-\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title={\textbf{Extensions to Structured Data}},enhanced,drop shadow]
-To test the generality of our findings, we plan to extend the numerical framework to data with inherent geometric structure, for instance, data defined on the torus or over $\mathbb{R}^d$. This would require leveraging techniques like Kronecker decomposition and spherical harmonics to analyze how the NTK evolution depends on the data manifold and input dimension. The representation-theoretic interpretation we developed suggests that the GOE statistics may be a manifestation of deeper symmetries that persist across different data geometries.
-\end{tcolorbox}
+\paragraph{Architectural Assumptions}
+The theoretical analysis presented in this paper is primarily focused on standard feedforward networks with ReLU activation functions. Extending these results to more complex and modern architectures is a critical next step. This includes incorporating \textbf{residual connections} (ResNets), \textbf{attention mechanisms} as found in Transformers~\cite{vaswani2017attention}, and other popular \textbf{activation functions}. Each of these architectural variations will require a separate and detailed analysis to understand their impact on the NTK hierarchy.
 
-\begin{tcolorbox}[colback=orange!5,colframe=orange!40!black,title={\textbf{Modern Architecture Extensions}},enhanced,drop shadow]
-To bridge the gap between theory and practice, this analysis must be expanded to include more complex and modern architectures. We plan to investigate the NTK hierarchy in different settings, such as for narrow networks or for networks with skip connections like ResNets and varying initialization schemes. The random matrix theory framework we established provides the theoretical foundation to tackle these more complex scenarios systematically.
-\end{tcolorbox}
+\paragraph{Training Dynamics Model}
+Our analysis is conducted in the continuous-time limit of gradient flow. While this provides a clean theoretical framework, practical training is performed using discrete-time optimizers like Stochastic Gradient Descent (SGD). The effects of \textbf{discretization} and \textbf{stochastic gradient noise}~\cite{mandt2017stochastic} may introduce additional correction terms to the hierarchy and alter the training dynamics in ways not captured by our current model.
 
-\begin{tcolorbox}[colback=yellow!5,colframe=yellow!40!black,title={\textbf{Future Collaboration Opportunities}},enhanced,drop shadow]
-This research opens pathways for future collaboration with experts in random matrix theory, information geometry and physical approaches. We plan to leverage expertise from the community to fully exploit the GOE connection and develop rigorous analysis of the optimization landscape, building on the solid foundations established in this work.
-\end{tcolorbox}
+\subsection{Future Research Directions and Open Questions}
 
+The limitations of our work naturally lead to a rich set of open questions and directions for future research.
+
+\paragraph{Resolving the Scaling Puzzle}
+A critical open question emerging from our work is the "scaling puzzle" observed in the third and fourth-order moment computations for finite-width corrections. We revealed a fundamental scaling property where intricate cancellations in the tensor structure reduce the naive $N^4$ scaling to a near-linear behavior. Future work should leverage techniques from quantum field theory, specifically applying Wick's theorem, to systematically compute the four-point correlation functions. A detailed combinatorial analysis of all pairwise contractions will be necessary to determine the exact suppression factors and fully explain this phenomenon.
+
+\paragraph{Deepening the Analysis of the NTK Hierarchy}
+Further investigation into the dynamics of the NTK hierarchy is warranted. We aim to clarify the behavior of the hierarchical coefficients, particularly $\textcolor{kernelcolor}{\lambda_L}$, and empirically verify its predicted linear scaling with depth. Since the $\textcolor{orange!80!black}{\mathbf{O}_4}$ kernel is a critical component of the first finite-width correction, a detailed study of its properties, including its eigendecomposition, is essential for understanding its contribution to feature learning.
+
+\paragraph{Understanding Geometric Structures in NTK Spectra}
+The emergence of distinct geometric patterns in the NTK spectrum, such as the observed "parabola shape," requires deeper investigation. Understanding the origin of these structures could reveal new insights into the inductive biases of deep networks. The connection to the Gaussian Orthogonal Ensemble (GOE) suggests that these patterns may be universal features arising from the underlying symmetries of the network architecture, a hypothesis that merits rigorous theoretical and empirical exploration.
+
+\paragraph{Extensions to Structured Data and Modern Architectures}
+To test the generality of our findings, we plan to extend the numerical framework to data with inherent geometric structure, such as data defined on a torus or over $\mathbb{R}^d$. This will involve leveraging techniques like Kronecker decomposition and spherical harmonics to analyze how the NTK's evolution depends on the data manifold. Furthermore, as mentioned in our limitations, extending the hierarchy framework to transformer architectures is a critical next step for ensuring the relevance of our work to modern deep learning.
+
+\paragraph{Unification of Theoretical Frameworks}
+We also aim to unify our hierarchical framework with other powerful theoretical tools, such as the Tensor Programs from \cite{yang2020meanfield} and related work on infinite-width attention networks~\cite{hron2020infiniteattentionnngpntk}. The goal is to create a more comprehensive framework that encompasses feature learning, kernel learning, and the transfer of hyperparameters. Improving the computational path and incorporating techniques like freezing weight preconditioning are key steps toward this unification.
+
+\paragraph{Deriving Generalization Bounds and Guiding Architecture Design}
+Ultimately, the insights gained from the NTK hierarchy should be connected to practical outcomes. A major goal is to derive finite-width generalization bounds using our framework, bridging the gap between training dynamics and test performance. These theoretical insights could then be used to guide neural architecture search and design, transforming how practitioners construct and optimize networks in practice.
+
+\paragraph{Collaboration Opportunities}
+This research opens pathways for collaboration with experts in random matrix theory, information geometry, and theoretical physics. We plan to leverage expertise from these communities, especially we will be in discussion with Frank Nielsen, Gérard Ben Arous and Francis Bach to fully exploit the GOE connection and 
+develop a more rigorous analysis of the optimization landscape, building on the solid foundations established in this work.
+
+    
 
 
 \newpage
+
+
+
+
+
 \section{Conclusion}
 
 This study has established the theoretical framework of the Neural Tangent Kernel hierarchy for analyzing the training dynamics of finite-width neural networks. We focused on the first-order correction kernel, $\textcolor{k3color}{K^{(3)}}$, which governs the time evolution of the standard NTK, $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$.
 
 Our primary personal contributions are:
 
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!75!black, title=\textbf{Fundamental Theoretical Developments}, fonttitle=\bfseries, breakable]
 \textbf{Fundamental theoretical developments}:
 \begin{itemize}
     \item We derived a complete, non-recursive formula for the $\textcolor{k3color}{K^{(3)}}$ kernel, established from first principles of perturbation theory
     \item We developed a rigorous scaling analysis demonstrating that the magnitude of $\textcolor{k3color}{K^{(3)}}$ grows quadratically with network depth ($L^2$) and is suppressed by the square root of the width ($\sqrt{\m}$)
-    \item We established the fundamental scaling law $\textcolor{k3color}{K^{(3)}} \sim \mathcal{O}(L^2/\sqrt{\m})$ characterizing the intrinsic richness of deep network training dynamics
+    \item We established the fundamental scaling law $\textcolor{k3color}{K^{(3)}} \sim \mathcal{O}(L^2/m)$ characterizing the intrinsic richness of deep network training dynamics
 \end{itemize}
+\end{tcolorbox}
 
+\begin{tcolorbox}[colback=green!5!white, colframe=green!75!black, title=\textbf{Spectral Discoveries and Random Matrix Analysis}, fonttitle=\bfseries, breakable]
 \textbf{Spectral discoveries and random matrix analysis}:
 \begin{itemize}
     \item We conducted a deep spectral analysis of finite-width corrections, revealing a scaling puzzle that motivated deeper investigation
     \item We discovered that the infinite-width NTK's spectral statistics belong to the Gaussian Orthogonal Ensemble (GOE), a cornerstone of Random Matrix Theory
     \item We established that this GOE property provides fundamental insight into the nature of the kernel and constitutes a solid foundation for analyzing feature learning
 \end{itemize}
+\end{tcolorbox}
 
+\begin{tcolorbox}[colback=orange!5!white, colframe=orange!75!black, title=\textbf{Methodological Framework and Reproducible Experiments}, fonttitle=\bfseries, breakable]
 \textbf{Methodological framework and fully reproducible experiments}:
 \begin{itemize}
     \item We developed a comprehensive numerical framework enabling systematic analysis of NTK kernel spectral properties
@@ -3289,13 +3354,16 @@ Our primary personal contributions are:
     \item We established the profound connection between underlying network symmetries and universal random matrix properties through rigorous experimental validation
     \item We opened the path to using powerful analytical tools from Random Matrix Theory to rigorously compute finite-width corrections
 \end{itemize}
+\end{tcolorbox}
 
+\begin{tcolorbox}[colback=red!5!white, colframe=red!75!black, title=\textbf{Novel Theoretical Insights}, fonttitle=\bfseries, breakable]
 \textbf{Novel theoretical insights}:
 \begin{itemize}
     \item We demonstrated that deep network training dynamics are inherently richer than their shallow counterparts through the scaling law analysis
     \item We revealed that the complex, structured NTK inherits universal properties of random matrices due to its deep underlying symmetries
     \item We bridged the gap between theoretical understanding and practical deep learning through the GOE connection
 \end{itemize}
+\end{tcolorbox}
 
 The discovery of GOE statistics elevates this analysis beyond classical approaches, suggesting that the complex, structured NTK inherits universal properties of random matrices due to its deep underlying symmetries. This opens the door to using the powerful analytical tools of Random Matrix Theory to rigorously bridge the gap between theory and the practice of deep learning. Our fully reproducible experimental framework ensures that these findings can be independently verified and extended by the research community.
 
@@ -3387,7 +3455,7 @@ These discoveries fundamentally reframe neural network optimization as a problem
 
 \appendix
 
-\section{Main Proofs for Sobolev training}
+\section{Personal contribution : Main Proofs for Sobolev training}
 
 \subsection{Alternative Proof: Sobolev Loss on Unbounded Domains via Integration by Parts}
 
@@ -3617,340 +3685,9 @@ Matrix construction requires:
 
 
 
-
-
-
-\section{Mathematical Foundation: Concentration Inequalities}
-
-The goal of this section is to expose our strategy for our current research, with current research discussions with Pr Terjek.
-We are currently working on the following according to mixing strategies from high dimensional statistics, 
-from []~\ref{nguyen2022ntk_eigenvalues}
-
-
-
-
-\subsection{Scalar Concentration Inequalities}
-
-The foundation of modern NTK analysis rests on very powerful concentration inequalities that control the deviation of random variables from their expectations.
-
-\begin{theorem}[Chernoff Bound for Bounded Random Variables]
-Let $X_1, \ldots, X_n$ be independent random variables with $X_i \in [0,1]$ and $\E[X_i] = \mu_i$. Let $S = \sum_{i=1}^n X_i$ and $\mu = \E[S] = \sum_{i=1}^n \mu_i$. Then:
-$$\Pr(S \geq (1+\delta)\mu) \leq e^{-\frac{\delta^2 \mu}{2+\delta}}$$
-$$\Pr(S \leq (1-\delta)\mu) \leq e^{-\frac{\delta^2 \mu}{2}}$$
-for $\delta > 0$.
-\end{theorem}
-
-\begin{theorem}[Bernstein's Inequality]
-Let $X_1, \ldots, X_n$ be independent random variables with $\E[X_i] = 0$, $|X_i| \leq M$, and $\E[X_i^2] \leq \sigma_i^2$. Let $S = \sum_{i=1}^n X_i$ and $\sigma^2 = \sum_{i=1}^n \sigma_i^2$. Then:
-$$\Pr(|S| \geq t) \leq 2\exp\left(-\frac{t^2/2}{\sigma^2 + Mt/3}\right)$$
-\end{theorem}
-
-\subsection{Quadratic Forms and Hanson-Wright Inequalities}
-
-For neural networks, we frequently encounter quadratic forms in random variables, necessitating more sophisticated concentration tools.
-
-\begin{theorem}[Classical Hanson-Wright Inequality]
-Let $Y_1, \ldots, Y_n$ be independent mean-zero $\alpha$-subgaussian random variables, and $\mathbf{A} = (a_{i,j})$ be a symmetric matrix. Then:
-$$\Pr\left(\left|\sum_{i,j=1}^n a_{i,j}(Y_i Y_j - \E[Y_i Y_j])\right| \geq t\right) \leq 2\exp\left(-\frac{1}{C}\min\left\{\frac{t^2}{\beta^4\|\mathbf{A}\|_{HS}^2}, \frac{t}{\beta^2\|\mathbf{A}\|_{op}}\right\}\right)$$
-\end{theorem}
-
-where $\|\mathbf{A}\|_{HS} = \sqrt{\sum_{i,j} |a_{i,j}|^2}$ is the Hilbert-Schmidt norm and $\|\mathbf{A}\|_{op}$ is the operator norm.
-
-\begin{theorem}[Generalized Hanson-Wright for Random Tensors (Chang, 2022)]
-For random tensor vector $\overline{\mathcal{X}} \in \C^{(n \times I_1 \times \cdots \times I_M) \times (I_1 \times \cdots \times I_M)}$ and fixed tensor $\overline{\overline{\mathcal{A}}}$, the polynomial function:
-$$f_j(\overline{\mathcal{X}}) = \left(\sum_{i,\textcolor{red}{p}=1}^{\textcolor{red}{n}} \mathcal{A}_{i,\textcolor{red}{p}} \star_M (\mathcal{X}_i - \E[\mathcal{X}_i]) \star_M (\mathcal{X}_{\textcolor{red}{p}} - \E[\mathcal{X}_{\textcolor{red}{p}}])\right)^j$$
-satisfies concentration bounds involving Ky Fan $k$-norms of tensor sums, extending classical matrix concentration to tensor settings.
-\end{theorem}
-
-\subsection{Matrix Concentration Inequalities}
-
-Matrix concentration inequalities provide direct control over eigenvalues of random matrix sums, which is essential for NTK analysis.
-
-\begin{theorem}[Matrix Chernoff Bound (Tropp, 2012)]
-Let $X_1, \ldots, X_n$ be independent random Hermitian matrices with $X_i \preceq R \cdot I$ and $\E[X_i] \preceq \mu \cdot I$. Let $S = \sum_{i=1}^n X_i$. Then:
-$$\Pr(\lambda_{\max}(S) \geq (1+\delta)\mu \textcolor{red}{n}) \leq d \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^{\mu \textcolor{red}{n} / R}$$
-\end{theorem}
-
-\begin{theorem}[Matrix Bernstein Inequality (Vershynin, 2018)]
-Let $X_1, \ldots, X_n$ be independent random matrices with $\E[X_i] = 0$, $\|X_i\| \leq L$, and $\left\|\sum_{i=1}^n \E[X_i X_i^*]\right\| \leq \sigma^2$. Then:
-$$\Pr\left(\left\|\sum_{i=1}^n X_i\right\| \geq t\right) \leq 2d \exp\left(-\frac{t^2/2}{\sigma^2 + Lt/3}\right)$$
-\end{theorem}
-
-
-
-\subsection{Fundamental Mathematical Tools}
-
-\subsubsection{Matrix Analysis Techniques}
-
-\begin{lemma}[Weyl's Inequality]
-For Hermitian matrices $A, B$:
-$$\lambda_i(A) + \lambda_{\textcolor{red}{n}}(B) \leq \lambda_i(A + B) \leq \lambda_i(A) + \lambda_1(B)$$
-\end{lemma}
-
-\begin{lemma}[Schur Product Theorem]
-For PSD matrices $P, Q$:
-$$\evmin{P \circ Q} \geq \evmin{P} \min_i Q_{ii}$$
-\end{lemma}
-
-\begin{lemma}[Gershgorin Circle Theorem]
-For matrix $A = (a_{ij})$, all eigenvalues lie in the union of discs:
-$$\bigcup_{i=1}^{\textcolor{red}{n}} \left\{z \in \C : |z - a_{ii}| \leq \sum_{j \neq i} |a_{ij}|\right\}$$
-\end{lemma}
-
-\subsubsection{Specialized Neural Network Tools}
-
-\begin{definition}[Khatri-Rao Product]
-For matrices $A \in \R^{m \times k}$ and $B \in \R^{n \times k}$, the Khatri-Rao product $A \star B \in \R^{mn \times k}$ is the column-wise Kronecker product.
-\end{definition}
-
-\begin{definition}[Hadamard Power]
-For matrix $A$ and positive integer $r$, the $r$-th Hadamard power $A^{\odot r}$ is the element-wise $r$-th power.
-\end{definition}
-
 \newpage
 
-\section{Proof Schemes and High-Level Strategies}
-
-\subsection{General Framework for Eigenvalue Bounds}
-
-All modern approaches to bounding $\lambdaMin(\KNTK)$ follow a common high-level structure, though they differ in technical details and specific tools employed.
-\begin{figure}[h!]
-\centering
-\begin{tikzpicture}[
-    node distance=0.5cm and 2.2cm,
-    box/.style={rectangle, draw=blue!70, fill=blue!10, thick, rounded corners,
-                minimum width=3cm, minimum height=1.2cm, text centered, font=\small},
-    arrow/.style={->, thick, >=latex, blue!70}
-]
-    % we define the nodes in a horizontal sequence
-    \node[box] (step1) {\textbf{Step 1} \\ Decompose NTK};
-    \node[box, right=of step1] (step2) {\textbf{Step 2} \\ Analyze Terms};
-    \node[box, right=of step2] (step3) {\textbf{Step 3} \\ Combine Bounds};
-
-    % we draw the arrows connecting the steps
-    \draw[arrow] (step1) -- (step2);
-    \draw[arrow] (step2) -- (step3);
-
-    % we add descriptive text below each node for clarity
-    \node[text width=3cm, align=center, font=\footnotesize, below=0.2cm of step1] {
-        Break the NTK into a sum of simpler components.
-    };
-    \node[text width=3cm, align=center, font=\footnotesize, below=0.2cm of step2] {
-        Bound each term using concentration inequalities.
-    };
-    \node[text width=3cm, align=center, font=\footnotesize, below=0.2cm of step3] {
-        Synthesize a final bound on $\lambda_{\min}$ via spectral theory.
-    };
-\end{tikzpicture}
-\caption{High-level strategy for deriving NTK eigenvalue bounds.}
-\label{fig:ntk_bound_framework}
-\end{figure}
-
-
-\subsection{Proof Scheme 1: Empirical NTK Decomposition}
-
-\textbf{High-Level Strategy}: Direct decomposition of empirical NTK $\bar{K}^{(L)} = JJ^T$ using feature matrices and chain rule to obtain precise bounds on $\lambdaMin$.
-
-First we apply the fundamental chain rule decomposition:
-
-The proof begins by decomposing the empirical NTK $\bar{K}^{(L)} = JJ^T$ where $J$ is the Jacobian matrix. Applying the chain rule and standard algebraic manipulations yields the fundamental decomposition:
-
-\begin{align}
-\bar{K}^{(L)} = JJ^T = \sum_{p=0}^{L-1} F_p F_p^T \circ B_{p+1} B_{p+1}^T
-\end{align}
-
-where:
-\begin{itemize}
-    \item $F_p = [f_p(x_1), \ldots, f_p(x_N)]^T \in \R^{N \times n_p}$ are the \textbf{feature matrices} at layer $p$
-    \item $B_p \in \R^{N \times n_p}$ are the \textbf{derivative term matrices} with $i$-th row given by:
-\end{itemize}
-
-\begin{align}
-(B_p)_{i:} = \begin{cases}
-\Sigma_p(x_i) \left(\prod_{l=p+1}^{L-1} W_l \Sigma_l(x_i)\right) W_L, & p \in [L-2] \\
-\Sigma_{L-1}(x_i) W_L, & p = L-1 \\
-\frac{1}{\sqrt{N}} \mathbf{1}_N, & p = L
-\end{cases}
-\end{align}
-
-where $\Sigma_p(x) = \text{diag}([\sigma'(g_{p,j}(x))]_{j=1}^{n_p})$ is the diagonal matrix of activation derivatives.
-
-Then we apply Schur Product Theorem and Weyl's Inequality
-
-For PSD matrices $P, Q \in \R^{n \times n}$, the Schur product theorem :
-\begin{align}
-\evmin{P \circ Q} \geq \evmin{P} \min_{i \in [n]} Q_{ii}
-\end{align}
-
-Applying this to each term, then using Weyl's inequality for the sum:
-
-\begin{align}
-\evmin{JJ^T} &\geq \sum_{p=0}^{L-1} \evmin{F_p F_p^T \circ B_{p+1} B_{p+1}^T} \\
-&\geq \sum_{p=0}^{L-1} \evmin{F_p F_p^T} \min_{i \in [N]} \|(B_{p+1})_{i:}\|_2^2
-\end{align}
-
-This reduction separates the problem into:
-\begin{enumerate}
-    \item The \textbf{minimum eigenvalues of feature Gram matrices}: $\evmin{F_p F_p^T}$
-    \item The \textbf{minimum row norms of derivative matrices}: $\min_{i \in [N]} \|(B_{p+1})_{i:}\|_2^2$
-\end{enumerate}
-
-Then we bound the feature matrix eigenvalues:
-
-To bound $\evmin{F_p F_p^T}$, the strategy uses Chernoff-type matrix concentration. The fundamental bound is given by:
-\begin{lemma}[Matrix Concentration for Features]
-Let $\lambda = \evmin{\E_{w \sim \mathcal{N}(0, \beta_p^2 \mathbf{I}_{n_{p-1}})}[\sigma(F_{p-1}w)\sigma(F_{p-1}w)^T]}$. If 
-\begin{align}
-n_p \geq \max\left(N, c Q \max(1, \log(4Q)) \log\frac{N}{\delta}\right)
-\end{align}
-where $Q = \frac{\beta_p^2 \|F_{p-1}\|_F^2}{\lambda}$, then with probability at least $1-\delta$:
-\begin{align}
-\svmin{F_p}^2 \geq \frac{n_p \lambda}{4}
-\end{align}
-
-This lemma assumes that:
-\begin{itemize}
-\item The width $n_p$ of layer $p$ is sufficiently large compared to the number of samples $N$
-\item The feature matrix $F_{p-1}$ from the previous layer has bounded Frobenius norm
-\end{itemize}
-These conditions ensure concentration of the minimum singular value of the feature matrix around its expected value.
-\end{lemma}
-
-Then we use the Hermite expansion of the ReLU to bound the spectral analysis:
-
-To bound $\lambda$, we use the Hermite expansion of the ReLU. and exploiting the homogeneity of $\sigma$ (unless, generalized hermite):
-
-\begin{align}
-\lambda &= \evmin{\E[\sigma(F_{p-1}w)\sigma(F_{p-1}w)^T]} \\
-&= \evmin{D \E[\sigma(\hat{F}_{p-1}w)\sigma(\hat{F}_{p-1}w)^T] D}
-\end{align}
-
-where $D = \text{diag}(\|\{F_{p-1}\}_{i:}\|_2)$ and $\hat{F}_{p-1} = D^{-1}F_{p-1}$.
-
-Applying the Hermite expansion $\sigma(x) = \sum_{r=0}^{\infty} \mu_r(\sigma) H_r(x)$:
-
-\begin{align}
-\E[\sigma(\hat{F}_{p-1}w)\sigma(\hat{F}_{p-1}w)^T] = \mu_0(\sigma)^2 \mathbf{1}_N \mathbf{1}_N^T + \sum_{s=1}^{\infty} \mu_s(\sigma)^2 (\hat{F}_{p-1}^{*s})(\hat{F}_{p-1}^{*s})^T
-\end{align}
-
-where $\hat{F}_{p-1}^{*s}$ represents the $s$-th Khatri-Rao power of $\hat{F}_{p-1}$.
-
-Then we reduce into Khatri-Rao Powers:
-
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Insight : Khatri-Rao Powers and Hermite Expansion}},enhanced,drop shadow]
-A major insight is that for EVERY $r \geq 2$, we can lower bound:
-\begin{align}
-\lambda \geq \mu_r(\sigma)^2 \evmin{D(\hat{F}_{p-1}^{*r})(\hat{F}_{p-1}^{*r})^T D} = \mu_r(\sigma)^2 \frac{\evmin{(F_{p-1}^{*r})(F_{p-1}^{*r})^T}}{\max_{i \in [N]} \|(F_{p-1})_{i:}\|_2^{2(r-1)}}
-\end{align}
-
-Our research focus on applying this for every $r \geq 2$ and not only for one as it has been done in the past refd examples, because our activation function is not polynomial so the lower bound is highly not tight if not taking into account an infinite number of terms in the Hermite expansion.
-\end{tcolorbox}
-
-
-Then we can apply Gershgorin circle theorem:
-
-To analyze $(F_{p-1}^{*r})(F_{p-1}^{*r})^T = (F_{p-1}F_{p-1}^T)^{\circ r}$, we introduce centered features $\tilde{F}_{p-1} = F_{p-1} - \E_X[F_{p-1}]$. 
-
-Let $\mu = \E_x[f_{p-1}(x)] \in \R^{n_{p-1}}$ and $\Lambda = \text{diag}(F_{p-1}\mu - \|\mu\|_2^2 \mathbf{1}_N)$. Then:
-
-\begin{align}
-(F_{p-1}^{*r})(F_{p-1}^{*r})^T = (F_{p-1}F_{p-1}^T)^{\circ r} \succeq \left(\tilde{F}_{p-1}\tilde{F}_{p-1}^T - \frac{\Lambda \mathbf{1}_N \mathbf{1}_N^T \Lambda}{\|\mu\|_2^2}\right)^{\circ r}
-\end{align}
-
-Then we bound the minimum eigenvalue of $(\tilde{F}_{p-1}\tilde{F}_{p-1}^T)^{\circ r}$:
-
-\begin{align}
-\evmin{(\tilde{F}_{p-1}^{*r})(\tilde{F}_{p-1}^{*r})^T} &\geq \min_{i \in [N]} \|(\tilde{F}_{p-1})_{i:}\|_2^{2r} - N \max_{i \neq j} |\langle (\tilde{F}_{p-1})_{i:}, (\tilde{F}_{p-1})_{j:} \rangle|^r
-\end{align}
-
-Using concentration properties of centered features, we show:
-\begin{align}
-\|(\tilde{F}_{p-1})_{i:}\|_2^{2r} &= \Theta\left(\left(d \prod_{l=1}^{p-1} n_l \beta_l^2\right)^r\right) \\
-N \max_{i \neq j} |\langle (\tilde{F}_{p-1})_{i:}, (\tilde{F}_{p-1})_{j:} \rangle|^r &= o\left(\left(d \prod_{l=1}^{p-1} n_l \beta_l^2\right)^r\right)
-\end{align}
-
-with exponentially high probability.
-
-Then we bound the derivative term norms:
-
-To bound $\min_{i \in [N]} \|(B_{p+1})_{i:}\|_2^2$, we analyze each case:
-
-For $p \in [L-2]$:
-\begin{align}
-\|(B_{p+1})_{i:}\|_2^2 &= \|\Sigma_{p+1}(x_i) \left(\prod_{l=p+2}^{L-1} W_l \Sigma_l(x_i)\right) W_L\|_2^2 \\
-&= \Theta\left(\beta_L^2 n_{p+1} \prod_{l=p+2}^{L-1} n_l \beta_l^2\right)
-\end{align}
-
-This bound uses some very technical and important tools:
-\begin{itemize}
-    \item \textbf{Operator norm for  concentration of Gaussian matrices}
-    \item \textbf{Inductive analysis of random matrix products for every layer}
-    \item \textbf{Properties of derivative matrices $\Sigma_l(x)$ for every layer}
-\end{itemize}
-
-Then we assemble all bounds:
-
-Combining all bounds via union bound yields:
-
-\begin{align}
-\evmin{\bar{K}^{(L)}} &\geq \sum_{p=0}^{L-1} \mu_r(\sigma)^2 \Theta\left(d \prod_{l=1}^p n_l \beta_l^2\right) \Theta\left(\beta_L^2 \prod_{l=p+1}^{L-1} n_l \beta_l^2\right) \\
-&= \mu_r(\sigma)^2 \Theta\left(d \beta_L^2 \sum_{p=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
-\end{align}
-
-The width condition requires at least one layer to satisfy:
-\begin{align}
-n_p = \tilde{\Omega}(N \log N), \quad \text{with } \xi_p = 1
-\end{align}
-
-where $\xi_p$ indicates layer $p$ is "wide".
-
-\subsubsection{Upper Bound via Diagonal Analysis}
-
-For the upper bound, we use:
-\begin{align}
-\evmin{JJ^T} &\leq (JJ^T)_{11} = \sum_{p=0}^{L-1} \|(F_p)_{1:}\|_2^2 \|(B_{p+1})_{1:}\|_2^2 \\
-&= \sum_{p=0}^{L-1} \|f_p(x_1)\|_2^2 \|(B_{p+1})_{1:}\|_2^2 \\
-&= \mathcal{O}\left(d \beta_L^2 \sum_{p=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
-\end{align}
-
-\subsubsection{Final Result}
-
-Assuming $\beta_l = 1$ for simplicity and that some layer $p^*$ satisfies $n_{p^*} = \tilde{\Omega}(N)$, the main theorem gives:
-
-\begin{align}
-\mu_r(\sigma)^2 \Omega(d) \leq \evmin{\bar{K}^{(L)}} \leq \mathcal{O}(d L)
-\end{align}
-
-with probability at least $1 - \text{poly}(N) \exp(-\Omega(\min_l n_l))$.
-
-This approach significantly reduces width requirements compared to classical methods, requiring only one wide layer rather than all layers.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\newpage
-
-\section{Detailed appendix for architecture's paradigms}
+\section{Personal contribution : Detailed appendix for architecture's paradigms}
 We focus here on understanding NTK for other architectures and handcomputations made through this comparison.
 
 
@@ -4126,69 +3863,10 @@ The random variables $(\rho_1, \|x_1\|^2, \|y_1\|^2)$ follow exact distributions
 
 
 
-\newpage
-
-
-\section{Deep Narrow Neural Networks}
-
-\subsection{Scaled NTK at Initialization}
-This section provides inisghts on []~\ref{lee2022ntk} because it is a part of our ongoing research.
-
-
-\begin{theorem}[Theorem 1: Scaled NTK at Initialization]
-For $f^L_\theta$ EOC initialized, as $L \to \infty$:
-
-\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Deep Narrow NTK Limit}},enhanced,drop shadow,boxrule=2pt]
-\begin{equation}
-\boxed{\tilde{\Theta}^L_0(x, x') \xrightarrow{p} \tilde{\Theta}^\infty(x, x') = (x^T x' + 1 + \E_g[\sigma(g(x))\sigma(g(x'))]) I_{d_{out}}}
-\end{equation}
-where $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random field).
-\end{tcolorbox}
-\end{theorem}
-
-\textbf{Alternative formulation}: $\kappa_1(\cos(u) \cdot v)$ where:
-\begin{itemize}
-\item $v = \frac{1}{1 + \beta^2/\alpha^2}$, where $\beta$ is the bias variance
-\item $\alpha = \frac{\|x\| \|x'\| \rho}{d_{in}}$, where $\cos(u)$ is the cosine distance between $x, x'$
-\end{itemize}
-
-This framework gives a promising direction for analyzing deep narrow networks through limited expansion analysis.
-
-\subsection{Research Perspectives for Deep Narrow Networks}
-
-\textbf{Architectural modifications}:
-\begin{itemize}
-\item \textbf{Unit concatenation}: Combine multiple narrow networks to increase expressivity
-\item \textbf{Skip connections}: Investigate ResNet-style connections:
-  \[ \tilde{\Theta}^\infty_{\text{skip}}(x, x') = \tilde{\Theta}^\infty(x, x') + \text{skip terms} \]
-\end{itemize}
-
-\textbf{Initialization studies}:
-\begin{itemize}
-\item \textbf{Alternative initializations}: Explore different schemes beyond current setup
-\item \textbf{$\beta \to 0$ limit}: Analyze behavior when bias variance vanishes:
-  \[ v = \frac{1}{1 + \beta^2/\alpha^2} \to 1 \text{ as } \beta \to 0 \]
-\item \textbf{Complex kernel structures}: Find initializations that yield more intricate kernel forms
-\end{itemize}
-
-\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Theoretical Extensions}},enhanced,drop shadow,boxrule=2pt]
-\textbf{Theoretical extensions}:
-\begin{itemize}
-\item Extension of Hayou \& Yang's work on ResNets showing "wide and deep limits commute"
-\item Mean field analysis for deep narrow frameworks
-\item Careful analysis of stochasticity in initialization (not dropout)
-\item Experimental validation on practical tasks
-\end{itemize}
-\end{tcolorbox}
-
 
 \newpage
 
-\section{Detailed Proofs for the NTK hierarchy}
-
-
-
-
+\section{Personal contribution : Detailed Proofs for the NTK hierarchy}
 
 
 \subsection{Complete Derivation of the Third-Order Kernel}\label{sec:appendix_k3_derivation}
@@ -4319,6 +3997,8 @@ The full derivation and further details are provided in \hyperref[sec:appendix_e
 
 
 
+\newpage
+
 \section{Fully Expanded Non-Recursive Formula for $\textcolor{k3color}{K^{(3)}}$}\label{sec:appendix_expanded_formula}
 
 Here, we present the complete, non-recursive expression for $\textcolor{k3color}{K^{(3)}}_{\alpha\beta\gamma}$. This formula is obtained by substituting the expanded expressions for the directional derivatives $\delta_\gamma x^{(p)}_\mu$ and $\delta_\gamma G^{(\ell)}_\mu$ into the decomposed formula for $\textcolor{k3color}{K^{(3)}}$. This makes the dependency on the network parameters (weights $\textcolor{weightcolor}{\mathbf{W}}^{(k)}$) and activations at each layer fully explicit. We assume a ReLU activation function, which sets second derivatives of $\ReLU$ to zero almost everywhere.
@@ -4342,7 +4022,9 @@ The final expression is a sum of components corresponding to the differentiation
 In this expression, the products $\prod$ represent ordered matrix products. The empty product $\prod_{k=p+1}^p$ is defined as the identity matrix. This detailed formula lays bare the intricate dependencies of the NTK dynamics on the network's architecture and parameters at finite width.
 
 
-\section{Recursive Depth Analysis}\label{sec:appendix_recursive_derivation}
+\newpage
+
+\section{Personal contribution : Recursive Depth Analysis}\label{sec:appendix_recursive_derivation}
 
 To analyze the influence of network depth, it is useful to establish a recursive relation for $\textcolor{k3color}{K^{(3)}}$. Let $\textcolor{k3color}{K^{(3, H)}}_{\alpha\beta\gamma}$ denote the kernel for a network with $L$ layers. The goal is to express $\textcolor{k3color}{K^{(3, H+1)}}_{\alpha\beta\gamma}$ in terms of quantities computed for a network with $L$ layers.
 
@@ -4680,7 +4362,381 @@ The symmetry-theoretic approach thus unifies neural network analysis with fundam
 
 
 
+\newpage
 
+
+
+
+\section{Deep Narrow Neural Networks}
+
+\subsection{Scaled NTK at Initialization}
+This section provides inisghts on []~\ref{lee2022ntk} because it is a part of our ongoing research.
+
+
+\begin{theorem}[Theorem 1: Scaled NTK at Initialization]
+For $f^L_\theta$ EOC initialized, as $L \to \infty$:
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Deep Narrow NTK Limit}},enhanced,drop shadow,boxrule=2pt]
+\begin{equation}
+\boxed{\tilde{\Theta}^L_0(x, x') \xrightarrow{p} \tilde{\Theta}^\infty(x, x') = (x^T x' + 1 + \E_g[\sigma(g(x))\sigma(g(x'))]) I_{d_{out}}}
+\end{equation}
+where $g \sim \text{GP}(0, \rho^2 d_{in}^{-1} x^T x' + \beta^2)$ (Gaussian random field).
+\end{tcolorbox}
+\end{theorem}
+
+\textbf{Alternative formulation}: $\kappa_1(\cos(u) \cdot v)$ where:
+\begin{itemize}
+\item $v = \frac{1}{1 + \beta^2/\alpha^2}$, where $\beta$ is the bias variance
+\item $\alpha = \frac{\|x\| \|x'\| \rho}{d_{in}}$, where $\cos(u)$ is the cosine distance between $x, x'$
+\end{itemize}
+
+This framework gives a promising direction for analyzing deep narrow networks through limited expansion analysis.
+
+\subsection{Research Perspectives for Deep Narrow Networks}
+
+\textbf{Architectural modifications}:
+\begin{itemize}
+\item \textbf{Unit concatenation}: Combine multiple narrow networks to increase expressivity
+\item \textbf{Skip connections}: Investigate ResNet-style connections:
+  \[ \tilde{\Theta}^\infty_{\text{skip}}(x, x') = \tilde{\Theta}^\infty(x, x') + \text{skip terms} \]
+\end{itemize}
+
+\textbf{Initialization studies}:
+\begin{itemize}
+\item \textbf{Alternative initializations}: Explore different schemes beyond current setup
+\item \textbf{$\beta \to 0$ limit}: Analyze behavior when bias variance vanishes:
+  \[ v = \frac{1}{1 + \beta^2/\alpha^2} \to 1 \text{ as } \beta \to 0 \]
+\item \textbf{Complex kernel structures}: Find initializations that yield more intricate kernel forms
+\end{itemize}
+
+\begin{tcolorbox}[colback=green!5,colframe=green!80!black,title={\textbf{Remark: Theoretical Extensions}},enhanced,drop shadow,boxrule=2pt]
+\textbf{Theoretical extensions}:
+\begin{itemize}
+\item Extension of Hayou \& Yang's work on ResNets showing "wide and deep limits commute"
+\item Mean field analysis for deep narrow frameworks
+\item Careful analysis of stochasticity in initialization (not dropout)
+\item Experimental validation on practical tasks
+\end{itemize}
+\end{tcolorbox}
+
+
+
+
+
+\newpage
+
+\section{Personal contribution in ongoing work : Concentration Inequalities for smallest eigenvalues bounds for NTK Gram matrices}
+
+The goal of this section is to expose our strategy for our current research, with current research discussions with Pr Terjek.
+We are currently working on the following according to mixing strategies from high dimensional statistics, 
+from []~\ref{nguyen2022ntk_eigenvalues}
+
+
+\subsection{Scalar Concentration Inequalities}
+
+The foundation of modern NTK analysis rests on very powerful concentration inequalities that control the deviation of random variables from their expectations.
+
+\begin{theorem}[Chernoff Bound for Bounded Random Variables]
+Let $X_1, \ldots, X_n$ be independent random variables with $X_i \in [0,1]$ and $\E[X_i] = \mu_i$. Let $S = \sum_{i=1}^n X_i$ and $\mu = \E[S] = \sum_{i=1}^n \mu_i$. Then:
+$$\Pr(S \geq (1+\delta)\mu) \leq e^{-\frac{\delta^2 \mu}{2+\delta}}$$
+$$\Pr(S \leq (1-\delta)\mu) \leq e^{-\frac{\delta^2 \mu}{2}}$$
+for $\delta > 0$.
+\end{theorem}
+
+\begin{theorem}[Bernstein's Inequality]
+Let $X_1, \ldots, X_n$ be independent random variables with $\E[X_i] = 0$, $|X_i| \leq M$, and $\E[X_i^2] \leq \sigma_i^2$. Let $S = \sum_{i=1}^n X_i$ and $\sigma^2 = \sum_{i=1}^n \sigma_i^2$. Then:
+$$\Pr(|S| \geq t) \leq 2\exp\left(-\frac{t^2/2}{\sigma^2 + Mt/3}\right)$$
+\end{theorem}
+
+\subsection{Quadratic Forms and Hanson-Wright Inequalities}
+
+For neural networks, we frequently encounter quadratic forms in random variables, necessitating more sophisticated concentration tools.
+
+\begin{theorem}[Classical Hanson-Wright Inequality]
+Let $Y_1, \ldots, Y_n$ be independent mean-zero $\alpha$-subgaussian random variables, and $\mathbf{A} = (a_{i,j})$ be a symmetric matrix. Then:
+$$\Pr\left(\left|\sum_{i,j=1}^n a_{i,j}(Y_i Y_j - \E[Y_i Y_j])\right| \geq t\right) \leq 2\exp\left(-\frac{1}{C}\min\left\{\frac{t^2}{\beta^4\|\mathbf{A}\|_{HS}^2}, \frac{t}{\beta^2\|\mathbf{A}\|_{op}}\right\}\right)$$
+\end{theorem}
+
+where $\|\mathbf{A}\|_{HS} = \sqrt{\sum_{i,j} |a_{i,j}|^2}$ is the Hilbert-Schmidt norm and $\|\mathbf{A}\|_{op}$ is the operator norm.
+
+\begin{theorem}[Generalized Hanson-Wright for Random Tensors (Chang, 2022)]
+For random tensor vector $\overline{\mathcal{X}} \in \C^{(n \times I_1 \times \cdots \times I_M) \times (I_1 \times \cdots \times I_M)}$ and fixed tensor $\overline{\overline{\mathcal{A}}}$, the polynomial function:
+$$f_j(\overline{\mathcal{X}}) = \left(\sum_{i,\textcolor{red}{p}=1}^{\textcolor{red}{n}} \mathcal{A}_{i,\textcolor{red}{p}} \star_M (\mathcal{X}_i - \E[\mathcal{X}_i]) \star_M (\mathcal{X}_{\textcolor{red}{p}} - \E[\mathcal{X}_{\textcolor{red}{p}}])\right)^j$$
+satisfies concentration bounds involving Ky Fan $k$-norms of tensor sums, extending classical matrix concentration to tensor settings.
+\end{theorem}
+
+\subsection{Matrix Concentration Inequalities}
+
+Matrix concentration inequalities provide direct control over eigenvalues of random matrix sums, which is essential for NTK analysis.
+
+\begin{theorem}[Matrix Chernoff Bound (Tropp, 2012)]
+Let $X_1, \ldots, X_n$ be independent random Hermitian matrices with $X_i \preceq R \cdot I$ and $\E[X_i] \preceq \mu \cdot I$. Let $S = \sum_{i=1}^n X_i$. Then:
+$$\Pr(\lambda_{\max}(S) \geq (1+\delta)\mu \textcolor{red}{n}) \leq d \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^{\mu \textcolor{red}{n} / R}$$
+\end{theorem}
+
+\begin{theorem}[Matrix Bernstein Inequality (Vershynin, 2018)]
+Let $X_1, \ldots, X_n$ be independent random matrices with $\E[X_i] = 0$, $\|X_i\| \leq L$, and $\left\|\sum_{i=1}^n \E[X_i X_i^*]\right\| \leq \sigma^2$. Then:
+$$\Pr\left(\left\|\sum_{i=1}^n X_i\right\| \geq t\right) \leq 2d \exp\left(-\frac{t^2/2}{\sigma^2 + Lt/3}\right)$$
+\end{theorem}
+
+
+
+\subsection{Fundamental Mathematical Tools}
+
+\subsubsection{Matrix Analysis Techniques}
+
+\begin{lemma}[Weyl's Inequality]
+For Hermitian matrices $A, B$:
+$$\lambda_i(A) + \lambda_{\textcolor{red}{n}}(B) \leq \lambda_i(A + B) \leq \lambda_i(A) + \lambda_1(B)$$
+\end{lemma}
+
+\begin{lemma}[Schur Product Theorem]
+For PSD matrices $P, Q$:
+$$\evmin{P \circ Q} \geq \evmin{P} \min_i Q_{ii}$$
+\end{lemma}
+
+\begin{lemma}[Gershgorin Circle Theorem]
+For matrix $A = (a_{ij})$, all eigenvalues lie in the union of discs:
+$$\bigcup_{i=1}^{\textcolor{red}{n}} \left\{z \in \C : |z - a_{ii}| \leq \sum_{j \neq i} |a_{ij}|\right\}$$
+\end{lemma}
+
+\subsubsection{Specialized Neural Network Tools}
+
+\begin{definition}[Khatri-Rao Product]
+For matrices $A \in \R^{m \times k}$ and $B \in \R^{n \times k}$, the Khatri-Rao product $A \star B \in \R^{mn \times k}$ is the column-wise Kronecker product.
+\end{definition}
+
+\begin{definition}[Hadamard Power]
+For matrix $A$ and positive integer $r$, the $r$-th Hadamard power $A^{\odot r}$ is the element-wise $r$-th power.
+\end{definition}
+
+\newpage
+
+\section{Proof Schemes and High-Level Strategies}
+
+\subsection{General Framework for Eigenvalue Bounds}
+
+All modern approaches to bounding $\lambdaMin(\KNTK)$ follow a common high-level structure, though they differ in technical details and specific tools employed.
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+    node distance=0.5cm and 2.2cm,
+    box/.style={rectangle, draw=blue!70, fill=blue!10, thick, rounded corners,
+                minimum width=3cm, minimum height=1.2cm, text centered, font=\small},
+    arrow/.style={->, thick, >=latex, blue!70}
+]
+    % we define the nodes in a horizontal sequence
+    \node[box] (step1) {\textbf{Step 1} \\ Decompose NTK};
+    \node[box, right=of step1] (step2) {\textbf{Step 2} \\ Analyze Terms};
+    \node[box, right=of step2] (step3) {\textbf{Step 3} \\ Combine Bounds};
+
+    % we draw the arrows connecting the steps
+    \draw[arrow] (step1) -- (step2);
+    \draw[arrow] (step2) -- (step3);
+
+    % we add descriptive text below each node for clarity
+    \node[text width=3cm, align=center, font=\footnotesize, below=0.2cm of step1] {
+        Break the NTK into a sum of simpler components.
+    };
+    \node[text width=3cm, align=center, font=\footnotesize, below=0.2cm of step2] {
+        Bound each term using concentration inequalities.
+    };
+    \node[text width=3cm, align=center, font=\footnotesize, below=0.2cm of step3] {
+        Synthesize a final bound on $\lambda_{\min}$ via spectral theory.
+    };
+\end{tikzpicture}
+\caption{High-level strategy for deriving NTK eigenvalue bounds.}
+\label{fig:ntk_bound_framework}
+\end{figure}
+
+
+\subsection{Proof Scheme 1: Empirical NTK Decomposition}
+
+\textbf{High-Level Strategy}: Direct decomposition of empirical NTK $\bar{K}^{(L)} = JJ^T$ using feature matrices and chain rule to obtain precise bounds on $\lambdaMin$.
+
+First we apply the fundamental chain rule decomposition:
+
+The proof begins by decomposing the empirical NTK $\bar{K}^{(L)} = JJ^T$ where $J$ is the Jacobian matrix. Applying the chain rule and standard algebraic manipulations yields the fundamental decomposition:
+
+\begin{align}
+\bar{K}^{(L)} = JJ^T = \sum_{p=0}^{L-1} F_p F_p^T \circ B_{p+1} B_{p+1}^T
+\end{align}
+
+where:
+\begin{itemize}
+    \item $F_p = [f_p(x_1), \ldots, f_p(x_N)]^T \in \R^{N \times n_p}$ are the \textbf{feature matrices} at layer $p$
+    \item $B_p \in \R^{N \times n_p}$ are the \textbf{derivative term matrices} with $i$-th row given by:
+\end{itemize}
+
+\begin{align}
+(B_p)_{i:} = \begin{cases}
+\Sigma_p(x_i) \left(\prod_{l=p+1}^{L-1} W_l \Sigma_l(x_i)\right) W_L, & p \in [L-2] \\
+\Sigma_{L-1}(x_i) W_L, & p = L-1 \\
+\frac{1}{\sqrt{N}} \mathbf{1}_N, & p = L
+\end{cases}
+\end{align}
+
+where $\Sigma_p(x) = \text{diag}([\sigma'(g_{p,j}(x))]_{j=1}^{n_p})$ is the diagonal matrix of activation derivatives.
+
+Then we apply Schur Product Theorem and Weyl's Inequality
+
+For PSD matrices $P, Q \in \R^{n \times n}$, the Schur product theorem :
+\begin{align}
+\evmin{P \circ Q} \geq \evmin{P} \min_{i \in [n]} Q_{ii}
+\end{align}
+
+Applying this to each term, then using Weyl's inequality for the sum:
+
+\begin{align}
+\evmin{JJ^T} &\geq \sum_{p=0}^{L-1} \evmin{F_p F_p^T \circ B_{p+1} B_{p+1}^T} \\
+&\geq \sum_{p=0}^{L-1} \evmin{F_p F_p^T} \min_{i \in [N]} \|(B_{p+1})_{i:}\|_2^2
+\end{align}
+
+This reduction separates the problem into:
+\begin{enumerate}
+    \item The \textbf{minimum eigenvalues of feature Gram matrices}: $\evmin{F_p F_p^T}$
+    \item The \textbf{minimum row norms of derivative matrices}: $\min_{i \in [N]} \|(B_{p+1})_{i:}\|_2^2$
+\end{enumerate}
+
+Then we bound the feature matrix eigenvalues:
+
+To bound $\evmin{F_p F_p^T}$, the strategy uses Chernoff-type matrix concentration. The fundamental bound is given by:
+\begin{lemma}[Matrix Concentration for Features]
+Let $\lambda = \evmin{\E_{w \sim \mathcal{N}(0, \beta_p^2 \mathbf{I}_{n_{p-1}})}[\sigma(F_{p-1}w)\sigma(F_{p-1}w)^T]}$. If 
+\begin{align}
+n_p \geq \max\left(N, c Q \max(1, \log(4Q)) \log\frac{N}{\delta}\right)
+\end{align}
+where $Q = \frac{\beta_p^2 \|F_{p-1}\|_F^2}{\lambda}$, then with probability at least $1-\delta$:
+\begin{align}
+\svmin{F_p}^2 \geq \frac{n_p \lambda}{4}
+\end{align}
+
+This lemma assumes that:
+\begin{itemize}
+\item The width $n_p$ of layer $p$ is sufficiently large compared to the number of samples $N$
+\item The feature matrix $F_{p-1}$ from the previous layer has bounded Frobenius norm
+\end{itemize}
+These conditions ensure concentration of the minimum singular value of the feature matrix around its expected value.
+\end{lemma}
+
+Then we use the Hermite expansion of the ReLU to bound the spectral analysis:
+
+To bound $\lambda$, we use the Hermite expansion of the ReLU. and exploiting the homogeneity of $\sigma$ (unless, generalized hermite):
+
+\begin{align}
+\lambda &= \evmin{\E[\sigma(F_{p-1}w)\sigma(F_{p-1}w)^T]} \\
+&= \evmin{D \E[\sigma(\hat{F}_{p-1}w)\sigma(\hat{F}_{p-1}w)^T] D}
+\end{align}
+
+where $D = \text{diag}(\|\{F_{p-1}\}_{i:}\|_2)$ and $\hat{F}_{p-1} = D^{-1}F_{p-1}$.
+
+Applying the Hermite expansion $\sigma(x) = \sum_{r=0}^{\infty} \mu_r(\sigma) H_r(x)$:
+
+\begin{align}
+\E[\sigma(\hat{F}_{p-1}w)\sigma(\hat{F}_{p-1}w)^T] = \mu_0(\sigma)^2 \mathbf{1}_N \mathbf{1}_N^T + \sum_{s=1}^{\infty} \mu_s(\sigma)^2 (\hat{F}_{p-1}^{*s})(\hat{F}_{p-1}^{*s})^T
+\end{align}
+
+where $\hat{F}_{p-1}^{*s}$ represents the $s$-th Khatri-Rao power of $\hat{F}_{p-1}$.
+
+Then we reduce into Khatri-Rao Powers:
+
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Insight : Khatri-Rao Powers and Hermite Expansion}},enhanced,drop shadow]
+A major insight is that for EVERY $r \geq 2$, we can lower bound:
+\begin{align}
+\lambda \geq \mu_r(\sigma)^2 \evmin{D(\hat{F}_{p-1}^{*r})(\hat{F}_{p-1}^{*r})^T D} = \mu_r(\sigma)^2 \frac{\evmin{(F_{p-1}^{*r})(F_{p-1}^{*r})^T}}{\max_{i \in [N]} \|(F_{p-1})_{i:}\|_2^{2(r-1)}}
+\end{align}
+
+Our research focus on applying this for every $r \geq 2$ and not only for one as it has been done in the past refd examples, because our activation function is not polynomial so the lower bound is highly not tight if not taking into account an infinite number of terms in the Hermite expansion.
+\end{tcolorbox}
+
+
+Then we can apply Gershgorin circle theorem:
+
+To analyze $(F_{p-1}^{*r})(F_{p-1}^{*r})^T = (F_{p-1}F_{p-1}^T)^{\circ r}$, we introduce centered features $\tilde{F}_{p-1} = F_{p-1} - \E_X[F_{p-1}]$. 
+
+Let $\mu = \E_x[f_{p-1}(x)] \in \R^{n_{p-1}}$ and $\Lambda = \text{diag}(F_{p-1}\mu - \|\mu\|_2^2 \mathbf{1}_N)$. Then:
+
+\begin{align}
+(F_{p-1}^{*r})(F_{p-1}^{*r})^T = (F_{p-1}F_{p-1}^T)^{\circ r} \succeq \left(\tilde{F}_{p-1}\tilde{F}_{p-1}^T - \frac{\Lambda \mathbf{1}_N \mathbf{1}_N^T \Lambda}{\|\mu\|_2^2}\right)^{\circ r}
+\end{align}
+
+Then we bound the minimum eigenvalue of $(\tilde{F}_{p-1}\tilde{F}_{p-1}^T)^{\circ r}$:
+
+\begin{align}
+\evmin{(\tilde{F}_{p-1}^{*r})(\tilde{F}_{p-1}^{*r})^T} &\geq \min_{i \in [N]} \|(\tilde{F}_{p-1})_{i:}\|_2^{2r} - N \max_{i \neq j} |\langle (\tilde{F}_{p-1})_{i:}, (\tilde{F}_{p-1})_{j:} \rangle|^r
+\end{align}
+
+Using concentration properties of centered features, we show:
+\begin{align}
+\|(\tilde{F}_{p-1})_{i:}\|_2^{2r} &= \Theta\left(\left(d \prod_{l=1}^{p-1} n_l \beta_l^2\right)^r\right) \\
+N \max_{i \neq j} |\langle (\tilde{F}_{p-1})_{i:}, (\tilde{F}_{p-1})_{j:} \rangle|^r &= o\left(\left(d \prod_{l=1}^{p-1} n_l \beta_l^2\right)^r\right)
+\end{align}
+
+with exponentially high probability.
+
+Then we bound the derivative term norms:
+
+To bound $\min_{i \in [N]} \|(B_{p+1})_{i:}\|_2^2$, we analyze each case:
+
+For $p \in [L-2]$:
+\begin{align}
+\|(B_{p+1})_{i:}\|_2^2 &= \|\Sigma_{p+1}(x_i) \left(\prod_{l=p+2}^{L-1} W_l \Sigma_l(x_i)\right) W_L\|_2^2 \\
+&= \Theta\left(\beta_L^2 n_{p+1} \prod_{l=p+2}^{L-1} n_l \beta_l^2\right)
+\end{align}
+
+This bound uses some very technical and important tools:
+\begin{itemize}
+    \item \textbf{Operator norm for  concentration of Gaussian matrices}
+    \item \textbf{Inductive analysis of random matrix products for every layer}
+    \item \textbf{Properties of derivative matrices $\Sigma_l(x)$ for every layer}
+\end{itemize}
+
+Then we assemble all bounds:
+
+Combining all bounds via union bound yields:
+
+\begin{align}
+\evmin{\bar{K}^{(L)}} &\geq \sum_{p=0}^{L-1} \mu_r(\sigma)^2 \Theta\left(d \prod_{l=1}^p n_l \beta_l^2\right) \Theta\left(\beta_L^2 \prod_{l=p+1}^{L-1} n_l \beta_l^2\right) \\
+&= \mu_r(\sigma)^2 \Theta\left(d \beta_L^2 \sum_{p=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
+\end{align}
+
+The width condition requires at least one layer to satisfy:
+\begin{align}
+n_p = \tilde{\Omega}(N \log N), \quad \text{with } \xi_p = 1
+\end{align}
+
+where $\xi_p$ indicates layer $p$ is "wide".
+
+\subsubsection{Upper Bound via Diagonal Analysis}
+
+For the upper bound, we use:
+\begin{align}
+\evmin{JJ^T} &\leq (JJ^T)_{11} = \sum_{p=0}^{L-1} \|(F_p)_{1:}\|_2^2 \|(B_{p+1})_{1:}\|_2^2 \\
+&= \sum_{p=0}^{L-1} \|f_p(x_1)\|_2^2 \|(B_{p+1})_{1:}\|_2^2 \\
+&= \mathcal{O}\left(d \beta_L^2 \sum_{p=0}^{L-1} \prod_{l=1}^{L-1} n_l \beta_l^2\right)
+\end{align}
+
+\subsubsection{Final Result}
+
+Assuming $\beta_l = 1$ for simplicity and that some layer $p^*$ satisfies $n_{p^*} = \tilde{\Omega}(N)$, the main theorem gives:
+
+\begin{align}
+\mu_r(\sigma)^2 \Omega(d) \leq \evmin{\bar{K}^{(L)}} \leq \mathcal{O}(d L)
+\end{align}
+
+with probability at least $1 - \text{poly}(N) \exp(-\Omega(\min_l n_l))$.
+
+This approach significantly reduces width requirements compared to classical methods, requiring only one wide layer rather than all layers.
+
+
+
+
+
+
+
+
+
+\newpage
 \section{The Hessian-NTK Correspondence: A Spectral Equivalence}
 
 A critical insight for understanding the loss landscape of wide neural networks is the profound connection between the Hessian of the loss and the NTK. As we will show, in the large-width limit, their spectra become nearly identical. This correspondence allows us to translate all our findings about the NTK spectrum—from the dominant eigenvalue corresponding to data norms to the GOE statistics of the bulk—directly into statements about the geometry of the loss function around the network's initialization.
@@ -4721,7 +4777,7 @@ Since the higher moments of $\mathcal{B}$ (for $k \ge 3$) vanish in the large-wi
 
 
 
-
+\newpage
 
 \section{A dual RMT and Field Theory Perspective on the Neural Tangent Hierarchy}
 
@@ -4751,7 +4807,7 @@ These results significantly advance our understanding of the NTH. We are current
 
 Random Matrix Theory (RMT) provides a rigorous framework for analyzing the spectral properties of operators within the Neural Tangent Hierarchy. One line of work, following the seminal contributions of Ben Arous and collaborators, focuses on networks with heavy-tailed weight initializations. When matrix entries are drawn from distributions in the domain of attraction of an $\alpha$-stable law, the empirical spectral distribution converges to a measure $\mu_\alpha$, which extends Wigner's semicircular law to infinite variance settings []~\ref{benarous2007spectrum}. The absolute continuity of this limiting measure is crucial, as it ensures the existence of well-defined spectral gaps that are fundamental to analyzing training dynamics.
 
-A distinct application of RMT arises from the connection between the NTK and the Gauss-Newton matrix. Recent work by Baskervill et al. []~\ref{baskervill2024ntk} suggests that the Gauss-Newton matrix exhibits properties of the Gaussian Orthogonal Ensemble (GOE). This behavior is motivated by the rotationally invariant structure of the Gauss-Newton matrix itself, rather than any rotational invariance in the entries of the kernel. Since the NTK and the Gauss-Newton matrix are spectrally adjoint, their spectra are identical on the non-null subspace. However, the dimensionality of this subspace differs significantly: it is very large for the Gauss-Newton matrix but can be small for the NTK, especially when the number of samples $n$ is small. Consequently, this connection does not fully explain the behavior of the NTK's spectral bulk, which is the central focus of our analysis. Our insights apply specifically to this bulk, where the direct link to the Gauss-Newton properties may not hold. This highlights two separate involvements of RMT in understanding the NTK: first, the link through the Gauss-Newton matrix and Baskervill's results, and second, our own results, which are tailored to the bulk of the spectrum.
+A distinct application of RMT arises from the connection between the NTK and the Gauss-Newton matrix. Recent work by Baskervill et al. suggests that the Gauss-Newton matrix exhibits properties of the Gaussian Orthogonal Ensemble (GOE). This behavior is motivated by the rotationally invariant structure of the Gauss-Newton matrix itself, rather than any rotational invariance in the entries of the kernel. Since the NTK and the Gauss-Newton matrix are spectrally adjoint, their spectra are identical on the non-null subspace. However, the dimensionality of this subspace differs significantly: it is very large for the Gauss-Newton matrix but can be small for the NTK, especially when the number of samples $n$ is small. Consequently, this connection does not fully explain the behavior of the NTK's spectral bulk, which is the central focus of our analysis. Our insights apply specifically to this bulk, where the direct link to the Gauss-Newton properties may not hold. This highlights two separate involvements of RMT in understanding the NTK: first, the link through the Gauss-Newton matrix and Baskervill's results, and second, our own results, which are tailored to the bulk of the spectrum.
 
 The insights from RMT connect these spectral properties to the geometry of the optimization landscape. The loss surface of multilayer networks is deeply related to spin glass models, which allows for a statistical characterization of its critical points []~\ref{benarous2014high_dimensional_landscapes}. This analysis reveals a hierarchical structure where the number of critical points follows scaling laws determined by the underlying spectral properties, directly impacting the stability of NTH operators during training []~\ref{benarous2013complexity}.
 
