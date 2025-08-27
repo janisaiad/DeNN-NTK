@@ -373,22 +373,19 @@ La validation expérimentale confirme nos prédictions théoriques à travers pl
 
 \addcontentsline{toc}{section}{Introduction}
 \section*{Introduction}
-The study of learning dynamics in deep neural networks constitutes a fundamental research area. Our approach focuses on the desingularizing \textbf{Sobolev training} by decomposing the problem into two distinct contributions: an independent \textbf{neural tangent kernel (NTK)} and a Sobolev contribution. This decomposition relies on the \textbf{commutation} between integral operators and the fractional Laplace operator.
+The study of learning dynamics in deep neural networks constitutes a fundamental research area. In the past few years, research has focused on theoretical analysis of optimization mechanisms in deep learning, particularly through the \textbf{Neural Tangent Kernel (NTK)} formalism. However, it remains unclear how to optimally adapt neural architectures to learning problems involving \textbf{Sobolev spaces} and \textbf{specific sampling conditions}.
 
-\textbf{Key Discovery}: We establish that this commutation property holds \textit{exactly} only when using \textcolor{red}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) for sampling. For general sampling points, commutation breaks, necessitating \textbf{explicit derivative information} for effective learning. 
+In particular, existing approaches fail to elucidate the critical relationship between sampling points and learning effectiveness in the context of Sobolev training. This theoretical gap limits our understanding of fundamental mechanisms governing convergence of optimization algorithms in deep architectures.
+
+\textbf{Our proposition}: We establish a novel theoretical framework that decomposes Sobolev training into two distinct contributions: an independent \textbf{Neural Tangent Kernel (NTK)} and a Sobolev contribution. This decomposition relies on the \textbf{commutation} between integral operators and the fractional Laplace operator.
+
+\textbf{Key Discovery}: We demonstrate that this commutation property holds \textit{exactly} only when using \textcolor{red}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) for sampling. For general sampling points, commutation breaks, necessitating \textbf{explicit derivative information} for effective learning.
 
 Our analysis continues with the study of \textbf{NTK preconditioning} through a \textbf{freeze weights method}, illustrated by neural networks factorizing low-rank weight matrices. This approach is supported by a rigorous approximation theorem. For classical feed-forward networks (FCNN), we develop a \textbf{finite-width correction} that proves particularly fruitful. Finally, we explore \textbf{Transformers} as an alternative solution, offering a new learning paradigm.
 
-Across these different architectures, we study \textbf{feature learning regimes} and their scaling with network width. 
-Our results and discoveries rely partly on \textbf{statistical physics tools} to characterize model convergence and asymptotic behavior. 
-This analysis enables a better understanding of finite-width corrections and their implications for the practical optimization of deep neural networks.
+Across these different architectures, we study \textbf{feature learning regimes} and their scaling with network width. Our results and discoveries rely partly on \textbf{statistical physics tools} to characterize model convergence and asymptotic behavior. This analysis enables a better understanding of finite-width corrections and their implications for the practical optimization of deep neural networks.
 
 The end of this research establishes fundamental connections between neural network dynamics and \textbf{mathematical physics}, advancing theoretical understanding of \textbf{eigenvalue bounds} for neural tangent kernels across multiple architectures. We bridge classical optimization theory with advanced mathematical physics frameworks, leveraging tools from \textbf{quantum field theory} and \textbf{random matrix theory} to provide new insights into neural network behavior.
-
-Our contribution to \textbf{physics-informed deep learning theory} applies techniques from statistical mechanics and random matrix ensembles, offering a mathematical physics perspective that complements existing approaches. This interdisciplinary methodology demonstrates how theoretical physics concepts illuminate fundamental machine learning questions, establishing new paradigms for understanding complex neural architectures.
-
-Extensive experimental validation across feed-forward networks, \textbf{Multi-Layer Multi-component networks}, and transformers confirms our theoretical predictions while revealing phenomena that merit further investigation at the intersection of deep learning and mathematical physics.
-
 
 \newpage
 
