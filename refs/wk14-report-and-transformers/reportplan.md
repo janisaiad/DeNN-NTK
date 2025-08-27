@@ -183,3 +183,4 @@ put that :
 
 soutenance : 
 expliquer ce qui fait changer alpha dan sla soutenance
+commencer par parler des 3 refs initiales
