@@ -1782,67 +1782,61 @@ Another way to precondition the NTK is to choose a specific ad-hoc great initial
 
 
 
-
 \subsection{Detailed approach for Transformers and Softmax Analysis}
 \label{app:transformers}
 
-We present here our approach to the analysis of the softmax function and the Gaussian measure integrals that appear in Transformers NTK analysis following the work of []~\ref{hron2020infiniteattentionnngpntk}.
+We present here our approach to the analysis of the softmax function and the Gaussian measure integrals that appear in Transformers NTK analysis following the work of []~\ref{hron20020infiniteattentionnngpntk}.
 
 \begin{tcolorbox}[colback=personalcontribcolor!15,colframe=personalcontribcolor!80!black,title={\textbf{Major Personal Contribution}},enhanced,drop shadow,boxrule=2pt]
-This appendix presents the detailed calculations for the theoretical analysis of \textcolor{insightcolor}{\textbf{Gaussian measure integrals}} and \textcolor{methodcolor}{\textbf{softmax functions}}, specifically developed for \textcolor{kernelcolor}{\textbf{Transformer}} models. These results constitute an original contribution to the mathematical understanding of \textcolor{k3color}{\textbf{attention mechanisms}}.
+This appendix presents the detailed calculations for the theoretical analysis of \textcolor{blue}{\textbf{Gaussian measure integrals}} and \textcolor{orange}{\textbf{softmax functions}}, specifically developed for \textcolor{red}{\textbf{Transformer}} models. These results constitute an original contribution to the mathematical understanding of \textcolor{magenta}{\textbf{attention mechanisms}}.
 \end{tcolorbox}
 
 \subsection{Derivation of the NTK for Transformers}
 Following the work of \cite{hron2020infiniteattentionnngpntk}, we provide a derivation for the Neural Tangent Kernel (NTK) of a multi-head attention layer. This section outlines the model definition, weight initialization, and the resulting kernel expression in the infinite-width limit.
 
 \subsubsection{Model Definition}
-Let the input be $x \in \mathbb{R}^{d_s \times d_o}$, where $d_s$ is the number of tokens and $d_o$ is the embedding dimension.
+Let the input be $\textcolor{green}{x} \in \mathbb{R}^{d_s \times d_{model}}$, where $d_s$ is the number of tokens and $d_{model}$ is the embedding dimension.
 
 The output of a single attention head $h$ is given by:
 \begin{equation}
-f^h(x) = \underbrace{\text{softmax} \left( \frac{(x W_q^h)(x W_k^h)^T}{\sqrt{d_k}} \right)}_{\in \mathbb{R}^{d_s \times d_s}} \underbrace{(x W_v^h)}_{\in \mathbb{R}^{d_s \times d_v}}
+\textcolor{orange}{f^h(x)} = \underbrace{\text{softmax} \left( \frac{(\textcolor{green}{x} \textcolor{blue}{W_q^h})(\textcolor{green}{x} \textcolor{blue}{W_k^h})^T}{\sqrt{d_k}} \right)}_{\in \mathbb{R}^{d_s \times d_s}} \underbrace{(\textcolor{green}{x} \textcolor{blue}{W_v^h})}_{\in \mathbb{R}^{d_s \times d_k}}
 \end{equation}
-where the softmax function is applied row-wise to the attention matrix. The weight matrices are $W_q^h, W_k^h \in \mathbb{R}^{d_o \times d_k}$ and $W_v^h \in \mathbb{R}^{d_o \times d_v}$.
+where the softmax function is applied row-wise to the attention matrix. The weight matrices are $\textcolor{blue}{W_q^h}, \textcolor{blue}{W_k^h}, \textcolor{blue}{W_v^h} \in \mathbb{R}^{d_{model} \times d_k}$.
 
 The output of the full multi-head attention layer is a weighted sum of the outputs from each head:
 \begin{equation}
-f(x) = \sum_{h=1}^{d_H} \underbrace{f^h(x)}_{\in \mathbb{R}^{d_s \times d_v}} \underbrace{W^h}_{\in \mathbb{R}^{d_v \times d_o}}
+f(x) = \sum_{h=1}^{d_H} \underbrace{\textcolor{orange}{f^h(x)}}_{\in \mathbb{R}^{d_s \times d_k}} \underbrace{\textcolor{blue}{W^h}}_{\in \mathbb{R}^{d_k \times d_{model}}}
 \end{equation}
 
 \subsubsection{Weight Distributions (Initialization)}
 The weights are initialized from centered Gaussian distributions as follows:
 \begin{align}
-    W_q^h, W_k^h, W_v^h &\sim \mathcal{N}\left(0, \frac{\sigma_w^2}{d_o}\right) \quad \forall h \in \{1, \dots, d_H\} \\
-    W^h &\sim \mathcal{N}\left(0, \frac{\sigma_H^2}{d_H}\right)
+    \textcolor{blue}{W_q^h}, \textcolor{blue}{W_k^h}, \textcolor{blue}{W_v^h} &\sim \mathcal{N}\left(0, \frac{\sigma_w^2}{d_{model}}\right) \quad \forall h \in \{1, \dots, d_H\} \\
+    \textcolor{blue}{W^h} &\sim \mathcal{N}\left(0, \frac{\sigma_H^2}{d_H}\right)
 \end{align}
 
 \subsubsection{Limit and Neural Tangent Kernel (NTK)}
-In the infinite-width limit, where the dimensions $d_k, d_o \to +\infty$, the network output $f$ converges to a Gaussian Process (GP). The kernel of this GP and the associated NTK can be computed.
+In the infinite-width limit, where the dimensions $d_k, d_{model} \to +\infty$, the network output $f$ converges to a Gaussian Process (GP). The kernel of this GP and the associated NTK can be computed.
 
-The NTK between token $a$ of input $x$ and token $b$ of input $x'$ is given by $\Theta_{ab}(x, x')$. A simplified expression is:
+The NTK between token $a$ of input $\textcolor{green}{x}$ and token $b$ of input $\textcolor{green}{x'}$ is given by $\textcolor{red}{\Theta_{ab}(x, x')}$. A simplified expression is:
 \begin{equation}
-\Theta_{ab}(x, x') = 2 \sigma_w^2 (x_a \cdot x'_b) \left(1 + \sigma_{anv}^2 \sigma_v^2 S \right)
+\textcolor{red}{\Theta_{ab}(x, x')} = 2 \sigma_w^2 (\textcolor{green}{x_a} \cdot \textcolor{green}{x'_b}) \left(1 + \sigma_H^2 \sigma_w^2 \textcolor{magenta}{S} \right)
 \end{equation}
-where the term $S$ captures the effect of the attention matrix and its dynamics:
+where the term $\textcolor{magenta}{S}$ captures the effect of the attention matrix and its dynamics:
 \begin{equation}
-S = \sum_{c_1, c_2=1}^{d_s} (x_{c_1} \cdot x'_{c_1})(x_{c_2} \cdot x'_{c_2}) \mathbb{E}\left[ \frac{\partial \tilde{G}_{ac_1}}{\partial g_{ad_1}} \frac{\partial \tilde{G}_{ac_2}}{\partial g_{ad_2}} \right]
+\textcolor{magenta}{S} = \sum_{c_1, c_2=1}^{d_s} (\textcolor{green}{x_{c_1}} \cdot \textcolor{green}{x'_{c_1}})(\textcolor{green}{x_{c_2}} \cdot \textcolor{green}{x'_{c_2}}) \mathbb{E}\left[ \frac{\partial \textcolor{orange}{\tilde{G}_{ac_1}}}{\partial g_{ad_1}} \frac{\partial \textcolor{orange}{\tilde{G}_{ac_2}}}{\partial g_{ad_2}} \right]
 \end{equation}
 
-Here, $\tilde{G}$ represents the attention matrix after applying the softmax function, and $g$ is the matrix before softmax (the "logits"):
+Here, $\textcolor{orange}{\tilde{G}}$ represents the attention matrix after applying the softmax function, and $g$ is the matrix before softmax (the "logits"):
 \begin{align}
-    g_{ac} &= \frac{(x_a W_q^h)(x_c W_k^h)^T}{\sqrt{d_k}} \\
-    \tilde{G} &= \text{softmax}(g)
+    g_{ac} &= \frac{(\textcolor{green}{x_a} \textcolor{blue}{W_q^h})(\textcolor{green}{x_c} \textcolor{blue}{W_k^h})^T}{\sqrt{d_k}} \\
+    \textcolor{orange}{\tilde{G}} &= \text{softmax}(g)
 \end{align}
 The derivative of the softmax output with respect to its input is a well-known property of the softmax function:
 \begin{equation}
-\frac{\partial \tilde{G}_{ac_1}}{\partial g_{ad_1}} = \tilde{G}_{ac_1}(\delta_{c_1 d_1} - \tilde{G}_{ad_1})
+\frac{\partial \textcolor{orange}{\tilde{G}_{ac_1}}}{\partial g_{ad_1}} = \textcolor{orange}{\tilde{G}_{ac_1}}(\delta_{c_1 d_1} - \textcolor{orange}{\tilde{G}_{ad_1}})
 \end{equation}
 where $\delta$ denotes the Kronecker delta.
-
-
-
-
-
 
 
 \subsubsection{Problem Statement: Moments of the Softmax Function}
@@ -2137,7 +2131,7 @@ Networks perform automatic, adaptive directional domain decomposition. While neu
 
 Concrete progress requires network regularity. Many PDEs involve second-order derivatives (Laplacians). Applying rigorous optimization and approximation theorems requires twice-differentiable networks ($C^2$). Future directions include developing "Deep Super ReLU Network" []~\ref{yang2024deepsuperrelu} MMNN versions using smoother activations, guaranteeing necessary regularity and unlocking broader theoretical tools for PINN analysis.
 
-
+This convergence of architectural innovation and theoretical rigor represents a paradigm shift where practical deep learning and fundamental mathematics become inseparable disciplines.
 
 
 
@@ -3288,6 +3282,8 @@ Our primary personal contributions are:
 The discovery of GOE statistics elevates this analysis beyond classical approaches, suggesting that the complex, structured NTK inherits universal properties of random matrices due to its deep underlying symmetries. This opens the door to using the powerful analytical tools of Random Matrix Theory to rigorously bridge the gap between theory and the practice of deep learning. Our fully reproducible experimental framework ensures that these findings can be independently verified and extended by the research community.
 
 Future work should aim to leverage this Random Matrix Theory connection to derive precise scaling laws for higher-order kernels and connect them to concrete measures of generalization and performance.
+
+These discoveries fundamentally reframe neural network optimization as a problem at the intersection of statistical physics and functional analysis, opening entirely new theoretical territories for future exploration.
 
 \newpage
 
