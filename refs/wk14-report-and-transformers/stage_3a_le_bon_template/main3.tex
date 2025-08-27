@@ -4299,74 +4299,7 @@ This is precisely the action of the Hessian operator of $L = \textcolor{kernelco
 
 
 
-
 \newpage
-
-\section{Symmetry Theory and Universality Classes}\label{sec:symmetry_theory}
-
-\subsection{Lie Groups and Representations in Random Matrix Theory}
-
-We develop here the mathematical foundations connecting representation theory to symmetry classes observed in random matrix theory (RMT), particularly as they apply to neural tangent kernel analysis.
-
-\subsubsection{Classical Symmetry Classes}
-
-Random matrix theory classifies ensembles into ten symmetry classes based on the presence or absence of time-reversal symmetry $\mathcal{T}$ and particle-hole symmetry $\mathcal{C}$. These symmetries are encoded through the action of compact Lie groups on the matrix space.
-
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{📖 DEFINITION: Dyson's Threefold Way}},enhanced,drop shadow]
-The three classical Dyson ensembles correspond to:
-\begin{itemize}
-    \item \textbf{Gaussian Orthogonal Ensemble (GOE)}: Real symmetric matrices invariant under $O(N)$
-    \item \textbf{Gaussian Unitary Ensemble (GUE)}: Complex Hermitian matrices invariant under $U(N)$  
-    \item \textbf{Gaussian Symplectic Ensemble (GSE)}: Quaternionic matrices invariant under $USp(2N)$
-\end{itemize}
-Each class is characterized by the Dyson index $\beta \in \{1, 2, 4\}$ respectively.
-\end{tcolorbox}
-
-\subsubsection{Wigner-Dyson Statistics and Spectral Properties}
-
-The universality principle in RMT states that local eigenvalue statistics depend only on the fundamental symmetries of the ensemble, not on the specific details of the matrix element distributions. For the NTK matrix, we observe properties consistent with these universal laws, both at a global and local scale.
-
-\paragraph{Global Eigenvalue Density}
-For large random matrices, the macroscopic spectral density $\rho(\lambda)$ of eigenvalues follows the celebrated Wigner's semicircle law. For a properly normalized matrix from the GOE or GUE ensembles, the density is given by:
-\[
-\rho(\lambda) = \frac{1}{2\pi} \sqrt{4 - \lambda^2}, \quad \text{for } \lambda \in [-2, 2]
-\]
-This distribution describes the overall shape of the eigenvalue spectrum.
-
-\paragraph{Local Level Repulsion}
-On a microscopic scale, the distribution of spacings $s$ between adjacent eigenvalues exhibits "level repulsion," a phenomenon where eigenvalues tend to avoid being close to each other. The probability density $P(s)$ for the normalized spacing is accurately approximated by Wigner's surmise. This approximation, which Wigner derived by considering the simple case of $2 \times 2$ matrices, provides an excellent fit to the true distributions for large matrices. The surmises and the corresponding mean adjacent gap ratios $\langle r \rangle$ are:
-
-\begin{align}
-\text{GOE (orthogonal): } & P(s) \approx \frac{\pi s}{2} e^{-\frac{\pi s^2}{4}}, && \langle r \rangle \approx 0.5307 \\
-\text{GUE (unitary): } & P(s) \approx \frac{32s^2}{\pi^2} e^{-\frac{4s^2}{\pi}}, && \langle r \rangle \approx 0.5996 \\
-\text{GSE (symplectic): } & P(s) \approx \frac{2^{18} s^4}{3^6 \pi^3} e^{-\frac{64s^2}{9\pi}}, && \langle r \rangle \approx 0.6762
-\end{align}
-
-where $P(s)$ represents the nearest-neighbor spacing distribution.
-
-\subsubsection{Representation Theory and Eigenspace Structure}
-
-\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🎯 THEOREM: Schur-Weyl Duality for NTK}},enhanced,drop shadow]
-Consider a neural network with rotational symmetry under group $G$. The NTK operator $\textcolor{kernelcolor}{K}_\infty$ commutes with group actions:
-\begin{equation}
-[\textcolor{kernelcolor}{K}_\infty, \textcolor{orange!80!black}{R_g}] = 0, \quad \forall g \in G
-\end{equation}
-By Schur's lemma, $\textcolor{kernelcolor}{K}_\infty$ acts as a scalar on each irreducible representation that are spherical harmonics gradued spaces $V_\lambda$:
-\begin{equation}
-\textcolor{kernelcolor}{K}_\infty|_{V_\lambda} = c_\lambda \mathbf{I}_{V_\lambda}
-\end{equation}
-\end{tcolorbox}
-
-
-The symmetry-theoretic approach thus unifies neural network analysis with fundamental principles from quantum chaos and statistical mechanics, establishing deep connections between machine learning and mathematical physics.
-
-
-
-\newpage
-
-
-
-
 \section{Deep Narrow Neural Networks}
 
 \subsection{Scaled NTK at Initialization}
