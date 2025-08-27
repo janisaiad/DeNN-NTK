@@ -577,7 +577,7 @@ $n_k$ & Width of layer $k$ & $x^{(\ell)}$ & Output of layer $\ell$ \\
 $\W^{(\ell)}$ & Weight matrix of layer $\ell$ & $x^{(0)} = x$ & Network input \\
 $a \in \mathbb{R}^m$ & Output layer weights & $\textcolor{brown}{\theta}$ & Set of all trainable parameters \\
 $\ReLU'_\ell(x)$ & Diagonal derivative matrix & $G^{(\ell)}_\mu$ & Backpropagated gradient to layer $\ell$ \\
-$m$ & Network width & $L$ & Number of hidden layers \\
+$m$ & Network width & $L$ or $H$ & Number of hidden layers \\
 $\delta_\gamma(\cdot)$ & Directional derivative operator & & \\
 \bottomrule
 \end{longtable}
@@ -1782,6 +1782,24 @@ Another way to precondition the NTK is to choose a specific ad-hoc great initial
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \subsection{Detailed approach for Transformers and Softmax Analysis}
 \label{app:transformers}
 
@@ -1795,11 +1813,11 @@ This appendix presents the detailed calculations for the theoretical analysis of
 Following the work of \cite{hron2020infiniteattentionnngpntk}, we provide a derivation for the Neural Tangent Kernel (NTK) of a multi-head attention layer. This section outlines the model definition, weight initialization, and the resulting kernel expression in the infinite-width limit.
 
 \subsubsection{Model Definition}
-Let the input be $\textcolor{green}{x} \in \mathbb{R}^{d_s \times d_{model}}$, where $d_s$ is the number of tokens and $d_{model}$ is the embedding dimension.
+Let the input be $\textcolor{darkyellow}{x} \in \mathbb{R}^{d_s \times d_{model}}$, where $d_s$ is the number of tokens and $d_{model}$ is the embedding dimension.
 
 The output of a single attention head $h$ is given by:
 \begin{equation}
-\textcolor{orange}{f^h(x)} = \underbrace{\text{softmax} \left( \frac{(\textcolor{green}{x} \textcolor{blue}{W_q^h})(\textcolor{green}{x} \textcolor{blue}{W_k^h})^T}{\sqrt{d_k}} \right)}_{\in \mathbb{R}^{d_s \times d_s}} \underbrace{(\textcolor{green}{x} \textcolor{blue}{W_v^h})}_{\in \mathbb{R}^{d_s \times d_k}}
+\textcolor{orange}{f^h(x)} = \underbrace{\text{softmax} \left( \frac{(\textcolor{darkyellow}{x} \textcolor{blue}{W_q^h})(\textcolor{darkyellow}{x} \textcolor{blue}{W_k^h})^T}{\sqrt{d_k}} \right)}_{\in \mathbb{R}^{d_s \times d_s}} \underbrace{(\textcolor{darkyellow}{x} \textcolor{blue}{W_v^h})}_{\in \mathbb{R}^{d_s \times d_k}}
 \end{equation}
 where the softmax function is applied row-wise to the attention matrix. The weight matrices are $\textcolor{blue}{W_q^h}, \textcolor{blue}{W_k^h}, \textcolor{blue}{W_v^h} \in \mathbb{R}^{d_{model} \times d_k}$.
 
@@ -1818,18 +1836,18 @@ The weights are initialized from centered Gaussian distributions as follows:
 \subsubsection{Limit and Neural Tangent Kernel (NTK)}
 In the infinite-width limit, where the dimensions $d_k, d_{model} \to +\infty$, the network output $f$ converges to a Gaussian Process (GP). The kernel of this GP and the associated NTK can be computed.
 
-The NTK between token $a$ of input $\textcolor{green}{x}$ and token $b$ of input $\textcolor{green}{x'}$ is given by $\textcolor{red}{\Theta_{ab}(x, x')}$. A simplified expression is:
+The NTK between token $a$ of input $\textcolor{darkyellow}{x}$ and token $b$ of input $\textcolor{darkyellow}{x'}$ is given by $\textcolor{red}{\Theta_{ab}(x, x')}$. A simplified expression is:
 \begin{equation}
-\textcolor{red}{\Theta_{ab}(x, x')} = 2 \sigma_w^2 (\textcolor{green}{x_a} \cdot \textcolor{green}{x'_b}) \left(1 + \sigma_H^2 \sigma_w^2 \textcolor{magenta}{S} \right)
+\textcolor{red}{\Theta_{ab}(x, x')} = 2 \sigma_w^2 (\textcolor{darkyellow}{x_a} \cdot \textcolor{darkyellow}{x'_b}) \left(1 + \sigma_H^2 \sigma_w^2 \textcolor{magenta}{S} \right)
 \end{equation}
 where the term $\textcolor{magenta}{S}$ captures the effect of the attention matrix and its dynamics:
 \begin{equation}
-\textcolor{magenta}{S} = \sum_{c_1, c_2=1}^{d_s} (\textcolor{green}{x_{c_1}} \cdot \textcolor{green}{x'_{c_1}})(\textcolor{green}{x_{c_2}} \cdot \textcolor{green}{x'_{c_2}}) \mathbb{E}\left[ \frac{\partial \textcolor{orange}{\tilde{G}_{ac_1}}}{\partial g_{ad_1}} \frac{\partial \textcolor{orange}{\tilde{G}_{ac_2}}}{\partial g_{ad_2}} \right]
+\textcolor{magenta}{S} = \sum_{c_1, c_2=1}^{d_s} (\textcolor{darkyellow}{x_{c_1}} \cdot \textcolor{darkyellow}{x'_{c_1}})(\textcolor{darkyellow}{x_{c_2}} \cdot \textcolor{darkyellow}{x'_{c_2}}) \mathbb{E}\left[ \frac{\partial \textcolor{orange}{\tilde{G}_{ac_1}}}{\partial g_{ad_1}} \frac{\partial \textcolor{orange}{\tilde{G}_{ac_2}}}{\partial g_{ad_2}} \right]
 \end{equation}
 
 Here, $\textcolor{orange}{\tilde{G}}$ represents the attention matrix after applying the softmax function, and $g$ is the matrix before softmax (the "logits"):
 \begin{align}
-    g_{ac} &= \frac{(\textcolor{green}{x_a} \textcolor{blue}{W_q^h})(\textcolor{green}{x_c} \textcolor{blue}{W_k^h})^T}{\sqrt{d_k}} \\
+    g_{ac} &= \frac{(\textcolor{darkyellow}{x_a} \textcolor{blue}{W_q^h})(\textcolor{darkyellow}{x_c} \textcolor{blue}{W_k^h})^T}{\sqrt{d_k}} \\
     \textcolor{orange}{\tilde{G}} &= \text{softmax}(g)
 \end{align}
 The derivative of the softmax output with respect to its input is a well-known property of the softmax function:
@@ -3243,7 +3261,7 @@ This research opens pathways for future collaboration with experts in random mat
 
 
 \newpage
-\subsection{Conclusion}
+\section{Conclusion}
 
 This study has established the theoretical framework of the Neural Tangent Kernel hierarchy for analyzing the training dynamics of finite-width neural networks. We focused on the first-order correction kernel, $\textcolor{k3color}{K^{(3)}}$, which governs the time evolution of the standard NTK, $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$.
 
