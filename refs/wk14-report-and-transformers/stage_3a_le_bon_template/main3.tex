@@ -1201,6 +1201,9 @@ This theoretical guarantee will be quantitatively validated in the next section 
 \end{tcolorbox}
 
 
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Open Question on Regularization Interactions}},enhanced,drop shadow]
+    However, an open question remains: it is yet to be determined whether this beneficial effect of width on implicit regularization persists when other forms of explicit regularization, such as \textit{dropout} or \textit{weight decay}, are applied simultaneously with high intensity.
+\end{tcolorbox}
 
 
 
@@ -1789,6 +1792,58 @@ We present here our approach to the analysis of the softmax function and the Gau
 This appendix presents the detailed calculations for the theoretical analysis of \textcolor{insightcolor}{\textbf{Gaussian measure integrals}} and \textcolor{methodcolor}{\textbf{softmax functions}}, specifically developed for \textcolor{kernelcolor}{\textbf{Transformer}} models. These results constitute an original contribution to the mathematical understanding of \textcolor{k3color}{\textbf{attention mechanisms}}.
 \end{tcolorbox}
 
+\subsection{Derivation of the NTK for Transformers}
+Following the work of \cite{hron2020infiniteattentionnngpntk}, we provide a derivation for the Neural Tangent Kernel (NTK) of a multi-head attention layer. This section outlines the model definition, weight initialization, and the resulting kernel expression in the infinite-width limit.
+
+\subsubsection{Model Definition}
+Let the input be $x \in \mathbb{R}^{d_s \times d_o}$, where $d_s$ is the number of tokens and $d_o$ is the embedding dimension.
+
+The output of a single attention head $h$ is given by:
+\begin{equation}
+f^h(x) = \underbrace{\text{softmax} \left( \frac{(x W_q^h)(x W_k^h)^T}{\sqrt{d_k}} \right)}_{\in \mathbb{R}^{d_s \times d_s}} \underbrace{(x W_v^h)}_{\in \mathbb{R}^{d_s \times d_v}}
+\end{equation}
+where the softmax function is applied row-wise to the attention matrix. The weight matrices are $W_q^h, W_k^h \in \mathbb{R}^{d_o \times d_k}$ and $W_v^h \in \mathbb{R}^{d_o \times d_v}$.
+
+The output of the full multi-head attention layer is a weighted sum of the outputs from each head:
+\begin{equation}
+f(x) = \sum_{h=1}^{d_H} \underbrace{f^h(x)}_{\in \mathbb{R}^{d_s \times d_v}} \underbrace{W^h}_{\in \mathbb{R}^{d_v \times d_o}}
+\end{equation}
+
+\subsubsection{Weight Distributions (Initialization)}
+The weights are initialized from centered Gaussian distributions as follows:
+\begin{align}
+    W_q^h, W_k^h, W_v^h &\sim \mathcal{N}\left(0, \frac{\sigma_w^2}{d_o}\right) \quad \forall h \in \{1, \dots, d_H\} \\
+    W^h &\sim \mathcal{N}\left(0, \frac{\sigma_H^2}{d_H}\right)
+\end{align}
+
+\subsubsection{Limit and Neural Tangent Kernel (NTK)}
+In the infinite-width limit, where the dimensions $d_k, d_o \to +\infty$, the network output $f$ converges to a Gaussian Process (GP). The kernel of this GP and the associated NTK can be computed.
+
+The NTK between token $a$ of input $x$ and token $b$ of input $x'$ is given by $\Theta_{ab}(x, x')$. A simplified expression is:
+\begin{equation}
+\Theta_{ab}(x, x') = 2 \sigma_w^2 (x_a \cdot x'_b) \left(1 + \sigma_{anv}^2 \sigma_v^2 S \right)
+\end{equation}
+where the term $S$ captures the effect of the attention matrix and its dynamics:
+\begin{equation}
+S = \sum_{c_1, c_2=1}^{d_s} (x_{c_1} \cdot x'_{c_1})(x_{c_2} \cdot x'_{c_2}) \mathbb{E}\left[ \frac{\partial \tilde{G}_{ac_1}}{\partial g_{ad_1}} \frac{\partial \tilde{G}_{ac_2}}{\partial g_{ad_2}} \right]
+\end{equation}
+
+Here, $\tilde{G}$ represents the attention matrix after applying the softmax function, and $g$ is the matrix before softmax (the "logits"):
+\begin{align}
+    g_{ac} &= \frac{(x_a W_q^h)(x_c W_k^h)^T}{\sqrt{d_k}} \\
+    \tilde{G} &= \text{softmax}(g)
+\end{align}
+The derivative of the softmax output with respect to its input is a well-known property of the softmax function:
+\begin{equation}
+\frac{\partial \tilde{G}_{ac_1}}{\partial g_{ad_1}} = \tilde{G}_{ac_1}(\delta_{c_1 d_1} - \tilde{G}_{ad_1})
+\end{equation}
+where $\delta$ denotes the Kronecker delta.
+
+
+
+
+
+
 
 \subsubsection{Problem Statement: Moments of the Softmax Function}
 
@@ -1824,12 +1879,11 @@ We define $\textcolor{orange}{\delta_k} = e^{\beta (\textcolor{greencolor}{G_{ak
 Current state-of-the-art transformer models operate predominantly in the \textcolor{green}{\textbf{high temperature regime}} with $\beta \in [3.3, \infty)$ corresponding to $\T \in (0, 0.3]$ for non-creative applications. This regime is characterized by:
 
 \begin{equation}
-\boxed{  \T_{\text{typical}} \leq 0.3  implies \beta_{\text{typical}} \geq 3.3  }
+\boxed{  \T_{\text{typical}} \leq 0.3  \implies \beta_{\text{typical}} \geq 3.3  }
 \end{equation}
 
 In this high temperature setting, the softmax distribution approaches uniform behavior, leading to more diverse and less confident predictions. This contrasts with creative applications where lower temperatures ($T < 1$, $\beta > 1$) are used to produce more deterministic outputs.
 \end{tcolorbox}
-
 
 
 \subsubsection{Personal contribution currently in progress : Cumulant Expansion Framework}
@@ -1837,24 +1891,23 @@ In this high temperature setting, the softmax distribution approaches uniform be
 We employ the cumulant expansion approach, which is more physically motivated. First, we expand the logarithm:
 
 \begin{align}
-\log(\textcolor{blue}{Z_a}) &= \log\left(e^{\beta \textcolor{greencolor}{G_{a, \text{max}}}}\right) + \log\left( 1 + \sum_{k \neq \text{max}} \textcolor{orange}{\delta_k} \right) \\
-&\approx \beta \textcolor{greencolor}{G_{a, \text{max}}} + \textcolor{insightcolor}{\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)} - \textcolor{k3color}{\frac{1}{2}\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)^2} + \dots \label{eq:log_expansion}
+\log(\textcolor{blue}{Z_a}) &= \log\left(e^{\beta \textcolor{insightcolor}{G_{a, \text{max}}}}\right) + \log\left( 1 + \sum_{k \neq \text{max}} \textcolor{orange}{\delta_k} \right) \\
+&\approx \beta \textcolor{insightcolor}{G_{a, \text{max}}} + \textcolor{methodcolor}{\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)} - \textcolor{methodcolor}{\frac{1}{2}\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)^2} + \dots \label{eq:log_expansion}
 \end{align}
 
 For the dominant output ($l=\text{max}$):
 
 \begin{align}
-\textcolor{red}{S_{a, \text{max}}} &= \exp\left(\beta \textcolor{greencolor}{G_{a, \text{max}}} - \log(\textcolor{blue}{Z_a})\right) \\
-&\approx \exp\left( - \textcolor{insightcolor}{\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}} + \textcolor{k3color}{\frac{1}{2}\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)^2} - \dots \right) \\
-&\approx 1 - \textcolor{insightcolor}{\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}} + \textcolor{methodcolor}{\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)^2} + \dots \label{eq:dominant_softmax}
+\textcolor{red}{S_{a, \text{max}}} &= \exp\left(\beta \textcolor{insightcolor}{G_{a, \text{max}}} - \log(\textcolor{blue}{Z_a})\right) \\
+&\approx \exp\left( - \textcolor{methodcolor}{\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}} + \textcolor{methodcolor}{\frac{1}{2}\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)^2} - \dots \right) \\
+&\approx 1 - \textcolor{methodcolor}{\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}} + \textcolor{methodcolor}{\left(\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}\right)^2} + \dots \label{eq:dominant_softmax}
 \end{align}
 
 For a perturbative output ($l \neq \text{max}$):
 
 \begin{equation}
-\boxed{\textcolor{red}{S_{al}} = \exp(\beta \textcolor{greencolor}{G_{al}} - \log(\textcolor{blue}{Z_a})) \approx \textcolor{orange}{\delta_l} \left(1 - \textcolor{methodcolor}{\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}} + \dots \right)} \label{eq:perturbative_softmax}
+\boxed{\textcolor{red}{S_{al}} = \exp(\beta \textcolor{insightcolor}{G_{al}} - \log(\textcolor{blue}{Z_a})) \approx \textcolor{orange}{\delta_l} \left(1 - \textcolor{methodcolor}{\sum_{k \neq \text{max}} \textcolor{orange}{\delta_k}} + \dots \right)} \label{eq:perturbative_softmax}
 \end{equation}
-
 
 
 
@@ -2003,7 +2056,7 @@ The primary analytical approaches for the spectrum are:
     \item \textbf{Spectrum as a Zonal Operator:} A powerful approach is to analyze the NTK as a zonal kernel operator on the sphere. Following the methodology of Murray et al.~[]~\ref{murray2023characterizingspectrumntkpower}, we can seek a power series expansion of the kernel in terms of the Gram matrix ($K = \bm{x}^\top\bm{x}'$). This would allow for a direct characterization of its eigenvalues in terms of Gegenbauer polynomials.
     \item \textbf{Spectrum vs. Depth Analysis:} Adapt the proof methodology from Terj\'{e}k and Gonz\'{a}lez-S\'{a}nchez~[]~\ref{terjek2025mlpseocspectrumntk} to analyze how the NTK spectrum scales with depth $L$. This involves performing a power expansion of the kernel function with respect to the correlation $\rho$.
     \item \textbf{NTK Matrix Structure via Derivatives at Zero:} We will compute the derivatives of the kernel function at $\rho=0$. These derivatives provide the coefficients for a Taylor expansion around orthogonality, which directly defines the structure of the infinite-width NTK matrix.
-    \item \textbf{Eigenvalue Scaling via Taylor Decomposition at Zero:} To complement the depth analysis, we will perform a Taylor decomposition of the kernel's recursive map around the fixed point at $\rho=0$. The derivatives of this map will precisely determine the scaling of the eigenvalues with respect to the network depth $L$.
+    \item \textbf{Eigenvalue Scaling via Taylor Decomposition at Zero:} To complement the depth analysis, we will perform a Taylor  kernel's recursive map around the fixed point at $\rho=0$. The derivatives of this map will precisely determine the scaling of the eigenvalues with respect to the network depth $L$.
     \item \textbf{Smallest Eigenvalue Bound via Hermite Decomposition:} We will use the decomposition of the kernel function into the basis of Hermite polynomials to establish a rigorous lower bound on the smallest eigenvalue, which is crucial for understanding the conditioning of the NTK.
     \item \textbf{RKHS Characterization via Puiseux Series:} We will further analyze the Puiseux series expansions of the kernel in the limits $\rho \to \pm 1$ to determine the smoothness properties of the functions in the corresponding Reproducing Kernel Hilbert Space (RKHS), connecting the kernel's local behavior to the function space.
 \end{itemize}
@@ -2122,7 +2175,7 @@ Real neural networks exhibit behaviors that the infinite-width theory cannot exp
 The relative importance of finite-width corrections depends critically on the scaling regime between network width $m$ and dataset size $n$. In the lazy regime where $m \gg n^2$, the NTK dominates and the network behavior closely follows infinite-width predictions. The feature learning regime occurs when $m \sim n$, where corrections become order one and significantly modify the dynamics. In the rich regime where $m \ll n$, higher-order terms dominate and the network exhibits complex feature learning behavior that deviates substantially from NTK predictions:
 
 \begin{align}
-\text{Lazy regime:} \quad &m \gg n^2 \implies \text{NTK dominates} \nonumber\\
+\text{Lazy regime:} \quad &m \gg n^2 \text{NTK dominates} \nonumber\\
 \text{Feature learning regime:} \quad &m \sim n \implies \text{Corrections are } \mathcal{O}(1) \nonumber\\
 \text{Rich regime:} \quad &m \ll n \implies \text{Higher-order terms dominate} \label{eq:scaling_regimes}
 \end{align}
@@ -2415,7 +2468,7 @@ This stability is \textbf{essential} for our scaling analysis and explains why d
 
 \begin{equation}
 \label{eq:relu_recursion_main}
-\boxed{\delta_\gamma G^{(\ell)}_\mu = \frac{1}{\sqrt{\textcolor{widthcolor}{m}}}\sigma'_\ell(x_\mu) \W^{(\ell)} (\delta_\gamma x^{(\ell-1)}_\mu)}
+\boxed{\delta_\gamma G^{(\ell)}_\mu = \frac{1}{\sqrt{\textcolor{widthcolor}{m}}}\ReLU'_\ell(x_\mu) \W^{(\ell)} (\delta_\gamma x^{(\ell-1)}_\mu)}
 \end{equation}
 
 \textbf{Revolutionary Insight}: The vanishing second derivative $\ReLU''= 0$ eliminates \textit{all problematic terms} that make general activations intractable.
@@ -2493,7 +2546,7 @@ The experiment is structured as a systematic grid search over a range of network
     \item \texttt{L\_VALUES}: The network depth (referred to as $L$ in our formulas), $H \in \{2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 70, 90\}$
 \end{itemize}
 
-The specific results for slope of finite width corrections with respect to L and N for each of these parameters are detailed in our public repository, available at \url{https://github.com/janisaiad/DeNN-NTK/blob/main/experiments/data/experimentsresume/R2.txt}.
+The specific results for slope of finite width corrections with respect to L and N for each of these parameters are detailed in our public repository, available \hyperref{https://github.com/janisaiad/DeNN-NTK/blob/main/experiments/data/experimentsresume/R2.txt}{there}.
 
 
 
@@ -2527,6 +2580,10 @@ Second, the formula reveals the critical role of the initial kernel's spectrum. 
 
 \subsubsection{Personal contribution : Results on Depth Dependence}
 
+
+
+
+
 \begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{🎯 KEY INSIGHT: Depth-Dependent Scaling}},enhanced,drop shadow]
 Our comprehensive analysis reveals that network depth $L$ fundamentally controls finite-width corrections through the fact that 
 eigenvalues $\textcolor{kernelcolor}{\lambda_i} \sim \mathcal{O}(L/N)$ amplify corrections
@@ -2534,46 +2591,45 @@ eigenvalues $\textcolor{kernelcolor}{\lambda_i} \sim \mathcal{O}(L/N)$ amplify c
 
 \textbf{Result}: Total finite-width correction scales as $\mathcal{O}(L^{1.099})$ for reasonable network sizes, confirming the \textit{non-trivial} depth dependence beyond infinite-width theory.
 \end{tcolorbox}
+Now we give, knowing a $\textcolor{orange}{\alpha}$ scaling law w.r.t. depth, a more precise analysis of the minimum eigenvalue $\textcolor{kernelcolor}{\lambda_{\min}}(K_{\text{emp}})$ reveals an important finite-width effect. Based on our experiments and Weyl's inequality, we state the bound in our practical numerical setup:
 
-Now we give, knowing a $\alpha$ scaling law w.r.t. depth, a more precise analysis of the minimum eigenvalue $\textcolor{kernelcolor}{\lambda_{\min}}(K_{\text{emp}})$ reveals an important finite-width effect. Based on our experiments and Weyl's inequality, we state the bound in our practical numerical setup:
+\[ \textcolor{kernelcolor}{\lambda_{\min}}(K_{\text{emp}}) \ge \frac{0.75\textcolor{blue}{L}}{\textcolor{red}{N}} - \textcolor{gray}{C} \frac{\textcolor{red}{N}\textcolor{blue}{L}^{\textcolor{orange}{\alpha}}}{\textcolor{darkyellow}{M}} \]
 
-\[ \textcolor{kernelcolor}{\lambda_{\min}}(K_{\text{emp}}) \ge \frac{0.75H}{N} - C \frac{NL^\alpha}{M} \]
+where $\textcolor{gray}{C}$ is a constant and $\textcolor{orange}{\alpha}$ represents the power law scaling exponent. This shows how finite width further decreases the small eigenvalues through the negative correction term with the generalized depth dependence.
 
-where $C$ is a constant and $\alpha$ represents the power law scaling exponent. This shows how finite width further decreases the small eigenvalues through the negative correction term with the generalized depth dependence.
-
-For a parameter budget $P = M^2H$, we first optimize with respect to $L$:
+For a parameter budget $\textcolor{purple}{P} = \textcolor{darkyellow}{M}^2\textcolor{blue}{L}$, we first optimize with respect to $\textcolor{blue}{L}$:
 \[
-M = \sqrt{\frac{P}{H}} \implies \textcolor{kernelcolor}{\lambda_{\min}} \ge \frac{0.75H}{N} - C \frac{NL^\alpha}{\sqrt{\frac{P}{H}}} 
+\textcolor{darkyellow}{M} = \sqrt{\frac{\textcolor{purple}{P}}{\textcolor{blue}{L}}} \implies \textcolor{kernelcolor}{\lambda_{\min}} \ge \frac{0.75\textcolor{blue}{L}}{\textcolor{red}{N}} - \textcolor{gray}{C} \frac{\textcolor{red}{N}\textcolor{blue}{L}^{\textcolor{orange}{\alpha}}}{\sqrt{\frac{\textcolor{purple}{P}}{\textcolor{blue}{L}}}} 
 \]
 
 Simplifying the expression:
 \[
-\textcolor{kernelcolor}{\lambda_{\min}} \ge \frac{0.75H}{N} - C \frac{NL^{\alpha + 1/2}}{\sqrt{P}}
+\textcolor{kernelcolor}{\lambda_{\min}} \ge \frac{0.75\textcolor{blue}{L}}{\textcolor{red}{N}} - \textcolor{gray}{C} \frac{\textcolor{red}{N}\textcolor{blue}{L}^{\textcolor{orange}{\alpha} + 1/2}}{\sqrt{\textcolor{purple}{P}}}
 \]
 
-The optimal value of $L$ occurs when the derivative of w.r.t  $L$ is zero:
+The optimal value of $\textcolor{blue}{L}$ occurs when the derivative of w.r.t $\textcolor{blue}{L}$ is zero:
 \[
-\frac{\partial}{\partial H} \textcolor{kernelcolor}{\lambda_{\min}} = \frac{0.75}{N} - C \frac{N(\alpha + 1/2)}{\sqrt{P}} L^{\alpha - 1/2} = 0
+\frac{\partial}{\partial \textcolor{blue}{L}} \textcolor{kernelcolor}{\lambda_{\min}} = \frac{0.75}{\textcolor{red}{N}} - \textcolor{gray}{C} \frac{\textcolor{red}{N}(\textcolor{orange}{\alpha} + 1/2)}{\sqrt{\textcolor{purple}{P}}} \textcolor{blue}{L}^{\textcolor{orange}{\alpha} - 1/2} = 0
 \]
 
 Solving for the optimal depth:
 \[
-L^* = \left(\frac{0.75\sqrt{P}}{CN^2(\alpha + 1/2)}\right)^{\frac{1}{\alpha - 1/2}}
+\textcolor{blue}{L}^* = \left(\frac{0.75\sqrt{\textcolor{purple}{P}}}{\textcolor{gray}{C}\textcolor{red}{N}^2(\textcolor{orange}{\alpha} + 1/2)}\right)^{\frac{1}{\textcolor{orange}{\alpha} - 1/2}}
 \]
 
 This gives the optimal width:
 \[
-M^* = \sqrt{\frac{P}{L^*}} = \sqrt{P} \left(\frac{CN^2(\alpha + 1/2)}{0.75\sqrt{P}}\right)^{\frac{1}{2(\alpha - 1/2)}}
+\textcolor{darkyellow}{M}^* = \sqrt{\frac{\textcolor{purple}{P}}{\textcolor{blue}{L}^*}} = \sqrt{\textcolor{purple}{P}} \left(\frac{\textcolor{gray}{C}\textcolor{red}{N}^2(\textcolor{orange}{\alpha} + 1/2)}{0.75\sqrt{\textcolor{purple}{P}}}\right)^{\frac{1}{2(\textcolor{orange}{\alpha} - 1/2)}}
 \]
 
-We can simplify this expression by isolating the $P$ and $N$ exponents. Let us define $\beta = \frac{1}{2(\alpha - 1/2)}$ and reorganize:
+We can simplify this expression by isolating the $\textcolor{purple}{P}$ and $\textcolor{red}{N}$ exponents. Let us define $\beta = \frac{1}{2(\textcolor{orange}{\alpha} - 1/2)}$ and reorganize:
 \[
-M^* = P^{1/2} \left(\frac{C(\alpha + 1/2)}{0.75}\right)^{\beta} P^{-\beta/2} N^{2\beta}
+\textcolor{darkyellow}{M}^* = \textcolor{purple}{P}^{1/2} \left(\frac{\textcolor{gray}{C}(\textcolor{orange}{\alpha} + 1/2)}{0.75}\right)^{\beta} \textcolor{purple}{P}^{-\beta/2} \textcolor{red}{N}^{2\beta}
 \]
 
-Combining the $P$ exponents:
+Combining the $\textcolor{purple}{P}$ exponents:
 \[
-M^* = P^{1/2 - \beta/2} N^{2\beta} \left(\frac{C(\alpha + 1/2)}{0.75}\right)^{\beta}
+\textcolor{darkyellow}{M}^* = \textcolor{purple}{P}^{1/2 - \beta/2} \textcolor{red}{N}^{2\beta} \left(\frac{\textcolor{gray}{C}(\textcolor{orange}{\alpha} + 1/2)}{0.75}\right)^{\beta}
 \]
 \begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{🎯 OPTIMAL WIDTH FORMULA}},enhanced,drop shadow]
 For a given parameter budget $P$ and dataset size $N$, the optimal network width that maximizes the minimum eigenvalue bound is:
@@ -2618,17 +2674,20 @@ This observation provides theoretical justification for the empirical success of
 \end{tcolorbox}
 
 
-
+\newpage
 \begin{figure}[htbp]
     \centering
     \hfill
-    \includegraphics[width=0.60\textwidth]{figures/spectralradiusallconfigsD.png}
+    \includegraphics[width=0.55\textwidth]{figures/spectralradiusallconfigsD.png}
     
     \vspace{0.5cm} 
     
-    \includegraphics[width=0.60\textwidth]{figures/spectralradiusallconfigsL.png}
+    \includegraphics[width=0.55\textwidth]{figures/spectralradiusallconfigsL.png}
     \hfill
-    \includegraphics[width=0.60\textwidth]{figures/spectralradiusallconfigsN.png}
+    
+    \vspace{0.5cm} 
+
+    \includegraphics[width=0.55\textwidth]{figures/spectralradiusallconfigsN.png}
     
     \caption{Analysis of the spectral radius for different network configurations. The plots illustrate the impact of varying the dataset size (N), depth (L), and width (D) on the spectral properties of the NTK, confirming our theoretical scaling laws.}
     \label{fig:spectral_radius_all_configs}
@@ -3641,46 +3700,36 @@ For matrix $A$ and positive integer $r$, the $r$-th Hadamard power $A^{\odot r}$
 \subsection{General Framework for Eigenvalue Bounds}
 
 All modern approaches to bounding $\lambdaMin(\KNTK)$ follow a common high-level structure, though they differ in technical details and specific tools employed.
-
-\begin{figure}[h]
+\begin{figure}[h!]
 \centering
-\begin{tikzpicture}
-    % Define styles
-    \tikzset{
-        box/.style={rectangle, draw, thick, minimum width=3cm, minimum height=1.2cm, text centered, fill=blue!15},
-        arrow/.style={->, thick, blue!70}
-    }
+\begin{tikzpicture}[
+    node distance=0.5cm and 2.2cm,
+    box/.style={rectangle, draw=blue!70, fill=blue!10, thick, rounded corners,
+                minimum width=3cm, minimum height=1.2cm, text centered, font=\small},
+    arrow/.style={->, thick, >=latex, blue!70}
+]
+    % we define the nodes in a horizontal sequence
+    \node[box] (step1) {\textbf{Step 1} \\ Decompose NTK};
+    \node[box, right=of step1] (step2) {\textbf{Step 2} \\ Analyze Terms};
+    \node[box, right=of step2] (step3) {\textbf{Step 3} \\ Combine Bounds};
 
-    % Main boxes
-    \node[box] (step1) at (0,4) {\textbf{Step 1} \\ Problem Hermite decomposition};
-    \node[box] (step2) at (0,2) {\textbf{Step 2} \\ Concentration Analysis for each term};
-    \node[box] (step3) at (0,0) {\textbf{Step 3} \\ Spectral Analysis then summing back};
-
-    % Arrows
+    % we draw the arrows connecting the steps
     \draw[arrow] (step1) -- (step2);
     \draw[arrow] (step2) -- (step3);
 
-    % Annotations
-    \node[align=left, text width=4cm] at (4.5,4) {
-        $\bullet$ Decompose NTK \\
-        $\bullet$ Identify key terms \\
-        $\bullet$ Separate components
+    % we add descriptive text below each node for clarity
+    \node[text width=3cm, align=center, font=\footnotesize, below=0.2cm of step1] {
+        Break the NTK into a sum of simpler components.
     };
-    
-    \node[align=left, text width=4cm] at (4.5,2) {
-        $\bullet$ Apply matrix bounds \\
-        $\bullet$ Control randomness \\
-        $\bullet$ High-probability results
+    \node[text width=3cm, align=center, font=\footnotesize, below=0.2cm of step2] {
+        Bound each term using concentration inequalities.
     };
-    
-    \node[align=left, text width=4cm] at (4.5,0) {
-        $\bullet$ Matrix inequalities \\
-        $\bullet$ Combine bounds \\
-        $\bullet$ Final $\lambda_{\min}$ result
+    \node[text width=3cm, align=center, font=\footnotesize, below=0.2cm of step3] {
+        Synthesize a final bound on $\lambda_{\min}$ via spectral theory.
     };
-
 \end{tikzpicture}
-\caption{General Framework for NTK Eigenvalue Bounds}
+\caption{High-level strategy for deriving NTK eigenvalue bounds.}
+\label{fig:ntk_bound_framework}
 \end{figure}
 
 
@@ -3891,23 +3940,6 @@ This approach significantly reduces width requirements compared to classical met
 We focus here on understanding NTK for other architectures and handcomputations made through this comparison.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\newpage
 \subsection{Personal contribution: Detailed Calculations for Two Hidden Layer MMNN}
 \label{app:mmnn}
 
