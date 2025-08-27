@@ -91,6 +91,10 @@ parler de l'application en sciml surtout et de ce que l'on veut observe pour les
 et le scaling des parameters, est ce que les hypotheses theoriqeus sont verifiées etc .. 
 parler de l'aspect phystat avec boltzmann machine, et convergence à l'equilibre thermique
 
+
+
+
+
 (voir soutenance de these typique comment ça se passe)
 surtout parler de l'angle phystat pour la soutenance parce que le jury est calé en ça 
 soutenance : on parlera surtout des aspects pratiques et de comment voir les théorèmes sous la lumière (et interpréter les expériences numériques)
@@ -151,3 +155,31 @@ put that :
     \label{fig:wk7_spectrum_dist}
 \end{figure}
 
+.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+soutenance : 
+expliquer ce qui fait changer alpha dan sla soutenance
