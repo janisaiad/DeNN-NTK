@@ -1188,8 +1188,11 @@ The proof is provided in \hyperref[sec:appendix_commutation]{Appendix A.4}.
     the NTK Gram matrix smallest eigenvalue scales inversely with the number of data points.
     The main takeaway is that under the optimization perspective, the more data you have, the more your model space should
     live in a smooth function space to ensure same optimization performance. This is intuitive because
-    the more data you have, the more you should be smooth
-
+    the more data you have, the more the optimization will encounter non-smooth functions that would disagree with the data,
+    And restricting the model space to very smooth functions with $s$ large enough ensures that you will not encounter them,
+    and is then a good preconditionning strategy.
+    
+    This insight represents for us the major takeaway from this work.
     This is converse to general approximation and generalization results \ref{yang2024deepsuperrelu}.
 
 \end{tcolorbox}
@@ -1213,6 +1216,14 @@ The key insight is that Chebyshev sampling ensures the \textit{feature learning 
 This theoretical guarantee will be quantitatively validated in the next section through analysis of the NTK Gram matrix's smallest eigenvalue, establishing concrete bounds for when this regime equivalence holds in practical applications.
 \end{tcolorbox}
 
+
+
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Future directions}},enhanced,drop shadow]
+    Ongoing research is trying to show that, for general schemes, non-exact quadrature schemes deviate with $1/N$ scaling.
+    And sampling according to a random distribution over the sphere leads to a concentration bound for quasi-commutativity, and hence
+    spectrum concentration bounds.
+    This is an active research direction.
+\end{tcolorbox}
 
 
 
@@ -2569,9 +2580,9 @@ We reveal that the magnitude of the entries of the $\textcolor{k3color}{K^{(3)}}
 
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Key Scaling Result}},enhanced,drop shadow]
-The third-order kernel exhibits \textbf{quadratic depth scaling}:
+The third-order kernel exhibits \textbf{between linear and quadratic depth scaling}:
 \begin{equation}
-\textcolor{k3color}{K^{(3)}}_{\alpha\beta\gamma} \sim \mathcal{O}\left(\frac{L^2}{\sqrt{\m}}\right)
+\textcolor{k3color}{K^{(3)}}_{\alpha\beta\gamma} \sim \mathcal{O}\left(\frac{L}{m}\right) \text{ or } \mathcal{O}\left(\frac{L^2}{m}\right)
 \end{equation}
 \textbf{Implication}: The NTK dynamics become increasingly complex in deeper networks, contradicting naive expectations of exponential decay.
 \end{tcolorbox}
@@ -2579,9 +2590,9 @@ The third-order kernel exhibits \textbf{quadratic depth scaling}:
 The key observations are:
 \begin{itemize}
     \item The fundamental vectors $x^{(p)}$ and $G^{(\ell)}$ have norms that are stable across layers and do not decay.
-    \item The derivative terms $\delta_\gamma x^{(p)}$ and $\delta_\gamma G^{(\ell)}$ introduce factors of $1/\sqrt{\m}$ and $1/m$ respectively, but their recursive/summative nature leads to a linear growth with the number of layers involved.
-    \item For a fixed width $m$, the values of $\textcolor{k3color}{K^{(3)}}$ increase quadratically with depth $L$.
-    \item The factor $1/\sqrt{\m}$ controls the overall magnitude but does not introduce a decay with depth. In fact, the standard deviation of $K^{(3)}$ is $\mathcal{O}(1/\sqrt{\m})$
+    \item The derivative terms $\delta_\gamma x^{(p)}$ and $\delta_\gamma G^{(\ell)}$ introduce factors of $m$ and $1/m$ respectively, but their recursive/summative nature leads to a linear growth with the number of layers involved.
+    \item For a fixed width $m$, the values of $\textcolor{k3color}{K^{(3)}}$ increase between linearly and quadratically with depth $L$.
+    \item The factor $1/\m$ controls the overall magnitude but does not introduce a decay with depth. In fact, the standard deviation of $K^{(3)}$ is $\mathcal{O}(1/\sqrt{\m})$
     with mean 0.
 \end{itemize}
 
@@ -2739,7 +2750,11 @@ Future work and ongoing research is establishing the $\alpha$ scaling law w.r.t 
 
 Additionally, we share an exceptional insight: our results are consistent with those presented in Figure~\ref{fig:spectral_radius_all_configs}. These works, based on scaling laws obtained through numerical computations using Feynman diagrams, reveal exponents ranging from $3.2/2 = 1.6$ to $3.8/2 = 1.9$ for large-scale experiments concerning finite-width deviations from the infinite-width NTK. The experiments shown in this paper are complementary to ours and reinforce the validity of our theoretical framework.
 
-
+\begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Insight from industry}},enhanced,drop shadow]
+  
+Our research group acquired some insights from people working in the industry, arguing that they empirically uses width $M = 5N$ for practical uses showing the best optimization performance.
+    We are then in a very good agreement with the industry.
+\end{tcolorbox}
  
 \begin{tcolorbox}[colback=purple!10,colframe=purple!60!black,title={\textbf{🔍 FEATURE LEARNING PERSPECTIVE: Deep-Narrow vs Shallow-Wide Trade-offs}},enhanced,drop shadow]
 Our optimal allocation analysis reveals a fundamental dichotomy in learning mechanisms. When optimizing for minimal $\alpha$ values (approaching $1$), we obtain \textbf{shallow-wide architectures} that operate primarily in the \textit{kernel regime}, where the network functions remain close to their initialization and learning occurs through kernel methods without significant feature adaptation.
@@ -2986,14 +3001,15 @@ We first perform a naive scaling analysis of the correction terms by separating 
 
 The dominant contribution to the $T_3$ term comes from the sum over the $N-1$ bulk modes. Using the eigenvalue scaling $\textcolor{kernelcolor}{\lambda_{\text{bulk}}} \sim \mathcal{O}(L/N)$, we get:
 \begin{equation}
-T_3^{\text{bulk}} = - \sum_{i=2}^N\frac{1}{\textcolor{kernelcolor}{\lambda_{i}}}(O_{3}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) \sim (N-1) \times \frac{1}{\mathcal{O}(L/N)} \sim \mathcal{O}\left(\frac{N^2}{L}\right)
+T_3^{\text{bulk}} = - \sum_{i=2}^N\frac{1}{\textcolor{kernelcolor}{\lambda_{i}}} \mathbb{E}_{\hat{e}_i}[(\textcolor{orange!80!black}{\mathbf{O}_{3}}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})] \sim (N-1) \times \frac{1}{\mathcal{O}(L/N)} \times \mathbb{E}_{\hat{e}_i}[(\textcolor{orange!80!black}{\mathbf{O}_{3}}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})] \sim \mathcal{O}\left(\frac{N^2}{L}\right) \times \mathbb{E}_{\hat{e}_i}[(\textcolor{orange!80!black}{\mathbf{O}_{3}}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})]
 \end{equation}
 
 Similarly, the dominant contribution to $T_4$ comes from the $(N-1)^2$ terms where both indices are in the bulk. Approximating all bulk eigenvalues as $\textcolor{kernelcolor}{\lambda_{\text{bulk}}}$, the pre-factor scales as $1/\textcolor{kernelcolor}{\lambda_{\text{bulk}}}^2 \sim \mathcal{O}(N^2/L^2)$. This yields a naive scaling of:
 \begin{equation}
-T_4^{\text{bulk}} \sim (N-1)^2 \times \frac{1}{\mathcal{O}((L/N)^2)} \sim \mathcal{O}\left(\frac{N^4}{L^2}\right)
+T_4^{\text{bulk}} \sim (N-1)^2 \times \frac{1}{\mathcal{O}((L/N)^2)} \times \mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}\textcolor{orange!80!black}{\mathbf{O}_{4}}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})] \sim \mathcal{O}\left(\frac{N^4}{L^2}\right) \times \mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}\textcolor{orange!80!black}{\mathbf{O}_{4}}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})]
 \end{equation}
-This naive analysis suggests that the $T_4$ term dominates the correction with a strong $\mathcal{O}(N^4)$ dependence. However, this contradicts our experimental findings.
+
+These naive analyses suggest that both $T_3$ and $T_4$ terms could dominate the correction with strong $\mathcal{O}(N^2)$ and $\mathcal{O}(N^4)$ dependences respectively. However, this contradicts our experimental findings.
 
 \begin{tcolorbox}[colback=orange!15,colframe=orange!70!black,title={\textbf{📊 EMPIRICAL CONSTRAINT: Observed Scaling}},enhanced,drop shadow]
 Our experiments show that the total correction scales as:
@@ -3003,22 +3019,28 @@ Our experiments show that the total correction scales as:
 This near-linear scaling in $N$ provides a strong constraint on the behavior of the tensor components.
 \end{tcolorbox}
 
-The discrepancy between the naive scaling $\mathcal{O}(N^4/L^2)$ and the empirical scaling $\mathcal{O}(NL)$ implies that our initial assumption of statistical independence is incorrect. The tensor components $O_3$ and $O_4$ must have a specific scaling with $N$ and $L$ when projected onto the random bulk eigenvectors.
+The discrepancy between the naive scalings and the empirical scaling $\mathcal{O}(NL)$ implies that our initial assumption of statistical independence is incorrect. The tensor components $\textcolor{orange!80!black}{\mathbf{O}_{3}}$ and $\textcolor{orange!80!black}{\mathbf{O}_{4}}$ must have a specific scaling with $N$ and $L$ when projected onto the random bulk eigenvectors.
 
 \subsubsection{Personal contribution : From Empirical Scaling to Theoretical Understanding}
 
-\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{💡 BACKWARD CALCULATION: Deriving $\textcolor{orange!80!black}{\mathbf{O}_4}$ Scaling}},enhanced,drop shadow]
+\begin{tcolorbox}[colback=blue!10,colframe=blue!60!black,title={\textbf{💡 BACKWARD CALCULATION: Deriving Tensor Scaling}},enhanced,drop shadow]
 Working backward from the empirical scaling $\sim \mathcal{O}(NL)$, we can determine the required scaling of the tensor components when averaged over random eigenvectors:
 \end{tcolorbox}
 
+For the $\textcolor{orange!80!black}{\mathbf{O}_{3}}$ term, since $T_3^{\text{bulk}} \sim \mathcal{O}(NL)$, we have:
 \begin{equation}
-\mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}\textcolor{orange!80!black}{\mathbf{O}_{4}}\hat{e}_{j})(\cdots)] \sim \frac{\text{Empirical Scaling}}{\text{Naive Pre-factor}} \sim \frac{\mathcal{O}(NL)}{\mathcal{O}(N^4/L^2)} \sim \mathcal{O}\left(\frac{L^3}{N^3}\right) \label{eq:required_scaling}
+\mathbb{E}_{\hat{e}_i}[(\textcolor{orange!80!black}{\mathbf{O}_{3}}\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i})] \sim \frac{\mathcal{O}(NL)}{\mathcal{O}(N^2/L)} \sim \mathcal{O}\left(\frac{L^2}{N}\right) \label{eq:required_scaling_O3}
+\end{equation}
+
+For the $\textcolor{orange!80!black}{\mathbf{O}_{4}}$ term, since $T_4^{\text{bulk}} \sim \mathcal{O}(NL)$, we have:
+\begin{equation}
+\mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}\textcolor{orange!80!black}{\mathbf{O}_{4}}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})] \sim \frac{\mathcal{O}(NL)}{\mathcal{O}(N^4/L^2)} \sim \mathcal{O}\left(\frac{L^3}{N^3}\right) \label{eq:required_scaling_O4}
 \end{equation}
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{🎯 KEY FINDING: Eigenvector Correlations Matter}},enhanced,drop shadow]
-The significant reduction from the naive scaling $\mathcal{O}(N^4/L^2)$ to the empirical $\mathcal{O}(NL)$ reveals that the tensor components $\textcolor{orange!80!black}{\mathbf{O}_3}$ and $\textcolor{orange!80!black}{\mathbf{O}_4}$ have strong correlations with the eigenvector structure. These correlations effectively suppress the naive scaling, leading to the observed near-linear dependence on $N$.
+The significant reduction from the naive scalings to the empirical $\mathcal{O}(NL)$ reveals that both tensor components $\textcolor{orange!80!black}{\mathbf{O}_3}$ and $\textcolor{orange!80!black}{\mathbf{O}_4}$ have strong correlations with the eigenvector structure. For $\textcolor{orange!80!black}{\mathbf{O}_3}$, the expected value must scale as $\mathcal{O}(L^2/N)$, while for $\textcolor{orange!80!black}{\mathbf{O}_4}$, it must scale as $\mathcal{O}(L^3/N^3)$.
 
-This suggests that the tensors are not independent random objects but are intimately connected to the spectral properties of the \textcolor{kernelcolor}{NTK}, which motivates a deeper investigation using random matrix theory. This spectral correlation structure is precisely predicted by the quantum field theory framework for neural network correlations.
+These correlations effectively suppress the naive scaling, leading to the observed near-linear dependence on $N$. This suggests that the tensors are not independent random objects but are intimately connected to the spectral properties of the \textcolor{kernelcolor}{NTK}, which motivates a deeper investigation using random matrix theory. This spectral correlation structure is precisely predicted by the quantum field theory framework for neural network correlations.
 \end{tcolorbox}
 
 At the end, the main focus for us it to try to formulate a very strong statistical hypothesis to confirm this behavior for the eigenvectors.
@@ -3076,7 +3098,15 @@ Our numerical experiments reveal a striking result: the distribution of consecut
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.7\textwidth]{figures/consecutive_spacing_ratio_dist_N64_D10_M20_L2.png}
-    \caption{Empirical distribution of the ratio of consecutive eigenvalue spacings in the bulk of the NTK, for $N=64$ points, dimension $D=10$, $M=20$ samples, and $L=2$ layers. The empirical histogram (blue) is perfectly fitted by the theoretical prediction from the Gaussian Orthogonal Ensemble (red curve, Equation[]~\eqref{eq:goe_ratio_dist}). This confirms that the NTK exhibits strong level repulsion characteristic of the GOE.}
+    \caption{Empirical distribution of the ratio of consecutive eigenvalue spacings in the bulk of the NTK, 
+    for $N=64$ points, dimension $D=10$, $M=20$ width, and $L=2$ layers. The empirical histogram (blue) is 
+    perfectly fitted by the theoretical prediction from the Gaussian Orthogonal Ensemble 
+    (red curve, Equation[]~\eqref{eq:goe_ratio_dist}). 
+    This confirms that the NTK exhibits strong level repulsion characteristic of the GOE.
+    The mode of the curve is at $r=1$, which is the expected value for the GOE.
+    The reader can see that the curve put a hole exactly at the mode, further experiments have confirmed that adding the
+    largest eigenvalue spacing ratios fill the hole since $\frac{\lambda_1-\lambda_2}{\lambda_2-\lambda_3}$ is very near to 1.
+    }
     \label{fig:goe_spacing_ratio_empirical}
 \end{figure}
 
@@ -3119,21 +3149,6 @@ Remarkably, the sum over pairings in the \textcolor{orange!80!black}{\textbf{Wei
 \section{Summary of Personal Contributions : Derivations and Mathematical Formulations}
 
 This section presents our \textbf{novel theoretical contributions} to understanding finite-width neural networks through the lens of the Neural Tangent Hierarchy (NTH). We establish \textit{precise scaling laws}, develop a \textit{recursive formulation for leaky ReLU networks}, and connect our analysis to \textit{random matrix theory}.
-
-\subsubsection{Personal Contribution: Scaling Laws for Third-Order Corrections}
-
-\begin{tcolorbox}[colback=theoremcolor!10,colframe=theoremcolor!60!black,title={\textbf{Main Result: Scaling of $\textcolor{k3color}{K^{(3)}}$ with Network Depth}},enhanced,drop shadow]
-For a \textbf{ReLU network} of depth $L$ and width $m$, the third-order kernel exhibits the following \textit{fundamental scaling behavior}:
-
-\begin{equation}
-\label{eq:main_scaling_result}
-\|\textcolor{k3color}{K^{(3)}}_{\alpha\beta\gamma}\| \sim \mathcal{O}(m^{-1/2}) \cdot \rho^H
-\end{equation}
-
-where $\rho < 1$ is the \textbf{spectral radius} of the backward propagation operator, and the $m^{-1/2}$ scaling reflects the \textit{finite-width correction} to the infinite-width limit.
-\end{tcolorbox}
-
-This result represents a \textbf{breakthrough} in understanding how network architecture affects learning dynamics beyond the infinite-width approximation. The \textit{exponential decay} $\rho^H$ explains why deeper networks exhibit more stable training dynamics, while the $m^{-1/2}$ correction quantifies the deviation from infinite-width theory.
 
 \subsubsection{Personal Contribution: Novel ReLU Recursion Formula}
 
