@@ -56,7 +56,7 @@
     linkcolor=blue,
     refcolor=red,
     urlcolor=blue,
-    pdftitle={Deeper or Wider ? A first answer under the NTK perspective},
+    pdftitle={Deeper, Wider, or do they matter ? The NTK perspective to answer deep learning local optimization questions},
     pdfauthor={Janis AIAD},
     backref=true,
     hyperindex=true,
@@ -241,7 +241,7 @@
 
 \author{Janis AIAD}
 \date{\today}
-\title{Deeper or wider ? A first answer under the NTK perspective}
+\title{Deeper, Wider, or do they matter ? The NTK perspective to answer deep learning local optimization questions}
 
 
 
@@ -269,9 +269,9 @@
 
     \hrule
     \vspace{0.3cm}
-    {\LARGE\bfseries Deeper or wider ? A first answer under the NTK perspective \par}
+    {\LARGE\bfseries Deeper, Wider, or do they matter ?  \par}
     \vspace{0.2cm}
-    {\large Pushing the boundaries of optimization bounds in deep learning \par}
+    {\large The NTK perspective to answer deep learning local optimization major questions \par}
     \vspace{0.3cm}
     \hrule
     
@@ -701,6 +701,7 @@ and is part of the field slang, even if describing it in a Sobolev space is not 
 Under what conditions does optimizing the Sobolev training loss behave well? Specifically, we seek to understand when the condition number of key optimization matrices (such as the Gauss-Newton, Hessian, Fisher, and NTK matrices) remains small, ensuring stable and efficient convergence.
 \end{tcolorbox}
 
+We want to ensure the reader understand that we focus on giving an answer local optimization questions only.
 
 
 \subsection{Literature Review: Sobolev Training and NTK Eigenvalues}
@@ -1181,6 +1182,21 @@ The proof is provided in \hyperref[sec:appendix_commutation]{Appendix A.4}.
 \end{tcolorbox}
 
 
+
+\begin{tcolorbox}[colback=red!10,colframe=red!60!black,title={\textbf{Final takeaway on the result}},enhanced,drop shadow]
+    As provided in \ref{sec:ntk_gram_matrix_spectrum}, 
+    the NTK Gram matrix smallest eigenvalue scales inversely with the number of data points.
+    The main takeaway is that under the optimization perspective, the more data you have, the more your model space should
+    live in a smooth function space to ensure same optimization performance. This is intuitive because
+    the more data you have, the more you should be smooth
+
+    This is converse to general approximation and generalization results \ref{yang2024deepsuperrelu}.
+
+\end{tcolorbox}
+
+
+
+
 \newpage
 \section{Conclusion for Sobolev training and future works}
 In this work, we have established a comprehensive theoretical framework connecting Sobolev regularization theory with Neural Tangent Kernel analysis. Our personal contributions constitute three fundamental advances: (1) the factorization $\Ts = \Kinf \circ \Ps$ separating spectral filtering from kernel dynamics, (2) the commutation property $\Kop \Pop_s = \Pop_s \Kop$ for Chebyshev sampling points enabling frequency-by-frequency analysis, and (3) the rigorous connection between continuous Sobolev theory and discrete implementations.
@@ -1196,6 +1212,8 @@ The key insight is that Chebyshev sampling ensures the \textit{feature learning 
 
 This theoretical guarantee will be quantitatively validated in the next section through analysis of the NTK Gram matrix's smallest eigenvalue, establishing concrete bounds for when this regime equivalence holds in practical applications.
 \end{tcolorbox}
+
+
 
 
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Open Question on Regularization Interactions}},enhanced,drop shadow]
@@ -2654,6 +2672,8 @@ eigenvalues $\textcolor{kernelcolor}{\lambda_i} \sim \mathcal{O}(L/N)$ amplify c
 
 \textbf{Result}: Total finite-width correction scales as $\mathcal{O}(L^{1.099})$ for reasonable network sizes, confirming the \textit{non-trivial} depth dependence beyond infinite-width theory.
 \end{tcolorbox}
+We recommend the reader to read \ref{sec:ntk_gram_matrix_spectrum} for a more detailed analysis of the NTK Gram matrix spectrum.
+
 Now we give, knowing a $\textcolor{orange}{\alpha}$ scaling law w.r.t. depth, a more precise analysis of the minimum eigenvalue $\textcolor{kernelcolor}{\lambda_{\min}}(K_{\text{emp}})$ reveals an important finite-width effect. Based on our experiments and Weyl's inequality, we state the bound in our practical numerical setup:
 
 \[ \textcolor{kernelcolor}{\lambda_{\min}}(K_{\text{emp}}) \ge \frac{0.75\textcolor{blue}{L}}{\textcolor{red}{N}} - \textcolor{gray}{C} \frac{\textcolor{red}{N}\textcolor{blue}{L}^{\textcolor{orange}{\alpha}}}{\textcolor{darkyellow}{M}} \]
@@ -2891,7 +2911,7 @@ A huge insight is that if we have some data that are not over the sphere and wit
 
 
 \subsection{NTK Gram Matrix Spectrum Results}
-
+\label{sec:ntk_gram_matrix_spectrum}
 The key scaling laws for the discrete NTK matrix are:
 
 \textbf{Condition Number}:
@@ -2899,7 +2919,7 @@ The key scaling laws for the discrete NTK matrix are:
 The condition number grows linearly with data size $n$ but improves with depth $l$.
 
 \textbf{Eigenvalue Distribution}:
-\[ \lambda_{\text{min}} \sim \frac{3l}{4}, \quad \lambda_{\text{max}} \sim \frac{3nl}{4} \pm \xi \text{ where } \xi \sim \log(l) \]
+\[ \lambda_{\text{min}} \sim \frac{3L}{4n}, \quad \lambda_{\text{max}} \sim \frac{3L}{4} \pm \xi \text{ where } \xi \sim \log(L) \]
 
 The minimum eigenvalue scales linearly with depth, while the maximum scales with both depth and data size.
 

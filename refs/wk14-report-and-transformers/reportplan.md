@@ -184,3 +184,5 @@ put that :
 soutenance : 
 expliquer ce qui fait changer alpha dan sla soutenance
 commencer par parler des 3 refs initiales
+mettre la remarque sur les chemins de local optimization du prof sur les slides en tant que conjecture final et chemin à donner
+les correlations de misof sont les memes pour O3 et O4
