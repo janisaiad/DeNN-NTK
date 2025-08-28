@@ -194,3 +194,11 @@ ajoute rune partie asd et fisher
 disentangle le papier sur relu non finite width corrections
 bien parler du papier fisher etc .. dire que ce travail étant très recent, on l'a rajouté en biblio
 mais je n'en parle qu'à l'oral
+l'importance de la biblio
+toutes les notes de stage que j'ai prise
+expliquer à l'oral la technique du 12.1
+pg 70  attention nombre de points 
+montrer une gradient descent de mmnn
+non uniform distribution you should cholesky the convolution operator
+
+faire et montrer un agenda complet de lecture
