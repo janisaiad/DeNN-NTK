@@ -187,3 +187,10 @@ commencer par parler des 3 refs initiales
 mettre la remarque sur les chemins de local optimization du prof sur les slides en tant que conjecture final et chemin à donner
 les correlations de misof sont les memes pour O3 et O4
 weight decay is also a preconditionning
+ntk beta rope aussi
+expliquer gaussian corrections for feynman 
+faire chronologie du travail
+ajoute rune partie asd et fisher
+disentangle le papier sur relu non finite width corrections
+bien parler du papier fisher etc .. dire que ce travail étant très recent, on l'a rajouté en biblio
+mais je n'en parle qu'à l'oral
