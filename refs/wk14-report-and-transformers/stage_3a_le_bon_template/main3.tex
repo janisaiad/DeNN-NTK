@@ -703,6 +703,13 @@ Under what conditions does optimizing the Sobolev training loss behave well? Spe
 
 We want to ensure the reader understand that we focus on giving an answer local optimization questions only.
 
+Finally, the OpenAI team []~\ref{kaplan2020scalinglawsneurallanguage} showed that for transformers in NLP tasks, the width and depth do not matter for the optimization. This has been the beginning
+of our research and explains the title of this report. 
+
+We want to understand in which case depth and width matter or not, and we also want to inscribe this work 
+in SciML applications to enhance solvers Zero-Shot best practices architecture, in a field where empirically you do not have enough
+GPUs to build the best models before training only from empirical insights. We hope this work benefits the community as much as possible, especially
+when you have to choose between a very deep and wide architecture or a very shallow and narrow architecture.
 
 \subsection{Literature Review: Sobolev Training and NTK Eigenvalues}
 
@@ -725,6 +732,8 @@ Parallel to Sobolev training advances, NTK analysis has provided the dominant th
 These fundamental results were refined by Nguyen et al. []~\ref{nguyen2022ntk_eigenvalues} and Fan \& Wang []~\ref{fan2020spectra}, who connected eigenvalue distribution patterns to architectural parameters including depth, width, and random matrix effects. We observe that these works established precise relationships between network structure and spectral properties. More recently, Terjek et al. []~\ref{terjek2025mlpseocconcentrationntk} introduced concentration inequalities for empirical NTK spectra, ensuring stability of eigenvalue distributions in high-dimensional settings.
 
 Finite-width corrections represent an active research area where Hanin \& Nica []~\ref{hanin_nica_2019}, Dyer \& Gur-Ari []~\ref{dyer2019asymptotics}, and Guillen et al. []~\ref{guillen_misof_gerken_2025} employed diagrammatic techniques inspired by quantum field theory to describe NTK fluctuations. These approaches bridge the theoretical gap between infinite-width and finite-width regimes, providing practical insights for real neural networks.
+
+NTK has already given us a lot of insights on the optimization of deep neural networks for finding best RoPE schemes []~\ref{xu2024rethinking} for transformers and NLP tasks, this is the base of exponential scaling RoPE schemes instead of linear ones.
 
 \paragraph{Convergence of Sobolev Training and NTK Theory}
 
@@ -876,9 +885,6 @@ The framework selection can be summarized by the following decision tree we prop
 
 
 
-From now, we focus on dataset of normalized inputs, that lies over $\mathbb{S}^{d-1}$ for some dimension $d$. It'll remain implicit until
-we explicitly specify $|x_i|$ in some equations or results, that are true not only over the sphere because of NTK bi-homogeneity.
-
 
 \subsubsection{The Neural Tangent Kernel}
 
@@ -922,6 +928,9 @@ where $\rho_0(\mathbf{x},\mathbf{x}') = \frac{\mathbf{x}^{\top}\mathbf{x}'}{\|\m
 \end{theorem}
 
 
+From now, we focus on dataset of normalized inputs, that lies over $\mathbb{S}^{d-1}$ for some dimension $d$. It will remain implicit until
+we explicitly specify $|x_i|$ in some equations or results, that are true not only over the sphere because of NTK bi-homogeneity.
+
 
 \begin{tcolorbox}[colback=yellow!10,colframe=red!60!black,title={\textbf{Remark : Infinite-width}},enhanced,drop shadow]
     The limit is taken in the sense of the infinite-width limit : $N_1$ goes to infinity first, then $N_2$ goes to infinity, and so forth until $N_L$ goes to infinity.
@@ -936,11 +945,18 @@ where $\rho_0(\mathbf{x},\mathbf{x}') = \frac{\mathbf{x}^{\top}\mathbf{x}'}{\|\m
 \newline
 
 
-\textbf{Operator Form}: By rotational invariance, the infinite-width NTK can be seen as an operator acts zonally:
+\textbf{Operator Form}: 
+For non uniform distributions $d\sigma(y)$, the NTK operator is as follows:
 \begin{equation}
-\label{eq:ntk_operator_form}
+\label{eq:ntk_operator_form_non_zonally}
+(K_L^{\infty} f)(x) = \int_{\mathbb{S}^{d-1}} \tilde{K}_L^{\infty}(x \cdot y) f(y) d\sigma(y)
+\end{equation}
+
+\begin{equation}
+\label{eq:ntk_operator_form_zonally}
 (K_L^{\infty} f)(x) = \frac{2\pi^{d/2}}{\Gamma(d/2)} \int_{-1}^1 \tilde{K}_L^{\infty}(t)f(t)(1-t^2)^{(d-3)/2}dt
 \end{equation}
+By rotational invariance, the infinite-width NTK can be seen as an operator acting zonally for uniform distributions:
 where $\sigma$ denotes the uniform surface measure on $\mathbb{S}^{d-1}$.
 
 \textbf{Spectral Properties}: The spherical harmonics $Y_{\ell,p}$ are eigenfunctions with eigenvalues:
@@ -1191,7 +1207,7 @@ The proof is provided in \hyperref[sec:appendix_commutation]{Appendix A.4}.
     the more data you have, the more the optimization will encounter non-smooth functions that would disagree with the data,
     And restricting the model space to very smooth functions with $s$ large enough ensures that you will not encounter them,
     and is then a good preconditionning strategy.
-    
+
     This insight represents for us the major takeaway from this work.
     This is converse to general approximation and generalization results \ref{yang2024deepsuperrelu}.
 
@@ -1253,14 +1269,11 @@ This theoretical guarantee will be quantitatively validated in the next section 
 
 In the field of deep learning, the central task is to optimize a highly non-convex and high-dimensional loss function to find model parameters that generalize well to unseen data. Gradient-based optimization methods, such as Stochastic Gradient Descent (SGD), are the cornerstone of this process. However, the efficiency and stability of these methods are deeply connected to the geometry of the loss landscape, which is often poorly conditioned. \textbf{Preconditioning} is a classical technique from numerical optimization designed to address this challenge. It involves transforming the original optimization problem into an equivalent one that is easier to solve, typically by improving the condition number of the Hessian matrix, which leads to faster and more reliable convergence.
 
-Many widely-used techniques in modern deep learning can be interpreted as implicit forms of preconditioning. For instance, \textbf{Batch Normalization} standardizes the inputs to each layer, which has a profound regularizing effect and significantly smooths the loss landscape, allowing for higher learning rates. \textbf{Residual Connections}, the innovation behind ResNets, combat the vanishing and exploding gradient problems by providing shortcut paths for the gradient to flow through the network. This mechanism effectively improves the conditioning of the underlying weight matrices and ensures that deeper models can be trained effectively. Similarly, regularization methods like \textbf{Dropout} prevent complex co-adaptations of neurons, simplifying the optimization problem. Even adaptive optimization algorithms like \textbf{Adam} or \textbf{RMSprop} can be viewed as a form of diagonal preconditioning, as they maintain a per-parameter learning rate that adapts to the geometry of the loss function.
+Many widely-used techniques in modern deep learning can be interpreted as implicit forms of preconditioning. For instance, \textbf{Batch Normalization} standardizes the inputs to each layer, which has a profound regularizing effect and significantly smooths the loss landscape, allowing for higher learning rates. \textbf{Residual Connections}, the innovation behind ResNets, combat the vanishing and exploding gradient problems by providing shortcut paths for the gradient to flow through the network. This mechanism effectively improves the conditioning of the underlying weight matrices and ensures that deeper models can be trained effectively. Similarly, regularization methods like \textbf{Dropout} prevent complex co-adaptations of neurons, simplifying the optimization problem. Even adaptive optimization algorithms like \textbf{Adam} or \textbf{RMSprop} or \textbf{Weight Decay} can be viewed as a form of diagonal preconditioning, as they maintain a per-parameter learning rate that adapts to the geometry of the loss function.
 
 While these component-level strategies are essential, the overall \textbf{architecture} of a neural network plays a fundamental role in preconditioning the learning problem. The specific arrangement of layers, the nature of the connections, and the choice of non-linear activation functions collectively determine the intrinsic structure of the model's function space and the associated optimization landscape. A well-designed architecture can inherently possess favorable properties that make training more efficient, stable, and scalable.
 
 This report focuses on analyzing the preconditioning properties of two particularly significant and powerful modern architectures: 
-
-
-
 
 
 \textbf{Multi-Component Multi-layer Neural Networks (MMNN)} and \textbf{Transformers}. 
@@ -4733,6 +4746,22 @@ Stochastic Gradient Descent as Approximate Bayesian Inference.
 \textit{Journal of Machine Learning Research}, 18(1):1--35, 2017.
 URL: \url{https://jmlr.org/papers/v18/17-214.html}.
 % I ref the foundational work connecting stochastic gradient descent to approximate Bayesian inference
+
+
+\bibitem{xu2024rethinking}\label{xu2024rethinking}
+Norm Xu.
+Rethinking Rotary Position Embedding.
+Blog post, 2024.
+URL: \href{https://normxu.github.io/Rethinking-Rotary-Position-Embedding-2}{\url{https://normxu.github.io/Rethinking-Rotary-Position-Embedding-2}}.
+% I ref this work for its analysis of rotary position embedding mechanisms in transformer architectures
+
+\bibitem{kaplan2020scalinglawsneurallanguage}\label{kaplan2020scalinglawsneurallanguage}
+Jared Kaplan, Sam McCandlish, Tom Henighan, Tom B. Brown, Benjamin Chess, Rewon Child, Scott Gray, Alec Radford, Jeffrey Wu, and Dario Amodei.
+Scaling Laws for Neural Language Models.
+\textit{arXiv preprint arXiv:2001.08361}, 2020.
+URL: \href{https://arxiv.org/abs/2001.08361}{\url{https://arxiv.org/abs/2001.08361}}.
+% I ref this foundational work on scaling laws for neural language models and their empirical behavior
+
 
 \bibitem{vaswani2017attention}\label{vaswani2017attention}
 Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia Polosukhin.
