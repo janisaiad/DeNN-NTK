@@ -202,3 +202,10 @@ montrer une gradient descent de mmnn
 non uniform distribution you should cholesky the convolution operator
 
 faire et montrer un agenda complet de lecture
+
+ce que je retiens aussi pour les deadlines et le formattage, latex, j'ai 4 papiers en cours, donc maintenant j'ai grandi et pris en maturité sur latex,
+overleaf et toute la collaboration scientifique
+lister tous les gens avec qui j'ai collaboré
+
+recontacter terjek
+pris en maturité sur comment gérer de la biblio

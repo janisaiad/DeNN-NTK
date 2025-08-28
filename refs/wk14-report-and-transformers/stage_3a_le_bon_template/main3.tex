@@ -347,9 +347,9 @@ Experimental validation confirms our theoretical predictions across several arch
 
 \addcontentsline{toc}{section}{Résumé}
 \section*{Résumé}
-Au cours des dernières années, la recherche s'est concentrée sur la compréhension des mécanismes fondamentaux régissant la dynamique d'apprentissage dans les réseaux de neurones profonds. Bien que des progrès significatifs aient été réalisés grâce au formalisme du \textbf{Neural Tangent Kernel (NTK)}, il reste peu clair comment choisir la bonne architecture pour un problème donné. Dans le trilemme classique approximation/généralisation/optimisation, nous nous concentrons sur l'aspect optimisation, le moins bien compris. Ce rapport présente une réponse complète à cette question à travers le prisme de la \textbf{théorie du NTK} dans le contexte de \textbf{l'entraînement de Sobolev}.
+Au cours des dernières années, la recherche s'est concentrée sur la compréhension des mécanismes fondamentaux régissant la dynamique d'apprentissage dans les réseaux de neurones profonds. Bien que des progrès significatifs aient été réalisés grâce au formalisme du \textbf{NTK (NTK)}, il reste peu clair comment choisir la bonne architecture pour un problème donné. Dans le trilemme classique approximation/généralisation/optimisation, nous nous concentrons sur l'aspect optimisation, le moins bien compris. Ce rapport présente une réponse complète à cette question à travers le prisme de la \textbf{théorie du NTK} dans le contexte de \textbf{l'entraînement de Sobolev}.
 
-Nous établissons un nouveau cadre théorique et notre découverte clé démontre que l'efficacité de l'apprentissage dépend de manière critique des \textbf{conditions d'échantillonnage}, spécifiquement lors de l'utilisation de \textbf{points de Chebyshev}. Pour les schémas d'échantillonnage généraux, l'apprentissage optimal nécessite une \textbf{information expliref sur les dérivées} pour un entraînement efficace. Nous dérivons des \textbf{bornes théoriques et numériques explirefs} pour les quantités clés des réseaux de neurones, établissant des \textbf{bornes précises sur les valeurs propres} pour les matrices \textbf{NTK} et des \textbf{taux de convergence quantitatifs} en cours. Notre \textbf{analyse spectrale} couvre les \textbf{réseaux entièrement connectés (FCNN)}, les \textbf{réseaux multi-couches multi-composants (MMNN)}, et les \textbf{transformers}, révélant une mise à l'échelle spécifique à l'architecture avec la profondeur, la largeur et la dimension d'entrée. À travers les \textbf{corrections de largeur finie}, nous fournissons des \textbf{bornes d'erreur explirefs} et des fondations pour les \textbf{garanties de convergence} en cours pour la descente de gradient.
+Nous établissons un nouveau cadre théorique et notre découverte clé démontre que l'efficacité de l'apprentissage dépend de manière critique des \textbf{conditions d'échantillonnage}, spécifiquement lors de l'utilisation de \textbf{points de Chebyshev}. Pour les schémas d'échantillonnage généraux, l'apprentissage optimal nécessite une \textbf{information expliref sur les dérivées} pour un entraînement efficace. Nous dérivons des \textbf{bornes théoriques et numériques explicites} pour les quantités clés des réseaux de neurones, établissant des \textbf{bornes précises sur les valeurs propres} pour les matrices \textbf{NTK} et des \textbf{taux de convergence quantitatifs} en cours. Notre \textbf{analyse spectrale} couvre les \textbf{réseaux entièrement connectés (FCNN)}, les \textbf{réseaux multi-couches multi-composants (MMNN)}, et les \textbf{transformers}, révélant une mise à l'échelle spécifique à l'architecture avec la profondeur, la largeur et la dimension d'entrée. À travers les \textbf{corrections de largeur finie}, nous fournissons des \textbf{bornes d'erreur explirefs} et des fondations pour les \textbf{garanties de convergence} en cours pour la descente de gradient.
 Nous donnons également des points de vue dans les nouveaux champs de la physique mathématique (QFT, RMT, StatMech) appliqués au deep learning.
 
 La validation expérimentale confirme nos prédictions théoriques à travers plusieurs architectures. Un code entièrement reproductible est disponible \href{https://github.com/janisaiad/DeNN-NTK}{ici} et \href{https://github.com/janisaiad/MMN}{ici}.
@@ -373,11 +373,11 @@ La validation expérimentale confirme nos prédictions théoriques à travers pl
 
 \addcontentsline{toc}{section}{Introduction}
 \section*{Introduction}
-The study of learning dynamics in deep neural networks constitutes a fundamental research area. In the past few years, research has focused on theoretical analysis of optimization mechanisms in deep learning, particularly through the \textbf{Neural Tangent Kernel (NTK)} formalism. However, it remains unclear how to optimally adapt neural architectures to learning problems involving \textbf{Sobolev spaces} and \textbf{specific sampling conditions}.
+The study of learning dynamics in deep neural networks constitutes a fundamental research area. In the past few years, research has focused on theoretical analysis of optimization mechanisms in deep learning, particularly through the \textbf{NTK (NTK)} formalism. However, it remains unclear how to optimally adapt neural architectures to learning problems involving \textbf{Sobolev spaces} and \textbf{specific sampling conditions}.
 
 In particular, existing approaches fail to elucidate the critical relationship between sampling points and learning effectiveness in the context of Sobolev training. This theoretical gap limits our understanding of fundamental mechanisms governing convergence of optimization algorithms in deep architectures.
 
-\textbf{Our proposition}: We establish a novel theoretical framework that decomposes Sobolev training into two distinct contributions: an independent \textbf{Neural Tangent Kernel (NTK)} and a Sobolev contribution. This decomposition relies on the \textbf{commutation} between integral operators and the fractional Laplace operator.
+\textbf{Our proposition}: We establish a novel theoretical framework that decomposes Sobolev training into two distinct contributions: an independent \textbf{NTK (NTK)} and a Sobolev contribution. This decomposition relies on the \textbf{commutation} between integral operators and the fractional Laplace operator.
 
 \textbf{Key Discovery}: We demonstrate that this commutation property holds \textit{exactly} only when using \textcolor{red}{\textbf{Chebyshev points}} (or equivalent optimal interpolation nodes) for sampling. For general sampling points, commutation breaks, necessitating \textbf{explicit derivative information} for effective learning.
 
@@ -385,7 +385,7 @@ Our analysis continues with the study of \textbf{NTK preconditioning} through a 
 
 Across these different architectures, we study \textbf{feature learning regimes} and their scaling with network width. Our results and discoveries rely partly on \textbf{statistical physics tools} to characterize model convergence and asymptotic behavior. This analysis enables a better understanding of finite-width corrections and their implications for the practical optimization of deep neural networks.
 
-The end of this research establishes fundamental connections between neural network dynamics and \textbf{mathematical physics}, advancing theoretical understanding of \textbf{eigenvalue bounds} for neural tangent kernels across multiple architectures. We bridge classical optimization theory with advanced mathematical physics frameworks, leveraging tools from \textbf{quantum field theory} and \textbf{random matrix theory} to provide new insights into neural network behavior.
+The end of this research establishes fundamental connections between neural network dynamics and \textbf{mathematical physics}, advancing theoretical understanding of \textbf{eigenvalue bounds} for NTKs across multiple architectures. We bridge classical optimization theory with advanced mathematical physics frameworks, leveraging tools from \textbf{quantum field theory} and \textbf{random matrix theory} to provide new insights into neural network behavior.
 
 \newpage
 
@@ -406,7 +406,7 @@ I would like to thank all those who have helped and guided me during this resear
 First, I want to thank my family for their constant support, help, and understanding during my studies. Their patience during long hours of research and their trust in my work have been very important.
 
 I am very grateful to my supervisors, Professor \textbf{Haizhao Yang} and Professor \textbf{Shijun Zhang}, whose excellent guidance, mathematical knowledge, and teaching have shaped this work and my 
-understanding of deep learning theory. Their knowledge in neural tangent kernel theory and practice has been key in building the theoretical framework shown in this report.
+understanding of deep learning theory. Their knowledge in NTK theory and practice has been key in building the theoretical framework shown in this report.
 
 Special thanks go to \textbf{David Terjek} for his invaluable contributions to proof strategies and mathematical rigor throughout this research,
  and to \textbf{Tan Bui-Thanh} for his expertise in computational physics methodologies and insights about Hessian's spectrum and links to active subspace methods in CFD.
@@ -579,7 +579,7 @@ $\delta_\gamma(\cdot)$ & Directional derivative operator & & \\
 \bottomrule
 \end{longtable}
 
-\subsection*{Neural Tangent Kernel (NTK)}
+\subsection*{NTK (NTK)}
 \begin{longtable}{p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}p{0.2\textwidth}}
 \toprule
 \textbf{Symbol} & \textbf{Definition} & \textbf{Symbol} & \textbf{Definition} \\
@@ -714,7 +714,7 @@ when you have to choose between a very deep and wide architecture or a very shal
 
 \subsection{The Intersection of Sobolev Training and NTK Spectral Analysis}
 
-The convergence of Sobolev training methodologies with Neural Tangent Kernel (NTK) spectral analysis represents one of the most promising theoretical frontiers in modern machine learning. This research line fundamentally addresses how embedding derivative information into learning objectives reshapes the spectral and optimization dynamics of neural networks. The literature spans from foundational works in approximation theory to recent finite-width corrections via diagrammatic methods, forming a coherent but rapidly evolving theoretical framework.
+The convergence of Sobolev training methodologies with NTK (NTK) spectral analysis represents one of the most promising theoretical frontiers in modern machine learning. This research line fundamentally addresses how embedding derivative information into learning objectives reshapes the spectral and optimization dynamics of neural networks. The literature spans from foundational works in approximation theory to recent finite-width corrections via diagrammatic methods, forming a coherent but rapidly evolving theoretical framework.
 
 \paragraph{Foundations of Sobolev Training}
 
@@ -722,9 +722,9 @@ The theoretical origins of Sobolev training lie in classical numerical analysis,
 
 Subsequent theoretical refinements by Gupte et al. []~\ref{gupte2022sobolev_loss} provided rigorous error bounds, linking Sobolev loss formulations to spectral control of learned functions, particularly in high-frequency regimes. This insight established the principle that the Sobolev order $s$ directly dictates approximation error decay rates. We note that these results created the theoretical foundation for understanding how derivative penalties affect function space properties.
 
-Recent developments extend these ideas in two complementary directions. On the theoretical side, Doumeche et al. demonstrated that Sobolev training is a kernel method, effectively embedding fractional differential operators into the kernel structure. On the applied side, Townsend et al. []~\ref{townsend2020ntk} showed the effectiveness of Sobolev losses in PDE-constrained learning scenarios, where derivative-aware training achieves faster convergence and lower sample complexity compared to standard approaches.
+Recent developments extend these ideas in two complementary directions. On the theoretical side, Doumeche et al. demonstrated that Sobolev training is a kernel method, effectively embedding fractional differential operators into the kernel structure. On the applied side, Townsend et al. []~\ref{townsend2020ntk} showed the effectiveness of Sobolev losses in PDE-constrained learning scenarios, where non-derivative-aware training achieves faster convergence and lower sample complexity compared to standard approaches.
 
-\paragraph{Spectral Properties of Neural Tangent Kernels}
+\paragraph{Spectral Properties of NTKs}
 
 Parallel to Sobolev training advances, NTK analysis has provided the dominant theoretical framework for studying convergence in wide neural networks. Bach's foundational works established polynomial eigenvalue decay rates for NTKs, demonstrating that spectral tail behavior governs generalization properties, while the smallest eigenvalue $\lambda_{\min}$ dictates optimization convergence speed.
 
@@ -755,7 +755,7 @@ The synthesis of Sobolev training and NTK spectral analysis offers a unified the
 
 
 \newpage
-\section{The Neural Tangent Kernel under Sobolev training}
+\section{The NTK under Sobolev training}
 \subsection{Two Equivalent Sobolev Norms}
 
 The Sobolev space $L^s(\Omega)$ can be equipped with two equivalent norms:
@@ -880,14 +880,14 @@ The framework selection can be summarized by the following decision tree we prop
 
 
 
-\subsection{Theoretical Framework of the Neural Tangent Kernel}
+\subsection{Theoretical Framework of the NTK}
 
 
 
 
-\subsection{The Neural Tangent Kernel}
+\subsection{The NTK}
 
-For a neural network $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})$ with parameters $\boldsymbol{\textcolor{darkyellow}{\theta}}$, the \textit{Neural Tangent Kernel} []~\ref{jacot2018ntk} is defined by:
+For a neural network $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})$ with parameters $\boldsymbol{\textcolor{darkyellow}{\theta}}$, the \textit{NTK} []~\ref{jacot2018ntk} is defined by:
 \begin{tcolorbox}[colback=yellow!10,colframe=blue!40!black,title=Definition : NTK]
 \begin{equation}
 \label{eq:ntk_definition}
@@ -906,14 +906,14 @@ For a neural network $f(\mathbf{x}; \boldsymbol{\textcolor{darkyellow}{\theta}})
 
 
 
-\begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018, convergence]
+\begin{theorem}[NTK, Jacot et al. 2018, convergence]
 For a multi layer perceptron $f(\mathbf{x};\boldsymbol{\textcolor{darkyellow}{\theta}})$ with hidden layer widths $N_1, \ldots, N_L$ randomly EOC initialized with weights $W_1, \ldots, W_L$ and trained by gradient descent with infinitesimal learning rate, 
 as hidden layer widths tend to infinity,the network converges to a Gaussian process, with limit NTK kernel $\textcolor{red}{K}_L^{\infty}$ and dynamics given by $\frac{\partial f_t(\mathbf{x})}{\partial t}
     = -\eta \sum_{i=1}^{\textcolor{red}{n}} \textcolor{red}{K}_L^{\infty}(\mathbf{x},\mathbf{x}_i)\bigl(f_t(\mathbf{x}_i) - y_i\bigr)$.
 
 \end{theorem}
 
-\begin{theorem}[Neural Tangent Kernel, Jacot et al. 2018, recursive formula]
+\begin{theorem}[NTK, Jacot et al. 2018, recursive formula]
 The recursive formula for depth $L$ in the infinite-width limit becomes:
 \begin{equation}
 \label{eq:ntk_recursive}
@@ -1177,7 +1177,7 @@ For arbitrary sampling points, this commutation \textit{fails}, requiring explic
 
 \begin{theorem}[NTK-Sobolev Matrix Commutation - Chebyshev Case]
 \label{thm:ntk_sobolev_commutation}
-Let $\Kop \in \mathbb{R}^{\textcolor{red}{n} \times \textcolor{red}{n}}$ be a discrete \textit{neural tangent kernel matrix} and $\Pop_s \in \mathbb{R}^{\textcolor{red}{n} \times \textcolor{red}{n}}$ be a discrete \textit{Sobolev operator matrix} of order $s > 0$, both constructed from the same sample set $\{x_i\}_{i=1}^{\textcolor{red}{n}} \subset \mathbb{S}^{d-1}$ with quadrature weights $\{c_i\}_{i=1}^{\textcolor{red}{n}}$. If both matrices are rotationally invariant, then:
+Let $\Kop \in \mathbb{R}^{\textcolor{red}{n} \times \textcolor{red}{n}}$ be a discrete \textit{NTK matrix} and $\Pop_s \in \mathbb{R}^{\textcolor{red}{n} \times \textcolor{red}{n}}$ be a discrete \textit{Sobolev operator matrix} of order $s > 0$, both constructed from the same sample set $\{x_i\}_{i=1}^{\textcolor{red}{n}} \subset \mathbb{S}^{d-1}$ with quadrature weights $\{c_i\}_{i=1}^{\textcolor{red}{n}}$. If both matrices are rotationally invariant, then:
 \begin{enumerate}
     \item The matrices commute: $\Kop\Pop_s = \Pop_s\Kop$
     \item They are simultaneously diagonalizable with shared eigenvectors
@@ -1186,7 +1186,7 @@ Let $\Kop \in \mathbb{R}^{\textcolor{red}{n} \times \textcolor{red}{n}}$ be a di
 The proof is provided in \hyperref[sec:appendix_commutation]{Appendix A.4}.
 \end{theorem}
 \begin{tcolorbox}[colback=green!10,colframe=green!60!black,title={\textbf{Personal Contribution : Fundamental Algebraic Structure of NTK-Sobolev Commutation}},enhanced,drop shadow]
-    This commutation property establishes a \textit{fundamental algebraic structure} that underlies the compatibility between neural tangent kernel theory and Sobolev regularized training. For comprehensive studies of NTK theory, see []~\ref{golikov2022ntk_survey}. The key insight is that both operators inherit their spectral properties from the underlying \textit{rotational symmetry} of the sphere, leading to a shared eigenbasis of spherical harmonics.
+    This commutation property establishes a \textit{fundamental algebraic structure} that underlies the compatibility between NTK theory and Sobolev regularized training. For comprehensive studies of NTK theory, see []~\ref{golikov2022ntk_survey}. The key insight is that both operators inherit their spectral properties from the underlying \textit{rotational symmetry} of the sphere, leading to a shared eigenbasis of spherical harmonics.
 
     In the discrete setting, this translates to exact matrix commutation when the \textcolor{kernelcolor}{\textbf{NTK}} and \textcolor{sobolevcolor}{\textbf{Sobolev}} matrices are constructed consistently from the same sampling points and quadrature scheme. The separation of eigenspaces by harmonic degree means that learning dynamics can be analyzed \textit{frequency by frequency}, with each degree $\ell$ evolving independently under the composite operator $\Kop\Pop_s$.
     This spectral decomposition enables us to completely \textbf{disentangle} the analysis of:
@@ -1217,9 +1217,9 @@ The proof is provided in \hyperref[sec:appendix_commutation]{Appendix A.4}.
 
 \newpage
 \section{Conclusion for Sobolev training and future works}
-In this work, we have established a comprehensive theoretical framework connecting Sobolev regularization theory with Neural Tangent Kernel analysis. Our personal contributions constitute three fundamental advances: (1) the factorization $\Ts = \Kinf \circ \Ps$ separating spectral filtering from kernel dynamics, (2) the commutation property $\Kop \Pop_s = \Pop_s \Kop$ for Chebyshev sampling points enabling frequency-by-frequency analysis, and (3) the rigorous connection between continuous Sobolev theory and discrete implementations.
+In this work, we have established a comprehensive theoretical framework connecting Sobolev regularization theory with NTK analysis. Our personal contributions constitute three fundamental advances: (1) the factorization $\Ts = \Kinf \circ \Ps$ separating spectral filtering from kernel dynamics, (2) the commutation property $\Kop \Pop_s = \Pop_s \Kop$ for Chebyshev sampling points enabling frequency-by-frequency analysis, and (3) the rigorous connection between continuous Sobolev theory and discrete implementations.
 
-These theoretical advances enable profound analysis of Neural Tangent Kernel behavior through spectral decomposition. The commutation property allows us to disentangle dimensionality effects from network architecture effects, providing unprecedented analytical precision for understanding frequency component interactions with network capacity and training dynamics. The eigenvalue structure of the composite operator $\Kop\Pop_s$ directly determines convergence rates across the spectrum, enabling quantitative predictions for learning efficiency.
+These theoretical advances enable profound analysis of NTK behavior through spectral decomposition. The commutation property allows us to disentangle dimensionality effects from network architecture effects, providing unprecedented analytical precision for understanding frequency component interactions with network capacity and training dynamics. The eigenvalue structure of the composite operator $\Kop\Pop_s$ directly determines convergence rates across the spectrum, enabling quantitative predictions for learning efficiency.
 
 Future work and ongoing research will focus on extending these results to more general sampling schemes beyond Chebyshev points, including Fekete points and other quadrature-compatible point distributions. The goal is to develop commutation properties not limited to spherical harmonics but applicable to any data distribution, thereby broadening the theoretical framework to encompass arbitrary geometric settings and sampling strategies commonly encountered in scientific machine learning applications.
 
@@ -1279,7 +1279,7 @@ This report focuses on analyzing the preconditioning properties of two particula
 The motivation for this focus stems from recent theoretical and empirical evidence demonstrating that these models can achieve
  remarkable \textbf{super-convergence} properties. This behavior suggests that their designs incorporate powerful implicit 
  preconditioning mechanisms that are not yet fully understood. Our goal is to dissect these architectures through the lens 
- of the Neural Tangent Kernel (NTK), a theoretical tool that connects an infinitely wide neural network to a linear model
+ of the NTK (NTK), a theoretical tool that connects an infinitely wide neural network to a linear model
   with a fixed kernel. By studying the spectral properties of the NTK for these models, we can gain deep insights into how
    their architectural choices influence the optimization dynamics and lead to such exceptional performance.
 
@@ -1306,7 +1306,7 @@ The transition between feature learning and kernel regimes represents a fundamen
 The NTK spectrum, particularly its smallest eigenvalue $\lambda_{\min}$, determines convergence rates and optimization strategy. An ill-conditioned NTK suggests second-order methods are appropriate, while a well-conditioned NTK indicates first-order methods can achieve faster convergence. For MMNN architectures, different network components may operate in different regimes simultaneously, requiring careful analysis of heterogeneous optimization dynamics.
 
 \begin{tcolorbox}[colback=red!5,colframe=red!80!black,title={\textbf{Theorem: Spectral Equivalence of NTK, Hessian, and Fisher Matrix}},enhanced,drop shadow,boxrule=2pt]
-A fundamental result in deep learning theory establishes that for sufficiently wide neural networks (width $m \to \infty$), the spectra of the Hessian, the Fisher Information Matrix, and the Neural Tangent Kernel (NTK) are asymptotically equivalent.
+A fundamental result in deep learning theory establishes that for sufficiently wide neural networks (width $m \to \infty$), the spectra of the Hessian, the Fisher Information Matrix, and the NTK (NTK) are asymptotically equivalent.
 
 More precisely, the top $d$ eigenvalues of these matrices, where $d$ is the input data dimension, are proven to converge to the same limiting values determined by the NTK. The remainder of the spectrum, the "bulk," is concentrated around zero. It is provably shown that the spectral radius of this bulk decays as $\mathcal{O}(1/\sqrt{m})$. Furthermore, experimental results in []~\ref{takeuchi2025neuraltangentkernelsfisher} and []~\ref{dyer2019asymptotics} indicate that the individual non-top eigenvalues decay even faster, scaling as $\mathcal{O}(1/m)$. This powerful result connects the geometry of the loss landscape (Hessian) and information geometry (Fisher) to the kernel function, providing a unified view on optimization dynamics.
 \end{tcolorbox}
@@ -1492,7 +1492,7 @@ The choice of scaling for the trainable parameters critically determines the net
 \begin{itemize}
 \item Output function $h^{(\ell)}(x)$ maintains variance $\mathcal{O}(\sigma_A^2)$ → \textbf{stable magnitude preservation}
 \item Gradient with respect to weights remains small: $\mathcal{O}(\frac{1}{\sqrt{n_\ell}})$ → \textbf{"lazy training" regime}
-\item Network dynamics converge to linear model behavior characterized by the Neural Tangent Kernel
+\item Network dynamics converge to linear model behavior characterized by the NTK
 \end{itemize}
 
 \textbf{2. Mean-Field ($\mu$) Parameterization []~\ref{yang2020meanfield}:} Alternative $\frac{1}{n_\ell}$ scaling.
@@ -1569,7 +1569,7 @@ We call the EOC initialization when adding the condition $\sigma_c^2 =1$.
 
 
 \begin{theorem}[Gaussian process]
-\begin{tcolorbox}[colback=blue!10,colframe=blue!80!black,title={\textbf{Multi-Dimensional Gaussian Process at Layer $\ell$}},enhanced,drop shadow,boxrule=2pt]
+
 For a layer $\ell$ with output dimension $d_\ell$, the layer output $\bm{h}^{(\ell)}(\bm{x})$ follows a $d_\ell$-dimensional Gaussian process with Kronecker covariance structure:
 
 \begin{equation}
@@ -1582,7 +1582,7 @@ where $\mathbf{M}^{(\ell)}$ is the 2-dimensional covariance matrix between diffe
 \end{equation}
 
 and $\mathbf{I}_{d_\ell}$ is the $d_\ell \times d_\ell$ identity matrix clek!rnapturing the independence across output dimensions within the same input point.
-\end{tcolorbox}
+
 \end{theorem}
 
 
@@ -1594,7 +1594,7 @@ and $\mathbf{I}_{d_\ell}$ is the $d_\ell \times d_\ell$ identity matrix clek!rna
 
 \subsection{Personal contribution : NTK for a Single-Layer MMNN}
 \label{sec:single_layer_mmfn}
-We begin by deriving the Neural Tangent Kernel for a single-layer MMNN. This result forms the base case for the multi-layer recursion. For simplicity, we consider a single scalar output, such that the network is defined as:
+We begin by deriving the NTK for a single-layer MMNN. This result forms the base case for the multi-layer recursion. For simplicity, we consider a single scalar output, such that the network is defined as:
 
 \begin{tcolorbox}[colback=yellow!10,colframe=yellow!80!black,title={\textbf{Single-Layer MMNN Definition}},enhanced,drop shadow,boxrule=2pt]
 \begin{equation}
@@ -1818,7 +1818,7 @@ Ongoing research is doing a taylor expansion of the NTK near $\rho =1$ on that p
 \end{tcolorbox}
 
 \begin{tcolorbox}[colback=green!10,colframe=green!80!black,title={\textbf{Computational Insight: Linear Programming Formulation}},enhanced,drop shadow,boxrule=2pt]
-Following []~\ref{zhang2024superconvergence} approach, uniform distributions for random weights $\bm{w}_j^{(\ell)} \sim \text{Uniform}(\mathcal{S}^{d_{\ell-1}})$ and biases $b_j^{(\ell)} \sim \text{Uniform}[-1,1]$ transform MMNN optimization into a \textbf{linear programming problem}.
+Following []~\ref{zhang2024superconvergence} approach, uniform distributions for random weights $\bm{w}_j^{(\ell)} \sim \text{Uniform}(\mathcal{S}^{d_{\ell-1}})$ and biases $b_j^{(\ell)} \sim \text{Uniform}[-1,1]$ transform MMNN theoretical optimization into a \textbf{linear programming problem}.
 
 Since the random basis functions $\sigma(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)})$ are fixed and the network output is linear in trainable weights $\{\bm{A}_j^{(\ell)}\}$, the optimization becomes convex and exactly solvable.
 Another way to precondition the NTK is to choose a specific ad-hoc great initialization that we are trying to find in ongoing research.
@@ -1855,7 +1855,7 @@ This appendix presents the detailed calculations for the theoretical analysis of
 \end{tcolorbox}
 
 \subsection{Personal contribution : Derivation of the NTK for Transformers}
-Following the work of \cite{hron2020infiniteattentionnngpntk}, we provide a derivation for the Neural Tangent Kernel (NTK) of a multi-head attention layer in a very simple setting. 
+Following the work of \cite{hron2020infiniteattentionnngpntk}, we provide a derivation for the NTK (NTK) of a multi-head attention layer in a very simple setting. 
 The work has given us the intuition to have the good hypothesis in order to derive a NTK for the attention layer.
 But the notations in its are very cryptic and not well explained, so we have to rewrite it in a more readable way,
 and also rederive it with basic Central Limit Theorem and gradient covariance computations in random fields.
@@ -1884,7 +1884,7 @@ The weights are initialized from centered Gaussian distributions as follows:
     \textcolor{blue}{W^h} &\sim \mathcal{N}\left(0, \frac{\sigma_H^2}{d_H}\right)
 \end{align}
 
-\subsection{Limit and Neural Tangent Kernel (NTK)}
+\subsection{Limit and NTK (NTK)}
 In the infinite-width limit, where the dimensions $d_k, d_{model} \to +\infty$, the network output $f$ converges to a Gaussian Process (GP). The kernel of this GP and the associated NTK can be computed.
 
 The NTK between token $a$ of input $\textcolor{darkyellow}{x}$ and token $b$ of input $\textcolor{darkyellow}{x'}$ is given by $\textcolor{red}{\Theta_{ab}(x, x')}$. A simplified expression is:
@@ -2264,7 +2264,7 @@ This convergence of architectural innovation and theoretical rigor represents a 
 
 \subsection{Conceptual Clarity: Geometric Intuition and Practical Motivations}
 
-This section establishes the conceptual foundation for understanding finite-width corrections through geometric intuition and practical motivations. The infinite-width limit represents a linear evolution in function space, where the network moves along fixed tangent directions. We can visualize this evolution by considering the set of all possible network outputs as forming a high-dimensional manifold $\mathcal{M}$. At initialization, the NTK defines a linear tangent space $T_{\theta_0}\mathcal{M}$ within which the network operates. In the infinite-width regime, known as lazy training, the network remains confined to this tangent space and exhibits purely linear dynamics. However, finite-width corrections allow the network to "curve away" from the tangent space, enabling genuine feature learning beyond simple kernel regression. The Neural Tangent Hierarchy captures this geometric transition from linear (lazy) to non-linear (feature learning) dynamics through a systematic expansion of the dynamics in powers of the inverse width.
+This section establishes the conceptual foundation for understanding finite-width corrections through geometric intuition and practical motivations. The infinite-width limit represents a linear evolution in function space, where the network moves along fixed tangent directions. We can visualize this evolution by considering the set of all possible network outputs as forming a high-dimensional manifold $\mathcal{M}$. At initialization, the NTK defines a linear tangent space $T_{\theta_0}\mathcal{M}$ within which the network operates. In the infinite-width regime, known as lazy training, the network remains confined to this tangent space and exhibits purely linear dynamics. However, finite-width corrections allow the network to "curve away" from the tangent space, enabling genuine feature learning beyond simple kernel regression. The Neural Tangent Hierarchy []~\ref{huang2019dynamicsdeepneuralnetworks} captures this geometric transition from linear (lazy) to non-linear (feature learning) dynamics through a systematic expansion of the dynamics in powers of the inverse width.
 
 We can understand the NTK corrections through a physical analogy of elastic deformation. Consider a rubber sheet representing the function manifold being deformed under training forces. The infinite-width regime corresponds to small deformations governed by Hooke's law, where the response is purely linear and characterized by the second-order kernel $\textcolor{kernelcolor}{K^{(2)}}$. In contrast, finite-width networks exhibit large deformations described by non-linear elasticity, where higher-order kernels $\textcolor{k3color}{K^{(3)}}$ and $\textcolor{purple}{K^{(4)}}$ capture the non-linear elastic effects that become significant when the "deformation" induced by training is substantial. This physical intuition provides a concrete way to understand why finite-width corrections become increasingly important as networks become narrower relative to the dataset size:
 
@@ -2280,7 +2280,7 @@ Real neural networks exhibit behaviors that the infinite-width theory cannot exp
 The relative importance of finite-width corrections depends critically on the scaling regime between network width $m$ and dataset size $n$. In the lazy regime where $m \gg n^2$, the NTK dominates and the network behavior closely follows infinite-width predictions. The feature learning regime occurs when $m \sim n$, where corrections become order one and significantly modify the dynamics. In the rich regime where $m \ll n$, higher-order terms dominate and the network exhibits complex feature learning behavior that deviates substantially from NTK predictions:
 
 \begin{align}
-\text{Lazy regime:} \quad &m \gg n^2 \text{NTK dominates} \nonumber\\
+\text{Lazy regime:} \quad &m \gg n^2 \text{ NTK dominates} \nonumber\\
 \text{Feature learning regime:} \quad &m \sim n \implies \text{Corrections are } \mathcal{O}(1) \nonumber\\
 \text{Rich regime:} \quad &m \ll n \implies \text{Higher-order terms dominate} \label{eq:scaling_regimes}
 \end{align}
@@ -2329,10 +2329,10 @@ The \textit{NTK scaling} $1/\sqrt{\textcolor{darkyellow}{m}}$ ensures proper ini
 
 
 
-\subsection{The Neural Tangent Kernel Framework}
+\subsection{The NTK Framework}
 
 \begin{tcolorbox}[colback=kernelcolor!5,colframe=kernelcolor!50!black,title={\textbf{Second-Order Kernel Definition}},enhanced,drop shadow]
-The \textbf{Neural Tangent Kernel} governs the continuous-time least squares regression dynamics:
+The \textbf{NTK} governs the continuous-time least squares regression dynamics:
 
 \begin{equation}
 \label{eq:ntk_dynamics}
@@ -2396,7 +2396,7 @@ This section develops the \textbf{theoretical framework} and \textit{computation
 \subsection{Fundamental Evolution Equation []~\ref{huang2019dynamicsdeepneuralnetworks}}
 
 \begin{tcolorbox}[colback=orange!10,colframe=orange!60!black,title={\textbf{Key Insight: NTK Evolution Dynamics}},enhanced,drop shadow]
-The \textbf{time evolution} of the Neural Tangent Kernel is governed by the fundamental equation:
+The \textbf{time evolution} of the NTK is governed by the fundamental equation:
 
 \begin{equation}
 \label{eq:ntk_evolution}
@@ -3065,7 +3065,7 @@ comes from eigenvalues spacing ratios, known as the Wigner surmrise, and it need
 
 
 
-\subsection{Personal contribution : A Random Matrix Theory Framework for the Neural Tangent Kernel}
+\subsection{Personal contribution : A Random Matrix Theory Framework for the NTK}
 
 The complexity of finite-width corrections motivates a shift in perspective. 
 Instead of a direct, intractable analysis of the NTK's eigenvector statistics, we turn to the universal framework of \textbf{Random Matrix Theory (RMT)}. We model the NTK, $\textcolor{kernelcolor}{\Theta} = \frac{1}{\textcolor{blue!80!black}{m}}JJ^T$, as a sample covariance matrix whose entries are random at initialization. For unstructured data, RMT predicts its eigenvalue spectrum converges to the \textbf{Marchenko-Pastur (MP) law}, forming a continuous "bulk" that represents the network's intrinsic structural noise.
@@ -3367,7 +3367,7 @@ This eliminates all \textbf{second-order terms} that plague general activation f
 \subsection{Personal Contribution: Gaussian Orthogonal Ensemble Connection}
 
 \begin{tcolorbox}[colback=sobolevcolor!15,colframe=sobolevcolor!80!black,title={\textbf{Breakthrough : Gaussian Orthogonal Ensemble Connection}},enhanced,drop shadow]
-The \textbf{finite-width corrections} exhibit universal statistical properties of the Gaussian Orthogonal Ensemble. We demonstrate that eigenvalue statistics of matrices derived from $\textcolor{k3color}{K^{(3)}}$ and $\textcolor{k2color}{K^{(2)}}$ eigenvalues exhibit Wigner-Dyson spacing statistics, confirming the Wigner-Dyson-Mehta conjecture for neural tangent kernels.
+The \textbf{finite-width corrections} exhibit universal statistical properties of the Gaussian Orthogonal Ensemble. We demonstrate that eigenvalue statistics of matrices derived from $\textcolor{k3color}{K^{(3)}}$ and $\textcolor{k2color}{K^{(2)}}$ eigenvalues exhibit Wigner-Dyson spacing statistics, confirming the Wigner-Dyson-Mehta conjecture for NTKs.
 
 \textbf{Ongoing research are testing the following conjectures (in collaboration with []~\ref{baskerville2024ntk})}:
 \begin{itemize}
@@ -3427,7 +3427,8 @@ We provide a rigorous mathematical foundation for analyzing finite-width correct
 
 \subsection{Personal Contribution: Conjectures and Numerical Validation}
 
-We formulate and numerically validate several \textbf{groundbreaking conjectures} regarding the structure of the Neural Tangent Hierarchy:
+We formulate and numerically validate several \textbf{groundbreaking conjectures} regarding the structure of the Neural Tangent Hierarch
+y:
 
 \begin{tcolorbox}[colback=kernelcolor!10,colframe=kernelcolor!60!black,title={\textbf{Conjecture: Mean GOE Structure for NTH Corrections}},enhanced,drop shadow]
 Based on extensive numerical experiments, we conjecture that the finite-width corrections $\textcolor{k3color}{K^{(3)}}$ and $\textcolor{kernelcolor}{K^{(4)}}$ can be characterized through \textbf{mean field theory} over the Gaussian Orthogonal Ensemble:
@@ -3491,7 +3492,7 @@ M^* \propto N^{\frac{1}{0.599}} \approx N^{1.67}
 
 \textbf{Comparison with NTK Regime}: This scaling is notably different from the classical NTK regime, where optimal width typically scales as $M^* \propto N^{2}$ for fixed computational budget. Our finite-width correction analysis reveals a \textit{superlinear} scaling that bridges the gap between the infinite-width limit and practical finite networks. The exponent $1.67$ suggests that larger datasets benefit disproportionately from increased width, reflecting the enhanced capacity needed to capture complex feature interactions beyond the linearized NTK approximation.
 \end{tcolorbox}
-These empirical results validate our theoretical framework. The first confirms the scaling laws predicted by our hierarchical analysis of the neural tangent kernel, showing that finite-width corrections follow the expected theoretical behavior. The minimal dependence on input dimension ($D_{\text{in}}^{0.028}$) is remarkable because it suggests that our approach remains applicable in very high-dimensional contexts.
+These empirical results validate our theoretical framework. The first confirms the scaling laws predicted by our hierarchical analysis of the NTK, showing that finite-width corrections follow the expected theoretical behavior. The minimal dependence on input dimension ($D_{\text{in}}^{0.028}$) is remarkable because it suggests that our approach remains applicable in very high-dimensional contexts.
 
 The second result provides a practical optimal formula for computational resource allocation. Using our empirical exponent $\alpha = 1.099$, we obtain concrete recommendations on the optimal balance between network depth and width. This formula allows practitioners to determine the optimal architecture for a fixed parameter budget and dataset size. The discovered superlinear scaling with dataset size represents a significant departure from classical NTK predictions and provides new insights into the finite-width regime.
 
@@ -3507,7 +3508,7 @@ These empirical contributions strengthen the validity of our theoretical framewo
 \newpage
 \section{Limitations, Future Work and Open Questions}
 
-Our investigation into the scaling laws and spectral properties of the Neural Tangent Kernel has yielded significant insights, but it also presents several limitations that define clear directions for future research. The discovery of GOE statistics, in particular, provides a new lens through which to analyze feature learning and generalization in deep networks, opening up numerous promising avenues for exploration.
+Our investigation into the scaling laws and spectral properties of the NTK has yielded significant insights, but it also presents several limitations that define clear directions for future research. The discovery of GOE statistics, in particular, provides a new lens through which to analyze feature learning and generalization in deep networks, opening up numerous promising avenues for exploration.
 
 \subsection{Current Limitations}
 
@@ -3559,7 +3560,7 @@ develop a more rigorous analysis of the optimization landscape, building on the 
 
 \section{Conclusion}
 
-This study has established the theoretical framework of the Neural Tangent Kernel hierarchy for analyzing the training dynamics of finite-width neural networks. We focused on the first-order correction kernel, $\textcolor{k3color}{K^{(3)}}$, which governs the time evolution of the standard NTK, $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$.
+This study has established the theoretical framework of the NTK hierarchy for analyzing the training dynamics of finite-width neural networks. We focused on the first-order correction kernel, $\textcolor{k3color}{K^{(3)}}$, which governs the time evolution of the standard NTK, $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$.
 
 Our primary personal contributions are:
 
@@ -4129,7 +4130,7 @@ The random variables $(\rho_1, \|x_1\|^2, \|y_1\|^2)$ follow exact distributions
 
 \subsection{Complete Derivation of the Third-Order Kernel}\label{sec:appendix_k3_derivation}
 
-In the framework of the Neural Tangent Hierarchy (NTH), the kernel $\textcolor{k3color}{K^{(3)}}$ arises as the operator governing the time evolution of the Neural Tangent Kernel $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$. Here we present the complete mathematical derivation.
+In the framework of the Neural Tangent Hierarchy (NTH), the kernel $\textcolor{k3color}{K^{(3)}}$ arises as the operator governing the time evolution of the NTK $\textcolor{kernelcolor}{\textcolor{kernelcolor}{K}^{(2)}}$. Here we present the complete mathematical derivation.
 
 
 
@@ -4418,7 +4419,8 @@ For typical architectures where $H \ll \sqrt{\m}$, the dominant term is the one 
     \textcolor{k3color}{K^{(3)}}_{\alpha\beta\gamma} \sim \mathcal{O}\left(\frac{L^2}{\sqrt{\m}}\right)
 \end{equation}
 
-The complete mathematical analysis with detailed bounds for each component is provided in \hyperref[sec:appendix_scaling_analysis]{Appendix B.5}.
+The bound is not tight, but it is a good approximation for large $L$ and $m$ and we know it through our experiments.
+In fact this is $1/m$ due to mean zero correlations decaying as in []~\ref{dyer2019asymptotics}
 
 
 
@@ -4563,17 +4565,17 @@ This is precisely the action of the Hessian operator of $L = \textcolor{kernelco
 \addcontentsline{toc}{section}{References}
 \begin{thebibliography}{99}
 
-\subsection*{Neural Tangent Kernel Theory}
+\subsection*{NTK Theory}
 
 \bibitem{jacot2018ntk}\label{jacot2018ntk}
 Arthur Jacot, Franck Gabriel, and Clément Hongler.
-Neural tangent kernel: Convergence and generalization in neural networks.
+NTK: Convergence and generalization in neural networks.
 In \textit{Advances in Neural Information Processing Systems}, 2018.
 URL: \url{https://papers.nips.cc/paper/2018/hash/5a4be1fa34e62bb8a6ec6b91d2462f5a-Abstract.html}.
 
 \bibitem{golikov2022ntk_survey}\label{golikov2022ntk_survey}
 Evgeniy Golikov et al.
-Neural tangent kernel: A survey.
+NTK: A survey.
 \textit{arXiv preprint arXiv:2208.13614}, 2022.
 URL: \href{https://arxiv.org/abs/2208.13614}{\url{https://arxiv.org/abs/2208.13614}}.
 
@@ -4585,7 +4587,7 @@ URL: \url{https://arxiv.org/abs/2009.14397}.
 
 \bibitem{lee2022ntk}\label{lee2022ntk}
 Jongmin Lee, Joo Young Choi, Ernest K. Ryu, and Albert No.
-Neural tangent kernel analysis of deep narrow neural networks.
+NTK analysis of deep narrow neural networks.
 In \textit{Proceedings of the 39th International Conference on Machine Learning},
 volume 162 of \textit{Proceedings of Machine Learning Research}, pages 12282--12351, 2022.
 Editors: Kamalika Chaudhuri, Stefanie Jegelka, Le Song, Csaba Szepesvari, Gang Niu, Sivan Sabato.
@@ -4607,15 +4609,15 @@ URL: \url{https://arxiv.org/abs/2501.14724}.
 
 \bibitem{yu2025divergenceempiricalneuraltangent}\label{yu2025divergenceempiricalneuraltangent}
 Zixiong Yu, Songtao Tian, and Guhan Chen.
-Divergence of Empirical Neural Tangent Kernel in Classification Problems.
+Divergence of Empirical NTK in Classification Problems.
 \textit{arXiv preprint arXiv:2504.11130}, 2025.
 URL: \href{https://arxiv.org/abs/2504.11130}{\url{https://arxiv.org/abs/2504.11130}}.
 
 \bibitem{takeuchi2025neuraltangentkernelsfisher}\label{takeuchi2025neuraltangentkernelsfisher}
 Jun'ichi Takeuchi, Yoshinari Takeishi, Noboru Murata, Kazushi Mimura, Ka Long Keith Ho, and Hiroshi Nagaoka.
-Neural Tangent Kernels and Fisher Information Matrices for Simple ReLU Networks with Random Hidden Weights.
+NTKs and Fisher Information Matrices for Simple ReLU Networks with Random Hidden Weights.
 \textit{arXiv preprint arXiv:2507.18555}, 2025.
-Analysis of neural tangent kernels and Fisher information matrices for ReLU networks with random hidden weights.
+Analysis of NTKs and Fisher information matrices for ReLU networks with random hidden weights.
 URL: \href{https://arxiv.org/abs/2507.18555}{\url{https://arxiv.org/abs/2507.18555}}.
 
 \subsection*{Finite-Width Corrections and Neural Tangent Hierarchy}
@@ -4629,21 +4631,21 @@ URL: \href{https://arxiv.org/abs/1909.08156}{\url{https://arxiv.org/abs/1909.081
 
 \bibitem{hanin_nica_2019}\label{hanin_nica_2019}
 Boris Hanin and Mihai Nica.
-Finite depth and width corrections to the neural tangent kernel.
+Finite depth and width corrections to the NTK.
 In \textit{International Conference on Learning Representations (ICLR)}, 2020.
 Analyzes mean and variance of NTK at finite depth and width; exponential fluctuations.
 URL: \url{https://openreview.net/forum?id=ryeFFkrlh4}.
 
 \bibitem{seleznova2022ntk_beyond}\label{seleznova2022ntk_beyond}
 Mariia Seleznova and Gitta Kutyniok.
-Neural tangent kernel beyond the infinite-width limit: Effects of depth and initialization.
+NTK beyond the infinite-width limit: Effects of depth and initialization.
 In \textit{Proceedings of the 39th International Conference on Machine Learning},
 volume 162 of \textit{Proceedings of Machine Learning Research}, pages 19522--19560, 2022.
 URL: \url{https://proceedings.mlr.press/v162/seleznova22a.html}.
 
 \bibitem{seleznova_kutyniok_2022}\label{seleznova_kutyniok_2022}
 Mariia Seleznova and Gitta Kutyniok.
-Neural tangent kernel beyond the infinite-width limit: Effects of depth and initialization.
+NTK beyond the infinite-width limit: Effects of depth and initialization.
 \textit{arXiv preprint arXiv:2202.00553}, 2022.
 Studies NTK variability depending on depth-to-width ratio and initialization phases.
 URL: \href{https://arxiv.org/abs/2202.00553}{\url{https://arxiv.org/abs/2202.00553}}.
@@ -4666,19 +4668,19 @@ URL: \url{https://arxiv.org/abs/1910.02875}.
 
 \bibitem{fan2020spectra}\label{fan2020spectra}
 Zhou Fan and Zhichao Wang.
-Spectra of the conjugate kernel and neural tangent kernel for linear-width neural networks.
+Spectra of the conjugate kernel and NTK for linear-width neural networks.
 \textit{arXiv preprint arXiv:2005.11879}, 2020.
 URL: \href{https://arxiv.org/abs/2005.11879}{\url{https://arxiv.org/abs/2005.11879}}.
 
 \bibitem{bach2021ntk_eigenvalues}\label{bach2021ntk_eigenvalues}
 Francis Bach.
-On the eigenvalues of the gram matrix of a neural tangent kernel.
+On the eigenvalues of the gram matrix of a NTK.
 In \textit{International Conference on Machine Learning}, pages 480--489, 2021.
-Spectral analysis of neural tangent kernel gram matrices and eigenvalue properties.
+Spectral analysis of NTK gram matrices and eigenvalue properties.
 
 \bibitem{nguyen2022ntk_eigenvalues}\label{nguyen2022ntk_eigenvalues}
 Quynh Nguyen, Marco Mondelli, and Guido Montufar.
-Tight bounds on the smallest eigenvalue of the neural tangent kernel for deep relu networks.
+Tight bounds on the smallest eigenvalue of the NTK for deep relu networks.
 \textit{arXiv preprint arXiv:2012.11654}, 2022.
 URL: \href{https://arxiv.org/abs/2012.11654}{\url{https://arxiv.org/abs/2012.11654}}.
 
@@ -4782,7 +4784,7 @@ URL: \href{https://arxiv.org/abs/2403.11420}{\url{https://arxiv.org/abs/2403.114
 
 \bibitem{guillen_misof_gerken_2025}\label{guillen_misof_gerken_2025}
 Max Guillen, Philipp Misof, and Jan E. Gerken.
-Finite-width neural tangent kernels from feynman diagrams.
+Finite-width NTKs from feynman diagrams.
 \textit{arXiv preprint arXiv:2508.11522}, 2025.
 Introduces feynman diagram framework for finite-width NTK corrections.
 URL: \href{https://arxiv.org/abs/2508.11522}{\url{https://arxiv.org/abs/2508.11522}}.
