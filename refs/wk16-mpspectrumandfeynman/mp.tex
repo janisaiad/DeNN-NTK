@@ -1,0 +1,151 @@
+\documentclass[10pt]{beamer}
+\usetheme{Antibes}
+\usecolortheme{dolphin}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb, amsfonts}
+
+\title{Spectral Analysis of the Neural Tangent Kernel}
+\subtitle{Review of: \textit{Eigenvalue Distribution of the NTK in the Quadratic Scaling} (Benigni \& Paquette, 2025)}
+\author{Janis AIAD}
+\institute{UMD}
+\date{\today}
+
+\begin{document}
+
+% --- SLIDE 1: Title ---
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% --- SLIDE 2: The Object of Study: NTK Dynamics ---
+\begin{frame}
+    \frametitle{The Object of Study: NTK Dynamics}
+    \begin{block}{Gradient Flow Dynamics}
+        \begin{equation*}
+            \frac{d\hat{y}_t}{dt} = - \nabla_\theta \hat{y}(X, \theta_t)^\top \nabla_\theta \hat{y}(X, \theta_t) (\hat{y}_t - y) = -K^{\text{NTK}}(\theta_t) (\hat{y}_t - y)
+        \end{equation*}
+    \end{block}
+    \vspace{1cm}
+    \begin{alertblock}{Key Insight}
+    The NTK spectrum governs the eigenspeeds of learning, defining the functional modes acquired during training.
+    \end{alertblock}
+\end{frame}
+
+% --- SLIDE 3: Model Formulation ---
+\begin{frame}
+    \frametitle{Model Formulation}
+    \begin{block}{2-Layer NTK at Initialization}
+        \begin{equation*}
+            K^{\text{NTK}} = \frac{1}{d} XX^\top + \frac{1}{p} (XX^\top) \circ \left( \phi\left(\frac{XW}{\sqrt{d}}\right) D^2 \phi\left(\frac{XW}{\sqrt{d}}\right)^\top \right)
+        \end{equation*}
+    \end{block}
+    \begin{exampleblock}{Quadratic Scaling Regime (Assumption 2.1)}
+        \begin{equation*}
+            \frac{n}{d} \to \gamma_1 > 0 \quad \text{and} \quad \frac{d}{p} \to \gamma_2 > 0
+        \end{equation*}
+    \end{exampleblock}
+    \begin{alertblock}{Key Insight}
+    This scaling regime moves beyond the lazy-training limit, ensuring the non-linear term contributes non-trivially to the spectrum.
+    \end{alertblock}
+\end{frame}
+
+% --- SLIDE 4: Main Result: The Limiting Spectral Distribution ---
+\begin{frame}
+    \frametitle{Main Result: The Limiting Spectral Distribution}
+    \begin{theorem}[Thm. 2.7]
+        The Empirical Spectral Distribution $L_{K^{\text{NTK}}}$ converges weakly to $\mu$, characterized by:
+        \begin{equation*}
+            \mu = \mu_{\text{mp}}^{\gamma_1} \boxtimes \mu_{\nu, \phi}
+        \end{equation*}
+    \end{theorem}
+    \begin{block}{Stieltjes Transform of the Marchenko-Pastur Map (Def. 2.5)}
+        For a measure $\nu$ and its Stieltjes transform $s_\nu(z)$, the transform $s(z)$ of $\mu_{\text{mp}}^\gamma \boxtimes \nu$ solves:
+        \begin{equation*}
+            s(z) = s_\nu\left(z - \gamma \int \frac{t}{1+ts(z)} d\mu_{\text{mp}}(t) \right)
+        \end{equation*}
+    \end{block}
+    \begin{alertblock}{Key Insight}
+    The NTK spectrum is a free multiplicative convolution of the data's Gram matrix spectrum and a novel law induced by the non-linear features.
+    \end{alertblock}
+\end{frame}
+
+% --- SLIDE 5: Proof Strategy I: Decoupling via Chaos Expansion ---
+\begin{frame}
+    \frametitle{Proof Strategy I: Decoupling via Chaos Expansion}
+    \begin{block}{Wiener-Hermite Chaos Expansion of $\phi$}
+        \begin{equation*}
+            \phi(x) = \mathbb{E}_{z \sim \mathcal{N}}[\phi(z)] + \alpha_\phi x + \psi(x) \quad \text{where } \alpha_\phi := \mathbb{E}[z\phi(z)]
+        \end{equation*}
+    \end{block}
+    \begin{exampleblock}{Key Decoupling Step (Prop. 3.1)}
+        Let $\tilde{K}$ be the kernel where $\psi(XW/\sqrt{d})$ is replaced by an independent noise field $\tilde{\psi}(\tilde{X})$. Then for $z \in \mathbb{C}^+$,
+        \begin{equation*}
+            \left| \frac{1}{n}\text{Tr}(K-zI)^{-1} - \frac{1}{n}\text{Tr}(\tilde{K}-zI)^{-1} \right| \xrightarrow[n\to\infty]{P} 0
+        \end{equation*}
+    \end{exampleblock}
+    \begin{alertblock}{Key Insight}
+    The global spectrum is sensitive only to the linear projection of the non-linearity; higher-order terms can be replaced by independent noise.
+    \end{alertblock}
+\end{frame}
+
+% --- SLIDE 6: Proof Strategy II: RMT on the Covariance Tensor ---
+\begin{frame}
+    \frametitle{Proof Strategy II: RMT on the Covariance Tensor}
+    \begin{block}{Analysis via Bai-Zhou Resolvent Method}
+    The problem reduces to finding the spectrum of a conditional covariance tensor $Q$, given $W$ and $D$.
+    \end{block}
+    \begin{exampleblock}{Structure of the Limiting Covariance Tensor (Sec. 5)}
+        \begin{equation*}
+            Q = \frac{\alpha_\phi^2}{d} \left( \tau_{23}(\text{Id}_d \otimes W^\top W D) + \tau_{24}(WD \otimes WD) \right) + \beta_\phi^2 \tau_{23}(\text{Id}_d \otimes D^2)
+        \end{equation*}
+    \end{exampleblock}
+    \begin{alertblock}{Key Insight}
+    The problem is mapped from the NTK's spectrum to the spectrum of a deterministic operator constructed from the random weight matrices.
+    \end{alertblock}
+\end{frame}
+
+% --- SLIDE 7: Proof Strategy III: Spectrum of the Operator Q ---
+\begin{frame}
+    \frametitle{Proof Strategy III: Spectrum of the Operator Q}
+    \begin{block}{Spectrum of Q (Lemma 5.4)}
+        The asymptotic eigenvalue distribution of the operator $Q$ is given by $\text{Law}(\frac{\alpha_\phi^2}{d}\chi + \beta_\phi^2)$, where the law of $\chi$ is:
+        \begin{equation*}
+            \text{Law}(\chi) = \frac{\gamma_2}{2}(\mu_{\text{mp}}^{\gamma_2} * \mu_{\text{mp}}^{\gamma_2}) + (1-\gamma_2)\mu_{\text{mp}}^{\gamma_2} + \frac{\gamma_2}{2}\delta_0
+        \end{equation*}
+    \end{block}
+    \begin{exampleblock}{Origin of MP Law (Thm. 5.2)}
+    The squared singular values of $W \in \mathbb{R}^{d \times p}$ converge to $\mu_{\text{mp}}^{\gamma_2}$.
+    \end{exampleblock}
+    \begin{alertblock}{Key Insight}
+    The foundational Marchenko-Pastur law from the weight matrix $W$ propagates through the analysis, forming the building block of the final spectrum.
+    \end{alertblock}
+\end{frame}
+
+% --- SLIDE 8: Discussion: Open Problems & Future Directions ---
+\begin{frame}
+    \frametitle{Discussion: Open Problems & Future Directions}
+    \begin{itemize}
+        \item \textbf{The Spectral Edge (Mini-Bulk):} The analysis covers the bulk density. What is the universality class of the largest eigenvalues which dictate initial learning?
+        \vspace{0.5cm}
+        \item \textbf{Finite-Width Corrections:} This is the leading-order term in a $1/d$ expansion. Computing the tensor-valued finite-width corrections is a major open problem.
+        \vspace{0.5cm}
+        \item \textbf{Scaling with Depth:} How does this spectral structure evolve in deep networks? This requires connecting with distinct RMT formalisms like those of Terjek et al.
+        \vspace{0.5cm}
+        \item \textbf{Structured Data:} The concentration assumption on $X$ precludes data on low-dimensional manifolds. How does data geometry impact the NTK spectrum?
+    \end{itemize}
+    \begin{alertblock}{Key Insight}
+    This work provides a foundational result upon which more complex, practical, and finite models can be analyzed.
+    \end{alertblock}
+\end{frame}
+
+% --- SLIDE 9: Conclusion ---
+\begin{frame}
+    \frametitle{Conclusion}
+    \begin{center}
+        \vspace{1.5cm}
+        \Huge Thank You
+    \end{center}
+\end{frame}
+
+\end{document}
