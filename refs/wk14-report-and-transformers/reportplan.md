@@ -209,3 +209,18 @@ lister tous les gens avec qui j'ai collaboré
 
 recontacter terjek
 pris en maturité sur comment gérer de la biblio
+
+presenter le papier feynamal dire c'est quoi ces conneries de tenseurs
+
+la grande lecon c'est qu'il faut tout lire, vraiment tout, la revue la plus grande possible
+faire le listing de totutes les personnes et contact, et les contacter
+le probleme majeur c'est le temps, et savoir ou trouver le probleme le plus triaivial à resoudr een  1er
+choisir à chaque fois le projet pour les resultats
+faire
+
+maybe weyl is not tigh 
+linear width in transformers
+relation de recurrence dans misof et etre sur de son exposant
+
+omg le nouvel article
+à la fin analyse directe de muon et adam
