@@ -2,7 +2,16 @@
 \usepackage{amsmath,amssymb,amsthm,mathtools}
 \usepackage{xcolor}
 \usepackage{tikz}
+
+\DeclareRobustCommand{\ReLU}{\mathrel{\text{%
+\begin{tikzpicture}[baseline=(current bounding box.south)]
+    \draw[thick] (0,0) -- (0.25,0) -- (0.4,0.25);
+\end{tikzpicture}}}\!\!}
+
+
+
 \usetikzlibrary{positioning,shadows}
+\usetheme{Madrid}
 
 % Définition des couleurs
 \definecolor{kernelcolor}{RGB}{220,20,60}
@@ -12,7 +21,7 @@
 
 % Commandes personnalisées
 \newcommand{\E}{\mathbb{E}}
-\newcommand{\ReLU}{\text{ReLU}}
+
 \newcommand{\K}{\textcolor{kernelcolor}{K}}
 \newcommand{\NTK}{\textcolor{kernelcolor}{\mathbf{K}}}
 \newcommand{\Ps}{\textcolor{sobolevcolor}{P_s}}
@@ -23,6 +32,41 @@
 \date{}
 
 \begin{document}
+
+
+\begin{frame}
+\frametitle{Plan de la Présentation}
+
+\begin{enumerate}
+    \item \textbf{Introduction}
+    \item \textbf{Sobolev training}
+    \begin{itemize}
+        \item Énoncé du problème
+        \item Résultats et intuition pour les praticiens
+    \end{itemize}
+    
+    \vspace{0.3cm}
+    
+    \item \textbf{Préconditionnement \& NTK/NTH}
+    \begin{itemize}
+        \item Pourquoi les MMNNs \& Transformers
+        \item Éléments comparatifs
+        \item Spécificités \& résultats        
+    \end{itemize}
+    
+    \vspace{0.3cm}
+    
+    \item \textbf{Largeur Finie \& RMT}
+    \begin{itemize}
+        \item NTH pour réseau fini
+        \item Intuition et découvertes
+        \item Vers où et avec qui aller ensuite ?
+    \end{itemize}
+\end{enumerate}
+
+\end{frame}
+
+
 
 % Slide 1: Titre
 \begin{frame}
@@ -64,21 +108,6 @@ Analyses locales $\rightarrow$ globales
 \end{center}
 \end{frame}
 
-% Slide 4: Résultats de Terjek
-\begin{frame}{Résultats Théoriques}
-\textbf{Si beaucoup de points:} contraindre l'espace modèle
-
-$$s \uparrow \Rightarrow \text{régularisation optimale}$$
-
-\vspace{0.5cm}
-
-Information de \textit{smoothness} dans les données\\
-$\Rightarrow$ éviter directions inutiles de l'espace paramètres
-
-\vspace{0.5cm}
-
-\textbf{Contribution:} bornes explicites avec Haizhao Yang
-\end{frame}
 
 % Slide 5: Espace de Sobolev
 \begin{frame}{Norme de Sobolev}
@@ -95,18 +124,48 @@ $\Rightarrow$ éviter directions inutiles de l'espace paramètres
 
 % Slide 6: Fonctions de perte
 \begin{frame}{Loss Functions}
-\textbf{MSE standard:}
-$$\mathcal{L}_{\text{MSE}}(f) = \sum_{i=1}^{n} |f(x_i) - y_i|^2$$
 
 \textbf{Sobolev augmenté (PINNs):}
 $$\mathcal{L}_{\text{deriv}}(f) = \sum_{i=1}^{n} \left(|f(x_i) - y_i|^2 + \sum_{p=1}^s |D^p f(x_i) - D^p y_i|^2\right)$$
+
+
+\textbf{Regression standard:}
+$$\mathcal{L}_{\text{MSE}}(f) = \sum_{i=1}^{n} |f(x_i) - y_i|^2$$
+Analyse en fourier pertinente si assez de données sur sphere ($l_{max} \sim N^d$)
 \end{frame}
+
+
+
+% Slide 4: Résultats de Terjek
+\begin{frame}{Résultats Théoriques}
+    \textbf{Si beaucoup de points:} contraindre l'espace modèle
+    
+    $$\mu_\ell = \frac{\ell^s}{n}$$
+    
+    \vspace{0.5cm}
+    
+    Information de \textit{smoothness} dans les données\\
+    $\Rightarrow$ éviter directions inutiles de l'espace paramètres
+    
+    \vspace{0.5cm}
+    
+    \textbf{Contribution:} bornes explicites avec Haizhao Yang, \\
+    Futur borne pour toute distribution sur $\mathbb{S}^{d-1}$
+\end{frame}
+
+
 
 % Slide 7: Préconditionnement - MMNN
 \begin{frame}{MMNN : Multi-Component Networks}
-\textbf{Architecture:} matrice milieu low-rank
 
-\vspace{0.5cm}
+%figure landscape mmnn
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{figures/landscape_mmnn.png}
+\caption{Landscape MMNN}
+\end{figure}
+
+
 
 Réduction paramétrique \\
 $\mathcal{O}(n^2)$ vs $\mathcal{O}(n^4)$ pour FCNN
@@ -114,12 +173,21 @@ $\mathcal{O}(n^2)$ vs $\mathcal{O}(n^4)$ pour FCNN
 \vspace{0.5cm}
 
 \textbf{Interprétation fréquentielle:}\\
-Apprentissage de la transformée en ondelettes\\
+Apprentissage de la transformée en ondelettes sur RBF\\
 Performance optimale: ondelettes sparses
 \end{frame}
 
 % Slide 8: NTK pour MMNN
-\begin{frame}{NTK Definition}
+\begin{frame}{NTK for MMNN}
+
+    \textbf{Architecture:} matrice milieu low-rank, train A seulement
+
+\begin{equation}
+    \bm{h}^{(\ell)}(\bm{x}) = \frac{\sigma_A}{\sqrt{n_\ell}} \sum_{j=1}^{n_\ell} \bm{A}_j^{(\ell)} \ReLU\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)}\right) + \sigma_c \bm{c}^{(\ell)}
+\end{equation}
+
+
+
 \begin{equation}
 \NTK^{L}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}} \right\rangle
 \end{equation}
@@ -128,7 +196,7 @@ Performance optimale: ondelettes sparses
 
 \textbf{Deux méthodes de calcul:}\\
 1) TCL naïf (relation de récurrence)\\
-2) Théorème d'Adler (random field)
+2) Théorème d'Adler: $\textcolor{red}{\Theta_{ab}(x, x')} = \frac{\partial^2}{\partial \theta \partial \theta'} \boldsymbol{K_{ab}^{\text{NNGP}}(x, x')}$
 \end{frame}
 
 % Slide 9: Formule récursive
@@ -141,7 +209,6 @@ Performance optimale: ondelettes sparses
 \varrho(\rho) = \sigma_W^2 \int \ReLU(u_1) \ReLU(u_2) d\mathcal{N}\left( [u_1,u_2] \left| 0,\left[ \begin{smallmatrix} 1 & \rho \\ \rho & 1 \end{smallmatrix} \right] \right. \right)
 \end{equation}
 \end{frame}
-
 % Slide 10: Random field gaussien
 \begin{frame}{Deep Gaussian Process}
 \textbf{Structure du random field:}\\
@@ -152,7 +219,16 @@ Deep Gaussian = concaténation supportable
 Intégrales et opérateurs de convolution\\
 Analyse point fixe possible
 
-\vspace{0.5cm}
+\vspace{0.3cm}
+
+\textbf{Formule de récursion MMNN:}
+\begin{equation}
+\boxed{
+\Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \left(\sigma_A^2\dot{\Sigma}^{(\ell)}(x, x')\right) + \sigma_A^2 \Sigma^{(\ell)}(x, x') + 1
+}
+\end{equation}
+
+\vspace{0.3cm}
 
 \textbf{Validation:} prédictions théoriques vs pratique\\
 Loss finale, courbures, comportement training
@@ -164,19 +240,56 @@ Loss finale, courbures, comportement training
 
 $$\K_t = \K^{(0)} + \frac{1}{m}\K^{(1)}_t + \frac{1}{m^2}\K^{(2)}_t + \ldots$$
 
-\textbf{NTK Hierarchy:} tenseurs d'ordre $n$\\
-$\Rightarrow$ corrélations d'ordre $2n$
+\textbf{Tenseur typique de largeur finie:}
+\begin{equation}
+T_{ijkl} = \frac{1}{m^2} \sum_{a=1}^m \frac{\partial^2 f_i}{\partial w_a^2} \frac{\partial^2 f_j}{\partial w_a^2} \frac{\partial f_k}{\partial w_a} \frac{\partial f_l}{\partial w_a}
+\end{equation}
 
-\vspace{0.5cm}
+\vspace{0.3cm}
 
-\textbf{Physique:} diagrammes de Feynman\\
-Théorème de Wick
+\textbf{Décomposition de Wick:}
+\begin{align}
+\mathbb{E}[X_1 X_2 X_3 X_4] &= \mathbb{E}[X_1 X_2]\mathbb{E}[X_3 X_4] \\
+&+ \mathbb{E}[X_1 X_3]\mathbb{E}[X_2 X_4] \\
+&+ \mathbb{E}[X_1 X_4]\mathbb{E}[X_2 X_3]
+\end{align}
+
+\vspace{0.3cm}
+
+\textbf{Physique:} diagrammes de Feynman connectés\\
+Corrélations d'ordre $2n \sim \frac{1}{m^{n/2}}$
 \end{frame}
-
 % Slide 12: Tenseurs d'ordre 3 et 4
 \begin{frame}{Tenseurs d'Ordre Supérieur}
 \textbf{Scaling avec la largeur:}
-$$\text{Corrélations d'ordre } 2n \sim \frac{1}{m^{n/2}}$$
+
+
+
+
+\textbf{Tenseur d'ordre 3:} $\textcolor{k3color}{K^{(3)}}$\\
+Formulation simple obtenue
+
+\textbf{Tenseur d'ordre 4:} complexité exponentielle\\
+$\Rightarrow$ approche numérique
+
+\vspace{0.3cm}
+
+\textbf{Cumulants joints:}
+\small{
+\begin{align*}
+\mathbb{E}^c[X_1, X_2, X_3] = \mathbb{E}[X_1 X_2 X_3] &- \mathbb{E}[X_1 X_2]\mathbb{E}[X_3] - \mathbb{E}[X_1 X_3]\mathbb{E}[X_2] \\
+&- \mathbb{E}[X_2 X_3]\mathbb{E}[X_1] + 2\mathbb{E}[X_1]\mathbb{E}[X_2]\mathbb{E}[X_3]
+\end{align*}
+}
+
+\vspace{0.2cm}
+
+\textbf{Décomposition NTK-préactivation:}
+\small{
+\begin{equation*}
+\mathbb{E}^c[z_{i_1}^{(\ell+1)}, z_{i_2}^{(\ell+1)}, \Delta\Theta_{i_3 i_4}^{(\ell+1)}] = \frac{1}{n_\ell} \left( D_{1234}^{(\ell+1)} \delta_{i_1 i_2}\delta_{i_3 i_4} + F_{1324}^{(\ell+1)} \delta_{i_1 i_3}\delta_{i_2 i_4} + \dots \right)
+\end{equation*}
+}
 
 \vspace{0.5cm}
 
@@ -184,19 +297,28 @@ $$\text{Corrélations d'ordre } 2n \sim \frac{1}{m^{n/2}}$$
 Formulation simple obtenue
 
 \textbf{Tenseur d'ordre 4:} complexité exponentielle\\
-$\Rightarrow$ approche numérique
+$\Rightarrow$ approche numérique + apport d'une méthode autodiff JAX en $m²$
 \end{frame}
 
 % Slide 13: Approche spectrale
 \begin{frame}{Découverte Spectrale}
 \textbf{Décomposition sur valeurs propres NTK}
 
-$$\text{Formule } \sim \text{ moyenne dans un bulk}$$
+\begin{equation}
+\textcolor{blue!80!black}{\Theta^{(1)}_\infty(\vec{x})} = -\sum_{i=1}^N \frac{1}{\textcolor{kernelcolor}{\lambda_{i}}}(\textcolor{orange!80!black}{\mathbf{O}_{3}}(\vec{x};0)\cdot\hat{e}_{i})(\Delta f_{0}\cdot\hat{e}_{i}) + \sum_{i,j=1}^N\frac{1}{\textcolor{kernelcolor}{\lambda_{i}}(\textcolor{kernelcolor}{\lambda_{i}}+\textcolor{kernelcolor}{\lambda_{j}})}(\hat{e}_{i}^{T}\textcolor{orange!80!black}{\mathbf{O}_{4}}(\vec{x};0)\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})
+\end{equation}
+
+\vspace{0.3cm}
+
+\textbf{Scaling empirique observé:}
+\begin{equation}
+\mathbb{E}_{\hat{e}_i, \hat{e}_j}[(\hat{e}_{i}^{T}\textcolor{orange!80!black}{\mathbf{O}_{4}}\hat{e}_{j})(\Delta f_{0}\cdot \hat{e}_{i})(\Delta f_{0}\cdot \hat{e}_{j})] \sim \mathcal{O}\left(\frac{L^3}{N^3}\right)
+\end{equation}
 
 \vspace{0.5cm}
 
 \textbf{Conjecture:} distribution Marchenko-Pastur\\
-$\Rightarrow$ confirmée (papier Benigni)
+$\Rightarrow$ confirmée (L. Benigni et al 28/08/2025)
 
 \textbf{Hypothèse Wigner:} espacement des valeurs propres\\
 $\Rightarrow$ \textbf{validée!}
@@ -205,6 +327,13 @@ $\Rightarrow$ \textbf{validée!}
 % Slide 14: GOE Statistics
 \begin{frame}{Random Matrix Theory}
 \textbf{GOE Statistics:} répulsion des valeurs propres
+
+%on met la figure ici
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{figures/consecutive_spacing_ratio_dist_N64_D10_M20_L2.png}
+\caption{GOE Statistics}
+\end{figure}
 
 \vspace{0.5cm}
 
@@ -235,8 +364,17 @@ Système à l'équilibre, analogies verres
 
 % Slide 16: Collaboration actuelle
 \begin{frame}{Collaboration Actuelle}
-\textbf{Avec MG \& MIS:}\\
-Diagrammes de Feynman finite-width
+
+\vspace{0.3cm}
+
+\textbf{Collaborations spécifiques:}\\
+• M. Guillen \& P. Misof : développements feynmaniens finite-width\\
+• D. Terjek: bornes valeurs propres minimales, développement d'Hermite\\
+• L. Benigni: RMT scaling avec profondeur\\
+• H. Yang: transformers, S. Jun: MMNN\\
+• G. Ben Arous \& S. Péché: fondements RMT\\
+• Projets probabilistes futurs
+
 
 \vspace{0.5cm}
 
@@ -252,6 +390,11 @@ Analyse Adam \& Muon
 % Slide 17: Approche globale
 \begin{frame}{Vision Globale}
 \textbf{Communauté optimization:} NTK délaissé depuis 2022
+petit regain à l'origine du RoPE beta pour SOTA llms
+
+\begin{align}
+    \bm{h}^{(\ell)}(\bm{x}) = \frac{\sigma_A}{\sqrt{n_\ell}} \sum_{j=1}^{n_\ell} \bm{A}_j^{(\ell)} \ReLU\left(\bm{w}_j^{(\ell)\top} \bm{h}^{(\ell-1)}(\bm{x}) + \beta b_j^{(\ell)}\right) + \sigma_c \bm{c}^{(\ell)} \label{eq:ntk_rope_beta}
+\end{align}
 
 \vspace{0.5cm}
 
@@ -259,28 +402,32 @@ Analyse Adam \& Muon
 Coller analyses locales $\rightarrow$ globales
 
 NTK = cuvette locale + courbure\\
-$t \to \infty$ en finite width = point\\
-Itération $\rightarrow$ minimum global?
-\end{frame>
+\begin{align}
+    f(t) &= y + e^{-\textcolor{purple}{\Theta}_{0}t}\left(1-\int_{0}^{t}dt'e^{t'\textcolor{purple}{\Theta}_{0}}\textcolor{purple}{\Theta}^{(1)}(t')e^{-t'\textcolor{purple}{\Theta}_{0}}\right)\left(f_{0}-y\right) \label{eq:evolution_solution}
+    \end{align}
+$t \to \infty$ en finite width = point 1, puis 2 etc .. \\
+Itération $\rightarrow$ rapprocher du minimum global ?
+\end{frame}
 
 % Slide 18: Applications pratiques
 \begin{frame}{Applications Pratiques}
-\textbf{Scientific Machine Learning}
+\textbf{SciM}
 
-Points de Chebyshev $\rightarrow$ commutation exacte\\
-Bornes pratiques pour tailles raisonnables
+Points de Chebyshev $\rightarrow$ commutation et analyse exacte\\
+Bornes pratiques pour tailles et autres distributions raisonnables
 
 \vspace{0.5cm}
 
-\textbf{Objectif 1-2 ans:}\\
-Ouvrir librairie SciML\\
+\textbf{Objectif 1-2 ans:}\\ 
+Librairie SciML\\
 $\Rightarrow$ paramètres optimaux directs\\
-Fin du trial-and-error depth/width
+Fin du trial-and-error infini depth/width
 \end{frame}
 
 % Slide 19: Leçons et documentation
 \begin{frame}{Méthodologie}
-\textbf{Leçon:} trouver le problème le plus trivial
+\textbf{Leçon:} trouver le problème le plus trivial à résoudre, résultats rapides, 
+LIRE TOUTE LA LITTERATURE malgré le flot infini
 
 \vspace{0.5cm}
 
@@ -290,8 +437,7 @@ $>10$ collaborations actives
 
 \vspace{0.5cm}
 
-\textbf{Créativité > rythme prépa}\\
-Représentation mentale du problème
+\textbf{Créativité + Représentation mentale du problème}\\
 \end{frame}
 
 % Slide 20: Conclusion
@@ -301,16 +447,17 @@ Représentation mentale du problème
 
 \vspace{0.5cm}
 
-Bornes explicites valeurs propres NTK\\
-Théorie unifiée: FCNN, MMNN, Transformers\\
-Pont deep learning $\leftrightarrow$ physique mathématique
 
+Schémas numériques améliorés, résultats concrets en Sobolev training
+Théorie unifiée: FCNN, MMNN, Transformers\\
+Pont deep learning $\leftrightarrow$ physique mathématique = RMT
+But long terme : Bornes explicites valeurs propres NTK et SGD convergence\\
 \vspace{1cm}
 
 \textbf{Résultat pratique:}\\
 Guide pour choix optimal\\
 \textbf{Deeper or Wider}
-\end{center>
-\end{frame>
+\end{center}
+\end{frame}
 
-\end{document>
+\end{document}
