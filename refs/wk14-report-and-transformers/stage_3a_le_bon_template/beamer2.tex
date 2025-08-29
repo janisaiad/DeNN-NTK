@@ -116,22 +116,27 @@ Analyses locales $\rightarrow$ globales
 \|f\|_{L^s}^2 = \sum_{p=0}^s \int_{\Omega} |D^p f(x)|^2 dx
 \end{equation}
 
-\textbf{Norme Fourier:}
-\begin{equation}
-\|f\|_{L^s}^2 = \int_{\mathbb{R}^d} (1 + |\xi|^2)^s |\hat{f}(\xi)|^2 d\xi
-\end{equation}
-\end{frame}
-
-% Slide 6: Fonctions de perte
-\begin{frame}{Loss Functions}
 
 \textbf{Sobolev augmenté (PINNs):}
 $$\mathcal{L}_{\text{deriv}}(f) = \sum_{i=1}^{n} \left(|f(x_i) - y_i|^2 + \sum_{p=1}^s |D^p f(x_i) - D^p y_i|^2\right)$$
 
 
+
+\end{frame}
+
+% Slide 6: Fonctions de perte
+\begin{frame}{Loss Functions}
+
+
 \textbf{Regression standard:}
 $$\mathcal{L}_{\text{MSE}}(f) = \sum_{i=1}^{n} |f(x_i) - y_i|^2$$
 Analyse en fourier pertinente si assez de données sur sphere ($l_{max} \sim N^d$)
+
+\textbf{Norme Fourier:}
+\begin{equation}
+\|f\|_{L^s}^2 = \int_{\mathbb{R}^d} (1 + |\xi|^2)^s |\hat{f}(\xi)|^2 d\xi
+\end{equation}
+
 \end{frame}
 
 
@@ -189,7 +194,7 @@ Performance optimale: ondelettes sparses
 
 
 \begin{equation}
-\NTK^{L}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}} \right\rangle
+\NTK^{L}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta_A})}{\partial \boldsymbol{\theta_A}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta_A})}{\partial \boldsymbol{\theta_A}} \right\rangle
 \end{equation}
 
 \vspace{0.5cm}
@@ -197,27 +202,22 @@ Performance optimale: ondelettes sparses
 \textbf{Deux méthodes de calcul:}\\
 1) TCL naïf (relation de récurrence)\\
 2) Théorème d'Adler: $\textcolor{red}{\Theta_{ab}(x, x')} = \frac{\partial^2}{\partial \theta \partial \theta'} \boldsymbol{K_{ab}^{\text{NNGP}}(x, x')}$
+!! Aleatoire par nature car RBF !! mais std en $\frac{1}{r}$ donc conditionnement + concentration bounds
 \end{frame}
 
 % Slide 9: Formule récursive
-\begin{frame}{Formule Récursive}
-\begin{equation}
-\K_L^{\infty}(\mathbf{x},\mathbf{x}') = \|\mathbf{x}\| \|\mathbf{x}'\| \sum_{p=1}^{L} \varrho^{\circ (p-1)}\left( \rho_0(\mathbf{x},\mathbf{x}') \right)
-\end{equation}
 
-\begin{equation}
-\varrho(\rho) = \sigma_W^2 \int \ReLU(u_1) \ReLU(u_2) d\mathcal{N}\left( [u_1,u_2] \left| 0,\left[ \begin{smallmatrix} 1 & \rho \\ \rho & 1 \end{smallmatrix} \right] \right. \right)
-\end{equation}
-\end{frame}
+    
 % Slide 10: Random field gaussien
-\begin{frame}{Deep Gaussian Process}
-\textbf{Structure du random field:}\\
-Deep Gaussian = concaténation supportable
+\begin{frame}{Deep Gaussian Process et formule recursive}
+    \textbf{Structure du random field:}\\
+    Deep Gaussian = concaténation supportable
+
 
 \vspace{0.5cm}
 
-Intégrales et opérateurs de convolution\\
-Analyse point fixe possible
+Intégrales et opérateurs de convolution\ Analyse point fixe reportée pour L grand
+
 
 \vspace{0.3cm}
 
@@ -227,11 +227,17 @@ Analyse point fixe possible
 \Theta^{(\ell)}(x, x') = \Theta^{(\ell-1)}(x, x') \cdot \left(\sigma_A^2\dot{\Sigma}^{(\ell)}(x, x')\right) + \sigma_A^2 \Sigma^{(\ell)}(x, x') + 1
 }
 \end{equation}
+\end{frame}
 
-\vspace{0.3cm}
+\begin{frame}{2 Couches}
+\begin{equation}
+    \boxed{\textcolor{red}{\boldsymbol{\Theta}}^{(2)}(x,y) = \boldsymbol{\tilde{\Theta}}^{(2)}(\textcolor{magenta}{\rho}) = \textcolor{red}{\boldsymbol{\Theta}}^{(1)}(\textcolor{magenta}{\rho_1}) \cdot \left(1 - \frac{\arccos(\textcolor{magenta}{\rho_1})}{\pi}\right)\frac{2}{r} + \frac{2}{r}\textcolor{red}{\boldsymbol{\Sigma}}^{(1)}(\textcolor{magenta}{\rho_1})\|x_1\| \|y_1\| + 1}
+\end{equation}
 
-\textbf{Validation:} prédictions théoriques vs pratique\\
-Loss finale, courbures, comportement training
+\textbf{Validation future 2 layers:} prédictions théoriques d'un training\\
+Loss finale, courbures, comportement asymptotique, dependance en L etc ..
+
+Extension future sur L couches, lyapunov, controle de l'alea
 \end{frame}
 
 % Slide 11: Deeper or Wider - NTK fini
