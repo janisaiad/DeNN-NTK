@@ -232,6 +232,16 @@ omg le nouvel article
 
 
 
+
+
+
+
+
+
+
+
+
+
 qu'est ce que l'on retient pour l'oral : 20 min 15 slides
 
 - le début, 3 papier, méthodologies, détails de comment s'est déroulé le stage en pratique

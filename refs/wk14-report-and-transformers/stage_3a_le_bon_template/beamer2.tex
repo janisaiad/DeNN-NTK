@@ -1,0 +1,316 @@
+\documentclass{beamer}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,shadows}
+
+% Définition des couleurs
+\definecolor{kernelcolor}{RGB}{220,20,60}
+\definecolor{sobolevcolor}{RGB}{30,144,255}
+\definecolor{weightcolor}{RGB}{101,67,33}
+\definecolor{k3color}{RGB}{148,0,211}
+
+% Commandes personnalisées
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\ReLU}{\text{ReLU}}
+\newcommand{\K}{\textcolor{kernelcolor}{K}}
+\newcommand{\NTK}{\textcolor{kernelcolor}{\mathbf{K}}}
+\newcommand{\Ps}{\textcolor{sobolevcolor}{P_s}}
+
+\title{Neural Tangent Kernel: Deeper or Wider?}
+\author{Janis AIAD}
+\institute{École Polytechnique \& University of Maryland}
+\date{}
+
+\begin{document}
+
+% Slide 1: Titre
+\begin{frame}
+\titlepage
+\end{frame}
+
+% Slide 2: Point de départ - Scaling Laws
+\begin{frame}{Point de Départ}
+\begin{center}
+\textbf{Scaling Laws d'OpenAI}
+
+\vspace{1cm}
+
+Au-delà des 100k GPU:\\
+Comment choisir en pratique\\
+la taille optimale d'un réseau?
+
+\vspace{0.5cm}
+
+\textbf{SciML} : théorie $\leftrightarrow$ pratique
+\end{center}
+\end{frame}
+
+% Slide 3: Méthodologie - 3 papiers
+\begin{frame}{Méthodologie}
+\begin{center}
+\textbf{3 références initiales}
+
+\vspace{0.5cm}
+
+\textbf{1)} Sobolev training\\
+\textbf{2)} MMNN \& Transformers\\
+\textbf{3)} Finite-width corrections
+
+\vspace{1cm}
+
+\textbf{Conjecture:} NTK décrit le loss landscape\\
+Analyses locales $\rightarrow$ globales
+\end{center}
+\end{frame}
+
+% Slide 4: Résultats de Terjek
+\begin{frame}{Résultats Théoriques}
+\textbf{Si beaucoup de points:} contraindre l'espace modèle
+
+$$s \uparrow \Rightarrow \text{régularisation optimale}$$
+
+\vspace{0.5cm}
+
+Information de \textit{smoothness} dans les données\\
+$\Rightarrow$ éviter directions inutiles de l'espace paramètres
+
+\vspace{0.5cm}
+
+\textbf{Contribution:} bornes explicites avec Haizhao Yang
+\end{frame}
+
+% Slide 5: Espace de Sobolev
+\begin{frame}{Norme de Sobolev}
+\textbf{Norme gradient:}
+\begin{equation}
+\|f\|_{L^s}^2 = \sum_{p=0}^s \int_{\Omega} |D^p f(x)|^2 dx
+\end{equation}
+
+\textbf{Norme Fourier:}
+\begin{equation}
+\|f\|_{L^s}^2 = \int_{\mathbb{R}^d} (1 + |\xi|^2)^s |\hat{f}(\xi)|^2 d\xi
+\end{equation}
+\end{frame}
+
+% Slide 6: Fonctions de perte
+\begin{frame}{Loss Functions}
+\textbf{MSE standard:}
+$$\mathcal{L}_{\text{MSE}}(f) = \sum_{i=1}^{n} |f(x_i) - y_i|^2$$
+
+\textbf{Sobolev augmenté (PINNs):}
+$$\mathcal{L}_{\text{deriv}}(f) = \sum_{i=1}^{n} \left(|f(x_i) - y_i|^2 + \sum_{p=1}^s |D^p f(x_i) - D^p y_i|^2\right)$$
+\end{frame}
+
+% Slide 7: Préconditionnement - MMNN
+\begin{frame}{MMNN : Multi-Component Networks}
+\textbf{Architecture:} matrice milieu low-rank
+
+\vspace{0.5cm}
+
+Réduction paramétrique \\
+$\mathcal{O}(n^2)$ vs $\mathcal{O}(n^4)$ pour FCNN
+
+\vspace{0.5cm}
+
+\textbf{Interprétation fréquentielle:}\\
+Apprentissage de la transformée en ondelettes\\
+Performance optimale: ondelettes sparses
+\end{frame}
+
+% Slide 8: NTK pour MMNN
+\begin{frame}{NTK Definition}
+\begin{equation}
+\NTK^{L}(\mathbf{x}_i, \mathbf{x}_j) = \left\langle \frac{\partial f(\mathbf{x}_i; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}}, \frac{\partial f(\mathbf{x}_j; \boldsymbol{\theta})}{\partial \boldsymbol{\theta}} \right\rangle
+\end{equation}
+
+\vspace{0.5cm}
+
+\textbf{Deux méthodes de calcul:}\\
+1) TCL naïf (relation de récurrence)\\
+2) Théorème d'Adler (random field)
+\end{frame}
+
+% Slide 9: Formule récursive
+\begin{frame}{Formule Récursive}
+\begin{equation}
+\K_L^{\infty}(\mathbf{x},\mathbf{x}') = \|\mathbf{x}\| \|\mathbf{x}'\| \sum_{p=1}^{L} \varrho^{\circ (p-1)}\left( \rho_0(\mathbf{x},\mathbf{x}') \right)
+\end{equation}
+
+\begin{equation}
+\varrho(\rho) = \sigma_W^2 \int \ReLU(u_1) \ReLU(u_2) d\mathcal{N}\left( [u_1,u_2] \left| 0,\left[ \begin{smallmatrix} 1 & \rho \\ \rho & 1 \end{smallmatrix} \right] \right. \right)
+\end{equation}
+\end{frame}
+
+% Slide 10: Random field gaussien
+\begin{frame}{Deep Gaussian Process}
+\textbf{Structure du random field:}\\
+Deep Gaussian = concaténation supportable
+
+\vspace{0.5cm}
+
+Intégrales et opérateurs de convolution\\
+Analyse point fixe possible
+
+\vspace{0.5cm}
+
+\textbf{Validation:} prédictions théoriques vs pratique\\
+Loss finale, courbures, comportement training
+\end{frame}
+
+% Slide 11: Deeper or Wider - NTK fini
+\begin{frame}{Deeper or Wider? - NTK Fini}
+\textbf{Réseau fini = NTK qui bouge}
+
+$$\K_t = \K^{(0)} + \frac{1}{m}\K^{(1)}_t + \frac{1}{m^2}\K^{(2)}_t + \ldots$$
+
+\textbf{NTK Hierarchy:} tenseurs d'ordre $n$\\
+$\Rightarrow$ corrélations d'ordre $2n$
+
+\vspace{0.5cm}
+
+\textbf{Physique:} diagrammes de Feynman\\
+Théorème de Wick
+\end{frame}
+
+% Slide 12: Tenseurs d'ordre 3 et 4
+\begin{frame}{Tenseurs d'Ordre Supérieur}
+\textbf{Scaling avec la largeur:}
+$$\text{Corrélations d'ordre } 2n \sim \frac{1}{m^{n/2}}$$
+
+\vspace{0.5cm}
+
+\textbf{Tenseur d'ordre 3:} $\textcolor{k3color}{K^{(3)}}$\\
+Formulation simple obtenue
+
+\textbf{Tenseur d'ordre 4:} complexité exponentielle\\
+$\Rightarrow$ approche numérique
+\end{frame}
+
+% Slide 13: Approche spectrale
+\begin{frame}{Découverte Spectrale}
+\textbf{Décomposition sur valeurs propres NTK}
+
+$$\text{Formule } \sim \text{ moyenne dans un bulk}$$
+
+\vspace{0.5cm}
+
+\textbf{Conjecture:} distribution Marchenko-Pastur\\
+$\Rightarrow$ confirmée (papier Benigni)
+
+\textbf{Hypothèse Wigner:} espacement des valeurs propres\\
+$\Rightarrow$ \textbf{validée!}
+\end{frame}
+
+% Slide 14: GOE Statistics
+\begin{frame}{Random Matrix Theory}
+\textbf{GOE Statistics:} répulsion des valeurs propres
+
+\vspace{0.5cm}
+
+Complexité $\mathcal{O}(m^4) \rightarrow$ forme close\\
+Monte Carlo $\rightarrow$ moyenne analytique
+
+\vspace{0.5cm}
+
+\textbf{Structure locale + globale MP}\\
+NTK calculable vs Hessienne
+\end{frame}
+
+% Slide 15: Physique statistique
+\begin{frame}{Approches Physiques}
+\textbf{Random Matrix Theory}\\
+Combinatoire + théorème de Wick
+
+\textbf{Field Theory}\\
+Analogie systèmes en interaction
+
+\textbf{PhysStat}\\
+Système à l'équilibre, analogies verres
+
+\vspace{0.5cm}
+
+\textbf{Pont:} NTK, Gauss-Newton, Hessienne
+\end{frame}
+
+% Slide 16: Collaboration actuelle
+\begin{frame}{Collaboration Actuelle}
+\textbf{Avec MG \& MIS:}\\
+Diagrammes de Feynman finite-width
+
+\vspace{0.5cm}
+
+\textbf{Objectif:} scaling cohérent profondeur\\
+$\Rightarrow$ réponse finale loss landscape
+
+\vspace{0.5cm}
+
+\textbf{Suite:} statistiques locales\\
+Analyse Adam \& Muon
+\end{frame}
+
+% Slide 17: Approche globale
+\begin{frame}{Vision Globale}
+\textbf{Communauté optimization:} NTK délaissé depuis 2022
+
+\vspace{0.5cm}
+
+\textbf{Notre approche:}\\
+Coller analyses locales $\rightarrow$ globales
+
+NTK = cuvette locale + courbure\\
+$t \to \infty$ en finite width = point\\
+Itération $\rightarrow$ minimum global?
+\end{frame>
+
+% Slide 18: Applications pratiques
+\begin{frame}{Applications Pratiques}
+\textbf{Scientific Machine Learning}
+
+Points de Chebyshev $\rightarrow$ commutation exacte\\
+Bornes pratiques pour tailles raisonnables
+
+\vspace{0.5cm}
+
+\textbf{Objectif 1-2 ans:}\\
+Ouvrir librairie SciML\\
+$\Rightarrow$ paramètres optimaux directs\\
+Fin du trial-and-error depth/width
+\end{frame}
+
+% Slide 19: Leçons et documentation
+\begin{frame}{Méthodologie}
+\textbf{Leçon:} trouver le problème le plus trivial
+
+\vspace{0.5cm}
+
+\textbf{Documentation complète:}\\
+GitHub, YouTube, papiers scannés\\
+$>10$ collaborations actives
+
+\vspace{0.5cm}
+
+\textbf{Créativité > rythme prépa}\\
+Représentation mentale du problème
+\end{frame}
+
+% Slide 20: Conclusion
+\begin{frame}{Conclusion}
+\begin{center}
+\textbf{Contributions principales:}
+
+\vspace{0.5cm}
+
+Bornes explicites valeurs propres NTK\\
+Théorie unifiée: FCNN, MMNN, Transformers\\
+Pont deep learning $\leftrightarrow$ physique mathématique
+
+\vspace{1cm}
+
+\textbf{Résultat pratique:}\\
+Guide pour choix optimal\\
+\textbf{Deeper or Wider}
+\end{center>
+\end{frame>
+
+\end{document>
