@@ -12,21 +12,25 @@ qu'est ce que l'on retient pour l'oral : 20 min 15 slides
 
 
 Le point de départ c'est 2 choses, 1 papier d'openAI qui a introduit les scaling law
+Bonjpur je suis très content de vous avoir maintenant pour vous présenter mon travail durant les
+4 derniers mois.
+
+
+Avec mon superviseur, on souhaitait répondre de manière long terme à la question de l'optimization
+landscape pour les réseaux de neurones, et plus spécialement pouvoir donner une réponse one shot 
+au design optimal et préconditionnement à travers l'architecture. Comprendre pourquoi c'est difficile
+et que faire pour un budget donné de paramètres. J'ai répondu à cette question dans mon rapport donc là
+je vais surtout me focus sur la démarche et le pourquoi, l'intuition que l'on a eu à travers les discussions et collaborations informelles.
 
 Au delà d'avoir 100k gpu, je souhaitais aussi rentrer dans la communauté du sciML car florissant et surtout axé pratique
 l'idée c'était de donner des insights théoriques sur comment choisir en pratique en 1 shot la taille de notre réseau
 
 1)
-notre idée pour attaquer le loss landscape c'est que l'on conjecture que le NTK décrit très bien le loss landscape jusquà un point
-et on peut essayer de recoller les analyses locales pour en faire une globale
-
-
-
-les resultas de terjek maintenant
+notre idée pour attaquer le loss landscape c'est que l'on conjecture que le NTK décrit très bien le loss landscape jusquà un certain moment, et on recommence à partir de ce moment, on retrack la dynamique gradient avec le NTK à partir de ce nouveau point et peut essayer de recoller les analyses locales pour en faire une analyse globale
 
 
 Concrètement ce résultat dit que si vous avez beaucoup de points, vous devez constraindre l'espace modèle en augmentant s, car en profitant de l'information
-sur la smoothness dans les données, ne pas l'utiliser rend le problème plus difficile, vous allez avoir pleins de directions de l'espace
+sur la smoothness dans les données, ne pas l'utiliser rend le problème plus mal conditionné, vous allez avoir pleins de directions de l'espace
 des paramètres où la loss ne bouge pas, dans ces directions les fonctions candidates n'utilisent pas l'information de la données
 
 avec un grand s, vous contrevenez à cela et régularisez le problème, à raison
@@ -147,7 +151,7 @@ tout le monde et surtout le public n'a pas accès à 10k gpu
 Afin de répondre à la question deeper or wider, on essaye donc de calculer le ntk pour un reseau fini
 et cette théorie est connue et travaillée de seulement 10 personnes, beaucoup de physiciens
 
-l'iée est que un réseau fini = un NTK qui bouge, donc pour caractériser un NTK fini
+l'idée est que un réseau fini = un NTK qui bouge, donc pour caractériser un NTK fini
 pour des valeurs de N quelconque on essaye de voir quel ODE le NTK vérifie, on dérive par rapport au temps et 
 et on voit que l'on peut obtenir très facilement une structure hiérarchique infinie de NTK
 que l'on appelle la NTH.
