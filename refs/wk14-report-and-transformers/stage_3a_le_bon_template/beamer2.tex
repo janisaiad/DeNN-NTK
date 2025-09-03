@@ -34,6 +34,15 @@
 \begin{document}
 
 
+
+
+% Slide 1: Titre
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+
 \begin{frame}
 \frametitle{Plan de la Présentation}
 
@@ -68,34 +77,31 @@
 
 
 
-% Slide 1: Titre
-\begin{frame}
-\titlepage
-\end{frame}
-
 % Slide 2: Point de départ - Scaling Laws
 \begin{frame}{Point de Départ}
 \begin{center}
 \textbf{Scaling Laws d'OpenAI}
 
-\vspace{1cm}
+\begin{figure}
+\centering
+\includegraphics[width=0.9\textwidth]{figures/Capture d'écran 2025-09-02 173731.png}
+\caption{Landscape MMNN}
+\end{figure}
+
 
 Au-delà des 100k GPU:\\
 Comment choisir en pratique\\
 la taille optimale d'un réseau?
 
-\vspace{0.5cm}
 
-\textbf{SciML} : théorie $\leftrightarrow$ pratique
 \end{center}
 \end{frame}
 
 % Slide 3: Méthodologie - 3 papiers
 \begin{frame}{Méthodologie}
 \begin{center}
-\textbf{3 références initiales}
-
-\vspace{0.5cm}
+\textbf{3 aspects avancés}
+\textbf{SciML} : théorie $\leftrightarrow$ pratique
 
 \textbf{1)} Sobolev training\\
 \textbf{2)} MMNN \& Transformers\\
@@ -104,7 +110,7 @@ la taille optimale d'un réseau?
 \vspace{1cm}
 
 \textbf{Conjecture:} NTK décrit le loss landscape\\
-Analyses locales $\rightarrow$ globales
+En recollant les approximations locales $\rightarrow$ globales
 \end{center}
 \end{frame}
 
@@ -166,10 +172,9 @@ Analyse en fourier pertinente si assez de données sur sphere ($l_{max} \sim N^d
 %figure landscape mmnn
 \begin{figure}
 \centering
-\includegraphics[width=0.8\textwidth]{figures/landscape_mmnn.png}
+\includegraphics[width=0.5\textwidth]{figures/landscape_mmnn.png}
 \caption{Landscape MMNN}
 \end{figure}
-
 
 
 Réduction paramétrique \\
@@ -369,8 +374,8 @@ Système à l'équilibre, analogies verres
 • M. Guillen \& P. Misof : développements feynmaniens finite-width\\
 • D. Terjek: bornes valeurs propres minimales, développement d'Hermite\\
 • L. Benigni: RMT scaling avec profondeur\\
-• H. Yang: transformers, S. Jun: MMNN\\
-• G. Ben Arous \& S. Péché: fondements RMT\\
+• H. Yang: transformers, S. Zhang: MMNN\\
+• NP Baskerville, G. Ben Arous \& S. Péché: fondements RMT\\
 • Projets probabilistes futurs
 
 
@@ -409,7 +414,7 @@ Itération $\rightarrow$ rapprocher du minimum global ?
 
 % Slide 18: Applications pratiques
 \begin{frame}{Applications Pratiques}
-\textbf{SciM}
+\textbf{SciML}
 
 Points de Chebyshev $\rightarrow$ commutation et analyse exacte\\
 Bornes pratiques pour tailles et autres distributions raisonnables
@@ -425,7 +430,7 @@ Fin du trial-and-error infini depth/width
 % Slide 19: Leçons et documentation
 \begin{frame}{Méthodologie}
 \textbf{Leçon:} trouver le problème le plus trivial à résoudre, résultats rapides, 
-LIRE TOUTE LA LITTERATURE malgré le flot infini
+L malgré le flot infini
 
 \vspace{0.5cm}
 
