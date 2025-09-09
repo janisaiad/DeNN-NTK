@@ -3,14 +3,17 @@
 ## Description
 We investigate wether deeper or wider is better for NNs optimization under the NTK's perspective
 
+## Report
+To view the report, first run the following command:
+```bash
+pdflatex -interaction=nonstopmode -output-directory=refs/wk14-report-and-transformers/stage_3a_le_bon_template/ refs/wk14-report-and-transformers/stage_3a_le_bon_template/main3.tex
+```
+
+Then, open the report in the `refs/wk14-report-and-transformers/stage_3a_le_bon_template/main.pdf` file.
+
+
 ## Table of Contents
 - [Installation](#installation)
-- [Usage](#usage)
-- [Features](#features)
-- [Contributing](#contributing)
-- [Tests](#tests)
-- [License](#license)
-- [Contact](#contact)
 ## Installation
 
 To install dependencies using uv, follow these steps:
