@@ -1,19 +1,6 @@
-
-
-
-
-
-
-
-qu'est ce que l'on retient pour l'oral : 20 min 15 slides
-
-- le début, 3 papier, méthodologies, détails de comment s'est déroulé le stage en pratique
-
-
-
-Le point de départ c'est 2 choses, 1 papier d'openAI qui a introduit les scaling law
 Bonjpur je suis très content de vous avoir maintenant pour vous présenter mon travail durant les
-4 derniers mois.
+4 derniers mois. Vraiment très content car vous êtes physicienne de formation et que la réalité mathématique derrière nos calculs en deep learning est visible
+à travers des analogies physiques
 
 
 Avec mon superviseur, on souhaitait répondre de manière long terme à la question de l'optimization
