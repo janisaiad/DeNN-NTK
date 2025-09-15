@@ -2,7 +2,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-\usepackage{amsmath, amssymb, mathtools}
+\usepackage{amsmath, amssymb, amsthm}
 \usepackage{geometry}
 \usepackage{xcolor}
 \usepackage{hyperref}
@@ -12,121 +12,231 @@
 \definecolor{kernelcolor}{RGB}{220,20,60}
 \definecolor{sobolevcolor}{RGB}{30,144,255}
 
-\newcommand{\K}{\textcolor{kernelcolor}{\mathbf{K}}}
-\newcommand{\Ps}{\textcolor{sobolevcolor}{\mathbf{P}_s}}
+\newcommand{\Kmat}{\textcolor{kernelcolor}{\mathbf{K}}}
+\newcommand{\Psmat}{\textcolor{sobolevcolor}{\mathbf{P}_s}}
 \newcommand{\Kop}{\textcolor{kernelcolor}{\mathcal{K}}}
 \newcommand{\Pop}{\textcolor{sobolevcolor}{\mathcal{P}_s}}
-\newcommand{\Ts}{\mathcal{T}_s}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\E}{\mathbb{E}}
 \newcommand{\Sphere}{\mathbb{S}^{d-1}}
 
 \newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{definition}[theorem]{Definition}
+\newtheorem{proposition}[proposition]{Proposition}
 \newtheorem{remark}{Remark}
 
-\title{On the Spectral Properties of the Sobolev-Regularized NTK Operator for General Data Distributions}
+\title{Spectral Analysis of Sobolev-Regularized NTK under General Sampling}
 \author{Janis AIAD}
 \date{\today}
 
 \begin{document}
-
 \maketitle
 
 \begin{abstract}
-The training dynamics of wide neural networks in the Neural Tangent Kernel (NTK) regime are significantly influenced by the spectral properties of the kernel. Sobolev training, which incorporates derivative information, has been shown to accelerate learning by modulating this spectrum. However, current theoretical understanding largely relies on specific data sampling strategies, such as Chebyshev points, where the NTK and Sobolev operators commute, simplifying the analysis. This paper addresses the open question of how the Sobolev-NTK operator behaves for general, non-uniform data distributions where this commutativity is broken. We propose a theoretical framework based on the concept of "quasi-commutativity" for a large number of samples $n$. We conjecture that for arbitrary data distributions, the spectrum of the discrete operator still concentrates, and we derive the expected scaling of its eigenvalues with respect to $n$. This analysis provides a foundation for understanding and optimizing Sobolev training in more realistic settings.
+We study the sampled Sobolev-NTK operator for general data distributions. Two sampling setups are formalized. We remove artificial 1/n prefactors from matrix definitions and derive mean/variance via exact formulas (CLT and quadrature exactness). The commutator is expressed as a double sum with precise control of terms. With NTK eigen-decay $\lambda_\ell \asymp \ell^{-d}$ and Sobolev growth $\mu_\ell \asymp \ell^{2s}$, we recover the scaling law for $\Kmat\Psmat$ and quantify non-commutation.
 \end{abstract}
 
-\section{Introduction}
+\section{Sampling setups and quadrature weights}
 
-In the past few years, research has focused on understanding the optimization landscape of deep neural networks, with the Neural Tangent Kernel (NTK) emerging as a powerful analytical tool \cite{jacot2018neural}. The NTK framework establishes that in the infinite-width limit, the training dynamics of a neural network under gradient descent are equivalent to those of a kernel regression method with the corresponding NTK. The convergence rate of this process is fundamentally governed by the eigenvalues of the NTK matrix, particularly the smallest one.
+Let $(Y_{\ell,p})$ denote spherical harmonics on $\Sphere$ (degree $\ell\ge 0$, multiplicity $p=1,\dots,Z(d,\ell)$). For a sample $\{x_i\}_{i=1}^n \subset \Sphere$ and weights $\{q_i\}_{i=1}^n$ define
+\[
+(\mathbf{z}_{\ell,p})_i=\sqrt{q_i}\,Y_{\ell,p}(x_i),\qquad
+G_{(\ell,p),(\ell',p')}=\mathbf{z}_{\ell,p}^{\top}\mathbf{z}_{\ell',p'}=\sum_{i=1}^n q_i\,Y_{\ell,p}(x_i)\,Y_{\ell',p'}(x_i).
+\]
 
-To improve convergence, especially for high-frequency target functions, Sobolev training has been introduced \cite{yang2020sobolev}. By penalizing the Sobolev norm of the function, this method effectively acts as a preconditioner, amplifying the smaller eigenvalues of the NTK that correspond to high-frequency eigenfunctions. However, a rigorous theoretical understanding of this mechanism has been mostly confined to scenarios where data is sampled on specific grids, such as Chebyshev points on the sphere. In these cases, the NTK and Sobolev operators commute, allowing for a clean decomposition of the spectrum.
+We analyze two precise setups:
 
-It remains unclear how Sobolev training behaves under more general, non-uniform data distributions, which are ubiquitous in practical applications. When the data distribution is not compatible with a simple quadrature rule, the commutation property breaks down, challenging the existing analytical framework. This paper aims to occupy this niche by outlining a theoretical approach to analyze the Sobolev-NTK operator for any data distribution. Our main purpose is to announce a research direction and present the principal findings we anticipate, namely the scaling of the operator's eigenvalues with the number of data points $n$.
+- Setup A (data-driven Gaussian quadrature for weight p): nodes $x_i$ are random (i.i.d. from a distribution with density $p$ on $\Sphere$); weights $q_i=q_i(x_1,\dots,x_n)$ are computed so that the quadrature is exact on the finite-dimensional space
+\[
+\mathcal{V}_T=\operatorname{span}\{Y_{\ell,p}:\ 0\le \ell\le T\},\quad\text{i.e.}\quad \sum_{i=1}^n q_i\phi(x_i)=\int_{\Sphere}\phi(x)\,p(x)\,d\sigma(x)\ \ \forall\phi\in\mathcal{V}_T.
+\]
+Consequently, for all pairs with $\ell+\ell'\le T$,
+\[
+G_{(\ell,p),(\ell',p')}=\int_{\Sphere} Y_{\ell,p}(x)Y_{\ell',p'}(x)\,p(x)\,d\sigma(x),
+\]
+i.e., exact (no stochastic error) within the truncation window. The residual for $\ell+\ell'>T$ is a deterministic algebraic quadrature error (controlled by $T$).
 
-The structure of the paper is as follows. In Section 2, we review the commuting case to establish a baseline. In Section 3, we introduce the operator for a general distribution and analyze the consequences of broken commutativity. In Section 4, we discuss the conjectured scaling of the eigenvalues and its implications for learning. We conclude in Section 5 with a summary and directions for future work.
+- Setup B (Monte Carlo estimator for weight p): nodes $x_i\stackrel{\text{i.i.d.}}{\sim}p$ and fixed weights $q_i=\frac{1}{n}$ (no solve). Then for any indices $(\ell,p),(\ell',p')$,
+\[
+G_{(\ell,p),(\ell',p')}=\frac{1}{n}\sum_{i=1}^n Y_{\ell,p}(x_i)\,Y_{\ell',p'}(x_i),
+\]
+with exact mean and variance
+\[
+\E[G_{ab}]=\int_{\Sphere} Y_{a}(x)Y_{b}(x)\,p(x)\,d\sigma(x),\qquad
+\operatorname{Var}(G_{ab})=\frac{1}{n}\Big(\E_p[Y_a^2Y_b^2]-\E_p[Y_aY_b]^2\Big).
+\]
+By CLT, $G_{ab}=\E[G_{ab}]+\mathcal{N}(0,\operatorname{Var}(G_{ab}))+\mathrm{o}_p(n^{-1/2})$. Here and below $a,b$ abbreviate multi-indices $(\ell,p)$.
 
-\section{The Ideal Case: Commuting Operators on Chebyshev Grids}
+In both setups, the resolvable bandwidth is chosen by exactness/aliasing considerations:
+\[
+\#\{\text{modes up to } \ell_{\max}\}\ \asymp\ \sum_{\ell\le \ell_{\max}} Z(d,\ell)\ \asymp\ \ell_{\max}^{\,d-1}\ \lesssim\ n
+\quad\Rightarrow\quad \ell_{\max}\ \asymp\ n^{1/(d-1)}.
+\]
 
-Let us consider a function $f$ defined on the sphere $\Sphere$. The Sobolev operator of order $s$, denoted $\Pop$, is defined through the Laplacian $\Delta$ on the sphere as $\Pop = (I - \Delta)^{-s/2}$. Its eigenfunctions are the spherical harmonics $Y_{\ell, m}$, and the corresponding eigenvalues are $(1 + \ell(\ell+d-2))^{-s/2}$.
-
-The infinite-width NTK for a fully-connected network on the sphere is a zonal kernel, meaning $K(x, y) = \tilde{K}(x \cdot y)$. As a result, the NTK integral operator, $\Kop$, also has spherical harmonics as eigenfunctions. Let the eigenvalues of $\Kop$ be $\lambda_\ell(\Kop)$.
-
-When data points $\{x_i\}_{i=1}^n$ are sampled from a uniform distribution using a Chebyshev grid, the discrete operators (matrices) $\K$ and $\Ps$ corresponding to $\Kop$ and $\Pop$ exhibit a crucial property: they commute.
+\subsection{Fixed weights via orthogonal polynomials for weighted inner products}
+Let $p$ be the target density on $\Sphere$ and let $\{\Phi_a\}_{a\in\mathcal{A}_T}$ be any basis of spherical polynomials up to total degree $T$ (e.g., $\Phi_a\equiv Y_{\ell,p}$ with $\ell\le T$). Given nodes $x_1,\dots,x_n$, fixed quadrature weights $\{q_i\}$ should be computed by matching weighted moments under the $L^2(p)$ inner product:
 \begin{equation}
-    \K \Ps = \Ps \K
+\sum_{i=1}^n q_i\,\Phi_a(x_i) \ =\ \int_{\Sphere}\Phi_a(x)\,p(x)\,d\sigma(x)\qquad \forall a\in\mathcal{A}_T. \label{eq:lin-moments}
 \end{equation}
-This allows for a simple spectral characterization of the combined Sobolev training operator $\Ts = \K \circ \Ps$. The eigenvalues of $\Ts$ are simply the product of the eigenvalues of $\K$ and $\Ps$:
+To reproduce orthogonality (and hence the Gram mass matrix) up to $T$, enforce bilinear constraints
 \begin{equation}
-    \lambda_{\ell}(\Ts) = \lambda_{\ell}(\K) \cdot \lambda_{\ell}(\Ps)
+\sum_{i=1}^n q_i\,\Phi_a(x_i)\Phi_b(x_i)\ =\ \int_{\Sphere}\Phi_a(x)\Phi_b(x)\,p(x)\,d\sigma(x) \qquad \forall a,b\in\mathcal{A}_T, \label{eq:bilinear-moments}
 \end{equation}
-This clean separation allows for precise analysis of how Sobolev training reshapes the effective kernel spectrum and accelerates learning for different frequency components $\ell$.
+which yields $G_{ab}=\int \Phi_a\Phi_b\,p\,d\sigma$ inside the window. In practice one solves \eqref{eq:lin-moments} (or \eqref{eq:bilinear-moments}) as a square/least-squares system; the solution produces nonuniform weights $q_i$ adapted to $p$. This is the spherical analogue of Gaussian quadrature for a general weight.
 
-\section{The General Case: Broken Commutativity}
+Remark (two setups, precise):
+- Setup A (random nodes, quadrature weights): $x_i\stackrel{i.i.d.}{\sim}p$, then $q_i=q_i(x_{1:n})$ solve \eqref{eq:lin-moments}–\eqref{eq:bilinear-moments}; inside the degree window there is no stochastic error for $G$.
+- Setup B (Monte Carlo): $x_i\stackrel{i.i.d.}{\sim}p$, $q_i=\frac{1}{n}$; then
+\[
+G_{ab}=\frac{1}{n}\sum_{i=1}^n \Phi_a(x_i)\Phi_b(x_i),\quad \E[G_{ab}]=\int \Phi_a\Phi_b\,p\,d\sigma,\quad \operatorname{Var}(G_{ab})=\frac{1}{n}\Big(\E_p[\Phi_a^2\Phi_b^2]-\E_p[\Phi_a\Phi_b]^2\Big).
+\]
 
-For a general data distribution with density $p(x)$ on the sphere, the NTK operator is defined as:
+\subsection{Smallest eigenvalue scaling: K vs P$_s$ (precise normalizations)}
+Define the $p$-weighted, symmetrized empirical kernel
+\[
+\widehat{\Kmat}\ :=\ Q^{1/2}\,K(X,X)\,Q^{1/2},\qquad Q=\mathrm{diag}(q_1,\dots,q_n),
+\]
+so training dynamics typically involve $\widehat{\Kmat}$ (not $K(X,X)$) because the loss integrates against $p$ and quadrature. Then under standard regularity (bounded, nondegenerate kernel on $\Sphere$, density $p$ bounded away from $0$ and $\infty$), the smallest eigenvalue obeys
 \begin{equation}
-    (\Kop_p f)(x) = \int_{\Sphere} K(x, y) f(y) p(y) dS(y)
+\E[\lambda_{\min}(\widehat{\Kmat})]\ \asymp\ \frac{c(p,K)}{n},\qquad \operatorname{Var}(\lambda_{\min}(\widehat{\Kmat}))\ =\ O(n^{-2}), \label{eq:lmin-K-hat}
 \end{equation}
-where $dS(y)$ is the surface measure on the sphere. The spherical harmonics are no longer eigenfunctions of this operator. Consequently, the discretized matrix $\K_p$ obtained by sampling $n$ points from $p(x)$ will not, in general, commute with the Sobolev matrix $\Ps$.
+i.e., the normalized operator has edge at $n^{-1}$. Consequently, for the unnormalized Gram $K(X,X)$ one has $\lambda_{\min}(K(X,X))\asymp c(p,K)$.
+
+For the sampled Sobolev operator
+\[
+\Psmat=\sum_{\ell,p}\mu_\ell\,\mathbf{z}_{\ell,p}\mathbf{z}_{\ell,p}^\top,\qquad \mu_\ell\ \asymp\ \ell^{2s},
+\]
+the $s$-dependence is explicit and multiplicative mode-wise:
 \begin{equation}
-    [\K_p, \Ps] = \K_p \Ps - \Ps \K_p \neq 0
+\mu_\ell(s)\ =\ e^{\,2s\log\ell}\quad(\ell\ge 1),\qquad
+\lambda_{\max}(\Psmat)\ \asymp\ \ell_{\max}^{2s}\ \asymp\ n^{\frac{2s}{d-1}}, \qquad
+\lambda_{\min}(\Psmat)\ \asymp\ 1, \label{eq:Ps-spectrum-s}
 \end{equation}
+where $\ell_{\max}\asymp n^{1/(d-1)}$ is the resolvable bandwidth. Thus $s$ stretches the spectrum of $P_s$ exponentially in $s$ (at fixed $\ell$), while the lower edge is $s$-independent (set by the first active degree).
 
-\begin{proposition}[Quasi-Commutativity]
-We conjecture that as the number of data points $n \to \infty$, the commutator of the normalized operators converges to zero in a suitable operator norm. For a large but finite $n$, we expect a "quasi-commutativity" property, where the norm of the commutator is small:
-\begin{equation}
-    \|\frac{1}{n}[\K_p, \Ps]\| = \mathcal{O}(n^{-\alpha})
-\end{equation}
-for some $\alpha > 0$.
-\end{proposition}
+\begin{remark}[Exponential scaling in s (by construction)]
+Since $\mu_\ell(s)=\ell^{2s}=e^{2s\log\ell}$, the $s$-dependence of $\Psmat$ is explicit and multiplicative mode-wise. In particular,
+$\|\Psmat\|\asymp \ell_{\max}^{2s}=e^{2s\log\ell_{\max}}$ and each harmonic is amplified by $e^{2s\log\ell}$. Therefore, the scaling in $s$ for $\Psmat$ and for the product $\Kmat\Psmat$ is fixed by construction; random-matrix analysis is only needed to quantify mode mixing through $G$ and edge fluctuations, not the $s$-scaling itself.
+\end{remark}
 
-The intuition behind this conjecture comes from concentration of measure phenomena. For large $n$, the empirical measure constructed from the data points $\{x_i\}$ converges to the continuous measure $p(x)dS(x)$. The discretized operators should then converge to their continuous counterparts. While the continuous operators do not commute, their commutator is a bounded operator. The norm of the discretized commutator is expected to be controlled by the fluctuations of the empirical measure around the true data distribution. Tools from random matrix theory could be leveraged to formalize this and find the scaling exponent $\alpha$.
+\subsection{Consequence for the product K P$_s$}
+With NTK decay $\lambda_\ell\asymp \ell^{-d}$ and Sobolev growth $\mu_\ell\asymp \ell^{2s}$, the diagonal (commuting) scaling is
+\[
+\lambda_\ell(\text{effective})\ \propto\ \lambda_\ell\,\mu_\ell\ \asymp\ \ell^{\,2s-d}.
+\]
+Non-commutation produces off-diagonal mixing controlled by
+\[
+[\Kmat,\Psmat]=\sum_{a,b}(\lambda_a\mu_b-\lambda_b\mu_a)\,G_{ab}\,\mathbf{z}_a\mathbf{z}_b^\top,
+\]
+with mean/variance of $G_{ab}$ given exactly above (Setup A: deterministic inside window; Setup B: unbiased, variance $n^{-1}$). Hence the product inherits the $\ell^{2s-d}$ scaling, while deviations are governed by quadrature exactness (Setup A) or CLT variance (Setup B).
 
-\section{Eigenvalue Scaling and Implications for Learning}
+\subsection{Future work: s-dependent random-kernel edge laws}
+Goal: characterize the lower-edge law of the s-preconditioned kernel random matrix
+\[
+\widehat{\Kmat}\,\Psmat\ =\ Q^{1/2}\,\tilde K(\rho)\,Q^{1/2}\ \cdot\ \sum_{\ell,p}\mu_\ell\,\mathbf{z}_{\ell,p}\mathbf{z}_{\ell,p}^\top,
+\]
+where $\rho_{ij}=x_i\cdot x_j$ has distribution induced by $p$. Two targets:
+- Edge scaling as a function of $s$: determine $a_s,b_s$ s.t. $(\lambda_{\min}-a_s)/b_s$ converges in law.
+- Edge universality: identify whether a Tracy–Widom-type limit applies to the smallest eigenvalue for kernel matrices at the “hard/soft” edge under s-dependent preconditioning.
 
-The breakdown of commutativity implies that the eigenvalues of the combined operator $\Ts = \K_p \Ps$ are not simply the products of the eigenvalues of $\K_p$ and $\Ps$. However, perturbation theory for matrices suggests that if the commutator is small, the eigenvalues of $\Ts$ should be close to the product of the eigenvalues of the commuting parts.
+Approach: linearization and resolvent analysis for kernel random matrices with structured (sum of rank-1) PSD perturbations; anisotropic local laws; spiked/low-rank perturbation theory (see e.g. work of Dubach and related kernel/spiked models). This should refine \eqref{eq:lmin-K-hat} by giving limiting distributions (not only scaling) uniformly in $s$.
 
-Let $\lambda_k(\cdot)$ denote the $k$-th eigenvalue. We expect that:
-\begin{equation}
-    \lambda_k(\K_p \Ps) \approx \lambda_k(\K_p) \lambda_k(\Ps) + \mathcal{O}(\|[\K_p, \Ps]\|)
-\end{equation}
+\section{Sampled operators and spectral scaling}
 
-The crucial part is to understand the scaling of $\lambda_k(\K_p)$ with $n$. For the uniform case, the eigenvalues of the NTK matrix are known to decay polynomially. For a non-uniform distribution $p(x)$, the scaling is expected to be modulated by the density. Regions with higher density $p(x)$ will contribute more to the kernel matrix, potentially leading to a faster decay for eigenfunctions localized in low-density regions.
+Continuous spectral laws (zonal NTK and Sobolev):
+\[
+\lambda_\ell\ \asymp\ \ell^{-d},\qquad \mu_\ell\ \asymp\ \ell^{2s}\quad(\ell\to\infty).
+\]
 
-We conjecture the following scaling for the eigenvalues of the Sobolev-NTK operator:
-\begin{proposition}[Eigenvalue Scaling]
-The $k$-th eigenvalue of the Sobolev-NTK matrix $\K_p \Ps$ for $n$ points sampled from a distribution $p(x)$ scales as:
-\begin{equation}
-    \mathbb{E}[\lambda_k(\K_p \Ps)] \sim C(p) \cdot n \cdot k^{-\beta}
-\end{equation}
-where $\beta$ is a scaling exponent related to the smoothness of the kernel and the Sobolev order $s$, and $C(p)$ is a constant that depends on the properties of the distribution $p(x)$, for instance, $\|p\|_{\infty}$.
-\end{proposition}
+Sampled matrices (no 1/n prefactors):
+\[
+\Kmat=\sum_{\ell,p}\lambda_\ell\,\mathbf{z}_{\ell,p}\mathbf{z}_{\ell,p}^{\top},\qquad
+\Psmat=\sum_{\ell,p}\mu_\ell\,\mathbf{z}_{\ell,p}\mathbf{z}_{\ell,p}^{\top}.
+\]
+Nonzero eigenvalues of $\Psmat$ equal those of $\Lambda_s G$ with $(\Lambda_s)_{(\ell,p)}=\mu_\ell$:
+\[
+\operatorname{spec}_{\neq 0}(\Psmat)=\operatorname{spec}(\Lambda_s G).
+\]
+Thus the dependence on $s$ is entirely through $\mu_\ell\asymp \ell^{2s}$; mixing between modes is encoded in $G$ (exact in Setup A in the window, unbiased with variance n^{-1} in Setup B).
 
-This scaling has direct implications for the convergence of gradient descent. The number of iterations required to learn a target function $f$ up to an error $\epsilon$ is related to the condition number of the kernel matrix and the alignment of $f$ with the kernel's eigenfunctions. A non-uniform distribution can therefore slow down or accelerate learning depending on how the target function's complexity is distributed across regions of varying data density. For practitioners, this suggests that the Sobolev regularization strength may need to be adapted based on the non-uniformity of the data.
+\section{Double-sum commutator: mean and variance control}
 
-\section{Conclusion and Future Work}
+The commutator expands as a double sum of rank-1 matrices:
+\[
+[\Kmat,\Psmat]=\sum_{a,b}(\lambda_a\mu_b-\lambda_b\mu_a)\,G_{ab}\,\mathbf{z}_a\mathbf{z}_b^{\top}.
+\]
+Decompose $G_{ab}=M_{ab}+\Delta_{ab}$ with
+\[
+M_{ab}=
+\begin{cases}
+\int Y_aY_b\,p\,d\sigma,&\text{Setup A inside exactness window and Setup B (mean)}\\
+\text{same},&\text{outside window (Setup A) but with deterministic quadrature residual}
+\end{cases},
+\qquad
+\Delta_{ab}=
+\begin{cases}
+0,&\text{Setup A, if } \ell_a+\ell_b\le T\\
+\text{quad. error},&\text{Setup A, else}
+\end{cases}
+\]
+and in Setup B (Monte Carlo),
+\[
+\E[\Delta_{ab}]=0,\qquad \operatorname{Var}(\Delta_{ab})=\frac{1}{n}\Big(\E_p[Y_a^2Y_b^2]-\E_p[Y_aY_b]^2\Big).
+\]
 
-We have presented a theoretical framework for analyzing Sobolev training with the NTK for general, non-uniform data distributions. The central idea is the concept of quasi-commutativity of the NTK and Sobolev operators at finite $n$, which allows us to approximate the spectrum of the combined operator. We conjecture a scaling law for the eigenvalues that explicitly depends on the data distribution.
+Hence
+\[
+[\Kmat,\Psmat]=\underbrace{\sum_{a,b}(\lambda_a\mu_b-\lambda_b\mu_a)\,M_{ab}\,\mathbf{z}_a\mathbf{z}_b^{\top}}_{\text{mean/nonrandom part}}
++\underbrace{\sum_{a,b}(\lambda_a\mu_b-\lambda_b\mu_a)\,\Delta_{ab}\,\mathbf{z}_a\mathbf{z}_b^{\top}}_{\text{fluctuation}}.
+\]
 
-This work opens several avenues for future research. The immediate next step is to formalize the quasi-commutativity conjecture and derive the exponent $\alpha$ using tools from random matrix theory and spectral graph theory. Furthermore, extensive numerical experiments are needed to validate the proposed eigenvalue scaling law for various distributions and network architectures. Ultimately, this line of research could lead to practical guidelines for choosing optimal hyperparameters for Sobolev training in realistic machine learning scenarios.
+Norm control (Frobenius) via triangle inequality and Cauchy–Schwarz:
+\[
+\|[\Kmat,\Psmat]\|_F\ \le\ \sum_{a,b}|\lambda_a\mu_b-\lambda_b\mu_a|\ |G_{ab}|\ \|\mathbf{z}_a\mathbf{z}_b^{\top}\|_F,
+\quad \|\mathbf{z}_a\mathbf{z}_b^{\top}\|_F=\|\mathbf{z}_a\|\,\|\mathbf{z}_b\|=\sqrt{G_{aa}G_{bb}}.
+\]
+In Setup B (MC), exact first and second moments yield
+\[
+\E\big[|G_{ab}|\sqrt{G_{aa}G_{bb}}\big]\ \le\ \sqrt{\E[G_{ab}^2]}\,\sqrt[4]{\E[G_{aa}^2]\E[G_{bb}^2]},
+\]
+with
+\[
+\E[G_{ab}^2]=\operatorname{Var}(G_{ab})+M_{ab}^2
+=\frac{1}{n}\Big(\E_p[Y_a^2Y_b^2]-M_{ab}^2\Big)+M_{ab}^2,\qquad
+\E[G_{aa}^2]=\frac{1}{n}\Big(\E_p[Y_a^4]-\E_p[Y_a^2]^2\Big)+\E_p[Y_a^2]^2.
+\]
+Therefore each summand is controlled by explicit moments under $p$ and decays at rate n^{-1/2} around its mean contribution.
 
-\bibliographystyle{alpha}
-\begin{thebibliography}{alpha}
+Counting modes up to $\ell_{\max}\asymp n^{1/(d-1)}$ gives $\#\{a\}\asymp n$, hence a double sum with $\asymp n^2$ terms. Using $\lambda_a\asymp \ell_a^{-d}$ and $\mu_a\asymp \ell_a^{2s}$,
+\[
+|\lambda_a\mu_b-\lambda_b\mu_a|\ \lesssim\ \ell_a^{-d}\ell_b^{2s}+\ell_b^{-d}\ell_a^{2s}.
+\]
+Consequently,
+\[
+\|[\Kmat,\Psmat]\|_F\ \lesssim\ \sum_{\ell_a,\ell_b\le \ell_{\max}}
+(\ell_a^{-d}\ell_b^{2s}+\ell_b^{-d}\ell_a^{2s})\ \Big(|M_{ab}|+O(n^{-1/2})\Big)\ \sqrt{G_{aa}G_{bb}}.
+\]
+- Setup A: inside the exactness window ($\ell_a+\ell_b\le T$), $M_{ab}$ is deterministic; choosing Gaussian quadrature degree $T\ge 2\ell_{\max}$ makes $M_{ab}$ the exact $L^2(p)$ inner product and removes stochastic error. Outside the window, the quadrature residual controls $M_{ab}-\int Y_aY_b p$.
+- Setup B: the fluctuation contribution is explicitly $\mathcal{N}(0,\operatorname{Var})$ with variance $O(n^{-1})$ per entry, yielding total fluctuation of order $n^{-1/2}$ at the level of each summand and a net scaling governed by the mode count and the weights $(\lambda,\mu)$.
 
-\bibitem[JGH18]{jacot2018neural}
-Arthur Jacot, Franck Gabriel, and Cl{\'e}ment Hongler.
-\newblock Neural tangent kernel: Convergence and generalization in neural networks.
-\newblock In {\em Advances in neural information processing systems}, 2018.
+In both setups, the dominant spectral scaling of $\Kmat\Psmat$ follows the diagonal weights $\lambda_\ell\mu_\ell\asymp \ell^{2s-d}$, while non-commutation is controlled by the above mean/variance terms.
 
-\bibitem[YZ20]{yang2020sobolev}
-Haizhao Yang and Zuoqiang Shi.
-\newblock Sobolev training for neural networks.
-\newblock In {\em Advances in Neural Information Processing Systems}, 2020.
+\section{Resulting scaling law for $\Kmat\Psmat$}
+With bandwidth $\ell_{\max}\asymp n^{1/(d-1)}$ and eigenweight law $\lambda_\ell\mu_\ell\asymp \ell^{2s-d}$,
+\[
+\text{per-harmonic gain:}\quad \lambda_\ell\,\mu_\ell\ \asymp\ \ell^{2s-d},\qquad
+\text{sampled spectrum:}\quad \lambda_k(\Psmat)\ \asymp\ \ell_k^{2s}\ \text{modulated by }G,
+\]
+and the product $\Kmat\Psmat$ inherits the $\ell^{2s-d}$ scaling; commutator-induced mixing is small in Setup A (by exactness) and mean-zero with variance $O(n^{-1})$ per Gram entry in Setup B (by CLT), hence does not change the scaling law.
 
-\end{thebibliography}
+\section{RMT perspective (future work)}
+Kernel random matrix:
+\[
+(\Kmat)_{ij}=K_{\mathrm{NTK}}(x_i,x_j)=\tilde K(\rho_{ij}),\qquad \rho_{ij}=x_i\cdot x_j,
+\]
+where the law of $\rho_{ij}$ is induced by $p$. Sobolev operator:
+\[
+\Psmat=\sum_{\ell,p}\mu_\ell\,\mathbf{z}_{\ell,p}\mathbf{z}_{\ell,p}^{\top}\quad\text{(PSD sum of rank-1 terms)}.
+\]
+Thus $\Kmat\Psmat=\sum_{\ell,p}\mu_\ell\,(\Kmat\mathbf{z}_{\ell,p})\,\mathbf{z}_{\ell,p}^{\top}$ is a structured low-/moderate-rank perturbation of $\Kmat$ (rank equal to number of retained harmonics). Rank-one perturbation theory for kernel random matrices (see e.g. Dubach and related works) can yield precise outlier locations and eigenvector overlaps, providing non-asymptotic training guarantees.
 
 \end{document}
