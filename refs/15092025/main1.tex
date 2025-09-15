@@ -1,0 +1,132 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\geometry{a4paper, margin=1in}
+
+\definecolor{kernelcolor}{RGB}{220,20,60}
+\definecolor{sobolevcolor}{RGB}{30,144,255}
+
+\newcommand{\K}{\textcolor{kernelcolor}{\mathbf{K}}}
+\newcommand{\Ps}{\textcolor{sobolevcolor}{\mathbf{P}_s}}
+\newcommand{\Kop}{\textcolor{kernelcolor}{\mathcal{K}}}
+\newcommand{\Pop}{\textcolor{sobolevcolor}{\mathcal{P}_s}}
+\newcommand{\Ts}{\mathcal{T}_s}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Sphere}{\mathbb{S}^{d-1}}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}{Remark}
+
+\title{On the Spectral Properties of the Sobolev-Regularized NTK Operator for General Data Distributions}
+\author{Janis AIAD}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+The training dynamics of wide neural networks in the Neural Tangent Kernel (NTK) regime are significantly influenced by the spectral properties of the kernel. Sobolev training, which incorporates derivative information, has been shown to accelerate learning by modulating this spectrum. However, current theoretical understanding largely relies on specific data sampling strategies, such as Chebyshev points, where the NTK and Sobolev operators commute, simplifying the analysis. This paper addresses the open question of how the Sobolev-NTK operator behaves for general, non-uniform data distributions where this commutativity is broken. We propose a theoretical framework based on the concept of "quasi-commutativity" for a large number of samples $n$. We conjecture that for arbitrary data distributions, the spectrum of the discrete operator still concentrates, and we derive the expected scaling of its eigenvalues with respect to $n$. This analysis provides a foundation for understanding and optimizing Sobolev training in more realistic settings.
+\end{abstract}
+
+\section{Introduction}
+
+In the past few years, research has focused on understanding the optimization landscape of deep neural networks, with the Neural Tangent Kernel (NTK) emerging as a powerful analytical tool \cite{jacot2018neural}. The NTK framework establishes that in the infinite-width limit, the training dynamics of a neural network under gradient descent are equivalent to those of a kernel regression method with the corresponding NTK. The convergence rate of this process is fundamentally governed by the eigenvalues of the NTK matrix, particularly the smallest one.
+
+To improve convergence, especially for high-frequency target functions, Sobolev training has been introduced \cite{yang2020sobolev}. By penalizing the Sobolev norm of the function, this method effectively acts as a preconditioner, amplifying the smaller eigenvalues of the NTK that correspond to high-frequency eigenfunctions. However, a rigorous theoretical understanding of this mechanism has been mostly confined to scenarios where data is sampled on specific grids, such as Chebyshev points on the sphere. In these cases, the NTK and Sobolev operators commute, allowing for a clean decomposition of the spectrum.
+
+It remains unclear how Sobolev training behaves under more general, non-uniform data distributions, which are ubiquitous in practical applications. When the data distribution is not compatible with a simple quadrature rule, the commutation property breaks down, challenging the existing analytical framework. This paper aims to occupy this niche by outlining a theoretical approach to analyze the Sobolev-NTK operator for any data distribution. Our main purpose is to announce a research direction and present the principal findings we anticipate, namely the scaling of the operator's eigenvalues with the number of data points $n$.
+
+The structure of the paper is as follows. In Section 2, we review the commuting case to establish a baseline. In Section 3, we introduce the operator for a general distribution and analyze the consequences of broken commutativity. In Section 4, we discuss the conjectured scaling of the eigenvalues and its implications for learning. We conclude in Section 5 with a summary and directions for future work.
+
+\section{The Ideal Case: Commuting Operators on Chebyshev Grids}
+
+Let us consider a function $f$ defined on the sphere $\Sphere$. The Sobolev operator of order $s$, denoted $\Pop$, is defined through the Laplacian $\Delta$ on the sphere as $\Pop = (I - \Delta)^{-s/2}$. Its eigenfunctions are the spherical harmonics $Y_{\ell, m}$, and the corresponding eigenvalues are $(1 + \ell(\ell+d-2))^{-s/2}$.
+
+The infinite-width NTK for a fully-connected network on the sphere is a zonal kernel, meaning $K(x, y) = \tilde{K}(x \cdot y)$. As a result, the NTK integral operator, $\Kop$, also has spherical harmonics as eigenfunctions. Let the eigenvalues of $\Kop$ be $\lambda_\ell(\Kop)$.
+
+When data points $\{x_i\}_{i=1}^n$ are sampled from a uniform distribution using a Chebyshev grid, the discrete operators (matrices) $\K$ and $\Ps$ corresponding to $\Kop$ and $\Pop$ exhibit a crucial property: they commute.
+\begin{equation}
+    \K \Ps = \Ps \K
+\end{equation}
+This allows for a simple spectral characterization of the combined Sobolev training operator $\Ts = \K \circ \Ps$. The eigenvalues of $\Ts$ are simply the product of the eigenvalues of $\K$ and $\Ps$:
+\begin{equation}
+    \lambda_{\ell}(\Ts) = \lambda_{\ell}(\K) \cdot \lambda_{\ell}(\Ps)
+\end{equation}
+This clean separation allows for precise analysis of how Sobolev training reshapes the effective kernel spectrum and accelerates learning for different frequency components $\ell$.
+
+\section{The General Case: Broken Commutativity}
+
+For a general data distribution with density $p(x)$ on the sphere, the NTK operator is defined as:
+\begin{equation}
+    (\Kop_p f)(x) = \int_{\Sphere} K(x, y) f(y) p(y) dS(y)
+\end{equation}
+where $dS(y)$ is the surface measure on the sphere. The spherical harmonics are no longer eigenfunctions of this operator. Consequently, the discretized matrix $\K_p$ obtained by sampling $n$ points from $p(x)$ will not, in general, commute with the Sobolev matrix $\Ps$.
+\begin{equation}
+    [\K_p, \Ps] = \K_p \Ps - \Ps \K_p \neq 0
+\end{equation}
+
+\begin{proposition}[Quasi-Commutativity]
+We conjecture that as the number of data points $n \to \infty$, the commutator of the normalized operators converges to zero in a suitable operator norm. For a large but finite $n$, we expect a "quasi-commutativity" property, where the norm of the commutator is small:
+\begin{equation}
+    \|\frac{1}{n}[\K_p, \Ps]\| = \mathcal{O}(n^{-\alpha})
+\end{equation}
+for some $\alpha > 0$.
+\end{proposition}
+
+The intuition behind this conjecture comes from concentration of measure phenomena. For large $n$, the empirical measure constructed from the data points $\{x_i\}$ converges to the continuous measure $p(x)dS(x)$. The discretized operators should then converge to their continuous counterparts. While the continuous operators do not commute, their commutator is a bounded operator. The norm of the discretized commutator is expected to be controlled by the fluctuations of the empirical measure around the true data distribution. Tools from random matrix theory could be leveraged to formalize this and find the scaling exponent $\alpha$.
+
+\section{Eigenvalue Scaling and Implications for Learning}
+
+The breakdown of commutativity implies that the eigenvalues of the combined operator $\Ts = \K_p \Ps$ are not simply the products of the eigenvalues of $\K_p$ and $\Ps$. However, perturbation theory for matrices suggests that if the commutator is small, the eigenvalues of $\Ts$ should be close to the product of the eigenvalues of the commuting parts.
+
+Let $\lambda_k(\cdot)$ denote the $k$-th eigenvalue. We expect that:
+\begin{equation}
+    \lambda_k(\K_p \Ps) \approx \lambda_k(\K_p) \lambda_k(\Ps) + \mathcal{O}(\|[\K_p, \Ps]\|)
+\end{equation}
+
+The crucial part is to understand the scaling of $\lambda_k(\K_p)$ with $n$. For the uniform case, the eigenvalues of the NTK matrix are known to decay polynomially. For a non-uniform distribution $p(x)$, the scaling is expected to be modulated by the density. Regions with higher density $p(x)$ will contribute more to the kernel matrix, potentially leading to a faster decay for eigenfunctions localized in low-density regions.
+
+We conjecture the following scaling for the eigenvalues of the Sobolev-NTK operator:
+\begin{proposition}[Eigenvalue Scaling]
+The $k$-th eigenvalue of the Sobolev-NTK matrix $\K_p \Ps$ for $n$ points sampled from a distribution $p(x)$ scales as:
+\begin{equation}
+    \mathbb{E}[\lambda_k(\K_p \Ps)] \sim C(p) \cdot n \cdot k^{-\beta}
+\end{equation}
+where $\beta$ is a scaling exponent related to the smoothness of the kernel and the Sobolev order $s$, and $C(p)$ is a constant that depends on the properties of the distribution $p(x)$, for instance, $\|p\|_{\infty}$.
+\end{proposition}
+
+This scaling has direct implications for the convergence of gradient descent. The number of iterations required to learn a target function $f$ up to an error $\epsilon$ is related to the condition number of the kernel matrix and the alignment of $f$ with the kernel's eigenfunctions. A non-uniform distribution can therefore slow down or accelerate learning depending on how the target function's complexity is distributed across regions of varying data density. For practitioners, this suggests that the Sobolev regularization strength may need to be adapted based on the non-uniformity of the data.
+
+\section{Conclusion and Future Work}
+
+We have presented a theoretical framework for analyzing Sobolev training with the NTK for general, non-uniform data distributions. The central idea is the concept of quasi-commutativity of the NTK and Sobolev operators at finite $n$, which allows us to approximate the spectrum of the combined operator. We conjecture a scaling law for the eigenvalues that explicitly depends on the data distribution.
+
+This work opens several avenues for future research. The immediate next step is to formalize the quasi-commutativity conjecture and derive the exponent $\alpha$ using tools from random matrix theory and spectral graph theory. Furthermore, extensive numerical experiments are needed to validate the proposed eigenvalue scaling law for various distributions and network architectures. Ultimately, this line of research could lead to practical guidelines for choosing optimal hyperparameters for Sobolev training in realistic machine learning scenarios.
+
+\bibliographystyle{alpha}
+\begin{thebibliography}{alpha}
+
+\bibitem[JGH18]{jacot2018neural}
+Arthur Jacot, Franck Gabriel, and Cl{\'e}ment Hongler.
+\newblock Neural tangent kernel: Convergence and generalization in neural networks.
+\newblock In {\em Advances in neural information processing systems}, 2018.
+
+\bibitem[YZ20]{yang2020sobolev}
+Haizhao Yang and Zuoqiang Shi.
+\newblock Sobolev training for neural networks.
+\newblock In {\em Advances in Neural Information Processing Systems}, 2020.
+
+\end{thebibliography}
+
+\end{document}
