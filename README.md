@@ -2,6 +2,8 @@
 
 ## Description
 We investigate wether deeper or wider is better for NNs optimization under the NTK's perspective
+In parallel, other experiments with the same amount of content related to low rank weights NNs are available at [github.com/janisaiad/MMNN](https://github.com/janisaiad/MMNN).
+
 
 ## Report and contributions
 
