@@ -9,11 +9,11 @@ In parallel, other experiments with the same amount of content related to low ra
 
 A complete report has been done relating the theory and why all of those experiments have been done, especially getting the result page 62.
 
-You can read it in [refs/report/report.pdf](https://github.com/janisaiad/DeNN-NTK/blob/dev-janis/refs/report/report.pdf)
+You can read it in [refs/researchgroupUMD/report/report.pdf](https://github.com/janisaiad/DeNN-NTK/blob/dev-janis/refs/report/report.pdf)
 
 If there is an issue you can compile again the report, first run the following command (see [template directory](https://github.com/janisaiad/DeNN-NTK/tree/dev-janis/refs/wk14-report-and-transformers/stage_3a_le_bon_template)):
 ```bash
-pdflatex -interaction=nonstopmode -output-directory=refs/wk14-report-and-transformers/stage_3a_le_bon_template/ refs/wk14-report-and-transformers/stage_3a_le_bon_template/main3.tex
+pdflatex -interaction=nonstopmode -output-directory=refs/researchgroupUMD/wk14-report-and-transformers/stage_3a_le_bon_template/ refs/wk14-report-and-transformers/stage_3a_le_bon_template/main3.tex
 ```
 
 Then, open the report in the `refs/wk14-report-and-transformers/stage_3a_le_bon_template/main.pdf` file.
