@@ -1,0 +1,71 @@
+\documentclass[12pt]{article}
+% \usepackage[a4paper, margin=1in]{geometry}
+% \usepackage{graphicx}
+\input preamble.tex
+\input macros.tex
+
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{wrapfig}
+\usepackage{bm}
+\usepackage{stmaryrd}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{longtable}
+
+\title{Understanding the loss landscape of deep neural networks: new ideas}
+%\author{[Organization Name / Logo]}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+ 
+
+\tableofcontents
+
+\newpage
+
+
+
+\section{Litterature review}
+Currently compiling a bib tex of all the refs I have on the subject, and the remaining to read
+the scalar curvature is given by 
+S
+=
+tr
+(
+H
+)
+2
+−
+tr
+(
+H
+2
+)
+S=tr(H) 
+2
+ −tr(H 
+2
+ ),
+
+ to understand how SGD deal with flat/degenerate lanscapes, as then higher-order derivatives are necessary.
+Mostly, there are 2 path in understanding optimization :
+\begin{itemize}
+\item 1 :  through convgence guarantees in some particular setups with small enough learning rate, smooth convex function (type of non convex function where the non convexity is not too large see def, ie hessian  
+that put global analysis firstb
+
+\item 2 : through local analysis trying to get some spectral local statistics
+\end{itemize}
+
+
+basically lazy training is convexification (do some plots)
+
+\section{Which direction to work on}
+
+
+\end{document} 
