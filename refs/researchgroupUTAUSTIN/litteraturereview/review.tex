@@ -33,7 +33,9 @@ We study the loss landscape of deep neural networks with an emphasis on higher-o
 \section{Introduction}
 In the past few years, research has focused on understanding why over\-parameterized deep networks train efficiently despite highly non-convex objectives. Central themes include the structure of critical points, implicit bias of optimization, and properties of curvature along training trajectories. It remains unclear why simple first-order methods work so well in regimes where the Hessian is often degenerate and flat directions abound.
 
-This work aims to clarify how higher-order geometry interacts with SGD noise and step size, and to delineate regimes where local convexification occurs (e.g., lazy training). Our principal findings are outlined in the abstract; the paper is structured as follows: Section~\ref{sec:lit} reviews the literature, Section~\ref{sec:directions} proposes concrete research directions, and Appendix~\ref{app:plots} gathers plots.
+This work aims to clarify how higher-order geometry interacts with SGD noise and step size, and to delineate regimes where local convexification occurs (e.g., lazy training). Our principal findings are outlined in the abstract; the paper is structured as follows: Section~\ref{sec:lit} reviews the literature, Section~\ref{sec:third} focuses on third-order tensors, Section~\ref{sec:directions} proposes directions, and Appendix~\ref{app:plots} gathers plots.
+
+We begin by focusing on two-layer (single-hidden-layer) networks to establish clear third-order and spectral baselines before extending to deeper architectures.
 
 \section{Literature review}\label{sec:lit}
 We are compiling a BibTeX corpus covering optimization theory for deep networks, spectral analyses of Hessians, and connections to generalization. To understand how SGD behaves in flat or degenerate landscapes, higher-order derivatives become crucial. A simple curvature summary that often appears in analyses is
@@ -48,11 +50,33 @@ Broadly, there are two paths to understand optimization:
 
 A useful heuristic is that lazy training acts as a \emph{convexification} of the landscape around initialization, which can be diagnosed via spectra of \(\bm{H}\) and the stability of the neural tangent kernel. We defer empirical illustrations to Appendix~\ref{app:plots}.
 
+\section{Third-order tensors and scaling}\label{sec:third}
+We now focus on third-order information through the third-order Taylor tensor \(\bm{T}^{(3)}_{t}\). Recent work emphasizes that the trend observed for first and second order terms continues at order three: \(\bm{T}^{(3)}_{t}\) scales with average fourth or sixth powers of norms of forward and backward vectors, with average squared Frobenius norms of cross-layer Hessians and Jacobians, with average Euclidean norms of cross-layer ``Tressians'', and with soft ranks of second or third Hadamard powers of forward and backward Gram matrices, as well as soft ranks of second Hadamard powers of Hessian and Jacobian Gram matrices and soft ranks of Tressian Gram matrices; there also appear cosines of fourth-order tensors built from inner products and cosines of empirical covariance tensors of random third-order tensors~\cite{terjek2025featurelearningedgestability}.
+\begin{quote}
+\small
+The trend continues in the third order Taylor tensor $T^{(3)}_{t}$, which scales with the average fourth or sixth powers of norms of forward and backward vectors, the average squared Frobenius norms of cross layer Hessians and Jacobians, the average Euclidean norms of cross layer Tressians, as well as the soft ranks of second or third Hadamard powers of forward and backward Gram matrices, the 7 soft ranks of second Hadamard powers of Hessian and Jacobian Gram matrices and the soft ranks of Tressian Gram matrices. There are also cosines of fourth order tensors consisting of inner products and cosines of empirical covariance tensors of random third order tensors~\cite{terjek2025featurelearningedgestability}.
+\end{quote}
+\begin{equation}\label{eq:third-order-scaling}
+\|\bm{T}^{(3)}_{t}\| \;\sim\; \mathbb{E}\!\left[\|\bm{f}\|^{4\text{--}6}\right] \;+\; \mathbb{E}\!\left[\|\bm{b}\|^{4\text{--}6}\right] \;+\; \mathbb{E}\!\left[\|\bm{H}_{\text{cross}}\|_{\mathrm{F}}^{2}\right] \;+\; \mathbb{E}\!\left[\|\bm{J}_{\text{cross}}\|_{\mathrm{F}}^{2}\right] \;+\; \mathbb{E}\!\left[\|\bm{T}_{\text{cross}}\|_{2}\right] \;+\; \mathrm{srank}(\cdot),
+\end{equation}
+where \(\bm{f}\) and \(\bm{b}\) denote forward and backward vectors, \(\bm{J}\) Jacobians, \(\bm{H}\) Hessians, \(\bm{T}\) Tressians, and \(\mathrm{srank}(\cdot)\) summarizes soft-rank contributions from appropriate Hadamard-powered Gram matrices~\cite{terjek2025featurelearningedgestability}. This suggests that third-order geometry couples strongly with both width and depth through these Gram-structure statistics.
+
 \section{Which direction to work on}\label{sec:directions}
-We focus on formalizing when local convexification emerges and how it depends on architecture, width, depth, and initialization scale. First, we will characterize regimes where higher-order terms beyond the quadratic approximation materially affect descent dynamics. Second, we will connect spectral signals in \(\bm{H}\) to the effective noise of SGD and to step-size schedules. Finally, we will test whether lazy training reliably predicts optimization stability across models and datasets.
+Our initial scope is two-layer networks; we will subsequently generalize to deeper and wider architectures. We focus on formalizing when local convexification emerges and how it depends on architecture, width, depth, and initialization scale. First, we will characterize regimes where higher-order terms beyond the quadratic approximation materially affect descent dynamics. Second, we will connect spectral signals in \(\bm{H}\) to the effective noise of SGD and to step-size schedules. Finally, we will test whether lazy training reliably predicts optimization stability across models and datasets.
 
 \section{Conclusion}
 We outlined two complementary approaches to the loss landscape---global guarantees and local spectral analysis---and argued that lazy training can be read as convexification. Limitations include the need for stronger empirical coverage and tighter non-asymptotic bounds. We recommend a combined program: sharpen spectral diagnostics, couple them with SGD noise models, and validate across scales. All plots are collected in Appendix~\ref{app:plots}.
+
+\section*{References}
+\begin{thebibliography}{9}
+
+\bibitem{terjek2025featurelearningedgestability}
+D.~Terj\'ek.
+\newblock Feature Learning Beyond the Edge of Stability.
+\newblock arXiv:2502.13110, 2025.
+\newblock Available at \texttt{https://arxiv.org/abs/2502.13110}.
+
+\end{thebibliography}
 
 \appendix
 \section{Additional plots}\label{app:plots}
