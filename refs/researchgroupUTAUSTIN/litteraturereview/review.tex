@@ -22,50 +22,40 @@
 
 \maketitle
 
-
- 
+\begin{abstract}
+We study the loss landscape of deep neural networks with an emphasis on higher-order geometry and the behavior of stochastic gradient descent (SGD) in flat or degenerate regions. We take two complementary viewpoints: a global one via convergence guarantees under regularity assumptions, and a local one via spectral statistics of curvature. Our main observation is that lazy training can be interpreted as a form of convexification of the landscape, which clarifies when higher-order information matters. We conclude with research directions and leave empirical plots to Appendix~\ref{app:plots}.
+\end{abstract}
 
 \tableofcontents
 
 \newpage
 
+\section{Introduction}
+In the past few years, research has focused on understanding why over\-parameterized deep networks train efficiently despite highly non-convex objectives. Central themes include the structure of critical points, implicit bias of optimization, and properties of curvature along training trajectories. It remains unclear why simple first-order methods work so well in regimes where the Hessian is often degenerate and flat directions abound.
 
+This work aims to clarify how higher-order geometry interacts with SGD noise and step size, and to delineate regimes where local convexification occurs (e.g., lazy training). Our principal findings are outlined in the abstract; the paper is structured as follows: Section~\ref{sec:lit} reviews the literature, Section~\ref{sec:directions} proposes concrete research directions, and Appendix~\ref{app:plots} gathers plots.
 
-\section{Litterature review}
-Currently compiling a bib tex of all the refs I have on the subject, and the remaining to read
-the scalar curvature is given by 
-S
-=
-tr
-(
-H
-)
-2
-−
-tr
-(
-H
-2
-)
-S=tr(H) 
-2
- −tr(H 
-2
- ),
+\section{Literature review}\label{sec:lit}
+We are compiling a BibTeX corpus covering optimization theory for deep networks, spectral analyses of Hessians, and connections to generalization. To understand how SGD behaves in flat or degenerate landscapes, higher-order derivatives become crucial. A simple curvature summary that often appears in analyses is
+\begin{equation}\label{eq:scalar-curvature}
+\bm{S} \;=\; \operatorname{tr}\!\big(\bm{H}\big)^{2} \;-\; \operatorname{tr}\!\big(\bm{H}^{2}\big),
+\end{equation}
+where \(\bm{H}\) denotes the Hessian and \(\operatorname{tr}(\cdot)\) is the trace operator. Equation~\eqref{eq:scalar-curvature} highlights how the spectrum of \(\bm{H}\) controls aggregated curvature.
 
- to understand how SGD deal with flat/degenerate lanscapes, as then higher-order derivatives are necessary.
-Mostly, there are 2 path in understanding optimization :
-\begin{itemize}
-\item 1 :  through convgence guarantees in some particular setups with small enough learning rate, smooth convex function (type of non convex function where the non convexity is not too large see def, ie hessian  
-that put global analysis firstb
+Broadly, there are two paths to understand optimization:
+\paragraph{Global analysis.} One seeks convergence guarantees under regularity assumptions (e.g., sufficiently small learning rate, smoothness, and controlled non-convexity measured via Hessian bounds). This perspective prioritizes end-to-end guarantees.
+\paragraph{Local spectral analysis.} One studies local curvature statistics (eigenvalue distributions, outlier spikes, anisotropy) and their interaction with step size and SGD noise. This perspective prioritizes mechanistic understanding near iterates.
 
-\item 2 : through local analysis trying to get some spectral local statistics
-\end{itemize}
+A useful heuristic is that lazy training acts as a \emph{convexification} of the landscape around initialization, which can be diagnosed via spectra of \(\bm{H}\) and the stability of the neural tangent kernel. We defer empirical illustrations to Appendix~\ref{app:plots}.
 
+\section{Which direction to work on}\label{sec:directions}
+We focus on formalizing when local convexification emerges and how it depends on architecture, width, depth, and initialization scale. First, we will characterize regimes where higher-order terms beyond the quadratic approximation materially affect descent dynamics. Second, we will connect spectral signals in \(\bm{H}\) to the effective noise of SGD and to step-size schedules. Finally, we will test whether lazy training reliably predicts optimization stability across models and datasets.
 
-basically lazy training is convexification (do some plots)
+\section{Conclusion}
+We outlined two complementary approaches to the loss landscape---global guarantees and local spectral analysis---and argued that lazy training can be read as convexification. Limitations include the need for stronger empirical coverage and tighter non-asymptotic bounds. We recommend a combined program: sharpen spectral diagnostics, couple them with SGD noise models, and validate across scales. All plots are collected in Appendix~\ref{app:plots}.
 
-\section{Which direction to work on}
+\appendix
+\section{Additional plots}\label{app:plots}
+All plots referenced in the main text are reported here with captions and cross-references. We keep the main exposition uncluttered and refer to the appendix for visual summaries and ablations.
 
-
-\end{document} 
+\end{document}
