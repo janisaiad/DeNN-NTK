@@ -49,6 +49,58 @@ Broadly, there are two paths to understand optimization:
 \paragraph{Local spectral analysis.} One studies local curvature statistics (eigenvalue distributions, outlier spikes, anisotropy) and their interaction with step size and SGD noise. This perspective prioritizes mechanistic understanding near iterates.
 
 A useful heuristic is that lazy training acts as a \emph{convexification} of the landscape around initialization, which can be diagnosed via spectra of \(\bm{H}\) and the stability of the neural tangent kernel. We defer empirical illustrations to Appendix~\ref{app:plots}.
+\subsection{Edge of stability (EoS) phenomenon}\label{sec:eos}
+A recurrent empirical observation in training with (full-batch) gradient descent is the \emph{edge of stability} (EoS): the sharpness at the iterate, measured by the largest eigenvalue of the Hessian, tends to increase during training until it approaches the stability threshold determined by the step size~\cite{ma2022quadraticapproximationmultiscalestructure,terjek2025featurelearningedgestability}. Formally, writing \(\eta\) for the learning rate and \(\lambda_{\max}(\bm{H}_{t})\) for the top eigenvalue at time \(t\), one frequently observes
+\begin{equation}\label{eq:eos}
+\lambda_{\max}\big(\bm{H}_{t}\big) \;\to\; \frac{2}{\eta},
+\end{equation}
+up to problem-dependent constants and transients. This marks the boundary between stable and unstable linearized dynamics around the iterate. Beyond EoS, iterates may oscillate while training loss still decreases due to nonlinearity and curvature variation~\cite{ma2022quadraticapproximationmultiscalestructure}. Understanding how EoS interacts with convexification and higher-order (e.g., third-order) effects is central to our proposed experiments.
+
+\begin{quote}
+\small
+“Surprisingly, even after the sharpness stabilizes, the training loss keeps decreasing. The EoS cannot be explained on quadratic loss functions. On a quadratic loss, GD either converges or blows up exponentially fast, unless the learning rate is exactly $2/\lambda$, where $\lambda$ is the largest eigenvalue of the Hessian. In later sections, we observe that the EoS is caused by loss landscapes that grow slower than quadratic functions around the minimum, which we call subquadratic growth. We then theoretically study how EoS happens, and why the loss value keeps decreasing after EoS, on simplified landscapes.”~\cite{ma2022quadraticapproximationmultiscalestructure}
+\end{quote}
+
+An immediate implication is for learning-rate schedules: decaying the learning rate after approaching EoS can be theoretically aligned with stability and continued descent in subquadratic regions, whereas popular cosine schedules are largely heuristic without direct guarantees in this setting. We will therefore prioritize principled decay schemes in our experiments and contrast them with cosine.
+
+In parallel, Bai and Lee (ICLR 2020) analyze wide two-layer networks beyond the NTK regime by randomizing signs to suppress the linear NTK term and couple training with a quadratic model~\cite{bai2020beyond}. They show: (i) the randomization makes the gradient dynamics no longer governed by the linear NTK, enabling coupling to a quadratic approximation; (ii) the randomized loss has a favorable optimization landscape where every second-order stationary point attains training loss close to the best quadratic model; (iii) generalization and expressivity bounds match NTK in worst case and can improve by an \(O(d)\) factor under mild isotropic assumptions when learning polynomials or their linear combinations; and (iv) the technique extends systematically to higher-order regimes (``higher-order NTKs'') dominated by the \(k\)-th Taylor term, with similar or better sample complexity.
+
+\subsection{Beyond-NTK coupling vs. kernel-flow assumptions: a comparison}\label{sec:compare-beyond-ntk-kernel}
+The two lines of work address different regimes and assumptions. In \citet{bai2020beyond}, a sign randomization explicitly suppresses the linear NTK term so that training is \emph{no longer coupled} to the NTK; the dynamics couple instead to a quadratic (or higher-order) Taylor model with a provably favorable landscape and potential generalization gains. In contrast, \citet{ghosh2021stageslearningdynamicshighdimensional} adopt a \emph{full kernel learning} viewpoint: they analyze continuous-time function flows driven by a fixed kernel (population vs empirical), under high-dimensional structural assumptions (concentration of diagonals, spectral gaps, hypercontractivity), and characterize staged learning of degree components.
+
+Conceptually, the former demonstrates mechanisms to \emph{escape} NTK coupling (and thereby probe higher-order regimes), while the latter \emph{assumes} a stable kernel limit and disentangles oracle vs empirical effects within that kernel framework. Practically, our program on convexification and third-order diagnostics can interface with both: test beyond-NTK behaviors in two-layer networks via randomization, and benchmark staged learning signatures when the effective kernel appears stable (e.g., in wide limits of ResNets/Transformers).
+
+\subsection{Three stages of kernel learning dynamics (Ghosh--Mei--Yu, 2021)}\label{sec:gmystages}
+This work disentangles population (oracle) and empirical training dynamics for high-dimensional kernel methods, motivated by the NTK perspective~\cite{ghosh2021stageslearningdynamicshighdimensional}. At a high level, the analysis requires: concentration of diagonal kernel entries, spectral gaps for kernel eigenvalues, and hypercontractivity/delocalization of top eigenfunctions. Under dot-product kernels on the uniform measure over the \(d\)-dimensional sphere, they establish three phases of learning governed by degree components of the target function.
+
+They define continuous-time gradient flows in function space. The population (oracle) flow reads
+\begin{equation}\label{eq:oracle-flow}
+\frac{\mathrm{d}}{\mathrm{d}t} f^{\mathrm{or}}_{t}(x) \;=\; -\nabla R\big(f^{\mathrm{or}}_{t}(x)\big) \;=\; \mathbb{E}\big[\, H_{d}(x,z)\,\big(f_{d}(z) - f^{\mathrm{or}}_{t}(z)\big)\,\big],
+\end{equation}
+while the empirical flow with \(n\) samples \(\{(x_{i},y_{i})\}_{i=1}^{n}\) is
+\begin{equation}\label{eq:empirical-flow}
+\frac{\mathrm{d}}{\mathrm{d}t} \widehat{f}_{t}(x) \;=\; -\nabla R_{\mathrm{bn}}\big(\widehat{f}_{t}(x)\big) \;=\; \frac{1}{n}\sum_{i=1}^{n} H_{d}(x,x_{i})\,\big(y_{i} - \widehat{f}_{t}(x_{i})\big).
+\end{equation}
+
+For dot-product kernels satisfying their assumptions and time/sample scales \(d^{j+\delta} \le t \le d^{j+1-\delta}\), \(d^{s+\delta} \le n \le d^{s+1-\delta}\) for fixed integers \(j,s\ge 0\) and \(\delta>0\), they show, writing \(P_{\le r}\) and \(P_{> r}\) the projections onto degree components:
+\begin{align}
+\text{Oracle: } & R\big(f^{\mathrm{or}}_{t}\big) \;=\; \|P_{>j} f_{d}\|_{L^{2}}^{2} \;+\; \sigma_{\varepsilon}^{2} \;+\; o_{d}(1), \quad \big\| f^{\mathrm{or}}_{t} - P_{\le j} f_{d}\big\|_{L^{2}}^{2} \;=\; o_{d}(1).\label{eq:oracle-stage} \\
+\text{Empirical train: } & R_{\mathrm{bn}}\big(\widehat{f}_{t}\big) \;=\; \|P_{>j} f_{d}\|_{L^{2}}^{2} \;+\; \sigma_{\varepsilon}^{2} \;+\; o_{d,\mathbb{P}}(1)\ \text{ if }\ t/n = o_{d}(1),\ \ \ R_{\mathrm{bn}}\big(\widehat{f}_{t}\big) = o_{d,\mathbb{P}}(1)\ \text{ if }\ t/n = \omega_{d}(1).\label{eq:emp-train} \\
+\text{Empirical test: } & R\big(\widehat{f}_{t}\big) \;=\; \|P_{>\min\{j,s\}} f_{d}\|_{L^{2}}^{2} \;+\; \sigma_{\varepsilon}^{2} \;+\; o_{d,\mathbb{P}}(1), \quad \big\| \widehat{f}_{t} - P_{\le \min\{j,s\}} f_{d}\big\|_{L^{2}}^{2} \;=\; o_{d,\mathbb{P}}(1).\label{eq:emp-test}
+\end{align}
+
+Thus, the oracle model progressively learns degree components with time, whereas the empirical model tracks the oracle until sample limitations intervene, cleanly separating population versus sampled effects. Although these are kernel flows (not neural networks per se), the dynamics are explicitly motivated by NTK views of over-parameterized networks (Jacot et al., Du et al.).
+
+These characterisations sont en outre hautement généralisables à des architectures modernes dès lors que leur NTK converge vers une limite bien définie à grande largeur, ce qui inclut en pratique des familles comme les ResNets et les Transformers (sous hypothèses de scalings et de régularité standard). Cela rend ce cadre pertinent comme brique d’analyse au-delà des réseaux à deux couches.
+\begin{quote}
+\small
+``our analysis shows that the duration length of the first stage also impacts the final generalization error''~\cite{ghosh2021stageslearningdynamicshighdimensional}.
+\end{quote}
+
+\begin{quote}
+\small
+Remark 4 (Connection with Deep Learning Practice). Although we believe our results conceptually shed light on some of the interesting behaviors observed in the training dynamics of deep learning, due to our stylized setting we may not exactly see the predicted phenomena in practice. Accurately observing the three stages of kernel regression requires sufficiently high-dimensional data in order for the kernel eigenvalues to obey a staircase-like decay and for training to be sufficiently long as the time axis should be in log-scale. Our results hold for regression whereas for classification the empirical model may continue improving after classifying the train set correctly. Despite these caveats, certain conclusions can be observed in some realistic settings (c.f. Appendix E.4)~\cite{ghosh2021stageslearningdynamicshighdimensional}.
+\end{quote}
 
 \section{Third-order tensors and scaling}\label{sec:third}
 We now focus on third-order information through the third-order Taylor tensor \(\bm{T}^{(3)}_{t}\). Recent work emphasizes that the trend observed for first and second order terms continues at order three: \(\bm{T}^{(3)}_{t}\) scales with average fourth or sixth powers of norms of forward and backward vectors, with average squared Frobenius norms of cross-layer Hessians and Jacobians, with average Euclidean norms of cross-layer ``Tressians'', and with soft ranks of second or third Hadamard powers of forward and backward Gram matrices, as well as soft ranks of second Hadamard powers of Hessian and Jacobian Gram matrices and soft ranks of Tressian Gram matrices; there also appear cosines of fourth-order tensors built from inner products and cosines of empirical covariance tensors of random third-order tensors~\cite{terjek2025featurelearningedgestability}.
@@ -64,6 +116,43 @@ where \(\bm{f}\) and \(\bm{b}\) denote forward and backward vectors, \(\bm{J}\) 
 \section{Which direction to work on}\label{sec:directions}
 Our initial scope is two-layer networks; we will subsequently generalize to deeper and wider architectures. We focus on formalizing when local convexification emerges and how it depends on architecture, width, depth, and initialization scale. First, we will characterize regimes where higher-order terms beyond the quadratic approximation materially affect descent dynamics. Second, we will connect spectral signals in \(\bm{H}\) to the effective noise of SGD and to step-size schedules. Finally, we will test whether lazy training reliably predicts optimization stability across models and datasets.
 
+\section{Takeaways from the literature review}\label{sec:takeaways}
+Our first takeaway is that training dynamics admit a Taylor expansion with respect to time, which systematically organizes first-, second-, and third-order contributions along the optimization trajectory. In particular, the third-order Taylor tensor \(\bm{T}^{(3)}_{t}\) provides a principled handle on how higher-order curvature couples with forward/backward flows and Gram structures, consistent with recent analyses~\cite{terjek2025featurelearningedgestability}. We also have access to accompanying code implementing the time-wise Taylor expansion diagnostics (Terj\'ek, private communication), which we will use to validate empirical claims and to compare regimes dominated by linear, quadratic, and higher-order terms.
+
+\paragraph{Asymmetry of the Loss Landscape.} The paper ``The Goldilocks zone'' by \citet{fort2018goldilockszonebetterunderstanding} empirically observes properties of the loss landscape on random hypersurfaces. While they use the Hessian, the asymmetry they and others observe is mathematically captured by odd-ordered derivatives, with the third-order being the most significant. This connects directly to our focus on \(\bm{T}^{(3)}_{t}\) and provides empirical motivation for quantifying third-order effects beyond mere sharpness.
+
+\paragraph{Random matrix theory and third-order cumulants.} Recent work by \citet{baskerville2023randommatrixtheoryloss} suggests that random matrix theory can assess flatness (or lack thereof) in loss landscapes, potentially supported by GOE (Gaussian Orthogonal Ensemble) findings. They propose using third-order tensor cumulants to characterize landscape geometry beyond second-order statistics. This aligns with our program of third-order diagnostics and provides a probabilistic framework for understanding landscape structure.
+
+Our second takeaway is that lazy training can be read as a form of local convexification around initialization. We propose to design clear and reproducible numerical experiments that visualize and quantify this convexification effect (e.g., 2D/3D interpolations, filter-normalized directions, and trajectory-aligned slices), updating and extending the classic visualization protocol of loss landscapes~\cite{li2018visualizinglosslandscapeneural}. Such experiments, if made clean and systematic, could already take us quite far by isolating when and how convexification emerges across widths, depths, and initializations.
+
+Importantly, \citet{li2018visualizinglosslandscapeneural} date d'avant la popularisation de la théorie NTK; il reste donc un large espace pour des visualisations modernes centrées sur la convexification locale (et sa dynamique) avec des protocoles adaptés à ces régimes.
+
+Our third takeaway is the coupling beyond the NTK regime: after appropriate randomization, the linear NTK term is no longer dominant and training can couple with a quadratic model, yielding a favorable optimization landscape and improved generalization in certain settings~\cite{bai2020beyond}. This suggests a practical route to probe regimes where second- or higher-order terms govern the dynamics, especially in two-layer networks which we target first.
+
+\section{Future colab}\label{sec:future-colab}
+Given the close connections between kernel dynamics and higher-order regimes discussed above, a natural point of contact for future discussion and collaboration is Song Mei, who has written extensively with Andrea Montanari on related topics in high-dimensional statistics and learning theory. We propose to reach out to discuss empirical protocols (convexification visualizations) and theoretical questions around time-wise Taylor expansions and transitions beyond the NTK regime.
+
+\section{Ideas to work on}\label{sec:ideas}
+We propose a practical program to obtain general insights into convexification and higher-order effects. First, we will produce careful visualizations of local convexification with respect to network width across a few representative datasets in controlled setups (e.g., synthetic data uniformly distributed on the sphere), following and extending modern protocols of loss-landscape visualization. Second, we will compare scaling laws with ambient dimension, contrasting regimes where linear, quadratic, and third-order terms dominate. Third, we will plot full gradient-descent trajectories in curated 2D/3D slices (trajectory-aligned and filter-normalized) to track the onset and persistence of convexification. Finally, we will quantify the behavior of third-order "sharpness" through norms or spectral surrogates of the third-order tensor \(\bm{T}^{(3)}\), et vérifier que ce comportement est conforme aux prédictions ("behaves well"). Nous chercherons aussi explicitement des phénomènes anormaux (par exemple, un puits étroit à proximité d'une région plate), afin d'accumuler un large éventail d'observations et d'affiner les hypothèses.
+
+Beyond this, we will attempt to derive a finite-width analogue of the three-stage dynamics of \citet{ghosh2021stageslearningdynamicshighdimensional} when the NTK coupling breaks: model an \emph{effective kernel drift} over time and width, incorporate deviations from the infinite-width NTK, and quantify coupling to quadratic and higher-order Taylor terms (as in \cite{bai2020beyond}). Empirically, we will measure (i) the drift of the empirical NTK during training, (ii) the discrepancy between kernel-flow predictions and observed trajectories, and (iii) how these deviations align with convexification indicators and third-order sharpness.
+
+Finally, building on the multiscale perspective of \citet{ma2022quadraticapproximationmultiscalestructure}, we will probe \emph{separation of scales}: identify at which spatial/parameter scale the loss landscape becomes effectively convex (local convexification at that scale), and how this scale evolves with width, depth, initialization, and dataset. Concretely, we will (a) estimate a convexification scale via localized quadratic fits and higher-order residuals, (b) study its relation with EoS (Section~\ref{sec:eos}) and third-order sharpness, and (c) map this scale across controlled experiments (uniform sphere, synthetic polynomials) and practical tasks.
+Moreover, the multiscale structure appears to \emph{emerge from the training data} itself, as evidenced by experiments in \citet{ma2022quadraticapproximationmultiscalestructure}; we will therefore vary data distributions to isolate how data geometry seeds distinct scales and affects convexification and EoS.
+In addition, the positive homogeneity of ReLU (and related activations) propagates multi-scaling present in the input distribution to network outputs, gradients, and higher-order tensors, thereby inducing a multi-scale loss landscape even when the architecture is fixed. We will explicitly test this propagation by injecting controlled multi-scale structure into the data.
+
+Finally, learning-rate decay emerges as a strong research direction: we will design and analyze principled decay schedules aligned with EoS and multiscale behavior, and compare against heuristic cosine schedules. This line can be combined with prior work of Tan Bui-Thanh on stable and efficient iterative schemes, aiming for methods that are both theoretically grounded and highly operational in practice.
+
+We will also visualize how different learning-rate schedulers (including practical ones like cosine, linear, step decay, and polynomial) affect the loss landscape geometry, EoS behavior, and convexification patterns. This visualization will help understand the empirical success of various schedules and guide the design of principled alternatives based on landscape structure rather than heuristics.
+
+For convex \(L\)-smooth functions, we can derive learning-rate schedules that achieve \(O(1/T)\) convergence bounds, and piecewise constant decay schedules can be analyzed in this framework. We will explore how these theoretical guarantees translate to neural network training and whether they can be adapted for non-convex landscapes with local convexification.
+
+There remains a significant theoretical gap in learning-rate scheduling techniques for deep learning: while practical schedules (cosine, warmup, etc.) are widely used, their theoretical foundations are largely heuristic. This represents a major opportunity to bridge theory and practice by developing principled schedules based on landscape geometry, EoS dynamics, and multiscale structure.
+
+Notably, learning-rate tuning has been systematically addressed by Greg Yang's Tensor Programs framework~\cite{yang2022tensorprogramsvtuning}, which provides principled approaches to hyperparameter transfer and scaling laws. This work also tackles optimizer-related hyperparameters like Adam's \(\beta\) parameters, offering a foundation for understanding how these quantities should scale with model size and architecture. In particular, Tensor Programs has shown that learning rates follow the same curve for every depth up to a power law scaling (e.g., \(\propto 1/n\) where \(n\) is the width), providing a principled basis for hyperparameter scaling across architectures.
+
+Terj\'ek's work suggests promising future directions: analyzing the empirical evolution of third-order derivative quantities can already yield significant results, and introducing layer-dependent learning rates presents an interesting avenue for exploration. Remarkably, Terj\'ek observes that parabola-shaped networks perform best, and has previously shown (in work on NTK concentration~\cite{terjek2025mlpseocconcentrationntk}) that parabola-shaped architectures have NTKs that minimize variance propagation across layers. This suggests there is something fundamental about the relationship between architecture geometry, NTK properties, and optimization dynamics that warrants deeper investigation.
+
 \section{Conclusion}
 We outlined two complementary approaches to the loss landscape---global guarantees and local spectral analysis---and argued that lazy training can be read as convexification. Limitations include the need for stronger empirical coverage and tighter non-asymptotic bounds. We recommend a combined program: sharpen spectral diagnostics, couple them with SGD noise models, and validate across scales. All plots are collected in Appendix~\ref{app:plots}.
 
@@ -76,10 +165,58 @@ D.~Terj\'ek.
 \newblock arXiv:2502.13110, 2025.
 \newblock Available at \texttt{https://arxiv.org/abs/2502.13110}.
 
+\bibitem{bai2020beyond}
+Y.~Bai and J.~D.~Lee.
+\newblock Beyond Linearization: On Quadratic and Higher-Order Approximation of Wide Neural Networks.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2020.
+\newblock OpenReview: \texttt{https://openreview.net/forum?id=rkllGyBFPH}.
+
+\bibitem{li2018visualizinglosslandscapeneural}
+H.~Li, Z.~Xu, G.~Taylor, C.~Studer, and T.~Goldstein.
+\newblock Visualizing the Loss Landscape of Neural Nets.
+\newblock arXiv:1712.09913, 2018.
+\newblock Available at \texttt{https://arxiv.org/abs/1712.09913}.
+
+\bibitem{ghosh2021stageslearningdynamicshighdimensional}
+N.~Ghosh, S.~Mei, and B.~Yu.
+\newblock The Three Stages of Learning Dynamics in High-Dimensional Kernel Methods.
+\newblock arXiv:2111.07167, 2021.
+\newblock Available at \texttt{https://arxiv.org/abs/2111.07167}.
+
+\bibitem{ma2022quadraticapproximationmultiscalestructure}
+C.~Ma, D.~Kunin, L.~Wu, and L.~Ying.
+\newblock Beyond the Quadratic Approximation: the Multiscale Structure of Neural Network Loss Landscapes.
+\newblock arXiv:2204.11326, 2022.
+\newblock Available at \texttt{https://arxiv.org/abs/2204.11326}.
+
+\bibitem{fort2018goldilockszonebetterunderstanding}
+S.~Fort and A.~Scherlis.
+\newblock The Goldilocks zone: Towards better understanding of neural network loss landscapes.
+\newblock arXiv:1807.02581, 2018.
+\newblock Available at \texttt{https://arxiv.org/abs/1807.02581}.
+
+\bibitem{baskerville2023randommatrixtheoryloss}
+N.~P.~Baskerville.
+\newblock Random matrix theory and the loss surfaces of neural networks.
+\newblock arXiv:2306.02108, 2023.
+\newblock Available at \texttt{https://arxiv.org/abs/2306.02108}.
+
+\bibitem{yang2022tensorprogramsvtuning}
+G.~Yang, E.~J.~Hu, I.~Babuschkin, S.~Sidor, X.~Liu, D.~Farhi, N.~Ryder, J.~Pachocki, W.~Chen, and J.~Gao.
+\newblock Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer.
+\newblock arXiv:2203.03466, 2022.
+\newblock Available at \texttt{https://arxiv.org/abs/2203.03466}.
+
+\bibitem{terjek2025mlpseocconcentrationntk}
+D.~Terj\'ek and D.~Gonz\'alez-S\'anchez.
+\newblock MLPs at the EOC: Concentration of the NTK.
+\newblock arXiv:2501.14724, 2025.
+\newblock Available at \texttt{https://arxiv.org/abs/2501.14724}.
+
 \end{thebibliography}
 
 \appendix
 \section{Additional plots}\label{app:plots}
 All plots referenced in the main text are reported here with captions and cross-references. We keep the main exposition uncluttered and refer to the appendix for visual summaries and ablations.
 
-\end{document}
+\end{document} 
